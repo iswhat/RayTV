@@ -294,8 +294,8 @@ export class LiveStreamRepository {
     });
     
     // 监听网络状态变化
-    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
-      if (status.isOnline) {
+    this.eventBus.on('network:statusChanged', async (status?: { isOnline: boolean }) => {
+      if (status?.isOnline) {
         // 在线时刷新精选和热门直播
         await Promise.all([
           this.loadFeaturedStreams(),
@@ -327,7 +327,7 @@ export class LiveStreamRepository {
       
       // 尝试从缓存获取（如果不是强制刷新且直播正在进行中，可以使用缓存）
       if (!forceRefresh) {
-        const cachedStream = await this.cacheService.getCache<LiveStreamInfo>(cacheKey);
+        const cachedStream = await this.cacheService.get<LiveStreamInfo>(cacheKey);
         if (cachedStream && cachedStream.liveStatus === LiveStatus.LIVE) {
           this.logger.debug(`Live stream detail loaded from cache: ${streamId}`);
           
@@ -370,7 +370,7 @@ export class LiveStreamRepository {
         this.liveConfig.liveStreamDetailCacheDuration * 1000 : 
         3600000; // 1小时
       
-      await this.cacheService.setCache(
+      await this.cacheService.put(
         cacheKey,
         streamInfo,
         {
@@ -418,7 +418,7 @@ export class LiveStreamRepository {
       const cacheKey = this.generateLiveStreamListCacheKey(request);
       
       // 尝试从缓存获取
-      const cachedList = await this.cacheService.getCache<LiveStreamListResponse>(cacheKey);
+      const cachedList = await this.cacheService.get<LiveStreamListResponse>(cacheKey);
       if (cachedList) {
         this.logger.debug(`Live stream list loaded from cache`);
         
@@ -465,7 +465,7 @@ export class LiveStreamRepository {
       const streamList = response.data;
       
       // 缓存直播列表
-      await this.cacheService.setCache(
+      await this.cacheService.put(
         cacheKey,
         streamList,
         {
@@ -503,7 +503,7 @@ export class LiveStreamRepository {
    */
   public async getFeaturedStreams(): Promise<LiveStreamInfo[]> {
     // 首先尝试从缓存获取
-    const cached = await this.cacheService.getCache<LiveStreamInfo[]>(this.storageKeys.featuredStreams);
+    const cached = await this.cacheService.get<LiveStreamInfo[]>(this.storageKeys.featuredStreams);
     if (cached) {
       return cached;
     }
@@ -529,7 +529,7 @@ export class LiveStreamRepository {
       const featuredStreams = response.data;
       
       // 缓存精选直播
-      await this.cacheService.setCache(
+      await this.cacheService.put(
         this.storageKeys.featuredStreams,
         featuredStreams,
         {
@@ -550,7 +550,7 @@ export class LiveStreamRepository {
       this.logger.warn('Failed to load featured streams', error as Error);
       
       // 尝试从缓存获取旧数据
-      return await this.cacheService.getCache<LiveStreamInfo[]>(this.storageKeys.featuredStreams) || [];
+      return await this.cacheService.get<LiveStreamInfo[]>(this.storageKeys.featuredStreams) || [];
     }
   }
 
@@ -559,7 +559,7 @@ export class LiveStreamRepository {
    */
   public async getTrendingStreams(): Promise<LiveStreamInfo[]> {
     // 首先尝试从缓存获取
-    const cached = await this.cacheService.getCache<LiveStreamInfo[]>(this.storageKeys.trendingStreams);
+    const cached = await this.cacheService.get<LiveStreamInfo[]>(this.storageKeys.trendingStreams);
     if (cached) {
       return cached;
     }
@@ -586,7 +586,7 @@ export class LiveStreamRepository {
       const trendingStreams = response.data;
       
       // 缓存热门直播
-      await this.cacheService.setCache(
+      await this.cacheService.put(
         this.storageKeys.trendingStreams,
         trendingStreams,
         {
@@ -600,7 +600,7 @@ export class LiveStreamRepository {
       this.logger.warn('Failed to load trending streams', error as Error);
       
       // 尝试从缓存获取旧数据
-      return await this.cacheService.getCache<LiveStreamInfo[]>(this.storageKeys.trendingStreams) || [];
+      return await this.cacheService.get<LiveStreamInfo[]>(this.storageKeys.trendingStreams) || [];
     }
   }
 
@@ -1181,22 +1181,22 @@ export class LiveStreamRepository {
       if (streamId) {
         // 清除特定直播的缓存
         const cacheKey = `${this.storageKeys.liveStreamCache}${streamId}`;
-        await this.cacheService.removeCache(cacheKey);
+        await this.cacheService.remove(cacheKey);
         
         // 清除聊天缓存
-        await this.cacheService.removeCache(`${this.storageKeys.liveStreamChatCache}${streamId}`);
+        await this.cacheService.remove(`${this.storageKeys.liveStreamChatCache}${streamId}`);
       } else {
         // 清除所有直播列表缓存
         const pattern = `${this.storageKeys.liveStreamListCache}*`;
-        await this.cacheService.removeCacheByPattern(pattern);
+        await this.cacheService.removeByPattern(pattern);
         
         // 清除所有直播详情缓存
         const detailPattern = `${this.storageKeys.liveStreamCache}*`;
-        await this.cacheService.removeCacheByPattern(detailPattern);
+        await this.cacheService.removeByPattern(detailPattern);
         
         // 清除精选和热门直播缓存
-        await this.cacheService.removeCache(this.storageKeys.featuredStreams);
-        await this.cacheService.removeCache(this.storageKeys.trendingStreams);
+        await this.cacheService.remove(this.storageKeys.featuredStreams);
+        await this.cacheService.remove(this.storageKeys.trendingStreams);
       }
       
       this.logger.info(`${streamId ? `Cache cleared for live stream ${streamId}` : 'All live stream caches cleared'}`);

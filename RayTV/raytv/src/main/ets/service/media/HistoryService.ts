@@ -1,5 +1,5 @@
-import Logger from '@ohos/base/Logger';
-import { DatabaseManager } from '@ohos/database/DatabaseManager';
+import Logger from '../../common/util/Logger';
+import { DatabaseManager } from '../../data/db/DatabaseManager';
 import { MediaItem, MediaType, PlaySource } from './MediaService';
 
 /**
@@ -141,6 +141,8 @@ export class HistoryService {
       // 检查是否已存在
       const existing = await this.getHistoryById(historyId);
       
+      const db = this.dbManager.getDatabase();
+      
       if (existing) {
         // 更新现有记录
         historyItem.playCount = existing.playCount + 1;
@@ -217,18 +219,21 @@ export class HistoryService {
       const historyId = this.generateHistoryId(mediaId, siteKey, episodeId);
       const now = Date.now();
 
-      const result = await this.dbManager.executeSql(
+      // 先检查记录是否存在
+      const exists = await this.getHistoryById(historyId);
+      if (!exists) {
+        return false;
+      }
+
+      await this.dbManager.executeSql(
         `UPDATE ${this.historyTable} 
          SET progress = ?, lastPlayTime = ? 
          WHERE id = ?`,
         [progress, now, historyId]
       );
 
-      const success = result.affectedRows > 0;
-      if (success) {
-        Logger.info(this.TAG, `Updated progress for ${siteKey}:${mediaId}${episodeId ? `:${episodeId}` : ''}`);
-      }
-      return success;
+      Logger.info(this.TAG, `Updated progress for ${siteKey}:${mediaId}${episodeId ? `:${episodeId}` : ''}`);
+      return true;
     } catch (error) {
       Logger.error(this.TAG, `Failed to update progress: ${error}`);
       return false;
@@ -261,7 +266,7 @@ export class HistoryService {
       }
 
       // 执行查询
-      const result = await this.dbManager.executeSql(
+      const result = await this.dbManager.getDatabase().querySql(
         `SELECT * FROM ${this.historyTable} 
          ${whereClause} 
          ORDER BY lastPlayTime DESC 
@@ -270,7 +275,22 @@ export class HistoryService {
       );
 
       // 解析结果
-      return this.parseHistoryRows(result.rows as any[]);
+      const historyItems: HistoryItem[] = [];
+      
+      if (result !== null) {
+        while (result.goToNextRow()) {
+          const item: any = {};
+          for (let i = 0; i < result.rowCount; i++) {
+            const columnName = result.getColumnName(i);
+            const value = result.getLong(i) ?? result.getString(i);
+            item[columnName] = value;
+          }
+          historyItems.push(this.parseHistoryRow(item));
+        }
+        result.close();
+      }
+      
+      return historyItems;
     } catch (error) {
       Logger.error(this.TAG, `Failed to get history list: ${error}`);
       return [];
@@ -284,14 +304,23 @@ export class HistoryService {
    */
   public async getHistoryById(historyId: string): Promise<HistoryItem | null> {
     try {
-      const result = await this.dbManager.executeSql(
+      const result = await this.dbManager.getDatabase().querySql(
         `SELECT * FROM ${this.historyTable} WHERE id = ?`,
         [historyId]
       );
 
-      const rows = result.rows as any[];
-      if (rows.length > 0) {
-        return this.parseHistoryRow(rows[0]);
+      if (result !== null) {
+        if (result.goToFirstRow()) {
+          const item: any = {};
+          for (let i = 0; i < result.columnCount; i++) {
+            const columnName = result.getColumnName(i);
+            const value = result.getLong(i) ?? result.getString(i);
+            item[columnName] = value;
+          }
+          result.close();
+          return this.parseHistoryRow(item);
+        }
+        result.close();
       }
       return null;
     } catch (error) {
@@ -308,16 +337,25 @@ export class HistoryService {
    */
   public async getMediaHistory(mediaId: string, siteKey: string): Promise<HistoryItem | null> {
     try {
-      const result = await this.dbManager.executeSql(
+      const result = await this.dbManager.getDatabase().querySql(
         `SELECT * FROM ${this.historyTable} 
          WHERE mediaId = ? AND siteKey = ? AND episodeId IS NULL 
          ORDER BY lastPlayTime DESC LIMIT 1`,
         [mediaId, siteKey]
       );
 
-      const rows = result.rows as any[];
-      if (rows.length > 0) {
-        return this.parseHistoryRow(rows[0]);
+      if (result !== null) {
+        if (result.goToFirstRow()) {
+          const item: any = {};
+          for (let i = 0; i < result.columnCount; i++) {
+            const columnName = result.getColumnName(i);
+            const value = result.getLong(i) ?? result.getString(i);
+            item[columnName] = value;
+          }
+          result.close();
+          return this.parseHistoryRow(item);
+        }
+        result.close();
       }
       return null;
     } catch (error) {
@@ -339,15 +377,24 @@ export class HistoryService {
     episodeId: string
   ): Promise<HistoryItem | null> {
     try {
-      const result = await this.dbManager.executeSql(
+      const result = await this.dbManager.getDatabase().querySql(
         `SELECT * FROM ${this.historyTable} 
          WHERE mediaId = ? AND siteKey = ? AND episodeId = ?`,
         [mediaId, siteKey, episodeId]
       );
 
-      const rows = result.rows as any[];
-      if (rows.length > 0) {
-        return this.parseHistoryRow(rows[0]);
+      if (result !== null) {
+        if (result.goToFirstRow()) {
+          const item: any = {};
+          for (let i = 0; i < result.columnCount; i++) {
+            const columnName = result.getColumnName(i);
+            const value = result.getLong(i) ?? result.getString(i);
+            item[columnName] = value;
+          }
+          result.close();
+          return this.parseHistoryRow(item);
+        }
+        result.close();
       }
       return null;
     } catch (error) {
@@ -363,7 +410,8 @@ export class HistoryService {
    */
   public async deleteHistory(historyId: string): Promise<boolean> {
     try {
-      const result = await this.dbManager.executeSql(
+      const db = this.dbManager.getDatabase();
+      const result = await db.executeSql(
         `DELETE FROM ${this.historyTable} WHERE id = ?`,
         [historyId]
       );
@@ -387,7 +435,8 @@ export class HistoryService {
    */
   public async deleteMediaHistory(mediaId: string, siteKey: string): Promise<boolean> {
     try {
-      const result = await this.dbManager.executeSql(
+      const db = this.dbManager.getDatabase();
+      const result = await db.executeSql(
         `DELETE FROM ${this.historyTable} WHERE mediaId = ? AND siteKey = ?`,
         [mediaId, siteKey]
       );
@@ -409,7 +458,8 @@ export class HistoryService {
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
-      await this.dbManager.executeSql(`DELETE FROM ${this.historyTable}`);
+      const db = this.dbManager.getDatabase();
+      await db.executeSql(`DELETE FROM ${this.historyTable}`);
       Logger.info(this.TAG, 'Cleared all history');
       return true;
     } catch (error) {
@@ -425,7 +475,8 @@ export class HistoryService {
    */
   public async clearHistoryByType(type: MediaType): Promise<boolean> {
     try {
-      await this.dbManager.executeSql(
+      const db = this.dbManager.getDatabase();
+      await db.executeSql(
         `DELETE FROM ${this.historyTable} WHERE type = ?`,
         [type]
       );
@@ -444,7 +495,7 @@ export class HistoryService {
    */
   public async getHistoryCount(type?: MediaType): Promise<number> {
     try {
-      let query = 'SELECT COUNT(*) as count FROM ${this.historyTable}';
+      let query = `SELECT COUNT(*) as count FROM ${this.historyTable}`;
       const params: any[] = [];
 
       if (type) {
@@ -452,8 +503,18 @@ export class HistoryService {
         params.push(type);
       }
 
-      const result = await this.dbManager.executeSql(query, params);
-      return (result.rows as any[])[0].count || 0;
+      // 使用querySql方法查询而不是executeSql
+      const result = await this.dbManager.getDatabase().querySql(query, params);
+      let count = 0;
+      
+      if (result !== null) {
+        if (result.goToFirstRow()) {
+          count = result.getLong(0) || 0;
+        }
+        result.close();
+      }
+      
+      return count;
     } catch (error) {
       Logger.error(this.TAG, `Failed to get history count: ${error}`);
       return 0;
@@ -472,9 +533,33 @@ export class HistoryService {
     siteKey: string,
     episodeId?: string
   ): Promise<boolean> {
-    const historyId = this.generateHistoryId(mediaId, siteKey, episodeId);
-    const history = await this.getHistoryById(historyId);
-    return history !== null;
+    try {
+      let sql = `SELECT COUNT(*) as count FROM ${this.historyTable} WHERE mediaId = ? AND siteKey = ?`;
+      const params: string[] = [mediaId, siteKey];
+
+      if (episodeId !== undefined) {
+        sql += episodeId === null ? ' AND episodeId IS NULL' : ' AND episodeId = ?';
+        if (episodeId !== null) {
+          params.push(episodeId);
+        }
+      } else {
+        sql += ' AND episodeId IS NULL';
+      }
+
+      const db = this.dbManager.getDatabase();
+      const result = await db.querySql(sql, params);
+      let count = 0;
+      if (result !== null) {
+        if (result.goToFirstRow()) {
+          count = result.getLong(0);
+        }
+        result.close();
+      }
+      return count > 0;
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to check history existence: ${error}`);
+      return false;
+    }
   }
 
   /**
@@ -534,8 +619,9 @@ export class HistoryService {
   public async cleanupOldHistory(keepDays: number = 30): Promise<number> {
     try {
       const cutoffTime = Date.now() - (keepDays * 24 * 60 * 60 * 1000);
+      const db = this.dbManager.getDatabase();
       
-      const result = await this.dbManager.executeSql(
+      const result = await db.executeSql(
         `DELETE FROM ${this.historyTable} WHERE lastPlayTime < ?`,
         [cutoffTime]
       );

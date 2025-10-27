@@ -89,98 +89,99 @@ export class ConfigRepository {
     try {
       if (this.initialized) {
         this.logger.warn('ConfigRepository already initialized');
-    
-    this.defineConfig('app_theme', {
-      type: ConfigType.ENUM,
-      defaultValue: 'system',
-      description: '应用主题',
-      group: 'app',
-      options: ['light', 'dark', 'system']
         return;
-    });
-    
-    this.defineConfig('app_auto_start', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: false,
-      description: '开机自启动',
-      group: 'app'
-    });
-    
-    this.defineConfig('player_default_quality', {
-      type: ConfigType.STRING,
-      defaultValue: 'auto',
-      description: '默认播放质量',
-      group: 'player',
-      options: ['low', 'medium', 'high', 'ultra', 'auto']
-    });
-    
-    this.defineConfig('player_auto_play', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: true,
-      description: '自动播放',
-      group: 'player'
-    });
-    
-    this.defineConfig('player_remember_position', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: true,
-      description: '记住播放位置',
-      group: 'player'
-    });
-    
-    this.defineConfig('player_volume', {
-      type: ConfigType.NUMBER,
-      defaultValue: 80,
-      description: '默认音量',
-      group: 'player',
-      min: 0,
-      max: 100
-    });
-    
-    this.defineConfig('player_muted', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: false,
-      description: '是否静音',
-      group: 'player'
-    });
-    
-    this.defineConfig('player_hardware_acceleration', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: true,
-      description: '硬件加速',
-      group: 'player'
-    });
-    
-    this.defineConfig('network_timeout', {
-      type: ConfigType.NUMBER,
-      defaultValue: 30000,
-      description: '网络超时时间（毫秒）',
-      group: 'network',
-      min: 5000,
-      max: 60000
-    });
-    
-    this.defineConfig('network_retry_count', {
-      type: ConfigType.NUMBER,
-      defaultValue: 3,
-      description: '网络请求重试次数',
-      group: 'network',
-      min: 0,
-      max: 10
-    });
-    
-    this.defineConfig('network_auto_playback', {
-      type: ConfigType.BOOLEAN,
-      defaultValue: false,
-      description: '移动网络自动播放',
-      group: 'network'
-    });
-    
-    this.defineConfig('download_max_concurrent', {
-      type: ConfigType.NUMBER,
-      defaultValue: 3,
-      description:
       }
+      
+      this.defineConfig('app_theme', {
+        type: ConfigType.ENUM,
+        defaultValue: 'system',
+        description: '应用主题',
+        group: 'app',
+        options: ['light', 'dark', 'system']
+      });
+      
+      this.defineConfig('app_auto_start', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: false,
+        description: '开机自启动',
+        group: 'app'
+      });
+      
+      this.defineConfig('player_default_quality', {
+        type: ConfigType.STRING,
+        defaultValue: 'auto',
+        description: '默认播放质量',
+        group: 'player',
+        options: ['low', 'medium', 'high', 'ultra', 'auto']
+      });
+      
+      this.defineConfig('player_auto_play', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: true,
+        description: '自动播放',
+        group: 'player'
+      });
+      
+      this.defineConfig('player_remember_position', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: true,
+        description: '记住播放位置',
+        group: 'player'
+      });
+      
+      this.defineConfig('player_volume', {
+        type: ConfigType.NUMBER,
+        defaultValue: 80,
+        description: '默认音量',
+        group: 'player',
+        min: 0,
+        max: 100
+      });
+      
+      this.defineConfig('player_muted', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: false,
+        description: '是否静音',
+        group: 'player'
+      });
+      
+      this.defineConfig('player_hardware_acceleration', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: true,
+        description: '硬件加速',
+        group: 'player'
+      });
+      
+      this.defineConfig('network_timeout', {
+        type: ConfigType.NUMBER,
+        defaultValue: 30000,
+        description: '网络超时时间（毫秒）',
+        group: 'network',
+        min: 5000,
+        max: 60000
+      });
+      
+      this.defineConfig('network_retry_count', {
+        type: ConfigType.NUMBER,
+        defaultValue: 3,
+        description: '网络请求重试次数',
+        group: 'network',
+        min: 0,
+        max: 10
+      });
+      
+      this.defineConfig('network_auto_playback', {
+        type: ConfigType.BOOLEAN,
+        defaultValue: false,
+        description: '移动网络自动播放',
+        group: 'network'
+      });
+      
+      this.defineConfig('download_max_concurrent', {
+        type: ConfigType.NUMBER,
+        defaultValue: 3,
+        description: '最大并发下载数'
+      });
       
       // 设置配置文件路径
       if (configPath) {
@@ -205,7 +206,11 @@ export class ConfigRepository {
       this.eventBus.emit(ConfigEventType.CONFIG_ERROR, { error });
       
       // 使用默认配置作为后备
-      await this.resetToDefaults();
+      try {
+        await this.resetToDefaults();
+      } catch (resetError) {
+        this.logger.error('Failed to reset to defaults', resetError as Error);
+      }
     }
   }
 
@@ -739,11 +744,12 @@ export class ConfigRepository {
    */
   private async loadConfigsFromFile(): Promise<Record<string, any>> {
     try {
-      if (!this.configFilePath || !await this.fileUtil.exists(this.configFilePath)) {
+      if (!this.configFilePath) {
         return {};
       }
       
-      const content = await this.fileUtil.readTextFile(this.configFilePath);
+      // 使用HarmonyOS文件系统API代替不存在的方法
+      const content = await this.fileUtil.readFile(this.configFilePath, 'utf-8');
       return JSON.parse(content) || {};
     } catch (error) {
       this.logger.error('Failed to load configs from file', error as Error);
@@ -758,12 +764,13 @@ export class ConfigRepository {
     try {
       const allConfigs = this.getAllConfigs();
       
-      // 保存到存储
-      await this.storageUtil.set('app_configs', allConfigs, LocalStorageType.PERSISTENT);
+      // 保存到存储（使用HarmonyOS兼容的API）
+      await this.storageUtil.put('app_configs', allConfigs, LocalStorageType.PERSISTENT);
       
       // 保存到文件（如果指定了路径）
       if (this.configFilePath) {
-        await this.fileUtil.writeTextFile(this.configFilePath, JSON.stringify(allConfigs, null, 2));
+        // 使用HarmonyOS文件系统API代替不存在的方法
+        await this.fileUtil.writeFile(this.configFilePath, JSON.stringify(allConfigs, null, 2), 'utf-8');
       }
       
       // 发布配置保存事件
@@ -791,16 +798,17 @@ export class ConfigRepository {
       
       currentConfigs[key] = value;
       
-      // 保存到存储
-      await this.storageUtil.set('app_configs', currentConfigs, LocalStorageType.PERSISTENT);
+      // 保存到存储（使用HarmonyOS兼容的API）
+      await this.storageUtil.put('app_configs', currentConfigs, LocalStorageType.PERSISTENT);
       
       // 如果指定了文件路径，也更新文件
       if (this.configFilePath) {
         try {
-          const fileContent = await this.fileUtil.readTextFile(this.configFilePath);
+          // 使用HarmonyOS文件系统API代替不存在的方法
+          const fileContent = await this.fileUtil.readFile(this.configFilePath, 'utf-8');
           const fileConfigs = JSON.parse(fileContent) || {};
           fileConfigs[key] = value;
-          await this.fileUtil.writeTextFile(this.configFilePath, JSON.stringify(fileConfigs, null, 2));
+          await this.fileUtil.writeFile(this.configFilePath, JSON.stringify(fileConfigs, null, 2), 'utf-8');
         } catch (fileError) {
           // 文件保存失败不影响主要功能
           this.logger.warn('Failed to update config file', fileError as Error);

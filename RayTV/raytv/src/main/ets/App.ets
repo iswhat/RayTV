@@ -1,10 +1,11 @@
 import { useState, useEffect, onWindowFocus, onWindowBlur } from '@ohos/base';
 import { Router, RouteConfig } from '@ohos/router';
+import { getContext } from '@ohos.ability.featureAbility';
 import { mediaService } from './service/media/MediaService';
 import { historyService } from './service/media/HistoryService';
 import { favoriteService } from './service/media/FavoriteService';
 import { configService } from './service/config/ConfigService';
-import Logger from '@ohos/base/Logger';
+import Logger from './common/util/Logger';
 
 /**
  * RayTV应用主入口
@@ -136,12 +137,19 @@ struct App {
   private async initConfigService(): Promise<void> {
     try {
       Logger.info(this.TAG, 'Initializing configuration service...');
-      await configService.initialize();
+      
+      // 获取应用上下文并传递给配置服务
+      const context = getContext(this);
+      await configService.initialize(context);
       
       // 加载应用配置
-      const appConfig = await configService.getAppConfig();
-      if (appConfig && appConfig.version) {
-        this.appVersion = appConfig.version;
+      try {
+        const appVersion = await configService.getConfig('appVersion', this.appVersion);
+        if (appVersion) {
+          this.appVersion = appVersion.toString();
+        }
+      } catch (e) {
+        Logger.warn(this.TAG, 'Failed to get app version from config, using default');
       }
       
       Logger.info(this.TAG, 'Configuration service initialized');

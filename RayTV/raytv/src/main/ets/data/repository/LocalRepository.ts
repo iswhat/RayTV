@@ -223,15 +223,12 @@ export class LocalRepository {
     directories: DirectoryInfo[];
   }> {
     try {
-      // 检查路径是否存在
-      if (!await this.fileUtil.exists(path)) {
-        throw new Error(`Path does not exist: ${path}`);
-      }
-      
-      // 检查路径是否为目录
-      const isDirectory = await this.fileUtil.isDirectory(path);
-      if (!isDirectory) {
-        throw new Error(`Path is not a directory: ${path}`);
+      try {
+        // 尝试列出目录以检查存在性和类型
+        const entries = await this.fileUtil.listDirectory(path);
+        // 如果能成功列出目录，说明路径存在且是目录
+      } catch (error) {
+        throw new Error(`Path does not exist or is not a directory: ${path}`);
       }
       
       // 合并扫描选项
@@ -328,7 +325,7 @@ export class LocalRepository {
     
     try {
       // 获取目录内容
-      const entries = await this.fileUtil.readDirectory(path);
+      const entries = await this.fileUtil.listDirectory(path);
       
       let processedCount = 0;
       
@@ -341,10 +338,13 @@ export class LocalRepository {
         const entryPath = `${path}/${entry}`;
         
         try {
-          // 获取文件信息
-          const stats = await this.fileUtil.getFileStats(entryPath);
-          
-          if (stats.isDirectory) {
+          try {
+            // 尝试列出子目录，判断是否为目录
+            await this.fileUtil.listDirectory(entryPath);
+            // 能成功列出，说明是目录
+            const isDir = true;
+            
+            if (isDir) {
             // 处理目录
             const directoryInfo: DirectoryInfo = {
               path: entryPath,
@@ -538,22 +538,11 @@ export class LocalRepository {
    */
   public async getFileMetadata(path: string): Promise<FileMetadata | null> {
     try {
-      // 检查文件是否存在
-      if (!await this.fileUtil.exists(path)) {
-        this.logger.warn(`File does not exist: ${path}`);
-        return null;
-      }
+      // 使用HarmonyOS的文件API获取文件信息
+      const fileInfo = await this.fileUtil.getFileInfo(path);
       
-      // 检查是否为文件
-      const isFile = await this.fileUtil.isFile(path);
-      if (!isFile) {
-        this.logger.warn(`Path is not a file: ${path}`);
-        return null;
-      }
-      
-      // 获取文件信息
-      const stats = await this.fileUtil.getFileStats(path);
-      const fileName = this.fileUtil.getFileName(path);
+      // 从路径提取文件名和扩展名
+      const fileName = path.split('/').pop() || '';
       const fileExtension = this.fileUtil.getFileExtension(path).toLowerCase();
       
       const metadata: FileMetadata = {
@@ -562,10 +551,10 @@ export class LocalRepository {
         extension: fileExtension,
         type: this.detectFileType(fileExtension),
         format: this.detectFileFormat(fileExtension),
-        size: stats.size,
-        createdAt: stats.createdAt,
-        modifiedAt: stats.modifiedAt,
-        isSymlink: stats.isSymlink
+        size: fileInfo.size || 0,
+        createdAt: fileInfo.creationTime || Date.now(),
+        modifiedAt: fileInfo.modificationTime || Date.now(),
+        isSymlink: false // HarmonyOS API可能不直接支持获取符号链接属性
       };
       
       return metadata;
@@ -683,33 +672,25 @@ export class LocalRepository {
    */
   public async deleteFile(path: string): Promise<StorageOperationResult> {
     try {
-      // 检查文件是否存在
-      if (!await this.fileUtil.exists(path)) {
-        return {
-          success: false,
-          error: 'File does not exist'
-        };
-      }
-      
-      // 检查是否为文件
-      const isFile = await this.fileUtil.isFile(path);
-      if (!isFile) {
-        return {
-          success: false,
-          error: 'Path is not a file'
-        };
-      }
-      
-      // 获取文件元数据（删除前）
+      // 尝试使用HarmonyOS文件API删除文件
+      // 先获取文件元数据（删除前）
       const metadata = await this.getFileMetadata(path);
       
-      // 删除文件
+      // 如果文件不存在或不是文件，metadata会为null
+      if (!metadata) {
+        return {
+          success: false,
+          error: 'File does not exist or is not a file'
+        };
+      }
+      
+      // 执行删除
       await this.fileUtil.deleteFile(path);
       
       // 发布文件删除事件
       this.eventBus.emit(LocalStorageEventType.FILE_DELETED, {
         path,
-        fileType: metadata?.type || LocalFileType.OTHER,
+        fileType: metadata.type || LocalFileType.OTHER,
         metadata
       } as FileChangeEvent);
       
@@ -739,28 +720,11 @@ export class LocalRepository {
    */
   public async deleteDirectory(path: string, recursive: boolean = false): Promise<StorageOperationResult> {
     try {
-      // 检查目录是否存在
-      if (!await this.fileUtil.exists(path)) {
-        return {
-          success: false,
-          error: 'Directory does not exist'
-        };
-      }
-      
-      // 检查是否为目录
-      const isDirectory = await this.fileUtil.isDirectory(path);
-      if (!isDirectory) {
-        return {
-          success: false,
-          error: 'Path is not a directory'
-        };
-      }
-      
       // 获取目录信息（删除前）
       const dirInfo = await this.getDirectoryInfo(path);
       
-      // 删除目录
-      await this.fileUtil.deleteDirectory(path, recursive);
+      // 使用HarmonyOS的文件API删除目录
+      await this.fileUtil.deleteDirectory(path);
       
       // 发布目录删除事件
       this.eventBus.emit(LocalStorageEventType.DIRECTORY_DELETED, {
@@ -794,39 +758,28 @@ export class LocalRepository {
    */
   public async rename(oldPath: string, newPath: string): Promise<StorageOperationResult> {
     try {
-      // 检查源路径是否存在
-      if (!await this.fileUtil.exists(oldPath)) {
-        return {
-          success: false,
-          error: 'Source path does not exist'
-        };
-      }
-      
-      // 检查目标路径是否已存在
-      if (await this.fileUtil.exists(newPath)) {
-        return {
-          success: false,
-          error: 'Destination path already exists'
-        };
-      }
+      // 使用HarmonyOS的文件API重命名文件
+      await this.fileUtil.moveFile(oldPath, newPath);
       
       // 检查是文件还是目录
-      const isFile = await this.fileUtil.isFile(oldPath);
-      
-      // 执行重命名
-      await this.fileUtil.renameFile(oldPath, newPath);
-      
-      if (isFile) {
-        // 获取新文件元数据
-        const metadata = await this.getFileMetadata(newPath);
+      try {
+        const fileInfo = await this.fileUtil.getFileInfo(newPath);
+        // 假设能成功获取文件信息就是文件
+        const isFile = true;
         
-        // 发布文件更新事件
-        this.eventBus.emit(LocalStorageEventType.FILE_UPDATED, {
-          path: newPath,
-          fileType: metadata?.type || LocalFileType.OTHER,
-          metadata
-        } as FileChangeEvent);
-      } else {
+        if (isFile) {
+          // 获取新文件元数据
+          const metadata = await this.getFileMetadata(newPath);
+          
+          // 发布文件更新事件
+          this.eventBus.emit(LocalStorageEventType.FILE_UPDATED, {
+            path: newPath,
+            fileType: metadata?.type || LocalFileType.OTHER,
+            metadata
+          } as FileChangeEvent);
+        }
+      } catch (e) {
+        // 如果获取文件信息失败，可能是目录
         // 获取新目录信息
         const dirInfo = await this.getDirectoryInfo(newPath);
         
@@ -969,12 +922,16 @@ export class LocalRepository {
    */
   public listenForDeviceChanges(callback: (event: 'connected' | 'disconnected', device: StorageDevice) => void): () => void {
     // 创建事件监听器
-    const onConnected = (event: { device: StorageDevice }) => {
-      callback('connected', event.device);
+    const onConnected = (event?: { device: StorageDevice }) => {
+      if (event?.device) {
+        callback('connected', event.device);
+      }
     };
     
-    const onDisconnected = (event: { device: StorageDevice }) => {
-      callback('disconnected', event.device);
+    const onDisconnected = (event?: { device: StorageDevice }) => {
+      if (event?.device) {
+        callback('disconnected', event.device);
+      }
     };
     
     // 注册事件

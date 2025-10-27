@@ -1,6 +1,8 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { Preferences } from '@ohos.data.preferences';
-import { FileSystemAccess } from '@ohos.fileio';
+import fileio from '@ohos.fileio';
+import featureAbility from '@ohos.ability.featureAbility';
+import { Context } from '@ohos.ability.baseContext';
 
 /**
  * 配置类型枚举
@@ -54,7 +56,7 @@ export class ConfigService {
   private preferencesKey: string = 'RayTV_Config';
   private configItems: Map<string, ConfigItem> = new Map();
   private isInitialized: boolean = false;
-  private fileSystem: FileSystemAccess | null = null;
+  private context: Context | null = null;
   private configChangeListeners: Map<string, ((value: any) => void)[]> = new Map();
 
   /**
@@ -267,16 +269,20 @@ export class ConfigService {
 
   /**
    * 初始化配置服务
+   * @param context 应用上下文
    * @returns Promise<boolean>
    */
-  public async initialize(): Promise<boolean> {
+  public async initialize(context?: Context): Promise<boolean> {
     try {
       if (this.isInitialized) {
         return true;
       }
 
+      // 获取或使用传入的上下文
+      this.context = context || await featureAbility.getContext();
+      
       // 初始化Preferences
-      this.preferences = await Preferences.getPreferences(this.preferencesKey);
+      this.preferences = await Preferences.getPreferences(this.context, this.preferencesKey);
       Logger.info(this.TAG, 'Preferences initialized');
 
       // 确保所有默认配置项都已设置
@@ -662,9 +668,17 @@ export class ConfigService {
    */
   public async exportConfig(filePath: string): Promise<boolean> {
     try {
-      // 注意：这里需要根据HarmonyOS的文件系统API进行调整
       const configs = await this.getAllConfigs(true);
-      // 实现文件导出逻辑
+      const configJson = JSON.stringify(configs, null, 2);
+      
+      // 使用HarmonyOS的文件API写入文件
+      const fd = fileio.openSync(filePath, 0o2 | 0o100, 0o666);
+      try {
+        fileio.writeSync(fd, configJson);
+      } finally {
+        fileio.closeSync(fd);
+      }
+      
       Logger.info(this.TAG, `Config exported to ${filePath}`);
       return true;
     } catch (error) {
@@ -680,8 +694,22 @@ export class ConfigService {
    */
   public async importConfig(filePath: string): Promise<boolean> {
     try {
-      // 注意：这里需要根据HarmonyOS的文件系统API进行调整
-      // 实现文件导入逻辑
+      // 使用HarmonyOS的文件API读取文件
+      const fd = fileio.openSync(filePath, 0o00, 0o666);
+      let configJson: string;
+      try {
+        const fileStats = fileio.statSync(filePath);
+        const buffer = new ArrayBuffer(fileStats.size);
+        fileio.readSync(fd, buffer);
+        configJson = String.fromCharCode(...new Uint8Array(buffer));
+      } finally {
+        fileio.closeSync(fd);
+      }
+      
+      // 解析配置并应用
+      const configs = JSON.parse(configJson);
+      await this.setConfigs(configs);
+      
       Logger.info(this.TAG, `Config imported from ${filePath}`);
       return true;
     } catch (error) {
