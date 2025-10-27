@@ -1,8 +1,7 @@
 import Logger from '../../common/util/Logger';
-import { BaseLoader, SiteConfig, LoaderType } from './loader/BaseLoader';
-import { ArkJsLoader } from './loader/ArkJsLoader';
-import { ArkPyLoader } from './loader/ArkPyLoader';
-import { ArkJarLoader } from './loader/ArkJarLoader';
+import { BaseLoader, LoaderType } from './loader';
+import { Site } from '../../data/bean/Site';
+import { ArkJsLoader, ArkPyLoader, ArkJarLoader } from './loader';
 
 /**
  * 加载器工厂
@@ -34,14 +33,14 @@ export class LoaderFactory {
   }
 
   /**
-   * 根据站点配置创建加载器
-   * @param siteConfig 站点配置
+   * 根据站点信息创建加载器
+   * @param site 站点信息
    * @returns Promise<BaseLoader>
    */
-  public async createLoader(siteConfig: SiteConfig): Promise<BaseLoader> {
+  public async createLoader(site: Site): Promise<BaseLoader> {
     try {
       // 检查缓存中是否已有加载器
-      const cacheKey = this.getCacheKey(siteConfig);
+      const cacheKey = this.getCacheKey(site);
       let loader = this.loaderCache.get(cacheKey);
       
       // 如果加载器存在但已销毁，则移除缓存
@@ -52,7 +51,7 @@ export class LoaderFactory {
       
       // 如果缓存中没有，则创建新的加载器
       if (!loader) {
-        loader = this.createNewLoader(siteConfig);
+        loader = this.createNewLoader(site);
         
         // 初始化加载器
         await loader.init();
@@ -60,14 +59,14 @@ export class LoaderFactory {
         // 添加到缓存
         this.addToCache(cacheKey, loader);
         
-        Logger.info(this.TAG, `Created new ${loader.getLoaderType()} loader for site: ${siteConfig.name} (${siteConfig.key})`);
+        Logger.info(this.TAG, `Created new ${loader.getLoaderType()} loader for site: ${site.name} (${site.key})`);
       } else {
-        Logger.info(this.TAG, `Using cached loader for site: ${siteConfig.name} (${siteConfig.key})`);
+        Logger.info(this.TAG, `Using cached loader for site: ${site.name} (${site.key})`);
       }
       
       return loader;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create loader for site ${siteConfig.key}: ${error}`);
+      Logger.error(this.TAG, `Failed to create loader for site ${site.key}: ${error}`);
       throw error;
     }
   }
@@ -75,32 +74,39 @@ export class LoaderFactory {
   /**
    * 获取站点的加载器
    * 如果缓存中存在已初始化的加载器则直接返回，否则创建新的
-   * @param siteKey 站点唯一标识
-   * @returns BaseLoader | undefined
+   * @param site 站点信息
+   * @returns Promise<BaseLoader>
    */
-  public getLoader(siteKey: string): BaseLoader | undefined {
-    // 遍历缓存查找站点加载器
-    for (const [key, loader] of this.loaderCache.entries()) {
-      if (key.startsWith(`${siteKey}:`) && !loader.isDestroyed()) {
-        return loader;
-      }
+  public async getLoader(site: Site): Promise<BaseLoader> {
+    // 生成缓存键
+    const cacheKey = this.getCacheKey(site);
+    
+    // 查找缓存中的加载器
+    let loader = this.loaderCache.get(cacheKey);
+    
+    // 如果加载器存在且未销毁且已初始化，则直接返回
+    if (loader && !loader.isDestroyed() && loader.isInitialized()) {
+      return loader;
     }
-    return undefined;
+    
+    // 否则创建新的加载器
+    return this.createLoader(site);
   }
 
   /**
-   * 销毁站点的加载器
+   * 销毁指定站点的加载器
    * @param siteKey 站点唯一标识
+   * @returns boolean 是否成功销毁
    */
-  public destroyLoader(siteKey: string): void {
-    const keysToRemove: string[] = [];
+  public async destroyLoader(siteKey: string): Promise<boolean> {
+    const cacheKeysToRemove: string[] = [];
     
-    // 查找并销毁站点相关的加载器
+    // 查找所有匹配的缓存键
     for (const [key, loader] of this.loaderCache.entries()) {
       if (key.startsWith(`${siteKey}:`)) {
         try {
-          loader.destroy();
-          keysToRemove.push(key);
+          await loader.destroy();
+          cacheKeysToRemove.push(key);
           Logger.info(this.TAG, `Destroyed loader for site: ${siteKey}`);
         } catch (error) {
           Logger.error(this.TAG, `Failed to destroy loader for site ${siteKey}: ${error}`);
@@ -109,53 +115,46 @@ export class LoaderFactory {
     }
     
     // 从缓存中移除
-    for (const key of keysToRemove) {
+    for (const key of cacheKeysToRemove) {
       this.loaderCache.delete(key);
     }
+    
+    return cacheKeysToRemove.length > 0;
   }
 
   /**
    * 销毁所有加载器
    */
-  public destroyAllLoaders(): void {
-    Logger.info(this.TAG, 'Destroying all loaders');
-    
-    for (const loader of this.loaderCache.values()) {
-      try {
-        loader.destroy();
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to destroy loader: ${error}`);
-      }
-    }
-    
+  public async destroyAllLoaders(): Promise<void> {
+    const loaders = Array.from(this.loaderCache.values());
     this.loaderCache.clear();
-    Logger.info(this.TAG, 'All loaders destroyed');
+    
+    // 并行销毁所有加载器
+    await Promise.allSettled(
+      loaders.map(loader => {
+        return loader.destroy().catch(error => {
+          Logger.error(this.TAG, `Error destroying loader: ${error}`);
+        });
+      })
+    );
+    
+    Logger.info(this.TAG, `Destroyed all ${loaders.length} loaders`);
   }
 
   /**
-   * 获取缓存中的加载器数量
-   * @returns number
+   * 清空缓存
+   */
+  public clearCache(): void {
+    this.loaderCache.clear();
+    Logger.info(this.TAG, 'Loader cache cleared');
+  }
+
+  /**
+   * 获取缓存大小
+   * @returns number 缓存中的加载器数量
    */
   public getCacheSize(): number {
     return this.loaderCache.size;
-  }
-
-  /**
-   * 清理未使用的加载器缓存
-   */
-  public cleanCache(): void {
-    // 如果缓存超过最大大小，清理最早的加载器
-    const entries = Array.from(this.loaderCache.entries());
-    while (entries.length > this.maxCacheSize) {
-      const [key, loader] = entries.shift()!;
-      try {
-        loader.destroy();
-        this.loaderCache.delete(key);
-        Logger.info(this.TAG, `Cleaned cache: removed loader with key ${key}`);
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to clean cache for key ${key}: ${error}`);
-      }
-    }
   }
 
   /**
@@ -165,99 +164,140 @@ export class LoaderFactory {
   public setMaxCacheSize(size: number): void {
     if (size > 0) {
       this.maxCacheSize = size;
-      // 清理超出的缓存
-      this.cleanCache();
+      // 如果当前缓存超过新的最大值，清理多余的加载器
+      this.cleanupCache();
       Logger.info(this.TAG, `Max cache size set to: ${size}`);
     }
   }
 
   /**
+   * 关闭工厂，清理所有资源
+   */
+  public async shutdown(): Promise<void> {
+    await this.destroyAllLoaders();
+    Logger.info(this.TAG, 'LoaderFactory shutdown completed');
+  }
+
+  /**
    * 创建新的加载器实例
-   * @param siteConfig 站点配置
+   * @param site 站点配置
    * @returns BaseLoader
    * @private
    */
-  private createNewLoader(siteConfig: SiteConfig): BaseLoader {
-    switch (siteConfig.type) {
+  private createNewLoader(site: Site): BaseLoader {
+    switch (site.type) {
       case LoaderType.JS:
-        return new ArkJsLoader(siteConfig);
+        return new ArkJsLoader(site);
       case LoaderType.PY:
-        return new ArkPyLoader(siteConfig);
+        return new ArkPyLoader(site);
       case LoaderType.JAR:
-        return new ArkJarLoader(siteConfig);
+        return new ArkJarLoader(site);
       default:
-        throw new Error(`Unsupported loader type: ${siteConfig.type}`);
+        throw new Error(`Unsupported loader type: ${site.type}`);
     }
   }
 
   /**
-   * 生成缓存键
-   * @param siteConfig 站点配置
-   * @returns string
+   * 获取缓存键
+   * @param site 站点信息
+   * @returns string 缓存键
    * @private
    */
-  private getCacheKey(siteConfig: SiteConfig): string {
+  private getCacheKey(site: Site): string {
     // 使用站点key和配置的哈希值作为缓存键
-    const configHash = this.generateConfigHash(siteConfig);
-    return `${siteConfig.key}:${configHash}`;
+    const configHash = this.generateConfigHash(site);
+    return `${site.key}:${configHash}`;
   }
 
   /**
-   * 生成配置哈希值
-   * @param config 站点配置
-   * @returns string
+   * 生成站点的哈希值，用于缓存键
+   * @param site 站点信息
+   * @returns string 哈希值
    * @private
    */
-  private generateConfigHash(config: SiteConfig): string {
-    // 简单的配置哈希生成
-    const configString = JSON.stringify({
-      type: config.type,
-      url: config.url,
-      content: config.content,
-      enabled: config.enabled
+  private generateConfigHash(site: Site): string {
+    // 使用站点的关键信息生成哈希
+    const configStr = JSON.stringify({
+      key: site.key,
+      api: site.api,
+      ext: site.ext,
+      jar: site.jar,
+      type: site.type
     });
     
-    // 生成简单的哈希值
+    // 简单的字符串哈希算法
     let hash = 0;
-    for (let i = 0; i < configString.length; i++) {
-      const char = configString.charCodeAt(i);
+    if (configStr.length === 0) return String(hash);
+    
+    for (let i = 0; i < configStr.length; i++) {
+      const char = configStr.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+      hash = hash & hash; // 转换为32位整数
     }
     
-    return Math.abs(hash).toString(16);
+    return String(hash);
   }
 
   /**
-   * 添加加载器到缓存
+   * 添加到缓存
    * @param key 缓存键
    * @param loader 加载器实例
    * @private
    */
   private addToCache(key: string, loader: BaseLoader): void {
-    // 清理缓存以保持大小限制
-    this.cleanCache();
+    // 如果缓存已满，清理一些旧的加载器
+    if (this.loaderCache.size >= this.maxCacheSize) {
+      this.cleanupCache();
+    }
     
-    // 添加新的加载器到缓存
     this.loaderCache.set(key, loader);
+    Logger.debug(this.TAG, `Added loader to cache: ${key}, current cache size: ${this.loaderCache.size}`);
+  }
+
+  /**
+   * 清理缓存，移除最旧的或已销毁的加载器
+   * @private
+   */
+  private cleanupCache(): void {
+    const loadersToKeep: [string, BaseLoader][] = [];
+    const loadersToRemove: [string, BaseLoader][] = [];
     
-    Logger.debug(this.TAG, `Added loader to cache. Current cache size: ${this.loaderCache.size}`);
-  }
-
-  /**
-   * 检查加载器类型是否支持
-   * @param loaderType 加载器类型
-   * @returns boolean
-   */
-  public static isSupportedLoaderType(loaderType: string): boolean {
-    return Object.values(LoaderType).includes(loaderType as LoaderType);
-  }
-
-  /**
-   * 获取支持的加载器类型列表
-   * @returns string[]
-   */
-  public static getSupportedLoaderTypes(): string[] {
-    return Object.values(LoaderType);
+    // 分离已销毁的加载器
+    for (const [key, loader] of this.loaderCache.entries()) {
+      if (loader.isDestroyed()) {
+        loadersToRemove.push([key, loader]);
+      } else {
+        loadersToKeep.push([key, loader]);
+      }
+    }
+    
+    // 如果仍然需要移除更多加载器，按初始化时间排序并移除最旧的
+    if (loadersToKeep.length > this.maxCacheSize * 0.8) {
+      // 按初始化时间排序
+      loadersToKeep.sort((a, b) => {
+        const statusA = a[1].getStatus();
+        const statusB = b[1].getStatus();
+        return (statusA.initializedTime || 0) - (statusB.initializedTime || 0);
+      });
+      
+      // 移除多余的加载器
+      const excess = loadersToKeep.length - Math.floor(this.maxCacheSize * 0.8);
+      for (let i = 0; i < excess && i < loadersToKeep.length; i++) {
+        loadersToRemove.push(loadersToKeep[i]);
+      }
+    }
+    
+    // 移除选中的加载器
+    for (const [key, loader] of loadersToRemove) {
+      this.loaderCache.delete(key);
+      try {
+        loader.destroy();
+        Logger.debug(this.TAG, `Removed and destroyed loader from cache: ${key}`);
+      } catch (error) {
+        Logger.error(this.TAG, `Error destroying loader during cache cleanup: ${error}`);
+      }
+    }
+    
+    Logger.debug(this.TAG, `Cache cleanup completed, removed ${loadersToRemove.length} loaders, current cache size: ${this.loaderCache.size}`);
   }
 }

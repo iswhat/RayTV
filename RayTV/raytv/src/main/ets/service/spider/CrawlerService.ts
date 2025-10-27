@@ -3,7 +3,7 @@ import { SiteManager } from './SiteManager';
 import { LoaderFactory } from './LoaderFactory';
 import { CacheManager } from './CacheManager';
 import { BaseLoader } from './loader/BaseLoader';
-import { SiteInfo, SiteStatus } from './SiteManager';
+import { Site, SiteInfo, SiteStatus } from './SiteManager';
 import { TaskPoolManager } from '@ohos/base/TaskPoolManager';
 import { NetworkManager } from '@ohos/network/NetworkManager';
 
@@ -319,7 +319,7 @@ export class CrawlerService {
           context.method,
           context.params,
           {
-            siteInfo,
+            site: siteInfo as Site,
             priority: options.priority
           }
         );

@@ -1,8 +1,10 @@
 import Logger from '@ohos/base/Logger';
-import { BaseLoader, LoaderType, SiteConfig } from './BaseLoader';
+import { BaseLoader, LoaderType, Site } from './BaseLoader';
 import { TaskPoolManager } from '@ohos/base/TaskPoolManager';
 import HttpService from '@ohos/service/network/HttpService';
 import { FileSystemManager } from '@ohos.file.fs';
+import { MemoryManager } from '@ohos/base/MemoryManager';
+import { TimeoutManager } from '@ohos/base/TimeoutManager';
 
 /**
  * JAR加载器配置
@@ -23,20 +25,26 @@ export class ArkJarLoader extends BaseLoader {
   private taskPoolManager: TaskPoolManager;
   private httpService: HttpService;
   private fsManager: FileSystemManager;
+  private memoryManager: MemoryManager;
+  private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
   private sandboxId: string = '';
   private jarLoaded: boolean = false;
+  private methodExecutedCount: number = 0;
+  private lastMemoryCheckTime: number = 0;
 
   /**
    * 构造函数
-   * @param siteConfig 站点配置
+   * @param site 站点配置
    */
-  constructor(siteConfig: SiteConfig) {
-    super(siteConfig);
+  constructor(site: Site) {
+    super(site);
     this.taskPoolManager = TaskPoolManager.getInstance();
     this.httpService = HttpService.getInstance();
     this.fsManager = FileSystemManager.getFileSystemManager();
-    this.sandboxId = `sandbox_${siteConfig.key}_${Date.now()}`;
+    this.memoryManager = MemoryManager.getInstance();
+    this.timeoutManager = TimeoutManager.getInstance();
+    this.sandboxId = `sandbox_${site.key}_${Date.now()}`;
     
     // 设置默认配置
     this.loaderConfig = {
@@ -52,7 +60,12 @@ export class ArkJarLoader extends BaseLoader {
    */
   protected async onInit(): Promise<void> {
     try {
-      Logger.info(this.TAG, `Initializing JAR loader for site: ${this.siteConfig.name}`);
+      Logger.info(this.TAG, `Initializing JAR loader for site: ${this.site.name}`);
+      
+      // 检查内存是否充足
+      if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
+        throw new Error('Insufficient memory to initialize JAR loader');
+      }
       
       // 创建安全沙箱环境
       await this.createSecuritySandbox();
@@ -64,7 +77,8 @@ export class ArkJarLoader extends BaseLoader {
       await this.initializeJarResources();
       
       this.jarLoaded = true;
-      Logger.info(this.TAG, `JAR loader initialized successfully for site: ${this.siteConfig.name}`);
+      this.lastMemoryCheckTime = Date.now();
+      Logger.info(this.TAG, `JAR loader initialized successfully for site: ${this.site.name}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to initialize JAR loader: ${error}`);
       // 清理资源
@@ -85,27 +99,50 @@ export class ArkJarLoader extends BaseLoader {
         throw new Error('JAR file is not loaded');
       }
       
+      // 定期检查内存
+      this.methodExecutedCount++;
+      if (this.methodExecutedCount % 10 === 0 || Date.now() - this.lastMemoryCheckTime > 60000) {
+        if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
+          await this.garbageCollect();
+          if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
+            throw new Error('Insufficient memory to execute JAR method');
+          }
+        }
+        this.lastMemoryCheckTime = Date.now();
+      }
+      
       // 参数验证和安全检查
       this.validateParams(params);
+      this.validateMethod(method);
       
       // 在后台线程执行JAR方法
-      Logger.info(this.TAG, `Invoking JAR method: ${method} for site: ${this.siteConfig.name}`);
+      Logger.info(this.TAG, `Invoking JAR method: ${method} for site: ${this.site.name}`);
       
-      const result = await this.taskPoolManager.execute(async () => {
-        // 设置执行超时
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Method execution timeout')), this.loaderConfig.timeout);
+      // 使用超时管理器处理超时
+      const timeoutId = this.timeoutManager.setTimeout(
+        this.loaderConfig.timeout,
+        (methodName) => {
+          Logger.error(this.TAG, `Method execution timed out: ${methodName}`);
+        },
+        method
+      );
+      
+      try {
+        const result = await this.taskPoolManager.execute(async () => {
+          return await this.executeJarMethod(method, params);
         });
-        
-        const executionPromise = this.executeJarMethod(method, params);
-        
-        // 使用Promise.race处理超时
-        return await Promise.race([executionPromise, timeoutPromise]);
-      });
-      
-      return result;
+        return result;
+      } finally {
+        this.timeoutManager.clearTimeout(timeoutId);
+      }
     } catch (error) {
       Logger.error(this.TAG, `Failed to invoke JAR method ${method}: ${error}`);
+      // 增加错误计数
+      this.errorCount++;
+      if (this.errorCount > this.maxErrorCount) {
+        Logger.warn(this.TAG, `Too many errors, destroying loader for site: ${this.site.name}`);
+        await this.onDestroy();
+      }
       throw error;
     }
   }
@@ -116,7 +153,10 @@ export class ArkJarLoader extends BaseLoader {
    */
   protected async onDestroy(): Promise<void> {
     try {
-      Logger.info(this.TAG, `Destroying JAR loader for site: ${this.siteConfig.name}`);
+      Logger.info(this.TAG, `Destroying JAR loader for site: ${this.site.name}`);
+      
+      // 设置状态为销毁中
+      this.status = 'destroying';
       
       // 释放JAR资源
       await this.releaseJarResources();
@@ -127,10 +167,18 @@ export class ArkJarLoader extends BaseLoader {
       // 清理临时文件
       await this.cleanup();
       
+      // 清理超时任务
+      this.timeoutManager.clearAllTimeouts();
+      
+      // 通知内存管理器释放内存
+      this.memoryManager.releaseMemory(this.site.key);
+      
       this.jarLoaded = false;
-      Logger.info(this.TAG, `JAR loader destroyed successfully`);
+      this.status = 'destroyed';
+      Logger.info(this.TAG, `JAR loader destroyed successfully for site: ${this.site.name}`);
     } catch (error) {
       Logger.error(this.TAG, `Error during JAR loader destruction: ${error}`);
+      this.status = 'destroyed';
     }
   }
 
@@ -168,10 +216,15 @@ export class ArkJarLoader extends BaseLoader {
    * @private
    */
   private async loadJarFile(): Promise<void> {
-    const config = this.siteConfig;
+    const config = this.site;
     
     if (!config.url || !config.url.endsWith('.jar')) {
       throw new Error('Invalid JAR file URL');
+    }
+    
+    // 验证URL安全性
+    if (!this.validateUrl(config.url)) {
+      throw new Error('Security violation: Invalid or restricted JAR file URL');
     }
     
     try {
@@ -207,7 +260,7 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async initializeJarResources(): Promise<void> {
     try {
-      Logger.info(this.TAG, `Initializing JAR resources for: ${this.siteConfig.name}`);
+      Logger.info(this.TAG, `Initializing JAR resources for: ${this.site.name}`);
       
       // 这里需要使用HarmonyOS的ArkNative API加载JAR文件
       // 由于实际API可能有所不同，这里提供一个框架实现
@@ -240,6 +293,9 @@ export class ArkJarLoader extends BaseLoader {
     try {
       Logger.info(this.TAG, `Executing JAR method: ${method}`);
       
+      // 记录内存使用情况
+      const startMemory = this.memoryManager.getCurrentMemoryUsage();
+      
       // 转换参数格式
       const javaParams = this.convertToJavaParams(params);
       
@@ -258,7 +314,15 @@ export class ArkJarLoader extends BaseLoader {
       };
       
       // 转换结果格式
-      return this.convertFromJavaResult(result);
+      const jsResult = this.convertFromJavaResult(result);
+      
+      // 检查内存使用增长
+      const endMemory = this.memoryManager.getCurrentMemoryUsage();
+      if (endMemory - startMemory > 32 * 1024 * 1024) { // 超过32MB增长
+        Logger.warn(this.TAG, `Memory usage increased significantly during method execution: ${method}`);
+      }
+      
+      return jsResult;
     } catch (error) {
       Logger.error(this.TAG, `Error executing JAR method ${method}: ${error}`);
       throw error;
@@ -373,7 +437,55 @@ export class ArkJarLoader extends BaseLoader {
    * @private
    */
   private getJarFilePath(): string {
-    return `${this.getSandboxPath()}/${this.siteConfig.key}.jar`;
+    return `${this.getSandboxPath()}/${this.site.key}.jar`;
+  }
+  
+  /**
+   * 验证URL安全性
+   * @private
+   */
+  private validateUrl(url: string): boolean {
+    try {
+      const urlObj = new URL(url);
+      // 只允许https协议
+      if (urlObj.protocol !== 'https:') {
+        return false;
+      }
+      // 可以添加更多的URL验证逻辑
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  
+  /**
+   * 验证方法名
+   * @private
+   */
+  private validateMethod(method: string): void {
+    // 检查方法名是否包含危险字符或模式
+    const dangerousPatterns = [/\s/, /\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(method)) {
+        throw new Error(`Security violation: Invalid method name: ${method}`);
+      }
+    }
+    
+    // 方法名长度限制
+    if (method.length > 100) {
+      throw new Error('Method name too long');
+    }
+  }
+  
+  /**
+   * 垃圾回收
+   * @private
+   */
+  private async garbageCollect(): Promise<void> {
+    Logger.info(this.TAG, 'Triggering garbage collection');
+    // 在实际实现中，这里可以调用系统的垃圾回收机制
+    // ArkNativeAPI.garbageCollect();
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   /**

@@ -67,18 +67,18 @@ export class SiteManager {
     try {
       Logger.info(this.TAG, 'Initializing site manager...');
       
-      // 从数据库加载站点配置
-      const siteConfigs = await this.siteDao.getAll();
+      // 从数据库加载站点信息
+      const sites = await this.siteDao.getAll();
       
       // 初始化站点信息
-      for (const config of siteConfigs) {
+      for (const site of sites) {
         const siteInfo: SiteInfo = {
-          ...config,
-          status: config.enabled ? SiteStatus.NORMAL : SiteStatus.DISABLED,
+          ...site,
+          status: site.enabled ? SiteStatus.NORMAL : SiteStatus.DISABLED,
           errorCount: 0,
           performanceScore: 100
         };
-        this.sites.set(config.key, siteInfo);
+        this.sites.set(site.key, siteInfo);
       }
       
       this.initialized = true;
@@ -91,32 +91,32 @@ export class SiteManager {
 
   /**
    * 注册站点
-   * @param siteConfig 站点配置
+   * @param site 站点信息
    * @returns Promise<void>
    */
-  public async registerSite(siteConfig: Site): Promise<void> {
+  public async registerSite(site: Site): Promise<void> {
     try {
-      // 验证站点配置
-      this.validateSiteConfig(siteConfig);
+      // 验证站点信息
+      this.validateSite(site);
       
       // 检查站点是否已存在
-      if (this.sites.has(siteConfig.key)) {
-        throw new Error(`Site already exists: ${siteConfig.key}`);
+      if (this.sites.has(site.key)) {
+        throw new Error(`Site already exists: ${site.key}`);
       }
       
       // 创建站点信息
       const siteInfo: SiteInfo = {
-        ...siteConfig,
-        status: siteConfig.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
+        ...site,
+        status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
         errorCount: 0,
         performanceScore: 100
       };
       
       // 添加到内存并保存到数据库
-      this.sites.set(siteConfig.key, siteInfo);
-      await this.siteDao.save(siteConfig);
+      this.sites.set(site.key, siteInfo);
+      await this.siteDao.save(site);
       
-      Logger.info(this.TAG, `Registered site: ${siteConfig.name} (${siteConfig.key})`);
+      Logger.info(this.TAG, `Registered site: ${site.name} (${site.key})`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to register site: ${error}`);
       throw error;
@@ -125,24 +125,24 @@ export class SiteManager {
 
   /**
    * 更新站点
-   * @param siteConfig 站点配置
+   * @param site 站点信息
    * @returns Promise<void>
    */
-  public async updateSite(siteConfig: Site): Promise<void> {
+  public async updateSite(site: Site): Promise<void> {
     try {
-      // 验证站点配置
-      this.validateSiteConfig(siteConfig);
+      // 验证站点信息
+      this.validateSite(site);
       
       // 检查站点是否存在
-      const existingSite = this.sites.get(siteConfig.key);
+      const existingSite = this.sites.get(site.key);
       if (!existingSite) {
-        throw new Error(`Site not found: ${siteConfig.key}`);
+        throw new Error(`Site not found: ${site.key}`);
       }
       
       // 更新站点信息
       const updatedSiteInfo: SiteInfo = {
-        ...siteConfig,
-        status: siteConfig.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
+        ...site,
+        status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
         errorCount: existingSite.errorCount,
         lastError: existingSite.lastError,
         lastSuccessTime: existingSite.lastSuccessTime,
@@ -150,10 +150,10 @@ export class SiteManager {
       };
       
       // 更新内存并保存到数据库
-      this.sites.set(siteConfig.key, updatedSiteInfo);
-      await this.siteDao.update(siteConfig);
+      this.sites.set(site.key, updatedSiteInfo);
+      await this.siteDao.update(site);
       
-      Logger.info(this.TAG, `Updated site: ${siteConfig.name} (${siteConfig.key})`);
+      Logger.info(this.TAG, `Updated site: ${site.name} (${site.key})`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to update site: ${error}`);
       throw error;
@@ -296,16 +296,16 @@ export class SiteManager {
 
   /**
    * 批量注册站点
-   * @param siteConfigs 站点配置列表
+   * @param sites 站点信息列表
    * @returns Promise<void>
    */
-  public async registerSites(siteConfigs: Site[]): Promise<void> {
+  public async registerSites(sites: Site[]): Promise<void> {
     try {
-      for (const config of siteConfigs) {
+      for (const site of sites) {
         try {
-          await this.registerSite(config);
+          await this.registerSite(site);
         } catch (error) {
-          Logger.warn(this.TAG, `Failed to register site ${config.key}: ${error}`);
+          Logger.warn(this.TAG, `Failed to register site ${site.key}: ${error}`);
           // 继续处理其他站点
         }
       }
@@ -347,21 +347,21 @@ export class SiteManager {
   }
 
   /**
-   * 验证站点配置
-   * @param siteConfig 站点配置
+   * 验证站点信息
+   * @param site 站点信息
    * @private
    */
-  private validateSiteConfig(siteConfig: Site): void {
-    if (!siteConfig.key || !siteConfig.name || !siteConfig.type) {
-      throw new Error('Invalid site config: key, name and type are required');
+  private validateSite(site: Site): void {
+    if (!site.key || !site.name || !site.type) {
+      throw new Error('Invalid site: key, name and type are required');
     }
     
-    if (!Object.values(LoaderType).includes(siteConfig.type)) {
-      throw new Error(`Invalid loader type: ${siteConfig.type}`);
+    if (!Object.values(LoaderType).includes(site.type)) {
+      throw new Error(`Invalid loader type: ${site.type}`);
     }
     
-    if (siteConfig.url && !siteConfig.url.startsWith('http://') && !siteConfig.url.startsWith('https://')) {
-      throw new Error(`Invalid URL: ${siteConfig.url}`);
+    if (site.url && !site.url.startsWith('http://') && !site.url.startsWith('https://')) {
+      throw new Error(`Invalid URL: ${site.url}`);
     }
   }
 }
