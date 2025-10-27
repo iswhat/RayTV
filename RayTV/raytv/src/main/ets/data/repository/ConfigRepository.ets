@@ -1,8 +1,8 @@
 // ConfigRepository - 配置仓库
 // 负责处理应用配置的存储和管理
 
-import Logger from '../utils/Logger';
-import StorageUtil from '../utils/StorageUtil';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
 import { ConfigKey, ConfigValue, ConfigCategory } from '../model/ConfigModel';
 import DatabaseRepository from './DatabaseRepository';
 

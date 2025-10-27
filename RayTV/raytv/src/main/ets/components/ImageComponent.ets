@@ -3,7 +3,7 @@
  * 提供统一的图片加载、占位符和错误处理功能
  */
 import { Component, Prop, State, EventHub, Event } from '@ohos/hypium';
-import Logger from '../utils/Logger';
+import Logger from '../common/util/Logger';
 
 export interface ImageComponentOptions {
   /** 图片URL */

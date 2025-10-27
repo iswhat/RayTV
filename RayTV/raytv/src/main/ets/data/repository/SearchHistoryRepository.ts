@@ -1,9 +1,9 @@
 // SearchHistoryRepository - 搜索历史仓库类
 // 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
 import { LocalStorageType } from '../model/LocalModel';
 
 /**

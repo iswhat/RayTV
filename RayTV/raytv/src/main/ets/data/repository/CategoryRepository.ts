@@ -1,11 +1,11 @@
 // CategoryRepository - 分类仓库类
 // 负责管理视频和直播的分类数据
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { NetworkUtil } from '../../utils/NetworkUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType, CachePolicy } from '../model/CacheModel';
 

@@ -23,6 +23,7 @@ export class AppConstant {
   public static readonly DEFAULT_TIMEOUT: number = 30000; // 30秒
   public static readonly MAX_RETRY_COUNT: number = 3;
   public static readonly USER_AGENT: string = `${AppConstant.APP_NAME}/${AppConstant.VERSION_NAME} HarmonyOS/2.0`;
+  public static readonly NETWORK_CHECK_URL: string = 'https://www.eoeoo.com/base2/a.json';
 
   // 数据库相关
   public static readonly DATABASE_NAME: string = 'raytv.db';

@@ -1,10 +1,10 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { BaseLoader, LoaderType, Site } from './BaseLoader';
-import { TaskPoolManager } from '@ohos/base/TaskPoolManager';
-import HttpService from '@ohos/service/network/HttpService';
-import { FileSystemManager } from '@ohos.file.fs';
-import { MemoryManager } from '@ohos/base/MemoryManager';
-import { TimeoutManager } from '@ohos/base/TimeoutManager';
+import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
+import HttpService from '../../../data/service/NetworkService';
+import { fileio } from '@ohos.fileio';
+import MemoryManager from '../../../common/util/MemoryManager';
+import TimeoutManager from '../../../common/util/TimeoutManager';
 
 /**
  * JAR加载器配置

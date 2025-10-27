@@ -1,7 +1,7 @@
 // ConfigRepository - 配置仓库类
 // 负责管理应用程序的所有配置数据，提供统一的配置读写接口
 
-import { Logger } from '../../utils/Logger';
+import Logger from '../../common/util/Logger';
 import { StorageUtil } from '../../utils/StorageUtil';
 import { EventBusUtil } from '../../utils/EventBusUtil';
 import { FileUtil } from '../../utils/FileUtil';
@@ -89,7 +89,97 @@ export class ConfigRepository {
     try {
       if (this.initialized) {
         this.logger.warn('ConfigRepository already initialized');
+    
+    this.defineConfig('app_theme', {
+      type: ConfigType.ENUM,
+      defaultValue: 'system',
+      description: '应用主题',
+      group: 'app',
+      options: ['light', 'dark', 'system']
         return;
+    });
+    
+    this.defineConfig('app_auto_start', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: false,
+      description: '开机自启动',
+      group: 'app'
+    });
+    
+    this.defineConfig('player_default_quality', {
+      type: ConfigType.STRING,
+      defaultValue: 'auto',
+      description: '默认播放质量',
+      group: 'player',
+      options: ['low', 'medium', 'high', 'ultra', 'auto']
+    });
+    
+    this.defineConfig('player_auto_play', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: true,
+      description: '自动播放',
+      group: 'player'
+    });
+    
+    this.defineConfig('player_remember_position', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: true,
+      description: '记住播放位置',
+      group: 'player'
+    });
+    
+    this.defineConfig('player_volume', {
+      type: ConfigType.NUMBER,
+      defaultValue: 80,
+      description: '默认音量',
+      group: 'player',
+      min: 0,
+      max: 100
+    });
+    
+    this.defineConfig('player_muted', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: false,
+      description: '是否静音',
+      group: 'player'
+    });
+    
+    this.defineConfig('player_hardware_acceleration', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: true,
+      description: '硬件加速',
+      group: 'player'
+    });
+    
+    this.defineConfig('network_timeout', {
+      type: ConfigType.NUMBER,
+      defaultValue: 30000,
+      description: '网络超时时间（毫秒）',
+      group: 'network',
+      min: 5000,
+      max: 60000
+    });
+    
+    this.defineConfig('network_retry_count', {
+      type: ConfigType.NUMBER,
+      defaultValue: 3,
+      description: '网络请求重试次数',
+      group: 'network',
+      min: 0,
+      max: 10
+    });
+    
+    this.defineConfig('network_auto_playback', {
+      type: ConfigType.BOOLEAN,
+      defaultValue: false,
+      description: '移动网络自动播放',
+      group: 'network'
+    });
+    
+    this.defineConfig('download_max_concurrent', {
+      type: ConfigType.NUMBER,
+      defaultValue: 3,
+      description:
       }
       
       // 设置配置文件路径

@@ -5,7 +5,7 @@ import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { DEVICE_INFO_TABLE } from '../db/TableSchema';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
 import Logger from '../../common/util/Logger';
-import StorageUtil, { LocalStorageType } from '../../utils/StorageUtil';
+import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
 
 const TAG = 'DeviceInfoRepository';
 

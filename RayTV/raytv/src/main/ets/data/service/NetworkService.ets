@@ -191,6 +191,13 @@ export default class NetworkService {
   private cache: Map<string, NetworkCacheItem> = new Map();
   private activeRequests: Set<string> = new Set();
   
+  /**
+   * 获取当前网络连接状态
+   */
+  public get isConnected(): boolean {
+    return this.networkStatus === NetworkStatus.CONNECTED;
+  }
+  
   // 拦截器
   private requestInterceptors: RequestInterceptor[] = [];
   private responseInterceptors: ResponseInterceptor[] = [];
@@ -391,8 +398,16 @@ export default class NetworkService {
     try {
       // 实际应用中，这里应该使用系统API检查网络状态
       // 这里简化为模拟实现
-      const isConnected = await NetworkUtil.isConnected();
-      const networkType = await NetworkUtil.getNetworkType();
+      const isConnected = await NetworkUtil.checkNetworkStatus();
+      const networkTypeStr = await NetworkUtil.getNetworkType();
+      
+      // 将string类型的网络类型转换为NetworkType枚举
+      let networkType: NetworkType = NetworkType.UNKNOWN;
+      if (networkTypeStr.includes('wifi') || networkTypeStr.includes('ethernet')) {
+        networkType = NetworkType.WIFI;
+      } else if (networkTypeStr.includes('4g') || networkTypeStr.includes('5g') || networkTypeStr.includes('3g') || networkTypeStr.includes('cellular')) {
+        networkType = NetworkType.CELLULAR;
+      }
       
       let newStatus: NetworkStatus;
       if (isConnected) {

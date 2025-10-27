@@ -5,7 +5,7 @@ import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { COLLECTION_TABLE, COLLECTION_FOLDER_TABLE } from '../db/TableSchema';
 import { CollectionItemType, CollectionVisibility, CollectionSortType } from '../model/LocalModel';
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../utils/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'CollectionRepository';
 const COLLECTION_CACHE_PREFIX = 'collection_item_';

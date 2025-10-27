@@ -1,11 +1,11 @@
 // CacheRepository - 缓存仓库类
 // 负责管理应用程序的缓存数据，提供统一的缓存读写和管理接口
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { FileUtil } from '../../utils/FileUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { FormatUtil } from '../../utils/FormatUtil';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import FileUtil from '../../common/util/FileUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import FormatUtil from '../../common/util/FormatUtil';
 import {
   CacheType,
   CachePolicy,

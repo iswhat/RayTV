@@ -1,11 +1,11 @@
 // SearchRepository - 搜索仓库类
 // 负责管理搜索相关数据，包括搜索历史、热门搜索、搜索结果缓存等
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { NetworkUtil } from '../../utils/NetworkUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
 import { SearchType, SearchSort, SearchRequest, SearchResult, SearchResultItem } from '../dto/SearchDto';
 import { VideoInfo, VideoType } from '../dto/VideoDto';
 import { LocalStorageType } from '../model/LocalModel';

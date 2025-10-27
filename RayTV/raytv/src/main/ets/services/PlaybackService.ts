@@ -1,9 +1,9 @@
 // PlaybackService - 播放服务类
 // 负责管理视频播放相关的业务逻辑，包括播放控制、播放状态管理、音视频设置等
 
-import { Logger } from '../utils/Logger';
-import { EventBusUtil, GlobalEventType } from '../utils/EventBusUtil';
-import { StorageUtil } from '../utils/StorageUtil';
+import Logger from '../common/util/Logger';
+import EventBusUtil, { GlobalEventType } from '../common/util/EventBusUtil';
+import StorageUtil from '../common/util/StorageUtil';
 import { ConfigRepository } from '../data/repository/ConfigRepository';
 import { LocalStorageType } from '../data/model/LocalModel';
 import { LiveStream, LiveStreamQuality } from './LiveStreamService';

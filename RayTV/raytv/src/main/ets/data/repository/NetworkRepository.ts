@@ -1,10 +1,10 @@
 // NetworkRepository - 网络状态仓库类
 // 负责管理网络连接状态、网络请求监控和网络配置
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType } from '../model/CacheModel';
 

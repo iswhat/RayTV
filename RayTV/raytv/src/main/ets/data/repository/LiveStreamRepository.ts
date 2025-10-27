@@ -1,7 +1,7 @@
 // LiveStreamRepository - 直播数据仓库类
 // 负责管理直播流相关数据，包括直播列表、直播详情、关注、观看统计等
 
-import { Logger } from '../../utils/Logger';
+import Logger from '../../common/util/Logger';
 import { StorageUtil } from '../../utils/StorageUtil';
 import { NetworkUtil } from '../../utils/NetworkUtil';
 import { EventBusUtil } from '../../utils/EventBusUtil';

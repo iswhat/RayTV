@@ -102,9 +102,7 @@ export default class FileUtil {
    */
   public static async ensureDirExists(dirPath: string): Promise<void> {
     try {
-      if (!(await this.exists(dirPath))) {
-        await fs.mkdir(dirPath, 0o777, true);
-      }
+      await fs.mkdir(dirPath, 0o777, true);
     } catch (error) {
       Logger.error(TAG, `Failed to ensure directory exists ${dirPath}: ${error}`);
       throw error;

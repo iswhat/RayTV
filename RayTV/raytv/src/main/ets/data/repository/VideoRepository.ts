@@ -1,12 +1,12 @@
 // VideoRepository - 视频数据仓库类
 // 负责管理视频相关数据，包括视频列表、详情、收藏、观看历史等
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { NetworkUtil } from '../../utils/NetworkUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
-import { FileUtil } from '../../utils/FileUtil';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
+import FileUtil from '../../common/util/FileUtil';
 import {
   VideoType,
   VideoQuality,

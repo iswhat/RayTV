@@ -1,7 +1,7 @@
 // LocalRepository - 本地数据仓库类
 // 负责管理本地文件和存储相关操作，提供统一的数据访问接口
 
-import { Logger } from '../../utils/Logger';
+import Logger from '../../common/util/Logger';
 import { FileUtil } from '../../utils/FileUtil';
 import { StorageUtil } from '../../utils/StorageUtil';
 import { EventBusUtil } from '../../utils/EventBusUtil';

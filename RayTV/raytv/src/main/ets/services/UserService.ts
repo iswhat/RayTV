@@ -1,8 +1,8 @@
 // UserService - 用户服务类
 // 负责管理用户相关的业务逻辑，包括用户注册、登录、信息管理、权限控制等
 
-import { Logger } from '../utils/Logger';
-import { EventBusUtil, GlobalEventType } from '../utils/EventBusUtil';
+import Logger from '../common/util/Logger';
+import { EventBusUtil } from '../utils/EventBusUtil';
 import { StorageUtil } from '../utils/StorageUtil';
 import { NetworkUtil } from '../utils/NetworkUtil';
 import { ValidatorUtil } from '../utils/ValidatorUtil';

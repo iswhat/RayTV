@@ -1,10 +1,10 @@
 // DownloadService - 下载服务类
 // 负责管理视频下载相关的业务逻辑，包括下载任务的创建、暂停、恢复、取消、查询等功能
 
-import { Logger } from '../utils/Logger';
-import { EventBusUtil, GlobalEventType } from '../utils/EventBusUtil';
-import { StorageUtil } from '../utils/StorageUtil';
-import { FileUtil } from '../utils/FileUtil';
+import Logger from '../common/util/Logger';
+import { EventBusUtil, GlobalEventType } from '../common/util/EventBusUtil';
+import StorageUtil from '../common/util/StorageUtil';
+import FileUtil from '../common/util/FileUtil';
 import { ConfigRepository } from '../data/repository/ConfigRepository';
 import { LocalStorageType, FileType, StorageDevice } from '../data/model/LocalModel';
 import { LiveStream, LiveStreamQuality } from './LiveStreamService';

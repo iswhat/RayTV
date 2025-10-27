@@ -1,10 +1,10 @@
 // NotificationRepository - 通知仓库类
 // 负责管理应用内通知、系统通知和用户偏好设置
 
-import { Logger } from '../../utils/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType } from '../model/CacheModel';
 

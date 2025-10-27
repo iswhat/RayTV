@@ -1,9 +1,9 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { BaseLoader, LoaderType, Site } from './BaseLoader';
-import { TaskPoolManager } from '@ohos/base/TaskPoolManager';
-import HttpService from '@ohos/service/network/HttpService';
-import { MemoryManager } from '@ohos/base/MemoryManager';
-import { TimeoutManager } from '@ohos/base/TimeoutManager';
+import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
+import HttpService from '../../../data/service/NetworkService';
+import MemoryManager from '../../../common/util/MemoryManager';
+import TimeoutManager from '../../../common/util/TimeoutManager';
 
 /**
  * Python执行上下文

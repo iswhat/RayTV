@@ -26,6 +26,16 @@
   - 移除不存在的属性：`networkManager`和`taskPoolManager`
   - 添加正确的属性：`networkService`
 
+### 4. 加载器模块修复
+- 创建 TaskPoolManager 模块（task/pool/TaskPoolManager.ets），提供任务池管理功能
+- 创建 MemoryManager 工具类（common/util/MemoryManager.ets），提供内存监控和管理
+- 创建 TimeoutManager 工具类（common/util/TimeoutManager.ets），提供超时控制功能
+- 修复 ArkJsLoader、ArkJarLoader、ArkPyLoader 中的导入路径问题：
+  - Logger 导入改为 '../../common/util/Logger'
+  - TaskPoolManager 导入改为 '../../../task/pool/TaskPoolManager'
+  - HttpService 导入改为 '../../../data/service/NetworkService'
+  - MemoryManager 和 TimeoutManager 导入改为正确路径
+
 ## 已完成内容
 
 ### 1. 数据存储层

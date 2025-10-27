@@ -10,7 +10,7 @@ import {
   LiveStream
 } from '../bean/Live';
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../utils/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'LiveRepository';
 

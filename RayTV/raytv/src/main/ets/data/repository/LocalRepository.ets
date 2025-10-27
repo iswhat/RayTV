@@ -1,9 +1,9 @@
 // LocalRepository - 本地存储仓库
 // 负责处理本地文件和存储相关的操作
 
-import Logger from '../utils/Logger';
-import StorageUtil from '../utils/StorageUtil';
-import FileUtil from '../utils/FileUtil';
+import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import FileUtil from '../../common/util/FileUtil';
 import { LocalStorageType, FileMetadata } from '../model/LocalModel';
 import { FileService } from '../service/FileService';
 

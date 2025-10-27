@@ -14,7 +14,7 @@ import {
   VodDetail
 } from '../bean/Vod';
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../utils/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'VodRepository';
 

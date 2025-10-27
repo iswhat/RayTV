@@ -26,131 +26,151 @@
 - **分布式能力**：@ohos.distributedHardware.deviceManager (API 19)
 - **手势识别**：@ohos.multimodalInput.gesture (API 19)
 
-## 2. 详细项目结构
+## 2. 详细项目结构（已更新为实际代码结构）
 
 ```
 raytv/
 ├── App.ets                          # 应用入口
-├── MainAbility.ets                  # 主应用能力
 ├── common/                          # 通用组件和工具
 │   ├── constant/                    # 常量定义
 │   │   ├── AppConstant.ets          # 应用常量
 │   │   ├── ConfigConstant.ets       # 配置常量
 │   │   ├── PlayerConstant.ets       # 播放器常量
 │   │   └── RemoteKeyConstant.ets    # 遥控器按键常量
+│   ├── security/                    # 安全工具
 │   ├── util/                        # 工具类
-│   │   ├── Logger.ets               # 日志工具
-│   │   ├── NetworkUtil.ets          # 网络工具
+│   │   ├── DateUtil.ets             # 日期工具
 │   │   ├── FileUtil.ets             # 文件工具
 │   │   ├── JsonUtil.ets             # JSON工具
-│   │   ├── StringUtil.ets           # 字符串工具
-│   │   └── DeviceUtil.ets           # 设备工具
-│   ├── widget/                      # 自定义组件
-│   │   ├── LoadingComponent.ets     # 加载组件
-│   │   ├── ErrorComponent.ets       # 错误组件
-│   │   └── EmptyComponent.ets       # 空状态组件
-│   └── security/                    # 安全工具
-│       ├── SecurityManager.ets      # 安全管理器
-│       └── SandboxUtil.ets          # 沙箱工具
+│   │   ├── Logger.ets               # 日志工具（主实现）
+│   │   ├── MemoryManager.ets        # 内存管理工具
+│   │   ├── NetworkUtil.ets          # 网络工具
+│   │   ├── StorageUtil.ets          # 存储工具
+│   │   └── TimeoutManager.ets       # 超时管理工具
+│   └── widget/                      # 自定义组件
+├── components/                      # 组件目录
+│   └── ImageComponent.ets           # 图片组件
 ├── data/                            # 数据层
 │   ├── bean/                        # 数据模型
-│   │   ├── Vod.ets                  # 点播内容模型
+│   │   ├── Config.ets               # 配置信息模型
+│   │   ├── DeviceInfo.ets           # 设备信息模型
+│   │   ├── History.ets              # 历史记录模型
 │   │   ├── Live.ets                 # 直播内容模型
 │   │   ├── Site.ets                 # 站点模型
-│   │   ├── History.ets              # 历史记录模型
-│   │   ├── Config.ets               # 配置信息模型
-│   │   └── DeviceInfo.ets           # 设备信息模型
+│   │   └── Vod.ets                  # 点播内容模型
 │   ├── db/                          # 数据库相关
 │   │   ├── DatabaseManager.ets      # 数据库管理器
+│   │   ├── SQLiteHelper.ets         # SQLite助手类
 │   │   ├── TableSchema.ets          # 表结构定义
 │   │   └── dao/                     # 数据访问对象
-│   │       ├── SiteDao.ets          # 站点DAO
-│   │       ├── LiveDao.ets          # 直播DAO
-│   │       ├── HistoryDao.ets       # 历史记录DAO
-│   │       ├── KeepDao.ets          # 收藏DAO
-│   │       └── ConfigDao.ets        # 配置DAO
 │   ├── distributed/                 # 分布式数据管理
-│   │   └── DistributedDataManager.ets # 分布式数据管理器
+│   ├── dto/                         # 数据传输对象
+│   ├── model/                       # 数据模型
 │   ├── parser/                      # 数据解析器
-│   │   ├── VodParser.ets            # 点播内容解析器
-│   │   ├── LiveParser.ets           # 直播内容解析器
-│   │   └── SourceParser.ets         # 视频源解析器
+│   ├── repository/                  # 数据仓库实现
+│   │   ├── AuthRepository.ts        # 认证仓库
+│   │   ├── CacheRepository.ts       # 缓存仓库
+│   │   ├── CategoryRepository.ts    # 分类仓库
+│   │   ├── CollectionRepository.ets # 收藏仓库
+│   │   ├── ConfigRepository.ets     # 配置仓库
+│   │   ├── HistoryRepository.ets    # 历史记录仓库
+│   │   ├── LiveRepository.ets       # 直播仓库
+│   │   ├── LiveStreamRepository.ts  # 直播流仓库
+│   │   ├── LocalRepository.ets      # 本地仓库
+│   │   ├── NetworkRepository.ets    # 网络仓库
+│   │   ├── SiteRepository.ets       # 站点仓库
+│   │   ├── UserRepository.ts        # 用户仓库
+│   │   ├── VideoRepository.ts       # 视频仓库
+│   │   └── VodRepository.ets        # 点播仓库
+│   ├── service/                     # 数据服务
 │   └── source/                      # 数据源
-│       ├── RemoteDataSource.ets     # 远程数据源
-│       └── LocalDataSource.ets      # 本地数据源
 ├── domain/                          # 业务逻辑层
-│   ├── repository/                  # 数据仓库
-│   │   ├── VodRepository.ets        # 点播内容仓库
-│   │   ├── LiveRepository.ets       # 直播内容仓库
-│   │   └── ConfigRepository.ets     # 配置仓库
-│   ├── usecase/                     # 用例
-│   │   ├── SearchVodUseCase.ets     # 搜索点播用例
-│   │   ├── PlayVodUseCase.ets       # 播放点播用例
-│   │   ├── PlayLiveUseCase.ets      # 播放直播用例
-│   │   └── LoadConfigUseCase.ets    # 加载配置用例
-│   └── sandbox/                     # 沙箱隔离环境
-│       └── SandboxEnvironment.ets   # 沙箱环境管理
+│   ├── repository/                  # 仓库接口
+│   ├── sandbox/                     # 沙箱隔离环境
+│   ├── service/                     # 业务服务
+│   │   └── MediaService.ts          # 媒体服务
+│   └── usecase/                     # 用例
+│       ├── LoadConfigUseCase.ets    # 加载配置用例
+│       ├── PlayLiveUseCase.ets      # 播放直播用例
+│       ├── PlayVodUseCase.ets       # 播放点播用例
+│       ├── SearchLiveUseCase.ets    # 搜索直播用例
+│       └── SearchVodUseCase.ets     # 搜索点播用例
+├── pages/                           # 页面（主页面目录）
+│   ├── CategoryPage.ets             # 分类页面
+│   ├── FavoritesPage.ets            # 收藏页面
+│   ├── HistoryPage.ets              # 历史页面
+│   ├── HomePage.ets                 # 首页
+│   ├── Index.ets                    # 索引页面
+│   ├── MediaDetailPage.ets          # 媒体详情页面
+│   ├── PlaybackPage.ets             # 播放页面
+│   ├── SearchPage.ets               # 搜索页面
+│   └── SettingsPage.ets             # 设置页面
 ├── presentation/                    # 表现层
 │   ├── ability/                     # 应用能力
-│   │   ├── SearchAbility.ets        # 搜索能力
-│   │   ├── DetailAbility.ets        # 详情能力
-│   │   └── PlayAbility.ets          # 播放能力
-│   ├── page/                        # 页面
-│   │   ├── MainPage.ets             # 首页
-│   │   ├── SearchPage.ets           # 搜索页
-│   │   ├── DetailPage.ets           # 详情页
-│   │   ├── PlayPage.ets             # 播放页
-│   │   ├── SettingPage.ets          # 设置页
-│   │   └── LivePage.ets             # 直播页
-│   ├── viewmodel/                   # 视图模型
-│   │   ├── MainViewModel.ets        # 首页视图模型
-│   │   ├── SearchViewModel.ets      # 搜索视图模型
-│   │   ├── DetailViewModel.ets      # 详情视图模型
-│   │   └── PlayViewModel.ets        # 播放视图模型
+│   ├── harmony/                     # 鸿蒙特有组件
+│   ├── page/                        # 表现层页面
 │   ├── state/                       # 状态管理
-│   │   └── AppState.ets             # 应用全局状态
-│   └── harmony/                     # 鸿蒙特有UI组件
-│       ├── VoiceAssistantComponent.ets # 语音助手组件
-│       ├── DeviceFlowComponent.ets  # 设备流转组件
-│       └── GestureControlComponent.ets # 手势控制组件
+│   ├── view/                        # 视图组件
+│   └── viewmodel/                   # 视图模型
+│       ├── DetailViewModel.ets      # 详情视图模型
+│       ├── MainViewModel.ets        # 首页视图模型
+│       ├── PlayerViewModel.ets      # 播放器视图模型
+│       └── SearchViewModel.ets      # 搜索视图模型
+├── raytvability/                    # 应用能力
+│   └── RaytvAbility.ets             # 主应用能力
+├── raytvbackupability/              # 备份能力
+│   └── RaytvBackupAbility.ets       # 备份应用能力
 ├── service/                         # 服务层
-│   ├── player/                      # 播放器服务
-│   │   ├── PlayerManager.ets        # 播放器管理器
-│   │   ├── VideoPlayer.ets          # 自定义播放器组件
-│   │   ├── SourceManager.ets        # 视频源管理器
-│   │   └── PlayHistoryManager.ets   # 播放历史管理器
-│   ├── spider/                      # 爬虫服务
-│   │   ├── loader/                  # 多语言加载器
-│   │   │   ├── BaseLoader.ets       # 爬虫加载基类
-│   │   │   ├── jar/                 # JAR加载器
-│   │   │   │   └── ArkJarLoader.ets # Ark JAR加载器
-│   │   │   ├── js/                  # JavaScript加载器
-│   │   │   │   └── ArkJsLoader.ets  # Ark JS加载器
-│   │   │   └── py/                  # Python加载器
-│   │   │       └── ArkPyLoader.ets  # Ark Python加载器
-│   │   ├── adapter/                 # Fongmi配置适配器
-│   │   │   └── ConfigAdapter.ets    # 配置适配器
-│   │   └── SpiderService.ets        # 爬虫服务
 │   ├── config/                      # 配置服务
 │   │   ├── ConfigLoader.ets         # 配置加载器
 │   │   ├── ConfigParser.ets         # 配置解析器
 │   │   └── ConfigService.ets        # 配置服务
-│   ├── security/                    # 安全服务
-│   │   └── SecurityService.ets      # 安全服务
-│   ├── voice/                       # 语音助手服务
-│   │   └── VoiceAssistantService.ets # 语音助手服务
 │   ├── flow/                        # 设备流转服务
-│   │   └── DeviceFlowService.ets    # 设备流转服务
-│   └── gesture/                     # 手势操作服务
-│       └── GestureService.ets       # 手势操作服务
+│   ├── gesture/                     # 手势操作服务
+│   ├── media/                       # 媒体服务
+│   │   ├── FavoriteService.ts       # 收藏服务
+│   │   ├── HistoryService.ts        # 历史记录服务
+│   │   ├── MediaService.ts          # 媒体服务
+│   │   └── PlaybackService.ts       # 播放服务
+│   ├── player/                      # 播放器服务
+│   ├── security/                    # 安全服务
+│   ├── spider/                      # 爬虫服务
+│   │   ├── CrawlerService.ts        # 爬虫服务
+│   │   ├── LoaderFactory.ts         # 加载器工厂
+│   │   ├── SiteManager.ts           # 站点管理器
+│   │   ├── adapter/                 # 适配器
+│   │   └── loader/                  # 加载器
+│   └── voice/                       # 语音助手服务
+├── services/                        # 额外服务目录
+│   ├── DownloadService.ts           # 下载服务
+│   ├── LiveStreamService.ts         # 直播流服务
+│   ├── PlaybackService.ts           # 播放服务
+│   └── UserService.ts               # 用户服务
 ├── task/                            # 任务调度
-│   ├── scheduler/                   # WorkScheduler管理
-│   │   └── TaskScheduler.ets        # 任务调度器
-│   └── pool/                        # TaskPool优化
-│       └── TaskPoolManager.ets      # TaskPool管理器
-├── resources/                       # 资源文件
-└── etsconfig.json                   # ArkTS配置
+│   ├── pool/                        # 任务池
+│   │   └── TaskPoolManager.ets      # 任务池管理器
+│   └── scheduler/                   # 调度器
+├── utils/                           # 工具类（额外工具目录）
+│   ├── CacheService.ts              # 缓存服务
+│   ├── DateUtils.ts                 # 日期工具
+│   ├── EventBusUtil.ts              # 事件总线工具
+│   ├── FileUtil.ts                  # 文件工具
+│   ├── FormatUtil.ts                # 格式化工具
+│   ├── NetworkUtil.ts               # 网络工具
+│   ├── StorageUtil.ts               # 存储工具
+│   ├── StringUtils.ts               # 字符串工具
+│   └── ValidatorUtil.ts             # 验证工具
+└── resources/                       # 资源文件
 ```
+
+### 2.1 实际结构与规划差异说明
+
+1. **工具类目录**：实际项目中存在两个工具类目录（common/util/ 和 utils/），最终Logger工具已统一到common/util/Logger.ets中
+2. **Repository层**：实际实现了更丰富的仓库类，包括认证、缓存、分类等多个仓库
+3. **Service层**：服务分布在多个位置（data/service/、domain/service/、service/、services/）
+4. **页面组织**：主要页面位于pages/目录，部分页面在presentation/page/
+5. **数据库实现**：增加了SQLiteHelper.ets辅助类
+6. **应用能力**：使用RaytvAbility.ets作为主应用能力，而非常规划的MainAbility.ets
 
 ## 3. 核心模块实现计划
 

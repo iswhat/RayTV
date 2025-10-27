@@ -5,7 +5,7 @@ import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { History, HistoryGroup, HistoryType, ContentType } from '../bean/History';
 import { HISTORY_TABLE } from '../db/TableSchema';
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../utils/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'HistoryRepository';
 const HISTORY_CACHE_PREFIX = 'history_item_';

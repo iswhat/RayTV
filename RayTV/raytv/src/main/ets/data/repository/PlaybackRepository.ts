@@ -1,8 +1,8 @@
-import Logger from '../../utils/Logger';
-import StorageUtil, { LocalStorageType } from '../../utils/StorageUtil';
-import NetworkUtil from '../../utils/NetworkUtil';
-import EventBusUtil from '../../utils/EventBusUtil';
-import CacheService from '../../utils/CacheService';
+import Logger from '../../common/util/Logger';
+import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../common/util/CacheService';
 import UserRepository from './UserRepository';
 import VideoRepository from './VideoRepository';
 import { PlaybackState, VideoQuality, PlaybackSpeed, PlaybackMode, AudioTrack, SubtitleTrack } from '../model/LocalModel';

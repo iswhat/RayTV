@@ -5,7 +5,7 @@ import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { Site, SiteGroup, SiteType, LoaderType, SiteSearchConfig } from '../bean/Site';
 import { SITE_TABLE, SITE_GROUP_TABLE } from '../db/TableSchema';
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../utils/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'SiteRepository';
 const SITE_CACHE_PREFIX = 'site_data_';
