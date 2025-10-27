@@ -1,5 +1,31 @@
 # RayTV项目开发进度记录
 
+## 代码诊断问题修复
+
+### 1. 导入路径修复
+- **MediaService.ts**
+  - 修复Logger导入路径：从`../utils/Logger`改为`../../common/util/Logger`
+  - 修复SiteInfo导入路径：从`../site/SiteManager`改为`../spider/SiteManager`
+  
+- **CrawlerService.ts**
+  - 修复Logger导入路径：从`@ohos/base/Logger`改为`../../common/util/Logger`
+  - 移除不存在的导入：`TaskPoolManager`和`NetworkManager`
+  - 添加正确的导入：`NetworkService`
+
+### 2. 方法调用修复
+- **MediaService.ts**
+  - 修复站点状态判断：从`site.status === 'enabled' || site.status === 1`改为`site.status === 'normal' || site.enabled`
+  
+- **CrawlerService.ts**
+  - 修复网络连接检查：从`networkManager.isConnected()`改为`networkService.isConnected`
+  - 修复获取站点列表方法名：从`siteManager.getSites()`改为`siteManager.getAllSites()`
+  - 修复更新站点状态方法签名：返回类型从`boolean`改为`void`，移除返回值
+
+### 3. 类属性修复
+- **CrawlerService.ts**
+  - 移除不存在的属性：`networkManager`和`taskPoolManager`
+  - 添加正确的属性：`networkService`
+
 ## 已完成内容
 
 ### 1. 数据存储层

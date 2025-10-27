@@ -1,4 +1,4 @@
-import Logger from '../utils/Logger';
+import Logger from '../../common/util/Logger';
 import { CrawlerService, CrawlerResponse } from '../spider/CrawlerService';
 import { ConfigService } from '../config/ConfigService';
 import { SiteInfo } from '../spider/SiteManager';
@@ -500,7 +500,7 @@ export class MediaService {
     }
     
     // 只返回启用状态的站点
-    return sites.filter(site => site.status === 'enabled' || site.status === 1);
+    return sites.filter(site => site.status === 'normal' || site.enabled);
   }
 
   /**

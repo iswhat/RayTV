@@ -1,11 +1,10 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { SiteManager } from './SiteManager';
 import { LoaderFactory } from './LoaderFactory';
 import { CacheManager } from './CacheManager';
 import { BaseLoader } from './loader/BaseLoader';
 import { Site, SiteInfo, SiteStatus } from './SiteManager';
-import { TaskPoolManager } from '@ohos/base/TaskPoolManager';
-import { NetworkManager } from '@ohos/network/NetworkManager';
+import NetworkService from '../../data/service/NetworkService';
 
 /**
  * 爬虫请求选项接口
@@ -50,8 +49,7 @@ export class CrawlerService {
   private siteManager: SiteManager;
   private loaderFactory: LoaderFactory;
   private cacheManager: CacheManager;
-  private networkManager: NetworkManager;
-  private taskPoolManager: TaskPoolManager;
+  private networkService: NetworkService;
   private executingTasks: Map<string, Promise<any>> = new Map();
 
   /**
@@ -84,8 +82,7 @@ export class CrawlerService {
     this.siteManager = SiteManager.getInstance();
     this.loaderFactory = LoaderFactory.getInstance();
     this.cacheManager = CacheManager.getInstance();
-    this.networkManager = NetworkManager.getInstance();
-    this.taskPoolManager = TaskPoolManager.getInstance();
+    this.networkService = NetworkService.getInstance();
     Logger.info(this.TAG, 'CrawlerService initialized');
   }
 
@@ -132,7 +129,7 @@ export class CrawlerService {
       }
       
       // 检查网络连接
-      if (!this.networkManager.isConnected()) {
+      if (!this.networkService.isConnected) {
         Logger.warn(this.TAG, 'No network connection, trying to use cache');
         // 没有网络连接时，尝试使用缓存
         if (!requestOptions.disableCache) {
@@ -245,7 +242,7 @@ export class CrawlerService {
    * @returns SiteInfo[]
    */
   public getSites(): SiteInfo[] {
-    return this.siteManager.getSites();
+    return this.siteManager.getAllSites();
   }
 
   /**
@@ -263,8 +260,8 @@ export class CrawlerService {
    * @param status 新状态
    * @returns boolean
    */
-  public updateSiteStatus(siteKey: string, status: SiteStatus): boolean {
-    return this.siteManager.updateSiteStatus(siteKey, status);
+  public updateSiteStatus(siteKey: string, status: SiteStatus): void {
+    this.siteManager.updateSiteStatus(siteKey, status);
   }
 
   /**
