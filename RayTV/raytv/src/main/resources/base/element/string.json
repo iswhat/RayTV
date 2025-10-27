@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "RaytvAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "RaytvAbility_label",
+      "value": "label"
+    }
+  ]
+}

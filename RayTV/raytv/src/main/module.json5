@@ -1,0 +1,53 @@
+{
+  "module": {
+    "name": "raytv",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "RaytvAbility",
+    "deviceTypes": [
+      "phone",
+      "tablet",
+      "2in1",
+      "tv"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "RaytvAbility",
+        "srcEntry": "./ets/raytvability/RaytvAbility.ets",
+        "description": "$string:RaytvAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:RaytvAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "skills": [
+          {
+            "entities": [
+              "entity.system.home"
+            ],
+            "actions": [
+              "ohos.want.action.home"
+            ]
+          }
+        ]
+      }
+    ],
+    "extensionAbilities": [
+      {
+        "name": "RaytvBackupAbility",
+        "srcEntry": "./ets/raytvbackupability/RaytvBackupAbility.ets",
+        "type": "backup",
+        "exported": false,
+        "metadata": [
+          {
+            "name": "ohos.extension.backup",
+            "resource": "$profile:backup_config"
+          }
+        ],
+      }
+    ]
+  }
+}

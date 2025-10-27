@@ -1,0 +1,26 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'com.fongmi.android.tv.quickjs'
+
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 36
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation project(':catvod')
+    implementation 'wang.harlon.quickjs:wrapper-java:3.2.3'
+    implementation 'wang.harlon.quickjs:wrapper-android:3.2.3'
+    implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.4'
+}
