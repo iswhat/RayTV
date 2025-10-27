@@ -42,7 +42,7 @@ raytv/
 │   │   ├── DateUtil.ets             # 日期工具
 │   │   ├── FileUtil.ets             # 文件工具
 │   │   ├── JsonUtil.ets             # JSON工具
-│   │   ├── Logger.ets               # 日志工具（主实现）
+│   │   ├── Logger.ets               # 日志工具（单例模式实现，支持多级别日志、格式化输出、持久化存储和静态方法兼容）
 │   │   ├── MemoryManager.ets        # 内存管理工具
 │   │   ├── NetworkUtil.ets          # 网络工具
 │   │   ├── StorageUtil.ets          # 存储工具
