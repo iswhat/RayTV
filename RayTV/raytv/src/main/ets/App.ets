@@ -1,10 +1,13 @@
 import { useState, useEffect, onWindowFocus, onWindowBlur } from '@ohos/base';
 import { Router, RouteConfig } from '@ohos/router';
 import { getContext } from '@ohos.ability.featureAbility';
+import { LoadingProgress, Button, Text } from '@ohos/components';
 import { mediaService } from './service/media/MediaService';
 import { historyService } from './service/media/HistoryService';
 import { favoriteService } from './service/media/FavoriteService';
 import { configService } from './service/config/ConfigService';
+import { subscriptionManager } from './service/config/SubscriptionManager';
+import { lineManager } from './service/config/LineManager';
 import Logger from './common/util/Logger';
 
 /**
@@ -69,6 +72,22 @@ struct App {
         icon: '⚙️'
       }
     },
+    {      
+      path: 'pages/subscription/SubscriptionManagerPage',
+      name: 'SubscriptionManagerPage',
+      meta: {
+        title: '配置源管理',
+        showTabBar: false
+      }
+    },
+    {      
+      path: 'pages/LineManagerPage',
+      name: 'LineManagerPage',
+      meta: {
+        title: '线路管理',
+        showTabBar: false
+      }
+    },
     {
       path: 'pages/SearchPage',
       name: 'SearchPage',
@@ -117,10 +136,16 @@ struct App {
       // 3. 初始化媒体服务
       await this.initMediaService();
       
-      // 4. 设置全局路由配置
+      // 4. 初始化订阅管理器
+      await this.initSubscriptionManager();
+      
+      // 5. 初始化线路管理器
+      await this.initLineManager();
+      
+      // 6. 设置全局路由配置
       this.setupRouter();
       
-      // 5. 执行启动任务
+      // 6. 执行启动任务
       await this.executeStartupTasks();
       
       this.isInitialized = true;
@@ -156,6 +181,43 @@ struct App {
     } catch (error) {
       Logger.error(this.TAG, `Failed to initialize configuration service: ${error}`);
       throw error;
+    }
+  }
+  
+  /**
+   * 初始化订阅管理器
+   */
+  private async initSubscriptionManager(): Promise<void> {
+    try {
+      Logger.info(this.TAG, 'Initializing subscription manager...');
+      
+      // 获取应用上下文并传递给订阅管理器
+      const context = getContext(this);
+      await subscriptionManager.initialize(context);
+      
+      Logger.info(this.TAG, 'Subscription manager initialized');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to initialize subscription manager: ${error}`);
+      // 订阅管理器初始化失败不应阻止应用启动
+      throw error;
+    }
+  }
+  
+  /**
+   * 初始化线路管理器
+   */
+  private async initLineManager(): Promise<void> {
+    try {
+      Logger.info(this.TAG, 'Initializing line manager...');
+      
+      // 获取应用上下文并传递给线路管理器
+      const context = getContext(this);
+      await lineManager.initialize(context);
+      
+      Logger.info(this.TAG, 'Line manager initialized');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to initialize line manager: ${error}`);
+      // 线路管理器初始化失败不应阻止应用启动
     }
   }
   
@@ -205,10 +267,16 @@ struct App {
         Router.registerRoute(config);
       });
       
+      // 检查是否有可用线路，如果没有则跳转到线路管理页面
+      const hasAvailableLines = lineManager.hasAvailableLines();
+      const defaultPath = hasAvailableLines ? 'pages/HomePage' : 'pages/LineManagerPage';
+      
       // 设置默认路由
       Router.replace({
-        url: 'pages/HomePage'
+        url: defaultPath
       });
+      
+      Logger.info(this.TAG, `Default route set to: ${defaultPath}`);
       
       Logger.info(this.TAG, 'Router configured successfully');
     } catch (error) {

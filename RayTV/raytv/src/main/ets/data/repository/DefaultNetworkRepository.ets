@@ -16,6 +16,7 @@ import NetworkRepository, {
 import Movie from '../model/Movie';
 import SearchResult, { ResultType } from '../model/SearchResult';
 import { RequestConfig, Response } from '../../common/util/NetworkUtil';
+import { parserService } from '../../service/parser';
 
 const TAG = 'DefaultNetworkRepository';
 const DEFAULT_CACHE_KEY_PREFIX = 'network_cache_';
@@ -560,11 +561,35 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
   
   async getVideoSources(contentId: string, contentType: string): Promise<NetworkResult<VideoSourceInfo[]>> { 
-    return { success: false, message: 'Not implemented' }; 
+    try {
+      Logger.info(TAG, `Getting video sources for contentId: ${contentId}, contentType: ${contentType}`);
+      
+      // 使用解析器服务获取视频源
+      return await parserService.getVideoSources(contentId, contentType);
+    } catch (error) {
+      Logger.error(TAG, `Failed to get video sources: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get video sources' 
+      };
+    }
   }
   
   async parseVideoSource(sourceUrl: string, parserId?: string): Promise<NetworkResult<VideoSourceInfo>> { 
-    return { success: false, message: 'Not implemented' }; 
+    try {
+      Logger.info(TAG, `Parsing video source: ${sourceUrl}, parserId: ${parserId}`);
+      
+      // 使用解析器服务解析视频源
+      return await parserService.parseVideoSource(sourceUrl, parserId);
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse video source: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to parse video source' 
+      };
+    }
   }
   
   async getVideoChapters(contentId: string, season: number = 1): Promise<NetworkResult<ChapterInfo[]>> { 
@@ -620,11 +645,35 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
   
   async getParsers(): Promise<NetworkResult<ParserInfo[]>> { 
-    return { success: false, message: 'Not implemented' }; 
+    try {
+      Logger.info(TAG, 'Getting available parsers');
+      
+      // 使用解析器服务获取所有解析器
+      return await parserService.getParsers();
+    } catch (error) {
+      Logger.error(TAG, `Failed to get parsers: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get parsers' 
+      };
+    }
   }
   
   async checkParserAvailability(parserId: string): Promise<NetworkResult<boolean>> { 
-    return { success: false, message: 'Not implemented' }; 
+    try {
+      Logger.info(TAG, `Checking parser availability: ${parserId}`);
+      
+      // 使用解析器服务检查解析器可用性
+      return await parserService.checkParserAvailability(parserId);
+    } catch (error) {
+      Logger.error(TAG, `Failed to check parser availability: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to check parser availability' 
+      };
+    }
   }
   
   async submitFeedback(feedback: string, contact?: string): Promise<NetworkResult<boolean>> { 

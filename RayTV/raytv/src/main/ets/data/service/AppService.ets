@@ -15,6 +15,7 @@ import LiveStreamService from '../../service/live/LiveStreamService';
 import SubtitleService from './SubtitleService';
 import FileService from './FileService';
 import RepositoryFactory from '../repository/RepositoryFactory';
+import { ParserService } from '../../service/parser';
 
 // 常量定义
 const TAG = 'AppService';
@@ -441,18 +442,23 @@ export default class AppService {
       await subtitleService.initialize();
       this.services.set('subtitleService', subtitleService);
       
-      // 17. 更新统计信息
+      // 17. 初始化解析器服务
+      const parserService = ParserService.getInstance();
+      await parserService.initialize();
+      this.services.set('parserService', parserService);
+      
+      // 18. 更新统计信息
       await this.updateLaunchStatistics();
       
-      // 18. 执行启动时清理
+      // 19. 执行启动时清理
       await this.performStartupCleanup();
       
-      // 19. 检查更新
+      // 20. 检查更新
       if (this.appConfig.enableAutoUpdate) {
         await this.checkForUpdates();
       }
       
-      // 20. 发送初始化完成事件
+      // 21. 发送初始化完成事件
       this.isInitialized = true;
       this.setState(AppState.READY);
       

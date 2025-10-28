@@ -27,6 +27,19 @@ struct SettingsPage {
   @State notificationsEnabled: boolean = true;
   @State version: string = '1.0.0';
   
+  // 广告屏蔽设置
+  @State enableAdBlock: boolean = true;
+  @State blockVideoAds: boolean = true;
+  @State blockPopupAds: boolean = true;
+  
+  // 壁纸设置
+  @State enableWallpaper: boolean = false;
+  @State wallpaperType: 'none' | 'image' | 'video' = 'none';
+  
+  // 鸿蒙特有功能设置
+  @State enableVoiceAssistant: boolean = true;
+  @State enableDeviceFlow: boolean = true;
+  
   // 对话框状态
   @State showClearCacheDialog: boolean = false;
   @State showAboutDialog: boolean = false;
@@ -59,6 +72,19 @@ struct SettingsPage {
       this.maxCacheSize = await configService.getConfig('maxCacheSize', 1024);
       this.enableUpdateCheck = await configService.getConfig('enableUpdateCheck', true);
       this.notificationsEnabled = await configService.getConfig('notificationsEnabled', true);
+      
+      // 广告屏蔽设置
+      this.enableAdBlock = await configService.getConfig('enableAdBlock', true);
+      this.blockVideoAds = await configService.getConfig('blockVideoAds', true);
+      this.blockPopupAds = await configService.getConfig('blockPopupAds', true);
+      
+      // 壁纸设置
+      this.enableWallpaper = await configService.getConfig('enableWallpaper', false);
+      this.wallpaperType = await configService.getConfig('wallpaperType', 'none');
+      
+      // 鸿蒙特有功能设置
+      this.enableVoiceAssistant = await configService.getConfig('enableVoiceAssistant', true);
+      this.enableDeviceFlow = await configService.getConfig('enableDeviceFlow', true);
       
       // 获取应用版本
       this.version = await this.getAppVersion();
@@ -396,6 +422,161 @@ struct SettingsPage {
   }
   
   /**
+   * 渲染广告屏蔽设置
+   */
+  @Builder
+  private renderAdBlockSettings(): void {
+    this.renderSettingGroup('广告屏蔽', () => {
+      <>
+        {this.renderSwitchItem(
+          '启用广告屏蔽', 
+          this.enableAdBlock, 
+          (value) => {
+            this.enableAdBlock = value;
+            this.saveSetting('enableAdBlock', value);
+          },
+          '屏蔽视频中的广告内容'
+        )}
+        <Divider />
+        {this.renderSwitchItem(
+          '屏蔽视频广告', 
+          this.blockVideoAds, 
+          (value) => {
+            this.blockVideoAds = value;
+            this.saveSetting('blockVideoAds', value);
+          },
+          '过滤播放过程中的广告片段'
+        )}
+        <Divider />
+        {this.renderSwitchItem(
+          '屏蔽弹窗广告', 
+          this.blockPopupAds, 
+          (value) => {
+            this.blockPopupAds = value;
+            this.saveSetting('blockPopupAds', value);
+          },
+          '拦截页面中的弹窗广告'
+        )}
+        <Divider />
+        {this.renderOptionItem(
+          '更新广告规则', 
+          '', 
+          this.updateAdBlockRules,
+          '🔄'
+        )}
+      </>
+    });
+  }
+  
+  /**
+   * 渲染壁纸设置
+   */
+  @Builder
+  private renderWallpaperSettings(): void {
+    this.renderSettingGroup('壁纸设置', () => {
+      <>
+        {this.renderSwitchItem(
+          '启用壁纸', 
+          this.enableWallpaper, 
+          (value) => {
+            this.enableWallpaper = value;
+            this.saveSetting('enableWallpaper', value);
+          },
+          '自定义应用背景壁纸'
+        )}
+        <Divider />
+        <ListItem className="setting-item">
+          <Text className="setting-label">壁纸类型</Text>
+          <Button className="wallpaper-option" onClick={() => {}}>
+            {this.getWallpaperTypeText()} →
+          </Button>
+        </ListItem>
+        <Divider />
+        {this.renderOptionItem(
+          '选择壁纸', 
+          '', 
+          this.selectWallpaper,
+          '🖼️'
+        )}
+      </>
+    });
+  }
+  
+  /**
+   * 渲染鸿蒙特有功能设置
+   */
+  @Builder
+  private renderHarmonyFeaturesSettings(): void {
+    this.renderSettingGroup('鸿蒙功能', () => {
+      <>
+        {this.renderSwitchItem(
+          '小艺语音助手', 
+          this.enableVoiceAssistant, 
+          (value) => {
+            this.enableVoiceAssistant = value;
+            this.saveSetting('enableVoiceAssistant', value);
+          },
+          '通过语音控制应用功能'
+        )}
+        <Divider />
+        {this.renderSwitchItem(
+          '设备流转', 
+          this.enableDeviceFlow, 
+          (value) => {
+            this.enableDeviceFlow = value;
+            this.saveSetting('enableDeviceFlow', value);
+          },
+          '在不同设备间无缝切换播放'
+        )}
+      </>
+    });
+  }
+  
+  /**
+   * 更新广告规则
+   */
+  private async updateAdBlockRules(): Promise<void> {
+    try {
+      Logger.info(this.TAG, 'Updating ad block rules...');
+      // 这里应该调用广告屏蔽服务更新规则
+      Toast.show({ message: '广告规则更新成功' });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to update ad block rules: ${error}`);
+      Toast.show({ message: '更新广告规则失败' });
+    }
+  }
+  
+  /**
+   * 选择壁纸
+   */
+  private async selectWallpaper(): Promise<void> {
+    try {
+      Logger.info(this.TAG, 'Selecting wallpaper...');
+      // 这里应该打开壁纸选择界面
+      Toast.show({ message: '请选择壁纸' });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to select wallpaper: ${error}`);
+      Toast.show({ message: '选择壁纸失败' });
+    }
+  }
+  
+  /**
+   * 获取壁纸类型文本
+   */
+  private getWallpaperTypeText(): string {
+    switch (this.wallpaperType) {
+      case 'none':
+        return '无壁纸';
+      case 'image':
+        return '图片壁纸';
+      case 'video':
+        return '视频壁纸';
+      default:
+        return '无壁纸';
+    }
+  }
+  
+  /**
    * 渲染关于设置
    */
   @Builder
@@ -518,6 +699,9 @@ struct SettingsPage {
       <ScrollView className="content-scroll" scrollBar="auto">
         {this.renderThemeSettings()}
         {this.renderPlaybackSettings()}
+        {this.renderAdBlockSettings()}
+        {this.renderWallpaperSettings()}
+        {this.renderHarmonyFeaturesSettings()}
         {this.renderCacheSettings()}
         {this.renderNotificationSettings()}
         {this.renderAboutSettings()}

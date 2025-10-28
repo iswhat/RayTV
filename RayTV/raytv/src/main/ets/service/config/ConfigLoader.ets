@@ -32,10 +32,30 @@ export class ConfigLoader {
   /**
    * 从URL加载配置
    * @param url 配置URL
+   * @param cacheHours 缓存时间（小时），默认使用默认值
+   * @param forceRefresh 是否强制刷新（忽略缓存）
    */
-  public async loadFromUrl(url: string): Promise<string> {
+  public async loadFromUrl(url: string, cacheHours?: number, forceRefresh: boolean = false): Promise<string> {
     try {
       Logger.info(TAG, `Loading config from URL: ${url}`);
+      
+      // 验证缓存时间
+      const normalizedCacheHours = this.normalizeCacheTime(cacheHours);
+      
+      // 如果不是强制刷新，先尝试从缓存加载
+      if (!forceRefresh) {
+        try {
+          const cachedContent = await this.loadFromCache(url, normalizedCacheHours);
+          if (cachedContent) {
+            Logger.info(TAG, `Using cached config (${normalizedCacheHours}h)`);
+            return cachedContent;
+          }
+        } catch (cacheError) {
+          Logger.error(TAG, `Failed to load cached config: ${cacheError}`);
+        }
+      } else {
+        Logger.info(TAG, `Force refresh enabled, bypassing cache`);
+      }
       
       // 创建HTTP请求
       const request = http.createHttp();
@@ -209,11 +229,17 @@ export class ConfigLoader {
     }
   }
   
+  // 缓存过期时间配置（小时）
+  private minCacheHours: number = 24;     // 最小24小时
+  private maxCacheHours: number = 72;     // 最大72小时
+  private defaultCacheHours: number = 24; // 默认24小时
+
   /**
    * 从缓存加载配置
    * @param url 配置URL
+   * @param cacheHours 缓存时间（小时）
    */
-  private async loadFromCache(url: string): Promise<string | null> {
+  private async loadFromCache(url: string, cacheHours: number = this.defaultCacheHours): Promise<string | null> {
     try {
       const cacheFileName = this.getCacheFileName(url);
       const cacheFilePath = `${this.cachePath}/${cacheFileName}`;
@@ -230,11 +256,11 @@ export class ConfigLoader {
       const content = await fs.readText(file.fd);
       await fs.close(file.fd);
       
-      // 检查缓存是否过期（24小时）
+      // 检查缓存是否过期
       const cacheInfo = await fs.getFileStat(cacheFilePath);
       const cacheTime = cacheInfo.mtimeMs || cacheInfo.ctimeMs || Date.now();
       const now = Date.now();
-      const cacheExpiry = 24 * 60 * 60 * 1000; // 24小时
+      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 转换为毫秒
       
       if (now - cacheTime > cacheExpiry) {
         Logger.debug(TAG, `Cache expired, ignoring`);
@@ -361,6 +387,43 @@ export class ConfigLoader {
   }
   
   /**
+   * 清理过期缓存
+   * @param cacheHours 使用的缓存时间阈值（小时），默认使用最小缓存时间
+   */
+  public async cleanExpiredCache(cacheHours: number = this.minCacheHours): Promise<void> {
+    try {
+      Logger.info(TAG, `Cleaning expired cache (threshold: ${cacheHours}h)`);
+      
+      // 读取缓存目录
+      const files = await fs.listFile(this.cachePath);
+      const now = Date.now();
+      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000;
+      
+      // 删除过期缓存文件
+      for (const file of files) {
+        if (file.name.startsWith('config_') && file.name.endsWith('.json')) {
+          const filePath = `${this.cachePath}/${file.name}`;
+          try {
+            const fileInfo = await fs.getFileStat(filePath);
+            const cacheTime = fileInfo.mtimeMs || fileInfo.ctimeMs || Date.now();
+            
+            if (now - cacheTime > cacheExpiry) {
+              await fs.unlink(filePath);
+              Logger.debug(TAG, `Deleted expired cache file: ${file.name}`);
+            }
+          } catch (fileError) {
+            Logger.error(TAG, `Failed to check/delete cache file ${file.name}: ${fileError}`);
+          }
+        }
+      }
+      
+      Logger.info(TAG, 'Expired cache cleaned successfully');
+    } catch (error) {
+      Logger.error(TAG, `Failed to clean expired cache: ${error}`);
+    }
+  }
+  
+  /**
    * 获取缓存信息
    */
   public async getCacheInfo(): Promise<{
@@ -399,5 +462,28 @@ export class ConfigLoader {
         lastCacheTime: 0
       };
     }
+  }
+  
+  /**
+   * 规范化缓存时间
+   * @param hours 缓存时间（小时）
+   */
+  private normalizeCacheTime(hours?: number): number {
+    if (hours === undefined) {
+      return this.defaultCacheHours;
+    }
+    return Math.max(this.minCacheHours, Math.min(this.maxCacheHours, Math.floor(hours)));
+  }
+  
+  /**
+   * 设置缓存时间范围
+   * @param minHours 最小缓存时间（小时）
+   * @param maxHours 最大缓存时间（小时）
+   */
+  public setCacheTimeRange(minHours: number, maxHours: number): void {
+    this.minCacheHours = Math.max(24, minHours);
+    this.maxCacheHours = Math.min(72, Math.max(this.minCacheHours, maxHours));
+    this.defaultCacheHours = this.minCacheHours; // 默认使用最小缓存时间
+    Logger.info(TAG, `Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
   }
 }

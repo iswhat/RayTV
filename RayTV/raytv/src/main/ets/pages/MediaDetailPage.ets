@@ -1,5 +1,5 @@
 import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag } from '@ohos.base/ui';
+import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar } from '@ohos/base/ui';
 import { Router, ParamRouter } from '@ohos.router';
 import { mediaService } from '../service/media/MediaService';
 import { favoriteService } from '../service/media/FavoriteService';
@@ -22,6 +22,7 @@ struct MediaDetailPage {
   @State mediaDetail: MediaDetail | null = null;
   @State episodes: Episode[] = [];
   @State playSources: PlaySource[] = [];
+  @State filteredSources: PlaySource[] = [];
   @State relatedMedia: MediaItem[] = [];
   @State isLoading: boolean = true;
   @State isFavorite: boolean = false;
@@ -32,6 +33,7 @@ struct MediaDetailPage {
   @State selectedEpisodeIndex: number = 0;
   @State selectedSeason: number = 1;
   @State seasons: number[] = [1]; // 默认只有第1季
+  @State searchText: string = '';
   
   // 每页显示的剧集数量
   private episodesPageSize: number = 50;
@@ -152,9 +154,29 @@ struct MediaDetailPage {
         this.siteKey,
         episodeId
       );
+      this.filteredSources = [...this.playSources]; // 初始化过滤后的列表
     } catch (error) {
       Logger.error(this.TAG, `Failed to load play sources: ${error}`);
       this.errorMessage = '加载播放源失败';
+    }
+  }
+  
+  /**
+   * 处理搜索文本变化
+   */
+  private handleSearchChange(text: string) {
+    this.searchText = text;
+    
+    // 根据搜索文本过滤片源
+    if (text.trim()) {
+      const searchLower = text.toLowerCase();
+      this.filteredSources = this.playSources.filter(source => 
+        source.name.toLowerCase().includes(searchLower) ||
+        (source.description && source.description.toLowerCase().includes(searchLower))
+      );
+    } else {
+      // 如果搜索文本为空，显示所有片源
+      this.filteredSources = [...this.playSources];
     }
   }
   
@@ -258,27 +280,51 @@ struct MediaDetailPage {
   /**
    * 处理播放源点击
    */
-  private handlePlaySourceClick(source: PlaySource): void {
+  private async handlePlaySourceClick(source: PlaySource): void {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
-    // 跳转到播放页面
-    Router.push({
-      url: 'pages/PlaybackPage',
-      params: {
-        mediaId: this.mediaId,
-        siteKey: this.siteKey,
-        episodeId: this.selectedEpisodeIndex >= 0 && this.episodes[this.selectedEpisodeIndex] 
-          ? this.episodes[this.selectedEpisodeIndex].id 
-          : undefined,
-        playSource: source,
-        mediaTitle: this.mediaDetail.title,
-        episodeName: this.selectedEpisodeIndex >= 0 && this.episodes[this.selectedEpisodeIndex] 
-          ? this.episodes[this.selectedEpisodeIndex].name 
-          : undefined,
-        startPosition: this.currentPlayPosition, // 传递当前播放位置
-        autoSwitchSourceOnError: true // 启用自动切换片源功能
+    try {
+      let episodeId: string | undefined;
+      let episodeName: string | undefined;
+      let currentPlayPosition = 0;
+      
+      // 获取选中剧集信息
+      if (this.selectedEpisodeIndex >= 0 && this.episodes[this.selectedEpisodeIndex]) {
+        episodeId = this.episodes[this.selectedEpisodeIndex].id;
+        episodeName = this.episodes[this.selectedEpisodeIndex].name;
+        
+        // 尝试获取上次观看进度
+        if (episodeId) {
+          const watchHistory = await historyService.getWatchHistory(
+            this.mediaId,
+            this.siteKey,
+            episodeId
+          );
+          if (watchHistory && watchHistory.position > 0) {
+            currentPlayPosition = watchHistory.position;
+          }
+        }
       }
-    });
+      
+      // 跳转到播放页面
+      Router.push({
+        url: 'pages/PlaybackPage',
+        params: {
+          mediaId: this.mediaId,
+          siteKey: this.siteKey,
+          episodeId: episodeId,
+          playSource: source,
+          playSources: this.filteredSources,
+          mediaTitle: this.mediaDetail.title,
+          episodeName: episodeName,
+          startPosition: currentPlayPosition,
+          autoSwitchSourceOnError: true
+        }
+      });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to handle play source click: ${error}`);
+      this.errorMessage = '播放失败';
+    }
   }
   
   /**
@@ -521,24 +567,35 @@ struct MediaDetailPage {
    */
   @Builder
   private renderPlaySources(): void {
-    if (this.playSources.length === 0) {
-      <Text className="empty-text">
-        {this.selectedEpisodeIndex >= 0 ? '暂无播放源' : '请先选择剧集'}
-      </Text>
-      return;
-    }
-    
-    <List className="sources-list">
-      {this.playSources.map((source, index) => (
-        <ListItem key={index} onClick={() => this.handlePlaySourceClick(source)}>
-          <Flex className="source-item">
-            <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
-            {source.quality && <Tag className="source-quality">{source.quality}</Tag>}
-            <Text className="play-icon">▶</Text>
-          </Flex>
-        </ListItem>
-      ))}
-    </List>
+    <Stack className="sources-container">
+      {/* 搜索栏 */}
+      <SearchBar
+        className="search-bar"
+        placeholder="搜索片源"
+        value={this.searchText}
+        onChange={(text: string) => this.handleSearchChange(text)}
+        onClear={() => this.handleSearchChange('')}
+      />
+      
+      {/* 片源列表 */}
+      {this.filteredSources.length === 0 ? (
+        <Text className="empty-text">
+          {this.selectedEpisodeIndex >= 0 ? '暂无匹配的片源' : '请先选择剧集'}
+        </Text>
+      ) : (
+        <List className="sources-list">
+          {this.filteredSources.map((source, index) => (
+            <ListItem key={index} onClick={() => this.handlePlaySourceClick(source)}>
+              <Flex className="source-item">
+                <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
+                {source.quality && <Tag className="source-quality">{source.quality}</Tag>}
+                <Text className="play-icon">▶</Text>
+              </Flex>
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </Stack>
   }
   
   /**

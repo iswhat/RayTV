@@ -277,7 +277,7 @@ export class NetworkUtils {
       }
       
       // 尝试一个简单的请求验证
-      const response = await fetch('https://www.google.com/generate_204', {
+      const response = await fetch('https://www.baidu.com', {
         method: 'HEAD',
         cache: 'no-cache',
       });

@@ -52,7 +52,9 @@ struct PlaybackPage {
   private autoSwitchSourceOnError: boolean = true; // 是否自动切换片源
   private lastSaveTime: number = 0; // 上次保存进度的时间(毫秒)
   private currentPosition: number = 0; // 当前播放位置
-  private totalTime: number = 0;初始化
+  private totalTime: number = 0;
+  
+  // 初始化
   onMounted(() => {
     Logger.info(this.TAG, 'PlaybackPage mounted');
     
@@ -78,12 +80,15 @@ struct PlaybackPage {
   });
   
   // 清理资源
-  onUnmounted(() => {
+  aboutToDisappear() {
     Logger.info(this.TAG, 'PlaybackPage unmounted');
+    
+    // 移除播放监听器
+    this.removePlaybackListeners();
     
     // 保存最终播放进度
     this.savePlayProgress(this.currentPosition).catch(error => {
-      Logger.error(this.TAG, `Failed to save final play progress: ${error}`);
+      Logger.error(this.TAG, `Failed to save final progress: ${error}`);
     });
     
     // 停止控制栏超时
@@ -91,7 +96,9 @@ struct PlaybackPage {
     
     // 释放播放器资源
     this.releasePlayer();
-  });
+    playbackService.stop();
+    playbackService.destroy();
+  }
   
   /**
    * 初始化播放
@@ -362,10 +369,10 @@ struct PlaybackPage {
     if (!this.mediaId || !this.siteKey || !this.episodeId) return;
     
     try {
-      const duration = this.totalTime;
+      const duration = this.totalTime || this.duration;
       
       // 保存播放进度到历史记录
-      await HistoryService.getInstance().saveWatchProgress(
+      await historyService.saveWatchProgress(
         this.mediaId,
         this.siteKey,
         this.episodeId,
