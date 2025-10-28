@@ -1,7 +1,7 @@
 // EventBusUtil - 事件总线工具类
 // 提供全局事件发布订阅机制，用于组件间通信
 
-import { Logger } from './Logger';
+import Logger from '../common/util/Logger';
 
 /**
  * 事件处理器函数类型

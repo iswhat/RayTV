@@ -7,8 +7,8 @@ import LiveRepository from '../../data/repository/LiveRepository';
 import HistoryRepository from '../../data/repository/HistoryRepository';
 import CollectionRepository from '../../data/repository/CollectionRepository';
 import ConfigService from '../../service/config/ConfigService';
-import DeviceService from '../../data/service/DeviceService';
-import NetworkService from '../../data/service/NetworkService';
+import DeviceService from '../../service/device/DeviceService';
+import HttpService from '../../service/http/HttpService';
 
 const TAG = 'MediaService';
 
@@ -72,7 +72,7 @@ export default class MediaService {
   private collectionRepository: CollectionRepository;
   private configService: ConfigService;
   private deviceService: DeviceService;
-  private networkService: NetworkService;
+  private httpService: HttpService;
   private currentPlayingMedia: { id: string; type: MediaType } | null = null;
   private playListeners: Array<(media: { id: string; type: MediaType }) => void> = [];
 
@@ -83,7 +83,7 @@ export default class MediaService {
     this.collectionRepository = CollectionRepository.getInstance();
     this.configService = ConfigService.getInstance();
     this.deviceService = DeviceService.getInstance();
-    this.networkService = NetworkService.getInstance();
+    this.httpService = HttpService.getInstance();
   }
 
   public static getInstance(): MediaService {

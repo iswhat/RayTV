@@ -2,7 +2,7 @@
 import VideoCard from '../view/VideoCard';
 import CategoryNavigation from '../view/CategoryNavigation';
 import { VideoType } from '../../data/model/Movie';
-import { PlaybackStatus } from '../../data/service/PlayerService';
+import { PlaybackStatus } from '../../service/player/PlayerService';
 import PlayerController from '../view/PlayerController';
 
 interface MovieData {

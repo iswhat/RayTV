@@ -1,6 +1,6 @@
 // ServiceUsageExample.ets - 服务使用示例
 import Logger from '../common/util/Logger';
-import ServiceFactory from '../data/service/ServiceFactory';
+import ServiceFactory from '../service/ServiceFactory';
 import { Site, SiteType, LoaderType } from '../data/bean/Site';
 
 const TAG = 'ServiceUsageExample';

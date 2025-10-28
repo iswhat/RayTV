@@ -1,7 +1,7 @@
 import Logger from '../../common/util/Logger';
 import { BaseLoader, LoaderType, Site } from './BaseLoader';
 import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
-import HttpService from '../../../data/service/NetworkService';
+import HttpService from '../../http/HttpService';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
 

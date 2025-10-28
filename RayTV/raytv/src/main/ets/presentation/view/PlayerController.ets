@@ -1,5 +1,5 @@
 // PlayerController.ets - 播放器控制界面组件
-import { PlaybackStatus } from '../../data/service/PlayerService';
+import { PlaybackStatus } from '../../service/player/PlayerService';
 
 interface PlayerControllerProps {
   status: PlaybackStatus;

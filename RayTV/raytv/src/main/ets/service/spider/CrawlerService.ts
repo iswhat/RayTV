@@ -4,7 +4,7 @@ import { LoaderFactory } from './LoaderFactory';
 import { CacheManager } from './CacheManager';
 import { BaseLoader } from './loader/BaseLoader';
 import { Site, SiteInfo, SiteStatus } from './SiteManager';
-import NetworkService from '../../data/service/NetworkService';
+import HttpService from '../http/HttpService';
 
 /**
  * 爬虫请求选项接口
@@ -49,7 +49,7 @@ export class CrawlerService {
   private siteManager: SiteManager;
   private loaderFactory: LoaderFactory;
   private cacheManager: CacheManager;
-  private networkService: NetworkService;
+  private httpService: HttpService;
   private executingTasks: Map<string, Promise<any>> = new Map();
 
   /**
@@ -82,7 +82,7 @@ export class CrawlerService {
     this.siteManager = SiteManager.getInstance();
     this.loaderFactory = LoaderFactory.getInstance();
     this.cacheManager = CacheManager.getInstance();
-    this.networkService = NetworkService.getInstance();
+    this.httpService = HttpService.getInstance();
     Logger.info(this.TAG, 'CrawlerService initialized');
   }
 
@@ -129,7 +129,7 @@ export class CrawlerService {
       }
       
       // 检查网络连接
-      if (!this.networkService.isConnected) {
+      if (!this.httpService.isConnected) {
         Logger.warn(this.TAG, 'No network connection, trying to use cache');
         // 没有网络连接时，尝试使用缓存
         if (!requestOptions.disableCache) {

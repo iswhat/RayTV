@@ -4,7 +4,7 @@ import StorageUtil from '../../common/util/StorageUtil';
 import JsonUtil from '../../common/util/JsonUtil';
 import ConfigService from '../../service/config/ConfigService';
 import CacheService from '../../service/cache/CacheService';
-import NetworkService from './NetworkService';
+import HttpService from './http/HttpService';
 import AuthService from './AuthService';
 import MovieService from './MovieService';
 import HistoryService from '../../service/media/HistoryService';
@@ -398,9 +398,9 @@ export default class AppService {
       this.services.set('cacheService', cacheService);
       
       // 8. 初始化网络服务
-      const networkService = NetworkService.getInstance();
-      await networkService.initialize();
-      this.services.set('networkService', networkService);
+      const httpService = HttpService.getInstance();
+    await httpService.initialize();
+    this.services.set('httpService', httpService);
       
       // 9. 初始化认证服务
       const authService = AuthService.getInstance();
@@ -995,9 +995,9 @@ export default class AppService {
   private async resumeServices(): Promise<void> {
     try {
       // 恢复网络服务
-      const networkService = this.getService<NetworkService>('networkService');
-      if (networkService) {
-        await networkService.resume();
+      const httpService = this.getService<HttpService>('httpService');
+    if (httpService) {
+      await httpService.resume();
       }
       
       // 恢复下载服务
@@ -1024,9 +1024,9 @@ export default class AppService {
       }
       
       // 暂停网络服务的非必要连接
-      const networkService = this.getService<NetworkService>('networkService');
-      if (networkService) {
-        await networkService.pause();
+      const httpService = this.getService<HttpService>('httpService');
+    if (httpService) {
+      await httpService.pause();
       }
       
       Logger.debug(TAG, 'Paused services');

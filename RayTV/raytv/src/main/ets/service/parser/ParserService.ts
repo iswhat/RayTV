@@ -2,7 +2,7 @@ import Logger from '@ohos/base/Logger';
 import { ParserInfo } from '../../data/repository/NetworkRepository';
 import { NetworkResult, VideoSourceInfo } from '../../data/bean/NetworkResult';
 import { configService } from '../config/ConfigService';
-import { networkService } from '../../data/service/NetworkService';
+import HttpService from '../http/HttpService';
 
 /**
  * 解析器配置接口
@@ -384,7 +384,7 @@ export class ParserService {
       let m3u8Url = url;
       if (!url.includes('.m3u8')) {
         // 尝试获取重定向后的URL
-        const response = await networkService.head(url, { timeout: 10000 });
+        const response = await HttpService.getInstance().head(url, { timeout: 10000 });
         if (response.headers) {
           const contentType = response.headers['content-type'] || response.headers['Content-Type'];
           if (contentType && contentType.includes('application/x-mpegURL')) {
@@ -417,7 +417,7 @@ export class ParserService {
       let mpdUrl = url;
       if (!url.includes('.mpd')) {
         // 尝试获取重定向后的URL
-        const response = await networkService.head(url, { timeout: 10000 });
+        const response = await HttpService.getInstance().head(url, { timeout: 10000 });
         if (response.headers) {
           const contentType = response.headers['content-type'] || response.headers['Content-Type'];
           if (contentType && contentType.includes('application/dash+xml')) {
