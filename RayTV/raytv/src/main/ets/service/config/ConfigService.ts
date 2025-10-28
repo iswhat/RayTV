@@ -506,35 +506,284 @@ export class ConfigService {
   }
 
   /**
-   * 添加配置变更监听器
-   * @param key 配置键
-   * @param listener 监听器函数
-   */
-  public addConfigChangeListener(key: string, listener: (value: any) => void): void {
+ * 注册配置变更监听器
+ * @param key 配置键
+ * @param listener 监听器函数
+ */
+public registerConfigChangeListener(key: string, listener: (value: any) => void): void {
     if (!this.configChangeListeners.has(key)) {
-      this.configChangeListeners.set(key, []);
+        this.configChangeListeners.set(key, []);
     }
-    
-    const listeners = this.configChangeListeners.get(key)!;
-    if (!listeners.includes(listener)) {
-      listeners.push(listener);
-    }
-  }
+    this.configChangeListeners.get(key)!.push(listener);
+}
 
-  /**
-   * 移除配置变更监听器
-   * @param key 配置键
-   * @param listener 监听器函数
-   */
-  public removeConfigChangeListener(key: string, listener: (value: any) => void): void {
-    const listeners = this.configChangeListeners.get(key);
-    if (listeners) {
-      const index = listeners.indexOf(listener);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
+/**
+ * 取消注册配置变更监听器
+ * @param key 配置键
+ * @param listener 监听器函数
+ */
+public unregisterConfigChangeListener(key: string, listener: (value: any) => void): void {
+    if (this.configChangeListeners.has(key)) {
+        const listeners = this.configChangeListeners.get(key)!;
+        const index = listeners.indexOf(listener);
+        if (index > -1) {
+            listeners.splice(index, 1);
+        }
     }
-  }
+}
+
+/**
+ * 添加全局配置监听器
+ * @param listener 监听器函数
+ */
+public addConfigListener(listener: (config: any) => void): void {
+    this.configListeners.push(listener);
+}
+
+/**
+ * 移除全局配置监听器
+ * @param listener 监听器函数
+ */
+public removeConfigListener(listener: (config: any) => void): void {
+    const index = this.configListeners.indexOf(listener);
+    if (index > -1) {
+        this.configListeners.splice(index, 1);
+    }
+}
+
+/**
+ * 通知全局配置监听器
+ * @private
+ */
+private notifyConfigListeners(): void {
+    const currentConfig = this.getDefaultConfig();
+    this.configListeners.forEach(listener => {
+        try {
+            listener(currentConfig);
+        } catch (error) {
+            Logger.error(this.TAG, 'Error in config listener', error);
+        }
+    });
+}
+
+/**
+ * 保存配置到数据库
+ * @param key 配置键
+ * @param value 配置值
+ * @private
+ */
+private async saveConfigToDatabase(key: ConfigKey, value: any): Promise<void> {
+    if (!this.databaseRepo) return;
+    
+    try {
+        // 获取或创建配置项
+        let configItem: ConfigItem;
+        
+        if (this.configCache.has(key)) {
+            // 更新现有配置
+            configItem = { ...this.configCache.get(key)! };
+            configItem.value = value;
+            configItem.updatedAt = Date.now();
+        } else {
+            // 创建新配置
+            const defaultValue = this.getDefaultConfig()[key];
+            configItem = {
+                key,
+                value,
+                type: this.getValueType(value),
+                defaultValue,
+                category: this.getConfigCategory(key),
+                updatedAt: Date.now(),
+                createdAt: Date.now()
+            };
+        }
+        
+        // 保存到数据库
+        await this.databaseRepo.saveConfig(configItem);
+        
+        // 更新缓存
+        this.configCache.set(key, configItem);
+    } catch (error) {
+        Logger.warn(this.TAG, `Failed to save config to database: ${key}`, error);
+    }
+}
+
+/**
+ * 获取值的类型
+ * @param value 值
+ * @returns ConfigType
+ * @private
+ */
+private getValueType(value: any): ConfigType {
+    if (typeof value === 'string') return ConfigType.STRING;
+    if (typeof value === 'number') return ConfigType.NUMBER;
+    if (typeof value === 'boolean') return ConfigType.BOOLEAN;
+    if (Array.isArray(value)) return ConfigType.ARRAY;
+    if (typeof value === 'object') return ConfigType.OBJECT;
+    return ConfigType.STRING;
+}
+
+/**
+ * 获取配置分类
+ * @param key 配置键
+ * @returns 分类名称
+ * @private
+ */
+private getConfigCategory(key: string): string {
+    const categoryMap: Record<string, string> = {
+      // 界面相关
+      theme: CONFIG_CATEGORIES.UI,
+      language: CONFIG_CATEGORIES.UI,
+      interfaceScale: CONFIG_CATEGORIES.UI,
+      startupScreen: CONFIG_CATEGORIES.UI,
+      homeLayout: CONFIG_CATEGORIES.UI,
+      uiAnimationEnabled: CONFIG_CATEGORIES.UI,
+      
+      // 视频播放相关
+      videoQuality: CONFIG_CATEGORIES.VIDEO,
+      playbackSpeed: CONFIG_CATEGORIES.VIDEO,
+      autoPlay: CONFIG_CATEGORIES.VIDEO,
+      autoNextEpisode: CONFIG_CATEGORIES.VIDEO,
+      backgroundPlayEnabled: CONFIG_CATEGORIES.VIDEO,
+      videoPlayerSettings: CONFIG_CATEGORIES.VIDEO,
+      
+      // 字幕相关
+      subtitleEnabled: CONFIG_CATEGORIES.SUBTITLE,
+      subtitleSize: CONFIG_CATEGORIES.SUBTITLE,
+      subtitleColor: CONFIG_CATEGORIES.SUBTITLE,
+      subtitleDelay: CONFIG_CATEGORIES.SUBTITLE,
+      
+      // 缓存相关
+      cacheEnabled: CONFIG_CATEGORIES.CACHE,
+      cacheLimit: CONFIG_CATEGORIES.CACHE,
+      
+      // 网络相关
+      networkTimeout: CONFIG_CATEGORIES.NETWORK,
+      proxyEnabled: CONFIG_CATEGORIES.NETWORK,
+      proxyConfig: CONFIG_CATEGORIES.NETWORK,
+      dataSaverEnabled: CONFIG_CATEGORIES.NETWORK,
+      customHeaders: CONFIG_CATEGORIES.NETWORK,
+      customCookies: CONFIG_CATEGORIES.NETWORK,
+      
+      // 通知相关
+      notificationEnabled: CONFIG_CATEGORIES.NOTIFICATION,
+      
+      // 隐私相关
+      updateCheckEnabled: CONFIG_CATEGORIES.PRIVACY,
+      crashReportingEnabled: CONFIG_CATEGORIES.PRIVACY,
+      analyticsEnabled: CONFIG_CATEGORIES.PRIVACY,
+      
+      // 排序相关
+      favoriteSort: CONFIG_CATEGORIES.SORTING,
+      historySort: CONFIG_CATEGORIES.SORTING,
+      searchSort: CONFIG_CATEGORIES.SORTING,
+      
+      // 下载相关
+      maxConcurrentDownloads: CONFIG_CATEGORIES.DOWNLOAD,
+      downloadNetworkType: CONFIG_CATEGORIES.DOWNLOAD,
+      
+      // 家长控制
+      parentalControlEnabled: CONFIG_CATEGORIES.PARENTAL,
+      parentalControlPin: CONFIG_CATEGORIES.PARENTAL,
+      showAdultContent: CONFIG_CATEGORIES.PARENTAL,
+      
+      // 默认分类
+      defaultCategory: CONFIG_CATEGORIES.OTHER,
+      preferredServer: CONFIG_CATEGORIES.OTHER,
+      recentlyWatchedLimit: CONFIG_CATEGORIES.OTHER,
+      streamingEnabled: CONFIG_CATEGORIES.OTHER,
+      localPlaybackEnabled: CONFIG_CATEGORIES.OTHER
+    };
+    
+    return categoryMap[key] || CONFIG_CATEGORIES.OTHER;
+}
+
+/**
+ * 获取默认配置
+ * @returns 默认配置对象
+ * @private
+ */
+private getDefaultConfig(): Record<string, any> {
+    const defaultConfig: Record<string, any> = {};
+    
+    // 从配置项中提取默认值
+    this.configItems.forEach((item, key) => {
+      defaultConfig[key] = item.defaultValue;
+    });
+    
+    // 补充缺失的默认配置
+    const additionalDefaults = {
+      theme: 'light',
+      videoQuality: 'auto',
+      playbackSpeed: 1.0,
+      autoPlay: true,
+      autoNextEpisode: true,
+      subtitleEnabled: true,
+      subtitleSize: 18,
+      subtitleColor: '#FFFFFF',
+      subtitleDelay: 0,
+      interfaceScale: 1.0,
+      cacheEnabled: true,
+      cacheLimit: 1024,
+      networkTimeout: 30000,
+      proxyEnabled: false,
+      proxyConfig: { host: '', port: 0, type: 'http' },
+      notificationEnabled: true,
+      updateCheckEnabled: true,
+      crashReportingEnabled: false,
+      analyticsEnabled: false,
+      startupScreen: 'home',
+      homeLayout: 'grid',
+      favoriteSort: 'addedAt_desc',
+      historySort: 'timestamp_desc',
+      searchSort: 'relevance_desc',
+      maxConcurrentDownloads: 3,
+      downloadNetworkType: 'all',
+      parentalControlEnabled: false,
+      parentalControlPin: null,
+      recentlyWatchedLimit: 20,
+      dataSaverEnabled: false,
+      streamingEnabled: true,
+      localPlaybackEnabled: true,
+      showAdultContent: false,
+      defaultCategory: 'all',
+      preferredServer: 'auto',
+      videoPlayerSettings: {},
+      uiAnimationEnabled: true,
+      backgroundPlayEnabled: false,
+      customHeaders: {},
+      customCookies: {}
+    };
+    
+    return { ...additionalDefaults, ...defaultConfig };
+}
+
+/**
+ * 重置配置到默认值
+ * @returns Promise<boolean>
+ */
+public async resetConfig(): Promise<boolean> {
+    try {
+        const defaultConfig = this.getDefaultConfig();
+        
+        // 重置所有配置项
+        for (const [key, defaultValue] of Object.entries(defaultConfig)) {
+            await this.setConfig(key, defaultValue);
+        }
+        
+        // 清空缓存
+        this.configCache.clear();
+        
+        // 重新初始化
+        await this.initializeConfig();
+        
+        Logger.info(this.TAG, 'Configuration reset to default values');
+        return true;
+    } catch (error) {
+        Logger.error(this.TAG, 'Failed to reset configuration', error);
+        return false;
+    }
+}
 
   /**
    * 清除所有监听器
@@ -597,14 +846,14 @@ export class ConfigService {
   }
 
   /**
-   * 验证并转换配置值类型
-   * @param value 原始值
-   * @param type 目标类型
-   * @param defaultValue 默认值
-   * @returns 转换后的值
-   * @private
-   */
-  private validateAndConvertType(value: any, type: ConfigType, defaultValue: any): any {
+ * 验证并转换配置值类型
+ * @param value 输入值
+ * @param type 目标类型
+ * @param defaultValue 默认值
+ * @returns 转换后的值
+ * @private
+ */
+private validateAndConvertType(value: any, type: ConfigType, defaultValue: any): any {
     try {
       switch (type) {
         case ConfigType.STRING:
