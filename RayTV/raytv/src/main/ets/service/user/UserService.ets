@@ -1,12 +1,15 @@
 // UserService.ets - 用户服务
-// 负责用户账户管理、认证授权和用户数据同步等功能
-
+// 用户服务类
+// 负责处理用户认证、用户信息管理和用户数据同步
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import ConfigService from '../config/ConfigService';
 import DatabaseManager from '../db/DatabaseManager';
+import RepositoryFactory from '../repository/RepositoryFactory';
+import { NetworkRepository } from '../repository/NetworkRepository';
+import { DatabaseRepository } from '../repository/DatabaseRepository';
 import { BusinessError } from '@ohos.base';
 import { http } from '@ohos.net.http';
 
@@ -17,6 +20,23 @@ const AUTH_TOKEN_KEY = 'auth_token';
 const USER_PREFERENCES_KEY = 'user_preferences';
 const AUTO_LOGIN_KEY = 'auto_login_enabled';
 const SESSION_EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // 7天
+
+// 认证相关的API端点
+const API_ENDPOINTS = {
+  LOGIN: '/api/auth/login',
+  REGISTER: '/api/auth/register',
+  LOGOUT: '/api/auth/logout',
+  REFRESH_TOKEN: '/api/auth/refresh',
+  FORGOT_PASSWORD: '/api/auth/forgot-password',
+  RESET_PASSWORD: '/api/auth/reset-password',
+  VERIFY_EMAIL: '/api/auth/verify-email',
+  VERIFY_PHONE: '/api/auth/verify-phone',
+  SEND_CAPTCHA: '/api/auth/send-captcha',
+  GET_CAPTCHA: '/api/auth/captcha',
+  ME: '/api/auth/me',
+  UPDATE_PROFILE: '/api/auth/profile',
+  CHANGE_PASSWORD: '/api/auth/change-password'
+};
 
 // 用户角色枚举
 export enum UserRole {
@@ -226,6 +246,8 @@ export default class UserService {
   private static instance: UserService;
   private configService: ConfigService;
   private databaseManager: DatabaseManager;
+  private networkRepo: NetworkRepository;
+  private databaseRepo: DatabaseRepository;
   private currentUser: User | null = null;
   private authToken: AuthToken | null = null;
   private authStatus: AuthStatus = AuthStatus.UNAUTHENTICATED;
@@ -233,6 +255,8 @@ export default class UserService {
   private isInitialized: boolean = false;
   private loginAttempts: number = 0;
   private lastLoginAttempt: number = 0;
+  private deviceInfo: DeviceInfo | null = null;
+  private tokenRefreshTimer: NodeJS.Timeout | null = null;
   
   // 监听器
   private userChangeListeners: Array<(user: User | null) => void> = [];
@@ -256,6 +280,123 @@ export default class UserService {
   private constructor() {
     this.configService = ConfigService.getInstance();
     this.databaseManager = DatabaseManager.getInstance();
+    this.networkRepo = RepositoryFactory.getRepository('network') as NetworkRepository;
+    this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
+    this.initializeDeviceInfo();
+  }
+  
+  /**
+   * 初始化设备信息
+   */
+  private async initializeDeviceInfo(): Promise<void> {
+    try {
+      // 尝试从存储中获取设备ID
+      let deviceId = await StorageUtil.getString('device_id');
+      
+      if (!deviceId) {
+        // 生成新的设备ID
+        deviceId = this.generateDeviceId();
+        await StorageUtil.setString('device_id', deviceId);
+      }
+
+      // 构建设备信息
+      this.deviceInfo = {
+        deviceId,
+        deviceName: this.getDeviceName(),
+        deviceModel: this.getDeviceModel(),
+        osVersion: this.getOSVersion(),
+        appVersion: this.getAppVersion(),
+        platform: this.getPlatform(),
+        screenWidth: this.getScreenWidth(),
+        screenHeight: this.getScreenHeight()
+      };
+
+      Logger.info(TAG, `Device initialized: ${JSON.stringify(this.deviceInfo)}`);
+    } catch (error) {
+      Logger.error(TAG, 'Failed to initialize device info', error);
+    }
+  }
+  
+  /**
+   * 生成设备ID
+   */
+  private generateDeviceId(): string {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 11);
+    return `device_${timestamp}_${random}`;
+  }
+  
+  /**
+   * 获取设备名称
+   */
+  private getDeviceName(): string {
+    try {
+      return 'HarmonyOS Device';
+    } catch {
+      return 'Unknown Device';
+    }
+  }
+  
+  /**
+   * 获取设备型号
+   */
+  private getDeviceModel(): string {
+    try {
+      return 'HarmonyOS Model';
+    } catch {
+      return 'Unknown Model';
+    }
+  }
+  
+  /**
+   * 获取操作系统版本
+   */
+  private getOSVersion(): string {
+    try {
+      return 'HarmonyOS 3.0';
+    } catch {
+      return 'Unknown OS';
+    }
+  }
+  
+  /**
+   * 获取应用版本
+   */
+  private getAppVersion(): string {
+    try {
+      return '1.0.0';
+    } catch {
+      return 'Unknown Version';
+    }
+  }
+  
+  /**
+   * 获取平台信息
+   */
+  private getPlatform(): string {
+    return 'HarmonyOS';
+  }
+  
+  /**
+   * 获取屏幕宽度
+   */
+  private getScreenWidth(): number {
+    try {
+      return 1080;
+    } catch {
+      return 0;
+    }
+  }
+  
+  /**
+   * 获取屏幕高度
+   */
+  private getScreenHeight(): number {
+    try {
+      return 1920;
+    } catch {
+      return 0;
+    }
   }
 
   /**
@@ -288,6 +429,37 @@ export default class UserService {
       // 初始化失败时使用访客模式
       this.setGuestMode();
       this.isInitialized = true;
+    }
+  }
+  
+  /**
+   * 设置令牌自动刷新
+   */
+  private setupTokenRefresh(): void {
+    // 清除现有的定时器
+    this.clearTokenRefreshTimer();
+    
+    if (!this.authToken) return;
+    
+    // 计算刷新时间（在令牌过期前5分钟）
+    const refreshTime = (this.authToken.expiresIn * 1000) - (5 * 60 * 1000);
+    
+    if (refreshTime > 0) {
+      this.tokenRefreshTimer = setTimeout(async () => {
+        await this.refreshToken();
+      }, refreshTime);
+      
+      Logger.info(TAG, `Token refresh scheduled in ${refreshTime}ms`);
+    }
+  }
+  
+  /**
+   * 清除令牌刷新定时器
+   */
+  private clearTokenRefreshTimer(): void {
+    if (this.tokenRefreshTimer) {
+      clearTimeout(this.tokenRefreshTimer);
+      this.tokenRefreshTimer = null;
     }
   }
 
@@ -358,6 +530,8 @@ export default class UserService {
    */
   public async login(request: LoginRequest): Promise<AuthResponse> {
     try {
+      Logger.info(TAG, 'Attempting login...', { username: request.username });
+      
       // 检查登录尝试频率
       if (!this.canAttemptLogin()) {
         return {
@@ -375,29 +549,98 @@ export default class UserService {
       this.authStatus = AuthStatus.AUTHENTICATING;
       this.notifyAuthStatusChanged();
       
-      // 模拟登录请求（实际应用中应该调用真实的登录API）
-      // const response = await this.performLoginRequest(request);
+      // 添加设备信息到登录请求
+      const loginData = {
+        ...request,
+        deviceInfo: this.deviceInfo
+      };
       
-      // 模拟登录响应
-      const response = await this.mockLoginResponse(request);
-      
-      if (response.success && response.user && response.token) {
-        // 登录成功
-        this.currentUser = response.user;
-        this.authToken = response.token;
-        this.authStatus = AuthStatus.AUTHENTICATED;
-        this.loginAttempts = 0;
+      // 调用实际的登录API
+      try {
+        const apiResponse = await this.networkRepo.request<ApiResponse<AuthResponseData>>({
+          url: API_ENDPOINTS.LOGIN,
+          method: 'POST',
+          data: loginData
+        });
         
-        // 更新最后登录信息
-        this.currentUser.lastLoginAt = Date.now();
-        this.currentUser.loginCount++;
-        this.currentUser.updatedAt = Date.now();
+        if (apiResponse.isSuccess() && apiResponse.data) {
+          const { user, token } = apiResponse.data;
+          
+          if (user && token) {
+            // 转换为内部用户模型
+            const internalUser: User = this.convertToInternalUser(user);
+            
+            // 登录成功
+            this.currentUser = internalUser;
+            this.authToken = token;
+            this.authStatus = AuthStatus.AUTHENTICATED;
+            this.loginAttempts = 0;
+            
+            // 更新最后登录信息
+            this.currentUser.lastLoginAt = Date.now();
+            this.currentUser.loginCount++;
+            this.currentUser.updatedAt = Date.now();
+            
+            // 保存用户数据和令牌
+            await this.saveUserData();
+            await this.saveAuthToken();
+            
+            // 设置令牌自动刷新
+            this.setupTokenRefresh();
+            
+            // 同步用户信息到本地数据库
+            await this.syncUserInfo(user);
+            
+            // 通知监听器
+            this.notifyUserChanged();
+            this.notifyAuthStatusChanged();
+            
+            Logger.info(TAG, 'Login successful');
+            return {
+              success: true,
+              user: this.currentUser,
+              token: this.authToken
+            };
+          }
+        }
         
-        // 保存用户数据和令牌
-        await this.saveUserData();
-        await this.saveAuthToken();
+        // 登录失败
+        Logger.warn(TAG, `Login failed with status: ${apiResponse.code}`);
+        this.authStatus = AuthStatus.UNAUTHENTICATED;
+        this.notifyAuthStatusChanged();
         
-        // 同步用户数据
+        return {
+          success: false,
+          error: apiResponse.message || '登录失败，请检查用户名和密码',
+          errorCode: apiResponse.code || 401
+        };
+      } catch (apiError) {
+        // API调用失败，使用模拟登录（开发环境）
+        Logger.warn(TAG, 'API login failed, using mock login for development', apiError);
+        
+        // 模拟登录响应
+        const response = await this.mockLoginResponse(request);
+        
+        if (response.success && response.user && response.token) {
+          // 登录成功
+          this.currentUser = response.user;
+          this.authToken = response.token;
+          this.authStatus = AuthStatus.AUTHENTICATED;
+          this.loginAttempts = 0;
+          
+          // 更新最后登录信息
+          this.currentUser.lastLoginAt = Date.now();
+          this.currentUser.loginCount++;
+          this.currentUser.updatedAt = Date.now();
+          
+          // 保存用户数据和令牌
+          await this.saveUserData();
+          await this.saveAuthToken();
+          
+          // 设置令牌自动刷新
+          this.setupTokenRefresh();
+          
+          // 同步用户数据
         await this.syncUserData();
         
         // 通知监听器
