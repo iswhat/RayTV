@@ -63,6 +63,136 @@ export type ConfigValue =
   | object
   | null;
 
+// 播放器配置接口
+export interface PlayerConfig {
+  defaultPlayer: string;
+  autoPlay: boolean;
+  rememberPosition: boolean;
+  maxBufferSize: number;
+  minBufferSize: number;
+  preloadSeconds: number;
+  enableHardwareDecoding: boolean;
+  enableHDR: boolean;
+  subtitleSize: number;
+  subtitleColor: string;
+  subtitleBackgroundColor: string;
+  audioTrack: string;
+  videoTrack: string;
+}
+
+// 显示配置接口
+export interface DisplayConfig {
+  theme: string;
+  fontScale: number;
+  enableAnimations: boolean;
+  enableBlur: boolean;
+  autoRotate: boolean;
+  resolution: string;
+  screenSaverDelay: number;
+  idleTimeout: number;
+}
+
+// 网络配置接口
+export interface NetworkConfig {
+  timeout: number;
+  retryCount: number;
+  retryDelay: number;
+  enableCache: boolean;
+  cacheSize: number;
+  autoDetectNetwork: boolean;
+  useProxy: boolean;
+  proxyConfig: {
+    type: string;
+    host: string;
+    port: number;
+  };
+}
+
+// 存储配置接口
+export interface StorageConfig {
+  cachePath: string;
+  downloadPath: string;
+  maxCacheSize: number;
+  autoClearCache: boolean;
+  clearCacheInterval: number;
+  enableBackgroundCleanup: boolean;
+}
+
+// 通用配置接口
+export interface GeneralConfig {
+  language: string;
+  region: string;
+  timeZone: string;
+  enableAnalytics: boolean;
+  enableUsageReport: boolean;
+  firstLaunch: boolean;
+  version: string;
+  lastUpdated: number;
+}
+
+// 安全配置接口
+export interface SecurityConfig {
+  enablePinCode: boolean;
+  pinCode: string;
+  enableBiometric: boolean;
+  allowedApps: string[];
+  lockTimeout: number;
+  secureContentOnly: boolean;
+}
+
+// 通知配置接口
+export interface NotificationConfig {
+  enablePush: boolean;
+  enableUpdateNotification: boolean;
+  enableContentNotification: boolean;
+  enableLiveReminder: boolean;
+  notificationSound: string;
+  notificationVolume: number;
+}
+
+// 无障碍配置接口
+export interface AccessibilityConfig {
+  enableHighContrast: boolean;
+  enableScreenReader: boolean;
+  textToSpeechRate: number;
+  closedCaptionEnabled: boolean;
+  audioDescriptionEnabled: boolean;
+  hapticFeedbackEnabled: boolean;
+}
+
+// 直播配置接口
+export interface LiveConfig {
+  epgEnabled: boolean;
+  epgAutoUpdate: boolean;
+  epgUpdateInterval: number;
+  channelFavoritesEnabled: boolean;
+  lastWatchedChannel: string;
+  lastWatchedGroup: string;
+}
+
+// VOD配置接口
+export interface VodConfig {
+  autoPlayNextEpisode: boolean;
+  showRecommendedContent: boolean;
+  contentRating: string;
+  downloadQuality: string;
+  streamingQuality: string;
+}
+
+// 完整配置接口
+export interface Config {
+  player: PlayerConfig;
+  display: DisplayConfig;
+  network: NetworkConfig;
+  storage: StorageConfig;
+  general: GeneralConfig;
+  security: SecurityConfig;
+  notification: NotificationConfig;
+  accessibility: AccessibilityConfig;
+  live: LiveConfig;
+  vod: VodConfig;
+}
+
 // 配置项接口
 export interface ConfigItem {
   key: ConfigKey;
@@ -82,7 +212,107 @@ export interface ConfigItem {
   createdAt: number;
 }
 
-// 默认配置
+// 完整默认配置
+export const DEFAULT_FULL_CONFIG: Config = {
+  player: {
+    defaultPlayer: 'system',
+    autoPlay: false,
+    rememberPosition: true,
+    maxBufferSize: 20,
+    minBufferSize: 5,
+    preloadSeconds: 30,
+    enableHardwareDecoding: true,
+    enableHDR: false,
+    subtitleSize: 18,
+    subtitleColor: '#FFFFFF',
+    subtitleBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+    audioTrack: 'default',
+    videoTrack: 'auto'
+  },
+  display: {
+    theme: 'light',
+    fontScale: 1.0,
+    enableAnimations: true,
+    enableBlur: true,
+    autoRotate: true,
+    resolution: 'auto',
+    screenSaverDelay: 300,
+    idleTimeout: 0
+  },
+  network: {
+    timeout: 30000,
+    retryCount: 3,
+    retryDelay: 1000,
+    enableCache: true,
+    cacheSize: 500,
+    autoDetectNetwork: true,
+    useProxy: false,
+    proxyConfig: {
+      type: 'none',
+      host: '',
+      port: 0
+    }
+  },
+  storage: {
+    cachePath: '',
+    downloadPath: '',
+    maxCacheSize: 1024,
+    autoClearCache: true,
+    clearCacheInterval: 7,
+    enableBackgroundCleanup: true
+  },
+  general: {
+    language: 'zh-CN',
+    region: 'CN',
+    timeZone: 'Asia/Shanghai',
+    enableAnalytics: true,
+    enableUsageReport: false,
+    firstLaunch: false,
+    version: '1.0.0',
+    lastUpdated: Date.now()
+  },
+  security: {
+    enablePinCode: false,
+    pinCode: '',
+    enableBiometric: false,
+    allowedApps: [],
+    lockTimeout: 300,
+    secureContentOnly: false
+  },
+  notification: {
+    enablePush: true,
+    enableUpdateNotification: true,
+    enableContentNotification: false,
+    enableLiveReminder: true,
+    notificationSound: 'default',
+    notificationVolume: 1.0
+  },
+  accessibility: {
+    enableHighContrast: false,
+    enableScreenReader: false,
+    textToSpeechRate: 1.0,
+    closedCaptionEnabled: true,
+    audioDescriptionEnabled: false,
+    hapticFeedbackEnabled: true
+  },
+  live: {
+    epgEnabled: true,
+    epgAutoUpdate: true,
+    epgUpdateInterval: 3600,
+    channelFavoritesEnabled: true,
+    lastWatchedChannel: '',
+    lastWatchedGroup: ''
+  },
+  vod: {
+    autoPlayNextEpisode: true,
+    showRecommendedContent: true,
+    contentRating: 'all',
+    downloadQuality: '720p',
+    streamingQuality: 'auto'
+  }
+};
+
+// 配置项默认配置
 export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
   // 界面相关
   theme: 'dark',
@@ -174,6 +404,9 @@ export default class ConfigService {
   private databaseRepo: DatabaseRepository;
   private configCache: Map<ConfigKey, ConfigItem> = new Map();
   private configParser: ConfigParser;
+  private fullConfig: Config = { ...DEFAULT_FULL_CONFIG };
+  private configListeners: Array<(config: Config) => void> = [];
+  private isInitialized: boolean = false;
 
   /**
    * 构造函数（私有，防止外部实例化）
@@ -193,6 +426,95 @@ export default class ConfigService {
     }
     return ConfigService.instance;
   }
+  
+  /**
+   * 获取完整配置
+   */
+  public async getFullConfig(): Promise<Config> {
+    if (!this.isInitialized) {
+      await this.initializeConfig();
+    }
+    return { ...this.fullConfig };
+  }
+  
+  /**
+   * 合并配置
+   */
+  private mergeConfig(defaultConfig: Config, customConfig: Partial<Config>): Config {
+    const merged = { ...defaultConfig };
+    
+    Object.keys(customConfig).forEach(key => {
+      const configKey = key as keyof Config;
+      if (typeof customConfig[configKey] === 'object' && customConfig[configKey] !== null) {
+        merged[configKey] = {
+          ...merged[configKey],
+          ...customConfig[configKey]
+        };
+      } else if (customConfig[configKey] !== undefined) {
+        merged[configKey] = customConfig[configKey] as any;
+      }
+    });
+    
+    return merged;
+  }
+  
+  /**
+   * 确保默认配置存在
+   */
+  private ensureDefaultConfig(): void {
+    // 更新最后更新时间
+    this.fullConfig.general.lastUpdated = Date.now();
+    
+    // 验证必要的配置项
+    if (!this.fullConfig.player) {
+      this.fullConfig.player = DEFAULT_FULL_CONFIG.player;
+    }
+    if (!this.fullConfig.display) {
+      this.fullConfig.display = DEFAULT_FULL_CONFIG.display;
+    }
+    if (!this.fullConfig.network) {
+      this.fullConfig.network = DEFAULT_FULL_CONFIG.network;
+    }
+  }
+  
+  /**
+   * 更新完整配置
+   */
+  public async updateFullConfig(customConfig: Partial<Config>): Promise<ApiResponse<Config>> {
+    try {
+      // 合并配置
+      this.fullConfig = this.mergeConfig(this.fullConfig, customConfig);
+      this.ensureDefaultConfig();
+      
+      // 保存到存储
+      await StorageUtil.setObject('app_full_config', this.fullConfig);
+      
+      // 通知监听器
+      this.configListeners.forEach(listener => listener(this.fullConfig));
+      
+      return ApiResponse.success(this.fullConfig, '配置更新成功');
+    } catch (error) {
+      Logger.error(TAG, 'Failed to update full config', error);
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
+    }
+  }
+  
+  /**
+   * 添加配置更改监听器
+   */
+  public addConfigListener(listener: (config: Config) => void): void {
+    this.configListeners.push(listener);
+  }
+  
+  /**
+   * 移除配置更改监听器
+   */
+  public removeConfigListener(listener: (config: Config) => void): void {
+    const index = this.configListeners.indexOf(listener);
+    if (index > -1) {
+      this.configListeners.splice(index, 1);
+    }
+  }
 
   /**
    * 初始化配置
@@ -200,6 +522,9 @@ export default class ConfigService {
   private async initializeConfig(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing configuration...');
+      
+      // 1. 首先尝试加载完整配置
+      await this.loadFullConfig();
       
       // 加载配置到缓存
       const allConfig = await this.databaseRepo.getAllConfig();
@@ -229,9 +554,42 @@ export default class ConfigService {
         }
       }
       
+      // 确保默认配置完整性
+      this.ensureDefaultConfig();
+      
+      this.isInitialized = true;
       Logger.info(TAG, 'Configuration initialized successfully');
     } catch (error) {
       Logger.error(TAG, 'Failed to initialize configuration', error);
+      // 初始化失败时使用默认配置
+      this.fullConfig = { ...DEFAULT_FULL_CONFIG };
+      this.ensureDefaultConfig();
+      this.isInitialized = true;
+    }
+  }
+  
+  /**
+   * 加载完整配置
+   */
+  private async loadFullConfig(): Promise<void> {
+    try {
+      // 尝试从本地存储加载完整配置
+      const storedConfig = await StorageUtil.getObject<Config>('app_full_config');
+      
+      if (storedConfig) {
+        // 合并存储的配置和默认配置
+        this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig);
+        Logger.info(TAG, 'Loaded full configuration from storage');
+      } else {
+        // 使用默认配置
+        this.fullConfig = { ...DEFAULT_FULL_CONFIG };
+        await StorageUtil.setObject('app_full_config', this.fullConfig);
+        Logger.info(TAG, 'Using default full configuration');
+      }
+    } catch (error) {
+      Logger.error(TAG, 'Failed to load full configuration', error);
+      // 加载失败时使用默认配置
+      this.fullConfig = { ...DEFAULT_FULL_CONFIG };
     }
   }
 
@@ -264,6 +622,54 @@ export default class ConfigService {
       // 发生错误时返回默认值
       const defaultValue = DEFAULT_CONFIG[key];
       return ApiResponse.success(defaultValue, `获取配置失败，返回默认值`);
+    }
+  }
+
+  /**
+   * 获取部分配置
+   */
+  public async getPartialConfig<K extends keyof Config>(key: K): Promise<Config[K]> {
+    if (!this.isInitialized) {
+      await this.initializeConfig();
+    }
+    
+    const configSection = this.fullConfig[key];
+    if (!configSection) {
+      // 如果配置部分不存在，从默认配置获取
+      return DEFAULT_FULL_CONFIG[key];
+    }
+    
+    return { ...configSection };
+  }
+  
+  /**
+   * 更新部分配置
+   */
+  public async updatePartialConfig<K extends keyof Config>(key: K, sectionConfig: Partial<Config[K]>): Promise<ApiResponse<Config[K]>> {
+    try {
+      if (!this.isInitialized) {
+        await this.initializeConfig();
+      }
+      
+      // 更新部分配置
+      this.fullConfig[key] = {
+        ...this.fullConfig[key],
+        ...sectionConfig
+      };
+      
+      // 更新最后修改时间
+      this.fullConfig.general.lastUpdated = Date.now();
+      
+      // 保存到存储
+      await StorageUtil.setObject('app_full_config', this.fullConfig);
+      
+      // 通知监听器
+      this.configListeners.forEach(listener => listener(this.fullConfig));
+      
+      return ApiResponse.success(this.fullConfig[key], '配置更新成功');
+    } catch (error) {
+      Logger.error(TAG, `Failed to update partial config for key: ${String(key)}`, error);
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
     }
   }
 
