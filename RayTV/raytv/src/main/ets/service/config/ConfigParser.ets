@@ -1,22 +1,29 @@
 // ConfigParser - 配置解析器
+// 实现Fongmi配置文件解析和适配功能
 import Logger from '../../common/util/Logger';
-import { Site } from '../../data/bean/Site';
+import { Site, SiteType } from '../../data/bean/Site';
+import { AppConfig, HarmonyConfig } from '../../data/bean/Config';
 
 const TAG = 'ConfigParser';
 
 /**
- * 站点类型枚举
- */
-export enum SiteType {
-  VOD = 'vod',
-  LIVE = 'live',
-  ALL = 'all'
-}
-
-/**
- * 配置解析器，负责解析和验证站点配置
+ * 配置解析器，负责解析和适配各种格式的配置文件
  */
 export class ConfigParser {
+  private static instance: ConfigParser;
+  
+  private constructor() {}
+  
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): ConfigParser {
+    if (!ConfigParser.instance) {
+      ConfigParser.instance = new ConfigParser();
+    }
+    return ConfigParser.instance;
+  }
+
   /**
    * 验证站点配置
    * @param site 站点配置
@@ -74,6 +81,86 @@ export class ConfigParser {
       Logger.error(TAG, `Error validating site: ${error}`);
       return false;
     }
+  }
+  
+  /**
+   * 确保站点配置的默认值
+   */
+  private ensureDefaultValues(site: any): void {
+    site.type = site.type || SiteType.ALL;
+    site.searchable = site.searchable !== false;
+    site.categories = site.categories || [];
+    site.headers = site.headers || {};
+    site.search = site.search || {};
+    site.detail = site.detail || {};
+    site.play = site.play || {};
+    site.filterable = site.filterable || false;
+    site.filters = site.filters || [];
+    site.proxy = site.proxy || false;
+    site.weight = site.weight || 0;
+    site.enabled = site.enabled !== false;
+    site.updateTime = site.updateTime || Date.now();
+    site.lastCheckTime = site.lastCheckTime || 0;
+  }
+
+  /**
+   * 解析站点配置
+   * @param configContent 配置文件内容
+   * @returns 站点列表
+   */
+  public parseSites(configContent: string): Site[] {
+    try {
+      Logger.info(TAG, 'Parsing sites configuration');
+      
+      // 尝试解析为JSON
+      const config = this.parseJsonContent(configContent);
+      
+      // 支持不同格式的配置结构
+      const sitesData = config.sites || config.subscriptions || config.data || config;
+      if (!sitesData) {
+        throw new Error('Invalid sites configuration format');
+      }
+      
+      // 检查是否为Fongmi格式
+      if (this.isFongmiFormat(sitesData)) {
+        return this.convertFongmiFormat(sitesData);
+      }
+      
+      // 标准数组格式
+      const sites: Site[] = [];
+      if (Array.isArray(sitesData)) {
+        for (const siteData of sitesData) {
+          try {
+            const site = this.parseSiteItem(siteData);
+            sites.push(site);
+          } catch (error) {
+            Logger.error(TAG, `Failed to parse site item: ${error}`);
+          }
+        }
+      }
+      
+      Logger.info(TAG, `Successfully parsed ${sites.length} sites`);
+      return sites;
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse sites configuration: ${error}`);
+      throw error;
+    }
+  }
+  
+  /**
+   * 判断是否为Fongmi格式配置
+   */
+  private isFongmiFormat(config: any): boolean {
+    if (typeof config !== 'object' || config === null) return false;
+    
+    // Fongmi格式通常是对象，每个键对应一个站点
+    return !Array.isArray(config) && 
+           Object.keys(config).length > 0 &&
+           Object.entries(config).some(([_, value]) => 
+             typeof value === 'object' && 
+             value !== null && 
+             ('api' in value || 'name' in value)
+           );
   }
   
   /**
@@ -156,7 +243,93 @@ export class ConfigParser {
     // 默认类型
     return SiteType.ALL;
   }
+
+  /**
+   * 安全解析JSON内容
+   * @param content JSON字符串内容
+   */
+  public parseJsonContent(content: string): any {
+    try {
+      // 预处理，移除注释和多余空格
+      const cleanContent = this.cleanJsonContent(content);
+      return JSON.parse(cleanContent);
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse JSON content: ${error}`);
+      throw new Error(`Invalid JSON format: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
   
+  /**
+   * 清理JSON内容，移除注释和无效字符
+   * @param content 原始JSON内容
+   */
+  private cleanJsonContent(content: string): string {
+    // 移除单行注释
+    let clean = content.replace(/\/\/.*$/gm, '');
+    // 移除多行注释
+    clean = clean.replace(/\/\*[\s\S]*?\*\//g, '');
+    // 移除多余空白字符
+    clean = clean.trim();
+    return clean;
+  }
+  
+  /**
+   * 解析单个站点配置项
+   * @param siteData 站点数据
+   */
+  private parseSiteItem(siteData: any): Site {
+    if (!siteData || typeof siteData !== 'object') {
+      throw new Error('Invalid site data format');
+    }
+    
+    const site: Site = {
+      key: siteData.key || this.generateSiteKey(siteData.name || 'unknown'),
+      name: siteData.name || 'Unknown Site',
+      type: this.convertSiteType(siteData.type),
+      api: siteData.api || siteData.url || '',
+      searchable: siteData.searchable !== false,
+      categories: this.convertCategories(siteData.categories),
+      headers: this.convertHeaders(siteData.headers || siteData.header),
+      search: siteData.search || {},
+      detail: siteData.detail || {},
+      play: siteData.play || {},
+      filterable: siteData.filterable || false,
+      filters: siteData.filters || [],
+      proxy: siteData.proxy || false,
+      weight: siteData.weight || 0,
+      enabled: siteData.enabled !== false,
+      updateTime: Date.now(),
+      lastCheckTime: 0
+    };
+    
+    if (!this.validateSite(site)) {
+      throw new Error(`Invalid site configuration for: ${site.name}`);
+    }
+    
+    return site;
+  }
+  
+  /**
+   * 生成站点唯一键
+   * @param name 站点名称
+   */
+  private generateSiteKey(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  }
+  
+  /**
+   * 转换站点类型
+   * @param type 原始类型
+   */
+  private convertSiteType(type?: string): SiteType {
+    if (!type) return SiteType.ALL;
+    
+    const lowerType = type.toLowerCase();
+    if (lowerType === 'vod' || lowerType.includes('点播')) return SiteType.VOD;
+    if (lowerType === 'live' || lowerType.includes('直播')) return SiteType.LIVE;
+    return SiteType.ALL;
+  }
+
   /**
    * 转换请求头
    * @param headers 原始请求头
@@ -198,176 +371,183 @@ export class ConfigParser {
       return result;
     }
     
+    // 处理数组格式分类
     if (Array.isArray(categories)) {
-      categories.forEach((category: any) => {
-        if (typeof category === 'string') {
-          result.push({ key: category, name: category });
-        } else if (typeof category === 'object' && category.key && category.name) {
-          result.push({ key: category.key, name: category.name });
+      categories.forEach((cat: any) => {
+        if (typeof cat === 'string') {
+          result.push({ key: cat, name: cat });
+        } else if (typeof cat === 'object' && cat.key && cat.name) {
+          result.push({ key: cat.key, name: cat.name });
         }
       });
-    } else if (typeof categories === 'object') {
-      // 处理键值对格式
+    } 
+    // 处理Fongmi格式分类（对象格式）
+    else if (typeof categories === 'object' && categories !== null) {
       Object.entries(categories).forEach(([key, value]) => {
-        result.push({ key, name: value as string });
+        result.push({ 
+          key: key, 
+          name: typeof value === 'string' ? value : String(value || key)
+        });
       });
     }
     
-    return result;
+    // 确保分类唯一
+    const uniqueCategories = new Map<string, { key: string; name: string }>();
+    result.forEach(cat => {
+      if (!uniqueCategories.has(cat.key)) {
+        uniqueCategories.set(cat.key, cat);
+      }
+    });
+    
+    return Array.from(uniqueCategories.values());
   }
-  
+
   /**
    * 转换搜索规则
-   * @param searchRules 原始搜索规则
+   * @param searchData 原始搜索配置
    */
-  public convertSearchRules(searchRules: any): any {
-    if (!searchRules || typeof searchRules !== 'object') {
-      return {
-        url: '',
-        method: 'get',
-        headers: {},
-        data: {},
-        parse: {
-          items: '',
-          title: '',
-          cover: '',
-          desc: '',
-          url: ''
-        }
-      };
-    }
+  public convertSearchRules(searchData: any): any {
+    if (!searchData) return {};
     
-    // 确保必要字段存在
-    const result = { ...searchRules };
-    result.parse = result.parse || {};
-    
-    return result;
+    // 标准化搜索规则格式
+    return {
+      // Fongmi格式搜索规则适配
+      page: searchData.page !== undefined ? searchData.page : true,
+      searchKey: searchData.key || searchData.searchKey || 'wd',
+      pageKey: searchData.pageKey || 'page',
+      resultPath: searchData.resultPath || '',
+      list: searchData.list || [],
+      ...searchData
+    };
   }
   
   /**
-   * 转换详情规则
-   * @param detailRules 原始详情规则
+   * 转换详情页规则
+   * @param detailData 原始详情配置
    */
-  public convertDetailRules(detailRules: any): any {
-    if (!detailRules || typeof detailRules !== 'object') {
-      return {
-        url: '',
-        method: 'get',
-        headers: {},
-        data: {},
-        parse: {
-          title: '',
-          cover: '',
-          desc: '',
-          info: [],
-          list: []
-        }
-      };
-    }
+  public convertDetailRules(detailData: any): any {
+    if (!detailData) return {};
     
-    // 确保必要字段存在
-    const result = { ...detailRules };
-    result.parse = result.parse || {};
-    
-    return result;
+    // 标准化详情页规则格式
+    return {
+      // Fongmi格式详情页规则适配
+      video: detailData.video || {},
+      parse: detailData.parse || [],
+      ...detailData
+    };
   }
   
   /**
    * 转换播放规则
-   * @param playRules 原始播放规则
+   * @param playData 原始播放配置
    */
-  public convertPlayRules(playRules: any): any {
-    if (!playRules || typeof playRules !== 'object') {
-      return {
-        url: '',
-        method: 'get',
-        headers: {},
-        data: {},
-        parse: {
-          code: '',
-          url: '',
-          headers: {}
-        }
-      };
+  public convertPlayRules(playData: any): any {
+    if (!playData) return {};
+    
+    // 标准化播放规则格式
+    const play = {
+      // Fongmi格式播放规则适配
+      parse: playData.parse || [],
+      proxy: playData.proxy !== undefined ? playData.proxy : false,
+      ...playData
+    };
+    
+    // 处理多格式播放规则
+    if (typeof playData !== 'object') {
+      // 处理字符串格式播放规则
+      play.url = playData;
     }
     
-    // 确保必要字段存在
-    const result = { ...playRules };
-    result.parse = result.parse || {};
-    
-    return result;
+    return play;
   }
-  
+
   /**
-   * 提取扩展信息
-   * @param site 站点配置
+   * 解析应用配置
+   * @param configContent 配置文件内容
    */
-  public extractExtensionInfo(site: Site): Record<string, any> {
-    const extensions: Record<string, any> = {};
-    
-    // 提取自定义字段
-    const customFields = ['parser', 'encrypt', 'decrypt', 'transform', 'beforeRequest', 'afterResponse'];
-    
-    customFields.forEach(field => {
-      if (site[field as keyof Site] !== undefined) {
-        extensions[field] = site[field as keyof Site];
-      }
-    });
-    
-    // 提取特殊标记
-    if (site.api.includes('http://') && !site.proxy) {
-      extensions.needsHttpsUpgrade = true;
-    }
-    
-    return extensions;
-  }
-  
-  /**
-   * 优化站点配置
-   * @param site 原始站点配置
-   */
-  public optimizeSiteConfig(site: Site): Site {
-    const optimized: Site = { ...site };
-    
-    // 优化API URL
-    if (optimized.api) {
-      // 移除末尾斜杠
-      optimized.api = optimized.api.replace(/\/$/, '');
+  public parseAppConfig(configContent: string): HarmonyConfig {
+    try {
+      Logger.info(TAG, 'Parsing application configuration');
       
-      // 规范化URL格式
-      if (!optimized.api.startsWith('http://') && !optimized.api.startsWith('https://')) {
-        optimized.api = 'http://' + optimized.api;
-      }
+      const config = this.parseJsonContent(configContent);
+      
+      // 创建HarmonyOS专用配置
+      const harmonyConfig: HarmonyConfig = {
+        app: {
+          name: config.app?.name || 'RayTV',
+          version: config.app?.version || '1.0.0',
+          debug: config.app?.debug || false
+        },
+        services: {
+          autoStart: config.services?.autoStart || false,
+          backgroundRefresh: config.services?.backgroundRefresh || false,
+          dataSync: config.services?.dataSync || false
+        },
+        player: {
+          defaultEngine: config.player?.defaultEngine || 'system',
+          autoPlayNext: config.player?.autoPlayNext || true,
+          rememberPosition: config.player?.rememberPosition || true,
+          subtitles: config.player?.subtitles || { enabled: true }
+        },
+        ui: {
+          theme: config.ui?.theme || 'system',
+          fontSize: config.ui?.fontSize || 'medium',
+          layout: config.ui?.layout || 'default'
+        },
+        security: {
+          enableScreenLock: config.security?.enableScreenLock || false,
+          allowScreenshots: config.security?.allowScreenshots || true,
+          dataEncryption: config.security?.dataEncryption || false
+        },
+        // 兼容Fongmi配置
+        sites: this.parseSites(configContent),
+        updateTime: Date.now()
+      };
+      
+      return harmonyConfig;
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse application configuration: ${error}`);
+      // 返回默认配置
+      return this.getDefaultConfig();
     }
-    
-    // 优化请求头
-    if (!optimized.headers) {
-      optimized.headers = {};
-    }
-    
-    // 添加默认User-Agent
-    if (!optimized.headers['User-Agent']) {
-      optimized.headers['User-Agent'] = 'RayTV-HarmonyOS/1.0';
-    }
-    
-    // 优化分类列表
-    if (!optimized.categories) {
-      optimized.categories = [];
-    }
-    
-    // 去重分类
-    const categoryKeys = new Set<string>();
-    optimized.categories = optimized.categories.filter(cat => {
-      if (categoryKeys.has(cat.key)) {
-        return false;
-      }
-      categoryKeys.add(cat.key);
-      return true;
-    });
-    
-    return optimized;
   }
   
+  /**
+   * 获取默认配置
+   */
+  private getDefaultConfig(): HarmonyConfig {
+    return {
+      app: {
+        name: 'RayTV',
+        version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now()
+    };
+  }
+
   /**
    * 验证URL格式
    * @param url URL字符串
@@ -377,133 +557,8 @@ export class ConfigParser {
       new URL(url);
       return true;
     } catch {
-      // 尝试添加默认协议
-      try {
-        new URL('http://' + url);
-        return true;
-      } catch {
-        return false;
-      }
+      // 简单的URL格式检查作为备用
+      return /^https?:\/\/.+/.test(url);
     }
-  }
-  
-  /**
-   * 确保必要的默认值
-   * @param site 站点配置
-   */
-  private ensureDefaultValues(site: any): void {
-    if (!site.type) {
-      site.type = SiteType.ALL;
-    }
-    
-    if (site.searchable === undefined) {
-      site.searchable = true;
-    }
-    
-    if (!site.headers) {
-      site.headers = {};
-    }
-    
-    if (!site.categories) {
-      site.categories = [];
-    }
-    
-    if (site.enabled === undefined) {
-      site.enabled = true;
-    }
-    
-    if (!site.weight && site.weight !== 0) {
-      site.weight = 100;
-    }
-    
-    if (!site.search) {
-      site.search = {};
-    }
-    
-    if (!site.detail) {
-      site.detail = {};
-    }
-    
-    if (!site.play) {
-      site.play = {};
-    }
-    
-    // 设置时间戳
-    if (!site.updateTime) {
-      site.updateTime = Date.now();
-    }
-    
-    if (!site.lastCheckTime) {
-      site.lastCheckTime = 0;
-    }
-  }
-  
-  /**
-   * 批量验证站点列表
-   * @param sites 站点列表
-   */
-  public validateSites(sites: any[]): Site[] {
-    const validSites: Site[] = [];
-    const invalidCount: Record<string, number> = { missingKey: 0, missingName: 0, missingApi: 0, invalidApi: 0, other: 0 };
-    
-    if (!Array.isArray(sites)) {
-      Logger.error(TAG, 'Input sites is not an array');
-      return [];
-    }
-    
-    Logger.info(TAG, `Validating ${sites.length} sites`);
-    
-    sites.forEach((site, index) => {
-      try {
-        if (this.validateSite(site)) {
-          // 优化配置并添加到有效列表
-          const optimized = this.optimizeSiteConfig(site);
-          validSites.push(optimized);
-        } else {
-          // 统计失败原因
-          if (!site.key) invalidCount.missingKey++;
-          else if (!site.name) invalidCount.missingName++;
-          else if (!site.api) invalidCount.missingApi++;
-          else if (!this.isValidUrl(site.api)) invalidCount.invalidApi++;
-          else invalidCount.other++;
-        }
-      } catch (error) {
-        Logger.error(TAG, `Error validating site at index ${index}: ${error}`);
-        invalidCount.other++;
-      }
-    });
-    
-    // 打印验证统计
-    Logger.info(TAG, `Validation result: ${validSites.length} valid, ${sites.length - validSites.length} invalid`);
-    Logger.info(TAG, `Invalid reasons: ${JSON.stringify(invalidCount)}`);
-    
-    return validSites;
-  }
-  
-  /**
-   * 合并多个配置源
-   * @param configSources 配置源列表
-   */
-  public mergeConfigs(configSources: Array<{ sites: Site[] }>): Site[] {
-    const mergedSites: Site[] = [];
-    const siteKeys = new Set<string>();
-    
-    Logger.info(TAG, `Merging ${configSources.length} config sources`);
-    
-    configSources.forEach((source, index) => {
-      if (source.sites && Array.isArray(source.sites)) {
-        source.sites.forEach(site => {
-          if (site.key && !siteKeys.has(site.key)) {
-            siteKeys.add(site.key);
-            mergedSites.push(site);
-          } else if (site.key) {
-            Logger.warn(TAG, `Duplicate site key ${site.key} found in source ${index + 1}`);
-          }
-        });
-      }
-    });
-    
-    Logger.info(TAG, `Merged ${mergedSites.length} unique sites`);
-    return mergedSites;
   }
 }

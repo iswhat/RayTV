@@ -3,6 +3,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import { DatabaseRepository } from '../repository/DatabaseRepository';
+import ConfigParser from './ConfigParser';
 
 // 导入模型和DTO
 import ApiResponse, { ResponseCode } from '../dto/ApiResponse';
@@ -165,19 +166,21 @@ export const CONFIG_CATEGORIES = {
 };
 
 /**
- * 配置服务类
- * 负责管理应用的各种配置设置
- */
+   * 配置服务类
+   * 负责管理应用的各种配置设置
+   */
 export default class ConfigService {
   private static instance: ConfigService;
   private databaseRepo: DatabaseRepository;
   private configCache: Map<ConfigKey, ConfigItem> = new Map();
+  private configParser: ConfigParser;
 
   /**
    * 构造函数（私有，防止外部实例化）
    */
   private constructor() {
     this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
+    this.configParser = new ConfigParser();
     this.initializeConfig();
   }
 
@@ -749,7 +752,8 @@ export default class ConfigService {
         }))
       };
       
-      const jsonStr = JSON.stringify(exportData, null, 2);
+      // 使用ConfigParser格式化导出数据
+      const jsonStr = this.configParser.formatExportConfig(exportData);
       return ApiResponse.success(jsonStr, '导出配置成功');
     } catch (error) {
       Logger.error(TAG, 'Failed to export config', error);
@@ -768,8 +772,8 @@ export default class ConfigService {
     try {
       Logger.info(TAG, 'Importing configuration...', { merge });
       
-      // 解析JSON数据
-      const importData = JSON.parse(jsonData);
+      // 使用ConfigParser解析配置数据
+      const importData = this.configParser.parseImportConfig(jsonData);
       const configs = importData.configs || [];
       
       let imported = 0;

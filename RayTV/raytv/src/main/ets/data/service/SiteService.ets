@@ -1,7 +1,23 @@
-import Logger from '../../../common/util/Logger';
-import { Site, SiteType, SiteTestResult, SiteImportExportConfig } from '../bean/Site';
+import Logger from '../../../../common/util/Logger';
+import { Site, SiteType } from '../bean/Site';
 import { SiteDao } from '../db/dao/SiteDao';
-import JsonUtil from '../../../common/util/JsonUtil';
+import JsonUtil from '../../../../common/util/JsonUtil';
+
+// 站点测试结果接口
+export interface SiteTestResult {
+  siteKey: string;
+  status: 'success' | 'failed';
+  responseTime: number;
+  testTime: number;
+  errorMessage?: string;
+}
+
+// 站点导入导出配置接口
+export interface SiteImportExportConfig {
+  includeCredentials?: boolean;
+  includeStats?: boolean;
+  includeCustomConfig?: boolean;
+  description?: string;
 
 const TAG = 'SiteService';
 

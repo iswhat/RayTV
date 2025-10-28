@@ -165,14 +165,15 @@ export class MediaService {
 
   /**
    * 搜索媒体
-   * @param params 搜索参数
+   * @param params 搜索参数对象，包含关键词、页码、每页数量、类型和筛选条件
    * @param siteKeys 指定站点（可选）
    * @returns Promise<SearchResult>
    */
   public async searchMedia(
-    params: SearchParams,
+    params: SearchParams | {keyword: string; page?: number; pageSize?: number; type?: MediaType; [key: string]: any},
     siteKeys?: string[]
   ): Promise<SearchResult> {
+    // 兼容处理参数
     const searchParams = { ...MediaService.DEFAULT_SEARCH_PARAMS, ...params };
     const sites = this.getAvailableSites(siteKeys);
     const results: MediaItem[] = [];

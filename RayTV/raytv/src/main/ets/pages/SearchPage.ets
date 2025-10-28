@@ -1,7 +1,10 @@
 import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
 import { ScrollView, TextInput, Button, List, ListItem, Image, Text, LoadingProgress, Empty, Flex, Tag } from '@ohos/base/ui';
 import { Router } from '@ohos/router';
+import { MediaItem } from '../data/bean/MediaItem';
+import { SearchHistoryItem } from '../data/repository/SearchHistoryRepository';
 import { mediaService } from '../service/media/MediaService';
+import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
 import Logger from '@ohos/base/Logger';
 
 /**
@@ -16,13 +19,16 @@ struct SearchPage {
   @State searchQuery: string = '';
   @State searchResults: MediaItem[] = [];
   @State hotKeywords: string[] = [];
-  @State searchHistory: string[] = [];
+  @State searchHistory: SearchHistoryItem[] = [];
   @State isLoading: boolean = false;
   @State isSearching: boolean = false;
   @State errorMessage: string = '';
   @State currentPage: number = 1;
   @State hasMoreResults: boolean = true;
   @State showHistory: boolean = true;
+  @State displayMode: 'list' | 'grid' = 'list'; // 显示模式：列表或网格
+  @State showFilterPanel: boolean = false; // 是否显示筛选面板
+  @State filters: SearchFilter = {}; // 当前筛选条件
   
   // 分页配置
   private pageSize: number = 20;
@@ -165,12 +171,23 @@ struct SearchPage {
       // 保存搜索历史
       await this.saveSearchHistory(query);
       
-      // 执行搜索
-      Logger.info(this.TAG, `Searching for: ${query}`);
-      this.searchResults = await mediaService.searchMedia(query, this.currentPage, this.pageSize);
+      // 执行搜索，传递筛选条件
+      Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
       
-      // 检查是否有更多结果
-      this.hasMoreResults = this.searchResults.length >= this.pageSize;
+      // 构建搜索参数，包含筛选条件
+      const searchParams = {
+        keyword: query,
+        type: SearchType.All,
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        ...this.filters // 合并筛选条件
+      };
+      
+      const result = await mediaService.searchMedia(searchParams);
+      
+      // 处理搜索结果
+      this.searchResults = result.items || [];
+      this.hasMoreResults = result.hasMore || false;
       
       Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
     } catch (error) {
@@ -197,11 +214,20 @@ struct SearchPage {
       const query = this.searchQuery.trim();
       Logger.info(this.TAG, `Loading more results for: ${query}, page ${this.currentPage}`);
       
-      const moreResults = await mediaService.searchMedia(query, this.currentPage, this.pageSize);
+      // 构建搜索参数，包含筛选条件
+      const searchParams = {
+        keyword: query,
+        type: SearchType.All,
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        ...this.filters // 合并筛选条件
+      };
       
-      if (moreResults && moreResults.length > 0) {
-        this.searchResults = [...this.searchResults, ...moreResults];
-        this.hasMoreResults = moreResults.length === this.pageSize;
+      const result = await mediaService.searchMedia(searchParams);
+      
+      if (result && result.items && result.items.length > 0) {
+        this.searchResults = [...this.searchResults, ...result.items];
+        this.hasMoreResults = result.hasMore || false;
       } else {
         this.hasMoreResults = false;
       }
@@ -387,22 +413,208 @@ struct SearchPage {
   }
   
   /**
+   * 切换显示模式
+   */
+  private toggleDisplayMode(): void {
+    this.displayMode = this.displayMode === 'list' ? 'grid' : 'list';
+    // 可以保存用户的显示模式偏好到配置服务
+    // ConfigService.getInstance().setDisplayMode(this.displayMode);
+  }
+
+  /**
+   * 渲染显示模式切换按钮
+   */
+  @Builder
+  private renderDisplayModeToggle(): void {
+    <Button
+      className="display-mode-toggle"
+      icon={this.displayMode === 'list' ? 'grid' : 'list'}
+      onClick={this.toggleDisplayMode}
+      type="circle"
+      size="small"
+    >
+      {this.displayMode === 'list' ? '网格' : '列表'}
+    </Button>
+  }
+
+  /**
+   * 切换筛选面板显示
+   */
+  private toggleFilterPanel(): void {
+    this.showFilterPanel = !this.showFilterPanel;
+  }
+
+  /**
+   * 渲染筛选按钮
+   */
+  @Builder
+  private renderFilterButton(): void {
+    <Button
+      className="filter-button"
+      icon="filter"
+      onClick={this.toggleFilterPanel}
+      type="text"
+      size="small"
+    >
+      筛选
+    </Button>
+  }
+
+  /**
+   * 应用筛选条件
+   */
+  private applyFilters(): void {
+    this.currentPage = 1;
+    this.performSearch();
+    this.showFilterPanel = false;
+  }
+
+  /**
+   * 重置筛选条件
+   */
+  private resetFilters(): void {
+    this.filters = {};
+  }
+
+  /**
+   * 渲染筛选面板
+   */
+  @Builder
+  private renderFilterPanel(): void {
+    if (!this.showFilterPanel) return;
+    
+    <Stack className="filter-panel-overlay" onClick={this.toggleFilterPanel}>
+      <Stack className="filter-panel" onClick={(e) => e.stopPropagation()}>
+        <Stack className="filter-header">
+          <Text className="filter-title">筛选条件</Text>
+          <Button
+            icon="close"
+            onClick={this.toggleFilterPanel}
+            type="text"
+            size="small"
+          />
+        </Stack>
+        
+        <ScrollView className="filter-content">
+          {/* 媒体类型筛选 */}
+          <Stack className="filter-section">
+            <Text className="filter-section-title">媒体类型</Text>
+            <Flex className="filter-options">
+              <CheckboxGroup>
+                <Checkbox value="movie" onChange={(value) => this.updateMediaTypeFilter('movie', value)}>电影</Checkbox>
+                <Checkbox value="tv" onChange={(value) => this.updateMediaTypeFilter('tv', value)}>电视剧</Checkbox>
+                <Checkbox value="anime" onChange={(value) => this.updateMediaTypeFilter('anime', value)}>动漫</Checkbox>
+                <Checkbox value="variety" onChange={(value) => this.updateMediaTypeFilter('variety', value)}>综艺</Checkbox>
+              </CheckboxGroup>
+            </Flex>
+          </Stack>
+          
+          {/* 排序方式 */}
+          <Stack className="filter-section">
+            <Text className="filter-section-title">排序方式</Text>
+            <RadioGroup onChange={(value) => {
+              this.filters.sortBy = value;
+            }}>
+              <Radio value="time">最新</Radio>
+              <Radio value="score">评分</Radio>
+              <Radio value="hot">热度</Radio>
+            </RadioGroup>
+          </Stack>
+        </ScrollView>
+        
+        <Stack className="filter-actions">
+          <Button onClick={this.resetFilters} type="text">重置</Button>
+          <Button onClick={this.applyFilters} type="capsule">应用筛选</Button>
+        </Stack>
+      </Stack>
+    </Stack>
+  }
+
+  /**
+   * 更新媒体类型筛选
+   */
+  private updateMediaTypeFilter(type: string, checked: boolean): void {
+    if (!this.filters.types) {
+      this.filters.types = [];
+    }
+    
+    if (checked) {
+      if (!this.filters.types.includes(type)) {
+        this.filters.types.push(type);
+      }
+    } else {
+      const index = this.filters.types.indexOf(type);
+      if (index > -1) {
+        this.filters.types.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * 渲染网格模式的搜索结果项
+   */
+  @Builder
+  private renderGridItem(item: MediaItem): void {
+    <GridItem className="grid-item">
+      <Stack className="grid-item-content">
+        <Image
+          className="grid-item-image"
+          src={item.coverUrl || item.posterUrl || 'https://via.placeholder.com/100x150?text=No+Image'}
+          objectFit="cover"
+        />
+        <Stack className="grid-item-overlay">
+          <Text className="grid-item-title" numberOfLines={2}>
+            {item.title}
+          </Text>
+          {item.year && (
+            <Text className="grid-item-year">{item.year}</Text>
+          )}
+        </Stack>
+      </Stack>
+    </GridItem>
+  }
+
+  /**
    * 渲染搜索结果
    */
   @Builder
   private renderSearchResults(): void {
     <Stack className="search-results-section">
-      <Text className="results-count">
-        找到 {this.searchResults.length} 个结果
-      </Text>
+      <Flex className="results-header">
+        <Text className="results-count">
+          找到 {this.searchResults.length} 个结果
+        </Text>
+        <Flex className="header-actions">
+          {this.searchResults.length > 0 && this.renderFilterButton()}
+          {this.searchResults.length > 0 && this.renderDisplayModeToggle()}
+        </Flex>
+      </Flex>
+      
+      {/* 筛选面板 */}
+      {this.renderFilterPanel()}
       
       {this.searchResults.length > 0 ? (
-        <List
-          className="search-results-list"
-          itemTemplate={this.renderSearchResultItem}
-          data={this.searchResults}
-          onScrollBottom={() => this.loadMoreResults()}
-        />
+        this.displayMode === 'list' ? (
+          // 列表模式
+          <List
+            className="search-results-list"
+            itemTemplate={this.renderSearchResultItem}
+            data={this.searchResults}
+            onScrollBottom={() => this.loadMoreResults()}
+          />
+        ) : (
+          // 网格模式
+          <Grid
+            className="search-results-grid"
+            columnsTemplate="1fr 1fr"
+            rowsTemplate="auto"
+            rowsGap={10}
+            columnsGap={10}
+            onScrollBottom={() => this.loadMoreResults()}
+          >
+            {this.searchResults.map((item) => this.renderGridItem(item))}
+          </Grid>
+        )
       ) : (
         <Empty className="empty-results">
           <Text>暂无搜索结果</Text>

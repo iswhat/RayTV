@@ -3,6 +3,8 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
+import pinyinUtil from '../../common/util/PinyinUtil';
+import VodRepository from '../repository/VodRepository';
 
 // 常量定义
 const TAG = 'SearchService';
@@ -547,54 +549,125 @@ export default class SearchService {
     try {
       Logger.debug(TAG, `Getting search suggestions for: ${query}`);
       
-      // 在实际应用中，这里应该调用API获取建议
-      // 这里使用模拟数据
       const suggestions: SearchSuggestionItem[] = [];
+      const lowerQuery = query.toLowerCase();
+      const vodRepository = VodRepository.getInstance();
       
-      // 从历史记录中获取匹配的建议
-      const historySuggestions = this.searchHistory
-        .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, Math.min(5, maxResults))
-        .map(item => ({
-          text: item.query,
-          type: 'query' as const,
-          count: item.resultCount,
-          icon: 'history'
-        }));
+      // 1. 从实际影视作品数据中获取匹配的建议 - 支持拼音首字母匹配
+      // 首先尝试通过关键词直接搜索
+      let vodResults = await vodRepository.searchVod(query, undefined, maxResults * 3); // 获取更多结果以便过滤
       
-      suggestions.push(...historySuggestions);
-      
-      // 添加一些模拟的标签建议
-      const mockTags = ['热门', '新上线', '高分', '经典', '必看'];
-      const tagSuggestions = mockTags
-        .filter(tag => tag.includes(query))
-        .map(tag => ({
-          text: tag,
-          type: 'tag' as const,
-          icon: 'tag'
-        }));
-      
-      // 确保不超过最大结果数
-      const remainingSlots = maxResults - suggestions.length;
-      if (remainingSlots > 0 && tagSuggestions.length > 0) {
-        suggestions.push(...tagSuggestions.slice(0, remainingSlots));
+      // 如果直接搜索结果不足，尝试模糊搜索获取更多候选数据
+      if (vodResults.length < maxResults) {
+        // 对于拼音输入，可以尝试搜索数据库中所有内容然后在内存中过滤
+        const allVods = await vodRepository.searchVod('', undefined, 100);
+        vodResults = [...new Set([...vodResults, ...allVods])];
       }
       
-      // 添加一些模拟的人员建议
+      // 过滤并排序建议：优化拼音首字母匹配逻辑
+      const filteredVodSuggestions = vodResults
+        .filter(item => {
+          if (!item.title) return false;
+          
+          const title = item.title.toLowerCase();
+          const firstLetters = pinyinUtil.getFirstLetter(item.title).toLowerCase();
+          
+          // 匹配规则优先级：
+          // 1. 标题完全匹配
+          // 2. 标题包含关键词
+          // 3. 拼音首字母完全匹配
+          // 4. 拼音首字母包含关键词
+          // 5. 标题中任意词的拼音首字母匹配关键词
+          
+          // 直接文本匹配
+          if (title === lowerQuery || title.includes(lowerQuery)) {
+            return true;
+          }
+          
+          // 拼音首字母匹配
+          if (firstLetters.startsWith(lowerQuery) || firstLetters.includes(lowerQuery)) {
+            return true;
+          }
+          
+          // 检查标题中每个词的拼音首字母
+          const words = item.title.split(/\s+/);
+          return words.some(word => {
+            const wordFirstLetters = pinyinUtil.getFirstLetter(word).toLowerCase();
+            return wordFirstLetters.startsWith(lowerQuery) || wordFirstLetters.includes(lowerQuery);
+          });
+        })
+        .sort((a, b) => {
+          // 排序规则优化：
+          // 1. 完全匹配优先
+          // 2. 直接文本匹配优先于拼音首字母匹配
+          // 3. 匹配位置越靠前优先级越高
+          // 4. 标题长度短的优先
+          const aTitle = a.title.toLowerCase();
+          const bTitle = b.title.toLowerCase();
+          const aFirstLetters = pinyinUtil.getFirstLetter(a.title).toLowerCase();
+          const bFirstLetters = pinyinUtil.getFirstLetter(b.title).toLowerCase();
+          
+          // 完全匹配检查
+          const aIsExactMatch = aTitle === lowerQuery;
+          const bIsExactMatch = bTitle === lowerQuery;
+          if (aIsExactMatch && !bIsExactMatch) return -1;
+          if (!aIsExactMatch && bIsExactMatch) return 1;
+          
+          // 直接文本匹配检查
+          const aHasTextMatch = aTitle.includes(lowerQuery);
+          const bHasTextMatch = bTitle.includes(lowerQuery);
+          if (aHasTextMatch && !bHasTextMatch) return -1;
+          if (!aHasTextMatch && bHasTextMatch) return 1;
+          
+          // 拼音首字母匹配检查
+          const aHasPinyinMatch = aFirstLetters.includes(lowerQuery);
+          const bHasPinyinMatch = bFirstLetters.includes(lowerQuery);
+          if (aHasPinyinMatch && !bHasPinyinMatch) return -1;
+          if (!aHasPinyinMatch && bHasPinyinMatch) return 1;
+          
+          // 匹配位置检查
+          if (aHasTextMatch && bHasTextMatch) {
+            const aPos = aTitle.indexOf(lowerQuery);
+            const bPos = bTitle.indexOf(lowerQuery);
+            if (aPos !== bPos) return aPos - bPos;
+          }
+          
+          // 标题长度排序
+          return aTitle.length - bTitle.length;
+        })
+        .slice(0, maxResults)
+        .map(item => ({
+          text: item.title,
+          type: 'movie' as const,
+          icon: item.type === 'tv_series' ? 'tv' : 'movie',
+          mediaType: item.type || 'unknown',
+          year: item.year,
+          count: 1 // 相关结果数量，实际应用中可以计算
+        }));
+      
+      suggestions.push(...filteredVodSuggestions);
+      
+      // 2. 如果影视作品建议不足，从历史记录中补充
       if (suggestions.length < maxResults) {
-        const mockPersons = ['张三', '李四', '王五', '赵六', '钱七'];
-        const personSuggestions = mockPersons
-          .filter(person => person.includes(query))
-          .map(person => ({
-            text: person,
-            type: 'actor' as const,
-            icon: 'person'
+        const historySuggestions = this.searchHistory
+          .filter(item => {
+            // 确保不与已添加的影视作品建议重复
+            if (suggestions.some(s => s.text.toLowerCase() === item.query.toLowerCase())) {
+              return false;
+            }
+            
+            const itemQuery = item.query.toLowerCase();
+            return itemQuery.includes(lowerQuery) || pinyinUtil.containsPinyin(item.query, query);
+          })
+          .slice(0, Math.min(3, maxResults - suggestions.length))
+          .map(item => ({
+            text: item.query,
+            type: 'query' as const,
+            count: item.resultCount,
+            icon: 'history'
           }));
         
-        const remainingSlots2 = maxResults - suggestions.length;
-        if (remainingSlots2 > 0 && personSuggestions.length > 0) {
-          suggestions.push(...personSuggestions.slice(0, remainingSlots2));
-        }
+        suggestions.push(...historySuggestions);
       }
       
       // 通知监听器

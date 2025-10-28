@@ -57,8 +57,8 @@ export default class ServiceFactory {
 
       Logger.info(TAG, 'Initializing services...');
 
-      // 首先初始化仓库工厂
       const repoInitResult = await RepositoryFactory.getInstance().initialize();
+
       if (!repoInitResult) {
         Logger.error(TAG, 'Failed to initialize repository factory');
         return false;

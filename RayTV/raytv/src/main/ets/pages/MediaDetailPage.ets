@@ -274,9 +274,33 @@ struct MediaDetailPage {
         mediaTitle: this.mediaDetail.title,
         episodeName: this.selectedEpisodeIndex >= 0 && this.episodes[this.selectedEpisodeIndex] 
           ? this.episodes[this.selectedEpisodeIndex].name 
-          : undefined
+          : undefined,
+        startPosition: this.currentPlayPosition, // 传递当前播放位置
+        autoSwitchSourceOnError: true // 启用自动切换片源功能
       }
     });
+  }
+  
+  /**
+   * 保存当前播放进度
+   */
+  private async saveCurrentPlayProgress(episodeId: string): Promise<void> {
+    try {
+      const position = await playbackService.getCurrentPosition();
+      const duration = await playbackService.getDuration();
+      
+      if (position > 0 && this.mediaId && this.siteKey) {
+        await historyService.saveWatchProgress(
+          this.mediaId,
+          this.siteKey,
+          episodeId,
+          position,
+          duration
+        );
+      }
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to save play progress: ${error}`);
+    }
   }
   
   /**
@@ -466,10 +490,17 @@ struct MediaDetailPage {
           <Button
             key={episode.id || index}
             className={`episode-button ${this.selectedEpisodeIndex === index ? 'selected' : ''}`}
-            onClick={() => {
+            onClick={async () => {
+              // 保存上一集的进度
+              const lastEpisodeId = this.episodes[this.selectedEpisodeIndex]?.id;
+              if (lastEpisodeId) {
+                await this.saveCurrentPlayProgress(lastEpisodeId);
+              }
+              
               this.selectedEpisodeIndex = index;
               // 加载该集的播放源
               this.loadPlaySources(episode.id);
+              this.currentPlayPosition = 0; // 重置播放位置
             }}
           >
             {episode.name || `第${episode.number || index + 1}集`}

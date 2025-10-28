@@ -169,33 +169,140 @@
 - **MemoryManager.ets**: 内存管理工具
 - **TimeoutManager.ets**: 超时控制工具
 
-## 5. 代码诊断问题分析与解决思路
+## 5. 服务层重构与导入路径优化
 
-### 5.1 导入路径和模块问题
+### 5.1 服务文件移动与重组
+根据项目架构规划，将分散在多个目录的服务文件统一组织到service目录下：
+
+1. **从data/service/移动到service/子目录**：
+   - `DownloadService.ets` → `service/download/DownloadService.ets`
+   - `UserService.ets` → `service/user/UserService.ets`
+   - `HistoryService.ets` → `service/media/HistoryService.ets`
+   - `CacheService.ets` → `service/cache/CacheService.ets`
+   - `NotificationService.ets` → `service/notification/NotificationService.ets`
+   - `ConfigService.ets` → `service/config/ConfigService.ets`
+   - `LiveStreamService.ets` → `service/live/LiveStreamService.ets`
+
+2. **服务层结构优化**：
+   - 按功能域划分服务目录，如config、cache、media、notification等
+   - 统一服务命名和实现规范，确保所有服务采用单例模式
+   - 建立清晰的服务间依赖关系
+
+### 5.2 导入路径全面修复
+修复了超过20个文件中的导入路径问题：
+
+1. **CacheService导入路径修复**：
+   - 将所有从`../../common/util/CacheService`导入改为`../../service/cache/CacheService`
+   - 涉及文件包括AuthRepository.ts、LiveStreamRepository.ts等多个仓库类
+
+2. **ConfigService导入路径修复**：
+   - 将从`./ConfigService`或`../config/ConfigService`的错误路径统一修正
+   - 涉及MediaService.ts、CacheService.ets、PlaybackService.ets等多个服务文件
+
+3. **其他服务导入路径修复**：
+    - 修复DownloadService、UserService、HistoryService、NotificationService、LiveStreamService的导入路径
+    - 更新ServiceFactory.ets中的服务创建逻辑，确保正确引用新位置的服务
+    - 修复domain层对移动服务的引用路径
+ 
+### 5.3 文档同步更新
+
+1. **fileslist.md更新**：
+   - 从data/service/目录移除已移动的服务条目
+   - 在service/目录下添加移动后的服务条目
+   - 更新重复服务的标记，添加"待移除"说明
+   - 更新重构进度和后续计划
+
+2. **ReadMe.md更新**：
+   - 创建符合HarmonyOS规范的项目说明文档
+   - 更新项目结构描述，反映服务重组后的目录结构
+   - 添加服务重组说明章节
+   - 完善开发规范和技术栈说明
+   - 制定服务重构计划时间表
+
+## 6. 后续开发计划
+
+### 6.1 服务层完善
+- 完成data/service/剩余服务的迁移
+- 移除services/目录下的重复服务实现
+- 合并功能重叠的服务（如HistoryService和HistoryManager）
+- 优化服务间依赖关系，减少循环依赖
+- 为所有服务添加完整的接口文档和使用示例
+
+### 6.2 工具类统一
+- 继续合并utils/和common/util/目录下的工具类
+- 统一工具类命名规范（XXXUtil格式）
+- 完善工具类功能，确保符合HarmonyOS最佳实践
+- 移除冗余工具类实现
+
+### 6.3 代码质量优化
+- 进行全面的代码审查，确保符合HarmonyOS开发规范
+- 修复潜在的性能问题和内存泄漏
+- 完善错误处理和异常管理
+- 添加单元测试和集成测试
+
+### 6.4 功能实现
+- 基于重组后的服务层，实现核心业务功能
+- 集成HarmonyOS特有的分布式能力
+- 实现小艺语音助手集成
+- 开发跨设备应用流转功能
+- 完善手势操作支持
+
+### 6.5 性能优化
+- 优化服务启动和初始化性能
+- 改进缓存策略，提升应用响应速度
+- 优化网络请求和数据加载
+- 减少应用资源占用，提升电池续航
+
+## 7. 开发规范遵循
+
+### 7.1 HarmonyOS规范实施
+- 严格遵循ArkTS官方编码规范
+- 使用JSDoc格式为类、方法和重要变量添加注释
+- 遵循HarmonyOS权限申请和资源访问规范
+- 使用HarmonyOS推荐的API和接口设计模式
+
+### 7.2 项目架构遵循
+- 严格按照领域驱动设计原则组织代码结构
+- 保持服务层的单一职责和高内聚低耦合
+- 使用ServiceFactory统一管理服务生命周期
+- 遵循依赖倒置原则，通过接口依赖而非实现依赖
+
+1. **fileslist.md更新**：
+   - 更新所有移动服务文件的路径信息
+   - 添加"已从data/service/移动"备注说明
+   - 移除重复服务的标记，明确主要实现位置
+
+2. **项目结构文档更新**：
+   - 反映服务层最新的目录结构
+   - 明确工具类和服务的标准目录
+
+## 6. 代码诊断问题分析与解决思路
+
+### 6.1 导入路径和模块问题
 - **问题原因**：代码迁移和重构过程中，模块路径发生变化，但部分文件未同步更新
 - **解决思路**：统一修复所有导入路径，确保指向正确的模块位置
 
-### 5.2 FileUtil相关错误
+### 6.2 FileUtil相关错误
 - **问题原因**：代码使用了不存在的FileUtil方法（如exists、isDirectory、readDirectory等）
 - **解决思路**：使用HarmonyOS提供的正确API替代，如使用getFileSystemManager进行文件操作
 
-### 5.3 CacheService相关错误
+### 6.3 CacheService相关错误
 - **问题原因**：代码使用了CacheService上不存在的方法（如getCache、setCache、removeCache等）
 - **解决思路**：使用正确的CacheService API，如get和set方法，对于批量操作使用removeBatch方法
 
-### 5.4 StorageUtil相关错误
+### 6.4 StorageUtil相关错误
 - **问题原因**：代码使用了不存在的set方法
 - **解决思路**：使用正确的StorageUtil API，如put方法存储数据
 
-### 5.5 EventHandler类型不匹配
+### 6.5 EventHandler类型不匹配
 - **问题原因**：事件处理器的参数类型与EventHandler期望的类型不匹配
 - **解决思路**：调整事件处理函数参数，使其接收可能为undefined的数据类型
 
-### 5.6 语法和结构错误
+### 6.6 语法和结构错误
 - **问题原因**：代码中存在逗号、冒号缺失等语法错误
 - **解决思路**：修复所有语法错误，确保代码结构正确
 
-### 5.7 Promise处理错误
+### 6.7 Promise处理错误
 - **问题原因**：代码尝试访问Promise对象上不存在的属性
 - **解决思路**：正确处理Promise，确保在Promise解析后再访问结果属性
 

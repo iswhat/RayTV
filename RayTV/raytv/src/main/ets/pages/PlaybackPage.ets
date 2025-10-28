@@ -49,8 +49,10 @@ struct PlaybackPage {
   @State controlsTimeout: NodeJS.Timeout | null = null;
   @State lastProgressSaveTime: number = 0;
   @State saveProgressInterval: number = 30000; // 30秒保存一次进度
-  
-  // 初始化
+  private autoSwitchSourceOnError: boolean = true; // 是否自动切换片源
+  private lastSaveTime: number = 0; // 上次保存进度的时间(毫秒)
+  private currentPosition: number = 0; // 当前播放位置
+  private totalTime: number = 0;初始化
   onMounted(() => {
     Logger.info(this.TAG, 'PlaybackPage mounted');
     
@@ -59,13 +61,14 @@ struct PlaybackPage {
     this.mediaId = params?.['mediaId'] || '';
     this.siteKey = params?.['siteKey'] || '';
     this.episodeId = params?.['episodeId'];
-    this.initialPosition = params?.['currentTime'] || 0;
+    this.initialPosition = params?.['currentTime'] || params?.['startPosition'] || 0;
     this.mediaTitle = params?.['mediaTitle'] || '正在播放';
     this.episodeName = params?.['episodeName'] || '';
     this.playSource = params?.['playSource'];
     this.playSourceIndex = params?.['playSourceIndex'] || 0;
+    this.autoSwitchSourceOnError = params?.['autoSwitchSourceOnError'] !== false; // 默认开启
     
-    Logger.info(this.TAG, `Starting playback for: ${this.siteKey}:${this.mediaId}${this.episodeId ? ` episode: ${this.episodeId}` : ''}`);
+    Logger.info(this.TAG, `Starting playback for: ${this.siteKey}:${this.mediaId}${this.episodeId ? ` episode: ${this.episodeId}` : ''}, startPosition=${this.initialPosition}`);
     
     // 初始化播放器
     this.initializePlayback();
@@ -77,6 +80,11 @@ struct PlaybackPage {
   // 清理资源
   onUnmounted(() => {
     Logger.info(this.TAG, 'PlaybackPage unmounted');
+    
+    // 保存最终播放进度
+    this.savePlayProgress(this.currentPosition).catch(error => {
+      Logger.error(this.TAG, `Failed to save final play progress: ${error}`);
+    });
     
     // 停止控制栏超时
     this.stopControlsTimeout();
@@ -164,7 +172,13 @@ struct PlaybackPage {
       this.isLoading = false;
     } catch (error) {
       Logger.error(this.TAG, `Failed to setup playback: ${error}`);
-      throw error;
+      
+      // 尝试自动切换到下一个片源
+      if (this.autoSwitchSourceOnError) {
+        await this.handlePlaybackError(error);
+      } else {
+        throw error;
+      }
     }
   }
   
@@ -187,15 +201,28 @@ struct PlaybackPage {
         this.restartControlsTimeout();
       },
       
-      onTimeUpdate: (currentTime, duration) => {
-        this.currentTime = currentTime;
-        this.duration = duration;
+      onError: async (error: Error) => {
+        Logger.error(this.TAG, `Playback error: ${error}`);
         
-        // 定期保存播放进度
-        const now = Date.now();
-        if (now - this.lastProgressSaveTime > this.saveProgressInterval) {
-          this.savePlaybackProgress();
-          this.lastProgressSaveTime = now;
+        // 尝试自动切换片源
+        if (this.autoSwitchSourceOnError) {
+          await this.handlePlaybackError(error);
+        } else {
+          this.errorMessage = `播放错误: ${error.message || '未知错误'}`;
+        }
+      },
+      
+      // 定期保存播放进度
+      onTimeUpdate: async (currentTime, duration) => {
+        this.currentTime = currentTime;
+        this.currentPosition = currentTime;
+        this.duration = duration;
+        this.totalTime = duration || this.totalTime;
+        
+        // 每10秒保存一次播放进度
+        if (this.lastSaveTime === 0 || currentTime - this.lastSaveTime > 10000) {
+          await this.savePlayProgress(currentTime);
+          this.lastSaveTime = currentTime;
         }
       },
       
@@ -329,12 +356,94 @@ struct PlaybackPage {
   }
   
   /**
+   * 保存播放进度
+   */
+  private async savePlayProgress(position: number): Promise<void> {
+    if (!this.mediaId || !this.siteKey || !this.episodeId) return;
+    
+    try {
+      const duration = this.totalTime;
+      
+      // 保存播放进度到历史记录
+      await HistoryService.getInstance().saveWatchProgress(
+        this.mediaId,
+        this.siteKey,
+        this.episodeId,
+        position,
+        duration
+      );
+      
+      Logger.info(this.TAG, `Saved playback progress: ${position}ms of ${duration}ms`);
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to save play progress: ${error}`);
+    }
+  }
+  
+  /**
+   * 处理播放错误，尝试切换到下一个可用片源
+   */
+  private async handlePlaybackError(error: Error): Promise<void> {
+    if (!this.playSources || this.playSources.length <= 1) {
+      this.errorMessage = '播放失败，暂无可用备用片源';
+      this.isLoading = false;
+      return;
+    }
+    
+    // 查找当前片源的索引
+    const currentIndex = this.playSources.findIndex(s => 
+      s.id === this.playSource?.id || 
+      (s.name === this.playSource?.name && s.url === this.playSource?.url)
+    );
+    
+    // 选择下一个可用的片源
+    let nextIndex = (currentIndex + 1) % this.playSources.length;
+    
+    if (currentIndex !== -1) {
+      Logger.info(this.TAG, `尝试切换到下一个片源: ${nextIndex}，原片源: ${currentIndex}`);
+      
+      // 显示切换提示
+      this.errorMessage = `当前片源播放失败，正在尝试切换到备用片源(${nextIndex + 1}/${this.playSources.length})...`;
+      
+      // 等待一小段时间再切换
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      try {
+        // 保存当前播放位置
+        const currentPosition = this.currentPosition;
+        
+        // 切换到下一个片源
+        this.initialPosition = currentPosition; // 保持相同的播放位置
+        await this.setupPlayback(this.playSources[nextIndex]);
+        this.errorMessage = '';
+      } catch (nextError) {
+        // 如果下一个片源也失败，继续尝试下一个
+        if (nextIndex !== currentIndex) {
+          await this.handlePlaybackError(nextError);
+        } else {
+          this.errorMessage = '所有片源播放失败，请稍后重试';
+          this.isLoading = false;
+        }
+      }
+    } else {
+      this.errorMessage = '播放失败，无法识别当前片源';
+      this.isLoading = false;
+    }
+  }
+  
+  /**
    * 切换播放源
    */
   private async switchPlaySource(source: PlaySource): Promise<void> {
     try {
       this.isLoading = true;
+      
+      // 保存当前播放位置
+      const currentPosition = this.currentPosition;
+      
+      // 切换到新片源并恢复播放位置
+      this.initialPosition = currentPosition;
       await this.setupPlayback(source);
+      
       this.showSourceMenu = false;
     } catch (error) {
       Logger.error(this.TAG, `Failed to switch play source: ${error}`);
