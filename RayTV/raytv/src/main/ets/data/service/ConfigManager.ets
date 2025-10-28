@@ -1,5 +1,5 @@
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import { AppConfig, PlayerConfig, DisplayConfig, NetworkConfig, SecurityConfig, AdBlockConfig, HarmonyConfig, SearchConfig, DownloadConfig, SyncConfig, LogConfig, ConfigChange, ConfigValidationResult } from '../bean/Config';
 
 const TAG = 'ConfigManager';

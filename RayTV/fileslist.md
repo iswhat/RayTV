@@ -14,13 +14,13 @@
 
 | 文件名 | 路径 | 功能描述 | 存在于规划文档 | 存在于计划文档 | 备注 |
 |-------|------|---------|-------------|-------------|------|
-| DownloadService.ets | data/service/DownloadService.ets | 下载服务类，管理视频下载任务和下载队列 | ✓ | ✓ | 单例模式，支持多任务管理 |
-| UserService.ets | data/service/UserService.ets | 用户服务，负责用户账户管理、认证授权和用户数据同步 | ✓ | ✓ | 单例模式，支持多种登录方式 |
+| DownloadService.ets | service/download/DownloadService.ets | 下载服务类，管理视频下载任务和下载队列 | ✓ | ✓ | 单例模式，支持多任务管理，已从data/service/移动 |
+| UserService.ets | service/user/UserService.ets | 用户服务，负责用户账户管理、认证授权和用户数据同步 | ✓ | ✓ | 单例模式，支持多种登录方式，已从data/service/移动 |
 | SettingService.ets | data/service/SettingService.ets | 设置服务，管理应用配置、主题设置等 | ✓ | ✓ | 单例模式 |
-| HistoryService.ets | data/service/HistoryService.ets | 历史记录服务，管理观看历史记录 | ✓ | ✓ | 单例模式 |
-| CacheService.ets | data/service/CacheService.ets | 缓存服务，管理应用缓存 | ✓ | ✓ | 单例模式 |
-| NotificationService.ets | data/service/NotificationService.ets | 通知服务，管理应用通知 | ✓ | ✓ | 基于HarmonyOS通知API |
-| ConfigService.ets | data/service/ConfigService.ets | 配置服务，管理应用配置 | ✓ | ✓ | 单例模式 |
+| HistoryService.ets | service/media/HistoryService.ets | 历史记录服务，管理观看历史记录 | ✓ | ✓ | 单例模式，已从data/service/移动 |
+| CacheService.ets | service/cache/CacheService.ets | 缓存服务，管理应用缓存 | ✓ | ✓ | 单例模式，已从data/service/移动 |
+| NotificationService.ets | service/notification/NotificationService.ets | 通知服务，管理应用通知 | ✓ | ✓ | 基于HarmonyOS通知API，已从data/service/移动 |
+| ConfigService.ets | service/config/ConfigService.ets | 配置服务，管理应用配置 | ✓ | ✓ | 单例模式，已从data/service/移动 |
 | AppService.ets | data/service/AppService.ets | 应用服务，应用级别的服务管理 | ✓ | ✓ | |
 | AuthService.ets | data/service/AuthService.ets | 认证服务，处理用户认证 | ✓ | ✓ | |
 | CollectionService.ets | data/service/CollectionService.ets | 收藏服务，管理用户收藏 | ✓ | ✓ | |
@@ -30,7 +30,7 @@
 | DistributedDataService.ets | data/service/DistributedDataService.ets | 分布式数据服务 | ✓ | ✓ | |
 | FileService.ets | data/service/FileService.ets | 文件服务 | ✓ | ✓ | |
 | HistoryManager.ets | data/service/HistoryManager.ets | 历史记录管理器 | ✓ | ✓ | 与HistoryService功能重复 |
-| LiveStreamService.ets | data/service/LiveStreamService.ets | 直播流服务 | ✓ | ✓ | |
+| LiveStreamService.ets | service/live/LiveStreamService.ets | 直播流服务 | ✓ | ✓ | 已从data/service/移动 |
 | MediaCacheService.ets | data/service/MediaCacheService.ets | 媒体缓存服务 | ✓ | ✓ | |
 | MediaService.ets | data/service/MediaService.ets | 媒体服务 | ✓ | ✓ | |
 | MovieService.ets | data/service/MovieService.ets | 电影服务 | ✓ | ✓ | |

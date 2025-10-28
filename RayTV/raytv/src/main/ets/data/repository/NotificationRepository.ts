@@ -4,7 +4,7 @@
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
-import CacheService from '../../common/util/CacheService';
+import CacheService from '../../service/cache/CacheService';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType } from '../model/CacheModel';
 

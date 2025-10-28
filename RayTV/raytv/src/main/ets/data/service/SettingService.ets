@@ -3,8 +3,8 @@
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
-import ConfigService from './ConfigService';
-import UserService, { UserPreferences } from './UserService';
+import ConfigService from '../../service/config/ConfigService';
+import UserService, { UserPreferences } from '../../service/user/UserService';
 import DatabaseManager from '../db/DatabaseManager';
 import { Configuration, UIExtensionAbility } from '@kit.AbilityKit';
 import { CommonConstants } from '@kit.Constants';

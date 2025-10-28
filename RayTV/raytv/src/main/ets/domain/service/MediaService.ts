@@ -6,7 +6,7 @@ import VodRepository from '../../data/repository/VodRepository';
 import LiveRepository from '../../data/repository/LiveRepository';
 import HistoryRepository from '../../data/repository/HistoryRepository';
 import CollectionRepository from '../../data/repository/CollectionRepository';
-import ConfigService from '../../data/service/ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import DeviceService from '../../data/service/DeviceService';
 import NetworkService from '../../data/service/NetworkService';
 

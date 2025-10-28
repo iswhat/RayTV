@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
-import CacheService from '../../common/util/CacheService';
+import CacheService from '../../service/cache/CacheService';
 import { SearchType, SearchSort, SearchRequest, SearchResult, SearchResultItem } from '../dto/SearchDto';
 import { VideoInfo, VideoType } from '../dto/VideoDto';
 import { LocalStorageType } from '../model/LocalModel';

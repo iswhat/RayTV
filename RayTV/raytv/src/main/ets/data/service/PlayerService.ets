@@ -2,8 +2,8 @@
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
-import ConfigService from './ConfigService';
-import HistoryService from './HistoryService';
+import ConfigService from '../../service/config/ConfigService';
+import HistoryService from '../../service/media/HistoryService';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import { DatabaseRepository } from '../repository/DatabaseRepository';
 

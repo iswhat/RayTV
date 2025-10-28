@@ -2,7 +2,7 @@
 import Logger from '../../common/util/Logger';
 import { DeviceInfo, DeviceType, DeviceCapability } from '../bean/DeviceInfo';
 import DeviceInfoRepository from '../repository/DeviceInfoRepository';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 
 const TAG = 'DeviceService';
 

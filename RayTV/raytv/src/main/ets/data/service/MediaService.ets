@@ -2,7 +2,7 @@
 // 负责视频内容管理、播放状态同步和多设备媒体控制
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import DistributedDataService from './DistributedDataService';
 import DeviceManager from './DeviceManager';
 import PlayerService from './PlayerService';

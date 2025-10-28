@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
-import ConfigService from './ConfigService';
+import ConfigService from '../config/ConfigService';
 import DatabaseManager from '../db/DatabaseManager';
 import { BusinessError } from '@ohos.base';
 import { http } from '@ohos.net.http';

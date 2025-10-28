@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import { StorageUtil } from '../../utils/StorageUtil';
 import { NetworkUtil } from '../../utils/NetworkUtil';
 import { EventBusUtil } from '../../utils/EventBusUtil';
-import { CacheService } from '../../utils/CacheService';
+import CacheService from '../../service/cache/CacheService';
 import {
   VideoType,
   VideoQuality,

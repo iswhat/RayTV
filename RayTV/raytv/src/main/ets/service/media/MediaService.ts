@@ -1,6 +1,6 @@
 import Logger from '../../common/util/Logger';
 import { CrawlerService, CrawlerResponse } from '../spider/CrawlerService';
-import { ConfigService } from '../config/ConfigService';
+import ConfigService from '../config/ConfigService';
 import { SiteInfo } from '../spider/SiteManager';
 
 /**

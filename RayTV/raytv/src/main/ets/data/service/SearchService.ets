@@ -2,7 +2,7 @@
 // 负责视频内容搜索、历史记录管理和热门推荐功能
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 
 // 常量定义
 const TAG = 'SearchService';

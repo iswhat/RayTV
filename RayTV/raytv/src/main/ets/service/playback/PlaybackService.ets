@@ -2,7 +2,7 @@
 // 负责视频播放控制、播放状态管理和播放队列管理
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../config/ConfigService';
 import HistoryManager from './HistoryManager';
 import { AVPlay } from '@ohos.multimedia.media';
 import { AudioManager, AudioRendererInfo } from '@ohos.multimedia.audio';

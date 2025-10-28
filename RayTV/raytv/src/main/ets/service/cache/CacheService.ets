@@ -3,7 +3,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil from '../../common/util/FileUtil';
 import JsonUtil from '../../common/util/JsonUtil';
-import ConfigService from './ConfigService';
+import ConfigService from '../config/ConfigService';
 import FileService, { StorageLocation, FileType, FileConfig } from './FileService';
 
 // 常量定义

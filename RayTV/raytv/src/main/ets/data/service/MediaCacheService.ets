@@ -2,7 +2,7 @@
 // 负责管理视频文件的本地缓存，包括缓存策略、清理机制和缓存统计
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 // 常量定义

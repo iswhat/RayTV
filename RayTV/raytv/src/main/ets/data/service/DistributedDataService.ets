@@ -4,7 +4,7 @@
 import Logger from '../../common/util/Logger';
 import distributedData from '@ohos.data.distributedData';
 import { BusinessError } from '@ohos.base';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 
 // 常量定义
 const TAG = 'DistributedDataService';

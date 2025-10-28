@@ -2,7 +2,7 @@
 // 基于HarmonyOS通知API实现应用通知管理
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../config/ConfigService';
 import media from '@ohos.multimedia.media';
 import notificationManager from '@ohos.notificationManager';
 import { BusinessError } from '@ohos.base';

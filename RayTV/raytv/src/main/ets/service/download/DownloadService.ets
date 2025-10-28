@@ -7,7 +7,7 @@ import NetworkUtil from '../../common/util/NetworkUtil';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import { DatabaseRepository } from '../repository/DatabaseRepository';
 import { NetworkRepository } from '../repository/NetworkRepository';
-import ConfigService from './ConfigService';
+import ConfigService from '../config/ConfigService';
 
 // 导入模型和DTO
 import ApiResponse, { ResponseCode } from '../dto/ApiResponse';

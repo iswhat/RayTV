@@ -2,7 +2,7 @@
 // 负责协调本地数据库、网络数据和分布式数据之间的同步
 
 import Logger from '../../common/util/Logger';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import DistributedDataService from './DistributedDataService';
 import { SyncDataType } from './DistributedDataService';
 

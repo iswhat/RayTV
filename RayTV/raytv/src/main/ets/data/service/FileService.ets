@@ -2,9 +2,9 @@
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil, { FileInfo, FileStats } from '../../common/util/FileUtil';
-import ConfigService from './ConfigService';
+import ConfigService from '../../service/config/ConfigService';
 import NetworkService from './NetworkService';
-import { DownloadTask, DownloadStatus } from './DownloadService';
+import { DownloadTask, DownloadStatus } from '../../service/download/DownloadService';
 
 // 常量定义
 const TAG = 'FileService';
