@@ -2,9 +2,9 @@
 // 负责管理应用程序的所有配置数据，提供统一的配置读写接口
 
 import Logger from '../../common/util/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
-import { FileUtil } from '../../utils/FileUtil';
+import StorageUtil from '../../common/util/StorageUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import FileUtil from '../../common/util/FileUtil';
 import { ConfigType, ConfigItem, ConfigGroup } from '../model/ConfigModel';
 import { LocalStorageType } from '../model/LocalModel';
 

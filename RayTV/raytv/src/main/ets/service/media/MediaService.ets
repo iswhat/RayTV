@@ -1,5 +1,5 @@
 // MediaService.ets - 媒体服务
-// 负责视频内容管理、播放状态同步和多设备媒体控制
+// 负责视频内容管理、播放状态同步和多设备媒体控制，整合了业务逻辑层媒体服务功能
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
@@ -7,12 +7,21 @@ import DistributedDataService from './DistributedDataService';
 import DeviceManager from './DeviceManager';
 import PlayerService from './PlayerService';
 import { SyncDataType } from './DistributedDataService';
+import { Vod, Episode, VodCategory, VodTag } from '../../data/bean/Vod';
+import { LiveChannel, LiveGroup, EpgItem } from '../../data/bean/Live';
+import VodRepository from '../../data/repository/VodRepository';
+import LiveRepository from '../../data/repository/LiveRepository';
+import HistoryRepository from '../../data/repository/HistoryRepository';
+import CollectionRepository from '../../data/repository/CollectionRepository';
+import DeviceService from '../../service/device/DeviceService';
+import HttpService from '../../service/HttpService';
 
 // 常量定义
 const TAG = 'MediaService';
 
-// 媒体类型枚举
+// 媒体类型枚举 - 整合业务层和服务层的媒体类型定义
 export enum MediaType {
+  // 服务层媒体类型
   MOVIE = 'movie',
   TV_SERIES = 'tv_series',
   LIVE = 'live',
@@ -20,7 +29,11 @@ export enum MediaType {
   DOCUMENTARY = 'documentary',
   VARIETY = 'variety',
   SPORTS = 'sports',
-  OTHER = 'other'
+  OTHER = 'other',
+  
+  // 业务层媒体类型别名
+  VOD = 'vod',
+  EPISODE = 'episode'
 }
 
 // 媒体元数据接口
@@ -52,7 +65,7 @@ export interface MediaMetadata {
   updateTime: number;       // 更新时间
 }
 
-// 播放记录接口
+// 播放记录接口 - 整合服务层和业务层的播放记录定义
 export interface PlaybackRecord {
   mediaId: string;          // 媒体ID
   episodeId?: string;       // 剧集ID
@@ -61,6 +74,11 @@ export interface PlaybackRecord {
   playCount: number;        // 播放次数
   isFinished: boolean;      // 是否已播放完成
   deviceId?: string;        // 最后播放设备ID
+  totalDuration?: number;   // 总时长（业务层需要）
+  title?: string;           // 标题（业务层需要）
+  coverUrl?: string;        // 封面URL（业务层需要）
+  currentEpisode?: string;  // 当前剧集（业务层需要）
+  progress?: number;        // 进度百分比 0-100（业务层需要）
 }
 
 // 媒体播放进度接口
@@ -125,12 +143,55 @@ export enum MediaEvent {
 // 媒体事件监听回调类型
 type MediaEventListener = (event: MediaEvent, data: any) => void;
 
+// 播放选项接口（业务层需要）
+export interface PlayOptions {
+  autoPlay?: boolean;
+  startPosition?: number;
+  selectedEpisode?: string;
+  audioTrack?: string;
+  subtitleTrack?: string;
+  playbackRate?: number;
+  volume?: number;
+  muted?: boolean;
+  quality?: string;
+}
+
+// 搜索结果接口（业务层需要）
+export interface SearchResult {
+  vodItems: Vod[];
+  liveChannels: LiveChannel[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+// 推荐内容接口（业务层需要）
+export interface RecommendationResult {
+  featured: Vod[];
+  recentlyAdded: Vod[];
+  popular: Vod[];
+  continueWatching: PlaybackRecord[];
+  related: Vod[];
+}
+
 export default class MediaService {
   private static instance: MediaService;
+  // 服务层依赖
   private configService: ConfigService;
   private distributedDataService: DistributedDataService;
   private deviceManager: DeviceManager;
   private playerService: PlayerService;
+  
+  // 业务层依赖
+  private vodRepository: VodRepository;
+  private liveRepository: LiveRepository;
+  private historyRepository: HistoryRepository;
+  private collectionRepository: CollectionRepository;
+  private deviceService: DeviceService;
+  private httpService: HttpService;
+  
+  // 服务层状态
   private config: MediaServiceConfig = DEFAULT_MEDIA_SERVICE_CONFIG;
   private mediaMetadataCache: Map<string, MediaMetadata> = new Map();
   private playbackRecords: Map<string, PlaybackRecord> = new Map();
@@ -139,6 +200,10 @@ export default class MediaService {
   private eventListeners: Map<MediaEvent, MediaEventListener[]> = new Map();
   private progressSyncInterval: number | null = null;
   private isInitialized: boolean = false;
+  
+  // 业务层状态
+  private currentPlayingMedia: { id: string; type: MediaType } | null = null;
+  private playListeners: Array<(media: { id: string; type: MediaType }) => void> = [];
 
   /**
    * 获取单例实例
@@ -154,10 +219,19 @@ export default class MediaService {
    * 构造函数
    */
   private constructor() {
+    // 初始化服务层依赖
     this.configService = ConfigService.getInstance();
     this.distributedDataService = DistributedDataService.getInstance();
     this.deviceManager = DeviceManager.getInstance();
     this.playerService = PlayerService.getInstance();
+    
+    // 初始化业务层依赖
+    this.vodRepository = VodRepository.getInstance();
+    this.liveRepository = LiveRepository.getInstance();
+    this.historyRepository = HistoryRepository.getInstance();
+    this.collectionRepository = CollectionRepository.getInstance();
+    this.deviceService = DeviceService.getInstance();
+    this.httpService = HttpService.getInstance();
   }
 
   /**
@@ -193,6 +267,9 @@ export default class MediaService {
         this.startProgressSync();
       }
       
+      // 初始化业务层相关数据
+      await this.initializeBusinessLayer();
+      
       this.isInitialized = true;
       Logger.info(TAG, 'Media service initialized successfully');
     } catch (error) {
@@ -200,6 +277,222 @@ export default class MediaService {
       throw error;
     }
   }
+  
+  /**
+   * 初始化业务逻辑层
+   */
+  private async initializeBusinessLayer(): Promise<void> {
+    try {
+      Logger.info(TAG, 'Initializing business layer...');
+      
+      // 预加载常用数据
+      await this.preloadCommonData();
+      
+      Logger.info(TAG, 'Business layer initialized successfully');
+    } catch (error) {
+      Logger.error(TAG, `Failed to initialize business layer: ${JSON.stringify(error)}`);
+    }
+  }
+  
+  /**
+   * 预加载常用数据
+   */
+  private async preloadCommonData(): Promise<void> {
+    try {
+      // 预加载热门点播内容
+      await this.vodRepository.preloadPopularVods();
+      
+      // 预加载直播频道列表
+      await this.liveRepository.preloadLiveGroups();
+    } catch (error) {
+      Logger.warn(TAG, `Failed to preload common data: ${JSON.stringify(error)}`);
+    }
+  }
+  
+  /**
+   * 获取点播内容详情
+   */
+  public async getVodDetail(vodId: string): Promise<Vod | null> {
+    try {
+      const vod = await this.vodRepository.getVodById(vodId);
+      if (vod) {
+        // 记录访问
+        await this.vodRepository.incrementVodViewCount(vodId);
+        
+        // 预加载相关信息
+        await this.preloadVodRelatedContent(vodId);
+      }
+      return vod;
+    } catch (error) {
+      Logger.error(TAG, `Failed to get VOD detail for ID: ${vodId}`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * 获取直播频道详情
+   */
+  public async getLiveChannelDetail(channelId: string): Promise<LiveChannel | null> {
+    try {
+      const channel = await this.liveRepository.getChannelById(channelId);
+      if (channel) {
+        // 记录访问
+        await this.liveRepository.incrementChannelViewCount(channelId);
+      }
+      return channel;
+    } catch (error) {
+      Logger.error(TAG, `Failed to get live channel detail for ID: ${channelId}`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * 播放点播内容
+   */
+  public async playVod(vodId: string, options: PlayOptions = {}): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+      const vod = await this.getVodDetail(vodId);
+      if (!vod) {
+        return { success: false, error: 'Content not found' };
+      }
+
+      // 确定要播放的集数
+      let episodeToPlay: Episode | undefined;
+      if (options.selectedEpisode) {
+        episodeToPlay = vod.episodes.find(ep => ep.id === options.selectedEpisode);
+      } else if (options.currentEpisode) {
+        episodeToPlay = vod.episodes.find(ep => ep.id === options.currentEpisode);
+      } else {
+        // 获取最后观看的集数或第一集
+        const lastHistory = await this.historyRepository.getLastVodHistory(vodId);
+        if (lastHistory && lastHistory.episodeId) {
+          episodeToPlay = vod.episodes.find(ep => ep.id === lastHistory.episodeId);
+        }
+        if (!episodeToPlay && vod.episodes.length > 0) {
+          episodeToPlay = vod.episodes[0];
+        }
+      }
+
+      if (!episodeToPlay || !episodeToPlay.playUrl) {
+        return { success: false, error: 'No playable episode found' };
+      }
+
+      // 更新播放状态
+      this.currentPlayingMedia = { id: vodId, type: MediaType.VOD };
+      
+      // 通知播放开始
+      this.notifyPlayStarted({ id: vodId, type: MediaType.VOD });
+      
+      // 更新服务层播放状态
+      if (options.startPosition) {
+        await this.updatePlaybackPosition(vodId, options.startPosition, episodeToPlay.id);
+      }
+      
+      return { success: true, url: episodeToPlay.playUrl };
+    } catch (error) {
+      Logger.error(TAG, `Failed to play VOD: ${vodId}`, error);
+      return { success: false, error: 'Failed to start playback' };
+    }
+  }
+  
+  /**
+   * 播放直播频道
+   */
+  public async playLiveChannel(channelId: string, options: PlayOptions = {}): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+      const channel = await this.getLiveChannelDetail(channelId);
+      if (!channel || !channel.playUrl) {
+        return { success: false, error: 'Channel not found or no playback URL' };
+      }
+
+      // 更新播放状态
+      this.currentPlayingMedia = { id: channelId, type: MediaType.LIVE };
+      
+      // 更新直播观看历史
+      await this.historyRepository.saveLiveHistory({
+        channelId: channel.id,
+        channelName: channel.name,
+        channelLogo: channel.logo,
+        playUrl: channel.playUrl,
+        groupId: channel.groupId,
+        groupName: channel.groupName || '',
+        watchTime: Date.now()
+      });
+      
+      // 通知播放开始
+      this.notifyPlayStarted({ id: channelId, type: MediaType.LIVE });
+      
+      return { success: true, url: channel.playUrl };
+    } catch (error) {
+      Logger.error(TAG, `Failed to play live channel: ${channelId}`, error);
+      return { success: false, error: 'Failed to start live playback' };
+    }
+  }
+  
+  /**
+   * 预加载点播相关内容
+   */
+  private async preloadVodRelatedContent(vodId: string): Promise<void> {
+    try {
+      // 异步预加载相关内容，不阻塞主流程
+      const relatedTask = this.vodRepository.getRelatedVods(vodId, 10);
+      relatedTask.catch(error => {
+        Logger.warn(TAG, `Failed to preload related VODs for ${vodId}: ${JSON.stringify(error)}`);
+      });
+    } catch (error) {
+      Logger.warn(TAG, `Failed to schedule preload for VOD ${vodId}: ${JSON.stringify(error)}`);
+    }
+  }
+  
+  /**
+   * 通知播放开始
+   */
+  private notifyPlayStarted(media: { id: string; type: MediaType }): void {
+    this.playListeners.forEach(listener => {
+      try {
+        listener(media);
+      } catch (error) {
+        Logger.error(TAG, `Error in play listener: ${JSON.stringify(error)}`);
+      }
+    });
+    
+    // 同时触发服务层媒体事件
+    const mediaEvent = media.type === MediaType.LIVE ? MediaEvent.PLAYBACK_STARTED : MediaEvent.PLAYBACK_STARTED;
+    this.notifyEvent(mediaEvent, media);
+  }
+  
+  /**
+   * 添加播放监听器
+   */
+  public addPlayListener(listener: (media: { id: string; type: MediaType }) => void): void {
+    this.playListeners.push(listener);
+  }
+  
+  /**
+   * 移除播放监听器
+   */
+  public removePlayListener(listener: (media: { id: string; type: MediaType }) => void): void {
+    const index = this.playListeners.indexOf(listener);
+    if (index > -1) {
+      this.playListeners.splice(index, 1);
+    }
+  }
+  
+  /**
+   * 获取当前播放的媒体
+   */
+  public getCurrentPlayingMedia(): { id: string; type: MediaType } | null {
+    return this.currentPlayingMedia;
+  }
+  
+  /**
+   * 停止播放
+   */
+  public stopPlayback(): void {
+    this.currentPlayingMedia = null;
+    // 可以在这里调用playerService停止播放
+  }
+}
 
   /**
    * 加载配置

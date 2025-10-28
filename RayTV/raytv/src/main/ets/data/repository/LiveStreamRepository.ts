@@ -2,9 +2,9 @@
 // 负责管理直播流相关数据，包括直播列表、直播详情、关注、观看统计等
 
 import Logger from '../../common/util/Logger';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { NetworkUtil } from '../../utils/NetworkUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
+import StorageUtil from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
 import CacheService from '../../service/cache/CacheService';
 import {
   VideoType,

@@ -2,9 +2,9 @@
 // 负责管理本地文件和存储相关操作，提供统一的数据访问接口
 
 import Logger from '../../common/util/Logger';
-import { FileUtil } from '../../utils/FileUtil';
-import { StorageUtil } from '../../utils/StorageUtil';
-import { EventBusUtil } from '../../utils/EventBusUtil';
+import FileUtil from '../../common/util/FileUtil';
+import StorageUtil from '../../common/util/StorageUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
 import {
   LocalStorageType,
   LocalFileType,
