@@ -1,5 +1,6 @@
 // TaskPoolManager - 任务池管理器
 import Logger from '../../common/util/Logger';
+import taskPool from '@ohos.taskpool';
 
 const TAG = 'TaskPoolManager';
 
@@ -97,6 +98,25 @@ export class TaskPoolManager {
 
     // 开始处理队列
     this.processQueue();
+  }
+  
+  /**
+   * 将自定义优先级转换为TaskPool优先级
+   * @param priority 自定义优先级
+   * @returns taskPool.Priority 对应的TaskPool优先级
+   */
+  private getTaskPoolPriority(priority: TaskPriority): taskPool.Priority {
+    switch (priority) {
+      case TaskPriority.HIGH:
+      case TaskPriority.CRITICAL:
+        return taskPool.Priority.HIGH;
+      case TaskPriority.NORMAL:
+        return taskPool.Priority.MEDIUM;
+      case TaskPriority.LOW:
+        return taskPool.Priority.LOW;
+      default:
+        return taskPool.Priority.MEDIUM;
+    }
   }
 
   /**
@@ -255,8 +275,20 @@ export class TaskPoolManager {
     Logger.debug(TAG, `Task ${task.id} started execution`);
 
     try {
-      // 执行任务
-      const result = await task.execute();
+      // 使用TaskPool执行任务，实现真正的系统级并发
+      // 为任务创建Task对象，以便在单独线程中执行
+      const taskFunction = async () => {
+        return await task.execute();
+      };
+
+      // 设置任务优先级
+      const priority = this.getTaskPoolPriority(task.priority);
+      const taskOptions: taskPool.TaskOptions = {
+        priority
+      };
+
+      // 使用taskPool.execute执行任务
+      const result = await taskPool.execute(taskFunction, taskOptions);
       
       // 处理完成
       this.handleTaskComplete(task, result);

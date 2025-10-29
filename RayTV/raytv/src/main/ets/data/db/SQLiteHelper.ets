@@ -1,7 +1,7 @@
 // SQLiteHelper.ets - SQLite数据库操作辅助类
 // 提供基本的CRUD操作和SQL查询构建功能
 
-import relationalStore from '@ohos.data.relationalStore';
+import relationalStore from '@kit.RelationalStore';
 import { DatabaseManager } from './DatabaseManager';
 import Logger from '../../common/util/Logger';
 

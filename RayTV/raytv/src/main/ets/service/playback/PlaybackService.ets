@@ -7,6 +7,7 @@ import HistoryManager from './HistoryManager';
 import { AVPlay } from '@ohos.multimedia.media';
 import { AudioManager, AudioRendererInfo } from '@ohos.multimedia.audio';
 import { BusinessError } from '@ohos.base';
+import DeviceInfoRepository from '../../data/repository/DeviceInfoRepository';
 
 // 常量定义
 const TAG = 'PlaybackService';
@@ -189,7 +190,9 @@ export default class PlaybackService {
   private static instance: PlaybackService;
   private configService: ConfigService;
   private historyManager: HistoryManager;
+  private deviceInfoRepository: DeviceInfoRepository;
   private config: PlaybackConfig = DEFAULT_PLAYBACK_CONFIG;
+  private retryCount: number = 0; // 错误重试计数
   private avPlayInstance: AVPlay | null = null;
   private currentPlaybackItem: PlaybackItem | null = null;
   private playbackQueue: PlaybackItem[] = [];
@@ -231,6 +234,7 @@ export default class PlaybackService {
   private constructor() {
     this.configService = ConfigService.getInstance();
     this.historyManager = HistoryManager.getInstance();
+    this.deviceInfoRepository = DeviceInfoRepository.getInstance();
   }
 
   /**
@@ -338,10 +342,8 @@ export default class PlaybackService {
       await this.avPlayInstance.setAutoPlay(this.config.autoPlay);
       await this.avPlayInstance.setLoop(false);
       
-      // 设置解码模式
-      if (this.config.enableHardwareDecoding) {
-        await this.avPlayInstance.setParameter('videoDecodingMode', 'hardware');
-      }
+      // 根据设备能力设置最佳解码模式
+      await this.setupOptimalDecodingMode();
       
       // 设置缓冲大小
       await this.avPlayInstance.setParameter('cacheSize', this.config.bufferSize.toString());
@@ -362,6 +364,42 @@ export default class PlaybackService {
       throw error;
     }
   }
+  
+  /**
+   * 根据设备能力设置最佳解码模式
+   */
+  private async setupOptimalDecodingMode(): Promise<void> {
+    if (!this.avPlayInstance) return;
+    
+    try {
+      // 检查设备是否支持硬件解码
+      if (this.config.enableHardwareDecoding) {
+        try {
+          // 先尝试硬件解码
+          await this.avPlayInstance.setParameter('videoDecodingMode', 'hardware');
+          Logger.info(TAG, 'Hardware decoding enabled');
+        } catch (error) {
+          // 硬件解码失败，回退到软件解码
+          Logger.warn(TAG, 'Hardware decoding not supported, falling back to software decoding');
+          await this.avPlayInstance.setParameter('videoDecodingMode', 'software');
+          // 更新配置，避免下次再次尝试失败的解码模式
+          this.config.enableHardwareDecoding = false;
+        }
+      } else {
+        // 直接使用软件解码
+        await this.avPlayInstance.setParameter('videoDecodingMode', 'software');
+        Logger.info(TAG, 'Software decoding enabled');
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to setup decoding mode: ${error}`);
+      // 确保至少设置为软件解码
+      try {
+        await this.avPlayInstance.setParameter('videoDecodingMode', 'software');
+      } catch (fallbackError) {
+        Logger.error(TAG, `Failed to fallback to software decoding: ${fallbackError}`);
+      }
+    }
+  }
 
   /**
    * 设置事件监听器
@@ -377,8 +415,8 @@ export default class PlaybackService {
     });
 
     // 错误事件
-    this.avPlayInstance.on('error', (error: BusinessError) => {
-      this.handlePlaybackError(error);
+    this.avPlayInstance.on('error', async (error: BusinessError) => {
+      await this.handlePlaybackError(error);
     });
 
     // 缓冲进度事件
@@ -436,19 +474,259 @@ export default class PlaybackService {
   /**
    * 处理播放错误
    */
-  private handlePlaybackError(error: BusinessError): void {
+  private async handlePlaybackError(error: BusinessError): Promise<void> {
+    Logger.error(TAG, `Playback error occurred: ${JSON.stringify(error)}`);
+    
+    // 识别错误类型
+    const errorType = this.determineErrorType(error);
+    
     const playbackError: PlaybackError = {
       code: error.code || -1,
-      message: error.message || 'Unknown playback error',
-      type: this.determineErrorType(error.code),
+      message: error.message || 'Unknown error',
+      type: errorType,
       details: error
     };
     
-    this.updatePlaybackState(PlaybackState.ERROR);
+    // 通知错误监听器
     this.notifyErrorListeners(playbackError);
     
-    // 尝试重试
-    this.handlePlaybackRetry(playbackError);
+    // 更新播放状态
+    this.updatePlaybackState(PlaybackState.ERROR);
+    
+    // 尝试自动恢复
+    if (await this.attemptErrorRecovery(errorType)) {
+      Logger.info(TAG, 'Successfully recovered from playback error');
+    } else {
+      Logger.warn(TAG, 'Failed to recover from playback error, giving up');
+      // 保存播放位置以便后续恢复
+      await this.savePlaybackPosition();
+    }
+  }
+  
+  /**
+   * 确定错误类型
+   */
+  private determineErrorType(error: BusinessError): PlaybackErrorType {
+    const errorCode = error.code || 0;
+    const errorMessage = (error.message || '').toLowerCase();
+    
+    // 基于错误码和错误信息确定错误类型
+    if (errorMessage.includes('network') || errorMessage.includes('connect') || errorMessage.includes('timeout')) {
+      return PlaybackErrorType.NETWORK;
+    } else if (errorMessage.includes('decode') || errorMessage.includes('codec') || errorMessage.includes('format')) {
+      return PlaybackErrorType.DECODE;
+    } else if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
+      return PlaybackErrorType.PERMISSION;
+    } else if (errorMessage.includes('resource') || errorMessage.includes('not found')) {
+      return PlaybackErrorType.RESOURCE;
+    } else if (errorMessage.includes('timeout')) {
+      return PlaybackErrorType.TIMEOUT;
+    } else if (errorMessage.includes('drm')) {
+      return PlaybackErrorType.DRM;
+    } else {
+      return PlaybackErrorType.UNKNOWN;
+    }
+  }
+  
+  /**
+   * 尝试错误恢复
+   */
+  private async attemptErrorRecovery(errorType: PlaybackErrorType): Promise<boolean> {
+    // 检查重试次数是否超限
+    if (this.retryCount >= MAX_RETRY_COUNT) {
+      Logger.warn(TAG, `Max retry count (${MAX_RETRY_COUNT}) reached`);
+      return false;
+    }
+    
+    // 增加重试计数
+    this.retryCount++;
+    Logger.info(TAG, `Attempting to recover from error, retry ${this.retryCount}/${MAX_RETRY_COUNT}`);
+    
+    try {
+      // 等待一段时间再重试
+      await new Promise(resolve => setTimeout(resolve, MIN_RETRY_INTERVAL * this.retryCount));
+      
+      switch (errorType) {
+        case PlaybackErrorType.NETWORK:
+          // 网络错误：重新加载媒体
+          return await this.recoverFromNetworkError();
+          
+        case PlaybackErrorType.DECODE:
+          // 解码错误：切换解码模式后重新加载
+          return await this.recoverFromDecodeError();
+          
+        case PlaybackErrorType.TIMEOUT:
+          // 超时错误：重新连接
+          return await this.recoverFromTimeoutError();
+          
+        default:
+          // 其他错误：尝试重新加载
+          return await this.recoverFromGenericError();
+      }
+    } catch (error) {
+      Logger.error(TAG, `Recovery attempt failed: ${error}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 从网络错误恢复
+   */
+  private async recoverFromNetworkError(): Promise<boolean> {
+    if (!this.currentPlaybackItem) return false;
+    
+    try {
+      Logger.info(TAG, 'Recovering from network error');
+      // 重新创建播放实例
+      await this.createAVPlayInstance();
+      if (!this.avPlayInstance) return false;
+      
+      // 重新设置数据源
+      await this.avPlayInstance.setSource(this.currentPlaybackItem.url);
+      await this.avPlayInstance.prepare();
+      
+      // 恢复到上次播放位置
+      if (this.lastPosition > 0) {
+        await this.avPlayInstance.seekTo(this.lastPosition);
+      }
+      
+      // 恢复播放
+      if (this.config.autoPlay) {
+        await this.avPlayInstance.play();
+        this.updatePlaybackState(PlaybackState.PLAYING);
+      }
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to recover from network error: ${error}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 从解码错误恢复
+   */
+  private async recoverFromDecodeError(): Promise<boolean> {
+    if (!this.currentPlaybackItem) return false;
+    
+    try {
+      Logger.info(TAG, 'Recovering from decode error');
+      
+      // 如果当前使用硬件解码，尝试切换到软件解码
+      if (this.config.enableHardwareDecoding) {
+        Logger.info(TAG, 'Switching from hardware to software decoding');
+        this.config.enableHardwareDecoding = false;
+        
+        // 重新创建播放实例
+        await this.createAVPlayInstance();
+        if (!this.avPlayInstance) return false;
+        
+        // 重新设置数据源
+        await this.avPlayInstance.setSource(this.currentPlaybackItem.url);
+        await this.avPlayInstance.prepare();
+        
+        // 恢复到上次播放位置
+        if (this.lastPosition > 0) {
+          await this.avPlayInstance.seekTo(this.lastPosition);
+        }
+        
+        // 恢复播放
+        if (this.config.autoPlay) {
+          await this.avPlayInstance.play();
+          this.updatePlaybackState(PlaybackState.PLAYING);
+        }
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      Logger.error(TAG, `Failed to recover from decode error: ${error}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 从超时错误恢复
+   */
+  private async recoverFromTimeoutError(): Promise<boolean> {
+    // 超时错误处理，类似于网络错误
+    return await this.recoverFromNetworkError();
+  }
+  
+  /**
+   * 从一般错误恢复
+   */
+  private async recoverFromGenericError(): Promise<boolean> {
+    if (!this.currentPlaybackItem) return false;
+    
+    try {
+      Logger.info(TAG, 'Attempting generic error recovery');
+      // 释放并重新创建播放实例
+      await this.releaseAVPlayInstance();
+      await this.createAVPlayInstance();
+      
+      if (!this.avPlayInstance) return false;
+      
+      // 重新加载当前播放项
+      await this.load(this.currentPlaybackItem, this.lastPosition);
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Generic error recovery failed: ${error}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 优化播放质量
+   */
+  public async optimizePlaybackQuality(): Promise<void> {
+    try {
+      // 获取设备能力
+      const capabilities = await this.deviceInfoRepository.getDeviceCapabilities();
+      
+      if (!capabilities || !this.avPlayInstance) return;
+      
+      // 根据设备能力调整播放参数
+      Logger.info(TAG, 'Optimizing playback quality based on device capabilities');
+      
+      // 可以在这里添加更多的质量优化逻辑
+      // 例如根据网络状况调整缓冲大小
+      // 根据设备性能调整解码参数等
+    } catch (error) {
+      Logger.error(TAG, `Failed to optimize playback quality: ${error}`);
+    }
+  }
+  
+  /**
+   * 保存播放位置
+   */
+  private async savePlaybackPosition(): Promise<void> {
+    try {
+      if (!this.currentPlaybackItem || !this.avPlayInstance) return;
+      
+      // 获取当前播放位置
+      const position = await this.avPlayInstance.getCurrentTime();
+      this.lastPosition = position;
+      
+      // 更新当前播放项的位置
+      this.currentPlaybackItem.position = position;
+      
+      // 保存到历史记录
+      if (this.historyManager) {
+        await this.historyManager.savePlaybackHistory({
+          id: this.currentPlaybackItem.id,
+          title: this.currentPlaybackItem.title,
+          url: this.currentPlaybackItem.url,
+          duration: this.currentPlaybackItem.duration,
+          position: position,
+          lastPlayed: new Date().getTime()
+        });
+        Logger.info(TAG, `Saved playback position for ${this.currentPlaybackItem.id}: ${position}ms`);
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to save playback position: ${error}`);
+    }
   }
 
   /**

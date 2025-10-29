@@ -22,7 +22,7 @@ if ($args[0] -eq "build") {
 {
   "app": {
     "bundleName": "com.raytv.app",
-    "vendor": "example",
+    "vendor": "Ray",
     "versionCode": 1000000,
     "versionName": "1.0.0"
   },

@@ -1,4 +1,4 @@
-import relationalStore from '@ohos.data.relationalStore';
+import relationalStore from '@kit.RelationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { KEEP_TABLE } from '../TableSchema';
 import Logger from '../../../common/util/Logger';

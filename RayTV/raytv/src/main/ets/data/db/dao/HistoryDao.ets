@@ -1,4 +1,4 @@
-import relationalStore from '@ohos.data.relationalStore';
+import relationalStore from '@kit.RelationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { HISTORY_TABLE } from '../TableSchema';
 import { History, HistoryType, ContentType, PlaybackStatus } from '../../bean/History';

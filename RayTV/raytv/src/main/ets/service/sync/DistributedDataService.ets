@@ -436,9 +436,75 @@ export default class DistributedDataService {
    * 同步特定数据类型
    */
   private async syncDataType(dataType: SyncDataType, deviceIds: string[]): Promise<void> {
-    // TODO: 实现具体的数据同步逻辑
-    // 这里需要根据不同的数据类型实现相应的同步策略
-    Logger.debug(TAG, `Syncing data type: ${dataType}`);
+    if (!this.kvStore) {
+      return;
+    }
+
+    Logger.debug(TAG, `Syncing data type: ${dataType} with ${deviceIds.length} devices`);
+    const keyPrefix = `${dataType}_`;
+
+    try {
+      // 获取所有匹配前缀的键
+      const keys = await this.getAllKeysWithPrefix(keyPrefix);
+      Logger.debug(TAG, `Found ${keys.length} keys for data type ${dataType}`);
+
+      for (const fullKey of keys) {
+        // 获取本地数据
+        const localData = await this.kvStore.get(fullKey);
+        if (!localData) continue;
+
+        // 与每个设备的数据进行同步
+        for (const deviceId of deviceIds) {
+          try {
+            // 获取远程设备的数据
+            const remoteData = await this.kvStore.get(fullKey, deviceId);
+
+            if (!remoteData) {
+              // 远程没有数据，直接同步过去
+              await this.kvStore.set(fullKey, localData, deviceId);
+              Logger.debug(TAG, `Synced ${fullKey} to device ${deviceId}`);
+            } else if (remoteData.timestamp !== localData.timestamp) {
+              // 数据不同，需要解决冲突
+              const resolvedData = this.resolveConflict(localData, remoteData);
+              
+              // 更新本地和远程数据
+              if (JSON.stringify(resolvedData) !== JSON.stringify(localData)) {
+                await this.kvStore.set(fullKey, resolvedData);
+              }
+              
+              if (JSON.stringify(resolvedData) !== JSON.stringify(remoteData)) {
+                await this.kvStore.set(fullKey, resolvedData, deviceId);
+              }
+              
+              Logger.debug(TAG, `Resolved conflict for ${fullKey} with device ${deviceId}`);
+            }
+          } catch (error) {
+            Logger.error(TAG, `Failed to sync ${fullKey} with device ${deviceId}: ${error}`);
+            // 继续处理其他设备
+          }
+        }
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取所有匹配前缀的键
+   */
+  private async getAllKeysWithPrefix(prefix: string): Promise<string[]> {
+    if (!this.kvStore) {
+      return [];
+    }
+
+    try {
+      const allKeys = await this.kvStore.getAllKeys();
+      return allKeys.filter(key => key.startsWith(prefix));
+    } catch (error) {
+      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}`);
+      return [];
+    }
   }
 
   /**
@@ -461,20 +527,94 @@ export default class DistributedDataService {
   }
 
   /**
-   * 合并数据（简单实现，需要根据具体数据类型优化）
+   * 合并数据（根据不同数据类型实现智能合并策略）
    */
   private mergeData(localData: any, remoteData: any): any {
-    // 基础合并逻辑，实际应用中需要根据不同数据类型实现更复杂的合并策略
-    if (typeof localData === 'object' && typeof remoteData === 'object') {
-      const merged = { ...localData };
-      for (const key in remoteData) {
-        if (remoteData.hasOwnProperty(key)) {
-          merged[key] = remoteData[key];
+    // 确保输入是对象
+    if (typeof localData !== 'object' || localData === null) {
+      return remoteData;
+    }
+    if (typeof remoteData !== 'object' || remoteData === null) {
+      return localData;
+    }
+
+    // 创建合并结果对象
+    const merged = { ...localData };
+    
+    // 根据数据类型实现不同的合并策略
+    for (const key in remoteData) {
+      if (remoteData.hasOwnProperty(key)) {
+        // 跳过时间戳和设备ID，这些不应被合并
+        if (key === 'timestamp' || key === 'deviceId') {
+          continue;
+        }
+
+        // 获取数据类型
+        const keyPrefix = key.split('_')[0];
+        
+        switch (keyPrefix) {
+          case SyncDataType.HISTORY:
+            // 历史记录合并：保留最新的观看记录
+            if (remoteData[key] && localData[key]) {
+              merged[key] = {
+                ...remoteData[key],
+                // 保留本地数据中可能存在的额外字段
+                ...localData[key],
+                // 但使用最新的时间戳
+                lastWatched: Math.max(remoteData[key].lastWatched || 0, localData[key].lastWatched || 0)
+              };
+            } else {
+              merged[key] = remoteData[key] || localData[key];
+            }
+            break;
+            
+          case SyncDataType.FAVORITES:
+            // 收藏合并：合并两个列表
+            if (Array.isArray(localData[key]) && Array.isArray(remoteData[key])) {
+              // 创建一个集合以避免重复
+              const mergedSet = new Set([...localData[key], ...remoteData[key]]);
+              merged[key] = Array.from(mergedSet);
+            } else {
+              merged[key] = remoteData[key] || localData[key];
+            }
+            break;
+            
+          case SyncDataType.PLAYBACK_PROGRESS:
+            // 播放进度合并：保留最新的进度
+            if (remoteData[key] && localData[key]) {
+              const remoteProgress = remoteData[key].progress || 0;
+              const localProgress = localData[key].progress || 0;
+              
+              if (remoteProgress > localProgress) {
+                merged[key] = remoteData[key];
+              } else {
+                merged[key] = localData[key];
+              }
+            } else {
+              merged[key] = remoteData[key] || localData[key];
+            }
+            break;
+            
+          default:
+            // 默认策略：如果两个都是对象，递归合并
+            if (typeof localData[key] === 'object' && 
+                typeof remoteData[key] === 'object' && 
+                !Array.isArray(localData[key]) && 
+                !Array.isArray(remoteData[key])) {
+              merged[key] = this.mergeData(localData[key], remoteData[key]);
+            } else {
+              // 对于数组和基本类型，使用远程数据
+              merged[key] = remoteData[key];
+            }
         }
       }
-      return merged;
     }
-    return localData;
+    
+    // 更新合并后的时间戳和设备ID
+    merged.timestamp = Date.now();
+    merged.deviceId = distributedData.getLocalDeviceId();
+    
+    return merged;
   }
 
   /**

@@ -1,4 +1,4 @@
-import relationalStore from '@ohos.data.relationalStore';
+import relationalStore from '@kit.RelationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { SITE_TABLE } from '../TableSchema';
 import { Site, SiteType, LoaderType } from '../../bean/Site';

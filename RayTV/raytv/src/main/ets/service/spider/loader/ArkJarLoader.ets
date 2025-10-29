@@ -5,6 +5,8 @@ import HttpService from '../../http/HttpService';
 import { fileio } from '@ohos.fileio';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
+import sandbox from '@ohos.sandbox';
+import { BusinessError } from '@ohos.base';
 
 /**
  * JAR加载器配置
@@ -29,6 +31,7 @@ export class ArkJarLoader extends BaseLoader {
   private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
   private sandboxId: string = '';
+  private sandboxFs: any = null;
   private jarLoaded: boolean = false;
   private methodExecutedCount: number = 0;
   private lastMemoryCheckTime: number = 0;
@@ -193,20 +196,35 @@ export class ArkJarLoader extends BaseLoader {
     }
     
     try {
-      // 创建隔离的沙箱目录
-      const sandboxPath = this.getSandboxPath();
+      Logger.info(this.TAG, 'Creating true sandbox environment using @ohos.sandbox API');
       
-      // 检查并创建沙箱目录
-      if (!this.fsManager.existsSync(sandboxPath)) {
-        this.fsManager.mkdirSync(sandboxPath, { recursive: true });
-        Logger.info(this.TAG, `Created security sandbox at: ${sandboxPath}`);
-      }
+      // 使用@ohos.sandbox API创建真正的安全沙箱
+      this.sandboxId = await sandbox.createSandbox({ 
+        name: `raytv_jar_${this.site.key}`,
+        // 设置最小权限原则
+        permissions: [
+          'file.read',   // 只允许读取文件
+          'network.http'  // 只允许HTTP请求
+        ],
+        // 资源限制
+        resourceLimits: {
+          memoryLimitMB: this.loaderConfig.maxMemory || 256,
+          cpuLimitPercent: 30,  // 限制CPU使用率
+          diskQuotaMB: 512     // 限制磁盘使用
+        }
+      });
       
-      // 设置沙箱权限（只读模式）
-      // 这里需要根据HarmonyOS提供的API进行实际实现
+      Logger.info(this.TAG, `Created true security sandbox with ID: ${this.sandboxId}`);
+      
+      // 获取沙箱内的文件系统访问器
+      this.sandboxFs = await sandbox.getSandboxFileSystem(this.sandboxId);
+      
+      // 创建沙箱内目录结构
+      await this.sandboxFs.mkdir('/jar', { recursive: true });
+      await this.sandboxFs.mkdir('/temp', { recursive: true });
       
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create security sandbox: ${error}`);
+      Logger.error(this.TAG, `Failed to create true security sandbox: ${error}`);
       throw error;
     }
   }
@@ -350,20 +368,22 @@ export class ArkJarLoader extends BaseLoader {
    * @private
    */
   private async destroySecuritySandbox(): Promise<void> {
-    if (!this.loaderConfig.sandboxEnabled) {
+    if (!this.loaderConfig.sandboxEnabled || !this.sandboxId) {
       return;
     }
     
     try {
-      const sandboxPath = this.getSandboxPath();
+      Logger.info(this.TAG, `Destroying true security sandbox: ${this.sandboxId}`);
       
-      if (this.fsManager.existsSync(sandboxPath)) {
-        // 删除沙箱目录
-        this.fsManager.rmdirSync(sandboxPath, { recursive: true });
-        Logger.info(this.TAG, `Destroyed security sandbox: ${sandboxPath}`);
-      }
+      // 使用@ohos.sandbox API销毁沙箱，会自动清理所有资源
+      await sandbox.destroySandbox(this.sandboxId);
+      
+      this.sandboxId = '';
+      this.sandboxFs = null;
+      
+      Logger.info(this.TAG, 'True security sandbox destroyed successfully');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to destroy security sandbox: ${error}`);
+      Logger.error(this.TAG, `Failed to destroy true security sandbox: ${error}`);
     }
   }
 

@@ -1,4 +1,4 @@
-import relationalStore from '@ohos.data.relationalStore';
+import relationalStore from '@kit.dataStorage';
 import { DatabaseManager } from '../DatabaseManager';
 import { CONFIG_TABLE } from '../TableSchema';
 import { AppConfig, PlayerConfig, DisplayConfig, NetworkConfig, SecurityConfig, AdBlockConfig, HarmonyConfig, SearchConfig, DownloadConfig, SyncConfig, LogConfig } from '../../bean/Config';

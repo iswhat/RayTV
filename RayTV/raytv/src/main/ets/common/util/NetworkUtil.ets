@@ -1,6 +1,11 @@
 // NetworkUtil - 网络请求和连接管理工具类
 import Logger from './Logger';
 import AppConstant from '../constant/AppConstant';
+import http from '@ohos.net.http';
+import connection from '@ohos.net.connection';
+import { BusinessError } from '@ohos.base';
+import { fileIO } from '@ohos.file.fs';
+import { CacheManager } from '../../service/spider/CacheManager';
 
 const TAG = 'NetworkUtil';
 
@@ -34,6 +39,8 @@ export interface Response<T = any> {
 export default class NetworkUtil {
   private static readonly DEFAULT_TIMEOUT = 30000;
   private static readonly MAX_RETRY_COUNT = 3;
+  private static networkStatusListeners: Set<(isOnline: boolean, networkType: string) => void> = new Set();
+  private static isInitialized: boolean = false;
 
   /**
    * 发送HTTP请求
@@ -60,83 +67,78 @@ export default class NetworkUtil {
         fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
       }
 
-      // 构建请求选项
-      const requestOptions: RequestInit = {
+      Logger.info(TAG, `Sending ${method} request to ${fullUrl}`);
+
+      // 创建HTTP请求
+      const httpRequest = http.createHttp();
+      
+      // 设置请求选项
+      const httpOptions: http.HttpRequestOptions = {
         method,
-        headers: {
+        header: {
           'Content-Type': 'application/json',
           ...headers
         },
-        timeout
+        connectTimeout: timeout,
+        readTimeout: timeout
       };
 
       // 添加请求体
       if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
-        requestOptions.body = JSON.stringify(data);
+        httpOptions.extraData = JSON.stringify(data);
       }
 
-      Logger.info(TAG, `Sending ${method} request to ${fullUrl}`);
-
-      // 发送请求
-      const controller = new AbortController();
-      requestOptions.signal = controller.signal;
-      
-      // 设置超时
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-      
       try {
-        const response = await fetch(fullUrl, requestOptions);
-        clearTimeout(timeoutId);
-
+        // 发送请求
+        const response = await httpRequest.request(fullUrl, httpOptions);
+        
         // 读取响应数据
-        let responseData: any;
-        switch (responseType) {
-          case 'json':
-            responseData = await response.json();
-            break;
-          case 'arraybuffer':
-            responseData = await response.arrayBuffer();
-            break;
-          default:
-            responseData = await response.text();
+        let responseData: any = response.result;
+        
+        // 处理不同响应类型
+        if (responseType === 'json' && typeof responseData === 'string') {
+          try {
+            responseData = JSON.parse(responseData);
+          } catch (parseError) {
+            Logger.error(TAG, 'Failed to parse JSON response', parseError);
+          }
         }
 
-        // 提取响应头
+        // 构建响应头
         const responseHeaders: Record<string, string> = {};
-        response.headers.forEach((value, key) => {
-          responseHeaders[key] = value;
-        });
+        if (response.header) {
+          Object.keys(response.header).forEach(key => {
+            responseHeaders[key] = String(response.header![key]);
+          });
+        }
 
-        const result: Response<T> = {
-          status: response.status,
-          statusText: response.statusText,
+        // 检查状态码
+        if (response.responseCode < 200 || response.responseCode >= 300) {
+          throw new Error(`HTTP error! status: ${response.responseCode}`);
+        }
+
+        return {
+          status: response.responseCode,
+          statusText: String(response.responseCode),
           data: responseData,
           headers: responseHeaders
         };
-
-        // 检查响应状态
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        Logger.info(TAG, `Request to ${fullUrl} succeeded with status ${response.status}`);
-        return result;
       } catch (error) {
-        clearTimeout(timeoutId);
+        // 重试逻辑
+        if (retryCount < this.MAX_RETRY_COUNT && this.isRetryableError(error)) {
+          Logger.warn(TAG, `Request failed, retrying (${retryCount + 1}/${this.MAX_RETRY_COUNT})`, error);
+          // 指数退避策略
+          const delay = Math.pow(2, retryCount) * 1000;
+          await this.sleep(delay);
+          return this.request(config, retryCount + 1);
+        }
         throw error;
+      } finally {
+        // 销毁HTTP请求
+        httpRequest.destroy();
       }
     } catch (error) {
-      Logger.error(TAG, `Request failed: ${error}`);
-      
-      // 重试逻辑
-      if (retryCount < this.MAX_RETRY_COUNT && this.isRetryableError(error)) {
-        const delay = Math.pow(2, retryCount) * 1000; // 指数退避
-        Logger.info(TAG, `Retrying request in ${delay}ms (${retryCount + 1}/${this.MAX_RETRY_COUNT})`);
-        
-        await this.sleep(delay);
-        return this.request<T>(config, retryCount + 1);
-      }
-      
+      Logger.error(TAG, `Request error: ${error}`, error);
       throw error;
     }
   }
@@ -235,10 +237,15 @@ export default class NetworkUtil {
   /**
    * 延时函数
    * @param ms 延时毫秒数
-   * @returns Promise
+   * @returns Promise<void>
    */
   private static sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    // 使用Promise包装setTimeout，这在HarmonyOS中是兼容的
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, ms);
+    });
   }
 
   /**
@@ -247,58 +254,210 @@ export default class NetworkUtil {
    */
   public static async checkNetworkStatus(): Promise<boolean> {
     try {
-      // 使用navigator.onLine检查网络连接
-      if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
-        return navigator.onLine;
-      }
-      
-      // 备用检查方法：尝试访问可靠的域名
-      const response = await fetch(AppConstant.NETWORK_CHECK_URL, {
-        method: 'HEAD',
-        cache: 'no-cache',
-        timeout: 3000
-      });
-      return response.ok;
+      // 使用HarmonyOS原生API检查网络状态
+      const netStatus = await connection.getStatus();
+      return netStatus.isInternetAvailable;
     } catch (error) {
       Logger.warn(TAG, 'Network check failed:', error);
-      return false;
+      // 备用方法：使用HTTP请求检查
+      try {
+        const httpRequest = http.createHttp();
+        const response = await httpRequest.request(AppConstant.NETWORK_CHECK_URL, {
+          method: 'HEAD',
+          connectTimeout: 3000,
+          readTimeout: 3000
+        });
+        httpRequest.destroy();
+        return response.responseCode >= 200 && response.responseCode < 300;
+      } catch (httpError) {
+        Logger.warn(TAG, 'HTTP network check failed:', httpError);
+        return false;
+      }
     }
   }
 
   /**
    * 下载文件
    * @param url 文件URL
-   * @param filename 文件名
+   * @param savePath 保存路径
+   * @param options 下载选项
    * @returns Promise<void>
    */
-  public static async downloadFile(url: string, filename?: string): Promise<void> {
+  public static async downloadFile(url: string, savePath: string, options?: {
+    headers?: Record<string, string>;
+    timeout?: number;
+    onProgress?: (receivedSize: number, totalSize: number) => void;
+  }): Promise<void> {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Download failed with status ${response.status}`);
+      // 创建HTTP请求
+      const httpRequest = http.createHttp();
+      const downloadOptions: http.HttpRequestOptions = {
+        method: 'GET',
+        header: options?.headers || {},
+        responseType: http.HttpResponseType.ARRAY_BUFFER,
+        connectTimeout: options?.timeout || 60000,
+        readTimeout: options?.timeout || 60000
+      };
+
+      // 发送下载请求
+      const response = await httpRequest.request(url, downloadOptions);
+      
+      // 检查响应状态
+      if (response.responseCode < 200 || response.responseCode >= 300) {
+        throw new Error(`Download failed with status ${response.responseCode}`);
       }
-
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
       
-      // 创建下载链接
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.download = filename || url.split('/').pop() || 'download';
+      // 确保响应是ArrayBuffer类型
+      if (typeof response.result !== 'object' || !(response.result instanceof ArrayBuffer)) {
+        throw new Error('Invalid response data type');
+      }
       
-      // 模拟点击下载
-      document.body.appendChild(link);
-      link.click();
+      // 获取文件总大小
+      const totalSize = response.result.byteLength;
       
-      // 清理
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(objectUrl);
-      }, 100);
-
-      Logger.info(TAG, `File downloaded successfully: ${link.download}`);
+      // 写入文件
+      const file = await fileIO.open(savePath, fileIO.OpenMode.READ_WRITE | fileIO.OpenMode.CREATE);
+      
+      try {
+        // 将ArrayBuffer写入文件
+        const writeResult = await fileIO.write(file.fd, response.result);
+        
+        // 通知进度完成
+        if (options?.onProgress) {
+          options.onProgress(totalSize, totalSize);
+        }
+        
+        Logger.info(TAG, `File downloaded successfully: ${savePath}, size: ${writeResult.bytesWritten} bytes`);
+      } finally {
+        // 关闭文件
+        await fileIO.close(file.fd);
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to download file: ${error}`);
+      throw error;
+    }
+  }
+  
+  /**
+   * 初始化网络状态监听
+   */
+  private static async initializeNetworkListener(): Promise<void> {
+    if (this.isInitialized) return;
+    
+    try {
+      // 订阅网络状态变化
+      await connection.on('netStatusChange', async (data) => {
+        const isOnline = data !== null && data.isInternetAvailable !== false;
+        const networkType = isOnline ? await this.getNetworkType() : 'NONE';
+        
+        Logger.info(TAG, `Network status changed: online=${isOnline}, type=${networkType}`);
+        
+        // 通知所有监听器
+        this.notifyNetworkStatusChanged(isOnline, networkType);
+      });
+      
+      // 获取初始网络状态
+      const status = await connection.getStatus();
+      const isOnline = status !== null && status.isInternetAvailable !== false;
+      const initialNetworkType = isOnline ? await this.getNetworkType() : 'NONE';
+      
+      Logger.info(TAG, `Initial network status: online=${isOnline}, type=${initialNetworkType}`);
+      
+      this.isInitialized = true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to initialize network listener: ${error}`);
+    }
+  }
+
+  /**
+   * 通知所有监听器网络状态变化
+   * @param isOnline 是否在线
+   * @param networkType 网络类型
+   */
+  private static notifyNetworkStatusChanged(isOnline: boolean, networkType: string): void {
+    this.networkStatusListeners.forEach((listener) => {
+      try {
+        listener(isOnline, networkType);
+      } catch (error) {
+        Logger.error(TAG, `Error in network status listener: ${error}`);
+      }
+    });
+  }
+
+  /**
+   * 添加网络状态监听器
+   * @param listener 监听器回调函数
+   * @returns 取消监听的函数
+   */
+  public static addNetworkStatusListener(listener: (isOnline: boolean, networkType: string) => void): () => void {
+    this.networkStatusListeners.add(listener);
+    
+    // 自动初始化监听
+    this.initializeNetworkListener().catch((error) => {
+      Logger.error(TAG, `Failed to initialize network listener after adding: ${error}`);
+    });
+    
+    // 返回取消监听的函数
+    return () => {
+      this.removeNetworkStatusListener(listener);
+    };
+  }
+
+  /**
+   * 移除网络状态监听器
+   * @param listener 要移除的监听器
+   */
+  public static removeNetworkStatusListener(listener: (isOnline: boolean, networkType: string) => void): void {
+    this.networkStatusListeners.delete(listener);
+  }
+
+  /**
+   * 获取当前是否在线
+   * @returns 是否在线的Promise
+   */
+  public static async isOnline(): Promise<boolean> {
+    try {
+      const status = await connection.getStatus();
+      return status !== null && status.isInternetAvailable !== false;
+    } catch (error) {
+      Logger.warn(TAG, `Failed to check online status: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * 下载文本内容
+   * @param url 文本URL
+   * @param options 下载选项
+   * @returns Promise<string>
+   */
+  public static async downloadText(url: string, options?: {
+    headers?: Record<string, string>;
+    timeout?: number;
+  }): Promise<string> {
+    try {
+      // 创建HTTP请求
+      const httpRequest = http.createHttp();
+      const downloadOptions: http.HttpRequestOptions = {
+        method: 'GET',
+        header: options?.headers || {},
+        connectTimeout: options?.timeout || 30000,
+        readTimeout: options?.timeout || 30000
+      };
+
+      // 发送请求
+      const response = await httpRequest.request(url, downloadOptions);
+      httpRequest.destroy();
+      
+      // 检查响应状态
+      if (response.responseCode < 200 || response.responseCode >= 300) {
+        throw new Error(`Download failed with status ${response.responseCode}`);
+      }
+      
+      // 返回文本内容
+      return response.result as string;
+    } catch (error) {
+      Logger.error(TAG, `Failed to download text: ${error}`);
       throw error;
     }
   }
@@ -309,27 +468,56 @@ export default class NetworkUtil {
    */
   public static async getNetworkType(): Promise<string> {
     try {
-      // 在浏览器环境中，navigator.connection提供网络信息
-      if (typeof navigator !== 'undefined' && 'connection' in navigator) {
-        const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-        if (connection) {
-          return connection.effectiveType || 'unknown';
-        }
+      // 使用HarmonyOS原生API获取网络类型
+      const netStatus = await connection.getStatus();
+      
+      // 根据网络类型返回标准化的结果
+      switch (netStatus.type) {
+        case connection.NetConnectType.NONE:
+          return 'none';
+        case connection.NetConnectType.WIFI:
+          return 'wifi';
+        case connection.NetConnectType.MOBILE:
+          // 进一步区分移动网络类型
+          if (netStatus.subtype) {
+            if (netStatus.subtype >= connection.NetConnectSubtype.NR_5G && netStatus.subtype <= connection.NetConnectSubtype.NR_5G_E) {
+              return '5g';
+            } else if (netStatus.subtype >= connection.NetConnectSubtype.LTE && netStatus.subtype <= connection.NetConnectSubtype.LTE_ADVANCED_PRO) {
+              return '4g';
+            } else if (netStatus.subtype >= connection.NetConnectSubtype.UMTS && netStatus.subtype <= connection.NetConnectSubtype.HSPA_PLUS) {
+              return '3g';
+            } else if (netStatus.subtype >= connection.NetConnectSubtype.GPRS && netStatus.subtype <= connection.NetConnectSubtype.EDGE) {
+              return '2g';
+            }
+          }
+          return 'mobile';
+        case connection.NetConnectType.ETHERNET:
+          return 'ethernet';
+        default:
+          return 'unknown';
       }
-      
-      // 备用方法：通过请求响应时间估计网络类型
-      const startTime = performance.now();
-      await fetch(AppConstant.NETWORK_CHECK_URL, { method: 'HEAD' });
-      const endTime = performance.now();
-      const responseTime = endTime - startTime;
-      
-      if (responseTime < 100) return '4g';
-      if (responseTime < 300) return '3g';
-      if (responseTime < 1000) return '2g';
-      return 'slow';
     } catch (error) {
       Logger.warn(TAG, 'Failed to detect network type:', error);
-      return 'unknown';
+      // 备用方法：通过HTTP请求响应时间估计
+      try {
+        const startTime = Date.now();
+        const httpRequest = http.createHttp();
+        await httpRequest.request(AppConstant.NETWORK_CHECK_URL, {
+          method: 'HEAD',
+          connectTimeout: 3000
+        });
+        httpRequest.destroy();
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        
+        if (responseTime < 100) return '4g';
+        if (responseTime < 300) return '3g';
+        if (responseTime < 1000) return '2g';
+        return 'slow';
+      } catch (fallbackError) {
+        Logger.warn(TAG, 'Fallback network type detection failed:', fallbackError);
+        return 'unknown';
+      }
     }
   }
 
@@ -341,21 +529,50 @@ export default class NetworkUtil {
    */
   public static async cachedRequest<T = any>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
-      const cacheKey = `cache_${url}`;
-      const cacheInfo = localStorage.getItem(cacheKey);
+      const cacheKey = `network_cache_${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
       
-      if (cacheInfo) {
-        const { data, timestamp } = JSON.parse(cacheInfo);
-        const now = Date.now();
-        
-        // 检查缓存是否有效
-        if (now - timestamp < cacheTime) {
-          Logger.info(TAG, `Using cached data for ${url}`);
-          return data as T;
+      // 尝试从缓存获取数据
+      const cacheManager = CacheManager.getInstance();
+      
+      if (cacheManager) {
+        try {
+          const cachedData = await cacheManager.get(cacheKey);
+          if (cachedData) {
+            const { data, timestamp } = JSON.parse(cachedData);
+            const now = Date.now();
+            
+            // 检查缓存是否有效
+            if (now - timestamp < cacheTime) {
+              Logger.info(TAG, `Using cached data for ${url}`);
+              return data as T;
+            }
+          }
+        } catch (cacheError) {
+          Logger.warn(TAG, `Cache read error: ${cacheError}`);
+          // 缓存读取失败，继续发送网络请求
         }
       }
       
-      // 缓存无效，发送新请求
+      // 检查网络状态
+      const isNetworkAvailable = await this.checkNetworkStatus();
+      if (!isNetworkAvailable) {
+        // 离线模式，尝试返回旧缓存（即使过期）
+        if (cacheManager) {
+          try {
+            const oldCachedData = await cacheManager.get(cacheKey);
+            if (oldCachedData) {
+              Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
+              const { data } = JSON.parse(oldCachedData);
+              return data as T;
+            }
+          } catch (offlineCacheError) {
+            Logger.error(TAG, `Offline cache error: ${offlineCacheError}`);
+          }
+        }
+        throw new Error('Network unavailable and no cached data available');
+      }
+      
+      // 缓存无效或不存在，发送新请求
       const response = await this.get<T>(url);
       
       // 保存新缓存
@@ -363,7 +580,17 @@ export default class NetworkUtil {
         data: response.data,
         timestamp: Date.now()
       };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      
+      // 尝试保存到缓存
+      if (cacheManager) {
+        try {
+          await cacheManager.set(cacheKey, JSON.stringify(cacheData));
+          Logger.info(TAG, `Cached response for ${url}`);
+        } catch (cacheWriteError) {
+          Logger.warn(TAG, `Cache write error: ${cacheWriteError}`);
+          // 缓存写入失败，继续返回数据
+        }
+      }
       
       return response.data;
     } catch (error) {

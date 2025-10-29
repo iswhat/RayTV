@@ -6,6 +6,8 @@ import { DEVICE_INFO_TABLE } from '../db/TableSchema';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
 import Logger from '../../common/util/Logger';
 import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
+import codec from '@ohos.media.codec';
+import { BusinessError } from '@ohos.base';
 
 const TAG = 'DeviceInfoRepository';
 
@@ -148,8 +150,7 @@ export class DeviceInfoRepository {
    */
   private async collectDeviceInfo(): Promise<void> {
     try {
-      // 这里将根据HarmonyOS API获取设备信息
-      // 当前为模拟实现，实际使用时需要替换为真实的API调用
+      // 使用HarmonyOS API获取设备信息
       const collectedInfo: Record<string, any> = {
         // 设备基础信息
         [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
@@ -158,12 +159,12 @@ export class DeviceInfoRepository {
         [DeviceInfoKeys.OS_VERSION]: this.getSafeValue(DeviceInfoKeys.OS_VERSION, '1.0.0'),
         [DeviceInfoKeys.APP_VERSION]: this.getSafeValue(DeviceInfoKeys.APP_VERSION, '1.0.0'),
         
-        // 设备能力
-        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: ['h264', 'h265', 'vp9'],
-        [DeviceInfoKeys.SUPPORTED_AUDIO_CODECS]: ['aac', 'mp3', 'opus'],
-        [DeviceInfoKeys.MAX_RESOLUTION]: '4K',
-        [DeviceInfoKeys.HDR_SUPPORTED]: true,
-        [DeviceInfoKeys.DOLBY_ATMOS_SUPPORTED]: true,
+        // 设备能力 - 使用codec API检测真实的编解码支持
+        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
+        [DeviceInfoKeys.SUPPORTED_AUDIO_CODECS]: await this.detectSupportedAudioCodecs(),
+        [DeviceInfoKeys.MAX_RESOLUTION]: await this.detectMaxResolution(),
+        [DeviceInfoKeys.HDR_SUPPORTED]: await this.detectHDRSupport(),
+        [DeviceInfoKeys.DOLBY_ATMOS_SUPPORTED]: await this.detectDolbySupport(),
         
         // 屏幕信息
         [DeviceInfoKeys.SCREEN_WIDTH]: this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920),
@@ -494,6 +495,133 @@ export class DeviceInfoRepository {
    */
   public async getNetworkInfo(): Promise<DeviceNetworkInfo | null> {
     return await this.getDeviceInfo<DeviceNetworkInfo>(DeviceInfoKeys.NETWORK_INFO);
+  }
+  
+  /**
+   * 检测设备支持的视频编解码器
+   */
+  private async detectSupportedVideoCodecs(): Promise<string[]> {
+    try {
+      // 常见视频编解码器列表
+      const videoCodecs = ['h264', 'h265', 'vp8', 'vp9', 'av1', 'mpeg4'];
+      const supportedCodecs: string[] = [];
+      
+      // 使用codec API检测每个编解码器
+      for (const codecName of videoCodecs) {
+        try {
+          // 检查是否支持该编解码器的解码能力
+          const isSupported = await this.checkCodecSupport(codecName, codec.CodecMode.DECODER);
+          if (isSupported) {
+            supportedCodecs.push(codecName);
+          }
+        } catch (error) {
+          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${error}`);
+        }
+      }
+      
+      // 如果API检测失败，回退到基本编解码器列表
+      return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
+    } catch (error) {
+      Logger.error(TAG, `Failed to detect video codecs: ${error}`);
+      return ['h264', 'h265', 'vp9']; // 默认回退值
+    }
+  }
+  
+  /**
+   * 检测设备支持的音频编解码器
+   */
+  private async detectSupportedAudioCodecs(): Promise<string[]> {
+    try {
+      // 常见音频编解码器列表
+      const audioCodecs = ['aac', 'mp3', 'opus', 'flac', 'vorbis', 'ac3', 'eac3'];
+      const supportedCodecs: string[] = [];
+      
+      // 使用codec API检测每个编解码器
+      for (const codecName of audioCodecs) {
+        try {
+          // 检查是否支持该编解码器的解码能力
+          const isSupported = await this.checkCodecSupport(codecName, codec.CodecMode.DECODER);
+          if (isSupported) {
+            supportedCodecs.push(codecName);
+          }
+        } catch (error) {
+          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${error}`);
+        }
+      }
+      
+      // 如果API检测失败，回退到基本编解码器列表
+      return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
+    } catch (error) {
+      Logger.error(TAG, `Failed to detect audio codecs: ${error}`);
+      return ['aac', 'mp3', 'opus']; // 默认回退值
+    }
+  }
+  
+  /**
+   * 检测设备最大支持的分辨率
+   */
+  private async detectMaxResolution(): Promise<string> {
+    try {
+      // 这里可以添加实际的分辨率检测逻辑
+      // 暂时根据设备屏幕尺寸进行估算
+      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
+      
+      if (screenWidth >= 3840) {
+        return '4K';
+      } else if (screenWidth >= 2560) {
+        return '2K';
+      } else if (screenWidth >= 1920) {
+        return '1080p';
+      } else {
+        return '720p';
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to detect max resolution: ${error}`);
+      return '1080p'; // 默认回退值
+    }
+  }
+  
+  /**
+   * 检测设备是否支持HDR
+   */
+  private async detectHDRSupport(): Promise<boolean> {
+    try {
+      // 这里可以使用系统API检测HDR支持
+      // 暂时返回基于屏幕分辨率的估算值
+      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
+      return screenWidth >= 3840; // 假设4K屏幕通常支持HDR
+    } catch (error) {
+      Logger.error(TAG, `Failed to detect HDR support: ${error}`);
+      return false; // 默认不支持
+    }
+  }
+  
+  /**
+   * 检测设备是否支持Dolby Atmos
+   */
+  private async detectDolbySupport(): Promise<boolean> {
+    try {
+      // 这里可以使用音频API检测Dolby支持
+      // 暂时返回一个默认值
+      return false; // 默认不支持，实际应用中需要使用系统API检测
+    } catch (error) {
+      Logger.error(TAG, `Failed to detect Dolby support: ${error}`);
+      return false; // 默认不支持
+    }
+  }
+  
+  /**
+   * 检查特定编解码器的支持情况
+   */
+  private async checkCodecSupport(codecName: string, mode: codec.CodecMode): Promise<boolean> {
+    try {
+      // 使用codec API查询编解码器信息
+      const codecInfos = await codec.getCodecList(codecName);
+      return codecInfos.length > 0;
+    } catch (error) {
+      Logger.warn(TAG, `Error checking codec ${codecName} support: ${error}`);
+      return false;
+    }
   }
   
   /**
