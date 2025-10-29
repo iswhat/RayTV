@@ -1,4 +1,5 @@
 // HomePage.ets - 主页面组件
+import { useState, onMounted, onUnmounted } from '@kit.ArkUI';
 import VideoCard from '../view/VideoCard';
 import CategoryNavigation from '../view/CategoryNavigation';
 import { VideoType } from '../../data/model/Movie';

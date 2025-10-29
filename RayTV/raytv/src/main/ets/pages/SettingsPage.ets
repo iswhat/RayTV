@@ -1,9 +1,9 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@ohos/base/ui';
-import { Router } from '@ohos/router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import Logger from '../common/util/Logger.ets';
 import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
-import Logger from '@ohos/base/Logger';
 
 /**
  * 设置页面组件

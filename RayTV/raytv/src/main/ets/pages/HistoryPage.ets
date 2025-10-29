@@ -1,9 +1,9 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch } from '@ohos/base/ui';
-import { Router } from '@ohos/router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import Logger from '../common/util/Logger.ets';
 import { historyService } from '../service/media/HistoryService';
 import { mediaService } from '../service/media/MediaService';
-import Logger from '@ohos/base/Logger';
 
 /**
  * 历史记录页面组件
