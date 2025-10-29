@@ -144,10 +144,11 @@ export interface LogEntry {
    * 堆栈跟踪
    */
   stackTrace?: string;
+  
   /**
    * 额外数据
    */
-  extra?: string;
+  extra?: any;
 }
 
 /**
@@ -195,7 +196,7 @@ export class Logger {
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    this.config = Object.assign({}, this.config, config);
+    this.config = { ...this.config, ...config };
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
@@ -262,7 +263,7 @@ export class Logger {
    * @param tag 日志标签
    * @param error 错误对象或错误消息
    */
-  public static exception(tag: string, error: Error | string): void {
+  public static exception(tag: string, error: any): void {
     const instance = Logger.getInstance();
     let stackTrace = '';
     if (error instanceof Error) {
@@ -279,7 +280,7 @@ export class Logger {
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: string[]): void {
+  public static format(tag: string, format: string, ...args: any[]): void {
     const message = format.replace(/\{\}/g, () => args.shift() || '');
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
@@ -289,7 +290,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: string): void {
+  public debug(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
@@ -300,7 +301,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public info(message: string, extra?: string): void {
+  public info(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, extra);
     }
@@ -311,7 +312,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public warn(message: string, extra?: string): void {
+  public warn(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, extra);
     }
@@ -323,7 +324,7 @@ export class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public error(message: string, error?: Error, extra?: string): void {
+  public error(message: string, error?: Error, extra?: any): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -341,7 +342,7 @@ export class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public fatal(message: string, error?: Error, extra?: string): void {
+  public fatal(message: string, error?: Error, extra?: any): void {
     if (this.shouldLog(LogLevel.FATAL)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -358,7 +359,7 @@ export class Logger {
    * @param obj 要记录的对象
    * @param message 日志消息
    */
-  public logObject(obj: object, message?: string): void {
+  public logObject(obj: any, message?: string): void {
     const objString = this.serializeObject(obj);
     const finalMessage = message ? `${message}: ${objString}` : objString;
     this.debug(finalMessage);
@@ -373,7 +374,7 @@ export class Logger {
     const errorMessage = error.message || 'Unknown error';
     const stackTrace = error.stack || this.getStackTrace();
     const finalMessage = message ? `${message}: ${errorMessage}` : errorMessage;
-    this.error(finalMessage, undefined, stackTrace);
+    this.error(finalMessage, undefined, { stackTrace });
   }
 
   /**
@@ -472,8 +473,7 @@ export class Logger {
    * @param extra 额外数据
    * @param stackTrace 堆栈跟踪
    */
-  private
-  log(level: LogLevel, message: string, extra?: string, stackTrace?: string): void {
+  private log(level: LogLevel, message: string, extra?: any, stackTrace?: string): void {
     const entry: LogEntry = {
       level,
       message,
