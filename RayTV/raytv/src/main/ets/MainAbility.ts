@@ -1,17 +1,17 @@
-import UIAbility from '@ohos.app.ability.UIAbility';
-import hilog from '@ohos.hilog';
-import window from '@ohos.window';
+import { UIAbility, Want, AbilityConstant } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { window } from '@kit.ArkUI';
 
 export default class MainAbility extends UIAbility {
-  onCreate(want, launchParam) {
+  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
     hilog.info(0x0000, 'MainAbility', '%{public}s', 'Ability onCreate');
   }
 
-  onDestroy() {
+  onDestroy(): void {
     hilog.info(0x0000, 'MainAbility', '%{public}s', 'Ability onDestroy');
   }
 
-  onWindowStageCreate(windowStage: window.WindowStage) {
+  onWindowStageCreate(windowStage: window.WindowStage): void {
     // 设置WindowStage的事件监听回调
     windowStage.on('windowStageEvent', (event) => {
       hilog.info(0x0000, 'MainAbility', 'WindowStage event: %{public}s', event.type);
@@ -27,15 +27,15 @@ export default class MainAbility extends UIAbility {
     });
   }
 
-  onWindowStageDestroy() {
+  onWindowStageDestroy(): void {
     hilog.info(0x0000, 'MainAbility', '%{public}s', 'Ability onWindowStageDestroy');
   }
 
-  onForeground() {
+  onForeground(): void {
     hilog.info(0x0000, 'MainAbility', '%{public}s', 'Ability onForeground');
   }
 
-  onBackground() {
+  onBackground(): void {
     hilog.info(0x0000, 'MainAbility', '%{public}s', 'Ability onBackground');
   }
 }

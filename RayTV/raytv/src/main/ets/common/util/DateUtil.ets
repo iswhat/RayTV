@@ -226,7 +226,7 @@ export default class DateUtil {
       return result;
     } catch (error) {
       Logger.error(TAG, `Failed to add time: ${error}`);
-      throw new Error(`Failed to add time: ${error}`);
+      throw error;
     }
   }
 
@@ -251,7 +251,7 @@ export default class DateUtil {
       return 0;
     } catch (error) {
       Logger.error(TAG, `Failed to compare dates: ${error}`);
-      throw new Error(`Failed to compare dates: ${error}`);
+      throw error;
     }
   }
 
@@ -289,7 +289,7 @@ export default class DateUtil {
       }
     } catch (error) {
       Logger.error(TAG, `Failed to calculate date difference: ${error}`);
-      throw new Error(`Failed to calculate date difference: ${error}`);
+      throw error;
     }
   }
 

@@ -1,8 +1,8 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Select } from '@ohos/base/ui';
-import { Router } from '@ohos/router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import Logger from '../common/util/Logger.ets';
+import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Select } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
 import { mediaService } from '../service/media/MediaService';
-import Logger from '@ohos/base/Logger';
 
 /**
  * 分类页面组件

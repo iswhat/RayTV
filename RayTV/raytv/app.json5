@@ -4,7 +4,7 @@
   "versionName": "1.0.0",
   "versionCode": 1,
   "minAPIVersion": 9,
-  "targetAPIVersion": 9,
+  "targetAPIVersion": 10,
   "description": "一个功能强大的视频播放应用",
   "icon": "./assets/icon.png",
   "splashscreen": {

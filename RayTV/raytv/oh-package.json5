@@ -10,15 +10,10 @@
     "dev": "ohos-dev-server"
   },
   "dependencies": {
-    "@ohos.app.ability": "^9.0.0",
-    "@ohos.app.form": "^9.0.0",
-    "@ohos.app.ability.common": "^9.0.0",
-    "@ohos.hilog": "^9.0.0",
-    "@ohos.window": "^9.0.0",
-    "@ohos.base": "^9.0.0",
-    "@ohos.router": "^9.0.0",
-    "@ohos.ability.featureAbility": "^9.0.0",
-    "@ohos.components": "^9.0.0"
+    "@kit.AbilityKit": "^9.0.0",
+    "@kit.PerformanceAnalysisKit": "^9.0.0",
+    "@kit.ArkUI": "^9.0.0",
+    "@kit.CoreServicesKit": "^9.0.0"
   }
 }
 

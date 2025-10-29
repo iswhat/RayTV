@@ -1,6 +1,6 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem } from '@ohos.base/ui';
-import { Router } from '@ohos.router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
 import { mediaService } from '../service/media/MediaService';
 import { historyService } from '../service/media/HistoryService';
 import { favoriteService } from '../service/media/FavoriteService';

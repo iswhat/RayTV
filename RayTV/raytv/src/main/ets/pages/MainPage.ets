@@ -1,6 +1,6 @@
-import { useState, useEffect } from '@ohos.base';
-import { Router } from '@ohos.router';
-import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@ohos.components';
+import { useState, useEffect } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
 import Logger from '../common/util/Logger';
