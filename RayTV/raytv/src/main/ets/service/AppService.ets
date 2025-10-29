@@ -6,14 +6,14 @@ import ConfigService from '../../service/config/ConfigService';
 import CacheService from '../../service/cache/CacheService';
 import HttpService from './http/HttpService';
 import AuthService from './AuthService';
-import MovieService from './MovieService';
-import HistoryService from '../../service/media/HistoryService';
+import MovieService from './media/MovieService';
+import HistoryService from './media/HistoryService';
 import CollectionService from './collection/CollectionService';
 import DownloadService from '../../service/download/DownloadService';
 import PlayerService from './PlayerService';
 import LiveStreamService from '../../service/live/LiveStreamService';
 import SubtitleService from './SubtitleService';
-import FileService from './FileService';
+import FileService from './storage/FileService';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import { parserService } from './parser/index';
 
