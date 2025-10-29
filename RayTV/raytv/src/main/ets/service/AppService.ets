@@ -15,7 +15,7 @@ import LiveStreamService from '../../service/live/LiveStreamService';
 import SubtitleService from './SubtitleService';
 import FileService from './FileService';
 import RepositoryFactory from '../repository/RepositoryFactory';
-import { ParserService } from '../../service/parser';
+import { parserService } from './parser';
 
 // 常量定义
 const TAG = 'AppService';
@@ -443,7 +443,6 @@ export default class AppService {
       this.services.set('subtitleService', subtitleService);
       
       // 17. 初始化解析器服务
-      const parserService = ParserService.getInstance();
       await parserService.initialize();
       this.services.set('parserService', parserService);
       
