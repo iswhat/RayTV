@@ -1,7 +1,7 @@
 /**
  * LineManagerPage样式定义
  */
-import { StyleSheet } from '@ray-js/components';
+// 使用ArkTS样式系统，不需要StyleSheet
 
 export default StyleSheet.create({
   container: {

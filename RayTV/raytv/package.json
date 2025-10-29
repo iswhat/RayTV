@@ -1,0 +1,10 @@
+{
+  "name": "raytv",
+  "version": "1.0.0",
+  "description": "RayTV - HarmonyOS video player",
+  "scripts": {
+    "build": ".\\ohos.cmd build --product-type phone",
+    "version": ".\\ohos.cmd --version"
+  },
+  "dependencies": {}
+}

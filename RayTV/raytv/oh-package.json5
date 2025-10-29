@@ -15,13 +15,10 @@
     "@ohos.app.ability.common": "^9.0.0",
     "@ohos.hilog": "^9.0.0",
     "@ohos.window": "^9.0.0",
-    "@ray-js/components": "^1.0.0",
-    "@tarojs/taro": "^3.6.0",
-    "@tarojs/components": "^3.6.0",
-    "react": "^18.2.0",
-    "react-redux": "^8.0.0",
-    "redux": "^4.2.0",
-    "axios": "^1.4.0"
+    "@ohos.base": "^9.0.0",
+    "@ohos.router": "^9.0.0",
+    "@ohos.ability.featureAbility": "^9.0.0",
+    "@ohos.components": "^9.0.0"
   }
 }
 
