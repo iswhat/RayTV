@@ -1,6 +1,7 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, TextInput, Button, List, ListItem, Image, Text, LoadingProgress, Empty, Flex, Tag } from '@ohos/base/ui';
-import { Router } from '@ohos/router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { ScrollView, TextInput, Button, List, ListItem, Image, Text, LoadingProgress, Empty, Flex, Tag } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import Logger from '../common/util/Logger.ets';
 import { MediaItem } from '../data/bean/MediaItem';
 import { SearchHistoryItem } from '../data/repository/SearchHistoryRepository';
 import { mediaService } from '../service/media/MediaService';

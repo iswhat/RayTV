@@ -1,6 +1,7 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar } from '@ohos/base/ui';
-import { Router, ParamRouter } from '@ohos.router';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import Logger from '../common/util/Logger.ets';
 import { mediaService } from '../service/media/MediaService';
 import { favoriteService } from '../service/media/FavoriteService';
 import { historyService } from '../service/media/HistoryService';

@@ -1,7 +1,7 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@ohos/base';
-import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast } from '@ohos/base/ui';
-import { Router } from '@ohos.router';
-import { playbackService } from '../service/media/PlaybackService';
+import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
+import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast } from '@kit.ArkUI';
+import { Router } from '@kit.AbilityKit';
+import Logger from '../common/util/Logger.ets';playbackService } from '../service/media/PlaybackService';
 import { historyService } from '../service/media/HistoryService';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
