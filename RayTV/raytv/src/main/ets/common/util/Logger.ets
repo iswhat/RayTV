@@ -373,7 +373,7 @@ export class Logger {
     const errorMessage = error.message || 'Unknown error';
     const stackTrace = error.stack || this.getStackTrace();
     const finalMessage = message ? `${message}: ${errorMessage}` : errorMessage;
-    this.error(finalMessage, undefined, { stackTrace });
+    this.error(finalMessage, undefined, stackTrace);
   }
 
   /**
