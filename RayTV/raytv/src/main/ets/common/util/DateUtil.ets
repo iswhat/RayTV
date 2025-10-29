@@ -28,7 +28,7 @@ export default class DateUtil {
    */
   public static format(date: Date | number | string, format: DateFormatType | string = DateFormatType.FULL): string {
     try {
-      const dateObj = DateUtil.parseDate(date);
+      const dateObj = this.parseDate(date);
       if (!dateObj) {
         throw new Error('Invalid date');
       }
@@ -63,11 +63,11 @@ export default class DateUtil {
       // 格式化替换
       return formatStr
         .replace('YYYY', dateObj.getFullYear().toString())
-        .replace('MM', DateUtil.padZero(dateObj.getMonth() + 1))
-        .replace('DD', DateUtil.padZero(dateObj.getDate()))
-        .replace('HH', DateUtil.padZero(dateObj.getHours()))
-        .replace('mm', DateUtil.padZero(dateObj.getMinutes()))
-        .replace('ss', DateUtil.padZero(dateObj.getSeconds()));
+        .replace('MM', this.padZero(dateObj.getMonth() + 1))
+        .replace('DD', this.padZero(dateObj.getDate()))
+        .replace('HH', this.padZero(dateObj.getHours()))
+        .replace('mm', this.padZero(dateObj.getMinutes()))
+        .replace('ss', this.padZero(dateObj.getSeconds()));
     } catch (error) {
       Logger.error(TAG, `Failed to format date: ${error}`);
       return '';
@@ -86,7 +86,7 @@ export default class DateUtil {
 
       // 如果提供了格式，使用更精确的解析
       if (format) {
-        return DateUtil.parseWithFormat(dateStr, format);
+        return this.parseWithFormat(dateStr, format);
       }
 
       // 默认解析
@@ -154,7 +154,7 @@ export default class DateUtil {
    */
   public static getRelativeTime(date: Date | number | string): string {
     try {
-      const dateObj = DateUtil.parseDate(date);
+      const dateObj = this.parseDate(date);
       if (!dateObj) return '';
 
       const now = new Date();
@@ -197,7 +197,7 @@ export default class DateUtil {
    */
   public static add(date: Date | number | string, amount: number, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'): Date {
     try {
-      const dateObj = DateUtil.parseDate(date);
+      const dateObj = this.parseDate(date);
       if (!dateObj) throw new Error('Invalid date');
 
       const result = new Date(dateObj.getTime());
@@ -226,7 +226,7 @@ export default class DateUtil {
       return result;
     } catch (error) {
       Logger.error(TAG, `Failed to add time: ${error}`);
-      throw error;
+      throw new Error(`Failed to add time: ${error}`);
     }
   }
 
@@ -238,8 +238,8 @@ export default class DateUtil {
    */
   public static compare(date1: Date | number | string, date2: Date | number | string): number {
     try {
-      const d1 = DateUtil.parseDate(date1);
-      const d2 = DateUtil.parseDate(date2);
+      const d1 = this.parseDate(date1);
+      const d2 = this.parseDate(date2);
 
       if (!d1 || !d2) throw new Error('Invalid date');
 
@@ -251,7 +251,7 @@ export default class DateUtil {
       return 0;
     } catch (error) {
       Logger.error(TAG, `Failed to compare dates: ${error}`);
-      throw error;
+      throw new Error(`Failed to compare dates: ${error}`);
     }
   }
 
@@ -264,8 +264,8 @@ export default class DateUtil {
    */
   public static diff(date1: Date | number | string, date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'): number {
     try {
-      const d1 = DateUtil.parseDate(date1);
-      const d2 = DateUtil.parseDate(date2);
+      const d1 = this.parseDate(date1);
+      const d2 = this.parseDate(date2);
 
       if (!d1 || !d2) throw new Error('Invalid date');
 
@@ -289,7 +289,7 @@ export default class DateUtil {
       }
     } catch (error) {
       Logger.error(TAG, `Failed to calculate date difference: ${error}`);
-      throw error;
+      throw new Error(`Failed to calculate date difference: ${error}`);
     }
   }
 
@@ -300,7 +300,7 @@ export default class DateUtil {
    */
   public static isToday(date: Date | number | string): boolean {
     try {
-      const dateObj = DateUtil.parseDate(date);
+      const dateObj = this.parseDate(date);
       if (!dateObj) return false;
 
       const today = new Date();
@@ -318,7 +318,7 @@ export default class DateUtil {
    */
   public static isYesterday(date: Date | number | string): boolean {
     try {
-      const dateObj = DateUtil.parseDate(date);
+      const dateObj = this.parseDate(date);
       if (!dateObj) return false;
 
       const yesterday = new Date();
@@ -339,12 +339,13 @@ export default class DateUtil {
    */
   public static isBetween(date: Date | number | string, start: Date | number | string, end: Date | number | string): boolean {
     try {
-      const dateObj = DateUtil.parseDate(date);
-      const startObj = DateUtil.parseDate(start);
-      const endObj = DateUtil.parseDate(end);
+      const dateObj = this.parseDate(date);
+      const startObj = this.parseDate(start);
+      const endObj = this.parseDate(end);
+
       if (!dateObj || !startObj || !endObj) return false;
 
-      return DateUtil.compare(dateObj, startObj) >= 0 && DateUtil.compare(dateObj, endObj) <= 0;
+      return this.compare(dateObj, startObj) >= 0 && this.compare(dateObj, endObj) <= 0;
     } catch (error) {
       Logger.error(TAG, `Failed to check if date is between range: ${error}`);
       return false;
@@ -394,10 +395,11 @@ export default class DateUtil {
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
       const secs = Math.floor(seconds % 60);
+
       if (hours > 0) {
-        return `${hours}:${DateUtil.padZero(minutes)}:${DateUtil.padZero(secs)}`;
+        return `${hours}:${this.padZero(minutes)}:${this.padZero(secs)}`;
       } else {
-        return `${minutes}:${DateUtil.padZero(secs)}`;
+        return `${minutes}:${this.padZero(secs)}`;
       }
     } catch (error) {
       Logger.error(TAG, `Failed to format duration: ${error}`);

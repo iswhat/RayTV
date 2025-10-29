@@ -263,7 +263,7 @@ export class Logger {
    * @param tag 日志标签
    * @param error 错误对象或错误消息
    */
-  public static exception(tag: string, error: any): void {
+  public static exception(tag: string, error: string | Error): void {
     const instance = Logger.getInstance();
     let stackTrace = '';
     if (error instanceof Error) {
@@ -280,8 +280,8 @@ export class Logger {
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: any[]): void {
-    const message = format.replace(/\{\}/g, () => args.shift() || '');
+  public static format(tag: string, format: string, ...args: string[]): void {
+    const message = format.replace(/\{\}/g, (): string => args.shift() || '');
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
 
@@ -290,7 +290,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: any): void {
+  public debug(message: string, extra?: string): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
