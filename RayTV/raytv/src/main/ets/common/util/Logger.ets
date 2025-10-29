@@ -257,13 +257,12 @@ export class Logger {
   public static error(tag: string, message: string): void {
     Logger.getInstance().logInternal(LogLevel.ERROR, tag, message);
   }
-
   /**
    * 输出异常信息 - 兼容静态调用方式
    * @param tag 日志标签
    * @param error 错误对象或错误消息
    */
-  public static exception(tag: string, error: any): void {
+  public static exception(tag: string, error: Error | string): void {
     const instance = Logger.getInstance();
     let stackTrace = '';
     if (error instanceof Error) {
@@ -273,35 +272,32 @@ export class Logger {
       instance.logInternal(LogLevel.ERROR, tag, String(error));
     }
   }
-
   /**
    * 输出带格式化参数的日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: any[]): void {
-    const message = format.replace(/\{\}/g, () => args.shift() || '');
+  public static format(tag: string, format: string, ...args: string[]): void {
+    const message = format.replace(/\{\}/g, (): string => args.shift() || '');
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
-
   /**
    * 调试日志 - 实例方法
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: any): void {
+  public debug(message: string, extra?: object): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
   }
-
   /**
    * 信息日志 - 实例方法
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public info(message: string, extra?: any): void {
+  public info(message: string, extra?: object): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, extra);
     }
@@ -312,19 +308,18 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public warn(message: string, extra?: any): void {
+  public warn(message: string, extra?: object): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, extra);
     }
   }
-
   /**
    * 错误日志 - 实例方法
    * @param message 日志消息
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public error(message: string, error?: Error, extra?: any): void {
+  public error(message: string, error?: Error, extra?: object): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       let stackTrace = '';
       if (error && error.stack) {
