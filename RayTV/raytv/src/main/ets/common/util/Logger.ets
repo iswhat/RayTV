@@ -144,11 +144,10 @@ export interface LogEntry {
    * 堆栈跟踪
    */
   stackTrace?: string;
-  
   /**
    * 额外数据
    */
-  extra?: any;
+  extra?: Object;
 }
 
 /**
@@ -159,7 +158,7 @@ export class Logger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
-  private logFileHandle?: any;
+  private logFileHandle?: Object;
   private logQueue: LogEntry[] = [];
   private isWriting: boolean = false;
 
@@ -190,20 +189,59 @@ export class Logger {
     }
     return Logger.instance;
   }
-
   /**
    * 初始化Logger
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    this.config = { ...this.config, ...config };
+    this.config = this.mergeConfig(this.config, config);
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
       this.ensureLogFileExists();
     }
-    
     this.log(LogLevel.INFO, 'Logger initialized with level: ' + this.config.level);
+  }
+
+  /**
+   * 合并配置对象
+   * @param baseConfig 基础配置
+   * @param partialConfig 部分配置
+   */
+  private mergeConfig(baseConfig: LoggerConfig, partialConfig: Partial<LoggerConfig>): LoggerConfig {
+    const result: LoggerConfig = {
+      level: partialConfig.level !== undefined ? partialConfig.level : baseConfig.level,
+      consoleEnabled: partialConfig.consoleEnabled !== undefined ? partialConfig.consoleEnabled : baseConfig.consoleEnabled,
+      fileEnabled: partialConfig.fileEnabled !== undefined ? partialConfig.fileEnabled : baseConfig.fileEnabled,
+      formatEnabled: partialConfig.formatEnabled !== undefined ? partialConfig.formatEnabled : baseConfig.formatEnabled,
+      showTimestamp: partialConfig.showTimestamp !== undefined ? partialConfig.showTimestamp : baseConfig.showTimestamp,
+      showLevel: partialConfig.showLevel !== undefined ? partialConfig.showLevel : baseConfig.showLevel,
+      showCaller: partialConfig.showCaller !== undefined ? partialConfig.showCaller : baseConfig.showCaller,
+      showProcessId: partialConfig.showProcessId !== undefined ? partialConfig.showProcessId : baseConfig.showProcessId,
+      showThreadId: partialConfig.showThreadId !== undefined ? partialConfig.showThreadId : baseConfig.showThreadId,
+      enableStackTrace: partialConfig.enableStackTrace !== undefined ? partialConfig.enableStackTrace : baseConfig.enableStackTrace,
+    };
+
+    // 处理可选属性
+    if (partialConfig.logFilePath !== undefined) {
+      result.logFilePath = partialConfig.logFilePath;
+    } else if (baseConfig.logFilePath !== undefined) {
+      result.logFilePath = baseConfig.logFilePath;
+    }
+
+    if (partialConfig.maxFileSize !== undefined) {
+      result.maxFileSize = partialConfig.maxFileSize;
+    } else if (baseConfig.maxFileSize !== undefined) {
+      result.maxFileSize = baseConfig.maxFileSize;
+    }
+
+    if (partialConfig.maxFileCount !== undefined) {
+      result.maxFileCount = partialConfig.maxFileCount;
+    } else if (baseConfig.maxFileCount !== undefined) {
+      result.maxFileCount = baseConfig.maxFileCount;
+    }
+
+    return result;
   }
 
   /**
@@ -257,12 +295,13 @@ export class Logger {
   public static error(tag: string, message: string): void {
     Logger.getInstance().logInternal(LogLevel.ERROR, tag, message);
   }
+
   /**
    * 输出异常信息 - 兼容静态调用方式
    * @param tag 日志标签
    * @param error 错误对象或错误消息
    */
-  public static exception(tag: string, error: Error | string): void {
+  public static exception(tag: string, error: any): void {
     const instance = Logger.getInstance();
     let stackTrace = '';
     if (error instanceof Error) {
@@ -272,32 +311,35 @@ export class Logger {
       instance.logInternal(LogLevel.ERROR, tag, String(error));
     }
   }
+
   /**
    * 输出带格式化参数的日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: string[]): void {
-    const message = format.replace(/\{\}/g, (): string => args.shift() || '');
+  public static format(tag: string, format: string, ...args: any[]): void {
+    const message = format.replace(/\{\}/g, () => args.shift() || '');
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
+
   /**
    * 调试日志 - 实例方法
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: object): void {
+  public debug(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
   }
+
   /**
    * 信息日志 - 实例方法
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public info(message: string, extra?: object): void {
+  public info(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, extra);
     }
@@ -308,18 +350,19 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public warn(message: string, extra?: object): void {
+  public warn(message: string, extra?: any): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, extra);
     }
   }
+
   /**
    * 错误日志 - 实例方法
    * @param message 日志消息
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public error(message: string, error?: Error, extra?: object): void {
+  public error(message: string, error?: Error, extra?: any): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       let stackTrace = '';
       if (error && error.stack) {

@@ -12,14 +12,7 @@
     "color": "#ffffff"
   },
   "orientation": ["portrait"],
-  "modules": [
-    {
-      "name": "@ray-js/components"
-    },
-    {
-      "name": "@tarojs/taro"
-    }
-  ],
+  "modules": [],
   "abilities": [
     {
       "name": "MainAbility",
