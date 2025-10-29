@@ -8,14 +8,14 @@ import HttpService from './http/HttpService';
 import AuthService from './AuthService';
 import MovieService from './MovieService';
 import HistoryService from '../../service/media/HistoryService';
-import CollectionService from './CollectionService';
+import CollectionService from './collection/CollectionService';
 import DownloadService from '../../service/download/DownloadService';
 import PlayerService from './PlayerService';
 import LiveStreamService from '../../service/live/LiveStreamService';
 import SubtitleService from './SubtitleService';
 import FileService from './FileService';
 import RepositoryFactory from '../repository/RepositoryFactory';
-import { parserService } from './parser';
+import { parserService } from './parser/index';
 
 // 常量定义
 const TAG = 'AppService';
