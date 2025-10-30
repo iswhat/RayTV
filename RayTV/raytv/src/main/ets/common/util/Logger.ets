@@ -154,12 +154,12 @@ export interface LogEntry {
 /**
  * 日志工具类
  */
-export class Logger {
+class Logger {
   private static instance: Logger;
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
-  private logFileHandle?: any; // 临时使用any，后续需要定义具体类型
+  private logFileHandle?: any; // 暂时使用any类型，但会在使用时添加适当的类型断言
   private logQueue: LogEntry[] = [];
   private isWriting: boolean = false;
 
@@ -196,11 +196,8 @@ export class Logger {
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    // 替换Object.assign为展开运算符
-    this.config = {
-      ...this.config,
-      ...config
-    };
+    // 使用Object.assign替代展开运算符，符合ArkTS规范
+    this.config = Object.assign({}, this.config, config);
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
@@ -296,8 +293,11 @@ export class Logger {
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: unknown[]): void {
-    const message = format.replace(/\{\}/g, () => args.shift() || '');
+  public static format(tag: string, format: string, ...args: any[]): void {
+    const message = format.replace(/\{\}/g, () => {
+      const arg = args.shift();
+      return arg !== undefined && arg !== null ? String(arg) : '';
+    });
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
 
@@ -625,7 +625,7 @@ export class Logger {
       // 查找调用Logger方法的位置
       for (let i = 3; i < stack.length; i++) {
         const line = stack[i];
-        if (line && !line.includes('Logger.ts')) {
+        if (line && !line.includes('Logger.ets')) {
           const match = line.match(/at\s+(\S+)\s+/);
           return match ? match[1] : 'unknown';
         }
@@ -706,8 +706,10 @@ export class Logger {
       this.checkLogFileSize();
     } catch (error) {
       console.error('Failed to write logs to file:', error);
-      // 重新加入队列
-      this.logQueue = [...entriesToWrite, ...this.logQueue];
+      // 不使用展开运算符，而是使用循环添加元素
+      for (const entry of entriesToWrite) {
+        this.logQueue.push(entry);
+      }
     } finally {
       this.isWriting = false;
     }
@@ -721,5 +723,6 @@ export class Logger {
   }
 }
 
-// 导出默认Logger实例
+// 导出Logger类和默认实例
+export { Logger };
 export default Logger.getInstance();

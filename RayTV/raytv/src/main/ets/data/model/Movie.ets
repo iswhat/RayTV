@@ -29,6 +29,39 @@ export enum VideoType {
 }
 
 /**
+ * Movie序列化接口
+ */
+export interface MovieSerializable {
+  id?: string;
+  title?: string;
+  originalTitle?: string;
+  type?: VideoType;
+  coverUrl?: string;
+  backdropUrl?: string;
+  overview?: string;
+  releaseDate?: string;
+  genres?: string[];
+  tags?: string[];
+  ratings?: RatingInfo[];
+  directors?: string[];
+  actors?: string[];
+  countries?: string[];
+  languages?: string[];
+  duration?: number;
+  totalEpisodes?: number;
+  currentSeason?: number;
+  episodes?: Episode[];
+  recommended?: boolean;
+  favorite?: boolean;
+  watchedProgress?: number;
+  playCount?: number;
+  updateTime?: string;
+  sources?: VideoSource[];
+  score?: number;
+  year?: number;
+}
+
+/**
  * 评分信息接口
  */
 export interface RatingInfo {
@@ -325,17 +358,17 @@ export default class Movie {
     if (!this.episodes) {
       return 0;
     }
-    // 修复类型错误：确保isWatched是布尔值
-    return this.episodes.filter(episode => episode.isWatched === true).length;
+    // 修复类型错误：确保isWatched是明确的布尔值，处理undefined情况
+    return this.episodes.filter(episode => Boolean(episode.isWatched)).length;
   }
 
   /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Partial<Movie> {
-    // 使用Movie类型本身作为返回类型，避免使用any
-    return {
+  public toSerializable(): MovieSerializable {
+    // 使用专用的序列化接口，符合ArkTS规范
+    const result: MovieSerializable = {
       id: this.id,
       title: this.title,
       originalTitle: this.originalTitle,
@@ -364,6 +397,7 @@ export default class Movie {
       score: this.score,
       year: this.year
     };
+    return result;
   }
 
   /**
@@ -371,8 +405,8 @@ export default class Movie {
    * @param data 序列化的数据
    * @returns Movie实例
    */
-  public static fromSerializable(data: Record<string, unknown>): Movie {
-    return new Movie(data as Partial<Movie>);
+  public static fromSerializable(data: Partial<Movie>): Movie {
+    return new Movie(data);
   }
 
   /**

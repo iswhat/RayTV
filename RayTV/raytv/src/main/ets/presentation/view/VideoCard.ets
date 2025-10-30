@@ -31,8 +31,8 @@ export default struct VideoCard {
   }
   
   private getTypeLabel(type: VideoType): string {
-    // 避免直接使用类作为对象，使用字符串比较
-    return type.toString() === 'MOVIE' ? '电影' : '剧集';
+    // 直接比较枚举值，避免使用toString()方法可能导致的类型错误
+    return type === VideoType.MOVIE ? '电影' : '剧集';
   }
   
   build() {

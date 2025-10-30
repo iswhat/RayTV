@@ -85,10 +85,10 @@ export default struct PlayerController {
         Row() {
           Button('←')
             .fontSize(24)
-          .width(48)
-          .height(48)
-          .backgroundColor('transparent')
-          .onClick(() => this.props.onBack())
+            .width(48)
+            .height(48)
+            .backgroundColor('transparent')
+            .onClick(() => this.props.onBack())
           
           Column() {
             if (this.props.title) {
@@ -111,10 +111,10 @@ export default struct PlayerController {
           
           Button(this.props.isFullscreen ? '⤢' : '⤡')
             .fontSize(24)
-          .width(48)
-          .height(48)
-          .backgroundColor('transparent')
-          .onClick(() => this.props.onToggleFullscreen())
+            .width(48)
+            .height(48)
+            .backgroundColor('transparent')
+            .onClick(() => this.props.onToggleFullscreen())
         }
         .width('100%')
         .padding(16)
@@ -171,11 +171,11 @@ export default struct PlayerController {
           // 控制按钮
           Row() {
             Button(this.props.isMuted ? '🔇' : '🔊')
-            .fontSize(24)
-            .width(48)
-            .height(48)
-            .backgroundColor('transparent')
-            .onClick(() => this.props.onToggleMute())
+              .fontSize(24)
+              .width(48)
+              .height(48)
+              .backgroundColor('transparent')
+              .onClick(() => this.props.onToggleMute())
             
             Slider({
               value: this.props.volume * 100,

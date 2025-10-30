@@ -415,9 +415,9 @@ class ConfigRepository {
    * 导出所有配置
    * @returns 配置对象
    */
-  public async exportConfigs(): Promise<Record<string, any>> {
+  public async exportConfigs(): Promise<Record<string, unknown>> {
     try {
-      const exportData: Record<string, any> = {};
+      const exportData: Record<string, unknown> = {};
       
       for (const [key, config] of this.configCache.entries()) {
         exportData[key] = {
@@ -439,7 +439,7 @@ class ConfigRepository {
    * 导入配置
    * @param configs 配置对象
    */
-  public async importConfigs(configs: Record<string, any>): Promise<void> {
+  public async importConfigs(configs: Record<string, unknown>): Promise<void> {
     try {
       for (const [key, config] of Object.entries(configs)) {
         if (typeof config === 'object' && config !== null) {

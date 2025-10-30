@@ -321,7 +321,7 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
+  public toSerializable(): Record<string, unknown> {
     return {
       id: this.id,
       title: this.title,
@@ -354,7 +354,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, any>): SearchResult {
+  public static fromSerializable(data: Record<string, unknown>): SearchResult {
     return new SearchResult(data);
   }
 

@@ -122,7 +122,7 @@ export interface SearchResultItem {
   searchScore?: number;             // 搜索匹配分数
   highlightTerms?: string[];        // 需要高亮的关键词
   source?: string;                  // 来源
-  metadata?: Record<string, any>;   // 额外元数据
+  metadata?: Record<string, unknown>;   // 额外元数据
 }
 
 /**

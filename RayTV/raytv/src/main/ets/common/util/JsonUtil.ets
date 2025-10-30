@@ -14,7 +14,7 @@ export default class JsonUtil {
    * @param pretty 是否格式化输出
    * @returns JSON字符串
    */
-  public static stringify(obj: unknown, pretty: boolean = false): string {
+  public static stringify(obj: Record<string, any>, pretty: boolean = false): string {
     try {
       if (pretty) {
         return JSON.stringify(obj, null, 2);
@@ -31,7 +31,7 @@ export default class JsonUtil {
    * @param jsonStr JSON字符串
    * @returns 反序列化后的对象
    */
-  public static parse<T = any>(jsonStr: string): T {
+  public static parse<T>(jsonStr: string): T {
     try {
       if (!jsonStr || typeof jsonStr !== 'string') {
         throw new Error('Invalid JSON string');
@@ -49,7 +49,7 @@ export default class JsonUtil {
    * @param defaultValue 默认值
    * @returns 解析结果或默认值
    */
-  public static safeParse<T = any>(jsonStr: string, defaultValue: T): T {
+  public static safeParse<T>(jsonStr: string, defaultValue: T): T {
     try {
       return JsonUtil.parse<T>(jsonStr);
     } catch (error) {
@@ -81,7 +81,7 @@ export default class JsonUtil {
    * @param obj 要拷贝的对象
    * @returns 拷贝后的新对象
    */
-  public static deepClone<T = any>(obj: T): T {
+  public static deepClone<T>(obj: T): T {
     try {
       // 处理循环引用和特殊类型
       if (obj === null || typeof obj !== 'object') {
@@ -123,20 +123,27 @@ export default class JsonUtil {
    * @param source 源对象
    * @returns 合并后的对象
    */
-  public static merge<T = any>(target: T, source: unknown): T {
+  public static merge<T = any>(target: T, source: Record<string, unknown>): T {
     try {
       const result = JsonUtil.deepClone(target);
       
-      for (const key in source) {
-        if (source.hasOwnProperty(key)) {
-          if (typeof source[key] === 'object' && source[key] !== null && 
-              typeof (result as any)[key] === 'object' && (result as any)[key] !== null) {
-            (result as unknown as Record<string, unknown>)[key] = JsonUtil.merge((result as unknown as Record<string, unknown>)[key], source[key]);
-          } else {
-            (result as unknown as Record<string, unknown>)[key] = source[key];
+      // 安全地转换result为可索引对象
+        const resultObj = result as Record<string, unknown>;
+        
+        for (const key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            const sourceValue = source[key];
+            const targetValue = resultObj[key];
+            
+            // 递归合并对象属性
+            if (sourceValue !== null && typeof sourceValue === 'object' &&
+                targetValue !== null && typeof targetValue === 'object') {
+              resultObj[key] = JsonUtil.merge(targetValue, sourceValue as Record<string, unknown>);
+            } else {
+              resultObj[key] = sourceValue;
+            }
           }
         }
-      }
       
       return result;
     } catch (error) {

@@ -67,7 +67,7 @@ export default class User {
   watchHistoryEnabled?: boolean; // 是否启用观看历史
   favoritesEnabled?: boolean;    // 是否启用收藏
   totalWatchTime?: number;       // 总观看时长（分钟）
-  settings?: Record<string, any>; // 其他设置
+  settings?: Record<string, unknown>; // 其他设置
 
   /**
    * 构造函数
@@ -292,8 +292,8 @@ export default class User {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
-    return {
+  public toSerializable(): Partial<User> {
+    const result: Partial<User> = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -312,6 +312,7 @@ export default class User {
       totalWatchTime: this.totalWatchTime,
       settings: this.settings
     };
+    return result;
   }
 
   /**
@@ -319,8 +320,8 @@ export default class User {
    * @param data 序列化的数据
    * @returns User实例
    */
-  public static fromSerializable(data: Record<string, any>): User {
-    return new User(data);
+  public static fromSerializable(data: Record<string, unknown>): User {
+    return new User(data as Partial<User>);
   }
 
   /**

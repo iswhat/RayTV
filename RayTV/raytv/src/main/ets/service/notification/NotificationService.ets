@@ -99,7 +99,7 @@ export interface NotificationServiceConfig {
   headsUpEnabled: boolean; // 是否启用悬浮通知
   reminderEnabled: boolean; // 是否启用提醒
   notificationLevels: Record<NotificationType, NotificationLevel>; // 各类型通知级别
-  channelSettings: Record<string, any>; // 通知渠道设置
+  channelSettings: Record<string, unknown>; // 通知渠道设置
 }
 
 // 默认通知服务配置

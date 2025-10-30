@@ -13,6 +13,14 @@ interface CategoryNavigationProps {
   showScrollButtons?: boolean;
 }
 
+/**
+ * 滚动偏移量接口
+ */
+export interface ScrollOffset {
+  x: number;
+  y: number;
+}
+
 @Component
 export default struct CategoryNavigation {
   @State scrollController: Scroller = new Scroller();
@@ -28,10 +36,10 @@ export default struct CategoryNavigation {
   
   // 检查滚动状态
   checkScrollPosition(): void {
-    // 为scrollOffset添加明确类型，避免any类型
-    const scrollOffset = this.scrollController.currentOffset() as { x: number; y: number };
-    // 为scrollExtent添加明确类型，避免any类型
-    const scrollExtent = this.scrollController.scrollableDistance() as { x: number; y: number };
+    // 使用明确的接口类型，避免对象字面量作为类型声明
+    const scrollOffset = this.scrollController.currentOffset() as ScrollOffset;
+    // 使用明确的接口类型，避免对象字面量作为类型声明
+    const scrollExtent = this.scrollController.scrollableDistance() as ScrollOffset;
     
     this.isScrollingLeft = scrollOffset.x > 10;
     this.isScrollingRight = scrollOffset.x < scrollExtent.x - 10;

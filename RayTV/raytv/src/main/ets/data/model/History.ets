@@ -194,8 +194,8 @@ export default class History {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
-    return {
+  public toSerializable(): Partial<History> {
+    const result: Partial<History> = {
       id: this.id,
       userId: this.userId,
       contentId: this.contentId,
@@ -215,6 +215,7 @@ export default class History {
       quality: this.quality,
       deviceId: this.deviceId
     };
+    return result;
   }
 
   /**
@@ -222,8 +223,8 @@ export default class History {
    * @param data 序列化的数据
    * @returns History实例
    */
-  public static fromSerializable(data: Record<string, any>): History {
-    return new History(data);
+  public static fromSerializable(data: Record<string, unknown>): History {
+    return new History(data as Partial<History>);
   }
 
   /**
