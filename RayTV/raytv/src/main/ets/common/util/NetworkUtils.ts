@@ -3,6 +3,10 @@
  * 提供网络请求、响应处理、错误重试等网络相关功能
  */
 import Logger from './Logger';
+import http from '@ohos.net.http';
+import connection from '@ohos.net.connection';
+import fs from '@ohos.file.fs';
+import promptAction from '@ohos.promptAction';
 
 // 网络请求超时时间
 const REQUEST_TIMEOUT = 30000; // 30秒
@@ -23,8 +27,8 @@ export interface RequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  params?: Record<string, any>;
-  data?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
   timeout?: number;
   retryCount?: number;
   baseURL?: string;
@@ -33,7 +37,7 @@ export interface RequestConfig {
 /**
  * 响应接口
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   data: T;
@@ -44,7 +48,7 @@ export interface ApiResponse<T = any> {
  */
 export class NetworkError extends Error {
   code: string;
-  response?: any;
+  response?: unknown;
   status?: number;
 
   constructor(message: string, code: string, response?: any, status?: number) {
@@ -110,50 +114,47 @@ export class NetworkUtils {
   /**
    * 检查响应状态
    */
-  private static checkResponseStatus(response: Response): boolean {
-    return response.status >= 200 && response.status < 300;
+  private static checkResponseStatus(response: http.HttpResponse): boolean {
+    return response.responseCode >= 200 && response.responseCode < 300;
   }
   
   /**
    * 处理网络错误
    */
-  private static handleNetworkError(error: any): never {
-    if (error.name === 'AbortError') {
-      throw new NetworkError('Request timeout', 'TIMEOUT', error);
-    }
-    
-    if (error.response) {
+  private static handleNetworkError(error: unknown): never {
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+        const errorObj = error as { code?: unknown; message?: string };
+        if (errorObj.code === 19 || errorObj.code === 28) {
+          throw new NetworkError('Request timeout', 'TIMEOUT', error);
+        }
+        throw new NetworkError(
+          errorObj.message || 'Unknown network error',
+          'NETWORK_ERROR',
+          error
+        );
+      }
+      
       throw new NetworkError(
-        error.response.statusText || 'Network error',
-        'HTTP_ERROR',
-        error.response,
-        error.response.status
+        String(error),
+        'NETWORK_ERROR',
+        error
       );
-    }
-    
-    throw new NetworkError(
-      error.message || 'Unknown network error',
-      'NETWORK_ERROR',
-      error
-    );
   }
   
   /**
    * 带重试机制的请求
    */
-  private static async requestWithRetry<T = any>(
+  private static async requestWithRetry<T = unknown>(
     config: RequestConfig,
     retryCount: number = 0
   ): Promise<ApiResponse<T>> {
-    const abortController = new AbortController();
+    const httpRequest = http.createHttp();
     const timeout = config.timeout || REQUEST_TIMEOUT;
     
-    // 设置超时
-    const timeoutId = setTimeout(() => {
-      abortController.abort();
-    }, timeout);
-    
     try {
+      // 设置超时
+      httpRequest.setTimeout({ connectTimeout: timeout });
+      
       const url = this.buildURL(config);
       const headers = this.mergeHeaders(config);
       
@@ -167,61 +168,93 @@ export class NetworkUtils {
       
       const startTime = Date.now();
       
-      const response = await fetch(url, {
-        method: config.method || 'GET',
-        headers,
-        body: config.data ? JSON.stringify(config.data) : undefined,
-        signal: abortController.signal,
+      // 转换请求方法
+      let method: http.RequestMethod = http.RequestMethod.GET;
+      switch (config.method) {
+        case 'POST':
+          method = http.RequestMethod.POST;
+          break;
+        case 'PUT':
+          method = http.RequestMethod.PUT;
+          break;
+        case 'DELETE':
+          method = http.RequestMethod.DELETE;
+          break;
+        case 'PATCH':
+          method = http.RequestMethod.PATCH;
+          break;
+        default:
+          method = http.RequestMethod.GET;
+      }
+      
+      const response = await httpRequest.request(url, {
+        method,
+        header: headers,
+        extraData: config.data ? JSON.stringify(config.data) : undefined,
       });
       
       const endTime = Date.now();
       Logger.debug(this.TAG, `Response received in ${endTime - startTime}ms`);
       
-      clearTimeout(timeoutId);
+      // 释放资源
+      httpRequest.destroy();
       
       if (!this.checkResponseStatus(response)) {
-        Logger.error(this.TAG, `HTTP Error: ${response.status} ${response.statusText}`);
+        Logger.error(this.TAG, `HTTP Error: ${response.responseCode}`);
         
         // 对于5xx错误，尝试重试
-        if (response.status >= 500 && retryCount < (config.retryCount || MAX_RETRY_COUNT)) {
+        if (response.responseCode >= 500 && retryCount < (config.retryCount || MAX_RETRY_COUNT)) {
           Logger.warn(this.TAG, `Retrying request (${retryCount + 1}/${config.retryCount || MAX_RETRY_COUNT})`);
           // 指数退避
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
-          return this.requestWithRetry(config, retryCount + 1);
+          return NetworkUtils.requestWithRetry(config, retryCount + 1);
         }
         
         throw new NetworkError(
-          response.statusText || 'HTTP error',
+          `HTTP error ${response.responseCode}`,
           'HTTP_ERROR',
           response,
-          response.status
+          response.responseCode
         );
       }
       
-      const data = await response.json();
+      // 解析响应数据
+      let data: ApiResponse<T>;
+      try {
+        data = JSON.parse(response.result.toString());
+      } catch (parseError) {
+        // 如果不是JSON，直接返回结果
+        data = { code: 200, message: 'Success', data: response.result } as ApiResponse<T>;
+      }
+      
       Logger.debug(this.TAG, `Response data: ${JSON.stringify(data)}`);
       
       return data;
     } catch (error) {
-      clearTimeout(timeoutId);
+      // 释放资源
+      try {
+        httpRequest.destroy();
+      } catch (e) {
+        // 忽略销毁时的错误
+      }
       
       // 对于网络错误，尝试重试
       if (retryCount < (config.retryCount || MAX_RETRY_COUNT) && 
           !(error instanceof NetworkError && error.code === 'TIMEOUT')) {
         Logger.warn(this.TAG, `Retrying request due to network error (${retryCount + 1}/${config.retryCount || MAX_RETRY_COUNT})`);
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
-        return this.requestWithRetry(config, retryCount + 1);
+        return NetworkUtils.requestWithRetry(config, retryCount + 1);
       }
       
-      this.handleNetworkError(error);
+      NetworkUtils.handleNetworkError(error);
     }
   }
   
   /**
    * GET请求
    */
-  public static async get<T = any>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<ApiResponse<T>> {
-    return this.requestWithRetry<T>({
+  public static async get<T = unknown>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<ApiResponse<T>> {
+    return NetworkUtils.requestWithRetry<T>({
       ...config,
       url,
       method: 'GET',
@@ -231,8 +264,8 @@ export class NetworkUtils {
   /**
    * POST请求
    */
-  public static async post<T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<ApiResponse<T>> {
-    return this.requestWithRetry<T>({
+  public static async post<T = unknown>(url: string, data?: unknown, config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<ApiResponse<T>> {
+    return NetworkUtils.requestWithRetry<T>({
       ...config,
       url,
       method: 'POST',
@@ -243,8 +276,8 @@ export class NetworkUtils {
   /**
    * PUT请求
    */
-  public static async put<T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<ApiResponse<T>> {
-    return this.requestWithRetry<T>({
+  public static async put<T = unknown>(url: string, data?: unknown, config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<ApiResponse<T>> {
+    return NetworkUtils.requestWithRetry<T>({
       ...config,
       url,
       method: 'PUT',
@@ -255,8 +288,8 @@ export class NetworkUtils {
   /**
    * DELETE请求
    */
-  public static async delete<T = any>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<ApiResponse<T>> {
-    return this.requestWithRetry<T>({
+  public static async delete<T = unknown>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<ApiResponse<T>> {
+    return NetworkUtils.requestWithRetry<T>({
       ...config,
       url,
       method: 'DELETE',
@@ -268,23 +301,29 @@ export class NetworkUtils {
    */
   public static async checkConnectivity(): Promise<boolean> {
     try {
-      // 使用navigator.onLine检查
-      if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
-        if (!navigator.onLine) {
-          Logger.warn(this.TAG, 'No internet connection detected by navigator.onLine');
+      // 使用HarmonyOS原生网络连接API检查
+      const netCap = await connection.getDefaultNetCapabilities();
+      const isConnected = netCap && netCap.netBearerType !== connection.NetBearType.NONE;
+      
+      Logger.info(this.TAG, `Connectivity check: ${isConnected ? 'connected' : 'disconnected'}`);
+      
+      // 如果检测到连接，进行简单的请求验证
+      if (isConnected) {
+        try {
+          const httpRequest = http.createHttp();
+          httpRequest.setTimeout({ connectTimeout: 5000 });
+          const response = await httpRequest.request('https://www.baidu.com', {
+            method: http.RequestMethod.HEAD
+          });
+          httpRequest.destroy();
+          return response.responseCode >= 200 && response.responseCode < 300;
+        } catch (reqError) {
+          Logger.warn(this.TAG, `Connection test failed despite network being available: ${reqError}`);
           return false;
         }
       }
       
-      // 尝试一个简单的请求验证
-      const response = await fetch('https://www.baidu.com', {
-        method: 'HEAD',
-        cache: 'no-cache',
-      });
-      
-      const isConnected = response.ok;
-      Logger.info(this.TAG, `Connectivity check: ${isConnected ? 'connected' : 'disconnected'}`);
-      return isConnected;
+      return false;
     } catch (error) {
       Logger.error(this.TAG, `Connectivity check failed: ${error}`);
       return false;
@@ -298,37 +337,46 @@ export class NetworkUtils {
     try {
       Logger.info(this.TAG, `Downloading file from ${url} to ${filename}`);
       
-      const response = await fetch(url);
+      // 获取应用的文件目录
+      const context = getContext();
+      const filesDir = context.filesDir;
+      const filePath = `${filesDir}/${filename}`;
       
-      if (!response.ok) {
-        throw new NetworkError(
-          `Download failed with status ${response.status}`,
-          'DOWNLOAD_ERROR',
-          response,
-          response.status
-        );
+      // 使用HTTP请求下载文件
+      const httpRequest = http.createHttp();
+      try {
+        const response = await httpRequest.downloadFile(url, {
+          filePath: filePath,
+          enableCache: false
+        });
+        
+        if (response.responseCode !== 200) {
+          throw new NetworkError(
+            `Download failed with status ${response.responseCode}`,
+            'DOWNLOAD_ERROR',
+            response,
+            response.responseCode
+          );
+        }
+        
+        Logger.info(this.TAG, `File downloaded successfully: ${filename}`);
+        
+        // 通知用户下载完成
+        try {
+          await promptAction.showToast({
+            message: `文件下载完成: ${filename}`,
+            duration: 2000
+          });
+        } catch (toastError) {
+          // 忽略toast错误
+          Logger.warn(this.TAG, `Failed to show toast: ${toastError}`);
+        }
+        
+        return true;
+      } finally {
+        // 释放资源
+        httpRequest.destroy();
       }
-      
-      const blob = await response.blob();
-      
-      // 创建下载链接
-      const a = document.createElement('a');
-      const urlBlob = URL.createObjectURL(blob);
-      a.href = urlBlob;
-      a.download = filename;
-      
-      // 触发下载
-      document.body.appendChild(a);
-      a.click();
-      
-      // 清理
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(urlBlob);
-      }, 100);
-      
-      Logger.info(this.TAG, `File downloaded successfully: ${filename}`);
-      return true;
     } catch (error) {
       Logger.error(this.TAG, `Failed to download file: ${error}`);
       return false;

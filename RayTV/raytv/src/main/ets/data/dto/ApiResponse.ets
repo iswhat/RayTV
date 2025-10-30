@@ -54,14 +54,14 @@ export interface ErrorDetail {
   field?: string;      // 字段名称（用于验证错误）
   message: string;     // 错误消息
   code?: string;       // 错误代码
-  value?: any;         // 错误值
+  value?: unknown;     // 错误值
 }
 
 /**
  * API响应类
  * 用于标准化API响应结构
  */
-export default class ApiResponse<T = any> {
+export default class ApiResponse<T = unknown> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据
@@ -208,7 +208,7 @@ export default class ApiResponse<T = any> {
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): Record<string, any> {
+  toObject(): Record<string, unknown> {
     return {
       code: this.code,
       message: this.message,
@@ -225,7 +225,7 @@ export default class ApiResponse<T = any> {
    * 从对象创建实例
    * @param obj 对象数据
    */
-  static fromObject<T = any>(obj: Record<string, any>): ApiResponse<T> {
+  static fromObject<T = unknown>(obj: Record<string, unknown>): ApiResponse<T> {
     return new ApiResponse<T>({
       code: obj.code || ResponseCode.SUCCESS,
       message: obj.message || 'Unknown response',
@@ -242,7 +242,7 @@ export default class ApiResponse<T = any> {
   /**
    * 创建成功响应
    */
-  static success<T = any>(data?: T, message: string = 'Success'): ApiResponse<T> {
+  static success<T = unknown>(data?: T, message: string = 'Success'): ApiResponse<T> {
     return new ApiResponse<T>({
       code: ResponseCode.SUCCESS,
       message,
@@ -253,7 +253,7 @@ export default class ApiResponse<T = any> {
   /**
    * 创建带分页的成功响应
    */
-  static successWithPagination<T = any>(
+  static successWithPagination<T = unknown>(
     data: T,
     pagination: PaginationInfo,
     message: string = 'Success'
@@ -269,7 +269,7 @@ export default class ApiResponse<T = any> {
   /**
    * 创建错误响应
    */
-  static error<T = any>(
+  static error<T = unknown>(
     code: ResponseCode,
     message: string,
     errors?: ErrorDetail[]
@@ -284,70 +284,70 @@ export default class ApiResponse<T = any> {
   /**
    * 创建参数错误响应
    */
-  static badRequest<T = any>(message: string = 'Bad Request', errors?: ErrorDetail[]): ApiResponse<T> {
+  static badRequest<T = unknown>(message: string = 'Bad Request', errors?: ErrorDetail[]): ApiResponse<T> {
     return this.error<T>(ResponseCode.BAD_REQUEST, message, errors);
   }
 
   /**
    * 创建未授权错误响应
    */
-  static unauthorized<T = any>(message: string = 'Unauthorized'): ApiResponse<T> {
+  static unauthorized<T = unknown>(message: string = 'Unauthorized'): ApiResponse<T> {
     return this.error<T>(ResponseCode.UNAUTHORIZED, message);
   }
 
   /**
    * 创建禁止访问错误响应
    */
-  static forbidden<T = any>(message: string = 'Forbidden'): ApiResponse<T> {
+  static forbidden<T = unknown>(message: string = 'Forbidden'): ApiResponse<T> {
     return this.error<T>(ResponseCode.FORBIDDEN, message);
   }
 
   /**
    * 创建未找到资源错误响应
    */
-  static notFound<T = any>(message: string = 'Resource not found'): ApiResponse<T> {
+  static notFound<T = unknown>(message: string = 'Resource not found'): ApiResponse<T> {
     return this.error<T>(ResponseCode.NOT_FOUND, message);
   }
 
   /**
    * 创建服务器错误响应
    */
-  static serverError<T = any>(message: string = 'Internal server error'): ApiResponse<T> {
+  static serverError<T = unknown>(message: string = 'Internal server error'): ApiResponse<T> {
     return this.error<T>(ResponseCode.INTERNAL_SERVER_ERROR, message);
   }
 
   /**
    * 创建网络错误响应
    */
-  static networkError<T = any>(message: string = 'Network error'): ApiResponse<T> {
+  static networkError<T = unknown>(message: string = 'Network error'): ApiResponse<T> {
     return this.error<T>(ResponseCode.NETWORK_ERROR, message);
   }
 
   /**
    * 创建超时错误响应
    */
-  static timeoutError<T = any>(message: string = 'Request timeout'): ApiResponse<T> {
+  static timeoutError<T = unknown>(message: string = 'Request timeout'): ApiResponse<T> {
     return this.error<T>(ResponseCode.TIMEOUT_ERROR, message);
   }
 
   /**
    * 创建解析错误响应
    */
-  static parseError<T = any>(message: string = 'Parse error'): ApiResponse<T> {
+  static parseError<T = unknown>(message: string = 'Parse error'): ApiResponse<T> {
     return this.error<T>(ResponseCode.PARSE_ERROR, message);
   }
 
   /**
    * 创建验证错误响应
    */
-  static validationError<T = any>(errors: ErrorDetail[], message: string = 'Validation failed'): ApiResponse<T> {
+  static validationError<T = unknown>(errors: ErrorDetail[], message: string = 'Validation failed'): ApiResponse<T> {
     return this.error<T>(ResponseCode.VALIDATION_ERROR, message, errors);
   }
 
   /**
    * 创建单个验证错误响应
    */
-  static singleValidationError<T = any>(field: string, message: string): ApiResponse<T> {
+  static singleValidationError<T = unknown>(field: string, message: string): ApiResponse<T> {
     const error: ErrorDetail = { field, message };
     return this.validationError<T>([error]);
   }
@@ -355,7 +355,7 @@ export default class ApiResponse<T = any> {
   /**
    * 从错误创建响应
    */
-  static fromError<T = any>(error: Error): ApiResponse<T> {
+  static fromError<T = unknown>(error: Error): ApiResponse<T> {
     // 可以根据不同类型的错误返回不同的响应
     Logger.error(TAG, `Creating response from error: ${error.message}`, error);
     
@@ -387,7 +387,7 @@ export default class ApiResponse<T = any> {
     message: string,
     field?: string,
     code?: string,
-    value?: any
+    value?: unknown
   ): ErrorDetail {
     return {
       field,

@@ -26,6 +26,7 @@ export class EventBusUtil {
   private eventMap: Map<string, Subscription[]> = new Map();
   private isPublishing = false;
   private pendingOperations: (() => void)[] = [];
+  private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
 
   /**
    * 私有构造函数
@@ -221,6 +222,8 @@ export class EventBusUtil {
       
       const operation = () => {
         this.eventMap.clear();
+        // 同时清除所有防抖定时器
+        this.clearAllDebounceTimers();
       };
 
       if (this.isPublishing) {
@@ -324,17 +327,49 @@ export class EventBusUtil {
   public emitDebounced<T = any>(eventName: string, data?: T, wait: number = 300): void {
     const debounceKey = `__debounce_${eventName}`;
     
-    // 在实际环境中，这里需要一个存储防抖定时器的机制
-    // 这里使用简单的模拟实现
-    const clearPreviousTimeout = () => {
-      // 清除之前的定时器
-    };
+    // 清除之前的定时器
+    this.clearDebounceTimer(debounceKey);
     
-    clearPreviousTimeout();
-    
-    setTimeout(() => {
+    // 创建新的定时器
+    const timerId = setTimeout(() => {
+      // 清除定时器引用
+      this.debounceTimers.delete(debounceKey);
+      // 发布事件
       this.emit(eventName, data);
+      this.logger.debug(`Debounced event emitted: ${eventName}`);
     }, wait);
+    
+    // 存储定时器ID
+    this.debounceTimers.set(debounceKey, timerId);
+    this.logger.debug(`Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
+  }
+  
+  /**
+   * 清除指定事件的防抖定时器
+   * @param debounceKey 防抖键
+   */
+  private clearDebounceTimer(debounceKey: string): void {
+    if (this.debounceTimers.has(debounceKey)) {
+      const timerId = this.debounceTimers.get(debounceKey)!;
+      clearTimeout(timerId);
+      this.debounceTimers.delete(debounceKey);
+      this.logger.debug(`Debounced timer cleared for key: ${debounceKey}`);
+    }
+  }
+  
+  /**
+   * 清除所有防抖定时器
+   */
+  public clearAllDebounceTimers(): void {
+    try {
+      this.logger.debug('Clearing all debounce timers');
+      this.debounceTimers.forEach(timerId => {
+        clearTimeout(timerId);
+      });
+      this.debounceTimers.clear();
+    } catch (error) {
+      this.logger.error('Failed to clear debounce timers', error as Error);
+    }
   }
 }
 

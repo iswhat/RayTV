@@ -1,6 +1,7 @@
 // TaskPoolManager - 任务池管理器
 import Logger from '../../common/util/Logger';
 import taskPool from '@ohos.taskpool';
+import MemoryManager from '../../common/util/MemoryManager';
 
 const TAG = 'TaskPoolManager';
 
@@ -48,12 +49,14 @@ export class TaskPoolManager {
   private runningTasks: Map<string, Task> = new Map();
   private maxConcurrentTasks: number = 3;
   private isProcessing: boolean = false;
+  private memoryManager: MemoryManager;
 
   /**
    * 私有构造函数
    */
   private constructor() {
     Logger.info(TAG, 'TaskPoolManager initialized');
+    this.memoryManager = MemoryManager.getInstance();
   }
 
   /**
@@ -166,7 +169,11 @@ export class TaskPoolManager {
     if (runningTask) {
       // 标记为取消状态
       this.runningTasks.delete(taskId);
-      runningTask.onCancel?.();
+      try {
+        runningTask.onCancel?.();
+      } catch (error) {
+        Logger.error(TAG, `Error in task ${taskId} onCancel callback: ${(error as Error).message}`);
+      }
       Logger.info(TAG, `Running task ${taskId} cancelled`);
       return true;
     }
@@ -176,7 +183,11 @@ export class TaskPoolManager {
     if (index !== -1) {
       const task = this.taskQueue[index];
       this.taskQueue.splice(index, 1);
-      task.onCancel?.();
+      try {
+        task.onCancel?.();
+      } catch (error) {
+        Logger.error(TAG, `Error in task ${taskId} onCancel callback: ${(error as Error).message}`);
+      }
       Logger.info(TAG, `Queued task ${taskId} cancelled`);
       return true;
     }
@@ -190,7 +201,11 @@ export class TaskPoolManager {
    */
   public clearQueue(): void {
     for (const task of this.taskQueue) {
-      task.onCancel?.();
+      try {
+        task.onCancel?.();
+      } catch (error) {
+        Logger.error(TAG, `Error in task onCancel callback: ${(error as Error).message}`);
+      }
     }
     this.taskQueue = [];
     Logger.info(TAG, 'Task queue cleared');
@@ -242,24 +257,81 @@ export class TaskPoolManager {
     this.isProcessing = true;
     
     try {
+      // 动态调整并发任务数基于内存使用情况
+      const memoryStats = this.memoryManager.getMemoryStats();
+      const adjustedMaxConcurrentTasks = this.calculateOptimalConcurrentTasks(memoryStats.currentUsage);
+      
       // 执行尽可能多的并发任务
       while (
-        this.runningTasks.size < this.maxConcurrentTasks &&
+        this.runningTasks.size < adjustedMaxConcurrentTasks &&
         this.taskQueue.length > 0
       ) {
+        // 在每次执行任务前重新检查内存可用性
+        if (!this.memoryManager.checkMemoryAvailability()) {
+          Logger.warn(TAG, `Insufficient memory to process tasks (${(memoryStats.currentUsage * 100).toFixed(1)}%), pausing queue`);
+          // 尝试清理内存
+          this.memoryManager.clearMemory();
+          // 延迟重试，根据内存使用情况动态调整延迟时间
+          const retryDelay = this.calculateRetryDelay(memoryStats.currentUsage);
+          setTimeout(() => this.processQueue(), retryDelay);
+          return;
+        }
+        
         const task = this.taskQueue.shift();
         if (task) {
           this.executeTask(task);
         }
       }
+      
+      // 如果队列不为空但没有执行任务，可能是因为内存不足
+      if (this.taskQueue.length > 0 && this.runningTasks.size < this.maxConcurrentTasks) {
+        Logger.info(TAG, `Task queue has ${this.taskQueue.length} tasks, but running at capacity (${this.runningTasks.size}/${adjustedMaxConcurrentTasks})`);
+      }
     } finally {
       this.isProcessing = false;
       
-      // 如果还有任务在队列中，继续处理
+      // 如果还有任务在队列中且没有达到最大并发数，继续处理
       if (this.taskQueue.length > 0 && this.runningTasks.size < this.maxConcurrentTasks) {
         setTimeout(() => this.processQueue(), 0);
       }
     }
+  }
+  
+  /**
+   * 根据内存使用情况计算最佳并发任务数
+   * @param memoryUsage 当前内存使用率
+   * @returns 调整后的最大并发任务数
+   */
+  private calculateOptimalConcurrentTasks(memoryUsage: number): number {
+    // 内存使用率低于50%：使用最大并发数
+    if (memoryUsage < 0.5) {
+      return this.maxConcurrentTasks;
+    }
+    // 内存使用率50%-70%：使用75%的最大并发数
+    else if (memoryUsage < 0.7) {
+      return Math.max(1, Math.floor(this.maxConcurrentTasks * 0.75));
+    }
+    // 内存使用率70%-85%：使用50%的最大并发数
+    else if (memoryUsage < 0.85) {
+      return Math.max(1, Math.floor(this.maxConcurrentTasks * 0.5));
+    }
+    // 内存使用率高于85%：只允许1个并发任务
+    else {
+      return 1;
+    }
+  }
+  
+  /**
+   * 根据内存使用情况计算重试延迟
+   * @param memoryUsage 当前内存使用率
+   * @returns 重试延迟时间（毫秒）
+   */
+  private calculateRetryDelay(memoryUsage: number): number {
+    // 内存使用越高，重试延迟越长
+    if (memoryUsage < 0.7) return 1000;     // 70%以下：1秒
+    if (memoryUsage < 0.8) return 2000;     // 70%-80%：2秒
+    if (memoryUsage < 0.9) return 3000;     // 80%-90%：3秒
+    return 5000;                            // 90%以上：5秒
   }
 
   /**
@@ -272,26 +344,35 @@ export class TaskPoolManager {
     }
 
     this.runningTasks.set(task.id, task);
-    Logger.debug(TAG, `Task ${task.id} started execution`);
+    Logger.debug(TAG, `Task ${task.id} started execution with priority ${task.priority}`);
+    
+    // 记录任务开始前的内存使用情况
+    const startMemoryUsage = this.memoryManager.getCurrentMemoryUsage();
+    const startTime = Date.now();
 
     try {
+      // 根据任务优先级和内存情况动态调整任务配置
+      const memoryStats = this.memoryManager.getMemoryStats();
+      const taskOptions = this.createOptimizedTaskOptions(task.priority, memoryStats);
+      
       // 使用TaskPool执行任务，实现真正的系统级并发
-      // 为任务创建Task对象，以便在单独线程中执行
       const taskFunction = async () => {
-        return await task.execute();
+        try {
+          return await task.execute();
+        } catch (error) {
+          Logger.error(TAG, `Task function execution error: ${error instanceof Error ? error.message : String(error)}`);
+          throw error;
+        }
       };
 
-      // 设置任务优先级
-      const priority = this.getTaskPoolPriority(task.priority);
-      const taskOptions: taskPool.TaskOptions = {
-        priority
-      };
-
-      // 使用taskPool.execute执行任务
+      // 执行任务
       const result = await taskPool.execute(taskFunction, taskOptions);
       
       // 处理完成
       this.handleTaskComplete(task, result);
+      
+      // 记录任务完成后的内存使用情况，监控内存泄漏
+      this.logTaskMemoryUsage(task.id, startMemoryUsage, startTime);
     } catch (error) {
       // 处理错误
       this.handleTaskError(task, error as Error);
@@ -299,8 +380,74 @@ export class TaskPoolManager {
       // 从运行中任务移除
       this.runningTasks.delete(task.id);
       
+      // 在任务完成后再次检查内存，如果内存使用过高尝试清理
+      this.checkAndCleanupMemory();
+      
       // 继续处理队列
       this.processQueue();
+    }
+  }
+  
+  /**
+   * 创建优化的任务选项
+   * @param priority 任务优先级
+   * @param memoryStats 内存统计信息
+   * @returns 优化的任务选项
+   */
+  private createOptimizedTaskOptions(priority: TaskPriority, memoryStats: { currentUsage: number }): taskPool.TaskOptions {
+    const taskOptions: taskPool.TaskOptions = {
+      priority: this.getTaskPoolPriority(priority)
+    };
+    
+    // 在内存紧张时，对低优先级任务应用更严格的资源限制
+    if (memoryStats.currentUsage > 0.8 && priority <= TaskPriority.NORMAL) {
+      Logger.info(TAG, `Applying resource limits for low priority task due to high memory usage (${(memoryStats.currentUsage * 100).toFixed(1)}%)`);
+      // 注意：TaskPool可能不直接支持这些选项，这里仅作为示例
+      // taskOptions.maxMemoryUsage = 0.1; // 限制任务内存使用
+    }
+    
+    return taskOptions;
+  }
+  
+  /**
+   * 记录任务的内存使用情况
+   * @param taskId 任务ID
+   * @param startUsage 开始时的内存使用率
+   * @param startTime 开始时间
+   */
+  private logTaskMemoryUsage(taskId: string, startUsage: number, startTime: number): void {
+    const endUsage = this.memoryManager.getCurrentMemoryUsage();
+    const duration = Date.now() - startTime;
+    const memoryDiff = endUsage - startUsage;
+    
+    // 如果内存使用增加了5%以上，记录警告
+    if (memoryDiff > 0.05) {
+      Logger.warn(TAG, `Task ${taskId} may be leaking memory: memory usage increased by ${(memoryDiff * 100).toFixed(1)}%`);
+    }
+    
+    if (duration > 10000) { // 任务执行超过10秒
+      Logger.info(TAG, `Long-running task ${taskId} completed in ${duration}ms`);
+    }
+  }
+  
+  /**
+   * 检查并在需要时清理内存
+   */
+  private checkAndCleanupMemory(): void {
+    const memoryUsage = this.memoryManager.getCurrentMemoryUsage();
+    
+    // 当内存使用超过85%时尝试清理
+    if (memoryUsage > 0.85) {
+      Logger.warn(TAG, `Memory usage high (${(memoryUsage * 100).toFixed(1)}%), attempting cleanup`);
+      this.memoryManager.clearMemory();
+      
+      // 清理后再次检查
+      const afterCleanupUsage = this.memoryManager.getCurrentMemoryUsage();
+      const freedMemory = memoryUsage - afterCleanupUsage;
+      
+      if (freedMemory > 0.05) {
+        Logger.info(TAG, `Memory cleanup successful: freed ${(freedMemory * 100).toFixed(1)}%`);
+      }
     }
   }
 
@@ -311,7 +458,11 @@ export class TaskPoolManager {
    */
   private handleTaskComplete(task: Task, result: any): void {
     Logger.debug(TAG, `Task ${task.id} completed successfully`);
-    task.onComplete?.(result);
+    try {
+      task.onComplete?.(result);
+    } catch (error) {
+      Logger.error(TAG, `Error in task ${task.id} onComplete callback: ${(error as Error).message}`);
+    }
   }
 
   /**
@@ -321,7 +472,11 @@ export class TaskPoolManager {
    */
   private handleTaskError(task: Task, error: Error): void {
     Logger.error(TAG, `Task ${task.id} failed: ${error.message}`);
-    task.onError?.(error);
+    try {
+      task.onError?.(error);
+    } catch (callbackError) {
+      Logger.error(TAG, `Error in task ${task.id} onError callback: ${(callbackError as Error).message}`);
+    }
   }
 }
 

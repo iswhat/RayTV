@@ -5,6 +5,7 @@ import { ConfigLoader } from './ConfigLoader';
 import { ConfigParser } from './ConfigParser';
 import { SiteDao } from '../../data/dao/SiteDao';
 import { LineDao } from '../../data/dao/LineDao';
+import http from '@ohos.net.http';
 
 const TAG = 'LineManager';
 
@@ -527,21 +528,22 @@ export class LineManager {
           try {
             const startTime = Date.now();
             
-            // 创建一个带超时的请求
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            // 创建HTTP请求对象
+            const httpRequest = http.createHttp();
+            httpRequest.setTimeout({ connectTimeout: timeout });
             
             // 测试片源URL
-            const response = await fetch(site.url, {
-              method: 'GET',
-              headers: {
+            const response = await httpRequest.request(site.url, {
+              method: http.RequestMethod.GET,
+              header: {
                 'User-Agent': 'RayTV-HarmonyOS',
                 'Accept': '*/*'
-              },
-              signal: controller.signal
+              }
             });
             
-            clearTimeout(timeoutId);
+            // 释放资源
+            httpRequest.destroy();
+            
             const responseTime = Date.now() - startTime;
             
             return {
@@ -570,21 +572,22 @@ export class LineManager {
           try {
             const startTime = Date.now();
             
-            // 创建一个带超时的请求
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            // 创建HTTP请求对象
+            const httpRequest = http.createHttp();
+            httpRequest.setTimeout({ connectTimeout: timeout });
             
             // 测试片源URL
-            const response = await fetch(site.url, {
-              method: 'GET',
-              headers: {
+            const response = await httpRequest.request(site.url, {
+              method: http.RequestMethod.GET,
+              header: {
                 'User-Agent': 'RayTV-HarmonyOS',
                 'Accept': '*/*'
-              },
-              signal: controller.signal
+              }
             });
             
-            clearTimeout(timeoutId);
+            // 释放资源
+            httpRequest.destroy();
+            
             const responseTime = Date.now() - startTime;
             
             results.push({

@@ -519,13 +519,13 @@ export class UserService {
       }
       
       // 检查是否已存在
-      const exists = favorites.some((fav: any) => fav.id === item.id && fav.type === item.type);
+      const exists = favorites.some((fav: FavoriteItem) => fav.id === item.id && fav.type === item.type);
       if (!exists) {
         // 添加到收藏列表
         favorites.unshift({
           ...item,
           addTime: new Date().toISOString()
-        });
+        } as FavoriteItem);
         
         // 保存收藏列表
         await this.storageUtil.save(StorageType.USER_DATA, `favorites_${this.userInfo.userId}`, favorites);
@@ -538,10 +538,20 @@ export class UserService {
     }
   }
   
-  /**
-   * 移除收藏
-   */
-  public async removeFavorite(itemId: string, itemType: string): Promise<boolean> {
+// 收藏项接口
+interface FavoriteItem {
+  id: string;
+  type: string;
+  title?: string;
+  poster?: string;
+  addTime: string;
+  [key: string]: any;
+}
+
+/**
+ * 移除收藏
+ */
+public async removeFavorite(itemId: string, itemType: string): Promise<boolean> {
     await this.initialize();
     
     if (!this.userInfo) {
@@ -557,7 +567,7 @@ export class UserService {
       }
       
       // 过滤掉要移除的项目
-      const newFavorites = favorites.filter((fav: any) => !(fav.id === itemId && fav.type === itemType));
+      const newFavorites = favorites.filter((fav: FavoriteItem) => !(fav.id === itemId && fav.type === itemType));
       
       // 保存更新后的收藏列表
       await this.storageUtil.save(StorageType.USER_DATA, `favorites_${this.userInfo.userId}`, newFavorites);
@@ -572,7 +582,7 @@ export class UserService {
   /**
    * 获取收藏列表
    */
-  public async getFavorites(type?: string): Promise<any[]> {
+  public async getFavorites(type?: string): Promise<FavoriteItem[]> {
     await this.initialize();
     
     if (!this.userInfo) {
@@ -589,7 +599,7 @@ export class UserService {
       
       // 如果指定了类型，过滤结果
       if (type) {
-        favorites = favorites.filter((fav: any) => fav.type === type);
+        favorites = favorites.filter((fav: FavoriteItem) => fav.type === type);
       }
       
       return favorites;
@@ -612,7 +622,7 @@ export class UserService {
     try {
       // 获取用户的收藏列表
       const favorites = await this.getFavorites();
-      return favorites.some((fav: any) => fav.id === itemId && fav.type === itemType);
+      return favorites.some((fav: FavoriteItem) => fav.id === itemId && fav.type === itemType);
     } catch (error) {
       console.error('Failed to check favorite status:', error);
       return false;

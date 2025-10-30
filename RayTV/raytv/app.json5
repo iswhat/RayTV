@@ -15,8 +15,8 @@
   "modules": [],
   "abilities": [
     {
-      "name": "MainAbility",
-      "srcEntrance": "./src/main/ets/MainAbility.ts",
+      "name": "raytvability.RaytvAbility",
+      "srcEntrance": "./src/main/ets/raytvability/RaytvAbility.ets",
       "description": "应用主入口",
       "icon": "./assets/icon.png",
       "label": "RayTV",
@@ -45,6 +45,13 @@
           "name": "ohos.permission.GET_NETWORK_INFO"
         }
       ]
+    },
+    {
+      "name": "raytvbackupability.RayTVBackupAbility",
+      "srcEntrance": "./src/main/ets/raytvbackupability/RayTVBackupAbility.ts",
+      "description": "RayTV应用备份还原能力",
+      "exported": true,
+      "type": "extension"
     }
   ],
   "distributedNotificationEnabled": false,
@@ -56,7 +63,7 @@
   ],
   "deviceConfig": {
     "default": {
-      "allowAppDataRestore": false,
+      "allowAppDataRestore": true,
       "keepAlive": false
     }
   },

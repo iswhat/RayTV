@@ -57,7 +57,7 @@ export class ConfigParser {
       }
       
       // 验证站点类型
-      if (site.type && !Object.values(SiteType).includes(site.type)) {
+      if (site.type && !this.isValidSiteType(site.type)) {
         Logger.warn(TAG, `Site ${site.name} has invalid type: ${site.type}`);
         site.type = SiteType.ALL; // 默认值
       }
@@ -84,8 +84,11 @@ export class ConfigParser {
   }
   
   /**
-   * 确保站点配置的默认值
+   * 检查是否为有效的站点类型
    */
+  private isValidSiteType(type: string): boolean {
+    return type === SiteType.ALL || type === SiteType.MOVIE || type === SiteType.SERIES || type === SiteType.ANIME;
+  }
   private ensureDefaultValues(site: any): void {
     site.type = site.type || SiteType.ALL;
     site.searchable = site.searchable !== false;

@@ -962,7 +962,7 @@ export class CacheRepository {
     
     // 检查标签
     if (options?.tags && options.tags.length > 0) {
-      if (!item.metadata.tags || !item.metadata.tags.some(tag => options.tags!.includes(tag))) {
+      if (!item.metadata.tags || !item.metadata.tags.some(tag => options.tags?.includes(tag))) {
         return false;
       }
     }

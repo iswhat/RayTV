@@ -141,7 +141,7 @@ export enum MediaEvent {
 }
 
 // 媒体事件监听回调类型
-type MediaEventListener = (event: MediaEvent, data: any) => void;
+type MediaEventListener = (event: MediaEvent, data: unknown) => void;
 
 // 播放选项接口（业务层需要）
 export interface PlayOptions {
@@ -197,7 +197,7 @@ export default class MediaService {
   private playbackRecords: Map<string, PlaybackRecord> = new Map();
   private collections: Map<string, MediaCollection> = new Map();
   private currentPlaybackProgress: PlaybackProgress | null = null;
-  private eventListeners: Map<MediaEvent, MediaEventListener[]> = new Map();
+  private eventListeners: Record<MediaEvent, MediaEventListener[]> = {} as Record<MediaEvent, MediaEventListener[]>;
   private progressSyncInterval: number | null = null;
   private isInitialized: boolean = false;
   
@@ -935,11 +935,10 @@ export default class MediaService {
    * 添加媒体事件监听
    */
   public addMediaEventListener(event: MediaEvent, listener: MediaEventListener): void {
-    if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, []);
-    }
+    this.ensureEventExists(event);
     
-    this.eventListeners.get(event)!.push(listener);
+    const listeners = this.getEventListeners(event);
+    listeners.push(listener);
     Logger.debug(TAG, `Added media event listener for ${event}`);
   }
 
@@ -947,8 +946,8 @@ export default class MediaService {
    * 移除媒体事件监听
    */
   public removeMediaEventListener(event: MediaEvent, listener: MediaEventListener): void {
-    if (this.eventListeners.has(event)) {
-      const listeners = this.eventListeners.get(event)!;
+    if (this.hasEvent(event)) {
+      const listeners = this.getEventListeners(event);
       const index = listeners.indexOf(listener);
       
       if (index > -1) {
@@ -961,9 +960,9 @@ export default class MediaService {
   /**
    * 通知事件
    */
-  private notifyEvent(event: MediaEvent, data: any): void {
-    if (this.eventListeners.has(event)) {
-      const listeners = this.eventListeners.get(event)!;
+  private notifyEvent(event: MediaEvent, data: unknown): void {
+    if (this.hasEvent(event)) {
+      const listeners = this.getEventListeners(event);
       for (const listener of listeners) {
         try {
           listener(event, data);
@@ -974,6 +973,30 @@ export default class MediaService {
     }
   }
 
+  /**
+   * 确保事件存在于监听器映射中
+   */
+  private ensureEventExists(event: MediaEvent): void {
+    if (!this.hasEvent(event)) {
+      this.eventListeners[event] = [];
+    }
+  }
+  
+  /**
+   * 检查事件是否存在
+   */
+  private hasEvent(event: MediaEvent): boolean {
+    return this.eventListeners[event] !== undefined;
+  }
+  
+  /**
+   * 获取事件监听器
+   */
+  private getEventListeners(event: MediaEvent): MediaEventListener[] {
+    this.ensureEventExists(event);
+    return this.eventListeners[event];
+  }
+  
   /**
    * 跨设备切换播放
    */

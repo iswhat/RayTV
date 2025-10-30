@@ -38,6 +38,25 @@ export interface RatingInfo {
 }
 
 /**
+ * 音轨信息接口
+ */
+export interface AudioTrack {
+  id: string;
+  name: string;
+  url: string;
+}
+
+/**
+ * 字幕信息接口
+ */
+export interface SubtitleTrack {
+  id: string;
+  name: string;
+  url: string;
+  language: string;
+}
+
+/**
  * 视频播放源接口
  */
 export interface VideoSource {
@@ -49,8 +68,8 @@ export interface VideoSource {
   size?: number;       // 文件大小（字节）
   duration?: number;   // 时长（秒）
   resolution?: string; // 分辨率
-  audioTracks?: Array<{id: string; name: string; url: string}>; // 音轨列表
-  subtitleTracks?: Array<{id: string; name: string; url: string; language: string}>; // 字幕列表
+  audioTracks?: Array<AudioTrack>; // 音轨列表
+  subtitleTracks?: Array<SubtitleTrack>; // 字幕列表
 }
 
 /**
@@ -306,14 +325,16 @@ export default class Movie {
     if (!this.episodes) {
       return 0;
     }
-    return this.episodes.filter(episode => episode.isWatched).length;
+    // 修复类型错误：确保isWatched是布尔值
+    return this.episodes.filter(episode => episode.isWatched === true).length;
   }
 
   /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
+  public toSerializable(): Partial<Movie> {
+    // 使用Movie类型本身作为返回类型，避免使用any
     return {
       id: this.id,
       title: this.title,
@@ -350,8 +371,8 @@ export default class Movie {
    * @param data 序列化的数据
    * @returns Movie实例
    */
-  public static fromSerializable(data: Record<string, any>): Movie {
-    return new Movie(data);
+  public static fromSerializable(data: Record<string, unknown>): Movie {
+    return new Movie(data as Partial<Movie>);
   }
 
   /**

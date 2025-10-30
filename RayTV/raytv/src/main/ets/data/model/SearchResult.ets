@@ -47,7 +47,7 @@ export default class SearchResult {
   directors?: string[];    // 导演列表（针对内容类型）
   popularity?: number;     // 热度/流行度
   matchScore?: number;     // 匹配分数（搜索相关性）
-  extraInfo?: Record<string, any>; // 额外信息
+  extraInfo?: Record<string, unknown>; // 额外信息，使用unknown类型提高类型安全性
   link?: string;           // 关联链接
   sourceId?: string;       // 来源ID
   sourceName?: string;     // 来源名称
@@ -75,7 +75,8 @@ export default class SearchResult {
     this.directors = data.directors || [];
     this.popularity = data.popularity;
     this.matchScore = data.matchScore;
-    this.extraInfo = data.extraInfo || {};
+    // 确保extraInfo是有效的对象类型
+    this.extraInfo = data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo) ? data.extraInfo : {};
     this.link = data.link;
     this.sourceId = data.sourceId;
     this.sourceName = data.sourceName;

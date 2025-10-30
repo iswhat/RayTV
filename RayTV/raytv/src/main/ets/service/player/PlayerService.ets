@@ -213,7 +213,7 @@ export default class PlayerService {
   private statusListeners: Map<PlaybackStatus, Array<(state: PlaybackState) => void>> = new Map();
   private settingsListeners: Array<(settings: PlayerSettings) => void> = [];
   private errorListeners: Array<(error: { type: PlaybackErrorType; message: string }) => void> = [];
-  private gestureListeners: Map<GestureType, Array<(region: GestureRegion) => void>> = [];
+  private gestureListeners: Map<GestureType, Array<(region: GestureRegion) => void>> = new Map();
 
   /**
    * 构造函数（私有，防止外部实例化）

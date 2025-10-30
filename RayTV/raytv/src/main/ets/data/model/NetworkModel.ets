@@ -36,12 +36,12 @@ export interface RequestOptions {
   /**
    * 请求数据
    */
-  data?: any;
+  data?: unknown;
   
   /**
    * URL查询参数
    */
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   
   /**
    * 超时时间（毫秒）
@@ -363,26 +363,26 @@ export interface NetworkListener {
    * @param eventType 事件类型
    * @param data 事件数据
    */
-  onNetworkEvent(eventType: NetworkEventType, data: any): void;
+  onNetworkEvent(eventType: NetworkEventType, data: unknown): void;
 }
 
 /**
  * 网络拦截器接口
  */
-export interface NetworkInterceptor {
+export interface NetworkInterceptor<T = unknown, R = unknown> {
   /**
    * 请求拦截
    * @param request 请求配置
    * @returns 处理后的请求配置
    */
-  interceptRequest(request: RequestOptions & { url: string; method: RequestMethod }): any;
+  interceptRequest(request: RequestOptions & { url: string; method: RequestMethod }): T;
   
   /**
    * 响应拦截
    * @param response 响应数据
    * @returns 处理后的响应数据
    */
-  interceptResponse(response: any): any;
+  interceptResponse(response: unknown): R;
 }
 
 /**

@@ -3,7 +3,7 @@
     "name": "raytv",
     "type": "entry",
     "description": "$string:module_desc",
-    "mainElement": "RaytvAbility",
+    "mainElement": "MainAbility",
     "deviceTypes": [
       "phone",
       "tablet",
@@ -15,8 +15,8 @@
     "pages": "$profile:main_pages",
     "abilities": [
       {
-        "name": "RaytvAbility",
-        "srcEntry": "./ets/raytvability/RaytvAbility.ets",
+        "name": "MainAbility",
+        "srcEntry": "./ets/MainAbility.ts",
         "description": "$string:RaytvAbility_desc",
         "icon": "$media:layered_image",
         "label": "$string:RaytvAbility_label",
@@ -37,16 +37,16 @@
     ],
     "extensionAbilities": [
       {
-        "name": "RaytvBackupAbility",
-        "srcEntry": "./ets/raytvbackupability/RaytvBackupAbility.ets",
         "type": "backup",
-        "exported": false,
+        "name": "raytvbackupability.RayTVBackupAbility",
+        "srcEntrance": "./ets/raytvbackupability/RayTVBackupAbility.ts",
+        "exported": true,
         "metadata": [
           {
-            "name": "ohos.extension.backup",
+            "name": "ohos.extension.backup.config",
             "resource": "$profile:backup_config"
           }
-        ],
+        ]
       }
     ]
   }

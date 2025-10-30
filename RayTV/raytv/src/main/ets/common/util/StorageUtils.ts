@@ -24,7 +24,7 @@ export enum StorageType {
  */
 export class StorageUtils {
   private static readonly TAG = 'StorageUtils';
-  private static memoryStorage: Map<string, any> = new Map();
+  private static memoryStorage: Map<string, unknown> = new Map();
   
   /**
    * 获取带前缀的键名
@@ -58,7 +58,7 @@ export class StorageUtils {
       
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to set item ${key}: ${error}`);
+      Logger.error(this.TAG, `Failed to set item ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
@@ -98,7 +98,7 @@ export class StorageUtils {
         return value as unknown as T;
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get item ${key}: ${error}`);
+      Logger.error(this.TAG, `Failed to get item ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
@@ -127,7 +127,7 @@ export class StorageUtils {
       
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to remove item ${key}: ${error}`);
+      Logger.error(this.TAG, `Failed to remove item ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
@@ -156,7 +156,7 @@ export class StorageUtils {
       
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear storage: ${error}`);
+      Logger.error(this.TAG, `Failed to clear storage: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }

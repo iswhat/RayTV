@@ -6,5 +6,7 @@
     "build": ".\\ohos.cmd build --product-type phone",
     "version": ".\\ohos.cmd --version"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }

@@ -22,7 +22,7 @@ interface PlayerControllerProps {
 
 @Component
 export default struct PlayerController {
-  private props: PlayerControllerProps;
+  private props: PlayerControllerProps = {} as PlayerControllerProps;
   private controllerTimeout: number | null = null;
   private isSeeking: boolean = false;
   private seekTime: number = 0;
@@ -52,18 +52,18 @@ export default struct PlayerController {
   }
   
   // 处理进度条拖动开始
-  onProgressBarStart() {
+  private onProgressBarStart(): void {
     this.isSeeking = true;
     this.seekTime = this.props.currentTime;
   }
   
   // 处理进度条拖动
-  onProgressBarMove(event: SliderChangeEvent) {
+  private onProgressBarMove(event: SliderChangeEvent): void {
     this.seekTime = (event.progress / 100) * this.props.totalTime;
   }
   
   // 处理进度条拖动结束
-  onProgressBarEnd(event: SliderChangeEvent) {
+  private onProgressBarEnd(event: SliderChangeEvent): void {
     this.isSeeking = false;
     const finalTime = (event.progress / 100) * this.props.totalTime;
     this.props.onSeek(finalTime);
@@ -83,10 +83,8 @@ export default struct PlayerController {
         
         // 顶部控制栏
         Row() {
-          Button() {
-            Text('←')
-              .fontSize(24)
-          }
+          Button('←')
+            .fontSize(24)
           .width(48)
           .height(48)
           .backgroundColor('transparent')
@@ -111,10 +109,8 @@ export default struct PlayerController {
           .flexGrow(1)
           .marginLeft(16)
           
-          Button() {
-            Text(this.props.isFullscreen ? '⤢' : '⤡')
-              .fontSize(24)
-          }
+          Button(this.props.isFullscreen ? '⤢' : '⤡')
+            .fontSize(24)
           .width(48)
           .height(48)
           .backgroundColor('transparent')
@@ -131,10 +127,8 @@ export default struct PlayerController {
             .height(80)
             .color('#fff')
         } else {
-          Button() {
-            Text(this.props.status === PlaybackStatus.PLAYING ? '⏸' : '▶')
-              .fontSize(48)
-          }
+          Button(this.props.status === PlaybackStatus.PLAYING ? '⏸' : '▶')
+            .fontSize(48)
           .width(120)
           .height(120)
           .backgroundColor('rgba(0,0,0,0.5)')
@@ -152,9 +146,9 @@ export default struct PlayerController {
               
             Slider({
               value: this.getProgressPercentage(),
-              onStart: this.onProgressBarStart.bind(this),
-              onChange: this.onProgressBarMove.bind(this),
-              onEnd: this.onProgressBarEnd.bind(this),
+              onStart: () => this.onProgressBarStart(),
+              onChange: (event) => this.onProgressBarMove(event),
+              onEnd: (event) => this.onProgressBarEnd(event),
               min: 0,
               max: 100,
               step: 0.1
@@ -176,10 +170,8 @@ export default struct PlayerController {
           
           // 控制按钮
           Row() {
-            Button() {
-              Text(this.props.isMuted ? '🔇' : '🔊')
-                .fontSize(24)
-            }
+            Button(this.props.isMuted ? '🔇' : '🔊')
+            .fontSize(24)
             .width(48)
             .height(48)
             .backgroundColor('transparent')

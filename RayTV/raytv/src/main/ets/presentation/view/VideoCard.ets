@@ -22,12 +22,17 @@ export default struct VideoCard {
   @State isHover: boolean = false;
   @State isPressed: boolean = false;
   
-  private props: VideoCardProps;
+  private props: VideoCardProps = {} as VideoCardProps;
   private defaultWidth: number = 220;
   private defaultAspectRatio: number = 0.5625; // 16:9
   
   constructor(props: VideoCardProps) {
     this.props = props;
+  }
+  
+  private getTypeLabel(type: VideoType): string {
+    // 避免直接使用类作为对象，使用字符串比较
+    return type.toString() === 'MOVIE' ? '电影' : '剧集';
   }
   
   build() {
@@ -85,7 +90,7 @@ export default struct VideoCard {
             }
             
             // 类型标识
-            Text(this.props.type === VideoType.MOVIE ? '电影' : '剧集')
+            Text(this.getTypeLabel(this.props.type))
               .padding({ left: 8, right: 8, top: 4, bottom: 4 })
               .position({ x: '100%', y: 8, offsetX: -8 })
               .fontSize(12)

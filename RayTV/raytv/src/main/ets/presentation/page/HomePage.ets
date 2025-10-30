@@ -206,7 +206,7 @@ export default struct HomePage {
         CategoryNavigation({
           categories: this.categories,
           selectedCategoryId: this.selectedCategory,
-          onCategoryChange: this.handleCategoryChange.bind(this),
+          onCategoryChange: (categoryId) => this.handleCategoryChange(categoryId),
           showScrollButtons: true
         })
         
@@ -307,12 +307,12 @@ export default struct HomePage {
           isBuffering: this.isBuffering,
           title: '当前播放',
           subtitle: '精彩内容正在播放',
-          onPlayPause: this.handlePlayPause.bind(this),
-          onSeek: this.handleSeek.bind(this),
-          onVolumeChange: this.handleVolumeChange.bind(this),
-          onToggleMute: this.handleToggleMute.bind(this),
-          onToggleFullscreen: this.handleToggleFullscreen.bind(this),
-          onBack: this.handleBack.bind(this),
+          onPlayPause: () => this.handlePlayPause(),
+          onSeek: (time) => this.handleSeek(time),
+          onVolumeChange: (volume) => this.handleVolumeChange(volume),
+          onToggleMute: () => this.handleToggleMute(),
+          onToggleFullscreen: () => this.handleToggleFullscreen(),
+          onBack: () => this.handleBack(),
           showController: this.showPlayerController
         })
       }

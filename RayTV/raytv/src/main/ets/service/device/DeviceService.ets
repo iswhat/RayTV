@@ -3,6 +3,10 @@ import Logger from '../../common/util/Logger';
 import { DeviceInfo, DeviceType, DeviceCapability } from '../bean/DeviceInfo';
 import DeviceInfoRepository from '../repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
+import deviceInfo from '@ohos.deviceInfo';
+import systemLanguage from '@ohos.systemLanguage';
+import connection from '@ohos.net.connection';
+import display from '@ohos.display';
 
 const TAG = 'DeviceService';
 
@@ -163,27 +167,35 @@ export default class DeviceService {
    * 检测设备类型
    */
   private detectDeviceType(): DeviceType {
-    // 在实际应用中，根据设备特性检测设备类型
-    // 这里简化处理
-    const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
-    
-    if (userAgent.includes('SmartTV') || userAgent.includes('Tizen') || userAgent.includes('webOS')) {
+    // 使用HarmonyOS设备信息API检测设备类型
+    try {
+      // 根据productModel或deviceType判断设备类型
+      // 这里简化处理，实际应用中可根据具体的设备标识进行更精确判断
+      const deviceModel = deviceInfo.productModel.toLowerCase();
+      
+      // 常见电视设备标识关键词
+      const tvKeywords = ['smarttv', 'tizen', 'webos', 'tv', 'smart-tv'];
+      // 常见平板设备标识关键词
+      const tabletKeywords = ['tablet', 'pad', 'tab'];
+      // 常见移动设备标识关键词
+      const mobileKeywords = ['phone', 'mobile', 'cell'];
+      
+      if (tvKeywords.some(keyword => deviceModel.includes(keyword))) {
+        return DeviceType.SMART_TV;
+      }
+      if (tabletKeywords.some(keyword => deviceModel.includes(keyword))) {
+        return DeviceType.TABLET;
+      }
+      if (mobileKeywords.some(keyword => deviceModel.includes(keyword))) {
+        return DeviceType.MOBILE;
+      }
+      
+      // 默认返回TV类型，因为这是TV应用
+      return DeviceType.SMART_TV;
+    } catch (error) {
+      Logger.error(TAG, 'Failed to detect device type', error);
       return DeviceType.SMART_TV;
     }
-    if (userAgent.includes('Android') && userAgent.includes('Mobile')) {
-      return DeviceType.MOBILE;
-    }
-    if (userAgent.includes('Android')) {
-      return DeviceType.TABLET;
-    }
-    if (userAgent.includes('iPad')) {
-      return DeviceType.TABLET;
-    }
-    if (userAgent.includes('iPhone')) {
-      return DeviceType.MOBILE;
-    }
-    
-    return DeviceType.DESKTOP;
   }
 
   /**
@@ -191,10 +203,11 @@ export default class DeviceService {
    */
   private getDeviceName(): string {
     try {
-      // 在实际应用中，使用设备API获取设备名称
+      // 使用HarmonyOS设备信息API获取设备名称
+      return `${deviceInfo.manufacturer} ${deviceInfo.productModel}` || 'RayTV Device';
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get device name', error);
       return 'RayTV Device';
-    } catch {
-      return 'Unknown Device';
     }
   }
 
@@ -203,9 +216,10 @@ export default class DeviceService {
    */
   private getManufacturer(): string {
     try {
-      // 简化实现
-      return 'Unknown Manufacturer';
-    } catch {
+      // 使用HarmonyOS设备信息API获取制造商
+      return deviceInfo.manufacturer || 'Unknown Manufacturer';
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get manufacturer', error);
       return 'Unknown';
     }
   }
@@ -215,9 +229,10 @@ export default class DeviceService {
    */
   private getModel(): string {
     try {
-      // 简化实现
-      return 'Unknown Model';
-    } catch {
+      // 使用HarmonyOS设备信息API获取设备型号
+      return deviceInfo.productModel || 'Unknown Model';
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get device model', error);
       return 'Unknown';
     }
   }
@@ -227,11 +242,10 @@ export default class DeviceService {
    */
   private getOSVersion(): string {
     try {
-      if (typeof navigator !== 'undefined') {
-        return navigator.appVersion || 'Unknown';
-      }
-      return 'Unknown';
-    } catch {
+      // 使用HarmonyOS设备信息API获取系统版本
+      return deviceInfo.osFullName || deviceInfo.apiVersion || 'Unknown';
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get OS version', error);
       return 'Unknown';
     }
   }
@@ -253,14 +267,18 @@ export default class DeviceService {
    */
   private getScreenResolution(): { width: number; height: number } {
     try {
-      if (typeof window !== 'undefined') {
+      // 使用HarmonyOS display API获取屏幕分辨率
+      const displays = display.getAllDisplaysSync();
+      if (displays && displays.length > 0) {
+        const defaultDisplay = displays[0];
         return {
-          width: window.screen.width,
-          height: window.screen.height
+          width: defaultDisplay.width,
+          height: defaultDisplay.height
         };
       }
       return { width: 1920, height: 1080 };
-    } catch {
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get screen resolution', error);
       return { width: 1920, height: 1080 };
     }
   }
@@ -270,11 +288,10 @@ export default class DeviceService {
    */
   private getDeviceLanguage(): string {
     try {
-      if (typeof navigator !== 'undefined') {
-        return navigator.language || 'zh-CN';
-      }
-      return 'zh-CN';
-    } catch {
+      // 使用HarmonyOS系统语言API获取设备语言
+      return systemLanguage.getSystemLanguageSync() || 'zh-CN';
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get device language', error);
       return 'zh-CN';
     }
   }
@@ -367,11 +384,11 @@ export default class DeviceService {
    */
   private async checkTouchCapability(): Promise<boolean> {
     try {
-      if (typeof window !== 'undefined') {
-        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      }
-      return false;
-    } catch {
+      // HarmonyOS设备通常支持触摸，这里简化处理
+      // 实际应用中可以通过多模态输入API进行更精确的检测
+      return true;
+    } catch (error) {
+      Logger.error(TAG, 'Failed to check touch capability', error);
       return false;
     }
   }
@@ -441,15 +458,33 @@ export default class DeviceService {
    */
   private async getNetworkInfo(): Promise<{ type: string; isConnected: boolean }> {
     try {
-      if (typeof navigator !== 'undefined' && 'connection' in navigator) {
-        const connection = (navigator as any).connection;
+      // 使用HarmonyOS网络连接API获取网络信息
+      const netInfo = connection.getDefaultNetSync();
+      if (netInfo) {
+        const networkType = connection.getNetCapabilitiesSync(netInfo).netCap?.bearerTypes[0] || 'unknown';
+        
+        // 将网络类型转换为可读字符串
+        let typeStr = 'unknown';
+        switch (networkType) {
+          case connection.NetBearType.WIFI:
+            typeStr = 'wifi';
+            break;
+          case connection.NetBearType.CELLULAR:
+            typeStr = 'cellular';
+            break;
+          case connection.NetBearType.ETHERNET:
+            typeStr = 'ethernet';
+            break;
+        }
+        
         return {
-          type: connection.effectiveType || 'unknown',
+          type: typeStr,
           isConnected: true
         };
       }
-      return { type: 'unknown', isConnected: true };
-    } catch {
+      return { type: 'unknown', isConnected: false };
+    } catch (error) {
+      Logger.error(TAG, 'Failed to get network info', error);
       return { type: 'unknown', isConnected: false };
     }
   }
@@ -485,11 +520,13 @@ export default class DeviceService {
     const properties: Record<string, string> = {};
     
     try {
-      if (typeof navigator !== 'undefined') {
-        properties.userAgent = navigator.userAgent;
-        properties.platform = navigator.platform;
-        properties.language = navigator.language;
-      }
+      // 使用HarmonyOS设备信息API获取系统属性
+      properties.manufacturer = deviceInfo.manufacturer || '';
+      properties.model = deviceInfo.productModel || '';
+      properties.osFullName = deviceInfo.osFullName || '';
+      properties.apiVersion = deviceInfo.apiVersion.toString() || '';
+      properties.deviceType = deviceInfo.deviceType || '';
+      properties.language = systemLanguage.getSystemLanguageSync() || '';
     } catch (error) {
       Logger.error(TAG, 'Error getting system properties', error);
     }

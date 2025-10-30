@@ -285,7 +285,7 @@ export default class SettingService {
   
   // 监听器
   private generalListeners: Array<() => void> = [];
-  private specificListeners: Record<string, Array<(event: SettingChangeEvent<any>) => void>> = {};
+  private specificListeners: Record<string, Array<(event: SettingChangeEvent<unknown>) => void>> = {};
   private themeListeners: Array<(themeMode: ThemeMode, accentColor: string) => void> = [];
   private languageListeners: Array<(language: LanguageCode) => void> = [];
 
@@ -790,13 +790,13 @@ export default class SettingService {
   /**
    * 验证导入的设置
    */
-  private async validateImportedSettings(settings: any): Promise<void> {
+  private async validateImportedSettings(settings: Partial<AppSettings>): Promise<void> {
     // 验证必需的设置项
-    if (!settings.themeMode && settings.themeMode !== 0) {
+    if (settings.themeMode !== undefined && settings.themeMode !== null && settings.themeMode !== 0) {
       throw new Error('Invalid theme mode in imported settings');
     }
     
-    if (!settings.language) {
+    if (!settings.language && settings.language !== '') {
       throw new Error('Invalid language in imported settings');
     }
     

@@ -2,6 +2,7 @@ import Logger from '../../common/util/Logger';
 import { Site } from '../bean/Site';
 import { DatabaseManager } from '../db/DatabaseManager';
 import { TableSchema } from '../db/TableSchema';
+import { ValuesBucket, RelationalPredicates, ResultSet } from '@kit.RelationalStore';
 
 /**
  * 站点数据访问对象

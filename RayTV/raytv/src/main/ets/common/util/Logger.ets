@@ -148,7 +148,7 @@ export interface LogEntry {
   /**
    * 额外数据
    */
-  extra?: any;
+  extra?: Record<string, unknown>;
 }
 
 /**
@@ -159,7 +159,7 @@ export class Logger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
-  private logFileHandle?: any;
+  private logFileHandle?: any; // 临时使用any，后续需要定义具体类型
   private logQueue: LogEntry[] = [];
   private isWriting: boolean = false;
 
@@ -196,7 +196,11 @@ export class Logger {
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    this.config = { ...this.config, ...config };
+    // 替换Object.assign为展开运算符
+    this.config = {
+      ...this.config,
+      ...config
+    };
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
@@ -226,51 +230,63 @@ export class Logger {
    * 调试日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param message 日志消息
+   * @param extra 额外数据
    */
-  public static debug(tag: string, message: string): void {
-    Logger.getInstance().logInternal(LogLevel.DEBUG, tag, message);
+  public static debug(tag: string, message: string, extra?: Record<string, unknown>): void {
+    const instance = Logger.getInstance();
+    const formattedMessage = `[${tag}] ${message}`;
+    instance.debug(formattedMessage, extra);
   }
 
   /**
    * 信息日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param message 日志消息
+   * @param extra 额外数据
    */
-  public static info(tag: string, message: string): void {
-    Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
+  public static info(tag: string, message: string, extra?: Record<string, unknown>): void {
+    const instance = Logger.getInstance();
+    const formattedMessage = `[${tag}] ${message}`;
+    instance.info(formattedMessage, extra);
   }
 
   /**
    * 警告日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param message 日志消息
+   * @param extra 额外数据
    */
-  public static warn(tag: string, message: string): void {
-    Logger.getInstance().logInternal(LogLevel.WARN, tag, message);
+  public static warn(tag: string, message: string, extra?: Record<string, unknown>): void {
+    const instance = Logger.getInstance();
+    const formattedMessage = `[${tag}] ${message}`;
+    instance.warn(formattedMessage, extra);
   }
 
   /**
    * 错误日志 - 兼容静态调用方式
    * @param tag 日志标签
    * @param message 日志消息
+   * @param error 错误对象
+   * @param extra 额外数据
    */
-  public static error(tag: string, message: string): void {
-    Logger.getInstance().logInternal(LogLevel.ERROR, tag, message);
+  public static error(tag: string, message: string, error?: Error, extra?: Record<string, unknown>): void {
+    const instance = Logger.getInstance();
+    const formattedMessage = `[${tag}] ${message}`;
+    instance.error(formattedMessage, error, extra);
   }
 
   /**
    * 输出异常信息 - 兼容静态调用方式
    * @param tag 日志标签
    * @param error 错误对象或错误消息
+   * @param extra 额外数据
    */
-  public static exception(tag: string, error: any): void {
+  public static exception(tag: string, error: string | Error, extra?: Record<string, unknown>): void {
     const instance = Logger.getInstance();
-    let stackTrace = '';
     if (error instanceof Error) {
-      stackTrace = error.stack || '';
-      instance.logInternal(LogLevel.ERROR, tag, `${error.message}\n${stackTrace}`);
+      instance.logException(error, `[${tag}] ${error.message}`, extra);
     } else {
-      instance.logInternal(LogLevel.ERROR, tag, String(error));
+      instance.error(`[${tag}] ${String(error)}`, undefined, extra);
     }
   }
 
@@ -280,7 +296,7 @@ export class Logger {
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: any[]): void {
+  public static format(tag: string, format: string, ...args: unknown[]): void {
     const message = format.replace(/\{\}/g, () => args.shift() || '');
     Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
   }
@@ -290,7 +306,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: any): void {
+  public debug(message: string, extra?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
@@ -301,7 +317,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public info(message: string, extra?: any): void {
+  public info(message: string, extra?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, extra);
     }
@@ -312,7 +328,7 @@ export class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public warn(message: string, extra?: any): void {
+  public warn(message: string, extra?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, extra);
     }
@@ -324,7 +340,7 @@ export class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public error(message: string, error?: Error, extra?: any): void {
+  public error(message: string, error?: Error, extra?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -342,7 +358,7 @@ export class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public fatal(message: string, error?: Error, extra?: any): void {
+  public fatal(message: string, error?: Error, extra?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.FATAL)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -359,7 +375,7 @@ export class Logger {
    * @param obj 要记录的对象
    * @param message 日志消息
    */
-  public logObject(obj: any, message?: string): void {
+  public logObject(obj: Record<string, unknown>, message?: string): void {
     const objString = this.serializeObject(obj);
     const finalMessage = message ? `${message}: ${objString}` : objString;
     this.debug(finalMessage);
@@ -473,7 +489,7 @@ export class Logger {
    * @param extra 额外数据
    * @param stackTrace 堆栈跟踪
    */
-  private log(level: LogLevel, message: string, extra?: any, stackTrace?: string): void {
+  private log(level: LogLevel, message: string, extra?: Record<string, unknown>, stackTrace?: string): void {
     const entry: LogEntry = {
       level,
       message,
@@ -651,7 +667,7 @@ export class Logger {
    * 序列化对象
    * @param obj 要序列化的对象
    */
-  private serializeObject(obj: any): string {
+  private serializeObject(obj: Record<string, unknown>): string {
     try {
       return JSON.stringify(obj, null, 2);
     } catch (error) {

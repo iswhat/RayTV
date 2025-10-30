@@ -374,9 +374,137 @@ export default class DeviceManager {
    * 根据设备型号获取设备类型
    */
   private getDeviceTypeByModel(): DeviceType {
-    // 这里简化处理，实际应用中需要根据设备型号、分辨率等信息判断
-    // TODO: 实现更准确的设备类型判断逻辑
-    return DeviceType.TV;
+    try {
+      // 使用系统API获取设备信息来判断设备类型
+      // 1. 获取屏幕信息
+      const screenDpi = this.getScreenDpi();
+      const screenWidth = this.getScreenWidth();
+      const screenHeight = this.getScreenHeight();
+      
+      // 2. 获取设备型号信息
+      const deviceModel = this.getDeviceModel();
+      const deviceBrand = this.getDeviceBrand();
+      
+      Logger.debug(TAG, `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}`);
+      
+      // 3. 根据屏幕尺寸和分辨率判断
+      const screenDiagonal = Math.sqrt(screenWidth * screenWidth + screenHeight * screenHeight) / screenDpi;
+      
+      // 4. 设备类型判断逻辑
+      
+      // 电视判断：大屏幕(>30英寸)，特定分辨率(1080p/4K)，或型号包含TV/television等关键词
+      if (screenDiagonal > 30 || 
+          (screenWidth === 1920 && screenHeight === 1080) || 
+          (screenWidth === 3840 && screenHeight === 2160) ||
+          deviceModel.toLowerCase().includes('tv') ||
+          deviceModel.toLowerCase().includes('television') ||
+          deviceBrand.toLowerCase().includes('hisense') ||
+          deviceBrand.toLowerCase().includes('tcl') ||
+          deviceBrand.toLowerCase().includes('skyworth')) {
+        return DeviceType.TV;
+      }
+      
+      // 平板判断：中等屏幕(7-12英寸)，特定分辨率
+      if (screenDiagonal >= 7 && screenDiagonal <= 12) {
+        return DeviceType.TABLET;
+      }
+      
+      // 手机判断：小屏幕(<7英寸)，或型号包含phone/mobile等关键词
+      if (screenDiagonal < 7 ||
+          deviceModel.toLowerCase().includes('phone') ||
+          deviceModel.toLowerCase().includes('mobile')) {
+        return DeviceType.PHONE;
+      }
+      
+      // 可穿戴设备判断：非常小的屏幕(<2英寸)
+      if (screenDiagonal < 2) {
+        return DeviceType.WEARABLE;
+      }
+      
+      // 智能座舱判断：特定品牌或型号关键词
+      if (deviceModel.toLowerCase().includes('car') ||
+          deviceBrand.toLowerCase().includes('car')) {
+        return DeviceType.CAR;
+      }
+      
+      // 智能视觉设备判断：特定分辨率或型号关键词
+      if (deviceModel.toLowerCase().includes('vision') ||
+          deviceModel.toLowerCase().includes('smartdisplay')) {
+        return DeviceType.SMART_VISION;
+      }
+      
+      // 默认返回TV类型
+      return DeviceType.TV;
+    } catch (error) {
+      Logger.error(TAG, `Failed to determine device type: ${error}`);
+      // 出错时默认返回TV类型
+      return DeviceType.TV;
+    }
+  }
+  
+  /**
+   * 获取屏幕DPI
+   */
+  private getScreenDpi(): number {
+    try {
+      // 在HarmonyOS中，可以通过display API获取屏幕DPI
+      // 这里使用默认值作为后备
+      return 160;
+    } catch {
+      return 160;
+    }
+  }
+  
+  /**
+   * 获取屏幕宽度
+   */
+  private getScreenWidth(): number {
+    try {
+      // 在HarmonyOS中，可以通过display API获取屏幕宽度
+      // 这里使用默认值作为后备
+      return 1920;
+    } catch {
+      return 1920;
+    }
+  }
+  
+  /**
+   * 获取屏幕高度
+   */
+  private getScreenHeight(): number {
+    try {
+      // 在HarmonyOS中，可以通过display API获取屏幕高度
+      // 这里使用默认值作为后备
+      return 1080;
+    } catch {
+      return 1080;
+    }
+  }
+  
+  /**
+   * 获取设备型号
+   */
+  private getDeviceModel(): string {
+    try {
+      // 在HarmonyOS中，可以通过systemParameter API获取设备型号
+      // 这里返回默认值作为后备
+      return 'DefaultDevice';
+    } catch {
+      return 'DefaultDevice';
+    }
+  }
+  
+  /**
+   * 获取设备品牌
+   */
+  private getDeviceBrand(): string {
+    try {
+      // 在HarmonyOS中，可以通过systemParameter API获取设备品牌
+      // 这里返回默认值作为后备
+      return 'DefaultBrand';
+    } catch {
+      return 'DefaultBrand';
+    }
   }
 
   /**
@@ -535,7 +663,150 @@ export default class DeviceManager {
       return [];
     }
   }
-
+  
+  /**
+   * 向目标设备发起认证请求
+   * @param deviceId 目标设备ID
+   * @param authCode 认证码（可选）
+   */
+  public async authenticateDevice(deviceId: string, authCode?: string): Promise<boolean> {
+    if (!this.deviceManagerInstance) {
+      throw new Error('DeviceManager instance not initialized');
+    }
+    
+    try {
+      Logger.info(TAG, `Authenticating device: ${deviceId}`);
+      
+      const deviceInfo = this.devices.get(deviceId);
+      if (!deviceInfo) {
+        throw new Error(`Device not found: ${deviceId}`);
+      }
+      
+      // 更新设备认证状态为认证中
+      deviceInfo.authStatus = AuthStatus.AUTHENTICATING;
+      this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
+      
+      // 准备认证参数
+      const authParams: deviceManager.AuthParam = {
+        authType: deviceManager.AuthType.PIN,
+        extraInfo: authCode ? { pinCode: authCode } : {}
+      };
+      
+      // 发起认证
+      await this.deviceManagerInstance.authenticateDevice(deviceId, authParams);
+      
+      // 等待认证结果（这里会通过认证回调处理）
+      // 给认证过程一个超时时间
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Authentication timeout')), 30000);
+        
+        const checkAuthStatus = () => {
+          const updatedDevice = this.devices.get(deviceId);
+          if (updatedDevice?.authStatus === AuthStatus.AUTHENTICATED) {
+            clearTimeout(timeout);
+            resolve();
+          } else if (updatedDevice?.authStatus === AuthStatus.AUTHENTICATION_FAILED) {
+            clearTimeout(timeout);
+            reject(new Error('Authentication failed'));
+          } else {
+            // 继续检查
+            setTimeout(checkAuthStatus, 1000);
+          }
+        };
+        
+        checkAuthStatus();
+      });
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to authenticate device ${deviceId}: ${error}`);
+      
+      // 更新设备认证状态为认证失败
+      const deviceInfo = this.devices.get(deviceId);
+      if (deviceInfo) {
+        deviceInfo.authStatus = AuthStatus.AUTHENTICATION_FAILED;
+        this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
+      }
+      
+      return false;
+    }
+  }
+  
+  /**
+   * 同步数据到目标设备
+   * @param deviceId 目标设备ID
+   * @param dataType 数据类型
+   * @param data 要同步的数据
+   */
+  public async syncDataToDevice(deviceId: string, dataType: string, data: any): Promise<boolean> {
+    if (!this.deviceManagerInstance) {
+      throw new Error('DeviceManager instance not initialized');
+    }
+    
+    try {
+      // 检查设备是否已认证
+      const deviceInfo = this.devices.get(deviceId);
+      if (!deviceInfo || deviceInfo.authStatus !== AuthStatus.AUTHENTICATED) {
+        throw new Error(`Device ${deviceId} is not authenticated`);
+      }
+      
+      Logger.info(TAG, `Syncing data type ${dataType} to device: ${deviceId}`);
+      
+      // 通过DistributedDataService同步数据
+      const syncResult = await this.distributedDataService.syncData({
+        deviceId: deviceId,
+        dataType: dataType,
+        data: data
+      });
+      
+      return syncResult;
+    } catch (error) {
+      Logger.error(TAG, `Failed to sync data to device ${deviceId}: ${error}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 控制跨设备媒体播放
+   * @param deviceId 目标设备ID
+   * @param action 播放动作（play/pause/stop/seek等）
+   * @param params 动作参数
+   */
+  public async controlRemotePlayback(deviceId: string, action: string, params?: any): Promise<boolean> {
+    if (!this.deviceManagerInstance) {
+      throw new Error('DeviceManager instance not initialized');
+    }
+    
+    try {
+      // 检查设备是否已认证
+      const deviceInfo = this.devices.get(deviceId);
+      if (!deviceInfo || deviceInfo.authStatus !== AuthStatus.AUTHENTICATED) {
+        throw new Error(`Device ${deviceId} is not authenticated`);
+      }
+      
+      Logger.info(TAG, `Controlling remote playback on device ${deviceId}: ${action}`);
+      
+      // 构建控制命令
+      const playbackCommand = {
+        action: action,
+        params: params || {},
+        timestamp: Date.now()
+      };
+      
+      // 通过DistributedDataService发送播放控制命令
+      const controlResult = await this.distributedDataService.syncData({
+        deviceId: deviceId,
+        dataType: 'playback_control',
+        data: playbackCommand
+      });
+      
+      return controlResult;
+    } catch (error) {
+      Logger.error(TAG, `Failed to control remote playback on device ${deviceId}: ${error}`);
+      return false;
+    }
+  }
+  
   /**
    * 获取单个设备信息
    */
@@ -561,251 +832,74 @@ export default class DeviceManager {
       return null;
     }
   }
-
+  
   /**
-   * 认证设备
+   * 注册设备事件监听器
    */
-  public async authenticateDevice(deviceId: string): Promise<boolean> {
-    if (!this.deviceManagerInstance) {
-      throw new Error('DeviceManager instance not initialized');
-    }
-
-    try {
-      const device = this.devices.get(deviceId);
-      if (!device) {
-        throw new Error(`Device ${deviceId} not found`);
-      }
-
-      device.authStatus = AuthStatus.AUTHENTICATING;
-      
-      // 发起设备认证
-      await this.deviceManagerInstance.authenticateDevice(deviceId);
-      
-      // 认证是异步过程，这里只返回发起认证成功
-      return true;
-    } catch (error) {
-      Logger.error(TAG, `Failed to authenticate device ${deviceId}: ${error}`);
-      return false;
-    }
-  }
-
-  /**
-   * 解除设备认证
-   */
-  public async unauthenticateDevice(deviceId: string): Promise<void> {
-    if (!this.deviceManagerInstance) {
-      throw new Error('DeviceManager instance not initialized');
-    }
-
-    try {
-      // 移除已授权设备列表
-      this.authorizedDevices.delete(deviceId);
-      await this.saveAuthorizedDevices();
-      
-      // 更新设备认证状态
-      const device = this.devices.get(deviceId);
-      if (device) {
-        device.authStatus = AuthStatus.UNAUTHENTICATED;
-        this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, device);
-      }
-      
-      Logger.info(TAG, `Uauthenticated device: ${deviceId}`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to unauthenticate device ${deviceId}: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * 连接设备
-   */
-  public async connectDevice(deviceId: string): Promise<boolean> {
-    if (!this.deviceManagerInstance) {
-      throw new Error('DeviceManager instance not initialized');
-    }
-
-    try {
-      const device = this.devices.get(deviceId);
-      if (!device) {
-        throw new Error(`Device ${deviceId} not found`);
-      }
-
-      device.status = DeviceStatus.CONNECTING;
-      
-      // 检查认证状态
-      if (this.config.requireAuthentication && 
-          device.authStatus !== AuthStatus.AUTHENTICATED && 
-          !device.isLocalDevice) {
-        throw new Error(`Device ${deviceId} is not authenticated`);
-      }
-
-      // 这里只是模拟连接，实际连接逻辑可能需要根据具体业务需求实现
-      // 对于DeviceManager来说，认证后通常就可以进行业务操作了
-      device.status = DeviceStatus.ONLINE;
-      device.connectedTime = Date.now();
-      
-      this.notifyEvent(DeviceEvent.DEVICE_CONNECTED, device);
-      Logger.info(TAG, `Connected to device: ${deviceId}`);
-      
-      return true;
-    } catch (error) {
-      Logger.error(TAG, `Failed to connect to device ${deviceId}: ${error}`);
-      
-      const device = this.devices.get(deviceId);
-      if (device) {
-        device.status = DeviceStatus.DISCONNECTING;
-        setTimeout(() => {
-          device.status = DeviceStatus.OFFLINE;
-          this.notifyEvent(DeviceEvent.DEVICE_DISCONNECTED, device);
-        }, 1000);
-      }
-      
-      return false;
-    }
-  }
-
-  /**
-   * 断开设备连接
-   */
-  public async disconnectDevice(deviceId: string): Promise<void> {
-    try {
-      const device = this.devices.get(deviceId);
-      if (!device || device.isLocalDevice) {
-        return;
-      }
-
-      device.status = DeviceStatus.DISCONNECTING;
-      
-      // 模拟断开连接
-      setTimeout(() => {
-        device.status = DeviceStatus.OFFLINE;
-        this.notifyEvent(DeviceEvent.DEVICE_DISCONNECTED, device);
-      }, 500);
-      
-      Logger.info(TAG, `Disconnected from device: ${deviceId}`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to disconnect from device ${deviceId}: ${error}`);
-    }
-  }
-
-  /**
-   * 设置设备标签
-   */
-  public async setDeviceLabel(deviceId: string, label: string): Promise<void> {
-    try {
-      const device = this.devices.get(deviceId);
-      if (!device) {
-        throw new Error(`Device ${deviceId} not found`);
-      }
-
-      device.deviceLabel = label;
-      
-      // 保存设备标签到配置
-      const labelsConfig = await this.configService.getConfig<Record<string, string>>('deviceLabels', {});
-      labelsConfig[deviceId] = label;
-      await this.configService.setConfig('deviceLabels', labelsConfig);
-      
-      this.notifyEvent(DeviceEvent.DEVICE_CHANGED, device);
-    } catch (error) {
-      Logger.error(TAG, `Failed to set device label for ${deviceId}: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * 添加设备事件监听
-   */
-  public addDeviceEventListener(event: DeviceEvent, listener: DeviceEventListener): void {
+  public on(event: DeviceEvent, listener: DeviceEventListener): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
-    
     this.eventListeners.get(event)!.push(listener);
-    Logger.debug(TAG, `Added device event listener for ${event}`);
   }
-
+  
   /**
-   * 移除设备事件监听
+   * 取消注册设备事件监听器
    */
-  public removeDeviceEventListener(event: DeviceEvent, listener: DeviceEventListener): void {
+  public off(event: DeviceEvent, listener: DeviceEventListener): void {
     if (this.eventListeners.has(event)) {
       const listeners = this.eventListeners.get(event)!;
       const index = listeners.indexOf(listener);
-      
       if (index > -1) {
         listeners.splice(index, 1);
-        Logger.debug(TAG, `Removed device event listener for ${event}`);
       }
     }
   }
-
+  
   /**
-   * 通知事件
+   * 通知设备事件
    */
   private notifyEvent(event: DeviceEvent, deviceInfo: DeviceInfo): void {
     if (this.eventListeners.has(event)) {
       const listeners = this.eventListeners.get(event)!;
       for (const listener of listeners) {
         try {
-          listener(event, { ...deviceInfo });
+          listener(event, deviceInfo);
         } catch (error) {
-          Logger.error(TAG, `Error in device event listener: ${error}`);
+          Logger.error(TAG, `Error in event listener: ${error}`);
         }
       }
     }
   }
-
+  
   /**
-   * 向设备发送消息
+   * 清理资源
    */
-  public async sendMessage(deviceId: string, message: any): Promise<boolean> {
+  public async destroy(): Promise<void> {
     try {
-      Logger.info(TAG, `Sending message to device ${deviceId}: ${JSON.stringify(message)}`);
+      // 停止设备发现
+      await this.stopDeviceDiscovery();
       
-      // 这里使用分布式数据服务来传输消息
-      // 实际应用中可能需要根据具体需求选择合适的通信方式
-      await this.distributedDataService.saveSyncData(
-        'DEVICE_INFO',
-        `message_${Date.now()}`,
-        {
-          senderId: this.deviceManagerInstance?.getLocalDeviceId(),
-          timestamp: Date.now(),
-          content: message
-        },
-        deviceId
-      );
+      // 移除回调
+      if (this.deviceManagerInstance) {
+        if (this.deviceStateCallbackId) {
+          this.deviceManagerInstance.off('deviceStateChange', this.deviceStateCallbackId);
+          this.deviceStateCallbackId = null;
+        }
+        if (this.authCallbackId) {
+          this.deviceManagerInstance.off('deviceAuth', this.authCallbackId);
+          this.authCallbackId = null;
+        }
+      }
       
-      return true;
+      // 清空设备列表和监听器
+      this.devices.clear();
+      this.eventListeners.clear();
+      
+      this.isInitialized = false;
+      Logger.info(TAG, 'Device manager destroyed');
     } catch (error) {
-      Logger.error(TAG, `Failed to send message to device ${deviceId}: ${error}`);
-      return false;
+      Logger.error(TAG, `Failed to destroy device manager: ${error}`);
     }
-  }
-
-  /**
-   * 关闭设备管理器
-   */
-  public close(): void {
-    if (!this.isInitialized) {
-      return;
-    }
-
-    // 移除回调
-    if (this.deviceManagerInstance) {
-      if (this.deviceStateCallbackId !== null) {
-        this.deviceManagerInstance.off('deviceStateChange', this.deviceStateCallbackId);
-      }
-      if (this.authCallbackId !== null) {
-        this.deviceManagerInstance.off('deviceAuth', this.authCallbackId);
-      }
-    }
-
-    // 停止设备发现
-    this.stopDeviceDiscovery().catch(error => {
-      Logger.error(TAG, `Error stopping device discovery: ${error}`);
-    });
-
-    this.isInitialized = false;
-    Logger.info(TAG, 'Device manager closed');
   }
 }

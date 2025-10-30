@@ -125,14 +125,80 @@ export class DatabaseManager {
   }
   
   /**
-   * 检查数据库版本
+   * 检查数据库版本并执行迁移
    */
   private async checkDatabaseVersion(): Promise<void> {
     try {
-      // TODO: 实现数据库版本管理和迁移逻辑
+      Logger.info(TAG, `Checking database version: ${DATABASE_INFO.VERSION}`);
+      
+      // 从数据库元数据表中获取当前版本
+      let currentVersion = 0;
+      const resultSet = await this.database.querySql(
+        'SELECT version FROM database_meta WHERE id = 1',
+        []
+      );
+      
+      if (resultSet.goToFirstRow()) {
+        currentVersion = resultSet.getLong(0) || 0;
+      }
+      resultSet.close();
+      
+      Logger.info(TAG, `Current database version: ${currentVersion}, Target version: ${DATABASE_INFO.VERSION}`);
+      
+      // 如果需要升级
+      if (currentVersion < DATABASE_INFO.VERSION) {
+        await this.migrateDatabase(currentVersion, DATABASE_INFO.VERSION);
+        // 更新版本信息
+        await this.database.executeSql(
+          'INSERT OR REPLACE INTO database_meta (id, version, last_updated) VALUES (1, ?, ?)',
+          [DATABASE_INFO.VERSION, Date.now()]
+        );
+        Logger.info(TAG, `Database version updated to: ${DATABASE_INFO.VERSION}`);
+      }
+      
       Logger.info(TAG, `Database version: ${DATABASE_INFO.VERSION}`);
     } catch (error) {
       Logger.error(TAG, `Failed to check database version: ${JSON.stringify(error)}`);
+      throw error; // 版本检查失败应该抛出异常，因为这是关键功能
+    }
+  }
+  
+  /**
+   * 执行数据库迁移
+   * @param fromVersion 源版本
+   * @param toVersion 目标版本
+   */
+  private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
+    try {
+      Logger.info(TAG, `Migrating database from version ${fromVersion} to ${toVersion}`);
+      
+      // 开始事务
+      await this.executeTransaction(async (db) => {
+        // 根据版本逐步执行迁移脚本
+        for (let version = fromVersion + 1; version <= toVersion; version++) {
+          Logger.info(TAG, `Applying migration for version ${version}`);
+          // 这里可以根据不同的版本执行不同的迁移脚本
+          // 例如：执行ALTER TABLE语句、数据转换等
+          
+          // 示例：如果需要创建元数据表（首次迁移时）
+          if (version === 1) {
+            await db.executeSql(
+              'CREATE TABLE IF NOT EXISTS database_meta (' +
+              'id INTEGER PRIMARY KEY, ' +
+              'version INTEGER NOT NULL, ' +
+              'last_updated INTEGER NOT NULL)' +
+              '', []
+            );
+          }
+          
+          // 可以在这里添加其他版本的迁移逻辑
+        }
+      });
+      
+      Logger.info(TAG, `Database migration completed successfully`);
+    } catch (error) {
+      Logger.error(TAG, `Database migration failed: ${JSON.stringify(error)}`);
+      throw error;
     }
   }
   
@@ -247,8 +313,27 @@ export class DatabaseManager {
    */
   public async getDatabaseSize(): Promise<number> {
     try {
-      // TODO: 实现获取数据库文件大小的逻辑
-      return 0;
+      Logger.debug(TAG, 'Getting database size');
+      
+      // 使用PRAGMA page_count和page_size查询数据库大小
+      const pageCountResult = await this.database.querySql('PRAGMA page_count', []);
+      let pageCount = 0;
+      if (pageCountResult.goToFirstRow()) {
+        pageCount = pageCountResult.getLong(0) || 0;
+      }
+      pageCountResult.close();
+      
+      const pageSizeResult = await this.database.querySql('PRAGMA page_size', []);
+      let pageSize = 0;
+      if (pageSizeResult.goToFirstRow()) {
+        pageSize = pageSizeResult.getLong(0) || 0;
+      }
+      pageSizeResult.close();
+      
+      const databaseSize = pageCount * pageSize;
+      Logger.info(TAG, `Database size: ${databaseSize} bytes`);
+      
+      return databaseSize;
     } catch (error) {
       Logger.error(TAG, `Failed to get database size: ${JSON.stringify(error)}`);
       return 0;

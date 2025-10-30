@@ -3,6 +3,7 @@ import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import StorageUtil from '../../common/util/StorageUtil';
+import http from '@ohos.net.http';
 import NetworkRepository, {
   NetworkResult,
   NetworkConfig,
@@ -28,7 +29,7 @@ const DEFAULT_CACHE_EXPIRY = 3600000; // 默认缓存1小时
  */
 export default class DefaultNetworkRepository implements NetworkRepository {
   private config: NetworkConfig;
-  private requestMap: Map<string, AbortController> = new Map();
+  private requestMap: Map<string, http.HttpRequest> = new Map();
 
   /**
    * 构造函数
@@ -130,8 +131,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   private createRequestConfig(
     url: string,
     method: string,
-    data?: Record<string, any>,
-    params?: Record<string, any>,
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>,
     customHeaders?: Record<string, string>
   ): RequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
@@ -523,8 +524,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
   cancelAllRequests(): void {
     try {
-      this.requestMap.forEach((controller) => {
-        controller.abort();
+      this.requestMap.forEach((request) => {
+        request.destroy();
       });
       this.requestMap.clear();
       Logger.info(TAG, 'All requests cancelled');
@@ -535,9 +536,9 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
   cancelRequest(requestId: string): void {
     try {
-      const controller = this.requestMap.get(requestId);
-      if (controller) {
-        controller.abort();
+      const request = this.requestMap.get(requestId);
+      if (request) {
+        request.destroy();
         this.requestMap.delete(requestId);
         Logger.info(TAG, `Request cancelled: ${requestId}`);
       }
@@ -596,7 +597,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<any[]>> { 
+  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<unknown[]>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -636,7 +637,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, any>>> { 
+  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -680,11 +681,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, any>>> { 
+  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getAppConfig(): Promise<NetworkResult<Record<string, any>>> { 
+  async getAppConfig(): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   

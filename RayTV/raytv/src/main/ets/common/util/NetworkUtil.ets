@@ -16,8 +16,8 @@ export interface RequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  params?: Record<string, any>;
-  data?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
   timeout?: number;
   responseType?: 'text' | 'json' | 'arraybuffer';
 }
@@ -25,7 +25,7 @@ export interface RequestConfig {
 /**
  * 网络响应接口
  */
-export interface Response<T = any> {
+export interface Response<T = unknown> {
   status: number;
   statusText: string;
   data: T;
@@ -48,14 +48,14 @@ export default class NetworkUtil {
    * @param retryCount 当前重试次数
    * @returns Promise<Response>
    */
-  public static async request<T = any>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
+  public static async request<T = unknown>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
     const { 
       url, 
       method = 'GET', 
       headers = {}, 
       params = {}, 
       data,
-      timeout = this.DEFAULT_TIMEOUT,
+      timeout = NetworkUtil.DEFAULT_TIMEOUT,
       responseType = 'json'
     } = config;
 
@@ -63,9 +63,9 @@ export default class NetworkUtil {
       // 构建完整URL（添加查询参数）
       let fullUrl = url;
       if (Object.keys(params).length > 0) {
-        const queryString = this.buildQueryString(params);
+        const queryString = NetworkUtil.buildQueryString(params);
         fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
-      }
+
 
       Logger.info(TAG, `Sending ${method} request to ${fullUrl}`);
 
@@ -93,7 +93,7 @@ export default class NetworkUtil {
         const response = await httpRequest.request(fullUrl, httpOptions);
         
         // 读取响应数据
-        let responseData: any = response.result;
+        let responseData: unknown = response.result;
         
         // 处理不同响应类型
         if (responseType === 'json' && typeof responseData === 'string') {
@@ -125,21 +125,19 @@ export default class NetworkUtil {
         };
       } catch (error) {
         // 重试逻辑
-        if (retryCount < this.MAX_RETRY_COUNT && this.isRetryableError(error)) {
-          Logger.warn(TAG, `Request failed, retrying (${retryCount + 1}/${this.MAX_RETRY_COUNT})`, error);
+        if (retryCount < NetworkUtil.MAX_RETRY_COUNT && NetworkUtil.isRetryableError(error)) {
+          Logger.warn(TAG, `Request failed, retrying (${retryCount + 1}/${NetworkUtil.MAX_RETRY_COUNT})`, error);
           // 指数退避策略
           const delay = Math.pow(2, retryCount) * 1000;
-          await this.sleep(delay);
-          return this.request(config, retryCount + 1);
+          await NetworkUtil.sleep(delay);
+          return NetworkUtil.request(config, retryCount + 1);
         }
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(TAG, `Request error: ${errorMessage}`, error);
+        throw error instanceof Error ? error : new Error(errorMessage);
       } finally {
         // 销毁HTTP请求
         httpRequest.destroy();
-      }
-    } catch (error) {
-      Logger.error(TAG, `Request error: ${error}`, error);
-      throw error;
     }
   }
 
@@ -150,8 +148,8 @@ export default class NetworkUtil {
    * @param headers 请求头
    * @returns Promise<Response>
    */
-  public static async get<T = any>(url: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<Response<T>> {
-    return this.request<T>({
+  public static async get<T = unknown>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<Response<T>> {
+    return NetworkUtil.request<T>({
       url,
       method: 'GET',
       params,
@@ -166,8 +164,8 @@ export default class NetworkUtil {
    * @param headers 请求头
    * @returns Promise<Response>
    */
-  public static async post<T = any>(url: string, data?: any, headers?: Record<string, string>): Promise<Response<T>> {
-    return this.request<T>({
+  public static async post<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
+    return NetworkUtil.request<T>({
       url,
       method: 'POST',
       data,
@@ -182,8 +180,8 @@ export default class NetworkUtil {
    * @param headers 请求头
    * @returns Promise<Response>
    */
-  public static async put<T = any>(url: string, data?: any, headers?: Record<string, string>): Promise<Response<T>> {
-    return this.request<T>({
+  public static async put<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
+    return NetworkUtil.request<T>({
       url,
       method: 'PUT',
       data,
@@ -197,10 +195,26 @@ export default class NetworkUtil {
    * @param headers 请求头
    * @returns Promise<Response>
    */
-  public static async delete<T = any>(url: string, headers?: Record<string, string>): Promise<Response<T>> {
-    return this.request<T>({
+  public static async delete<T = unknown>(url: string, headers?: Record<string, string>): Promise<Response<T>> {
+    return NetworkUtil.request<T>({
       url,
       method: 'DELETE',
+      headers
+    });
+  }
+
+  /**
+   * 发送PATCH请求
+   * @param url 请求URL
+   * @param data 请求数据
+   * @param headers 请求头
+   * @returns Promise<Response>
+   */
+  public static async patch<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
+    return NetworkUtil.request<T>({
+      url,
+      method: 'PATCH',
+      data,
       headers
     });
   }
@@ -210,7 +224,7 @@ export default class NetworkUtil {
    * @param params 查询参数对象
    * @returns 查询字符串
    */
-  private static buildQueryString(params: Record<string, any>): string {
+  private static buildQueryString(params: Record<string, unknown>): string {
     return Object.entries(params)
       .filter(([_, value]) => value !== undefined && value !== null)
       .map(([key, value]) => {
@@ -227,7 +241,7 @@ export default class NetworkUtil {
    * @param error 错误对象
    * @returns 是否可重试
    */
-  private static isRetryableError(error: any): boolean {
+  private static isRetryableError(error: unknown): boolean {
     // 网络错误、超时、服务器错误(5xx)可重试
     return error.name === 'AbortError' || 
            error.message.includes('Network') ||
@@ -527,7 +541,7 @@ export default class NetworkUtil {
    * @param cacheTime 缓存时间（毫秒）
    * @returns Promise<any>
    */
-  public static async cachedRequest<T = any>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
+  public static async cachedRequest<T = unknown>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
       const cacheKey = `network_cache_${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
       

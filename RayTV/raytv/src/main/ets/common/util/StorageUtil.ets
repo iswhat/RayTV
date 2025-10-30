@@ -22,12 +22,12 @@ export enum StorageType {
  * 提供多种存储方式的统一接口，包括偏好设置、文件存储等
  */
 export default class StorageUtil {
-  private static memoryCache: Record<string, { value: any; expireTime: number }> = {};
+  private static memoryCache: Record<string, { value: unknown; expireTime: number }> = {};
   private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
 
   static {
     // 启动内存缓存自动清理
-    this.startMemoryCacheCleanup();
+    StorageUtil.startMemoryCacheCleanup();
   }
 
   /**
@@ -37,7 +37,7 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: any, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: unknown, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
     try {
       const dataToSave = {
         value,
@@ -47,13 +47,13 @@ export default class StorageUtil {
 
       switch (type) {
         case StorageType.PREFERENCES:
-          await this.saveToPreferences(key, dataToSave);
+          await StorageUtil.saveToPreferences(key, dataToSave);
           break;
         case StorageType.FILE:
-          await this.saveToFile(key, dataToSave);
+          await StorageUtil.saveToFile(key, dataToSave);
           break;
         case StorageType.MEMORY:
-          this.saveToMemory(key, dataToSave);
+          StorageUtil.saveToMemory(key, dataToSave);
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -61,8 +61,8 @@ export default class StorageUtil {
 
       Logger.info(TAG, `Saved data for key: ${key}, type: ${type}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to save data for key ${key}: ${error}`);
-      throw error;
+      Logger.error(TAG, `Failed to save data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -73,19 +73,19 @@ export default class StorageUtil {
    * @param defaultValue 默认值
    * @returns 读取的数据或默认值
    */
-  public static async get<T = any>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T> {
+  public static async get<T = unknown>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T> {
     try {
-      let data: any;
+      let data: unknown;
 
       switch (type) {
         case StorageType.PREFERENCES:
-          data = await this.getFromPreferences(key);
+          data = await StorageUtil.getFromPreferences(key);
           break;
         case StorageType.FILE:
-          data = await this.getFromFile(key);
+          data = await StorageUtil.getFromFile(key);
           break;
         case StorageType.MEMORY:
-          data = this.getFromMemory(key);
+          data = StorageUtil.getFromMemory(key);
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -94,13 +94,13 @@ export default class StorageUtil {
       // 检查是否过期
       if (data && data.expireTime > 0 && Date.now() > data.expireTime) {
         Logger.warn(TAG, `Data expired for key: ${key}`);
-        await this.remove(key, type);
+        await StorageUtil.remove(key, type);
         return defaultValue as T;
       }
 
       return data ? data.value as T : (defaultValue as T);
     } catch (error) {
-      Logger.error(TAG, `Failed to get data for key ${key}: ${error}`);
+      Logger.error(TAG, `Failed to get data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return defaultValue as T;
     }
   }
@@ -114,13 +114,13 @@ export default class StorageUtil {
     try {
       switch (type) {
         case StorageType.PREFERENCES:
-          await this.removeFromPreferences(key);
+          await StorageUtil.removeFromPreferences(key);
           break;
         case StorageType.FILE:
-          await this.removeFromFile(key);
+          await StorageUtil.removeFromFile(key);
           break;
         case StorageType.MEMORY:
-          this.removeFromMemory(key);
+          StorageUtil.removeFromMemory(key);
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -128,8 +128,8 @@ export default class StorageUtil {
 
       Logger.info(TAG, `Removed data for key: ${key}, type: ${type}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to remove data for key ${key}: ${error}`);
-      throw error;
+      Logger.error(TAG, `Failed to remove data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -141,13 +141,13 @@ export default class StorageUtil {
     try {
       switch (type) {
         case StorageType.PREFERENCES:
-          await this.clearPreferences();
+          await StorageUtil.clearPreferences();
           break;
         case StorageType.FILE:
-          await this.clearFiles();
+          await StorageUtil.clearFiles();
           break;
         case StorageType.MEMORY:
-          this.clearMemory();
+          StorageUtil.clearMemory();
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -155,8 +155,8 @@ export default class StorageUtil {
 
       Logger.info(TAG, `Cleared all data for type: ${type}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to clear data for type ${type}: ${error}`);
-      throw error;
+      Logger.error(TAG, `Failed to clear storage of type ${type}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -172,13 +172,13 @@ export default class StorageUtil {
 
       switch (type) {
         case StorageType.PREFERENCES:
-          exists = await this.hasInPreferences(key);
+          exists = await StorageUtil.hasInPreferences(key);
           break;
         case StorageType.FILE:
-          exists = await this.hasInFile(key);
+          exists = await StorageUtil.hasInFile(key);
           break;
         case StorageType.MEMORY:
-          exists = this.hasInMemory(key);
+          exists = StorageUtil.hasInMemory(key);
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -186,7 +186,7 @@ export default class StorageUtil {
 
       return exists;
     } catch (error) {
-      Logger.error(TAG, `Failed to check existence for key ${key}: ${error}`);
+      Logger.error(TAG, `Failed to check existence for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
@@ -230,13 +230,8 @@ export default class StorageUtil {
       await pref.putString(key, jsonData);
       await pref.flush();
     } catch (error) {
-      Logger.warn(TAG, `Preferences save failed, falling back to localStorage: ${error}`);
-      // 降级到localStorage（如果可用）
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(key, jsonData);
-      } else {
-        throw error;
-      }
+      Logger.error(TAG, `Failed to save to preferences for key ${key}: ${error}`);
+      throw error;
     }
   }
 
@@ -246,12 +241,7 @@ export default class StorageUtil {
       const jsonData = await pref.getString(key, null);
       return jsonData ? JsonUtil.parse(jsonData) : null;
     } catch (error) {
-      Logger.warn(TAG, `Preferences get failed, falling back to localStorage: ${error}`);
-      // 降级到localStorage（如果可用）
-      if (typeof localStorage !== 'undefined') {
-        const jsonData = localStorage.getItem(key);
-        return jsonData ? JsonUtil.parse(jsonData) : null;
-      }
+      Logger.error(TAG, `Failed to get from preferences for key ${key}: ${error}`);
       throw error;
     }
   }
@@ -262,12 +252,8 @@ export default class StorageUtil {
       await pref.delete(key);
       await pref.flush();
     } catch (error) {
-      Logger.warn(TAG, `Preferences remove failed, falling back to localStorage: ${error}`);
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem(key);
-      } else {
-        throw error;
-      }
+      Logger.error(TAG, `Failed to remove from preferences for key ${key}: ${error}`);
+      throw error;
     }
   }
 
@@ -280,12 +266,8 @@ export default class StorageUtil {
       }
       await pref.flush();
     } catch (error) {
-      Logger.warn(TAG, `Preferences clear failed, falling back to localStorage: ${error}`);
-      if (typeof localStorage !== 'undefined') {
-        localStorage.clear();
-      } else {
-        throw error;
-      }
+      Logger.error(TAG, `Failed to clear preferences: ${error}`);
+      throw error;
     }
   }
 
@@ -294,10 +276,7 @@ export default class StorageUtil {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       return await pref.has(key);
     } catch (error) {
-      Logger.warn(TAG, `Preferences has check failed, falling back to localStorage: ${error}`);
-      if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem(key) !== null;
-      }
+      Logger.error(TAG, `Failed to check existence in preferences for key ${key}: ${error}`);
       throw error;
     }
   }
@@ -307,10 +286,7 @@ export default class StorageUtil {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       return await pref.keys();
     } catch (error) {
-      Logger.warn(TAG, `Preferences keys get failed, falling back to localStorage: ${error}`);
-      if (typeof localStorage !== 'undefined') {
-        return Object.keys(localStorage);
-      }
+      Logger.error(TAG, `Failed to get all keys from preferences: ${error}`);
       return [];
     }
   }

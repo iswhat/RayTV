@@ -1,4 +1,4 @@
-import relationalStore from '@kit.dataStorage';
+import relationalStore from '@kit.RelationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { CONFIG_TABLE } from '../TableSchema';
 import { AppConfig, PlayerConfig, DisplayConfig, NetworkConfig, SecurityConfig, AdBlockConfig, HarmonyConfig, SearchConfig, DownloadConfig, SyncConfig, LogConfig } from '../../bean/Config';

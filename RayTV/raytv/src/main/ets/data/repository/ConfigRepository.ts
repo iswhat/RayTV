@@ -41,7 +41,7 @@ export class ConfigRepository {
   private fileUtil = FileUtil.getInstance();
   
   // 内存中的配置缓存
-  private configCache: Map<string, any> = new Map();
+  private configCache: Map<string, unknown> = new Map();
   
   // 配置版本号
   private configVersion: string = '1.0.0';
@@ -50,10 +50,10 @@ export class ConfigRepository {
   private configFilePath: string | null = null;
   
   // 默认配置
-  private defaultConfigs: Map<string, any> = new Map();
+  private defaultConfigs: Map<string, unknown> = new Map();
   
   // 配置项定义
-  private configDefinitions: Map<string, ConfigItem<any>> = new Map();
+  private configDefinitions: Map<string, ConfigItem<unknown>> = new Map();
   
   // 是否已初始化
   private initialized: boolean = false;
@@ -452,7 +452,7 @@ export class ConfigRepository {
    * @param config 配置项定义
    */
   public defineConfig<T>(key: string, config: ConfigItem<T>): void {
-    this.configDefinitions.set(key, config as ConfigItem<any>);
+    this.configDefinitions.set(key, config);
     this.defaultConfigs.set(key, config.defaultValue);
     
     // 如果配置项已存在于缓存中，验证其值

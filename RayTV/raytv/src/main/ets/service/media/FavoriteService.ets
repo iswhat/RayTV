@@ -1,6 +1,7 @@
 import Logger from '@ohos/base/Logger';
-import { DatabaseManager } from '@ohos/database/DatabaseManager';
+import { DatabaseManager } from '../../data/db/DatabaseManager';
 import { MediaItem, MediaType } from './MediaService';
+import { ValuesBucket, RelationalPredicates, ResultSet } from '@kit.RelationalStore';
 
 /**
  * 收藏项接口
@@ -57,39 +58,11 @@ export class FavoriteService {
    */
   private async initialize(): Promise<void> {
     try {
-      // 创建收藏表
-      await this.dbManager.executeSql(`
-        CREATE TABLE IF NOT EXISTS ${this.favoriteTable} (
-          id TEXT PRIMARY KEY,
-          mediaId TEXT NOT NULL,
-          siteKey TEXT NOT NULL,
-          title TEXT NOT NULL,
-          cover TEXT,
-          desc TEXT,
-          type TEXT NOT NULL,
-          year TEXT,
-          score REAL,
-          tags TEXT,
-          favoriteTime INTEGER NOT NULL,
-          extra TEXT,
-          UNIQUE(mediaId, siteKey)
-        );
-      `);
-
-      // 创建索引
-      await this.dbManager.executeSql(`
-        CREATE INDEX IF NOT EXISTS idx_favorite_time 
-        ON ${this.favoriteTable} (favoriteTime DESC);
-      `);
-      
-      await this.dbManager.executeSql(`
-        CREATE INDEX IF NOT EXISTS idx_favorite_type 
-        ON ${this.favoriteTable} (type);
-      `);
-
-      Logger.info(this.TAG, 'Favorite table initialized');
+      // 使用DatabaseManager创建表（表结构已在DatabaseManager中定义）
+      // 这里只记录初始化日志
+      Logger.info(this.TAG, 'FavoriteService initialized');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize favorite table: ${error}`);
+      Logger.error(this.TAG, `Failed to initialize favorite service: ${error}`);
     }
   }
 
@@ -120,27 +93,40 @@ export class FavoriteService {
       };
 
       try {
-        // 尝试插入，如果已存在则更新
-        await this.dbManager.executeSql(
-          `INSERT OR REPLACE INTO ${this.favoriteTable} 
-           (id, mediaId, siteKey, title, cover, desc, type, year, score, 
-            tags, favoriteTime, extra) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            favoriteItem.id,
-            favoriteItem.mediaId,
-            favoriteItem.siteKey,
-            favoriteItem.title,
-            favoriteItem.cover || '',
-            favoriteItem.desc || '',
-            favoriteItem.type,
-            favoriteItem.year || '',
-            favoriteItem.score || 0,
-            favoriteItem.tags ? JSON.stringify(favoriteItem.tags) : '',
-            favoriteItem.favoriteTime,
-            JSON.stringify(favoriteItem.extra)
-          ]
-        );
+        const db = await this.dbManager.getDatabase();
+        
+        // 创建ValuesBucket对象
+        const valuesBucket: ValuesBucket = {
+          id: favoriteItem.id,
+          mediaId: favoriteItem.mediaId,
+          siteKey: favoriteItem.siteKey,
+          title: favoriteItem.title,
+          cover: favoriteItem.cover || '',
+          desc: favoriteItem.desc || '',
+          type: favoriteItem.type,
+          year: favoriteItem.year || '',
+          score: favoriteItem.score || 0,
+          tags: favoriteItem.tags ? JSON.stringify(favoriteItem.tags) : '',
+          favoriteTime: favoriteItem.favoriteTime,
+          extra: JSON.stringify(favoriteItem.extra)
+        };
+        
+        // 检查是否已存在
+        const predicates = new RelationalPredicates(this.favoriteTable);
+        predicates.equalTo('mediaId', favoriteItem.mediaId);
+        predicates.equalTo('siteKey', favoriteItem.siteKey);
+        
+        const resultSet = await db.query(this.favoriteTable, predicates);
+        const exists = resultSet.rowCount > 0;
+        resultSet.close();
+        
+        if (exists) {
+          // 更新现有记录
+          await db.update(this.favoriteTable, valuesBucket, predicates);
+        } else {
+          // 插入新记录
+          await db.insert(this.favoriteTable, valuesBucket);
+        }
 
         Logger.info(this.TAG, `Added favorite: ${media.siteKey}:${media.id}`);
         return favoriteItem;

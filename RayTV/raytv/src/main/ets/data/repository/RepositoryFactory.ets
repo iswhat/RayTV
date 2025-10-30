@@ -156,7 +156,7 @@ export default class RepositoryFactory {
       RepositoryFactory.instance.close().catch(error => {
         Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
       });
-      RepositoryFactory.instance = undefined!;
+      RepositoryFactory.instance = null;
     }
     Logger.info(TAG, 'Repository factory reset');
   }

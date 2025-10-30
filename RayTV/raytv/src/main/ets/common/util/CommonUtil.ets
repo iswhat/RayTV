@@ -55,7 +55,7 @@ export class CommonUtil {
     }
     
     if (obj instanceof Object) {
-      const clonedObj: any = {};
+      const clonedObj: Record<string, unknown> = {};
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
           clonedObj[key] = this.deepClone(obj[key]);
@@ -73,7 +73,7 @@ export class CommonUtil {
    * @param delay 延迟时间（毫秒）
    * @returns 防抖后的函数
    */
-  public debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...args: Parameters<T>) => void {
+  public debounce<T extends (...args: unknown[]) => unknown>(func: T, delay: number): (...args: Parameters<T>) => void {
     let timeoutId: number | undefined;
     
     return (...args: Parameters<T>) => {
@@ -88,7 +88,7 @@ export class CommonUtil {
    * @param limit 时间限制（毫秒）
    * @returns 节流后的函数
    */
-  public throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
+  public throttle<T extends (...args: unknown[]) => unknown>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean = false;
     
     return (...args: Parameters<T>) => {
@@ -509,13 +509,13 @@ export class CommonUtil {
     let result = obj;
     
     for (const key of keys) {
-      if (result === null || result === undefined) {
+      if (result === null || result === undefined || (typeof result !== 'object' && !Array.isArray(result))) {
         return defaultValue;
       }
       result = result[key];
     }
     
-    return result !== undefined ? result : defaultValue;
+    return result !== undefined && result !== null ? result as unknown as T : defaultValue;
   }
   
   /**

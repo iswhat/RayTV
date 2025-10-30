@@ -502,10 +502,75 @@ export class ArkJarLoader extends BaseLoader {
    * @private
    */
   private async garbageCollect(): Promise<void> {
-    Logger.info(this.TAG, 'Triggering garbage collection');
-    // 在实际实现中，这里可以调用系统的垃圾回收机制
-    // ArkNativeAPI.garbageCollect();
+    Logger.info(this.TAG, 'Triggering garbage collection using system mechanism');
+    try {
+      // 调用系统垃圾回收机制
+      await this.sandbox.garbageCollect();
+      Logger.info(this.TAG, 'System garbage collection completed successfully');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to trigger system garbage collection: ${error}`);
+      // 如果系统垃圾回收失败，回退到基本清理
+      await this.cleanupResources();
+    }
+  }
+  
+  /**
+   * 清理资源作为垃圾回收的补充
+   */
+  private async cleanupResources(): Promise<void> {
+    Logger.info(this.TAG, 'Performing resource cleanup');
+    // 清理临时对象和缓存
+    if (this.jarCache) {
+      this.jarCache.clear();
+    }
     await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  /**
+   * 清理资源
+   * 销毁安全沙箱并释放所有占用的资源
+   * @public
+   */
+  public async cleanup(): Promise<void> {
+    try {
+      Logger.info(this.TAG, `Cleaning up JAR loader resources for site: ${this.site.name}`);
+      
+      // 如果已创建沙箱，先销毁沙箱
+      if (this.sandboxId && this.loaderConfig.sandboxEnabled) {
+        try {
+          Logger.info(this.TAG, `Destroying security sandbox with ID: ${this.sandboxId}`);
+          await sandbox.destroySandbox(this.sandboxId);
+          this.sandboxId = '';
+          this.sandboxFs = null;
+        } catch (error) {
+          Logger.error(this.TAG, `Failed to destroy sandbox: ${error}`);
+        }
+      }
+      
+      // 清理JAR文件
+      if (this.jarFilePath) {
+        try {
+          if (this.fsManager.accessSync(this.jarFilePath, this.fsManager.F_OK)) {
+            this.fsManager.unlinkSync(this.jarFilePath);
+          }
+          this.jarFilePath = '';
+        } catch (error) {
+          Logger.error(this.TAG, `Failed to delete JAR file: ${error}`);
+        }
+      }
+      
+      // 释放内存资源
+      this.jarLoaded = false;
+      this.methodExecutedCount = 0;
+      
+      // 触发垃圾回收
+      await this.garbageCollect();
+      
+      Logger.info(this.TAG, `Resources cleaned up successfully for site: ${this.site.name}`);
+    } catch (error) {
+      Logger.error(this.TAG, `Error during cleanup: ${error}`);
+      // 即使出错也继续执行，确保尽可能多的资源被释放
+    }
   }
 
   /**

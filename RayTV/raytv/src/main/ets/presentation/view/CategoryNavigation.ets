@@ -19,7 +19,7 @@ export default struct CategoryNavigation {
   @State isScrollingRight: boolean = false;
   @State isScrollingLeft: boolean = false;
   
-  private props: CategoryNavigationProps;
+  private props: CategoryNavigationProps = {} as CategoryNavigationProps;
   private scrollButtonWidth: number = 50;
   
   constructor(props: CategoryNavigationProps) {
@@ -27,9 +27,11 @@ export default struct CategoryNavigation {
   }
   
   // 检查滚动状态
-  checkScrollPosition() {
-    const scrollOffset = this.scrollController.currentOffset();
-    const scrollExtent = this.scrollController.scrollableDistance();
+  checkScrollPosition(): void {
+    // 为scrollOffset添加明确类型，避免any类型
+    const scrollOffset = this.scrollController.currentOffset() as { x: number; y: number };
+    // 为scrollExtent添加明确类型，避免any类型
+    const scrollExtent = this.scrollController.scrollableDistance() as { x: number; y: number };
     
     this.isScrollingLeft = scrollOffset.x > 10;
     this.isScrollingRight = scrollOffset.x < scrollExtent.x - 10;
