@@ -1,4 +1,4 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { AdBlockConfig } from '../../data/bean/Config';
 import { configService } from '../config/ConfigService';
 

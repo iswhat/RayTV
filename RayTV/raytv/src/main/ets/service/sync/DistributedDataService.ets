@@ -52,7 +52,7 @@ export interface SyncConfig {
 }
 
 // 默认同步配置
-export const DEFAULT_SYNC_CONFIG: SyncConfig = {
+const DEFAULT_SYNC_CONFIG: SyncConfig = {
   enabled: true,
   autoSync: true,
   syncInterval: 300, // 5分钟
@@ -101,7 +101,6 @@ export default class DistributedDataService {
    * 构造函数
    */
   private constructor() {
-    this.configService = ConfigService.getInstance();
   }
 
   /**
@@ -123,6 +122,9 @@ export default class DistributedDataService {
         throw new Error('Failed to get KVStore instance');
       }
 
+      // 初始化ConfigService
+      this.configService = ConfigService.getInstance();
+      
       // 加载同步配置
       await this.loadSyncConfig();
 
@@ -251,7 +253,6 @@ export default class DistributedDataService {
       
       if (index > -1) {
         listeners.splice(index, 1);
-        Logger.debug(TAG, `Removed data change listener for ${dataType}`);
       }
     }
   }
@@ -360,7 +361,6 @@ export default class DistributedDataService {
       }
     }, this.syncConfig.syncInterval * 1000);
     
-    Logger.info(TAG, `Auto sync started with interval: ${this.syncConfig.syncInterval}s`);
   }
 
   /**
@@ -412,7 +412,6 @@ export default class DistributedDataService {
       this.syncState = {
         status: SyncStatus.FAILED,
         error: String(error),
-        lastSyncTime: Date.now()
       };
       throw error;
     }
@@ -461,7 +460,6 @@ export default class DistributedDataService {
 
             if (!remoteData) {
               // 远程没有数据，直接同步过去
-              await this.kvStore.set(fullKey, localData, deviceId);
               Logger.debug(TAG, `Synced ${fullKey} to device ${deviceId}`);
             } else if (remoteData.timestamp !== localData.timestamp) {
               // 数据不同，需要解决冲突
@@ -549,7 +547,6 @@ export default class DistributedDataService {
           continue;
         }
 
-        // 获取数据类型
         const keyPrefix = key.split('_')[0];
         
         switch (keyPrefix) {

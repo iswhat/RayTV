@@ -1,5 +1,5 @@
 // Movie - 电影/视频实体类
-import Logger from '../../common/util/Logger';
+import { Logger } from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 
 const TAG = 'Movie';
@@ -158,7 +158,7 @@ export default class Movie {
    * 构造函数
    */
   constructor(data: Partial<Movie>) {
-    this.id = data.id || `movie_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.id = data.id || `movie_${DateUtil.getTimestamp()}_${Math.random().toString(36).substring(2, 11)}`;
     this.title = data.title || '';
     this.originalTitle = data.originalTitle;
     this.type = data.type || VideoType.OTHER;
@@ -177,13 +177,15 @@ export default class Movie {
     this.totalEpisodes = data.totalEpisodes;
     this.currentSeason = data.currentSeason;
     this.episodes = data.episodes || [];
-    this.recommended = data.recommended || false;
-    this.favorite = data.favorite || false;
+    // 明确初始化布尔值，避免undefined
+    this.recommended = !!data.recommended;
+    this.favorite = !!data.favorite;
     this.watchedProgress = data.watchedProgress || 0;
     this.playCount = data.playCount || 0;
     this.updateTime = data.updateTime || DateUtil.format(new Date());
     this.sources = data.sources || [];
     this.score = data.score;
+    // 安全处理日期转换
     this.year = data.year || (data.releaseDate ? new Date(data.releaseDate).getFullYear() : undefined);
   }
 
@@ -285,9 +287,9 @@ export default class Movie {
     this.updateTime = DateUtil.format(new Date());
 
     // 更新对应剧集的进度
-    if (episodeId && this.episodes) {
+    if (episodeId && this.episodes && this.episodes.length > 0) {
       const episode = this.episodes.find(e => e.id === episodeId);
-      if (episode) {
+      if (episode != null) {
         episode.watchedProgress = progress;
         // 如果观看进度超过总时长的90%，标记为已观看
         if (episode.duration && progress >= episode.duration * 0.9) {
@@ -334,10 +336,9 @@ export default class Movie {
    * @returns 进度百分比
    */
   public getProgressPercentage(): number {
-    if (!this.duration || this.duration === 0) {
-      return 0;
-    }
-    return Math.min(100, Math.round((this.watchedProgress || 0) / this.duration * 100));
+    const watchedProgress = this.watchedProgress || 0;
+    const duration = this.duration || 1;
+    return Math.min(100, Math.round(watchedProgress / duration * 100));
   }
 
   /**
@@ -347,7 +348,7 @@ export default class Movie {
   public isMultiEpisode(): boolean {
     return this.type === VideoType.TV_SERIES || 
            this.type === VideoType.ANIME || 
-           (this.episodes && this.episodes.length > 1);
+           (this.episodes != null && this.episodes.length > 1);
   }
 
   /**
@@ -355,11 +356,14 @@ export default class Movie {
    * @returns 已观看集数
    */
   public getWatchedEpisodeCount(): number {
-    if (!this.episodes) {
+    if (!this.episodes || this.episodes.length === 0) {
       return 0;
     }
-    // 修复类型错误：确保isWatched是明确的布尔值，处理undefined情况
-    return this.episodes.filter(episode => Boolean(episode.isWatched)).length;
+    // 确保isWatched是明确的布尔值，处理undefined情况
+    return this.episodes.filter(episode => {
+      // 确保episode对象存在且isWatched为true
+      return episode != null && episode.isWatched === true;
+    }).length;
   }
 
   /**

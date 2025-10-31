@@ -1,5 +1,5 @@
 // JsonUtil - JSON数据处理工具类
-import Logger from './Logger';
+import { Logger, LogLevel } from './Logger';
 
 const TAG = 'JsonUtil';
 
@@ -14,15 +14,16 @@ export default class JsonUtil {
    * @param pretty 是否格式化输出
    * @returns JSON字符串
    */
-  public static stringify(obj: Record<string, any>, pretty: boolean = false): string {
+  public static stringify(obj: object, pretty: boolean = false): string {
     try {
       if (pretty) {
         return JSON.stringify(obj, null, 2);
       }
       return JSON.stringify(obj);
     } catch (error) {
-      Logger.error(TAG, `Failed to stringify object: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to stringify object: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -31,15 +32,16 @@ export default class JsonUtil {
    * @param jsonStr JSON字符串
    * @returns 反序列化后的对象
    */
-  public static parse<T>(jsonStr: string): T {
+  public static parse<T>(jsonStr: string): T | null {
     try {
       if (!jsonStr || typeof jsonStr !== 'string') {
         throw new Error('Invalid JSON string');
       }
       return JSON.parse(jsonStr) as T;
     } catch (error) {
-      Logger.error(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to parse JSON: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -49,11 +51,12 @@ export default class JsonUtil {
    * @param defaultValue 默认值
    * @returns 解析结果或默认值
    */
-  public static safeParse<T>(jsonStr: string, defaultValue: T): T {
+  public static safeParse<T>(jsonStr: string, defaultValue: T): T | null {
     try {
       return JsonUtil.parse<T>(jsonStr);
     } catch (error) {
-      Logger.warn(TAG, `Safe parse fallback to default value: ${error instanceof Error ? error.message : String(error)}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().warn(`${TAG} - Safe parse fallback to default value: ${errorMessage}`);
       return defaultValue;
     }
   }
@@ -92,7 +95,7 @@ export default class JsonUtil {
         return new Date(obj.getTime()) as unknown as T;
       }
       
-      if (obj instanceof Array) {
+      if (Array.isArray(obj)) {
         const cloneArr: unknown[] = [];
         for (let i = 0; i < obj.length; i++) {
           cloneArr[i] = JsonUtil.deepClone(obj[i]);
@@ -100,20 +103,22 @@ export default class JsonUtil {
         return cloneArr as unknown as T;
       }
       
-      if (typeof obj === 'object') {
+      if (typeof obj === 'object' && obj !== null) {
         const cloneObj: Record<string, unknown> = {};
-        for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            cloneObj[key] = JsonUtil.deepClone(obj[key]);
-          }
+        // 使用Object.keys替代for..in循环
+        const keys = Object.keys(obj as Record<string, unknown>);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          cloneObj[key] = JsonUtil.deepClone((obj as Record<string, unknown>)[key]);
         }
-        return cloneObj as T;
+        return cloneObj as unknown as T;
       }
       
       return obj;
     } catch (error) {
-      Logger.error(TAG, `Failed to deep clone object: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to deep clone object: ${errorMessage}`);
+      return obj;
     }
   }
 
@@ -123,32 +128,34 @@ export default class JsonUtil {
    * @param source 源对象
    * @returns 合并后的对象
    */
-  public static merge<T = any>(target: T, source: Record<string, unknown>): T {
+  public static merge<T>(target: T, source: Record<string, unknown>): T {
     try {
       const result = JsonUtil.deepClone(target);
       
       // 安全地转换result为可索引对象
-        const resultObj = result as Record<string, unknown>;
+      const resultObj = result as Record<string, unknown>;
+      
+      // 使用Object.keys替代for..in循环
+      const sourceKeys = Object.keys(source);
+      for (let i = 0; i < sourceKeys.length; i++) {
+        const key = sourceKeys[i];
+        const sourceValue = source[key];
+        const targetValue = resultObj[key];
         
-        for (const key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            const sourceValue = source[key];
-            const targetValue = resultObj[key];
-            
-            // 递归合并对象属性
-            if (sourceValue !== null && typeof sourceValue === 'object' &&
-                targetValue !== null && typeof targetValue === 'object') {
-              resultObj[key] = JsonUtil.merge(targetValue, sourceValue as Record<string, unknown>);
-            } else {
-              resultObj[key] = sourceValue;
-            }
-          }
+        // 递归合并对象属性
+        if (sourceValue !== null && typeof sourceValue === 'object' &&
+            targetValue !== null && typeof targetValue === 'object') {
+          resultObj[key] = JsonUtil.merge(targetValue, sourceValue as Record<string, unknown>);
+        } else {
+          resultObj[key] = sourceValue;
         }
+      }
       
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to merge JSON objects: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to merge JSON objects: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -158,20 +165,23 @@ export default class JsonUtil {
    * @param keys 要提取的属性名数组
    * @returns 提取后的新对象
    */
-  public static pick<T extends Record<string, unknown> = Record<string, unknown>>(obj: unknown, keys: string[]): T {
+  public static pick<T extends Record<string, unknown>>(obj: unknown, keys: string[]): T {
     try {
       const result: Record<string, unknown> = {};
       
-      keys.forEach(key => {
+      // 使用标准for循环替代forEach
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
           result[key] = (obj as Record<string, unknown>)[key];
         }
-      });
+      }
       
       return result as T;
     } catch (error) {
-      Logger.error(TAG, `Failed to pick properties: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to pick properties: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -181,13 +191,24 @@ export default class JsonUtil {
    * @param keys 要排除的属性名数组
    * @returns 排除后的新对象
    */
-  public static omit<T extends Record<string, unknown> = Record<string, unknown>>(obj: unknown, keys: string[]): T {
+  public static omit<T extends Record<string, unknown>>(obj: unknown, keys: string[]): T {
     try {
       const result: Record<string, unknown> = {};
       
       if (obj && typeof obj === 'object') {
-        for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key) && !keys.includes(key)) {
+        // 使用Object.keys替代for..in循环
+        const objKeys = Object.keys(obj as Record<string, unknown>);
+        for (let i = 0; i < objKeys.length; i++) {
+          const key = objKeys[i];
+          // 检查key是否在排除列表中
+          let shouldExclude = false;
+          for (let j = 0; j < keys.length; j++) {
+            if (keys[j] === key) {
+              shouldExclude = true;
+              break;
+            }
+          }
+          if (!shouldExclude) {
             result[key] = (obj as Record<string, unknown>)[key];
           }
         }
@@ -195,8 +216,9 @@ export default class JsonUtil {
       
       return result as T;
     } catch (error) {
-      Logger.error(TAG, `Failed to omit properties: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to omit properties: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -207,11 +229,15 @@ export default class JsonUtil {
    */
   public static compress(jsonStr: string): string {
     try {
-      const parsed = this.parse(jsonStr);
-      return this.stringify(parsed);
+      const parsed = this.parse<object>(jsonStr);
+      if (parsed) {
+        return this.stringify(parsed);
+      }
+      return jsonStr;
     } catch (error) {
-      Logger.error(TAG, `Failed to compress JSON: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to compress JSON: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -222,11 +248,15 @@ export default class JsonUtil {
    */
   public static format(jsonStr: string): string {
     try {
-      const parsed = this.parse(jsonStr);
-      return this.stringify(parsed, true);
+      const parsed = this.parse<object>(jsonStr);
+      if (parsed) {
+        return this.stringify(parsed, true);
+      }
+      return jsonStr;
     } catch (error) {
-      Logger.error(TAG, `Failed to format JSON: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to format JSON: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
 }

@@ -1,6 +1,6 @@
 // FileUtil - 文件操作工具类
 import fs from '@ohos.file.fs';
-import Logger from './Logger';
+import { Logger } from './Logger';
 
 const TAG = 'FileUtil';
 
@@ -23,8 +23,9 @@ export default class FileUtil {
       await fs.close(file.fd);
       return String.fromCharCode(...new Uint8Array(buf));
     } catch (error) {
-      Logger.error(TAG, `Failed to read file ${filePath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to read file ${filePath}: ${errorMessage}`);
+      throw new Error(`Failed to read file ${filePath}: ${errorMessage}`);
     }
   }
 
@@ -36,15 +37,16 @@ export default class FileUtil {
   public static async writeFile(filePath: string, content: string): Promise<void> {
     try {
       // 确保目录存在
-      await this.ensureDirExists(this.getParentPath(filePath));
+      await FileUtil.ensureDirExists(FileUtil.getParentPath(filePath));
       
       const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
       const buf = new TextEncoder().encode(content);
       await fs.write(file.fd, buf.buffer);
       await fs.close(file.fd);
     } catch (error) {
-      Logger.error(TAG, `Failed to write file ${filePath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to write file ${filePath}: ${errorMessage}`);
+      throw new Error(`Failed to write file ${filePath}: ${errorMessage}`);
     }
   }
 
@@ -56,15 +58,16 @@ export default class FileUtil {
   public static async appendFile(filePath: string, content: string): Promise<void> {
     try {
       // 确保目录存在
-      await this.ensureDirExists(this.getParentPath(filePath));
+      await FileUtil.ensureDirExists(FileUtil.getParentPath(filePath));
       
       const file = await fs.open(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.APPEND);
       const buf = new TextEncoder().encode(content);
       await fs.write(file.fd, buf.buffer);
       await fs.close(file.fd);
     } catch (error) {
-      Logger.error(TAG, `Failed to append file ${filePath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to append file ${filePath}: ${errorMessage}`);
+      throw new Error(`Failed to append file ${filePath}: ${errorMessage}`);
     }
   }
 
@@ -74,12 +77,13 @@ export default class FileUtil {
    */
   public static async deleteFile(filePath: string): Promise<void> {
     try {
-      if (await this.exists(filePath)) {
+      if (await FileUtil.exists(filePath)) {
         await fs.unlink(filePath);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to delete file ${filePath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to delete file ${filePath}: ${errorMessage}`);
+      throw new Error(`Failed to delete file ${filePath}: ${errorMessage}`);
     }
   }
 
@@ -91,8 +95,9 @@ export default class FileUtil {
     try {
       await fs.mkdir(dirPath, 0o777);
     } catch (error) {
-      Logger.error(TAG, `Failed to create directory ${dirPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to create directory ${dirPath}: ${errorMessage}`);
+      throw new Error(`Failed to create directory ${dirPath}: ${errorMessage}`);
     }
   }
 
@@ -104,8 +109,9 @@ export default class FileUtil {
     try {
       await fs.mkdir(dirPath, 0o777, true);
     } catch (error) {
-      Logger.error(TAG, `Failed to ensure directory exists ${dirPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
+      throw new Error(`Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
     }
   }
 
@@ -118,7 +124,7 @@ export default class FileUtil {
     try {
       await fs.stat(path);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -132,8 +138,9 @@ export default class FileUtil {
     try {
       return await fs.stat(filePath);
     } catch (error) {
-      Logger.error(TAG, `Failed to get file stat ${filePath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to get file stat ${filePath}: ${errorMessage}`);
+      throw new Error(`Failed to get file stat ${filePath}: ${errorMessage}`);
     }
   }
 
@@ -146,8 +153,9 @@ export default class FileUtil {
     try {
       return await fs.listDir(dirPath);
     } catch (error) {
-      Logger.error(TAG, `Failed to list files in directory ${dirPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to list files in directory ${dirPath}: ${errorMessage}`);
+      throw new Error(`Failed to list files in directory ${dirPath}: ${errorMessage}`);
     }
   }
 
@@ -159,11 +167,12 @@ export default class FileUtil {
   public static async copyFile(srcPath: string, destPath: string): Promise<void> {
     try {
       // 确保目标目录存在
-      await this.ensureDirExists(this.getParentPath(destPath));
+      await FileUtil.ensureDirExists(FileUtil.getParentPath(destPath));
       await fs.copyFile(srcPath, destPath);
     } catch (error) {
-      Logger.error(TAG, `Failed to copy file from ${srcPath} to ${destPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
+      throw new Error(`Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
     }
   }
 
@@ -175,11 +184,12 @@ export default class FileUtil {
   public static async moveFile(srcPath: string, destPath: string): Promise<void> {
     try {
       // 确保目标目录存在
-      await this.ensureDirExists(this.getParentPath(destPath));
+      await FileUtil.ensureDirExists(FileUtil.getParentPath(destPath));
       await fs.rename(srcPath, destPath);
     } catch (error) {
-      Logger.error(TAG, `Failed to move file from ${srcPath} to ${destPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
+      throw new Error(`Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
     }
   }
 
@@ -230,24 +240,25 @@ export default class FileUtil {
    */
   public static async clearDirectory(dirPath: string): Promise<void> {
     try {
-      if (!(await this.exists(dirPath))) {
+      if (!(await FileUtil.exists(dirPath))) {
         return;
       }
       
-      const files = await this.listFiles(dirPath);
+      const files = await FileUtil.listFiles(dirPath);
       for (const file of files) {
         const filePath = `${dirPath}/${file}`;
-        const stat = await this.getFileStat(filePath);
+        const stat = await FileUtil.getFileStat(filePath);
         if (stat.isDirectory()) {
-          await this.clearDirectory(filePath);
+          await FileUtil.clearDirectory(filePath);
           await fs.rmdir(filePath);
         } else {
           await fs.unlink(filePath);
         }
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to clear directory ${dirPath}: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to clear directory ${dirPath}: ${errorMessage}`);
+      throw new Error(`Failed to clear directory ${dirPath}: ${errorMessage}`);
     }
   }
 }

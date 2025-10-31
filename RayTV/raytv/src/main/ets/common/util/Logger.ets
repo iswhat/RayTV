@@ -107,6 +107,16 @@ export interface LoggerConfig {
 }
 
 /**
+ * 日志额外数据接口
+ */
+export interface LoggerExtraData {
+  // 具体属性定义，符合ArkTS规范
+  message?: string;
+  code?: number;
+  detail?: object;
+}
+
+/**
  * 日志条目接口
  */
 export interface LogEntry {
@@ -148,7 +158,7 @@ export interface LogEntry {
   /**
    * 额外数据
    */
-  extra?: Record<string, unknown>;
+  extra?: LoggerExtraData;
 }
 
 /**
@@ -159,7 +169,7 @@ class Logger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
-  private logFileHandle?: any; // 暂时使用any类型，但会在使用时添加适当的类型断言
+  private logFileHandle?: object; // 使用object类型替代any，在使用时会添加类型断言
   private logQueue: LogEntry[] = [];
   private isWriting: boolean = false;
 
@@ -196,7 +206,7 @@ class Logger {
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    // 使用Object.assign替代展开运算符，符合ArkTS规范
+    // 使用Object.assign合并对象属性，符合ArkTS规范
     this.config = Object.assign({}, this.config, config);
     
     if (this.config.fileEnabled && this.config.logFilePath) {
@@ -229,7 +239,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public static debug(tag: string, message: string, extra?: Record<string, unknown>): void {
+  public static debug(tag: string, message: string, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     const formattedMessage = `[${tag}] ${message}`;
     instance.debug(formattedMessage, extra);
@@ -241,7 +251,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public static info(tag: string, message: string, extra?: Record<string, unknown>): void {
+  public static info(tag: string, message: string, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     const formattedMessage = `[${tag}] ${message}`;
     instance.info(formattedMessage, extra);
@@ -253,7 +263,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public static warn(tag: string, message: string, extra?: Record<string, unknown>): void {
+  public static warn(tag: string, message: string, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     const formattedMessage = `[${tag}] ${message}`;
     instance.warn(formattedMessage, extra);
@@ -266,7 +276,7 @@ class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public static error(tag: string, message: string, error?: Error, extra?: Record<string, unknown>): void {
+  public static error(tag: string, message: string, error?: Error, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     const formattedMessage = `[${tag}] ${message}`;
     instance.error(formattedMessage, error, extra);
@@ -278,7 +288,7 @@ class Logger {
    * @param error 错误对象或错误消息
    * @param extra 额外数据
    */
-  public static exception(tag: string, error: string | Error, extra?: Record<string, unknown>): void {
+  public static exception(tag: string, error: string | Error, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     if (error instanceof Error) {
       instance.logException(error, `[${tag}] ${error.message}`, extra);
@@ -293,12 +303,35 @@ class Logger {
    * @param format 格式化字符串
    * @param args 格式化参数
    */
-  public static format(tag: string, format: string, ...args: any[]): void {
-    const message = format.replace(/\{\}/g, () => {
-      const arg = args.shift();
-      return arg !== undefined && arg !== null ? String(arg) : '';
-    });
-    Logger.getInstance().logInternal(LogLevel.INFO, tag, message);
+  public static format(tag: string, format: string, ...args: Array<string | number | boolean | object | undefined | null>): void {
+    // 不使用正则表达式，使用简单的字符串替换
+    let message = format;
+    for (let i = 0; i < args.length; i++) {
+      const placeholder = `\{${i}\}`;
+      const arg = args[i];
+      const argStr = arg !== undefined && arg !== null ? String(arg) : '';
+      
+      // 避免使用replace方法，手动实现字符串替换
+      let newMessage = '';
+      let lastIndex = 0;
+      let index = message.indexOf(placeholder);
+      
+      while (index !== -1) {
+        newMessage += message.substring(lastIndex, index);
+        newMessage += argStr;
+        lastIndex = index + placeholder.length;
+        index = message.indexOf(placeholder, lastIndex);
+      }
+      
+      newMessage += message.substring(lastIndex);
+      message = newMessage;
+    }
+    
+    // 不使用logInternal，直接调用log方法
+    const instance = Logger.getInstance();
+    if (instance.shouldLog(LogLevel.INFO)) {
+      instance.log(LogLevel.INFO, `[${tag}] ${message}`);
+    }
   }
 
   /**
@@ -306,7 +339,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public debug(message: string, extra?: Record<string, unknown>): void {
+  public debug(message: string, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, extra);
     }
@@ -317,7 +350,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public info(message: string, extra?: Record<string, unknown>): void {
+  public info(message: string, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, extra);
     }
@@ -328,7 +361,7 @@ class Logger {
    * @param message 日志消息
    * @param extra 额外数据
    */
-  public warn(message: string, extra?: Record<string, unknown>): void {
+  public warn(message: string, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, extra);
     }
@@ -340,7 +373,7 @@ class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public error(message: string, error?: Error, extra?: Record<string, unknown>): void {
+  public error(message: string, error?: Error, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -358,7 +391,7 @@ class Logger {
    * @param error 错误对象
    * @param extra 额外数据
    */
-  public fatal(message: string, error?: Error, extra?: Record<string, unknown>): void {
+  public fatal(message: string, error?: Error, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.FATAL)) {
       let stackTrace = '';
       if (error && error.stack) {
@@ -375,7 +408,7 @@ class Logger {
    * @param obj 要记录的对象
    * @param message 日志消息
    */
-  public logObject(obj: Record<string, unknown>, message?: string): void {
+  public logObject(obj: object, message?: string): void {
     const objString = this.serializeObject(obj);
     const finalMessage = message ? `${message}: ${objString}` : objString;
     this.debug(finalMessage);
@@ -458,11 +491,11 @@ class Logger {
 
   /**
    * 内部日志记录方法 - 用于兼容静态调用
+   * 注意：此方法当前未被使用，保留是为了向后兼容
    */
-  private logInternal(level: LogLevel, tag: string, message: string): void {
+  private logInternal(level: LogLevel, message: string): void {
     if (this.shouldLog(level)) {
-      const formattedMessage = `[${tag}] ${message}`;
-      this.log(level, formattedMessage);
+      this.log(level, message);
     }
   }
 
@@ -489,7 +522,7 @@ class Logger {
    * @param extra 额外数据
    * @param stackTrace 堆栈跟踪
    */
-  private log(level: LogLevel, message: string, extra?: Record<string, unknown>, stackTrace?: string): void {
+  private log(level: LogLevel, message: string, extra?: LoggerExtraData, stackTrace?: string): void {
     const entry: LogEntry = {
       level,
       message,
@@ -526,7 +559,7 @@ class Logger {
     if (this.config.fileEnabled) {
       this.logQueue.push(entry);
       if (!this.isWriting) {
-        this.writeLogsToFile().catch(err => {
+        this.writeLogsToFile().catch((err: Error) => {
           console.error('Failed to write logs to file:', err);
         });
       }
@@ -667,7 +700,7 @@ class Logger {
    * 序列化对象
    * @param obj 要序列化的对象
    */
-  private serializeObject(obj: Record<string, unknown>): string {
+  private serializeObject(obj: object): string {
     try {
       return JSON.stringify(obj, null, 2);
     } catch (error) {

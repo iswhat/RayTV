@@ -4,12 +4,12 @@ import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import ConfigService from '../../service/config/ConfigService';
 import HistoryService from '../../service/media/HistoryService';
-import RepositoryFactory from '../repository/RepositoryFactory';
-import { DatabaseRepository } from '../repository/DatabaseRepository';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
+import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
 
 // 导入模型和DTO
-import ApiResponse, { ResponseCode } from '../dto/ApiResponse';
-import Movie, { VideoSource, VideoType, VideoQuality } from '../model/Movie';
+import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
+import Movie, { VideoSource, VideoType, VideoQuality } from '../../data/model/Movie';
 
 // 常量定义
 const TAG = 'PlayerService';

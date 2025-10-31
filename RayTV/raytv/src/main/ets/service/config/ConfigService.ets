@@ -1,12 +1,12 @@
 // ConfigService - 配置服务类
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
-import RepositoryFactory from '../repository/RepositoryFactory';
-import { DatabaseRepository } from '../repository/DatabaseRepository';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
+import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
 import ConfigParser from './ConfigParser';
 
 // 导入模型和DTO
-import ApiResponse, { ResponseCode } from '../dto/ApiResponse';
+import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
 
 // 常量定义
 const TAG = 'ConfigService';

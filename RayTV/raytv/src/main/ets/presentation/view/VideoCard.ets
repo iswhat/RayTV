@@ -1,5 +1,8 @@
 // VideoCard.ets - 通用视频卡片组件
 import { VideoType } from '../../data/model/Movie';
+import { LinearGradient } from '@ohos.arkui.advanced.linearGradient';
+import { GradientDirection } from '@ohos.arkui.advanced.linearGradient';
+import { FontWeight, ImageFit, TransitionType, TextOverflow } from '@ohos.arkui';
 
 interface VideoCardProps {
   id: string;
@@ -50,12 +53,14 @@ export default struct VideoCard {
         if (this.isHover) {
           Stack() {
             // 渐变遮罩
-            LinearGradient()
-              .colors(["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"])
-              .direction(GradientDirection.Bottom)
-              .width('100%')
-              .height('100%')
-              .borderRadius(8)
+            LinearGradient() {
+              // LinearGradient的内容占位符
+            }
+            .colors(["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"])
+            .direction(GradientDirection.Bottom)
+            .width('100%')
+            .height('100%')
+            .borderRadius(8)
             
             // 评分
             if (this.props.rating) {

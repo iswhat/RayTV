@@ -1,8 +1,8 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { ParserInfo } from '../../data/repository/NetworkRepository';
 import { NetworkResult, VideoSourceInfo } from '../../data/bean/NetworkResult';
 import { configService } from '../config/ConfigService';
-import HttpService from '../http/HttpService';
+import HttpService from '../HttpService';
 
 /**
  * 解析器配置接口

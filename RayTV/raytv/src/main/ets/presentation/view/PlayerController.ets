@@ -1,5 +1,8 @@
 // PlayerController.ets - 播放器控制界面组件
 import { PlaybackStatus } from '../../service/player/PlayerService';
+import { Font, Text, Button, Stack, Row, Column, Slider, LoadingProgress, TextOverflow, SliderChangeMode } from '@ohos.arkui';
+import { VerticalAlign, FontWeight } from '@ohos.arkui.text';
+import { TransitionType } from '@ohos.arkui.transition';
 
 interface PlayerControllerProps {
   status: PlaybackStatus;
@@ -70,10 +73,8 @@ export default struct PlayerController {
   }
   
   build() {
-    if (!this.props.showController) return null;
-    
-    return (
-      Stack() {
+    Stack() {
+      if (this.props.showController) {
         // 渐变背景
         LinearGradient()
           .colors(["rgba(0,0,0,0.6)", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.6)"])
@@ -129,35 +130,42 @@ export default struct PlayerController {
         } else {
           Button(this.props.status === PlaybackStatus.PLAYING ? '⏸' : '▶')
             .fontSize(48)
-          .width(120)
-          .height(120)
-          .backgroundColor('rgba(0,0,0,0.5)')
-          .borderRadius(60)
-          .onClick(() => this.props.onPlayPause())
+            .width(120)
+            .height(120)
+            .backgroundColor('rgba(0,0,0,0.5)')
+            .borderRadius(60)
+            .onClick(() => this.props.onPlayPause())
         }
         
         // 底部控制栏
         Column() {
           // 进度条
-          Row() {
+        Row() {
             Text(this.formatTime(this.isSeeking ? this.seekTime : this.props.currentTime))
               .fontSize(14)
-              .marginRight(12)
+              .margin({ right: 12 })
               
             Slider({
               value: this.getProgressPercentage(),
-              onStart: () => this.onProgressBarStart(),
-              onChange: (event) => this.onProgressBarMove(event),
-              onEnd: (event) => this.onProgressBarEnd(event),
               min: 0,
               max: 100,
               step: 0.1
             })
-            .flexGrow(1)
-            .trackColor({ 
-              selected: '#37a2da', 
-              unselected: 'rgba(255,255,255,0.3)' 
+            .onChange((event) => {
+              const value = event.progress;
+              if (event.mode === SliderChangeMode.START) {
+                this.onProgressBarStart();
+              } else if (event.mode === SliderChangeMode.MOVE) {
+                const sliderEvent = { progress: value };
+                this.onProgressBarMove(sliderEvent);
+              } else if (event.mode === SliderChangeMode.END) {
+                const sliderEvent = { progress: value };
+                this.onProgressBarEnd(sliderEvent);
+              }
             })
+            .flexGrow(1)
+            .trackColor('#37a2da')
+            .backgroundColor('rgba(255,255,255,0.3)')
             .blockColor('#fff')
             .height(40)
             
@@ -179,20 +187,19 @@ export default struct PlayerController {
             
             Slider({
               value: this.props.volume * 100,
-              onChange: (event) => this.props.onVolumeChange(event.progress / 100),
               min: 0,
               max: 100,
               step: 1
             })
-            .width(150)
-            .trackColor({ 
-              selected: '#37a2da', 
-              unselected: 'rgba(255,255,255,0.3)' 
+            .onChange((event) => {
+              this.props.onVolumeChange(event.progress / 100);
             })
+            .width(150)
+            .trackColor('#37a2da')
+            .backgroundColor('rgba(255,255,255,0.3)')
             .blockColor('#fff')
             .height(40)
-            .marginLeft(8)
-            .marginRight(16)
+            .margin({ left: 8, right: 16 })
             
             Button() {
               Text(this.props.status === PlaybackStatus.PLAYING ? '⏸' : '▶')
@@ -208,16 +215,16 @@ export default struct PlayerController {
           .padding(16)
           .alignItems(VerticalAlign.Center)
         }
-        .position({ y: '100%', offsetY: -16 })
+        .position({ y: '100%' })
       }
-      .width('100%')
-      .height('100%')
-      .position({ x: 0, y: 0 })
-      .transition({
-        type: TransitionType.Insert,
-        opacity: 0,
-        duration: 300
-      })
-    );
+    }
+    .width('100%')
+    .height('100%')
+    .position({ x: 0, y: 0 })
+    .transition({
+      type: TransitionType.Insert,
+      opacity: 0,
+      duration: 300
+    })
   }
 }

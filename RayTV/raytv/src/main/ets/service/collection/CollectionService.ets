@@ -1,13 +1,13 @@
 // CollectionService - 收藏服务类
 import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
-import RepositoryFactory from '../repository/RepositoryFactory';
-import { DatabaseRepository } from '../repository/DatabaseRepository';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
+import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
 
 // 导入模型和DTO
-import { VideoType } from '../model/Movie';
-import ApiResponse, { ResponseCode } from '../dto/ApiResponse';
-import { MovieDetailData } from '../dto/MovieDetailDto';
+import { VideoType } from '../../data/model/Movie';
+import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
+import { MovieDetailData } from '../../data/dto/MovieDetailDto';
 
 // 常量定义
 const TAG = 'CollectionService';

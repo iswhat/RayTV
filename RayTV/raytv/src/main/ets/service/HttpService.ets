@@ -3,7 +3,7 @@
 
 import http from '@ohos.net.http';
 import { ConfigService } from './config/ConfigService';
-import { AdBlockManager } from '../adblock/AdBlockManager';
+import { AdBlockManager } from './adblock/AdBlockManager';
 
 export class HttpService {
   private static instance: HttpService;

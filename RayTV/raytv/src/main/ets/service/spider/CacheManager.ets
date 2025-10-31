@@ -1,6 +1,5 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger.ets';
 import { FileSystemManager } from '@ohos.file.fs';
-import { Utils } from '@ohos/base/Utils';
 
 /**
  * 缓存项接口
@@ -488,7 +487,7 @@ export class CacheManager {
    * @private
    */
   private getCacheKeyHash(key: string): string {
-    return Utils.generateHash(key);
+    return this.generateHash(key);
   }
 
   /**
@@ -500,11 +499,31 @@ export class CacheManager {
   private generateParamsHash(params: any): string {
     try {
       const sortedParams = this.sortParams(params);
-      return Utils.generateHash(JSON.stringify(sortedParams));
+      return this.generateHash(JSON.stringify(sortedParams));
     } catch (error) {
       Logger.error(this.TAG, `Failed to generate params hash: ${error}`);
       return 'error';
     }
+  }
+  
+  /**
+   * 简单的字符串哈希生成函数
+   * @param str 输入字符串
+   * @returns 哈希值字符串
+   * @private
+   */
+  private generateHash(str: string): string {
+    let hash = 0;
+    if (str.length === 0) return hash.toString();
+    
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 转换为32位整数
+    }
+    
+    // 转换为16进制字符串
+    return Math.abs(hash).toString(16);
   }
 
   /**

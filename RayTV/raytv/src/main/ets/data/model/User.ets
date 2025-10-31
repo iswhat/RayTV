@@ -30,7 +30,7 @@ export interface UserPreferences {
   parentalControlLevel?: number;        // 家长控制级别
   searchHistoryEnabled?: boolean;       // 是否保存搜索历史
   playbackSpeed?: number;               // 默认播放速度
-  [key: string]: any;                   // 其他自定义偏好设置
+  // 移除索引签名，符合ArkTS规范
 }
 
 /**
@@ -118,10 +118,10 @@ export default class User {
    * @param preferences 要更新的偏好设置
    */
   public updatePreferences(preferences: Partial<UserPreferences>): void {
-    this.preferences = {
-      ...this.preferences,
-      ...preferences
-    };
+    if (!this.preferences) {
+      this.preferences = {} as UserPreferences;
+    }
+    this.preferences = Object.assign({}, this.preferences, preferences);
   }
 
   /**
@@ -190,17 +190,17 @@ export default class User {
     
     if (existingIndex >= 0) {
       // 更新现有设备的信息
-      this.activeDevices[existingIndex] = {
-        ...this.activeDevices[existingIndex],
-        ...deviceInfo,
-        lastActiveTime: DateUtil.format(new Date())
-      };
+      this.activeDevices[existingIndex] = Object.assign(
+        {},
+        this.activeDevices[existingIndex],
+        deviceInfo,
+        { lastActiveTime: DateUtil.format(new Date()) }
+      );
     } else {
       // 添加新设备
-      this.activeDevices.push({
-        ...deviceInfo,
-        lastActiveTime: DateUtil.format(new Date())
-      });
+      const newDevice = Object.assign({}, deviceInfo);
+      newDevice.lastActiveTime = DateUtil.format(new Date());
+      this.activeDevices.push(newDevice);
     }
   }
 
@@ -248,12 +248,18 @@ export default class User {
    * @returns 是否有权限
    */
   public hasPermission(permission: string): boolean {
-    // 基础权限映射
-    const permissions: Record<UserRole, string[]> = {
-      [UserRole.GUEST]: ['basic_view', 'limited_search'],
-      [UserRole.REGULAR]: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'],
-      [UserRole.VIP]: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_full', 'hd_content', 'ad_free', 'exclusive_content'],
-      [UserRole.ADMIN]: ['*'] // 管理员拥有所有权限
+    // 基础权限映射 - 使用接口定义和具体属性名
+    interface PermissionsMap {
+      GUEST: string[];
+      REGULAR: string[];
+      VIP: string[];
+      ADMIN: string[];
+    }
+    const permissions: PermissionsMap = {
+      GUEST: ['basic_view', 'limited_search'],
+      REGULAR: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'],
+      VIP: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_full', 'hd_content', 'ad_free', 'exclusive_content'],
+      ADMIN: ['*'] // 管理员拥有所有权限
     };
 
     const userPermissions = permissions[this.role] || [];

@@ -1,5 +1,5 @@
 // HomePage.ets - 主页面组件
-import { useState, onMounted, onUnmounted } from '@kit.ArkUI';
+import { FontWeight, BarState, ScrollDirection } from '@ohos.arkui';
 import VideoCard from '../view/VideoCard';
 import CategoryNavigation from '../view/CategoryNavigation';
 import { VideoType } from '../../data/model/Movie';
@@ -175,8 +175,7 @@ export default struct HomePage {
           Text('RayTV')
             .fontSize(24)
             .fontWeight(FontWeight.Bold)
-            .marginLeft(20)
-            .marginTop(10)
+            .margin({ left: 20, top: 10 })
           
           Row() {
             Button() {
@@ -195,7 +194,7 @@ export default struct HomePage {
             .height(48)
             .marginRight(20)
           }
-          .marginLeft('auto')
+          .margin({ left: 'auto' })
         }
         .width('100%')
         .height(60)
@@ -217,9 +216,7 @@ export default struct HomePage {
             Text('精选推荐')
               .fontSize(22)
               .fontWeight(FontWeight.Bold)
-              .marginTop(20)
-              .marginLeft(20)
-              .marginBottom(16)
+              .margin({ top: 20, left: 20, bottom: 16 })
             
             // 精选内容横向滚动
             Scroll() {
@@ -253,9 +250,7 @@ export default struct HomePage {
             Text('热门电影')
               .fontSize(22)
               .fontWeight(FontWeight.Bold)
-              .marginTop(20)
-              .marginLeft(20)
-              .marginBottom(16)
+              .margin({ top: 20, left: 20, bottom: 16 })
             
             // 热门电影网格布局
             Grid() {
@@ -272,7 +267,7 @@ export default struct HomePage {
                     isFavorite: movie.isFavorite,
                     onPress: () => this.handleVideoPress(movie),
                     onFavorite: () => this.handleFavoritePress(movie.id),
-                    width: '100%',
+                    width: 100,
                     aspectRatio: 0.75
                   })
                 }
@@ -281,9 +276,7 @@ export default struct HomePage {
             .columnsTemplate('1fr 1fr 1fr 1fr')
             .columnsGap(16)
             .rowsGap(20)
-            .paddingLeft(20)
-            .paddingRight(20)
-            .paddingBottom(20)
+            .padding({ right: 20, bottom: 20 })
           }
           .width('100%')
         }
