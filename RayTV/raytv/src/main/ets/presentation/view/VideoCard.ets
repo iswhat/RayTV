@@ -2,7 +2,8 @@
 import { VideoType } from '../../data/model/Movie';
 import { LinearGradient } from '@ohos.arkui.advanced.linearGradient';
 import { GradientDirection } from '@ohos.arkui.advanced.linearGradient';
-import { FontWeight, ImageFit, TransitionType, TextOverflow } from '@ohos.arkui';
+import { FontWeight, TextOverflow } from '@ohos.arkui.text';
+import { ImageFit, TransitionType } from '@ohos.arkui';
 
 interface VideoCardProps {
   id: string;

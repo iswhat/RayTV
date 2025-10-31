@@ -1,5 +1,6 @@
 // HomePage.ets - 主页面组件
-import { FontWeight, BarState, ScrollDirection } from '@ohos.arkui';
+import { BarState, ScrollDirection } from '@ohos.arkui';
+import { FontWeight } from '@ohos.arkui.text';
 import VideoCard from '../view/VideoCard';
 import CategoryNavigation from '../view/CategoryNavigation';
 import { VideoType } from '../../data/model/Movie';
@@ -67,7 +68,7 @@ export default struct HomePage {
       id: '3',
       title: '三体',
       coverUrl: 'https://example.com/three_body.jpg',
-      type: VideoType.TV,
+      type: VideoType.SERIES as VideoType,
       year: '2023',
       rating: 8.4,
       isNew: false,
@@ -77,7 +78,7 @@ export default struct HomePage {
       id: '4',
       title: '狂飙',
       coverUrl: 'https://example.com/the_knockout.jpg',
-      type: VideoType.TV,
+      type: VideoType.SERIES as VideoType,
       year: '2023',
       rating: 9.1,
       isNew: false,
@@ -97,7 +98,7 @@ export default struct HomePage {
       id: '6',
       title: '漫长的季节',
       coverUrl: 'https://example.com/long_season.jpg',
-      type: VideoType.TV,
+      type: VideoType.SERIES as VideoType,
       year: '2023',
       rating: 9.5,
       isNew: false,
@@ -184,7 +185,7 @@ export default struct HomePage {
             }
             .width(48)
             .height(48)
-            .marginRight(16)
+            .margin({ right: 16 })
             
             Button() {
               Text('⭐')
@@ -192,7 +193,7 @@ export default struct HomePage {
             }
             .width(48)
             .height(48)
-            .marginRight(20)
+            .margin({ right: 20 })
           }
           .margin({ left: 'auto' })
         }
@@ -236,10 +237,10 @@ export default struct HomePage {
                     width: 300,
                     aspectRatio: 0.5625
                   })
-                  .marginRight(16)
+                  .margin({ right: 16 })
                 })
               }
-              .paddingLeft(20)
+              .padding({ left: 20 })
               .paddingRight(20)
               .paddingBottom(20)
             }
@@ -276,7 +277,7 @@ export default struct HomePage {
             .columnsTemplate('1fr 1fr 1fr 1fr')
             .columnsGap(16)
             .rowsGap(20)
-            .padding({ right: 20, bottom: 20 })
+            .padding({ right: 20, bottom: 20, left: 20 })
           }
           .width('100%')
         }

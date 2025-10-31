@@ -1,5 +1,6 @@
 // CategoryNavigation.ets - 分类导航组件
-import { TransitionType } from '@ohos.arkui.transition';
+import { Scroller, BarState, ScrollDirection, Text, Button, Row, Scroll, ForEach } from '@ohos.arkui';
+import { FontWeight } from '@ohos.arkui.text';
 
 interface Category {
   id: string;
@@ -25,8 +26,8 @@ export interface ScrollOffset {
 @Component
 export default struct CategoryNavigation {
   private scrollController: Scroller = new Scroller();
-  private isScrollingRight: boolean = false;
-  private isScrollingLeft: boolean = false;
+  @State private isScrollingRight: boolean = false;
+  @State private isScrollingLeft: boolean = false;
   
   private props: CategoryNavigationProps = {} as CategoryNavigationProps;
   private scrollButtonWidth: number = 50;
@@ -36,7 +37,7 @@ export default struct CategoryNavigation {
   }
   
   // 检查滚动状态
-  private checkScrollPosition(): void {
+  checkScrollPosition(): void {
     try {
       const scrollOffset = this.scrollController.currentOffset();
       this.isScrollingLeft = scrollOffset.x > 10;
@@ -49,7 +50,7 @@ export default struct CategoryNavigation {
   }
   
   // 滚动到左侧
-  private scrollToLeft(): void {
+  scrollToLeft(): void {
     try {
       this.scrollController.scrollPage({ next: false });
       setTimeout(() => this.checkScrollPosition(), 100);
@@ -59,7 +60,7 @@ export default struct CategoryNavigation {
   }
   
   // 滚动到右侧
-  private scrollToRight(): void {
+  scrollToRight(): void {
     try {
       this.scrollController.scrollPage({ next: true });
       setTimeout(() => this.checkScrollPosition(), 100);
@@ -69,9 +70,12 @@ export default struct CategoryNavigation {
   }
   
   build() {
+    // 在build方法外调用
+    const showScrollButtons = this.props.showScrollButtons || false;
+    
     Row() {
       // 左侧滚动按钮
-      if (this.props.showScrollButtons && this.isScrollingLeft) {
+      if (showScrollButtons && this.isScrollingLeft) {
         Button() {
           Text('←')
             .fontSize(24)
@@ -104,9 +108,6 @@ export default struct CategoryNavigation {
             .backgroundColor(isSelected ? '#37a2da' : 'transparent')
             .borderRadius(24)
             .onClick(() => this.props.onCategoryChange(category.id))
-            .transition({
-              type: TransitionType.Insert | TransitionType.Delete | TransitionType.Update
-            })
           })
         }
         .padding({ left: this.props.showScrollButtons ? this.scrollButtonWidth : 0 })
@@ -119,7 +120,7 @@ export default struct CategoryNavigation {
       .height(60)
       
       // 右侧滚动按钮
-      if (this.props.showScrollButtons && this.isScrollingRight) {
+      if (showScrollButtons && this.isScrollingRight) {
         Button() {
           Text('→')
             .fontSize(24)
