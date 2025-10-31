@@ -1,8 +1,7 @@
 // PlayerController.ets - 播放器控制界面组件
 import { PlaybackStatus } from '../../service/player/PlayerService';
-import { Font, Text, Button, Stack, Row, Column, Slider, LoadingProgress, TextOverflow, SliderChangeMode } from '@ohos.arkui';
+import { Text, Button, Stack, Row, Column, Slider, LoadingProgress, TextOverflow, SliderChangeMode } from '@ohos.arkui';
 import { VerticalAlign, FontWeight } from '@ohos.arkui.text';
-import { TransitionType } from '@ohos.arkui.transition';
 
 interface PlayerControllerProps {
   status: PlaybackStatus;
@@ -31,6 +30,7 @@ export default struct PlayerController {
   private seekTime: number = 0;
   
   constructor(props: PlayerControllerProps) {
+    super();
     this.props = props;
   }
   
@@ -54,31 +54,26 @@ export default struct PlayerController {
     return (time / this.props.totalTime) * 100;
   }
   
-  // 处理进度条拖动开始
-  private onProgressBarStart(): void {
-    this.isSeeking = true;
-    this.seekTime = this.props.currentTime;
-  }
-  
   // 处理进度条拖动
-  private onProgressBarMove(event: SliderChangeEvent): void {
-    this.seekTime = (event.progress / 100) * this.props.totalTime;
-  }
-  
-  // 处理进度条拖动结束
-  private onProgressBarEnd(event: SliderChangeEvent): void {
-    this.isSeeking = false;
-    const finalTime = (event.progress / 100) * this.props.totalTime;
-    this.props.onSeek(finalTime);
+  private onProgressBarChange(event: Slider.ChangeEvent): void {
+    if (event.mode === SliderChangeMode.Begin) {
+      this.isSeeking = true;
+      this.seekTime = this.props.currentTime;
+    } else if (event.mode === SliderChangeMode.Moving) {
+      this.seekTime = (event.progress / 100) * this.props.totalTime;
+    } else if (event.mode === SliderChangeMode.End) {
+      this.isSeeking = false;
+      const finalTime = (event.progress / 100) * this.props.totalTime;
+      this.props.onSeek(finalTime);
+    }
   }
   
   build() {
     Stack() {
       if (this.props.showController) {
         // 渐变背景
-        LinearGradient()
-          .colors(["rgba(0,0,0,0.6)", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.6)"])
-          .direction(GradientDirection.TopBottom)
+        Stack()
+          .backgroundColor('rgba(0,0,0,0.3)')
           .width('100%')
           .height('100%')
         
@@ -152,16 +147,7 @@ export default struct PlayerController {
               step: 0.1
             })
             .onChange((event) => {
-              const value = event.progress;
-              if (event.mode === SliderChangeMode.START) {
-                this.onProgressBarStart();
-              } else if (event.mode === SliderChangeMode.MOVE) {
-                const sliderEvent = { progress: value };
-                this.onProgressBarMove(sliderEvent);
-              } else if (event.mode === SliderChangeMode.END) {
-                const sliderEvent = { progress: value };
-                this.onProgressBarEnd(sliderEvent);
-              }
+              this.onProgressBarChange(event);
             })
             .flexGrow(1)
             .trackColor('#37a2da')
@@ -221,10 +207,6 @@ export default struct PlayerController {
     .width('100%')
     .height('100%')
     .position({ x: 0, y: 0 })
-    .transition({
-      type: TransitionType.Insert,
-      opacity: 0,
-      duration: 300
-    })
+    .opacity(this.props.showController ? 1 : 0)
   }
 }
