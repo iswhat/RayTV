@@ -3,7 +3,7 @@ import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { favoriteService } from '../service/media/FavoriteService';
 import { mediaService } from '../service/media/MediaService';
-import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem as ListItemComponent } from '@arkui/native';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem } from '@arkui/native';
 
 /**
  * 收藏项接口定义
@@ -346,7 +346,7 @@ struct FavoritesPage {
   private renderFavoriteItem(favorite: FavoriteItem): void {
     const media = this.mediaItems.get(favorite.id);
     
-    <ListItemComponent onClick={() => this.handleMediaClick(favorite)}>
+    <ListItem onClick={() => this.handleMediaClick(favorite)}>
       <Flex className="favorite-item">
         {this.isEditMode && (
           <Checkbox
@@ -378,7 +378,7 @@ struct FavoritesPage {
           )}
         </Flex>
       </Flex>
-      </ListItemComponent>
+      </ListItem>
   }
   
   /**

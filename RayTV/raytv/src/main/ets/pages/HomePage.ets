@@ -1,4 +1,4 @@
-import { Stack, Flex, List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem, Progress, ListItem as ListItemComponent } from '@arkui/native';
+import { Stack, Flex, List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem, ProgressBar, ListItem } from '@arkui/native';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
@@ -355,7 +355,7 @@ struct HomePage {
    */
   @Builder
   private renderHistoryItem(history: HistoryItem): void {
-    <ListItemComponent onClick={() => this.handleHistoryItemClick(history)}>
+    <ListItem onClick={() => this.handleHistoryItemClick(history)}>
       <Flex className="history-item">
         <Image
           src={history.coverUrl || 'https://via.placeholder.com/80x120?text=No+Image'}
@@ -374,14 +374,15 @@ struct HomePage {
           <Text className="history-progress">
             观看至: {this.formatTime(history.currentTime)} / {this.formatTime(history.duration)}
           </Text>
-          <Progress
+          <ProgressBar
             className="history-progress-bar"
-            value={(history.currentTime / history.duration) * 100}
-            type="linear"
-          ></Progress>
+            percent={history.duration > 0 ? (history.currentTime / history.duration) * 100 : 0}
+            strokeWidth={4}
+            color="#FF4500"
+          />
         </Flex>
       </Flex>
-    </ListItemComponent>
+    </ListItem>
   }
   
   /**

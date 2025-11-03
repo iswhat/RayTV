@@ -2,7 +2,7 @@
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
-import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem as ListItemComponent } from '@arkui/native';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem } from '@arkui/native';
 
 /**
  * 媒体项接口定义
@@ -330,33 +330,26 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    <ListItemComponent onClick={() => this.handleMediaItemClick(media)}>
-      <Flex className="media-item">
-        <Image
-          src={media.coverUrl || 'https://via.placeholder.com/120x160?text=No+Image'}
-          className="media-cover"
-          objectFit="cover"
-        />
-        <Flex className="media-info" direction="column">
-          <Text className="media-title" numberOfLines={2}>{media.title}</Text>
-          <Flex className="media-meta">
-            {media.year && <Tag className="meta-tag">{media.year}</Tag>}
-            {media.region && <Tag className="meta-tag">{media.region}</Tag>}
-            {media.score && <Tag className="meta-tag score">{media.score}</Tag>}
+    <ListItem onClick={() => this.handleMediaItemClick(media)}>
+          <Flex className="media-item">
+            <Image
+              src={media.coverUrl || 'https://via.placeholder.com/80x120?text=No+Image'}
+              className="media-cover"
+              objectFit="cover"
+            />
+            <Flex className="media-info" direction="column">
+              <Text className="media-title" numberOfLines={2}>
+                {media.title}
+              </Text>
+              {media.year && (
+                <Text className="media-year">{media.year}</Text>
+              )}
+              {media.score && (
+                <Text className="media-score">评分: {media.score}</Text>
+              )}
+            </Flex>
           </Flex>
-          {media.description && (
-            <Text className="media-description" numberOfLines={3}>
-              {media.description}
-            </Text>
-          )}
-          {media.actors && media.actors.length > 0 && (
-            <Text className="media-actors" numberOfLines={1}>
-              主演: {media.actors.slice(0, 3).join(', ')}
-            </Text>
-          )}
-        </Flex>
-      </Flex>
-      </ListItemComponent>
+        </ListItem>
   }
   
   /**

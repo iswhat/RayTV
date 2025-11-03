@@ -1,4 +1,4 @@
-import { Stack, Video, Image, Text, Button, Slider, List, ListItem as ListItemComponent, LoadingProgress, Toast, PromptAction } from '@arkui/native';
+import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction } from '@arkui/native';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { playbackService } from '../service/media/PlaybackService';
@@ -726,14 +726,14 @@ struct PlaybackPage {
     
     <List className="source-menu">
       {this.playSources.map((source, index) => (
-        <ListItemComponent 
+        <ListItem 
           key={index} 
           onClick={() => this.switchPlaySource(source)}
           className={this.playSource?.url === source.url ? 'selected' : ''}
         >
           <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
           {source.quality && <Text className="source-quality">{source.quality}</Text>}
-        </ListItemComponent>
+        </ListItem>
       ))}
     </List>
   }
