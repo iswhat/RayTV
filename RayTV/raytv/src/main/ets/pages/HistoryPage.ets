@@ -1,8 +1,8 @@
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch } from '@arkui/native';
+import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch, Stack, ProgressBar, Blank, BarState } from '@arkui/native';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
-import { historyService } from '../service/media/HistoryService';
-import { mediaService } from '../service/media/MediaService';
+import { historyService, HistoryItem } from '../service/media/HistoryService';
+import { mediaService, MediaItem, MediaType } from '../service/media/MediaService';
 
 /**
  * 历史记录页面组件
@@ -90,9 +90,9 @@ struct HistoryPage {
               id: history.mediaId,
               siteKey: history.siteKey,
               title: history.title,
-              coverUrl: history.coverUrl,
+              coverUrl: history.cover || '',
               type: history.type,
-              year: history.year,
+              year: '',
               description: '',
               score: '',
               directors: [],
@@ -241,11 +241,10 @@ struct HistoryPage {
             params: {
               mediaId: history.mediaId,
               siteKey: history.siteKey,
-              episodeIndex: history.episodeIndex,
-              playSourceIndex: history.playSourceIndex,
-              playbackPosition: history.playbackPosition,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
               title: history.title,
-              coverUrl: history.coverUrl
+              coverUrl: history.cover || ''
             }
           });
         })
@@ -257,11 +256,10 @@ struct HistoryPage {
             params: {
               mediaId: history.mediaId,
               siteKey: history.siteKey,
-              episodeIndex: history.episodeIndex,
-              playSourceIndex: history.playSourceIndex,
-              playbackPosition: history.playbackPosition,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
               title: history.title,
-              coverUrl: history.coverUrl
+              coverUrl: history.cover || ''
             }
           });
         });
@@ -269,17 +267,16 @@ struct HistoryPage {
       Logger.error(this.TAG, `Failed to handle history click: ${error}`);
       // 错误处理：跳转到播放页面
       Router.push({
-        url: 'pages/PlaybackPage',
-        params: {
-          mediaId: history.mediaId,
-          siteKey: history.siteKey,
-          episodeIndex: history.episodeIndex,
-          playSourceIndex: history.playSourceIndex,
-          playbackPosition: history.playbackPosition,
-          title: history.title,
-          coverUrl: history.coverUrl
-        }
-      });
+      url: 'pages/PlaybackPage',
+      params: {
+        mediaId: history.mediaId,
+        siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      }
+    });
     }
   }
   
@@ -295,11 +292,10 @@ struct HistoryPage {
       params: {
         mediaId: history.mediaId,
         siteKey: history.siteKey,
-        episodeIndex: history.episodeIndex,
-        playSourceIndex: history.playSourceIndex,
-        playbackPosition: history.playbackPosition,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
         title: history.title,
-        coverUrl: history.coverUrl
+        coverUrl: history.cover || ''
       }
     });
   }
@@ -342,187 +338,216 @@ struct HistoryPage {
    * 渲染头部
    */
   @Builder
-  private renderHeader(): void {
-    <Stack className="header">
-      <Button className="back-button" onClick={this.handleBack}>
-        ←
-      </Button>
-      <Text className="page-title">播放历史</Text>
-      <Button className="action-button" onClick={this.toggleEditMode}>
-        {this.isEditMode ? '取消' : '编辑'}
-      </Button>
-    </Stack>
+  private renderHeader() {
+    Stack.create({ className: "header" });
+    Button.create({ className: "back-button", onClick: this.handleBack });
+    Button.text("←");
+    Button.pop();
+    Text.create({ className: "page-title" });
+    Text.text("播放历史");
+    Text.pop();
+    Button.create({ className: "action-button", onClick: this.toggleEditMode });
+    Button.text(this.isEditMode ? '取消' : '编辑');
+    Button.pop();
+    Stack.pop();
   }
   
   /**
    * 渲染编辑工具栏
    */
   @Builder
-  private renderEditToolbar(): void {
+  private renderEditToolbar() {
     if (!this.isEditMode || this.histories.length === 0) return;
     
-    <Flex className="edit-toolbar">
-      <Flex className="select-all">
-        <Checkbox
-          checked={this.selectedItems.size === this.histories.length && this.histories.length > 0}
-          onCheckChange={this.handleSelectAll}
-        />
-        <Text>全选</Text>
-      </Flex>
-      <Text className="selected-count">
-        已选择 {this.selectedItems.size} 项
-      </Text>
-      <Button
-        className="delete-button"
-        onClick={this.handleDeleteSelected}
-        disabled={this.selectedItems.size === 0}
-      >
-        删除
-      </Button>
-      <Button
-        className="clear-all-button"
-        onClick={this.handleClearAll}
-      >
-        清空
-      </Button>
-    </Flex>
+    Flex.create({ className: "edit-toolbar" });
+    Flex.create({ className: "select-all" });
+    Checkbox.create();
+    Checkbox.checked(this.selectedItems.size === this.histories.length && this.histories.length > 0);
+    Checkbox.onCheckChange(this.handleSelectAll);
+    Checkbox.pop();
+    Text.create();
+    Text.text("全选");
+    Text.pop();
+    Flex.pop();
+    Text.create({ className: "selected-count" });
+    Text.text(`已选择 ${this.selectedItems.size} 项`);
+    Text.pop();
+    Button.create({ 
+      className: "delete-button", 
+      onClick: this.handleDeleteSelected,
+      disabled: this.selectedItems.size === 0 
+    });
+    Button.text("删除");
+    Button.pop();
+    Button.create({ className: "clear-all-button", onClick: this.handleClearAll });
+    Button.text("清空");
+    Button.pop();
+    Flex.pop();
   }
   
   /**
    * 渲染设置选项
    */
   @Builder
-  private renderSettings(): void {
+  private renderSettings() {
     if (this.isEditMode || this.histories.length === 0) return;
     
-    <Flex className="settings-container">
-      <Text className="setting-label">自动续播上次内容</Text>
-      <Switch
-        checked={this.autoPlayLast}
-        onValueChange={(value) => {
-          this.autoPlayLast = value;
-          // 这里可以保存设置到配置服务
-          Logger.info(this.TAG, `Auto play last content: ${value}`);
-        }}
-      />
-    </Flex>
+    Flex.create({ className: "settings-container" });
+    Text.create({ className: "setting-label" });
+    Text.text("自动续播上次内容");
+    Text.pop();
+    Switch.create();
+    Switch.checked(this.autoPlayLast);
+    Switch.onValueChange((value) => {
+      this.autoPlayLast = value;
+      // 这里可以保存设置到配置服务
+      Logger.info(this.TAG, `Auto play last content: ${value}`);
+    });
+    Switch.pop();
+    Flex.pop();
   }
   
   /**
    * 渲染历史记录项
    */
   @Builder
-  private renderHistoryItem(history: HistoryItem): void {
+  private renderHistoryItem(history: HistoryItem) {
     const media = this.mediaItems.get(history.mediaId);
-    const progressText = this.formatPlaybackProgress(history.playbackPosition, history.duration);
-    const progressPercentage = this.getProgressPercentage(history.playbackPosition, history.duration);
+    const progressText = this.formatPlaybackProgress(history.progress * 1000, (history.duration || 0) * 1000);
+    const progressPercentage = this.getProgressPercentage(history.progress * 1000, (history.duration || 0) * 1000);
     
-    <ListItem onClick={() => this.handleHistoryClick(history)}>
-      <Flex className="history-item">
-        {this.isEditMode && (
-          <Checkbox
-            checked={this.selectedItems.has(history.id)}
-            onCheckChange={() => this.handleItemSelect(history.id)}
-          />
-        )}
-        <Image
-          src={media?.coverUrl || history.coverUrl || 'https://via.placeholder.com/120x160?text=No+Image'}
-          className="media-cover"
-          objectFit="cover"
-        />
-        <Flex className="media-info" direction="column">
-          <Text className="media-title" numberOfLines={2}>
-            {media?.title || history.title}
-          </Text>
-          {history.episodeTitle && (
-            <Text className="episode-title" numberOfLines={1}>
-              第{history.episodeIndex + 1}集: {history.episodeTitle}
-            </Text>
-          )}
-          <Text className="play-time">
-            播放时间: {new Date(history.playTime).toLocaleString()}
-          </Text>
-          <Stack className="progress-container">
-            <ProgressBar
-              percent={progressPercentage}
-              style={{ strokeWidth: 4, color: '#FF4500' }}
-            ></ProgressBar>
-            <Text className="progress-text">{progressText}</Text>
-          </Stack>
-          {!this.isEditMode && (
-            <Button className="continue-button" onClick={() => this.handleContinuePlay(history)}>
-              继续观看
-            </Button>
-          )}
-        </Flex>
-      </Flex>
-    </ListItem>
+    ListItem.create({ onClick: () => this.handleHistoryClick(history) });
+    Flex.create({ className: "history-item" });
+    
+    if (this.isEditMode) {
+      Checkbox.create();
+      Checkbox.checked(this.selectedItems.has(history.id));
+      Checkbox.onCheckChange(() => this.handleItemSelect(history.id));
+      Checkbox.pop();
+    }
+    
+    Image.create({ 
+      src: media?.coverUrl || history.cover || 'https://via.placeholder.com/120x160?text=No+Image',
+      className: "media-cover",
+      objectFit: ImageFit.Cover
+    });
+    Image.pop();
+    
+    Flex.create({ className: "media-info", direction: FlexDirection.Column });
+    Text.create({ className: "media-title", numberOfLines: 2 });
+    Text.text(media?.title || history.title);
+    Text.pop();
+    
+    if (history.episodeTitle) {
+      Text.create({ className: "episode-title", numberOfLines: 1 });
+      Text.text(history.episodeTitle);
+      Text.pop();
+    }
+    
+    Text.create({ className: "play-time" });
+    Text.text(`播放时间: ${new Date(history.lastPlayTime).toLocaleString()}`);
+    Text.pop();
+    
+    Stack.create({ className: "progress-container" });
+    ProgressBar.create();
+    ProgressBar.percent(progressPercentage);
+    ProgressBar.strokeWidth(4);
+    ProgressBar.color("#FF4500");
+    ProgressBar.pop();
+    Text.create({ className: "progress-text" });
+    Text.text(progressText);
+    Text.pop();
+    Stack.pop();
+    
+    if (!this.isEditMode) {
+      Button.create({ className: "continue-button", onClick: () => this.handleContinuePlay(history) });
+      Button.text("继续观看");
+      Button.pop();
+    }
+    
+    Flex.pop();
+    ListItem.pop();
   }
   
   /**
    * 渲染历史记录列表
    */
   @Builder
-  private renderHistoryList(): void {
+  private renderHistoryList() {
     if (this.isLoading && !this.isRefreshing) {
-      <Stack className="loading-container">
-        <LoadingProgress className="loading-progress" color="#FF4500" />
-        <Text>加载中...</Text>
-      </Stack>
+      Stack.create({ className: "loading-container" });
+      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
+      LoadingProgress.pop();
+      Text.create();
+      Text.text("加载中...");
+      Text.pop();
+      Stack.pop();
       return;
     }
     
     if (this.errorMessage) {
-      <Stack className="error-container">
-        <Text className="error-icon">⚠️</Text>
-        <Text className="error-message">{this.errorMessage}</Text>
-        <Button className="retry-button" onClick={this.loadHistories}>
-          重试
-        </Button>
-      </Stack>
+      Stack.create({ className: "error-container" });
+      Text.create({ className: "error-icon" });
+      Text.text("⚠️");
+      Text.pop();
+      Text.create({ className: "error-message" });
+      Text.text(this.errorMessage);
+      Text.pop();
+      Button.create({ className: "retry-button", onClick: this.loadHistories });
+      Button.text("重试");
+      Button.pop();
+      Stack.pop();
       return;
     }
     
     if (this.histories.length === 0) {
-      <Empty className="empty-container">
-        <Text className="empty-icon">📺</Text>
-        <Text>暂无播放历史</Text>
-        <Button className="explore-button" onClick={() => Router.push({ url: 'pages/HomePage' })}>
-          去探索
-        </Button>
-      </Empty>
+      Empty.create({ className: "empty-container" });
+      Text.create({ className: "empty-icon" });
+      Text.text("📺");
+      Text.pop();
+      Text.create();
+      Text.text("暂无播放历史");
+      Text.pop();
+      Button.create({ className: "explore-button", onClick: () => Router.push({ url: 'pages/HomePage' }) });
+      Button.text("去探索");
+      Button.pop();
+      Empty.pop();
       return;
     }
     
-    <List
-      className="history-list"
-      itemTemplate={this.renderHistoryItem}
-      data={this.histories}
-      onRefresh={() => this.handleRefresh()}
-      refreshing={this.isRefreshing}
-    />
+    List.create({ 
+      className: "history-list",
+      itemTemplate: this.renderHistoryItem,
+      data: this.histories,
+      onRefresh: () => this.handleRefresh(),
+      refreshing: this.isRefreshing
+    });
+    List.pop();
   }
   
   /**
    * 组件渲染
    */
   build() {
-    <Stack className="history-page">
-      {/* 页面头部 */}
-      {this.renderHeader()}
-      
-      {/* 编辑工具栏 */}
-      {this.renderEditToolbar()}
-      
-      {/* 设置选项 */}
-      {this.renderSettings()}
-      
-      {/* 历史记录列表 */}
-      <ScrollView className="content-scroll" scrollBar="auto">
-        {this.renderHistoryList()}
-        <Blank className="bottom-space" />
-      </ScrollView>
-    </Stack>
+    Stack.create({ className: "history-page" });
+    
+    // 页面头部
+    this.renderHeader();
+    
+    // 编辑工具栏
+    this.renderEditToolbar();
+    
+    // 设置选项
+    this.renderSettings();
+    
+    // 历史记录列表
+    ScrollView.create({ className: "content-scroll", scrollBar: BarState.Auto });
+    this.renderHistoryList();
+    Blank.create({ className: "bottom-space" });
+    Blank.pop();
+    ScrollView.pop();
+    
+    Stack.pop();
   }
 }
 

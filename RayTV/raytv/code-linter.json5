@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "rules": {
+    // ArkTS组件导入规范检查
+    "arkts-component-import": {
+      "level": "error",
+      "description": "禁止使用组件别名导入，必须使用标准导入方式",
+      "pattern": "import.*as.*Component",
+      "message": "请使用标准组件导入方式，避免别名导入"
+    },
+    
+    // ArkTS属性语法规范检查
+    "arkts-property-syntax": {
+      "level": "error", 
+      "description": "组件属性必须使用独立属性语法，禁止使用style对象",
+      "pattern": "style={{.*}}",
+      "message": "请将style对象拆分为独立属性设置"
+    },
+    
+    // 组件使用一致性检查
+    "consistent-component-usage": {
+      "level": "warning",
+      "description": "确保组件使用方式在整个项目中保持一致",
+      "pattern": "ListItemComponent",
+      "message": "请使用标准ListItem组件名称"
+    },
+    
+    // ArkUI Native组件库导入检查
+    "arkui-native-import": {
+      "level": "info",
+      "description": "确保正确导入ArkUI Native组件库",
+      "pattern": "from '@arkui/native'",
+      "message": "✅ ArkUI Native组件库导入正确"
+    },
+    
+    // ProgressBar组件属性检查
+    "progressbar-property-check": {
+      "level": "warning",
+      "description": "ProgressBar组件必须设置正确的属性",
+      "pattern": "ProgressBar",
+      "message": "请检查ProgressBar组件的strokeWidth和color属性设置"
+    }
+  },
+  
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    ".hvigor"
+  ],
+  
+  "include": [
+    "src/**/*.ets",
+    "src/**/*.ts"
+  ]
+}

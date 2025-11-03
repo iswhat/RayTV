@@ -406,7 +406,7 @@ struct HomePage {
   private renderCarousel(): void {
     if (this.featuredMedia.length === 0) return;
     
-    <Swiper className="carousel" indicatorStyle={{ color: '#FFFFFF', selectedColor: '#FF4500' }}>
+    <Swiper className="carousel" indicatorColor="#FFFFFF" selectedIndicatorColor="#FF4500">
       {this.featuredMedia.slice(0, 5).map((media) => (
         <SwiperItem>
           <Stack onClick={() => this.handleMediaItemClick(media)}>

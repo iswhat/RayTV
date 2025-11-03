@@ -73,18 +73,16 @@ struct MainPage {
   renderMediaItem(media: any) {
     return (
       <ListItem onClick={() => Router.push({ url: `pages/MediaDetailPage?id=${media.id}` })}>
-        <Column style={{ padding: 10 }}>
+        <Column padding={10}>
           <Image
             src={media.cover}
-            style={{
-              width: 150,
-              height: 200,
-              objectFit: ImageFit.Cover,
-              borderRadius: 8
-            }}
+            width={150}
+            height={200}
+            objectFit={ImageFit.Cover}
+            borderRadius={8}
             alt={media.title}
           ></Image>
-          <Text style={{ marginTop: 8, fontSize: 14, maxLines: 2 }}>{media.title}</Text>
+          <Text marginTop={8} fontSize={14} maxLines={2}>{media.title}</Text>
         </Column>
       </ListItem>
     );
@@ -92,12 +90,12 @@ struct MainPage {
   
   build() {
     return (
-      <Flex direction={FlexDirection.Column} style={{ padding: 20 }}>
+      <Flex direction={FlexDirection.Column} padding={20}>
         {/* 标题栏 */}
-        <Row style={{ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center, marginBottom: 20 }}>
-          <Text style={{ fontSize: 24, fontWeight: FontWeight.Bold }}>RayTV</Text>
+        <Row justifyContent={FlexAlign.SpaceBetween} alignItems={ItemAlign.Center} marginBottom={20}>
+          <Text fontSize={24} fontWeight={FontWeight.Bold}>RayTV</Text>
           <Row>
-            <Button onClick={this.navigateToSearch} style={{ marginRight: 10 }}>
+            <Button onClick={this.navigateToSearch} marginRight={10}>
               搜索
             </Button>
             <Button onClick={this.navigateToSettings}>
@@ -109,20 +107,18 @@ struct MainPage {
         {/* 分类入口 */}
         <Button 
           onClick={this.navigateToCategory}
-          style={{
-            backgroundColor: '#007AFF',
-            color: 'white',
-            width: '100%',
-            padding: 12,
-            fontSize: 16,
-            marginBottom: 20
-          }}
+          backgroundColor="#007AFF"
+          color="white"
+          width="100%"
+          padding={12}
+          fontSize={16}
+          marginBottom={20}
         >
           浏览分类
         </Button>
         
         {/* 推荐内容 */}
-        <Text style={{ fontSize: 20, fontWeight: FontWeight.Bold, marginBottom: 15 }}>推荐内容</Text>
+        <Text fontSize={20} fontWeight={FontWeight.Bold} marginBottom={15}>推荐内容</Text>
         
         {this.isLoading ? (
           <Text>加载中...</Text>
@@ -132,12 +128,12 @@ struct MainPage {
             horizontal={true}
             itemGenerator={(index) => this.renderMediaItem(this.featuredMedia[index])}
             data={this.featuredMedia}
-            style={{ height: 250 }}
+            height={250}
           />
         )}
         
         {/* 底部提示 */}
-        <Text style={{ fontSize: 12, color: '#888888', marginTop: 20, textAlign: TextAlign.Center }}>
+        <Text fontSize={12} color="#888888" marginTop={20} textAlign={TextAlign.Center}>
           请确保已配置视频源以获得最佳体验
         </Text>
       </Flex>
