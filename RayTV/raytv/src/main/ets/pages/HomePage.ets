@@ -315,74 +315,79 @@ struct HomePage {
    * 渲染媒体卡片
    */
   @Builder
-  private renderMediaCard(media: MediaItem): void {
-    <GridItem onClick={() => this.handleMediaItemClick(media)}>
-      <Stack className="media-card">
-        <Image
-          src={media.coverUrl || 'https://via.placeholder.com/200x300?text=No+Image'}
-          className="media-cover"
-          objectFit="cover"
-          alt={media.title}
-        />
-        <Stack className="media-overlay">
-          <Text className="media-title" numberOfLines={2}>
-            {media.title}
-          </Text>
-          {media.year && (
-            <Text className="media-year">{media.year}</Text>
-          )}
-        </Stack>
-      </Stack>
-    </GridItem>
+  private renderMediaCard(media: MediaItem) {
+    GridItem.create({ onClick: () => this.handleMediaItemClick(media) });
+     Stack.create({ className: "media-card" });
+     Image.create({
+       src: media.coverUrl || "https://via.placeholder.com/200x300?text=No+Image",
+       className: "media-cover",
+       objectFit: "cover",
+       alt: media.title
+     });
+     Image.pop();
+    Stack.create({ className: "media-overlay" });
+    Text.create({ className: "media-title", numberOfLines: 2 });
+    Text.text(media.title);
+    Text.pop();
+    if (media.year) {
+      Text.create({ className: "media-year" });
+      Text.text(media.year);
+      Text.pop();
+    }
+    Stack.pop();
+    Stack.pop();
+    GridItem.pop();
   }
   
   /**
    * 渲染分类项
    */
   @Builder
-  private renderCategoryItem(category: { id: string; name: string }): void {
-    <GridItem onClick={() => this.handleCategoryClick(category)}>
-      <Stack className="category-item">
-        <Text className="category-name" numberOfLines={1}>
-          {category.name}
-        </Text>
-      </Stack>
-    </GridItem>
+  private renderCategoryItem(category: { id: string; name: string }) {
+    GridItem.create({ onClick: () => this.handleCategoryClick(category) });
+    Stack.create({ className: "category-item" });
+    Text.create({ className: "category-name", numberOfLines: 1 });
+    Text.text(category.name);
+    Text.pop();
+    Stack.pop();
+    GridItem.pop();
   }
   
   /**
    * 渲染历史记录项
    */
   @Builder
-  private renderHistoryItem(history: HistoryItem): void {
-    <ListItem onClick={() => this.handleHistoryItemClick(history)}>
-      <Flex className="history-item">
-        <Image
-          src={history.coverUrl || 'https://via.placeholder.com/80x120?text=No+Image'}
-          className="history-cover"
-          objectFit="cover"
-        />
-        <Flex className="history-info" direction="column">
-          <Text className="history-title" numberOfLines={2}>
-            {history.title}
-          </Text>
-          {history.episodeName && (
-            <Text className="history-episode" numberOfLines={1}>
-              第{history.episodeName}
-            </Text>
-          )}
-          <Text className="history-progress">
-            观看至: {this.formatTime(history.currentTime)} / {this.formatTime(history.duration)}
-          </Text>
-          <ProgressBar
-            className="history-progress-bar"
-            percent={history.duration > 0 ? (history.currentTime / history.duration) * 100 : 0}
-            strokeWidth={4}
-            color="#FF4500"
-          />
-        </Flex>
-      </Flex>
-    </ListItem>
+  private renderHistoryItem(history: HistoryItem) {
+    ListItem.create({ onClick: () => this.handleHistoryItemClick(history) });
+    Flex.create({ className: "history-item" });
+    Image.create({
+        src: history.coverUrl || "https://via.placeholder.com/80x120?text=No+Image",
+        className: "history-cover",
+        objectFit: "cover"
+      });
+    Image.pop();
+    Flex.create({ className: "history-info", direction: "column" });
+    Text.create({ className: "history-title", numberOfLines: 2 });
+    Text.text(history.title);
+    Text.pop();
+    if (history.episodeName) {
+      Text.create({ className: "history-episode", numberOfLines: 1 });
+      Text.text("第" + history.episodeName);
+      Text.pop();
+    }
+    Text.create({ className: "history-progress" });
+    Text.text("观看至: " + this.formatTime(history.currentTime) + " / " + this.formatTime(history.duration));
+    Text.pop();
+    ProgressBar.create({
+      className: "history-progress-bar",
+      percent: history.duration > 0 ? (history.currentTime / history.duration) * 100 : 0,
+      strokeWidth: 4,
+      color: "#FF4500"
+    });
+    ProgressBar.pop();
+    Flex.pop();
+    Flex.pop();
+    ListItem.pop();
   }
   
   /**
@@ -403,171 +408,196 @@ struct HomePage {
    * 渲染轮播图
    */
   @Builder
-  private renderCarousel(): void {
+  private renderCarousel() {
     if (this.featuredMedia.length === 0) return;
     
-    <Swiper className="carousel" indicatorColor="#FFFFFF" selectedIndicatorColor="#FF4500">
-      {this.featuredMedia.slice(0, 5).map((media) => (
-        <SwiperItem>
-          <Stack onClick={() => this.handleMediaItemClick(media)}>
-            <Image
-              src={media.coverUrl || 'https://via.placeholder.com/800x400?text=No+Image'}
-              className="carousel-image"
-              objectFit="cover"
-            />
-            <Stack className="carousel-overlay">
-              <Text className="carousel-title">{media.title}</Text>
-              {media.description && (
-                <Text className="carousel-description" numberOfLines={2}>
-                  {media.description}
-                </Text>
-              )}
-            </Stack>
-          </Stack>
-        </SwiperItem>
-      ))}
-    </Swiper>
+    Swiper.create({ className: "carousel", indicatorColor: "#FFFFFF", selectedIndicatorColor: "#FF4500" });
+    this.featuredMedia.slice(0, 5).forEach((media) => {
+      SwiperItem.create();
+      Stack.create({ onClick: () => this.handleMediaItemClick(media) });
+      Image.create({
+        src: media.coverUrl || "https://via.placeholder.com/800x400?text=No+Image",
+        className: "carousel-image",
+        objectFit: "cover"
+      });
+      Image.pop();
+      Stack.create({ className: "carousel-overlay" });
+      Text.create({ className: "carousel-title" });
+      Text.text(media.title);
+      Text.pop();
+      if (media.description) {
+        Text.create({ className: "carousel-description", numberOfLines: 2 });
+        Text.text(media.description);
+        Text.pop();
+      }
+      Stack.pop();
+      Stack.pop();
+      SwiperItem.pop();
+    });
+    Swiper.pop();
   }
   
   /**
    * 渲染加载状态
    */
   @Builder
-  private renderLoading(): void {
-    <Stack className="loading-container">
-      <LoadingProgress className="loading-progress" color="#FF4500" />
-      <Text className="loading-text">加载中...</Text>
-    </Stack>
+  private renderLoading() {
+    Stack.create({ className: "loading-container" });
+    LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
+    LoadingProgress.pop();
+    Text.create({ className: "loading-text" });
+    Text.text("加载中...");
+    Text.pop();
+    Stack.pop();
   }
   
   /**
    * 渲染错误状态
    */
   @Builder
-  private renderError(): void {
-    <Stack className="error-container">
-      <Text className="error-icon">⚠️</Text>
-      <Text className="error-message">{this.errorMessage}</Text>
-      <Button className="retry-button" onClick={() => this.loadHomeData()}>
-        重试
-      </Button>
-    </Stack>
+  private renderError() {
+    Stack.create({ className: "error-container" });
+    Text.create({ className: "error-icon" });
+    Text.text("⚠️");
+    Text.pop();
+    Text.create({ className: "error-message" });
+    Text.text(this.errorMessage);
+    Text.pop();
+    Button.create({ className: "retry-button", onClick: () => this.loadHomeData() });
+    Button.text("重试");
+    Button.pop();
+    Stack.pop();
   }
   
   /**
    * 渲染内容部分
    */
   @Builder
-  private renderContent(): void {
-    <ScrollView className="content-scroll" scrollBar="auto">
-      {/* 轮播图 */}
-      {this.renderCarousel()}
-      
-      {/* 分类区域 */}
-      <Stack className="section">
-        <Text className="section-title">分类</Text>
-        <Button className="section-more" onClick={() => Router.push({ url: 'pages/CategoriesPage' })}>
-          更多
-        </Button>
-        {this.categories.length > 0 && (
-          <Grid
-            className="categories-grid"
-            columns={4}
-            itemTemplate={this.renderCategoryItem}
-            data={this.categories}
-          />
-        )}
-      </Stack>
-      
-      {/* 最新更新 */}
-      <Stack className="section">
-        <Text className="section-title">最新更新</Text>
-        <Button className="section-more" onClick={() => Router.push({ url: 'pages/LatestPage' })}>
-          更多
-        </Button>
-        {this.latestMedia.length > 0 && (
-          <Grid
-            className={this.homeLayout === 'grid' ? 'media-grid' : 'media-list'}
-            columns={this.homeLayout === 'grid' ? 3 : 1}
-            itemTemplate={this.renderMediaCard}
-            data={this.latestMedia}
-          />
-        )}
-      </Stack>
-      
-      {/* 热门推荐 */}
-      <Stack className="section">
-        <Text className="section-title">热门推荐</Text>
-        <Button className="section-more" onClick={() => Router.push({ url: 'pages/PopularPage' })}>
-          更多
-        </Button>
-        {this.popularMedia.length > 0 && (
-          <Grid
-            className={this.homeLayout === 'grid' ? 'media-grid' : 'media-list'}
-            columns={this.homeLayout === 'grid' ? 3 : 1}
-            itemTemplate={this.renderMediaCard}
-            data={this.popularMedia}
-          />
-        )}
-      </Stack>
-      
-      {/* 最近播放 */}
-      {this.recentPlays.length > 0 && (
-        <Stack className="section">
-          <Text className="section-title">继续观看</Text>
-          <Button className="section-more" onClick={this.navigateToHistory}>
-            更多
-          </Button>
-          <List
-            className="history-list"
-            itemTemplate={this.renderHistoryItem}
-            data={this.recentPlays}
-          />
-        </Stack>
-      )}
-      
-      <Blank className="bottom-space" />
-    </ScrollView>
+  private renderContent() {
+    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
+    
+    // 轮播图
+    this.renderCarousel();
+    
+    // 分类区域
+    Stack.create({ className: "section" });
+    Text.create({ className: "section-title" });
+    Text.text("分类");
+    Text.pop();
+    Button.create({ className: "section-more", onClick: () => Router.push({ url: 'pages/CategoriesPage' }) });
+    Button.text("更多");
+    Button.pop();
+    if (this.categories.length > 0) {
+      Grid.create({ className: "categories-grid", columns: 4, itemTemplate: this.renderCategoryItem, data: this.categories });
+      Grid.pop();
+    }
+    Stack.pop();
+    
+    // 最新更新
+    Stack.create({ className: "section" });
+    Text.create({ className: "section-title" });
+    Text.text("最新更新");
+    Text.pop();
+    Button.create({ className: "section-more", onClick: () => Router.push({ url: 'pages/LatestPage' }) });
+    Button.text("更多");
+    Button.pop();
+    if (this.latestMedia.length > 0) {
+      Grid.create({ 
+        className: this.homeLayout === 'grid' ? 'media-grid' : 'media-list', 
+        columns: this.homeLayout === 'grid' ? 3 : 1, 
+        itemTemplate: this.renderMediaCard, 
+        data: this.latestMedia 
+      });
+      Grid.pop();
+    }
+    Stack.pop();
+    
+    // 热门推荐
+    Stack.create({ className: "section" });
+    Text.create({ className: "section-title" });
+    Text.text("热门推荐");
+    Text.pop();
+    Button.create({ className: "section-more", onClick: () => Router.push({ url: 'pages/PopularPage' }) });
+    Button.text("更多");
+    Button.pop();
+    if (this.popularMedia.length > 0) {
+      Grid.create({ 
+        className: this.homeLayout === 'grid' ? 'media-grid' : 'media-list', 
+        columns: this.homeLayout === 'grid' ? 3 : 1, 
+        itemTemplate: this.renderMediaCard, 
+        data: this.popularMedia 
+      });
+      Grid.pop();
+    }
+    Stack.pop();
+    
+    // 最近播放
+    if (this.recentPlays.length > 0) {
+      Stack.create({ className: "section" });
+      Text.create({ className: "section-title" });
+      Text.text("继续观看");
+      Text.pop();
+      Button.create({ className: "section-more", onClick: this.navigateToHistory });
+      Button.text("更多");
+      Button.pop();
+      List.create({ className: "history-list", itemTemplate: this.renderHistoryItem, data: this.recentPlays });
+      List.pop();
+      Stack.pop();
+    }
+    
+    Blank.create({ className: "bottom-space" });
+    Blank.pop();
+    ScrollView.pop();
   }
   
   /**
    * 组件渲染
    */
   build() {
-    <Stack className="home-page">
-      {/* 顶部搜索栏 */}
-      <Stack className="search-header">
-        <Flex className="search-bar">
-          <TextInput
-            className="search-input"
-            value={this.searchQuery}
-            onChange={(value) => { this.searchQuery = value; }}
-            onFocus={() => { this.isSearchFocused = true; }}
-            onBlur={() => { this.isSearchFocused = false; }}
-            onSubmit={this.handleSearch}
-            placeholder="搜索电影、电视剧..."
-            enterKeyType="search"
-          />
-          <Button className="search-button" onClick={this.handleSearch}>
-            搜索
-          </Button>
-        </Flex>
-        <Flex className="header-actions">
-          <Button className="header-action" onClick={this.navigateToHistory}>
-            历史
-          </Button>
-          <Button className="header-action" onClick={this.navigateToFavorites}>
-            收藏
-          </Button>
-          <Button className="header-action" onClick={this.navigateToSettings}>
-            设置
-          </Button>
-        </Flex>
-      </Stack>
-      
-      {/* 主内容区域 */}
-      {this.isLoading ? this.renderLoading() : this.errorMessage ? this.renderError() : this.renderContent()}
-    </Stack>
+    Stack.create({ className: "home-page" });
+    
+    // 顶部搜索栏
+    Stack.create({ className: "search-header" });
+    Flex.create({ className: "search-bar" });
+    TextInput.create({
+      className: "search-input",
+      value: this.searchQuery,
+      onChange: (value) => { this.searchQuery = value; },
+      onFocus: () => { this.isSearchFocused = true; },
+      onBlur: () => { this.isSearchFocused = false; },
+      onSubmit: this.handleSearch,
+      placeholder: "搜索电影、电视剧...",
+      enterKeyType: "search"
+    });
+    TextInput.pop();
+    Button.create({ className: "search-button", onClick: this.handleSearch });
+    Button.text("搜索");
+    Button.pop();
+    Flex.pop();
+    
+    Flex.create({ className: "header-actions" });
+    Button.create({ className: "header-action", onClick: this.navigateToHistory });
+    Button.text("历史");
+    Button.pop();
+    Button.create({ className: "header-action", onClick: this.navigateToFavorites });
+    Button.text("收藏");
+    Button.pop();
+    Button.create({ className: "header-action", onClick: this.navigateToSettings });
+    Button.text("设置");
+    Button.pop();
+    Flex.pop();
+    Stack.pop();
+    
+    // 主内容区域
+    if (this.isLoading) {
+      this.renderLoading();
+    } else if (this.errorMessage) {
+      this.renderError();
+    } else {
+      this.renderContent();
+    }
+    
+    Stack.pop();
   }
 }
 

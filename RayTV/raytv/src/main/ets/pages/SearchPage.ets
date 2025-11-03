@@ -389,7 +389,7 @@ struct SearchPage {
     <ListItem onClick={() => this.handleSearchResultClick(media)}>
       <Flex className="search-result-item">
         <Image
-          src={media.coverUrl || 'https://via.placeholder.com/100x150?text=No+Image'}
+          src={media.coverUrl || "https://via.placeholder.com/100x150?text=No+Image"}
           className="result-cover"
           objectFit="cover"
         />
@@ -567,7 +567,7 @@ struct SearchPage {
       <Stack className="grid-item-content">
         <Image
           className="grid-item-image"
-          src={item.coverUrl || item.posterUrl || 'https://via.placeholder.com/100x150?text=No+Image'}
+          src={item.coverUrl || item.posterUrl || "https://via.placeholder.com/100x150?text=No+Image"}
           objectFit="cover"
         />
         <Stack className="grid-item-overlay">

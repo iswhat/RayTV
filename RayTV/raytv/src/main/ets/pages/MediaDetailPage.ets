@@ -560,7 +560,7 @@ struct MediaDetailPage {
     <Stack className="media-header">
       <Flex className="media-info">
         <Image
-          src={this.mediaDetail.coverUrl || 'https://via.placeholder.com/200x300?text=No+Image'}
+          src={this.mediaDetail.coverUrl || "https://via.placeholder.com/200x300?text=No+Image"}
           className="media-cover"
           objectFit="cover"
         />
@@ -757,7 +757,7 @@ struct MediaDetailPage {
           {this.relatedMedia.map((media) => (
             <Stack key={`${media.siteKey}-${media.id}`} className="related-item" onClick={() => this.handleRelatedMediaClick(media)}>
               <Image
-                src={media.coverUrl || 'https://via.placeholder.com/150x200?text=No+Image'}
+                src={media.coverUrl || "https://via.placeholder.com/150x200?text=No+Image"}
                 className="related-cover"
                 objectFit="cover"
               ></Image>

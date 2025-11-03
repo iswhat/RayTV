@@ -492,7 +492,6 @@ export default class MediaService {
     this.currentPlayingMedia = null;
     // 可以在这里调用playerService停止播放
   }
-}
 
   /**
    * 加载配置

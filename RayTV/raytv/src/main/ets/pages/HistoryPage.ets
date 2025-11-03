@@ -427,7 +427,7 @@ struct HistoryPage {
     }
     
     Image.create({ 
-      src: media?.coverUrl || history.cover || 'https://via.placeholder.com/120x160?text=No+Image',
+      src: media?.coverUrl || history.cover || "https://via.placeholder.com/120x160?text=No+Image",
       className: "media-cover",
       objectFit: ImageFit.Cover
     });
