@@ -1,4 +1,4 @@
-import { List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem } from '@arkui/native';
+import { Stack, Flex, List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem, Progress, ListItem as ListItemComponent } from '@arkui/native';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
@@ -6,7 +6,6 @@ import { historyService } from '../service/media/HistoryService';
 import { favoriteService } from '../service/media/FavoriteService';
 import { configService } from '../service/config/ConfigService';
 import { ThemeMode } from '../service/config/SettingService';
-import { Stack, Flex, Image, Text, Button, TextInput, ScrollView, Grid, GridItem, List, ListItem as ListItemComponent, Swiper, SwiperItem, LoadingProgress, Progress, Blank } from '@arkui/native';
 
 // 类型定义
 export interface MediaItem {
