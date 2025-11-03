@@ -1,7 +1,7 @@
 import Logger from '../../common/util/Logger';
 import { LoaderType } from './loader/BaseLoader';
 import { Site } from '../../data/bean/Site';
-import { SiteDao } from '../../data/dao/SiteDao';
+import { SiteDao } from '../../data/db/dao/SiteDao';
 
 /**
  * 站点状态枚举

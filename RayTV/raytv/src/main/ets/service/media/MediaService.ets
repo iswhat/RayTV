@@ -14,7 +14,7 @@ import LiveRepository from '../../data/repository/LiveRepository';
 import HistoryRepository from '../../data/repository/HistoryRepository';
 import CollectionRepository from '../../data/repository/CollectionRepository';
 import DeviceService from '../../service/device/DeviceService';
-import HttpService from '../../service/HttpService';
+import HttpService from '../HttpService';
 
 // 常量定义
 const TAG = 'MediaService';

@@ -1,5 +1,5 @@
 // Index.ets - 应用主入口页面
-import HomePage from '../presentation/page/HomePage';
+import HomePage from './HomePage';
 
 @Entry
 @Component

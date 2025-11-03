@@ -1,7 +1,7 @@
-import Logger from '../../../../common/util/Logger';
+import Logger from '../../../common/util/Logger';
 import { Site, SiteType } from '../bean/Site';
 import { SiteDao } from '../db/dao/SiteDao';
-import JsonUtil from '../../../../common/util/JsonUtil';
+import JsonUtil from '../../../common/util/JsonUtil';
 
 // 站点测试结果接口
 export interface SiteTestResult {

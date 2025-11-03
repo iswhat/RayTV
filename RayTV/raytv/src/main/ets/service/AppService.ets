@@ -399,8 +399,8 @@ export default class AppService {
       
       // 8. 初始化网络服务
       const httpService = HttpService.getInstance();
-    await httpService.initialize();
-    this.services.set('httpService', httpService);
+      await httpService.initialize();
+      this.services.set('httpService', httpService);
       
       // 9. 初始化认证服务
       const authService = AuthService.getInstance();

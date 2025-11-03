@@ -2,7 +2,7 @@
 // 负责管理视频播放历史记录
 
 import Logger from '../../common/util/Logger';
-import HistoryDao from '../../data/dao/HistoryDao';
+import HistoryDao from '../../data/db/dao/HistoryDao';
 import ConfigService from '../config/ConfigService';
 
 // 常量定义

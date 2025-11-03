@@ -1,11 +1,84 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar, Stack, Flex, Blank, TextInput, Grid, GridItem, Swiper, SwiperItem } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { favoriteService } from '../service/media/FavoriteService';
 import { historyService } from '../service/media/HistoryService';
-import Logger from '@ohos/base/Logger';
+import { playbackService } from '../service/media/PlaybackService';
+import { Stack, Flex, Image, Text, Button, ScrollView, Grid, GridItem, List, ListItem, Tag, SearchBar, LoadingProgress, Blank } from '@arkui/native';
+// 类型定义
+export interface MediaItem {
+  id: string;
+  siteKey: string;
+  title: string;
+  coverUrl: string;
+  type?: string;
+  score?: string;
+  year?: string;
+  status?: string;
+}
+
+export interface MediaDetail {
+  id: string;
+  siteKey: string;
+  title: string;
+  coverUrl: string;
+  description?: string;
+  score?: string;
+  year?: string;
+  type?: string;
+  status?: string;
+  episodes?: Episode[];
+  directors?: string[];
+  actors?: string[];
+  genres?: string[];
+  regions?: string[];
+}
+
+export interface Episode {
+  id: string;
+  name: string;
+  season?: number;
+  episode?: number;
+}
+
+export interface PlaySource {
+  id?: string;
+  name?: string;
+  quality?: string;
+  url?: string;
+  description?: string;
+}
+
+export interface FavoriteItem {
+  id: string;
+  mediaId: string;
+  siteKey: string;
+  title: string;
+  coverUrl: string;
+  type?: string;
+  favoriteTime: number;
+}
+
+export interface HistoryItem {
+  id: string;
+  mediaId: string;
+  siteKey: string;
+  episodeId: string;
+  title: string;
+  coverUrl: string;
+  episodeName: string;
+  currentTime: number;
+  duration: number;
+  lastPlayTime: number;
+}
+
+export interface WatchHistory {
+  mediaId: string;
+  episodeId: string;
+  position: number;
+  lastWatchTime: number;
+}
 
 /**
  * 媒体详情页组件
@@ -40,7 +113,7 @@ struct MediaDetailPage {
   private episodesPageSize: number = 50;
   
   // 初始化
-  onMounted(() => {
+  aboutToAppear(): void {
     Logger.info(this.TAG, 'MediaDetailPage mounted');
     
     // 获取路由参数
@@ -52,17 +125,17 @@ struct MediaDetailPage {
     
     // 加载媒体详情
     this.loadMediaDetail();
-  });
+  }
   
   // 清理资源
-  onUnmounted(() => {
+  aboutToDisappear(): void {
     Logger.info(this.TAG, 'MediaDetailPage unmounted');
-  });
+  }
   
   /**
    * 加载媒体详情
    */
-  private async loadMediaDetail(): Promise<void> {
+  private loadMediaDetail(): void {
     if (!this.mediaId || !this.siteKey) {
       this.errorMessage = '缺少必要参数';
       this.isLoading = false;
@@ -72,72 +145,99 @@ struct MediaDetailPage {
     this.isLoading = true;
     this.errorMessage = '';
     
-    try {
-      // 并行加载所有数据
-      const [detail, isFav] = await Promise.all([
-        this.fetchMediaDetail(),
-        favoriteService.isFavorite(this.mediaId, this.siteKey)
-      ]);
-      
+    // 获取媒体详情
+    this.fetchMediaDetail().then((detail) => {
       this.mediaDetail = detail;
-      this.isFavorite = isFav;
-      
       // 加载相关推荐
       this.loadRelatedMedia();
-    } catch (error) {
+    }).catch((error) => {
       Logger.error(this.TAG, `Failed to load media detail: ${error}`);
-      this.errorMessage = '加载失败，请稍后重试';
-    } finally {
+      this.errorMessage = '加载详情失败';
+    }).finally(() => {
       this.isLoading = false;
+    });
+    
+    // 检查收藏状态
+    this.checkIsFavorited();
+  }
+  
+  /**
+   * 检查是否已收藏
+   */
+  private checkIsFavorited(): void {
+    if (!this.mediaId || !this.siteKey) return;
+    
+    try {
+      favoriteService.isFavorite(this.mediaId, this.siteKey).then((isFavorited) => {
+        this.isFavorite = isFavorited;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
+        this.isFavorite = false;
+      });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
+      this.isFavorite = false;
     }
   }
   
   /**
    * 获取媒体详情
    */
-  private async fetchMediaDetail(): Promise<MediaDetail> {
-    try {
-      const detail = await mediaService.getMediaDetail(this.mediaId, this.siteKey);
-      
-      // 初始化剧集列表
-      if (detail.episodes && detail.episodes.length > 0) {
-        this.episodes = detail.episodes;
-        
-        // 提取所有季数
-        this.seasons = [...new Set(detail.episodes.map(ep => ep.season || 1))].sort((a, b) => a - b);
-        
-        // 检查是否有更多剧集
-        this.hasMoreEpisodes = detail.episodes.length >= this.episodesPageSize;
+  private fetchMediaDetail(): Promise<MediaDetail> {
+    return new Promise((resolve, reject) => {
+      if (!this.mediaId || !this.siteKey) {
+        reject(new Error('Missing required parameters'));
+        return;
       }
       
-      return detail;
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to fetch media detail: ${error}`);
-      throw error;
-    }
+      try {
+        mediaService.getMediaDetail(this.mediaId, this.siteKey).then((detail) => {
+          // 初始化剧集列表
+          if (detail.episodes && detail.episodes.length > 0) {
+            this.episodes = detail.episodes;
+            
+            // 提取所有季数
+            this.seasons = [...new Set(detail.episodes.map(ep => ep.season || 1))].map(num => Number(num)).sort((a, b) => a - b);
+            
+            // 检查是否有更多剧集
+            this.hasMoreEpisodes = detail.episodes.length >= this.episodesPageSize;
+          }
+          
+          resolve(detail);
+        }).catch((error) => {
+          Logger.error(this.TAG, `Failed to fetch media detail: ${error}`);
+          reject(error);
+        });
+      } catch (error) {
+        Logger.error(this.TAG, `Failed to fetch media detail: ${error}`);
+        reject(error);
+      }
+    });
   }
   
   /**
    * 加载更多剧集
    */
-  private async loadMoreEpisodes(): Promise<void> {
+  private loadMoreEpisodes(): void {
     if (!this.hasMoreEpisodes || !this.mediaId || !this.siteKey) return;
     
     try {
       this.currentPage++;
-      const moreEpisodes = await mediaService.getEpisodes(
+      mediaService.getEpisodes(
         this.mediaId, 
         this.siteKey, 
         this.currentPage, 
         this.episodesPageSize
-      );
-      
-      if (moreEpisodes && moreEpisodes.length > 0) {
-        this.episodes = [...this.episodes, ...moreEpisodes];
-        this.hasMoreEpisodes = moreEpisodes.length === this.episodesPageSize;
-      } else {
-        this.hasMoreEpisodes = false;
-      }
+      ).then((moreEpisodes) => {
+        if (moreEpisodes && moreEpisodes.length > 0) {
+          this.episodes = [...this.episodes, ...moreEpisodes];
+          this.hasMoreEpisodes = moreEpisodes.length === this.episodesPageSize;
+        } else {
+          this.hasMoreEpisodes = false;
+        }
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to load more episodes: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load more episodes: ${error}`);
     }
@@ -146,16 +246,34 @@ struct MediaDetailPage {
   /**
    * 加载播放源
    */
-  private async loadPlaySources(episodeId?: string): Promise<void> {
+  private loadPlaySources(episodeId?: string): void {
     if (!this.mediaId || !this.siteKey) return;
     
     try {
-      this.playSources = await mediaService.getPlaySources(
-        this.mediaId, 
-        this.siteKey,
-        episodeId
-      );
-      this.filteredSources = [...this.playSources]; // 初始化过滤后的列表
+      mediaService.getPlaySources(this.mediaId, this.siteKey, episodeId).then((playSources) => {
+        this.playSources = playSources;
+        this.filteredSources = [...this.playSources]; // 初始化过滤后的列表
+        this.isLoading = false;
+        
+        // 如果有播放源且选择了剧集，跳转到播放页面
+        if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
+          Router.push({
+            url: 'pages/PlaybackPage',
+            params: {
+              mediaId: this.mediaId,
+              siteKey: this.siteKey,
+              episodeId: this.episodes[this.selectedEpisodeIndex].id,
+              playSourceIndex: 0,
+              mediaTitle: this.mediaDetail?.title || '',
+              episodeName: this.episodes[this.selectedEpisodeIndex].name
+            }
+          });
+        }
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to load play sources: ${error}`);
+        this.errorMessage = '加载播放源失败';
+        this.isLoading = false;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load play sources: ${error}`);
       this.errorMessage = '加载播放源失败';
@@ -184,15 +302,19 @@ struct MediaDetailPage {
   /**
    * 加载相关推荐
    */
-  private async loadRelatedMedia(): Promise<void> {
+  private loadRelatedMedia(): void {
     if (!this.mediaId || !this.siteKey) return;
     
     try {
-      this.relatedMedia = await mediaService.getRelatedMedia(
+      mediaService.getRelatedMedia(
         this.mediaId, 
         this.siteKey,
         10
-      );
+      ).then((relatedMedia) => {
+        this.relatedMedia = relatedMedia;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to load related media: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load related media: ${error}`);
     }
@@ -201,14 +323,19 @@ struct MediaDetailPage {
   /**
    * 处理收藏/取消收藏
    */
-  private async handleToggleFavorite(): Promise<void> {
+  private handleToggleFavorite(): void {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
     try {
       if (this.isFavorite) {
         // 取消收藏
-        await favoriteService.removeFavorite(this.mediaId, this.siteKey);
-        Logger.info(this.TAG, `Removed from favorites: ${this.mediaId}`);
+        favoriteService.removeFavorite(this.mediaId, this.siteKey).then(() => {
+          Logger.info(this.TAG, `Removed from favorites: ${this.mediaId}`);
+          this.isFavorite = false;
+        }).catch((error) => {
+          Logger.error(this.TAG, `Failed to remove favorite: ${error}`);
+          this.errorMessage = '操作失败，请稍后重试';
+        });
       } else {
         // 添加收藏
         const favoriteItem: FavoriteItem = {
@@ -220,11 +347,15 @@ struct MediaDetailPage {
           type: this.mediaDetail.type,
           favoriteTime: Date.now()
         };
-        await favoriteService.addFavorite(favoriteItem);
-        Logger.info(this.TAG, `Added to favorites: ${this.mediaId}`);
+        
+        favoriteService.addFavorite(favoriteItem).then(() => {
+          Logger.info(this.TAG, `Added to favorites: ${this.mediaId}`);
+          this.isFavorite = true;
+        }).catch((error) => {
+          Logger.error(this.TAG, `Failed to add favorite: ${error}`);
+          this.errorMessage = '操作失败，请稍后重试';
+        });
       }
-      
-      this.isFavorite = !this.isFavorite;
     } catch (error) {
       Logger.error(this.TAG, `Failed to toggle favorite: ${error}`);
       this.errorMessage = '操作失败，请稍后重试';
@@ -234,7 +365,7 @@ struct MediaDetailPage {
   /**
    * 处理播放剧集
    */
-  private async handlePlayEpisode(episode: Episode): Promise<void> {
+  private handlePlayEpisode(episode: Episode): void {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
     try {
@@ -251,27 +382,10 @@ struct MediaDetailPage {
         duration: 0,
         lastPlayTime: Date.now()
       };
-      await historyService.addHistory(historyItem);
+      historyService.addHistory(historyItem);
       
       // 加载播放源并播放
-      await this.loadPlaySources(episode.id);
-      
-      if (this.playSources.length > 0) {
-        // 跳转到播放页面
-        Router.push({
-          url: 'pages/PlaybackPage',
-          params: {
-            mediaId: this.mediaId,
-            siteKey: this.siteKey,
-            episodeId: episode.id,
-            playSourceIndex: 0,
-            mediaTitle: this.mediaDetail.title,
-            episodeName: episode.name
-          }
-        });
-      } else {
-        this.errorMessage = '暂无可用播放源';
-      }
+      this.loadPlaySources(episode.id);
     } catch (error) {
       Logger.error(this.TAG, `Failed to play episode: ${error}`);
       this.errorMessage = '播放失败，请稍后重试';
@@ -281,7 +395,7 @@ struct MediaDetailPage {
   /**
    * 处理播放源点击
    */
-  private async handlePlaySourceClick(source: PlaySource): void {
+  private handlePlaySourceClick(source: PlaySource): void {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
     try {
@@ -296,32 +410,27 @@ struct MediaDetailPage {
         
         // 尝试获取上次观看进度
         if (episodeId) {
-          const watchHistory = await historyService.getWatchHistory(
+          historyService.getWatchHistory(
             this.mediaId,
             this.siteKey,
             episodeId
-          );
-          if (watchHistory && watchHistory.position > 0) {
-            currentPlayPosition = watchHistory.position;
-          }
+          ).then(watchHistory => {
+            if (watchHistory && watchHistory.position > 0) {
+              currentPlayPosition = watchHistory.position;
+            }
+            
+            // 跳转到播放页面
+            this.navigateToPlayback(episodeId, episodeName, source, currentPlayPosition);
+          }).catch(() => {
+            // 即使获取历史记录失败，仍继续跳转到播放页面
+            this.navigateToPlayback(episodeId, episodeName, source, 0);
+          });
+        } else {
+          this.navigateToPlayback(episodeId, episodeName, source, 0);
         }
+      } else {
+        this.navigateToPlayback(episodeId, episodeName, source, 0);
       }
-      
-      // 跳转到播放页面
-      Router.push({
-        url: 'pages/PlaybackPage',
-        params: {
-          mediaId: this.mediaId,
-          siteKey: this.siteKey,
-          episodeId: episodeId,
-          playSource: source,
-          playSources: this.filteredSources,
-          mediaTitle: this.mediaDetail.title,
-          episodeName: episodeName,
-          startPosition: currentPlayPosition,
-          autoSwitchSourceOnError: true
-        }
-      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle play source click: ${error}`);
       this.errorMessage = '播放失败';
@@ -329,22 +438,58 @@ struct MediaDetailPage {
   }
   
   /**
+   * 导航到播放页面
+   */
+  private navigateToPlayback(
+    episodeId: string | undefined,
+    episodeName: string | undefined,
+    playSource: PlaySource,
+    startPosition: number
+  ): void {
+    Router.push({
+      url: 'pages/PlaybackPage',
+      params: {
+        mediaId: this.mediaId,
+        siteKey: this.siteKey,
+        episodeId: episodeId,
+        playSource: playSource,
+        playSources: this.filteredSources,
+        mediaTitle: this.mediaDetail?.title || '',
+        episodeName: episodeName,
+        startPosition: startPosition,
+        autoSwitchSourceOnError: true
+      }
+    });
+  }
+  
+  /**
    * 保存当前播放进度
    */
-  private async saveCurrentPlayProgress(episodeId: string): Promise<void> {
+  private saveCurrentPlayProgress(episodeId: string): void {
     try {
-      const position = await playbackService.getCurrentPosition();
-      const duration = await playbackService.getDuration();
-      
-      if (position > 0 && this.mediaId && this.siteKey) {
-        await historyService.saveWatchProgress(
-          this.mediaId,
-          this.siteKey,
-          episodeId,
-          position,
-          duration
-        );
-      }
+      playbackService.getCurrentPosition()
+        .then(position => {
+          playbackService.getDuration()
+            .then(duration => {
+              if (position > 0 && this.mediaId && this.siteKey) {
+                historyService.saveWatchProgress(
+                  this.mediaId,
+                  this.siteKey,
+                  episodeId,
+                  position,
+                  duration
+                ).catch(error => {
+                  Logger.error(this.TAG, `Failed to save watch progress: ${error}`);
+                });
+              }
+            })
+            .catch(error => {
+              Logger.error(this.TAG, `Failed to get duration: ${error}`);
+            });
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to get current position: ${error}`);
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to save play progress: ${error}`);
     }
@@ -537,17 +682,16 @@ struct MediaDetailPage {
           <Button
             key={episode.id || index}
             className={`episode-button ${this.selectedEpisodeIndex === index ? 'selected' : ''}`}
-            onClick={async () => {
+            onClick={() => {
               // 保存上一集的进度
               const lastEpisodeId = this.episodes[this.selectedEpisodeIndex]?.id;
               if (lastEpisodeId) {
-                await this.saveCurrentPlayProgress(lastEpisodeId);
+                this.saveCurrentPlayProgress(lastEpisodeId);
               }
               
               this.selectedEpisodeIndex = index;
               // 加载该集的播放源
               this.loadPlaySources(episode.id);
-              this.currentPlayPosition = 0; // 重置播放位置
             }}
           >
             {episode.name || `第${episode.number || index + 1}集`}
@@ -616,7 +760,7 @@ struct MediaDetailPage {
                 src={media.coverUrl || 'https://via.placeholder.com/150x200?text=No+Image'}
                 className="related-cover"
                 objectFit="cover"
-              />
+              ></Image>
               <Text className="related-title" numberOfLines={2}>{media.title}</Text>
             </Stack>
           ))}

@@ -1,13 +1,11 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+import { Stack, Video, Image, Text, Button, Slider, List, ListItem as ListItemComponent, LoadingProgress, Toast, PromptAction } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { playbackService } from '../service/media/PlaybackService';
 import { historyService } from '../service/media/HistoryService';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
-import { PlaybackState, PlaybackSpeed } from '../service/media/PlaybackService';
-import Logger from '@ohos/base/Logger';
+import { PlaybackState, PlaybackSpeed, PlaySource, Subtitle } from '../service/media/PlaybackService';
 
 /**
  * 播放页面组件
@@ -56,8 +54,11 @@ struct PlaybackPage {
   private totalTime: number = 0;
   
   // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'PlaybackPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'PlaybackPage appeared');
     
     // 获取路由参数
     const params = Router.getParams();
@@ -78,19 +79,25 @@ struct PlaybackPage {
     
     // 设置控制栏自动隐藏
     this.startControlsTimeout();
-  });
+  }
   
-  // 清理资源
-  aboutToDisappear() {
-    Logger.info(this.TAG, 'PlaybackPage unmounted');
-    
-    // 移除播放监听器
-    this.removePlaybackListeners();
-    
-    // 保存最终播放进度
-    this.savePlayProgress(this.currentPosition).catch(error => {
-      Logger.error(this.TAG, `Failed to save final progress: ${error}`);
-    });
+  /**
+     * 页面卸载时调用
+     */
+    aboutToDisappear(): void {
+      Logger.info(this.TAG, 'PlaybackPage disappeared');
+      this.cleanupPlayer();
+    }
+
+    /**
+     * 清理播放器资源
+     */
+    private cleanupPlayer(): void {
+      // 移除播放监听器
+      playbackService.removeAllListeners();
+      
+      // 保存最终播放进度
+    this.savePlayProgress(this.currentPosition);
     
     // 停止控制栏超时
     this.stopControlsTimeout();
@@ -104,7 +111,7 @@ struct PlaybackPage {
   /**
    * 初始化播放
    */
-  private async initializePlayback(): Promise<void> {
+  private initializePlayback(): void {
     if (!this.mediaId || !this.siteKey) {
       this.errorMessage = '缺少必要参数';
       this.isLoading = false;
@@ -114,18 +121,23 @@ struct PlaybackPage {
     
     try {
       // 加载播放源
-      await this.loadPlaySources();
-      
-      // 设置播放源并开始播放
-      if (this.playSource) {
-        await this.setupPlayback(this.playSource);
-      } else if (this.playSources.length > 0 && this.playSourceIndex < this.playSources.length) {
-        await this.setupPlayback(this.playSources[this.playSourceIndex]);
-      } else {
-        this.errorMessage = '无可用播放源';
+      this.loadPlaySources().then(() => {
+        // 设置播放源并开始播放
+        if (this.playSource) {
+          this.setupPlayback(this.playSource);
+        } else if (this.playSources.length > 0 && this.playSourceIndex < this.playSources.length) {
+          this.setupPlayback(this.playSources[this.playSourceIndex]);
+        } else {
+          this.errorMessage = '无可用播放源';
+          this.isLoading = false;
+          this.playbackState = PlaybackState.ERROR;
+        }
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to initialize playback: ${error}`);
+        this.errorMessage = '播放初始化失败';
         this.isLoading = false;
         this.playbackState = PlaybackState.ERROR;
-      }
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to initialize playback: ${error}`);
       this.errorMessage = '播放初始化失败';
@@ -137,55 +149,78 @@ struct PlaybackPage {
   /**
    * 加载播放源
    */
-  private async loadPlaySources(): Promise<void> {
-    try {
-      // 如果没有传入播放源，则从服务获取
-      if (!this.playSource || this.playSources.length === 0) {
-        this.playSources = await mediaService.getPlaySources(
-          this.mediaId,
-          this.siteKey,
-          this.episodeId
-        );
-        Logger.info(this.TAG, `Loaded ${this.playSources.length} play sources`);
+  private loadPlaySources(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        // 如果没有传入播放源，则从服务获取
+        if (!this.playSource || this.playSources.length === 0) {
+          mediaService.getPlaySources(
+            this.mediaId,
+            this.siteKey,
+            this.episodeId
+          ).then((sources) => {
+            this.playSources = sources;
+            Logger.info(this.TAG, `Loaded ${this.playSources.length} play sources`);
+            
+            // 如果只有一个播放源，则使用它
+            if (this.playSources.length === 1 && !this.playSource) {
+              this.playSource = this.playSources[0];
+            }
+            resolve();
+          }).catch((error) => {
+            Logger.error(this.TAG, `Failed to load play sources: ${error}`);
+            reject(error);
+          });
+        } else {
+          resolve();
+        }
+      } catch (error) {
+        Logger.error(this.TAG, `Failed to load play sources: ${error}`);
+        reject(error);
       }
-      
-      // 如果只有一个播放源，则使用它
-      if (this.playSources.length === 1 && !this.playSource) {
-        this.playSource = this.playSources[0];
-      }
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to load play sources: ${error}`);
-      throw error;
-    }
+    });
   }
   
   /**
    * 设置播放
    */
-  private async setupPlayback(source: PlaySource): Promise<void> {
+  private setupPlayback(source: PlaySource): void {
     try {
       // 添加播放监听器
       this.addPlaybackListeners();
       
       // 设置播放源
-      await playbackService.setSource(source, {
+      playbackService.setSource(source, {
         autoPlay: true,
         startPosition: this.initialPosition,
         volume: this.volume,
         isMuted: this.isMuted,
         playbackSpeed: this.playbackSpeed
+      }).then(() => {
+        this.playSource = source;
+        this.isLoading = false;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to setup playback: ${error}`);
+        
+        // 尝试自动切换到下一个片源
+        if (this.autoSwitchSourceOnError) {
+          this.handlePlaybackError(error);
+        } else {
+          this.errorMessage = '播放设置失败';
+          this.isLoading = false;
+          this.playbackState = PlaybackState.ERROR;
+        }
       });
-      
-      this.playSource = source;
-      this.isLoading = false;
     } catch (error) {
       Logger.error(this.TAG, `Failed to setup playback: ${error}`);
       
       // 尝试自动切换到下一个片源
       if (this.autoSwitchSourceOnError) {
-        await this.handlePlaybackError(error);
+        this.handlePlaybackError(error);
       } else {
-        throw error;
+        this.errorMessage = '播放设置失败';
+        this.isLoading = false;
+        this.playbackState = PlaybackState.ERROR;
       }
     }
   }
@@ -209,19 +244,19 @@ struct PlaybackPage {
         this.restartControlsTimeout();
       },
       
-      onError: async (error: Error) => {
+      onError: (error: Error) => {
         Logger.error(this.TAG, `Playback error: ${error}`);
         
         // 尝试自动切换片源
         if (this.autoSwitchSourceOnError) {
-          await this.handlePlaybackError(error);
+          this.handlePlaybackError(error);
         } else {
           this.errorMessage = `播放错误: ${error.message || '未知错误'}`;
         }
       },
       
       // 定期保存播放进度
-      onTimeUpdate: async (currentTime, duration) => {
+      onTimeUpdate: (currentTime, duration) => {
         this.currentTime = currentTime;
         this.currentPosition = currentTime;
         this.duration = duration;
@@ -229,15 +264,9 @@ struct PlaybackPage {
         
         // 每10秒保存一次播放进度
         if (this.lastSaveTime === 0 || currentTime - this.lastSaveTime > 10000) {
-          await this.savePlayProgress(currentTime);
+          this.savePlayProgress(currentTime);
           this.lastSaveTime = currentTime;
         }
-      },
-      
-      onError: (error) => {
-        Logger.error(this.TAG, `Playback error: ${error.message}`);
-        this.errorMessage = error.message || '播放出错';
-        this.isLoading = false;
       },
       
       onCompleted: () => {
@@ -257,34 +286,39 @@ struct PlaybackPage {
   /**
    * 处理播放完成
    */
-  private async handlePlaybackCompleted(): Promise<void> {
+  private handlePlaybackCompleted(): void {
     try {
       // 保存完成的播放状态
-      await historyService.updateProgress(
+      historyService.updateProgress(
         this.mediaId,
         this.siteKey,
         this.duration, // 标记为已完成
         this.episodeId,
         true // 标记为已完成
-      );
-      
-      // 可以在这里处理下一集逻辑
-      Toast.show('播放完成');
+      ).then(() => {
+        Toast.show('播放完成');
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to handle playback completed: ${error}`);
+        Toast.show('播放完成');
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle playback completed: ${error}`);
+      Toast.show('播放完成');
     }
   }
   
   /**
    * 保存播放进度
    */
-  private async savePlaybackProgress(): Promise<void> {
+  private savePlaybackProgress(): void {
     try {
-      await playbackService.savePlaybackPosition(
+      playbackService.savePlaybackPosition(
         this.mediaId,
         this.siteKey,
         this.episodeId
-      );
+      ).catch((error) => {
+        Logger.error(this.TAG, `Failed to save playback progress: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to save playback progress: ${error}`);
     }
@@ -293,12 +327,16 @@ struct PlaybackPage {
   /**
    * 切换播放/暂停
    */
-  private async togglePlayPause(): Promise<void> {
+  private togglePlayPause(): void {
     try {
       if (this.isPlaying) {
-        await playbackService.pause();
+        playbackService.pause().catch((error) => {
+          Logger.error(this.TAG, `Failed to pause playback: ${error}`);
+        });
       } else {
-        await playbackService.play();
+        playbackService.play().catch((error) => {
+          Logger.error(this.TAG, `Failed to play: ${error}`);
+        });
       }
       
       this.showControls = true;
@@ -311,13 +349,15 @@ struct PlaybackPage {
   /**
    * 处理进度条变化
    */
-  private async handleProgressChange(value: number): Promise<void> {
+  private handleProgressChange(value: number): void {
     try {
       const seekTime = (value / 100) * this.duration;
-      await playbackService.seekTo(seekTime);
-      
-      this.showControls = true;
-      this.restartControlsTimeout();
+      playbackService.seekTo(seekTime).then(() => {
+        this.showControls = true;
+        this.restartControlsTimeout();
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to seek: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to seek: ${error}`);
     }
@@ -326,13 +366,15 @@ struct PlaybackPage {
   /**
    * 处理音量变化
    */
-  private async handleVolumeChange(value: number): Promise<void> {
+  private handleVolumeChange(value: number): void {
     try {
       this.volume = value;
       if (this.isMuted && value > 0) {
         this.isMuted = false;
       }
-      await playbackService.setVolume(value);
+      playbackService.setVolume(value).catch((error) => {
+        Logger.error(this.TAG, `Failed to set volume: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to set volume: ${error}`);
     }
@@ -341,10 +383,14 @@ struct PlaybackPage {
   /**
    * 切换静音
    */
-  private async toggleMute(): Promise<void> {
+  private toggleMute(): void {
     try {
-      this.isMuted = !this.isMuted;
-      await playbackService.setMuted(this.isMuted);
+      const newMuteState = !this.isMuted;
+      playbackService.setMuted(newMuteState).then(() => {
+        this.isMuted = newMuteState;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to toggle mute: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to toggle mute: ${error}`);
     }
@@ -353,11 +399,14 @@ struct PlaybackPage {
   /**
    * 设置播放速度
    */
-  private async setPlaybackSpeed(speed: PlaybackSpeed): Promise<void> {
+  private setPlaybackSpeed(speed: PlaybackSpeed): void {
     try {
       this.playbackSpeed = speed;
-      await playbackService.setPlaybackSpeed(speed);
-      this.showSpeedMenu = false;
+      playbackService.setPlaybackSpeed(speed).then(() => {
+        this.showSpeedMenu = false;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to set playback speed: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to set playback speed: ${error}`);
     }
@@ -366,22 +415,24 @@ struct PlaybackPage {
   /**
    * 保存播放进度
    */
-  private async savePlayProgress(position: number): Promise<void> {
+  private savePlayProgress(position: number): void {
     if (!this.mediaId || !this.siteKey || !this.episodeId) return;
     
     try {
       const duration = this.totalTime || this.duration;
       
       // 保存播放进度到历史记录
-      await historyService.saveWatchProgress(
+      historyService.saveWatchProgress(
         this.mediaId,
         this.siteKey,
         this.episodeId,
         position,
         duration
-      );
-      
-      Logger.info(this.TAG, `Saved playback progress: ${position}ms of ${duration}ms`);
+      ).then(() => {
+        Logger.info(this.TAG, `Saved playback progress: ${position}ms of ${duration}ms`);
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to save play progress: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to save play progress: ${error}`);
     }
@@ -390,7 +441,7 @@ struct PlaybackPage {
   /**
    * 处理播放错误，尝试切换到下一个可用片源
    */
-  private async handlePlaybackError(error: Error): Promise<void> {
+  private handlePlaybackError(error: Error): void {
     if (!this.playSources || this.playSources.length <= 1) {
       this.errorMessage = '播放失败，暂无可用备用片源';
       this.isLoading = false;
@@ -412,26 +463,13 @@ struct PlaybackPage {
       // 显示切换提示
       this.errorMessage = `当前片源播放失败，正在尝试切换到备用片源(${nextIndex + 1}/${this.playSources.length})...`;
       
-      // 等待一小段时间再切换
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 保存当前播放位置
+      const currentPosition = this.currentPosition;
       
-      try {
-        // 保存当前播放位置
-        const currentPosition = this.currentPosition;
-        
-        // 切换到下一个片源
-        this.initialPosition = currentPosition; // 保持相同的播放位置
-        await this.setupPlayback(this.playSources[nextIndex]);
-        this.errorMessage = '';
-      } catch (nextError) {
-        // 如果下一个片源也失败，继续尝试下一个
-        if (nextIndex !== currentIndex) {
-          await this.handlePlaybackError(nextError);
-        } else {
-          this.errorMessage = '所有片源播放失败，请稍后重试';
-          this.isLoading = false;
-        }
-      }
+      // 切换到下一个片源
+      this.initialPosition = currentPosition; // 保持相同的播放位置
+      this.setupPlayback(this.playSources[nextIndex]);
+      this.errorMessage = '';
     } else {
       this.errorMessage = '播放失败，无法识别当前片源';
       this.isLoading = false;
@@ -441,22 +479,31 @@ struct PlaybackPage {
   /**
    * 切换播放源
    */
-  private async switchPlaySource(source: PlaySource): Promise<void> {
+  private switchPlaySource(source: PlaySource): void {
     try {
       this.isLoading = true;
+      this.playbackState = PlaybackState.BUFFERING;
       
       // 保存当前播放位置
       const currentPosition = this.currentPosition;
       
-      // 切换到新片源并恢复播放位置
-      this.initialPosition = currentPosition;
-      await this.setupPlayback(source);
+      // 设置新的播放源
+      this.setupPlayback(source);
       
+      // 恢复播放位置
+      if (currentPosition > 0) {
+        playbackService.seek(currentPosition).catch((error) => {
+          Logger.error(this.TAG, `Failed to seek to position after switching source: ${error}`);
+        });
+      }
+      
+      this.isLoading = false;
       this.showSourceMenu = false;
     } catch (error) {
       Logger.error(this.TAG, `Failed to switch play source: ${error}`);
       this.errorMessage = '切换播放源失败';
       this.isLoading = false;
+      this.playbackState = PlaybackState.ERROR;
     }
   }
   
@@ -474,9 +521,8 @@ struct PlaybackPage {
    */
   private handleBack(): void {
     // 先保存进度
-    this.savePlaybackProgress().finally(() => {
-      Router.back();
-    });
+    this.savePlaybackProgress();
+    Router.back();
   }
   
   /**
@@ -523,9 +569,18 @@ struct PlaybackPage {
   /**
    * 释放播放器资源
    */
-  private async releasePlayer(): Promise<void> {
+  private releasePlayer(): void {
     try {
-      await playbackService.release();
+      // 保存当前播放进度
+      this.savePlaybackProgress();
+      
+      // 移除播放监听器
+      playbackService.removeAllListeners();
+      
+      // 释放播放器资源
+      playbackService.release().catch((error) => {
+        Logger.error(this.TAG, `Failed to release player: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to release player: ${error}`);
     }
@@ -611,7 +666,7 @@ struct PlaybackPage {
           min={0}
           max={100}
           onChange={this.handleProgressChange}
-        />
+        ></Slider>
         <Flex className="time-display">
           <Text className="current-time">{this.formatTime(this.currentTime)}</Text>
           <Text className="duration">{this.formatTime(this.duration)}</Text>
@@ -629,7 +684,7 @@ struct PlaybackPage {
           min={0}
           max={100}
           onChange={this.handleVolumeChange}
-        />
+        ></Slider>
       </Stack>
       
       <Button className="source-button" onClick={() => this.showSourceMenu = !this.showSourceMenu}>
@@ -671,14 +726,14 @@ struct PlaybackPage {
     
     <List className="source-menu">
       {this.playSources.map((source, index) => (
-        <ListItem 
+        <ListItemComponent 
           key={index} 
           onClick={() => this.switchPlaySource(source)}
           className={this.playSource?.url === source.url ? 'selected' : ''}
         >
           <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
           {source.quality && <Text className="source-quality">{source.quality}</Text>}
-        </ListItem>
+        </ListItemComponent>
       ))}
     </List>
   }

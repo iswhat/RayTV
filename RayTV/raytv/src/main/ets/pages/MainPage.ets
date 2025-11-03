@@ -1,6 +1,6 @@
-import { useState, useEffect } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
+import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
 import Logger from '../common/util/Logger';
@@ -83,7 +83,7 @@ struct MainPage {
               borderRadius: 8
             }}
             alt={media.title}
-          />
+          ></Image>
           <Text style={{ marginTop: 8, fontSize: 14, maxLines: 2 }}>{media.title}</Text>
         </Column>
       </ListItem>

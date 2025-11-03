@@ -1,7 +1,6 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { historyService } from '../service/media/HistoryService';
 import { mediaService } from '../service/media/MediaService';
 
@@ -24,36 +23,48 @@ struct HistoryPage {
   @State autoPlayLast: boolean = true;
   
   // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'HistoryPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'HistoryPage appeared');
     this.loadHistories();
-  });
-  
-  // 清理资源
-  onUnmounted(() => {
-    Logger.info(this.TAG, 'HistoryPage unmounted');
-  });
+  }
+
+  /**
+   * 页面卸载时调用
+   */
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'HistoryPage disappeared');
+  }
   
   /**
    * 加载历史记录
    */
-  private async loadHistories(): Promise<void> {
+  private loadHistories(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
     try {
       // 从历史服务获取历史记录列表（按播放时间倒序）
-      const histories = await historyService.getHistories(100); // 获取最近100条记录
-      this.histories = histories;
-      
-      // 加载媒体详情
-      await this.loadMediaDetails(histories);
-      
-      Logger.info(this.TAG, `Loaded ${this.histories.length} history records`);
+      historyService.getHistories(100).then((histories) => {
+        this.histories = histories;
+        
+        // 加载媒体详情
+        this.loadMediaDetails(histories);
+        
+        Logger.info(this.TAG, `Loaded ${this.histories.length} history records`);
+        this.isLoading = false;
+        this.isRefreshing = false;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to load histories: ${error}`);
+        this.errorMessage = '加载历史记录失败，请稍后重试';
+        this.isLoading = false;
+        this.isRefreshing = false;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load histories: ${error}`);
       this.errorMessage = '加载历史记录失败，请稍后重试';
-    } finally {
       this.isLoading = false;
       this.isRefreshing = false;
     }
@@ -62,41 +73,44 @@ struct HistoryPage {
   /**
    * 加载媒体详情
    */
-  private async loadMediaDetails(histories: HistoryItem[]): Promise<void> {
+  private loadMediaDetails(histories: HistoryItem[]): void {
     try {
       // 并行加载媒体详情
-      const detailPromises = histories.map(async (history) => {
-        try {
-          const media = await mediaService.getMediaDetail(history.mediaId, history.siteKey);
-          if (media) {
-            this.mediaItems.set(history.mediaId, media);
-          }
-        } catch (error) {
-          Logger.warn(this.TAG, `Failed to load detail for ${history.mediaId}: ${error}`);
-          // 如果加载失败，使用历史记录中的基础信息
-          const placeholderMedia: MediaItem = {
-            id: history.mediaId,
-            siteKey: history.siteKey,
-            title: history.title,
-            coverUrl: history.coverUrl,
-            type: history.type,
-            year: history.year,
-            description: '',
-            score: '',
-            directors: [],
-            actors: [],
-            tags: [],
-            category: '',
-            region: '',
-            language: '',
-            updateTime: '',
-            status: ''
-          };
-          this.mediaItems.set(history.mediaId, placeholderMedia);
-        }
+      const detailPromises = histories.map((history) => {
+        return mediaService.getMediaDetail(history.mediaId, history.siteKey)
+          .then((media) => {
+            if (media) {
+              this.mediaItems.set(history.mediaId, media);
+            }
+          })
+          .catch((error) => {
+            Logger.warn(this.TAG, `Failed to load detail for ${history.mediaId}: ${error}`);
+            // 如果加载失败，使用历史记录中的基础信息
+            const placeholderMedia: MediaItem = {
+              id: history.mediaId,
+              siteKey: history.siteKey,
+              title: history.title,
+              coverUrl: history.coverUrl,
+              type: history.type,
+              year: history.year,
+              description: '',
+              score: '',
+              directors: [],
+              actors: [],
+              tags: [],
+              category: '',
+              region: '',
+              language: '',
+              updateTime: '',
+              status: ''
+            };
+            this.mediaItems.set(history.mediaId, placeholderMedia);
+          });
       });
       
-      await Promise.all(detailPromises);
+      Promise.all(detailPromises).catch((error) => {
+        Logger.error(this.TAG, `Failed in Promise.all: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load media details: ${error}`);
     }
@@ -142,33 +156,38 @@ struct HistoryPage {
   /**
    * 处理删除选中项
    */
-  private async handleDeleteSelected(): Promise<void> {
+  private handleDeleteSelected(): void {
     if (this.selectedItems.size === 0) return;
     
     try {
       const idsToDelete = Array.from(this.selectedItems);
       
       // 删除选中的历史记录
-      await historyService.removeHistories(idsToDelete);
-      
-      // 更新本地状态
-      this.histories = this.histories.filter(history => !idsToDelete.includes(history.id));
-      
-      // 清除已删除项的媒体详情缓存
-      idsToDelete.forEach(id => {
-        const history = this.histories.find(h => h.id === id);
-        if (history) {
-          this.mediaItems.delete(history.mediaId);
-        }
-        this.selectedItems.delete(id);
-      });
-      
-      Logger.info(this.TAG, `Deleted ${idsToDelete.length} history records`);
-      
-      // 如果没有历史记录了，退出编辑模式
-      if (this.histories.length === 0) {
-        this.isEditMode = false;
-      }
+      historyService.removeHistories(idsToDelete)
+        .then(() => {
+          // 更新本地状态
+          this.histories = this.histories.filter(history => !idsToDelete.includes(history.id));
+          
+          // 清除已删除项的媒体详情缓存
+          idsToDelete.forEach(id => {
+            const history = this.histories.find(h => h.id === id);
+            if (history) {
+              this.mediaItems.delete(history.mediaId);
+            }
+            this.selectedItems.delete(id);
+          });
+          
+          Logger.info(this.TAG, `Deleted ${idsToDelete.length} history records`);
+          
+          // 如果没有历史记录了，退出编辑模式
+          if (this.histories.length === 0) {
+            this.isEditMode = false;
+          }
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to delete histories: ${error}`);
+          this.errorMessage = '删除失败，请稍后重试';
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to delete histories: ${error}`);
       this.errorMessage = '删除失败，请稍后重试';
@@ -178,18 +197,23 @@ struct HistoryPage {
   /**
    * 处理清空所有历史
    */
-  private async handleClearAll(): Promise<void> {
+  private handleClearAll(): void {
     try {
       // 清空所有历史记录
-      await historyService.clearAllHistories();
-      
-      // 更新本地状态
-      this.histories = [];
-      this.mediaItems.clear();
-      this.selectedItems.clear();
-      this.isEditMode = false;
-      
-      Logger.info(this.TAG, 'Cleared all history records');
+      historyService.clearAllHistories()
+        .then(() => {
+          // 更新本地状态
+          this.histories = [];
+          this.mediaItems.clear();
+          this.selectedItems.clear();
+          this.isEditMode = false;
+          
+          Logger.info(this.TAG, 'Cleared all history records');
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to clear all histories: ${error}`);
+          this.errorMessage = '清空失败，请稍后重试';
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear all histories: ${error}`);
       this.errorMessage = '清空失败，请稍后重试';
@@ -207,19 +231,56 @@ struct HistoryPage {
     
     Logger.info(this.TAG, `History clicked: ${history.title}, episode: ${history.episodeIndex}`);
     
-    // 跳转到播放页面，带上上次播放的进度
-    Router.push({
-      url: 'pages/PlaybackPage',
-      params: {
-        mediaId: history.mediaId,
-        siteKey: history.siteKey,
-        episodeIndex: history.episodeIndex,
-        playSourceIndex: history.playSourceIndex,
-        playbackPosition: history.playbackPosition,
-        title: history.title,
-        coverUrl: history.coverUrl
-      }
-    });
+    try {
+      // 更新播放历史时间
+      historyService.updateHistoryTime(history.id)
+        .then(() => {
+          // 跳转到播放页面，带上上次播放的进度
+          Router.push({
+            url: 'pages/PlaybackPage',
+            params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeIndex: history.episodeIndex,
+              playSourceIndex: history.playSourceIndex,
+              playbackPosition: history.playbackPosition,
+              title: history.title,
+              coverUrl: history.coverUrl
+            }
+          });
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to update history time: ${error}`);
+          // 即使更新失败，也跳转到播放页面
+          Router.push({
+            url: 'pages/PlaybackPage',
+            params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeIndex: history.episodeIndex,
+              playSourceIndex: history.playSourceIndex,
+              playbackPosition: history.playbackPosition,
+              title: history.title,
+              coverUrl: history.coverUrl
+            }
+          });
+        });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to handle history click: ${error}`);
+      // 错误处理：跳转到播放页面
+      Router.push({
+        url: 'pages/PlaybackPage',
+        params: {
+          mediaId: history.mediaId,
+          siteKey: history.siteKey,
+          episodeIndex: history.episodeIndex,
+          playSourceIndex: history.playSourceIndex,
+          playbackPosition: history.playbackPosition,
+          title: history.title,
+          coverUrl: history.coverUrl
+        }
+      });
+    }
   }
   
   /**
@@ -385,7 +446,7 @@ struct HistoryPage {
             <ProgressBar
               percent={progressPercentage}
               style={{ strokeWidth: 4, color: '#FF4500' }}
-            />
+            ></ProgressBar>
             <Text className="progress-text">{progressText}</Text>
           </Stack>
           {!this.isEditMode && (

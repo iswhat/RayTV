@@ -3,7 +3,7 @@ import { Site } from '../../data/bean/Site';
 import { SiteManager } from '../spider/SiteManager';
 import { ConfigLoader } from './ConfigLoader';
 import { ConfigParser } from './ConfigParser';
-import { SiteDao } from '../../data/dao/SiteDao';
+import { SiteDao } from '../../data/db/dao/SiteDao';
 import { SubscriptionDao } from '../../data/dao/SubscriptionDao';
 
 const TAG = 'SubscriptionManager';

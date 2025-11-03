@@ -1,12 +1,41 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
+import { List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { historyService } from '../service/media/HistoryService';
 import { favoriteService } from '../service/media/FavoriteService';
 import { configService } from '../service/config/ConfigService';
-import { ThemeMode, HomePageLayout } from '../service/config/ConfigService';
-import Logger from '@ohos/base/Logger';
+import { ThemeMode } from '../service/config/SettingService';
+import { Stack, Flex, Image, Text, Button, TextInput, ScrollView, Grid, GridItem, List, ListItem as ListItemComponent, Swiper, SwiperItem, LoadingProgress, Progress, Blank } from '@arkui/native';
+
+// 类型定义
+export interface MediaItem {
+  id: string;
+  siteKey: string;
+  title: string;
+  cover: string;
+  coverUrl?: string; // 添加coverUrl属性以兼容现有代码
+  type?: string;
+  score?: string;
+  year?: string;
+  status?: string;
+  genres: string[];
+  actors: string[];
+  description?: string; // 添加description属性以兼容轮播图渲染
+}
+
+export interface HistoryItem {
+  id: string;
+  mediaId: string;
+  siteKey: string;
+  episodeId: string;
+  title: string;
+  coverUrl: string;
+  episodeName: string;
+  currentTime: number;
+  duration: number;
+  lastPlayTime: number;
+}
 
 /**
  * 首页组件
@@ -28,32 +57,32 @@ struct HomePage {
   @State errorMessage: string = '';
   @State currentTheme: ThemeMode = ThemeMode.AUTO;
   @State homeLayout: string = 'grid';
+  @State pageSize: number = 20;
   
   // 懒加载配置
-  private pageSize: number = 20;
   private isRefreshing: boolean = false;
   
-  // 初始化数据
-  onMounted(() => {
+  // 初始化页面
+  aboutToAppear(): void {
     Logger.info(this.TAG, 'HomePage mounted');
     this.initializePage();
-  });
+  }
   
   // 清理资源
-  onUnmounted(() => {
+  aboutToDisappear(): void {
     Logger.info(this.TAG, 'HomePage unmounted');
-  });
+  }
   
   /**
    * 初始化页面
    */
-  private async initializePage(): Promise<void> {
+  private initializePage(): void {
     try {
       // 加载配置
-      await this.loadConfigs();
+      this.loadConfigs();
       
       // 加载页面数据
-      await this.loadHomeData();
+      this.loadHomeData();
     } catch (error) {
       Logger.error(this.TAG, `Failed to initialize page: ${error}`);
       this.errorMessage = '页面初始化失败，请稍后重试';
@@ -63,16 +92,22 @@ struct HomePage {
   /**
    * 加载配置
    */
-  private async loadConfigs(): Promise<void> {
+  private loadConfigs(): void {
     try {
       // 获取主题模式
-      this.currentTheme = await configService.getConfig('themeMode') || ThemeMode.AUTO;
+      configService.getConfig('themeMode').then((value) => {
+        this.currentTheme = value || ThemeMode.AUTO;
+      });
       
       // 获取首页布局
-      this.homeLayout = await configService.getConfig('homePageLayout') || 'grid';
+      configService.getConfig('homePageLayout').then((value) => {
+        this.homeLayout = value || 'grid';
+      });
       
       // 获取分页大小
-      this.pageSize = await configService.getConfig('pageSize') || 20;
+      configService.getConfig('pageSize').then((value) => {
+        this.pageSize = value || 20;
+      });
       
       // 监听配置变化
       configService.addConfigChangeListener('themeMode', (value) => {
@@ -90,21 +125,17 @@ struct HomePage {
   /**
    * 加载首页数据
    */
-  private async loadHomeData(): Promise<void> {
+  private loadHomeData(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
     try {
       // 并行加载所有数据
-      const promises = [
-        this.loadFeaturedMedia(),
-        this.loadLatestMedia(),
-        this.loadPopularMedia(),
-        this.loadRecentPlays(),
-        this.loadCategories()
-      ];
-      
-      await Promise.allSettled(promises);
+      this.loadFeaturedMedia();
+      this.loadLatestMedia();
+      this.loadPopularMedia();
+      this.loadRecentPlays();
+      this.loadCategories();
     } catch (error) {
       Logger.error(this.TAG, `Failed to load home data: ${error}`);
       this.errorMessage = '数据加载失败，请检查网络连接';
@@ -116,9 +147,11 @@ struct HomePage {
   /**
    * 加载精选媒体
    */
-  private async loadFeaturedMedia(): Promise<void> {
+  private loadFeaturedMedia(): void {
     try {
-      this.featuredMedia = await mediaService.getRecommendedMedia(this.pageSize);
+      mediaService.getRecommendedMedia(this.pageSize).then((data) => {
+        this.featuredMedia = data;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load featured media: ${error}`);
     }
@@ -127,9 +160,11 @@ struct HomePage {
   /**
    * 加载最新媒体
    */
-  private async loadLatestMedia(): Promise<void> {
+  private loadLatestMedia(): void {
     try {
-      this.latestMedia = await mediaService.getLatestMedia(this.pageSize);
+      mediaService.getLatestMedia(this.pageSize).then((data) => {
+        this.latestMedia = data;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load latest media: ${error}`);
     }
@@ -138,9 +173,11 @@ struct HomePage {
   /**
    * 加载热门媒体
    */
-  private async loadPopularMedia(): Promise<void> {
+  private loadPopularMedia(): void {
     try {
-      this.popularMedia = await mediaService.getPopularMedia(this.pageSize);
+      mediaService.getPopularMedia(this.pageSize).then((data) => {
+        this.popularMedia = data;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load popular media: ${error}`);
     }
@@ -149,12 +186,15 @@ struct HomePage {
   /**
    * 加载最近播放
    */
-  private async loadRecentPlays(): Promise<void> {
+  private loadRecentPlays(): void {
     try {
-      const showRecentPlays = await configService.getConfig('showRecentPlays') || true;
-      if (showRecentPlays) {
-        this.recentPlays = await historyService.getRecentHistory(10);
-      }
+      configService.getConfig('showRecentPlays').then((showRecentPlays) => {
+        if (showRecentPlays !== false) {
+          historyService.getRecentHistory(10).then((data) => {
+            this.recentPlays = data;
+          });
+        }
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load recent plays: ${error}`);
     }
@@ -163,10 +203,11 @@ struct HomePage {
   /**
    * 加载分类列表
    */
-  private async loadCategories(): Promise<void> {
+  private loadCategories(): void {
     try {
-      const categoryList = await mediaService.getCategories();
-      this.categories = categoryList.slice(0, 12); // 最多显示12个分类
+      mediaService.getCategories().then((categoryList) => {
+        this.categories = categoryList.slice(0, 12); // 最多显示12个分类
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load categories: ${error}`);
     }
@@ -230,12 +271,12 @@ struct HomePage {
   /**
    * 处理刷新
    */
-  private async handleRefresh(): Promise<void> {
+  private handleRefresh(): void {
     if (this.isRefreshing) return;
     
     this.isRefreshing = true;
     try {
-      await this.loadHomeData();
+      this.loadHomeData();
     } finally {
       this.isRefreshing = false;
     }
@@ -315,7 +356,7 @@ struct HomePage {
    */
   @Builder
   private renderHistoryItem(history: HistoryItem): void {
-    <List.Item onClick={() => this.handleHistoryItemClick(history)}>
+    <ListItemComponent onClick={() => this.handleHistoryItemClick(history)}>
       <Flex className="history-item">
         <Image
           src={history.coverUrl || 'https://via.placeholder.com/80x120?text=No+Image'}
@@ -338,10 +379,10 @@ struct HomePage {
             className="history-progress-bar"
             value={(history.currentTime / history.duration) * 100}
             type="linear"
-          />
+          ></Progress>
         </Flex>
       </Flex>
-    </List.Item>
+    </ListItemComponent>
   }
   
   /**
@@ -493,7 +534,7 @@ struct HomePage {
    * 组件渲染
    */
   build() {
-    <Stack className="home-page" theme={this.currentTheme}>
+    <Stack className="home-page">
       {/* 顶部搜索栏 */}
       <Stack className="search-header">
         <Flex className="search-bar">

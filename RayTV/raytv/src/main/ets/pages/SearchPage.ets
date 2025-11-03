@@ -1,12 +1,10 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { ScrollView, TextInput, Button, List, ListItem, Image, Text, LoadingProgress, Empty, Flex, Tag } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { MediaItem } from '../data/bean/MediaItem';
 import { SearchHistoryItem } from '../data/repository/SearchHistoryRepository';
 import { mediaService } from '../service/media/MediaService';
 import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
-import Logger from '@ohos/base/Logger';
 
 /**
  * 搜索页面组件
@@ -35,9 +33,11 @@ struct SearchPage {
   private pageSize: number = 20;
   private searchDebounceTimer: NodeJS.Timeout | null = null;
   
-  // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'SearchPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'SearchPage appeared');
     
     // 获取路由参数中的搜索词
     const params = Router.getParams();
@@ -51,25 +51,29 @@ struct SearchPage {
     
     // 加载搜索历史
     this.loadSearchHistory();
-  });
+  }
   
-  // 清理资源
-  onUnmounted(() => {
-    Logger.info(this.TAG, 'SearchPage unmounted');
+  /**
+   * 页面卸载时调用
+   */
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'SearchPage disappeared');
     
     // 清理定时器
     if (this.searchDebounceTimer) {
       clearTimeout(this.searchDebounceTimer);
     }
-  });
+  }
   
   /**
    * 加载热门搜索词
    */
-  private async loadHotKeywords(): Promise<void> {
+  private loadHotKeywords(): void {
     try {
-      this.hotKeywords = await mediaService.getHotSearchKeywords(10);
-      Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
+      mediaService.getHotSearchKeywords(10).then((data) => {
+        this.hotKeywords = data;
+        Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load hot keywords: ${error}`);
       // 使用默认热门关键词
@@ -80,58 +84,49 @@ struct SearchPage {
   /**
    * 加载搜索历史
    */
-  private loadSearchHistory(): Promise<void> {
-    return new Promise((resolve) => {
-      try {
-        // 这里应该从本地存储中读取搜索历史
-        // 暂时使用模拟数据
-        const history = ['复仇者联盟', '海贼王', '星际穿越'];
-        this.searchHistory = history;
-        Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items`);
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to load search history: ${error}`);
-        this.searchHistory = [];
-      }
-      resolve();
-    });
+  private loadSearchHistory(): void {
+    try {
+      // 这里应该从本地存储中读取搜索历史
+      // 暂时使用模拟数据
+      const history = ['复仇者联盟', '海贼王', '星际穿越'];
+      this.searchHistory = history;
+      Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items`);
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to load search history: ${error}`);
+      this.searchHistory = [];
+    }
   }
   
   /**
    * 保存搜索历史
    */
-  private saveSearchHistory(keyword: string): Promise<void> {
-    return new Promise((resolve) => {
-      try {
-        // 去重并限制数量
-        let history = this.searchHistory.filter(item => item !== keyword);
-        history.unshift(keyword);
-        history = history.slice(0, 10); // 最多保存10条
-        
-        this.searchHistory = history;
-        
-        // 这里应该保存到本地存储
-        Logger.info(this.TAG, `Search history saved: ${keyword}`);
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to save search history: ${error}`);
-      }
-      resolve();
-    });
+  private saveSearchHistory(keyword: string): void {
+    try {
+      // 去重并限制数量
+      let history = this.searchHistory.filter(item => item !== keyword);
+      history.unshift(keyword);
+      history = history.slice(0, 10); // 最多保存10条
+      
+      this.searchHistory = history;
+      
+      // 这里应该保存到本地存储
+      Logger.info(this.TAG, `Search history saved: ${keyword}`);
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to save search history: ${error}`);
+    }
   }
   
   /**
    * 清除搜索历史
    */
-  private clearSearchHistory(): Promise<void> {
-    return new Promise((resolve) => {
-      try {
-        this.searchHistory = [];
-        // 这里应该清除本地存储中的搜索历史
-        Logger.info(this.TAG, 'Search history cleared');
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to clear search history: ${error}`);
-      }
-      resolve();
-    });
+  private clearSearchHistory(): void {
+    try {
+      this.searchHistory = [];
+      // 这里应该清除本地存储中的搜索历史
+      Logger.info(this.TAG, 'Search history cleared');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to clear search history: ${error}`);
+    }
   }
   
   /**
@@ -158,7 +153,7 @@ struct SearchPage {
   /**
    * 执行搜索
    */
-  private async performSearch(): Promise<void> {
+  private performSearch(): void {
     const query = this.searchQuery.trim();
     if (!query) return;
     
@@ -170,7 +165,7 @@ struct SearchPage {
     
     try {
       // 保存搜索历史
-      await this.saveSearchHistory(query);
+      this.saveSearchHistory(query);
       
       // 执行搜索，传递筛选条件
       Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
@@ -184,19 +179,27 @@ struct SearchPage {
         ...this.filters // 合并筛选条件
       };
       
-      const result = await mediaService.searchMedia(searchParams);
-      
-      // 处理搜索结果
-      this.searchResults = result.items || [];
-      this.hasMoreResults = result.hasMore || false;
-      
-      Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
+      mediaService.searchMedia(searchParams).then((result) => {
+        // 处理搜索结果
+        this.searchResults = result.items || [];
+        this.hasMoreResults = result.hasMore || false;
+        
+        Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
+        this.isLoading = false;
+        this.isSearching = false;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Search failed: ${error}`);
+        this.errorMessage = '搜索失败，请稍后重试';
+        this.searchResults = [];
+        this.hasMoreResults = false;
+        this.isLoading = false;
+        this.isSearching = false;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Search failed: ${error}`);
       this.errorMessage = '搜索失败，请稍后重试';
       this.searchResults = [];
       this.hasMoreResults = false;
-    } finally {
       this.isLoading = false;
       this.isSearching = false;
     }
@@ -205,7 +208,7 @@ struct SearchPage {
   /**
    * 加载更多搜索结果
    */
-  private async loadMoreResults(): Promise<void> {
+  private loadMoreResults(): void {
     if (!this.hasMoreResults || this.isLoading || !this.searchQuery.trim()) return;
     
     this.isLoading = true;
@@ -224,18 +227,22 @@ struct SearchPage {
         ...this.filters // 合并筛选条件
       };
       
-      const result = await mediaService.searchMedia(searchParams);
-      
-      if (result && result.items && result.items.length > 0) {
-        this.searchResults = [...this.searchResults, ...result.items];
-        this.hasMoreResults = result.hasMore || false;
-      } else {
-        this.hasMoreResults = false;
-      }
+      mediaService.searchMedia(searchParams).then((result) => {
+        if (result && result.items && result.items.length > 0) {
+          this.searchResults = [...this.searchResults, ...result.items];
+          this.hasMoreResults = result.hasMore || false;
+        } else {
+          this.hasMoreResults = false;
+        }
+        this.isLoading = false;
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to load more results: ${error}`);
+        this.errorMessage = '加载更多结果失败';
+        this.isLoading = false;
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load more results: ${error}`);
       this.errorMessage = '加载更多结果失败';
-    } finally {
       this.isLoading = false;
     }
   }

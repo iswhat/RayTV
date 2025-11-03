@@ -1,9 +1,44 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { favoriteService } from '../service/media/FavoriteService';
 import { mediaService } from '../service/media/MediaService';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem as ListItemComponent } from '@arkui/native';
+
+/**
+ * 收藏项接口定义
+ */
+interface FavoriteItem {
+  id: string;
+  siteKey: string;
+  title: string;
+  coverUrl?: string;
+  type?: string;
+  year?: string;
+  addTime: string;
+}
+
+/**
+ * 媒体项接口定义
+ */
+interface MediaItem {
+  id: string;
+  siteKey: string;
+  title: string;
+  coverUrl?: string;
+  type?: string;
+  year?: string;
+  description: string;
+  score: string;
+  directors: string[];
+  actors: string[];
+  tags: string[];
+  category: string;
+  region: string;
+  language: string;
+  updateTime: string;
+  status: string;
+}
 
 /**
  * 收藏页面组件
@@ -24,93 +59,102 @@ struct FavoritesPage {
   @State sortBy: 'time' | 'title' = 'time';
   
   // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'FavoritesPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'FavoritesPage appeared');
     this.loadFavorites();
-  });
-  
-  // 清理资源
-  onUnmounted(() => {
-    Logger.info(this.TAG, 'FavoritesPage unmounted');
-  });
+  }
+
+  /**
+   * 页面卸载时调用
+   */
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'FavoritesPage disappeared');
+  }
   
   /**
    * 加载收藏列表
    */
-  private async loadFavorites(): Promise<void> {
+  private loadFavorites(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    try {
-      // 从收藏服务获取收藏列表
-      let favorites = await favoriteService.getFavorites();
-      
-      // 根据排序方式排序
-      if (this.sortBy === 'time') {
-        favorites.sort((a, b) => {
-          return new Date(b.addTime).getTime() - new Date(a.addTime).getTime();
-        });
-      } else if (this.sortBy === 'title') {
-        favorites.sort((a, b) => {
-          const titleA = this.mediaItems.get(a.id)?.title || a.title;
-          const titleB = this.mediaItems.get(b.id)?.title || b.title;
-          return titleA.localeCompare(titleB);
-        });
-      }
-      
-      this.favorites = favorites;
-      
-      // 加载媒体详情
-      await this.loadMediaDetails(favorites);
-      
-      Logger.info(this.TAG, `Loaded ${this.favorites.length} favorites`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to load favorites: ${error}`);
-      this.errorMessage = '加载收藏失败，请稍后重试';
-    } finally {
-      this.isLoading = false;
-      this.isRefreshing = false;
-    }
+    // 从收藏服务获取收藏列表
+    favoriteService.getFavorites()
+      .then(favorites => {
+        // 根据排序方式排序
+        if (this.sortBy === 'time') {
+          favorites.sort((a, b) => {
+            return new Date(b.addTime).getTime() - new Date(a.addTime).getTime();
+          });
+        } else if (this.sortBy === 'title') {
+          favorites.sort((a, b) => {
+            const titleA = this.mediaItems.get(a.id)?.title || a.title;
+            const titleB = this.mediaItems.get(b.id)?.title || b.title;
+            return titleA.localeCompare(titleB);
+          });
+        }
+        
+        this.favorites = favorites;
+        
+        // 加载媒体详情
+        this.loadMediaDetails(favorites);
+        
+        Logger.info(this.TAG, `Loaded ${this.favorites.length} favorites`);
+      })
+      .catch(error => {
+        Logger.error(this.TAG, `Failed to load favorites: ${error}`);
+        this.errorMessage = '加载收藏失败，请稍后重试';
+      })
+      .finally(() => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+      });
   }
   
   /**
    * 加载媒体详情
    */
-  private async loadMediaDetails(favorites: FavoriteItem[]): Promise<void> {
+  private loadMediaDetails(favorites: FavoriteItem[]): void {
     try {
       // 并行加载媒体详情
-      const detailPromises = favorites.map(async (fav) => {
-        try {
-          const media = await mediaService.getMediaDetail(fav.id, fav.siteKey);
-          if (media) {
-            this.mediaItems.set(fav.id, media);
-          }
-        } catch (error) {
-          Logger.warn(this.TAG, `Failed to load detail for ${fav.id}: ${error}`);
-          // 如果加载失败，使用收藏项中的基础信息
-          const placeholderMedia: MediaItem = {
-            id: fav.id,
-            siteKey: fav.siteKey,
-            title: fav.title,
-            coverUrl: fav.coverUrl,
-            type: fav.type,
-            year: fav.year,
-            description: '',
-            score: '',
-            directors: [],
-            actors: [],
-            tags: [],
-            category: '',
-            region: '',
-            language: '',
-            updateTime: '',
-            status: ''
-          };
-          this.mediaItems.set(fav.id, placeholderMedia);
-        }
+      const detailPromises = favorites.map((fav) => {
+        return mediaService.getMediaDetail(fav.id, fav.siteKey)
+          .then(media => {
+            if (media) {
+              this.mediaItems.set(fav.id, media);
+            }
+          })
+          .catch(error => {
+            Logger.warn(this.TAG, `Failed to load detail for ${fav.id}: ${error}`);
+            // 如果加载失败，使用收藏项中的基础信息
+            const placeholderMedia: MediaItem = {
+              id: fav.id,
+              siteKey: fav.siteKey,
+              title: fav.title,
+              coverUrl: fav.coverUrl,
+              type: fav.type,
+              year: fav.year,
+              description: '',
+              score: '',
+              directors: [],
+              actors: [],
+              tags: [],
+              category: '',
+              region: '',
+              language: '',
+              updateTime: '',
+              status: ''
+            };
+            this.mediaItems.set(fav.id, placeholderMedia);
+          });
       });
       
-      await Promise.all(detailPromises);
+      Promise.all(detailPromises).catch(error => {
+        Logger.error(this.TAG, `Failed in Promise.all: ${error}`);
+      });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load media details: ${error}`);
     }
@@ -156,32 +200,32 @@ struct FavoritesPage {
   /**
    * 处理删除选中项
    */
-  private async handleDeleteSelected(): Promise<void> {
+  private handleDeleteSelected(): void {
     if (this.selectedItems.size === 0) return;
     
-    try {
-      const idsToDelete = Array.from(this.selectedItems);
-      
-      // 删除选中的收藏项
-      await favoriteService.removeFavorites(idsToDelete);
-      
-      // 更新本地状态
-      this.favorites = this.favorites.filter(fav => !idsToDelete.includes(fav.id));
-      idsToDelete.forEach(id => {
-        this.mediaItems.delete(id);
-        this.selectedItems.delete(id);
+    const idsToDelete = Array.from(this.selectedItems);
+    
+    // 删除选中的收藏项
+    favoriteService.removeFavorites(idsToDelete)
+      .then(() => {
+        // 更新本地状态
+        this.favorites = this.favorites.filter(fav => !idsToDelete.includes(fav.id));
+        idsToDelete.forEach(id => {
+          this.mediaItems.delete(id);
+          this.selectedItems.delete(id);
+        });
+        
+        Logger.info(this.TAG, `Deleted ${idsToDelete.length} favorites`);
+        
+        // 如果没有收藏项了，退出编辑模式
+        if (this.favorites.length === 0) {
+          this.isEditMode = false;
+        }
+      })
+      .catch(error => {
+        Logger.error(this.TAG, `Failed to delete favorites: ${error}`);
+        this.errorMessage = '删除失败，请稍后重试';
       });
-      
-      Logger.info(this.TAG, `Deleted ${idsToDelete.length} favorites`);
-      
-      // 如果没有收藏项了，退出编辑模式
-      if (this.favorites.length === 0) {
-        this.isEditMode = false;
-      }
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to delete favorites: ${error}`);
-      this.errorMessage = '删除失败，请稍后重试';
-    }
   }
   
   /**
@@ -302,7 +346,7 @@ struct FavoritesPage {
   private renderFavoriteItem(favorite: FavoriteItem): void {
     const media = this.mediaItems.get(favorite.id);
     
-    <ListItem onClick={() => this.handleMediaClick(favorite)}>
+    <ListItemComponent onClick={() => this.handleMediaClick(favorite)}>
       <Flex className="favorite-item">
         {this.isEditMode && (
           <Checkbox
@@ -334,7 +378,7 @@ struct FavoritesPage {
           )}
         </Flex>
       </Flex>
-    </ListItem>
+      </ListItemComponent>
   }
   
   /**

@@ -1,7 +1,6 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
-import Logger from '../common/util/Logger.ets';
+import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@arkui/native';
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
 
@@ -45,51 +44,106 @@ struct SettingsPage {
   @State showAboutDialog: boolean = false;
   
   // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'SettingsPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'SettingsPage appeared');
     this.loadSettings();
     this.calculateCacheSize();
-  });
-  
-  // 清理资源
-  onUnmounted(() => {
-    Logger.info(this.TAG, 'SettingsPage unmounted');
-  });
+  }
+
+  /**
+   * 页面卸载时调用
+   */
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'SettingsPage disappeared');
+  }
   
   /**
    * 加载设置
    */
-  private async loadSettings(): Promise<void> {
+  private loadSettings(): void {
     try {
       // 从配置服务加载设置
-      this.themeMode = await configService.getConfig('themeMode', 'auto');
-      this.language = await configService.getConfig('language', 'zh');
-      this.autoPlay = await configService.getConfig('autoPlay', true);
-      this.autoNextEpisode = await configService.getConfig('autoNextEpisode', true);
-      this.rememberProgress = await configService.getConfig('rememberProgress', true);
-      this.enableHardwareAcceleration = await configService.getConfig('enableHardwareAcceleration', true);
-      this.cacheStrategy = await configService.getConfig('cacheStrategy', 'disk');
-      this.maxCacheSize = await configService.getConfig('maxCacheSize', 1024);
-      this.enableUpdateCheck = await configService.getConfig('enableUpdateCheck', true);
-      this.notificationsEnabled = await configService.getConfig('notificationsEnabled', true);
-      
-      // 广告屏蔽设置
-      this.enableAdBlock = await configService.getConfig('enableAdBlock', true);
-      this.blockVideoAds = await configService.getConfig('blockVideoAds', true);
-      this.blockPopupAds = await configService.getConfig('blockPopupAds', true);
-      
-      // 壁纸设置
-      this.enableWallpaper = await configService.getConfig('enableWallpaper', false);
-      this.wallpaperType = await configService.getConfig('wallpaperType', 'none');
-      
-      // 鸿蒙特有功能设置
-      this.enableVoiceAssistant = await configService.getConfig('enableVoiceAssistant', true);
-      this.enableDeviceFlow = await configService.getConfig('enableDeviceFlow', true);
-      
-      // 获取应用版本
-      this.version = await this.getAppVersion();
-      
-      Logger.info(this.TAG, 'Settings loaded successfully');
+      // 使用Promise链来加载所有设置
+      configService.getConfig('themeMode', 'auto')
+        .then(themeMode => {
+          this.themeMode = themeMode;
+          return configService.getConfig('language', 'zh');
+        })
+        .then(language => {
+          this.language = language;
+          return configService.getConfig('autoPlay', true);
+        })
+        .then(autoPlay => {
+          this.autoPlay = autoPlay;
+          return configService.getConfig('autoNextEpisode', true);
+        })
+        .then(autoNextEpisode => {
+          this.autoNextEpisode = autoNextEpisode;
+          return configService.getConfig('rememberProgress', true);
+        })
+        .then(rememberProgress => {
+          this.rememberProgress = rememberProgress;
+          return configService.getConfig('enableHardwareAcceleration', true);
+        })
+        .then(enableHardwareAcceleration => {
+          this.enableHardwareAcceleration = enableHardwareAcceleration;
+          return configService.getConfig('cacheStrategy', 'disk');
+        })
+        .then(cacheStrategy => {
+          this.cacheStrategy = cacheStrategy;
+          return configService.getConfig('maxCacheSize', 1024);
+        })
+        .then(maxCacheSize => {
+          this.maxCacheSize = maxCacheSize;
+          return configService.getConfig('enableUpdateCheck', true);
+        })
+        .then(enableUpdateCheck => {
+          this.enableUpdateCheck = enableUpdateCheck;
+          return configService.getConfig('notificationsEnabled', true);
+        })
+        .then(notificationsEnabled => {
+          this.notificationsEnabled = notificationsEnabled;
+          return configService.getConfig('enableAdBlock', true);
+        })
+        .then(enableAdBlock => {
+          this.enableAdBlock = enableAdBlock;
+          return configService.getConfig('blockVideoAds', true);
+        })
+        .then(blockVideoAds => {
+          this.blockVideoAds = blockVideoAds;
+          return configService.getConfig('blockPopupAds', true);
+        })
+        .then(blockPopupAds => {
+          this.blockPopupAds = blockPopupAds;
+          return configService.getConfig('enableWallpaper', false);
+        })
+        .then(enableWallpaper => {
+          this.enableWallpaper = enableWallpaper;
+          return configService.getConfig('wallpaperType', 'none');
+        })
+        .then(wallpaperType => {
+          this.wallpaperType = wallpaperType;
+          return configService.getConfig('enableVoiceAssistant', true);
+        })
+        .then(enableVoiceAssistant => {
+          this.enableVoiceAssistant = enableVoiceAssistant;
+          return configService.getConfig('enableDeviceFlow', true);
+        })
+        .then(enableDeviceFlow => {
+          this.enableDeviceFlow = enableDeviceFlow;
+          // 获取应用版本
+          return this.getAppVersion();
+        })
+        .then(version => {
+          this.version = version;
+          Logger.info(this.TAG, 'Settings loaded successfully');
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to load settings: ${error}`);
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load settings: ${error}`);
     }
@@ -98,10 +152,16 @@ struct SettingsPage {
   /**
    * 保存设置
    */
-  private async saveSetting(key: string, value: any): Promise<void> {
+  private saveSetting(key: string, value: any): void {
     try {
-      await configService.setConfig(key, value);
-      Logger.info(this.TAG, `Setting saved: ${key} = ${value}`);
+      configService.setConfig(key, value)
+        .then(() => {
+          Logger.info(this.TAG, `Setting saved: ${key} = ${value}`);
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to save setting ${key}: ${error}`);
+          Toast.show({ message: '保存设置失败' });
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to save setting ${key}: ${error}`);
       Toast.show({ message: '保存设置失败' });
@@ -111,7 +171,7 @@ struct SettingsPage {
   /**
    * 计算缓存大小
    */
-  private async calculateCacheSize(): Promise<void> {
+  private calculateCacheSize(): void {
     try {
       // 这里应该调用缓存管理服务计算缓存大小
       // 暂时使用模拟数据
@@ -125,17 +185,22 @@ struct SettingsPage {
   /**
    * 清除缓存
    */
-  private async clearCache(): Promise<void> {
+  private clearCache(): void {
     try {
       // 调用相关服务清除缓存
-      await mediaService.clearCache();
-      
-      // 更新缓存大小
-      this.currentCacheSize = 0;
-      this.showClearCacheDialog = false;
-      
-      Logger.info(this.TAG, 'Cache cleared successfully');
-      Toast.show({ message: '缓存已清除' });
+      mediaService.clearCache()
+        .then(() => {
+          // 更新缓存大小
+          this.currentCacheSize = 0;
+          this.showClearCacheDialog = false;
+          
+          Logger.info(this.TAG, 'Cache cleared successfully');
+          Toast.show({ message: '缓存已清除' });
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to clear cache: ${error}`);
+          Toast.show({ message: '清除缓存失败' });
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear cache: ${error}`);
       Toast.show({ message: '清除缓存失败' });
@@ -145,7 +210,7 @@ struct SettingsPage {
   /**
    * 获取应用版本
    */
-  private async getAppVersion(): Promise<string> {
+  private getAppVersion(): string {
     try {
       // 这里应该从应用配置中获取版本号
       // 暂时返回固定版本
@@ -159,7 +224,7 @@ struct SettingsPage {
   /**
    * 检查更新
    */
-  private async checkForUpdates(): Promise<void> {
+  private checkForUpdates(): void {
     try {
       // 调用更新检查服务
       Logger.info(this.TAG, 'Checking for updates...');
@@ -175,16 +240,21 @@ struct SettingsPage {
   /**
    * 重置所有设置
    */
-  private async resetSettings(): Promise<void> {
+  private resetSettings(): void {
     try {
       // 重置配置服务中的所有设置
-      await configService.resetAllConfigs();
-      
-      // 重新加载设置
-      await this.loadSettings();
-      
-      Logger.info(this.TAG, 'Settings reset to default');
-      Toast.show({ message: '已重置为默认设置' });
+      configService.resetAllConfigs()
+        .then(() => {
+          // 重新加载设置
+          this.loadSettings();
+          
+          Logger.info(this.TAG, 'Settings reset to default');
+          Toast.show({ message: '已重置为默认设置' });
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to reset settings: ${error}`);
+          Toast.show({ message: '重置设置失败' });
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to reset settings: ${error}`);
       Toast.show({ message: '重置设置失败' });
@@ -535,7 +605,7 @@ struct SettingsPage {
   /**
    * 更新广告规则
    */
-  private async updateAdBlockRules(): Promise<void> {
+  private updateAdBlockRules(): void {
     try {
       Logger.info(this.TAG, 'Updating ad block rules...');
       // 这里应该调用广告屏蔽服务更新规则
@@ -549,7 +619,7 @@ struct SettingsPage {
   /**
    * 选择壁纸
    */
-  private async selectWallpaper(): Promise<void> {
+  private selectWallpaper(): void {
     try {
       Logger.info(this.TAG, 'Selecting wallpaper...');
       // 这里应该打开壁纸选择界面

@@ -1,8 +1,23 @@
-import { useState, useEffect, onMounted, onUnmounted } from '@kit.ArkUI';
-import Logger from '../common/util/Logger.ets';
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Select } from '@kit.ArkUI';
-import { Router } from '@kit.AbilityKit';
+
+import { Router } from '@ohos.router';
+import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem as ListItemComponent } from '@arkui/native';
+
+/**
+ * 媒体项接口定义
+ */
+interface MediaItem {
+  id: string;
+  title: string;
+  coverUrl?: string;
+  description?: string;
+  year?: string;
+  region?: string;
+  score?: string;
+  actors?: string[];
+  siteKey: string;
+}
 
 /**
  * 分类页面组件
@@ -31,9 +46,11 @@ struct CategoryPage {
   // 分页配置
   private pageSize: number = 20;
   
-  // 初始化
-  onMounted(() => {
-    Logger.info(this.TAG, 'CategoryPage mounted');
+  /**
+   * 页面加载时调用
+   */
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'CategoryPage appeared');
     
     // 获取路由参数
     const params = Router.getParams();
@@ -44,31 +61,44 @@ struct CategoryPage {
     // 初始化数据
     this.initCategoryData();
     this.loadMediaList(true);
-  });
+  }
   
-  // 清理资源
-  onUnmounted(() => {
-    Logger.info(this.TAG, 'CategoryPage unmounted');
-  });
+  /**
+   * 页面卸载时调用
+   */
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'CategoryPage disappeared');
+  }
   
   /**
    * 初始化分类数据
    */
-  private async initCategoryData(): Promise<void> {
+  private initCategoryData(): void {
     try {
       // 加载分类列表
-      const categories = await mediaService.getCategories();
-      this.categories = ['全部', ...categories];
-      
-      // 加载地区列表
-      const regions = await mediaService.getRegions();
-      this.regions = ['全部', ...regions];
-      
-      // 加载年份列表 (最近10年)
-      const currentYear = new Date().getFullYear();
-      this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
-      
-      Logger.info(this.TAG, `Loaded categories: ${this.categories.length}, regions: ${this.regions.length}`);
+      mediaService.getCategories()
+        .then(categories => {
+          this.categories = ['全部', ...categories];
+          
+          // 加载地区列表
+          return mediaService.getRegions();
+        })
+        .then(regions => {
+          this.regions = ['全部', ...regions];
+          
+          // 加载年份列表 (最近10年)
+          const currentYear = new Date().getFullYear();
+          this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
+          
+          Logger.info(this.TAG, `Loaded categories: ${this.categories.length}, regions: ${this.regions.length}`);
+        })
+        .catch(error => {
+          Logger.error(this.TAG, `Failed to load category data: ${error}`);
+          
+          // 使用默认数据
+          this.categories = ['全部', '电影', '电视剧', '动漫', '综艺', '纪录片'];
+          this.regions = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
+        });
     } catch (error) {
       Logger.error(this.TAG, `Failed to load category data: ${error}`);
       
@@ -81,7 +111,7 @@ struct CategoryPage {
   /**
    * 加载媒体列表
    */
-  private async loadMediaList(reset: boolean = false): Promise<void> {
+  private loadMediaList(reset: boolean = false): void {
     if (this.isLoading) return;
     
     this.isLoading = true;
@@ -95,23 +125,22 @@ struct CategoryPage {
       return;
     }
     
-    try {
-      const category = this.selectedCategory === '全部' ? '' : this.selectedCategory;
-      const region = this.selectedRegion === '全部' ? '' : this.selectedRegion;
-      const year = this.selectedYear === '全部' ? '' : this.selectedYear;
-      
-      Logger.info(this.TAG, `Loading media list: category=${category}, region=${region}, year=${year}, sort=${this.selectedSort}, page=${this.currentPage}`);
-      
-      // 调用媒体服务获取列表
-      const result = await mediaService.getMediaByCategory(
-        category,
-        region,
-        year,
-        this.selectedSort,
-        this.currentPage,
-        this.pageSize
-      );
-      
+    const category = this.selectedCategory === '全部' ? '' : this.selectedCategory;
+    const region = this.selectedRegion === '全部' ? '' : this.selectedRegion;
+    const year = this.selectedYear === '全部' ? '' : this.selectedYear;
+    
+    Logger.info(this.TAG, `Loading media list: category=${category}, region=${region}, year=${year}, sort=${this.selectedSort}, page=${this.currentPage}`);
+    
+    // 调用媒体服务获取列表
+    mediaService.getMediaByCategory(
+      category,
+      region,
+      year,
+      this.selectedSort,
+      this.currentPage,
+      this.pageSize
+    )
+    .then(result => {
       if (reset) {
         this.mediaList = result;
       } else {
@@ -122,14 +151,16 @@ struct CategoryPage {
       this.hasMoreResults = result.length === this.pageSize;
       
       Logger.info(this.TAG, `Media list loaded, total: ${this.mediaList.length}, has more: ${this.hasMoreResults}`);
-    } catch (error) {
+    })
+    .catch(error => {
       Logger.error(this.TAG, `Failed to load media list: ${error}`);
       this.errorMessage = '加载失败，请稍后重试';
       this.hasMoreResults = false;
-    } finally {
+    })
+    .finally(() => {
       this.isLoading = false;
       this.isRefreshing = false;
-    }
+    });
   }
   
   /**
@@ -299,7 +330,7 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    <ListItem onClick={() => this.handleMediaItemClick(media)}>
+    <ListItemComponent onClick={() => this.handleMediaItemClick(media)}>
       <Flex className="media-item">
         <Image
           src={media.coverUrl || 'https://via.placeholder.com/120x160?text=No+Image'}
@@ -319,14 +350,13 @@ struct CategoryPage {
             </Text>
           )}
           {media.actors && media.actors.length > 0 && (
-n                        
             <Text className="media-actors" numberOfLines={1}>
               主演: {media.actors.slice(0, 3).join(', ')}
             </Text>
           )}
         </Flex>
       </Flex>
-    </ListItem>
+      </ListItemComponent>
   }
   
   /**

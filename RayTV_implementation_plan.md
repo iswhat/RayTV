@@ -16,7 +16,7 @@
 - 基于HarmonyOS SDK API 19开发
 
 ### 1.2 技术栈确认
-- **开发语言**：ArkTS (主要)、TypeScript (辅助)
+- **开发语言**：ArkTS (主要)、TypeScript (只有在ArkTS无法实现的情况才考虑使用)  优先使用ArkTS作为主要开发语言，仅在必要时使用TypeScript作为辅助语言
 - **UI框架**：ArkUI (声明式UI)
 - **媒体播放**：AVPlayer (HarmonyOS原生)
 - **数据库**：RelationalStore (关系型数据库)
