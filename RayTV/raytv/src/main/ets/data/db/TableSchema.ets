@@ -340,6 +340,43 @@ export const SEARCH_HISTORY_TABLE = {
 };
 
 /**
+ * 线路表定义
+ */
+export const LINE_TABLE = {
+  NAME: 'line',
+  CREATE_SQL: `
+    CREATE TABLE IF NOT EXISTS line (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      url TEXT NOT NULL,
+      description TEXT,
+      type TEXT DEFAULT 'all',
+      update_time INTEGER NOT NULL,
+      create_time INTEGER NOT NULL,
+      source_count INTEGER DEFAULT 0,
+      enabled INTEGER DEFAULT 1,
+      current INTEGER DEFAULT 0,
+      cache_time INTEGER DEFAULT 24,
+      response_time INTEGER DEFAULT 0
+    );
+  `,
+  COLUMNS: {
+    ID: 'id',
+    NAME: 'name',
+    URL: 'url',
+    DESCRIPTION: 'description',
+    TYPE: 'type',
+    UPDATE_TIME: 'update_time',
+    CREATE_TIME: 'create_time',
+    SOURCE_COUNT: 'source_count',
+    ENABLED: 'enabled',
+    CURRENT: 'current',
+    CACHE_TIME: 'cache_time',
+    RESPONSE_TIME: 'response_time'
+  }
+};
+
+/**
  * 订阅表定义
  */
 export const SUBSCRIPTION_TABLE = {
