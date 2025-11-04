@@ -9,10 +9,10 @@ import PlayerService from '../player/PlayerService';
 import { SyncDataType } from '../sync/DistributedDataService';
 import { Vod, Episode, VodCategory, VodTag } from '../../data/bean/Vod';
 import { LiveChannel, LiveGroup, EpgItem } from '../../data/bean/Live';
-import VodRepository from '../../data/repository/VodRepository';
-import LiveRepository from '../../data/repository/LiveRepository';
-import HistoryRepository from '../../data/repository/HistoryRepository';
-import CollectionRepository from '../../data/repository/CollectionRepository';
+import { VodRepository } from '../../data/repository/VodRepository';
+import { LiveRepository } from '../../data/repository/LiveRepository';
+import { HistoryRepository } from '../../data/repository/HistoryRepository';
+import { CollectionRepository } from '../../data/repository/CollectionRepository';
 import DeviceService from '../../service/device/DeviceService';
 import HttpService from '../HttpService';
 

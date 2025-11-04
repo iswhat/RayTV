@@ -282,13 +282,16 @@ struct SettingsPage {
    */
   @Builder
   private renderHeader(): void {
-    <Stack className="header">
-      <Button className="back-button" onClick={this.handleBack}>
-        ←
-      </Button>
-      <Text className="page-title">设置</Text>
-      <Blank className="header-right" />
-    </Stack>
+    Stack.create({ className: "header" });
+    Button.create({ className: "back-button", onClick: this.handleBack });
+    Button.text("←");
+    Button.pop();
+    Text.create({ className: "page-title" });
+    Text.text("设置");
+    Text.pop();
+    Blank.create({ className: "header-right" });
+    Blank.pop();
+    Stack.pop();
   }
   
   /**
@@ -296,12 +299,14 @@ struct SettingsPage {
    */
   @Builder
   private renderSettingGroup(title: string, content: () => void): void {
-    <Stack className="setting-group">
-      <Text className="group-title">{title}</Text>
-      <Stack className="group-content">
-        {content()}
-      </Stack>
-    </Stack>
+    Stack.create({ className: "setting-group" });
+    Text.create({ className: "group-title" });
+    Text.text(title);
+    Text.pop();
+    Stack.create({ className: "group-content" });
+    content();
+    Stack.pop();
+    Stack.pop();
   }
   
   /**
@@ -309,16 +314,22 @@ struct SettingsPage {
    */
   @Builder
   private renderSwitchItem(label: string, checked: boolean, onValueChange: (value: boolean) => void, description?: string): void {
-    <ListItem className="setting-item">
-      <Flex direction="column" className="setting-info">
-        <Text className="setting-label">{label}</Text>
-        {description && <Text className="setting-description">{description}</Text>}
-      </Flex>
-      <Switch
-        checked={checked}
-        onValueChange={onValueChange}
-      />
-    </ListItem>
+    ListItem.create({ className: "setting-item" });
+    Flex.create({ direction: FlexDirection.Column, className: "setting-info" });
+    Text.create({ className: "setting-label" });
+    Text.text(label);
+    Text.pop();
+    if (description) {
+      Text.create({ className: "setting-description" });
+      Text.text(description);
+      Text.pop();
+    }
+    Flex.pop();
+    Switch.create();
+    Switch.checked(checked);
+    Switch.onValueChange(onValueChange);
+    Switch.pop();
+    ListItem.pop();
   }
   
   /**
@@ -326,16 +337,28 @@ struct SettingsPage {
    */
   @Builder
   private renderOptionItem(label: string, value: string, onClick: () => void, icon?: string): void {
-    <ListItem className="setting-item" onClick={onClick}>
-      <Flex className="setting-info">
-        {icon && <Text className="setting-icon">{icon}</Text>}
-        <Flex direction="column">
-          <Text className="setting-label">{label}</Text>
-          {value && <Text className="setting-value">{value}</Text>}
-        </Flex>
-      </Flex>
-      <Text className="setting-arrow">→</Text>
-    </ListItem>
+    ListItem.create({ className: "setting-item", onClick: onClick });
+    Flex.create({ className: "setting-info" });
+    if (icon) {
+      Text.create({ className: "setting-icon" });
+      Text.text(icon);
+      Text.pop();
+    }
+    Flex.create({ direction: FlexDirection.Column });
+    Text.create({ className: "setting-label" });
+    Text.text(label);
+    Text.pop();
+    if (value) {
+      Text.create({ className: "setting-value" });
+      Text.text(value);
+      Text.pop();
+    }
+    Flex.pop();
+    Flex.pop();
+    Text.create({ className: "setting-arrow" });
+    Text.text("→");
+    Text.pop();
+    ListItem.pop();
   }
   
   /**
@@ -344,38 +367,43 @@ struct SettingsPage {
   @Builder
   private renderThemeSettings(): void {
     this.renderSettingGroup('外观设置', () => {
-      <>
-        <ListItem className="setting-item">
-          <Text className="setting-label">主题模式</Text>
-          <Flex className="theme-options">
-            <Button
-              className={`theme-option ${this.themeMode === 'light' ? 'selected' : ''}`}
-              onClick={() => this.handleThemeChange('light')}
-            >
-              浅色
-            </Button>
-            <Button
-              className={`theme-option ${this.themeMode === 'dark' ? 'selected' : ''}`}
-              onClick={() => this.handleThemeChange('dark')}
-            >
-              深色
-            </Button>
-            <Button
-              className={`theme-option ${this.themeMode === 'auto' ? 'selected' : ''}`}
-              onClick={() => this.handleThemeChange('auto')}
-            >
-              自动
-            </Button>
-          </Flex>
-        </ListItem>
-        <Divider />
-        <ListItem className="setting-item">
-          <Text className="setting-label">语言</Text>
-          <Button className="language-option" onClick={() => {}}>
-            {this.language === 'zh' ? '简体中文' : 'English'} →
-          </Button>
-        </ListItem>
-      </>
+      ListItem.create({ className: "setting-item" });
+      Text.create({ className: "setting-label" });
+      Text.text("主题模式");
+      Text.pop();
+      Flex.create({ className: "theme-options" });
+      Button.create({ 
+        className: `theme-option ${this.themeMode === 'light' ? 'selected' : ''}`,
+        onClick: () => this.handleThemeChange('light')
+      });
+      Button.text("浅色");
+      Button.pop();
+      Button.create({ 
+        className: `theme-option ${this.themeMode === 'dark' ? 'selected' : ''}`,
+        onClick: () => this.handleThemeChange('dark')
+      });
+      Button.text("深色");
+      Button.pop();
+      Button.create({ 
+        className: `theme-option ${this.themeMode === 'auto' ? 'selected' : ''}`,
+        onClick: () => this.handleThemeChange('auto')
+      });
+      Button.text("自动");
+      Button.pop();
+      Flex.pop();
+      ListItem.pop();
+      
+      Divider.create();
+      Divider.pop();
+      
+      ListItem.create({ className: "setting-item" });
+      Text.create({ className: "setting-label" });
+      Text.text("语言");
+      Text.pop();
+      Button.create({ className: "language-option", onClick: () => {} });
+      Button.text(this.language === 'zh' ? '简体中文' : 'English' + " →");
+      Button.pop();
+      ListItem.pop();
     });
   }
   
@@ -385,45 +413,52 @@ struct SettingsPage {
   @Builder
   private renderPlaybackSettings(): void {
     this.renderSettingGroup('播放设置', () => {
-      <>
-        {this.renderSwitchItem(
-          '自动播放', 
-          this.autoPlay, 
-          (value) => {
-            this.autoPlay = value;
-            this.saveSetting('autoPlay', value);
-          },
-          '进入播放页后自动开始播放'
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '自动播放下一集', 
-          this.autoNextEpisode, 
-          (value) => {
-            this.autoNextEpisode = value;
-            this.saveSetting('autoNextEpisode', value);
-          }
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '记住播放进度', 
-          this.rememberProgress, 
-          (value) => {
-            this.rememberProgress = value;
-            this.saveSetting('rememberProgress', value);
-          }
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '硬件加速', 
-          this.enableHardwareAcceleration, 
-          (value) => {
-            this.enableHardwareAcceleration = value;
-            this.saveSetting('enableHardwareAcceleration', value);
-          },
-          '使用硬件加速提高播放流畅度'
-        )}
-      </>
+      this.renderSwitchItem(
+        '自动播放', 
+        this.autoPlay, 
+        (value) => {
+          this.autoPlay = value;
+          this.saveSetting('autoPlay', value);
+        },
+        '进入播放页后自动开始播放'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '自动播放下一集',
+        this.autoNextEpisode, 
+        (value) => {
+          this.autoNextEpisode = value;
+          this.saveSetting('autoNextEpisode', value);
+        }
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '记住播放进度', 
+        this.rememberProgress, 
+        (value) => {
+          this.rememberProgress = value;
+          this.saveSetting('rememberProgress', value);
+        }
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '硬件加速', 
+        this.enableHardwareAcceleration, 
+        (value) => {
+          this.enableHardwareAcceleration = value;
+          this.saveSetting('enableHardwareAcceleration', value);
+        },
+        '使用硬件加速提高播放流畅度'
+      );
     });
   }
   
@@ -433,26 +468,45 @@ struct SettingsPage {
   @Builder
   private renderCacheSettings(): void {
     this.renderSettingGroup('缓存设置', () => {
-      <>
-        <ListItem className="setting-item">
-          <Text className="setting-label">缓存策略</Text>
-          <Button className="cache-option" onClick={() => {}}>
-            {this.getCacheStrategyText()} →
-          </Button>
-        </ListItem>
-        <Divider />
-        <ListItem className="setting-item">
-          <Text className="setting-label">最大缓存大小</Text>
-          <Text className="setting-value">{this.maxCacheSize} MB</Text>
-        </ListItem>
-        <Divider />
-        {this.renderOptionItem(
-          '清除缓存', 
-          `${this.currentCacheSize} MB`, 
-          () => { this.showClearCacheDialog = true; },
-          '🗑️'
-        )}
-      </>
+      ListItem.create();
+      ListItem.className("setting-item");
+      Text.create();
+      Text.className("setting-label");
+      Text.content("缓存策略");
+      Text.pop();
+      Button.create();
+      Button.className("cache-option");
+      Button.onClick(() => {});
+      Text.create();
+      Text.content(this.getCacheStrategyText() + " →");
+      Text.pop();
+      Button.pop();
+      ListItem.pop();
+      
+      Divider.create();
+      Divider.pop();
+      
+      ListItem.create();
+      ListItem.className("setting-item");
+      Text.create();
+      Text.className("setting-label");
+      Text.content("最大缓存大小");
+      Text.pop();
+      Text.create();
+      Text.className("setting-value");
+      Text.content(this.maxCacheSize + " MB");
+      Text.pop();
+      ListItem.pop();
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '清除缓存', 
+        `${this.currentCacheSize} MB`, 
+        () => { this.showClearCacheDialog = true; },
+        '🗑️'
+      );
     });
   }
   
@@ -462,32 +516,36 @@ struct SettingsPage {
   @Builder
   private renderNotificationSettings(): void {
     this.renderSettingGroup('通知设置', () => {
-      <>
-        {this.renderSwitchItem(
-          '开启通知', 
-          this.notificationsEnabled, 
-          (value) => {
-            this.notificationsEnabled = value;
-            this.saveSetting('notificationsEnabled', value);
-          }
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '检查更新', 
-          this.enableUpdateCheck, 
-          (value) => {
-            this.enableUpdateCheck = value;
-            this.saveSetting('enableUpdateCheck', value);
-          }
-        )}
-        <Divider />
-        {this.renderOptionItem(
-          '检查更新', 
-          '', 
-          this.checkForUpdates,
-          '🔄'
-        )}
-      </>
+      this.renderSwitchItem(
+        '开启通知', 
+        this.notificationsEnabled, 
+        (value) => {
+          this.notificationsEnabled = value;
+          this.saveSetting('notificationsEnabled', value);
+        }
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '检查更新', 
+        this.enableUpdateCheck, 
+        (value) => {
+          this.enableUpdateCheck = value;
+          this.saveSetting('enableUpdateCheck', value);
+        }
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '检查更新', 
+        '', 
+        this.checkForUpdates,
+        '🔄'
+      );
     });
   }
   
@@ -497,44 +555,51 @@ struct SettingsPage {
   @Builder
   private renderAdBlockSettings(): void {
     this.renderSettingGroup('广告屏蔽', () => {
-      <>
-        {this.renderSwitchItem(
-          '启用广告屏蔽', 
-          this.enableAdBlock, 
-          (value) => {
-            this.enableAdBlock = value;
-            this.saveSetting('enableAdBlock', value);
-          },
-          '屏蔽视频中的广告内容'
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '屏蔽视频广告', 
-          this.blockVideoAds, 
-          (value) => {
-            this.blockVideoAds = value;
-            this.saveSetting('blockVideoAds', value);
-          },
-          '过滤播放过程中的广告片段'
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '屏蔽弹窗广告', 
-          this.blockPopupAds, 
-          (value) => {
-            this.blockPopupAds = value;
-            this.saveSetting('blockPopupAds', value);
-          },
-          '拦截页面中的弹窗广告'
-        )}
-        <Divider />
-        {this.renderOptionItem(
-          '更新广告规则', 
-          '', 
-          this.updateAdBlockRules,
-          '🔄'
-        )}
-      </>
+      this.renderSwitchItem(
+        '启用广告屏蔽', 
+        this.enableAdBlock, 
+        (value) => {
+          this.enableAdBlock = value;
+          this.saveSetting('enableAdBlock', value);
+        },
+        '屏蔽视频中的广告内容'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '屏蔽视频广告', 
+        this.blockVideoAds, 
+        (value) => {
+          this.blockVideoAds = value;
+          this.saveSetting('blockVideoAds', value);
+        },
+        '过滤播放过程中的广告片段'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '屏蔽弹窗广告', 
+        this.blockPopupAds, 
+        (value) => {
+          this.blockPopupAds = value;
+          this.saveSetting('blockPopupAds', value);
+        },
+        '拦截页面中的弹窗广告'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '更新广告规则', 
+        '', 
+        this.updateAdBlockRules,
+        '🔄'
+      );
     });
   }
   
@@ -544,31 +609,43 @@ struct SettingsPage {
   @Builder
   private renderWallpaperSettings(): void {
     this.renderSettingGroup('壁纸设置', () => {
-      <>
-        {this.renderSwitchItem(
-          '启用壁纸', 
-          this.enableWallpaper, 
-          (value) => {
-            this.enableWallpaper = value;
-            this.saveSetting('enableWallpaper', value);
-          },
-          '自定义应用背景壁纸'
-        )}
-        <Divider />
-        <ListItem className="setting-item">
-          <Text className="setting-label">壁纸类型</Text>
-          <Button className="wallpaper-option" onClick={() => {}}>
-            {this.getWallpaperTypeText()} →
-          </Button>
-        </ListItem>
-        <Divider />
-        {this.renderOptionItem(
-          '选择壁纸', 
-          '', 
-          this.selectWallpaper,
-          '🖼️'
-        )}
-      </>
+      this.renderSwitchItem(
+        '启用壁纸', 
+        this.enableWallpaper, 
+        (value) => {
+          this.enableWallpaper = value;
+          this.saveSetting('enableWallpaper', value);
+        },
+        '自定义应用背景壁纸'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      ListItem.create();
+      ListItem.className("setting-item");
+      Text.create();
+      Text.className("setting-label");
+      Text.content("壁纸类型");
+      Text.pop();
+      Button.create();
+      Button.className("wallpaper-option");
+      Button.onClick(() => {});
+      Text.create();
+      Text.content(this.getWallpaperTypeText() + " →");
+      Text.pop();
+      Button.pop();
+      ListItem.pop();
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '选择壁纸', 
+        '', 
+        this.selectWallpaper,
+        '🖼️'
+      );
     });
   }
   
@@ -578,27 +655,28 @@ struct SettingsPage {
   @Builder
   private renderHarmonyFeaturesSettings(): void {
     this.renderSettingGroup('鸿蒙功能', () => {
-      <>
-        {this.renderSwitchItem(
-          '小艺语音助手', 
-          this.enableVoiceAssistant, 
-          (value) => {
-            this.enableVoiceAssistant = value;
-            this.saveSetting('enableVoiceAssistant', value);
-          },
-          '通过语音控制应用功能'
-        )}
-        <Divider />
-        {this.renderSwitchItem(
-          '设备流转', 
-          this.enableDeviceFlow, 
-          (value) => {
-            this.enableDeviceFlow = value;
-            this.saveSetting('enableDeviceFlow', value);
-          },
-          '在不同设备间无缝切换播放'
-        )}
-      </>
+      this.renderSwitchItem(
+        '小艺语音助手', 
+        this.enableVoiceAssistant, 
+        (value) => {
+          this.enableVoiceAssistant = value;
+          this.saveSetting('enableVoiceAssistant', value);
+        },
+        '通过语音控制应用功能'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderSwitchItem(
+        '设备流转', 
+        this.enableDeviceFlow, 
+        (value) => {
+          this.enableDeviceFlow = value;
+          this.saveSetting('enableDeviceFlow', value);
+        },
+        '在不同设备间无缝切换播放'
+      );
     });
   }
   
@@ -652,37 +730,56 @@ struct SettingsPage {
   @Builder
   private renderAboutSettings(): void {
     this.renderSettingGroup('关于', () => {
-      <>
-        {this.renderOptionItem(
-          '关于应用', 
-          '', 
-          () => { this.showAboutDialog = true; },
-          'ℹ️'
-        )}
-        <Divider />
-        <ListItem className="setting-item">
-          <Text className="setting-label">版本</Text>
-          <Text className="setting-value">v{this.version}</Text>
-        </ListItem>
-        <Divider />
-        {this.renderOptionItem(
-          '用户协议', 
-          '', 
-          () => {},
-          '📄'
-        )}
-        <Divider />
-        {this.renderOptionItem(
-          '隐私政策', 
-          '', 
-          () => {},
-          '🔒'
-        )}
-        <Divider />
-        <Button className="reset-button" onClick={this.resetSettings}>
-          恢复默认设置
-        </Button>
-      </>
+      this.renderOptionItem(
+        '关于应用', 
+        '', 
+        () => { this.showAboutDialog = true; },
+        'ℹ️'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      ListItem.create();
+      ListItem.className("setting-item");
+      Text.create();
+      Text.className("setting-label");
+      Text.content("版本");
+      Text.pop();
+      Text.create();
+      Text.className("setting-value");
+      Text.content("v" + this.version);
+      Text.pop();
+      ListItem.pop();
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '用户协议', 
+        '', 
+        () => {},
+        '📄'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      this.renderOptionItem(
+        '隐私政策', 
+        '', 
+        () => {},
+        '🔒'
+      );
+      
+      Divider.create();
+      Divider.pop();
+      
+      Button.create();
+      Button.className("reset-button");
+      Button.onClick(this.resetSettings);
+      Button.content("恢复默认设置");
+      Button.pop();
     });
   }
   
@@ -707,26 +804,27 @@ struct SettingsPage {
    */
   @Builder
   private renderClearCacheDialog(): void {
-    <Dialog
-      open={this.showClearCacheDialog}
-      onCancel={() => { this.showClearCacheDialog = false; }}
-      onClose={() => { this.showClearCacheDialog = false; }}
-    >
-      <Stack className="dialog-container">
-        <Text className="dialog-title">清除缓存</Text>
-        <Text className="dialog-content">
-          确定要清除所有缓存吗？这将删除所有离线内容。
-        </Text>
-        <Flex className="dialog-actions">
-          <Button className="dialog-button cancel" onClick={() => { this.showClearCacheDialog = false; }}>
-            取消
-          </Button>
-          <Button className="dialog-button confirm" onClick={this.clearCache}>
-            确定
-          </Button>
-        </Flex>
-      </Stack>
-    </Dialog>
+    Dialog.create();
+    Dialog.open(this.showClearCacheDialog);
+    Dialog.onCancel(() => { this.showClearCacheDialog = false; });
+    Dialog.onClose(() => { this.showClearCacheDialog = false; });
+    Stack.create({ className: "dialog-container" });
+    Text.create({ className: "dialog-title" });
+    Text.content("清除缓存");
+    Text.pop();
+    Text.create({ className: "dialog-content" });
+    Text.content("确定要清除所有缓存吗？这将删除所有离线内容。");
+    Text.pop();
+    Flex.create({ className: "dialog-actions" });
+    Button.create({ className: "dialog-button cancel", onClick: () => { this.showClearCacheDialog = false; } });
+    Button.content("取消");
+    Button.pop();
+    Button.create({ className: "dialog-button confirm", onClick: this.clearCache });
+    Button.content("确定");
+    Button.pop();
+    Flex.pop();
+    Stack.pop();
+    Dialog.pop();
   }
   
   /**
@@ -734,54 +832,59 @@ struct SettingsPage {
    */
   @Builder
   private renderAboutDialog(): void {
-    <Dialog
-      open={this.showAboutDialog}
-      onCancel={() => { this.showAboutDialog = false; }}
-      onClose={() => { this.showAboutDialog = false; }}
-    >
-      <Stack className="dialog-container about-dialog">
-        <Image
-          src="https://via.placeholder.com/100x100?text=Logo"
-          className="app-logo"
-        />
-        <Text className="app-name">RayTV</Text>
-        <Text className="app-version">版本 v{this.version}</Text>
-        <Text className="app-description">
-          一款功能强大的媒体播放器应用，为您提供优质的观影体验。
-        </Text>
-        <Text className="copyright">© 2024 RayTV Team</Text>
-        <Button className="dialog-button close" onClick={() => { this.showAboutDialog = false; }}>
-          确定
-        </Button>
-      </Stack>
-    </Dialog>
+    Dialog.create();
+    Dialog.open(this.showAboutDialog);
+    Dialog.onCancel(() => { this.showAboutDialog = false; });
+    Dialog.onClose(() => { this.showAboutDialog = false; });
+    Stack.create({ className: "dialog-container about-dialog" });
+    Image.create({ src: "https://via.placeholder.com/100x100?text=Logo", className: "app-logo" });
+    Image.pop();
+    Text.create({ className: "app-name" });
+    Text.content("RayTV");
+    Text.pop();
+    Text.create({ className: "app-version" });
+    Text.content("版本 v" + this.version);
+    Text.pop();
+    Text.create({ className: "app-description" });
+    Text.content("一款功能强大的媒体播放器应用，为您提供优质的观影体验。");
+    Text.pop();
+    Text.create({ className: "copyright" });
+    Text.content("© 2024 RayTV Team");
+    Text.pop();
+    Button.create({ className: "dialog-button close", onClick: () => { this.showAboutDialog = false; } });
+    Button.content("确定");
+    Button.pop();
+    Stack.pop();
+    Dialog.pop();
   }
   
   /**
    * 组件渲染
    */
   build() {
-    <Stack className="settings-page">
-      {/* 页面头部 */}
-      {this.renderHeader()}
-      
-      {/* 设置内容 */}
-      <ScrollView className="content-scroll" scrollBar="auto">
-        {this.renderThemeSettings()}
-        {this.renderPlaybackSettings()}
-        {this.renderAdBlockSettings()}
-        {this.renderWallpaperSettings()}
-        {this.renderHarmonyFeaturesSettings()}
-        {this.renderCacheSettings()}
-        {this.renderNotificationSettings()}
-        {this.renderAboutSettings()}
-        <Blank className="bottom-space" />
-      </ScrollView>
-      
-      {/* 对话框 */}
-      {this.renderClearCacheDialog()}
-      {this.renderAboutDialog()}
-    </Stack>
+    Stack.create({ className: "settings-page" });
+    // 页面头部
+    this.renderHeader();
+    
+    // 设置内容
+    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
+    this.renderThemeSettings();
+    this.renderPlaybackSettings();
+    this.renderAdBlockSettings();
+    this.renderWallpaperSettings();
+    this.renderHarmonyFeaturesSettings();
+    this.renderCacheSettings();
+    this.renderNotificationSettings();
+    this.renderAboutSettings();
+    Blank.create({ className: "bottom-space" });
+    Blank.pop();
+    ScrollView.pop();
+    
+    // 对话框
+    this.renderClearCacheDialog();
+    this.renderAboutDialog();
+    
+    Stack.pop();
   }
 }
 

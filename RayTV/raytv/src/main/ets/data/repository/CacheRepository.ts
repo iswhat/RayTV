@@ -84,7 +84,7 @@ export class CacheRepository {
   private cacheDirectory: string | null = null;
   
   // 定时清理器
-  private cleanupTimer: NodeJS.Timeout | null = null;
+  private cleanupTimer: number | null = null;
   
   // 是否已初始化
   private initialized: boolean = false;

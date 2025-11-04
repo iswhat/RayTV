@@ -7,7 +7,7 @@ import HistoryManager from './HistoryManager';
 import { AVPlay } from '@ohos.multimedia.media';
 import { AudioManager, AudioRendererInfo } from '@ohos.multimedia.audio';
 import { BusinessError } from '@ohos.base';
-import DeviceInfoRepository from '../../data/repository/DeviceInfoRepository';
+import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 
 // 常量定义
 const TAG = 'PlaybackService';

@@ -530,10 +530,17 @@ struct MediaDetailPage {
    */
   @Builder
   private renderLoading(): void {
-    <Stack className="loading-container">
-      <LoadingProgress className="loading-progress" color="#FF4500" />
-      <Text className="loading-text">加载中...</Text>
-    </Stack>
+    Stack.create();
+    Stack.className("loading-container");
+    LoadingProgress.create();
+    LoadingProgress.className("loading-progress");
+    LoadingProgress.color("#FF4500");
+    LoadingProgress.pop();
+    Text.create();
+    Text.className("loading-text");
+    Text.content("加载中...");
+    Text.pop();
+    Stack.pop();
   }
   
   /**
@@ -541,13 +548,24 @@ struct MediaDetailPage {
    */
   @Builder
   private renderError(): void {
-    <Stack className="error-container">
-      <Text className="error-icon">⚠️</Text>
-      <Text className="error-message">{this.errorMessage}</Text>
-      <Button className="retry-button" onClick={() => this.loadMediaDetail()}>
-        重试
-      </Button>
-    </Stack>
+    Stack.create();
+    Stack.className("error-container");
+    Text.create();
+    Text.className("error-icon");
+    Text.content("⚠️");
+    Text.pop();
+    Text.create();
+    Text.className("error-message");
+    Text.content(this.errorMessage);
+    Text.pop();
+    Button.create();
+    Button.className("retry-button");
+    Button.onClick(() => this.loadMediaDetail());
+    Text.create();
+    Text.content("重试");
+    Text.pop();
+    Button.pop();
+    Stack.pop();
   }
   
   /**
@@ -557,87 +575,150 @@ struct MediaDetailPage {
   private renderHeader(): void {
     if (!this.mediaDetail) return;
     
-    <Stack className="media-header">
-      <Flex className="media-info">
-        <Image
-          src={this.mediaDetail.coverUrl || "https://via.placeholder.com/200x300?text=No+Image"}
-          className="media-cover"
-          objectFit="cover"
-        />
-        <Flex className="media-details" direction="column">
-          <Text className="media-title">{this.mediaDetail.title}</Text>
-          <Flex className="media-meta">
-            {this.mediaDetail.year && <Tag className="meta-tag">{this.mediaDetail.year}</Tag>}
-            {this.mediaDetail.score && <Tag className="meta-tag score">{this.mediaDetail.score}</Tag>}
-            {this.mediaDetail.type && <Tag className="meta-tag">{this.mediaDetail.type}</Tag>}
-            {this.mediaDetail.status && <Tag className="meta-tag">{this.mediaDetail.status}</Tag>}
-          </Flex>
-          {this.mediaDetail.directors && this.mediaDetail.directors.length > 0 && (
-            <Text className="media-directors">导演: {this.mediaDetail.directors.join(', ')}</Text>
-          )}
-          {this.mediaDetail.actors && this.mediaDetail.actors.length > 0 && (
-            <Text className="media-actors">演员: {this.mediaDetail.actors.slice(0, 5).join(', ')}
-              {this.mediaDetail.actors.length > 5 ? '...' : ''}</Text>
-          )}
-          {this.mediaDetail.genres && this.mediaDetail.genres.length > 0 && (
-            <Text className="media-genres">类型: {this.mediaDetail.genres.join(', ')}</Text>
-          )}
-          {this.mediaDetail.regions && this.mediaDetail.regions.length > 0 && (
-            <Text className="media-regions">地区: {this.mediaDetail.regions.join(', ')}</Text>
-          )}
-        </Flex>
-      </Flex>
-      
-      <Stack className="action-buttons">
-        <Button className="primary-button" onClick={() => {
-          if (this.episodes.length > 0) {
-            this.handlePlayEpisode(this.episodes[0]);
-          }
-        }}>
-          立即播放
-        </Button>
-        <Button 
-          className={`secondary-button ${this.isFavorite ? 'favorite-active' : ''}`} 
-          onClick={this.handleToggleFavorite}
-        >
-          {this.isFavorite ? '已收藏' : '收藏'}
-        </Button>
-      </Stack>
-    </Stack>
+    Stack.create();
+    Stack.className("media-header");
+    Flex.create();
+    Flex.className("media-info");
+    Image.create();
+    Image.src(this.mediaDetail.coverUrl || "https://via.placeholder.com/200x300?text=No+Image");
+    Image.className("media-cover");
+    Image.objectFit("cover");
+    Image.pop();
+    Flex.create();
+    Flex.className("media-details");
+    Flex.direction("column");
+    Text.create();
+    Text.className("media-title");
+    Text.content(this.mediaDetail.title);
+    Text.pop();
+    Flex.create();
+    Flex.className("media-meta");
+    if (this.mediaDetail.year) {
+      Tag.create();
+      Tag.className("meta-tag");
+      Text.create();
+      Text.content(this.mediaDetail.year);
+      Text.pop();
+      Tag.pop();
+    }
+    if (this.mediaDetail.score) {
+      Tag.create();
+      Tag.className("meta-tag score");
+      Text.create();
+      Text.content(this.mediaDetail.score);
+      Text.pop();
+      Tag.pop();
+    }
+    if (this.mediaDetail.type) {
+      Tag.create();
+      Tag.className("meta-tag");
+      Text.create();
+      Text.content(this.mediaDetail.type);
+      Text.pop();
+      Tag.pop();
+    }
+    if (this.mediaDetail.status) {
+      Tag.create();
+      Tag.className("meta-tag");
+      Text.create();
+      Text.content(this.mediaDetail.status);
+      Text.pop();
+      Tag.pop();
+    }
+    Flex.pop();
+    if (this.mediaDetail.directors && this.mediaDetail.directors.length > 0) {
+      Text.create();
+      Text.className("media-directors");
+      Text.content(`导演: ${this.mediaDetail.directors.join(', ')}`);
+      Text.pop();
+    }
+    if (this.mediaDetail.actors && this.mediaDetail.actors.length > 0) {
+      Text.create();
+      Text.className("media-actors");
+      Text.content(`演员: ${this.mediaDetail.actors.slice(0, 5).join(', ')}${this.mediaDetail.actors.length > 5 ? '...' : ''}`);
+      Text.pop();
+    }
+    if (this.mediaDetail.genres && this.mediaDetail.genres.length > 0) {
+      Text.create();
+      Text.className("media-genres");
+      Text.content(`类型: ${this.mediaDetail.genres.join(', ')}`);
+      Text.pop();
+    }
+    if (this.mediaDetail.regions && this.mediaDetail.regions.length > 0) {
+      Text.create();
+      Text.className("media-regions");
+      Text.content(`地区: ${this.mediaDetail.regions.join(', ')}`);
+      Text.pop();
+    }
+    Flex.pop();
+    Flex.pop();
+    
+    Stack.create();
+    Stack.className("action-buttons");
+    Button.create();
+    Button.className("primary-button");
+    Button.onClick(() => {
+      if (this.episodes.length > 0) {
+        this.handlePlayEpisode(this.episodes[0]);
+      }
+    });
+    Text.create();
+    Text.content("立即播放");
+    Text.pop();
+    Button.pop();
+    Button.create();
+    Button.className(`secondary-button ${this.isFavorite ? 'favorite-active' : ''}`);
+    Button.onClick(this.handleToggleFavorite);
+    Text.create();
+    Text.content(this.isFavorite ? '已收藏' : '收藏');
+    Text.pop();
+    Button.pop();
+    Stack.pop();
+    Stack.pop();
   }
   
   /**
    * 渲染剧情简介
    */
   @Builder
-  private renderDescription(): void {
-    if (!this.mediaDetail || !this.mediaDetail.description) return;
+  private renderSynopsis(): void {
+    if (!this.mediaDetail || !this.mediaDetail.synopsis) return;
     
-    <Stack className="description-section">
-      <Text className="section-title">剧情简介</Text>
-      <Text className="description-text">{this.mediaDetail.description}</Text>
-    </Stack>
+    Stack.create();
+    Stack.className("synopsis-section");
+    Text.create();
+    Text.className("section-title");
+    Text.content("剧情简介");
+    Text.pop();
+    Text.create();
+    Text.className("synopsis-content");
+    Text.content(this.mediaDetail.synopsis);
+    Text.pop();
+    Stack.pop();
   }
   
   /**
-   * 渲染标签页切换
+   * 渲染标签页切换栏
    */
   @Builder
-  private renderTabs(): void {
-    <Stack className="tabs">
-      <Button 
-        className={`tab-button ${this.selectedTab === 'episodes' ? 'active' : ''}`} 
-        onClick={() => { this.selectedTab = 'episodes'; }}
-      >
-        剧集列表
-      </Button>
-      <Button 
-        className={`tab-button ${this.selectedTab === 'sources' ? 'active' : ''}`} 
-        onClick={() => { this.selectedTab = 'sources'; }}
-      >
-        播放源
-      </Button>
-    </Stack>
+  private renderTabBar(): void {
+    Flex.create();
+    Flex.className("tab-bar");
+    Button.create();
+    Button.className(`tab-button ${this.activeTab === 'episodes' ? 'active' : ''}`);
+    Button.onClick(() => this.activeTab = 'episodes');
+    Text.create();
+    Text.content("剧集列表");
+    Text.pop();
+    Button.pop();
+    Button.create();
+    Button.className(`tab-button ${this.activeTab === 'sources' ? 'active' : ''}`);
+    Button.onClick(() => this.activeTab = 'sources');
+    Text.create();
+    Text.content("播放源");
+    Text.pop();
+    Button.pop();
+    Flex.pop();
   }
   
   /**
@@ -647,19 +728,26 @@ struct MediaDetailPage {
   private renderSeasonSelector(): void {
     if (this.seasons.length <= 1) return;
     
-    <ScrollView className="season-selector" scrollable="horizontal">
-      <Flex>
-        {this.seasons.map((season) => (
-          <Button
-            key={`season-${season}`}
-            className={`season-button ${this.selectedSeason === season ? 'active' : ''}`}
-            onClick={() => this.handleSeasonChange(season)}
-          >
-            第{season}季
-          </Button>
-        ))}
-      </Flex>
-    </ScrollView>
+    Flex.create();
+    Flex.className("season-selector");
+    Text.create();
+    Text.className("selector-label");
+    Text.content("选择季数:");
+    Text.pop();
+    Flex.create();
+    Flex.className("season-buttons");
+    this.seasons.forEach((season, index) => {
+      Button.create();
+      Button.key(season.id);
+      Button.className(`season-button ${this.selectedSeasonIndex === index ? 'active' : ''}`);
+      Button.onClick(() => this.selectedSeasonIndex = index);
+      Text.create();
+      Text.content(`第${season.seasonNumber}季`);
+      Text.pop();
+      Button.pop();
+    });
+    Flex.pop();
+    Flex.pop();
   }
   
   /**
@@ -668,79 +756,86 @@ struct MediaDetailPage {
   @Builder
   private renderEpisodes(): void {
     if (this.episodes.length === 0) {
-      <Text className="empty-text">暂无剧集信息</Text>
+      Text.create();
+      Text.className("no-episodes");
+      Text.content("暂无剧集");
+      Text.pop();
       return;
     }
     
-    // 筛选当前季的剧集
-    const currentSeasonEpisodes = this.episodes.filter(ep => ep.season === this.selectedSeason);
-    
-    <Stack>
-      {this.renderSeasonSelector()}
-      <Flex className="episodes-grid" wrap="wrap">
-        {currentSeasonEpisodes.map((episode, index) => (
-          <Button
-            key={episode.id || index}
-            className={`episode-button ${this.selectedEpisodeIndex === index ? 'selected' : ''}`}
-            onClick={() => {
-              // 保存上一集的进度
-              const lastEpisodeId = this.episodes[this.selectedEpisodeIndex]?.id;
-              if (lastEpisodeId) {
-                this.saveCurrentPlayProgress(lastEpisodeId);
-              }
-              
-              this.selectedEpisodeIndex = index;
-              // 加载该集的播放源
-              this.loadPlaySources(episode.id);
-            }}
-          >
-            {episode.name || `第${episode.number || index + 1}集`}
-          </Button>
-        ))}
-      </Flex>
-      
-      {this.hasMoreEpisodes && (
-        <Button className="load-more-button" onClick={this.loadMoreEpisodes}>
-          加载更多
-        </Button>
-      )}
-    </Stack>
+    List.create();
+    List.className("episode-list");
+    this.episodes.forEach((episode) => {
+      ListItem.create();
+      ListItem.key(episode.id);
+      ListItem.className("episode-item");
+      Flex.create();
+      Flex.className("episode-info");
+      Flex.onClick(() => this.handlePlayEpisode(episode));
+      Text.create();
+      Text.className("episode-title");
+      Text.content(episode.title);
+      Text.pop();
+      Text.create();
+      Text.className("episode-duration");
+      Text.content(episode.duration);
+      Text.pop();
+      if (episode.isWatched) {
+        Badge.create();
+        Badge.className("watched-badge");
+        Text.create();
+        Text.content("已观看");
+        Text.pop();
+        Badge.pop();
+      }
+      Flex.pop();
+      ListItem.pop();
+    });
+    List.pop();
   }
   
   /**
    * 渲染播放源列表
    */
   @Builder
-  private renderPlaySources(): void {
-    <Stack className="sources-container">
-      {/* 搜索栏 */}
-      <SearchBar
-        className="search-bar"
-        placeholder="搜索片源"
-        value={this.searchText}
-        onChange={(text: string) => this.handleSearchChange(text)}
-        onClear={() => this.handleSearchChange('')}
-      />
-      
-      {/* 片源列表 */}
-      {this.filteredSources.length === 0 ? (
-        <Text className="empty-text">
-          {this.selectedEpisodeIndex >= 0 ? '暂无匹配的片源' : '请先选择剧集'}
-        </Text>
-      ) : (
-        <List className="sources-list">
-          {this.filteredSources.map((source, index) => (
-            <ListItem key={index} onClick={() => this.handlePlaySourceClick(source)}>
-              <Flex className="source-item">
-                <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
-                {source.quality && <Tag className="source-quality">{source.quality}</Tag>}
-                <Text className="play-icon">▶</Text>
-              </Flex>
-            </ListItem>
-          ))}
-        </List>
-      )}
-    </Stack>
+  private renderSources(): void {
+    if (this.sources.length === 0) {
+      Text.create();
+      Text.className("no-sources");
+      Text.content("暂无播放源");
+      Text.pop();
+      return;
+    }
+    
+    List.create();
+    List.className("source-list");
+    this.sources.forEach((source) => {
+      ListItem.create();
+      ListItem.key(source.id);
+      ListItem.className("source-item");
+      Flex.create();
+      Flex.className("source-info");
+      Flex.onClick(() => this.handlePlaySource(source));
+      Text.create();
+      Text.className("source-name");
+      Text.content(source.name);
+      Text.pop();
+      Text.create();
+      Text.className("source-quality");
+      Text.content(source.quality);
+      Text.pop();
+      if (source.isDefault) {
+        Badge.create();
+        Badge.className("default-badge");
+        Text.create();
+        Text.content("默认");
+        Text.pop();
+        Badge.pop();
+      }
+      Flex.pop();
+      ListItem.pop();
+    });
+    List.pop();
   }
   
   /**
@@ -773,36 +868,56 @@ struct MediaDetailPage {
    * 组件渲染
    */
   build() {
-    <Stack className="media-detail-page">
-      {/* 顶部导航栏 */}
-      <Stack className="nav-header">
-        <Button className="back-button" onClick={this.handleBack}>
-          ← 返回
-        </Button>
-        <Text className="page-title">详情</Text>
-        <Blank />
-      </Stack>
+    Stack.create();
+    Stack.className("media-detail-page");
+    
+    // 顶部导航栏
+    Stack.create();
+    Stack.className("nav-header");
+    Button.create();
+    Button.className("back-button");
+    Button.onClick(this.handleBack);
+    Text.create();
+    Text.content("← 返回");
+    Text.pop();
+    Button.pop();
+    Text.create();
+    Text.className("page-title");
+    Text.content("详情");
+    Text.pop();
+    Blank.create();
+    Blank.pop();
+    Stack.pop();
+    
+    // 主内容区域
+    if (this.isLoading) {
+      this.renderLoading();
+    } else if (this.errorMessage) {
+      this.renderError();
+    } else {
+      ScrollView.create();
+      ScrollView.className("content-scroll");
+      ScrollView.scrollBar("auto");
+      this.renderHeader();
+      this.renderSynopsis();
+      this.renderTabBar();
       
-      {/* 主内容区域 */}
-      {this.isLoading ? (
-        this.renderLoading()
-      ) : this.errorMessage ? (
-        this.renderError()
-      ) : (
-        <ScrollView className="content-scroll" scrollBar="auto">
-          {this.renderHeader()}
-          {this.renderDescription()}
-          {this.renderTabs()}
-          
-          <Stack className="tab-content">
-            {this.selectedTab === 'episodes' ? this.renderEpisodes() : this.renderPlaySources()}
-          </Stack>
-          
-          {this.renderRelatedMedia()}
-          <Blank className="bottom-space" />
-        </ScrollView>
-      )}
-    </Stack>
+      Stack.create();
+      Stack.className("tab-content");
+      if (this.selectedTab === 'episodes') {
+        this.renderEpisodes();
+      } else {
+        this.renderPlaySources();
+      }
+      Stack.pop();
+      
+      this.renderRelatedMedia();
+      Blank.create();
+      Blank.className("bottom-space");
+      Blank.pop();
+      ScrollView.pop();
+    }
+    Stack.pop();
   }
 }
 

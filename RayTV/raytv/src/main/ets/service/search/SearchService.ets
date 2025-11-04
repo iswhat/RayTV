@@ -3,8 +3,8 @@
 
 import { StorageUtil } from '../../common/util/StorageUtil';
 import { SiteManager } from '../spider/SiteManager';
-import { VideoItem } from '../../data/bean/Vod.ets';
-import { LiveChannel } from '../../data/bean/Live.ets';
+import { VideoItem } from '../../data/bean/Vod';
+import { LiveChannel } from '../../data/bean/Live';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';

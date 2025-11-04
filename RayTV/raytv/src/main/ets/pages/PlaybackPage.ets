@@ -45,7 +45,7 @@ struct PlaybackPage {
   @State isFullscreen: boolean = false;
   @State errorMessage: string = '';
   @State isLoading: boolean = true;
-  @State controlsTimeout: NodeJS.Timeout | null = null;
+  @State controlsTimeout: number | null = null;
   @State lastProgressSaveTime: number = 0;
   @State saveProgressInterval: number = 30000; // 30秒保存一次进度
   private autoSwitchSourceOnError: boolean = true; // 是否自动切换片源
@@ -605,13 +605,23 @@ struct PlaybackPage {
    */
   @Builder
   private renderLoading(): void {
-    <Stack className="loading-overlay">
-      <LoadingProgress className="loading-progress" color="#FF4500" />
-      <Text className="loading-text">正在加载...</Text>
-      {this.bufferPercentage > 0 && (
-        <Text className="buffer-text">已缓冲 {this.bufferPercentage}%</Text>
-      )}
-    </Stack>
+    Stack.create();
+    Stack.className("loading-overlay");
+    LoadingProgress.create();
+    LoadingProgress.className("loading-progress");
+    LoadingProgress.color("#FF4500");
+    LoadingProgress.pop();
+    Text.create();
+    Text.className("loading-text");
+    Text.content("正在加载...");
+    Text.pop();
+    if (this.bufferPercentage > 0) {
+      Text.create();
+      Text.className("buffer-text");
+      Text.content(`已缓冲 ${this.bufferPercentage}%`);
+      Text.pop();
+    }
+    Stack.pop();
   }
   
   /**
@@ -619,13 +629,24 @@ struct PlaybackPage {
    */
   @Builder
   private renderError(): void {
-    <Stack className="error-overlay">
-      <Text className="error-icon">⚠️</Text>
-      <Text className="error-message">{this.errorMessage}</Text>
-      <Button className="retry-button" onClick={() => this.initializePlayback()}>
-        重试
-      </Button>
-    </Stack>
+    Stack.create();
+    Stack.className("error-overlay");
+    Text.create();
+    Text.className("error-icon");
+    Text.content("⚠️");
+    Text.pop();
+    Text.create();
+    Text.className("error-message");
+    Text.content(this.errorMessage);
+    Text.pop();
+    Button.create();
+    Button.className("retry-button");
+    Button.onClick(() => this.initializePlayback());
+    Text.create();
+    Text.content("重试");
+    Text.pop();
+    Button.pop();
+    Stack.pop();
   }
   
   /**
@@ -633,20 +654,38 @@ struct PlaybackPage {
    */
   @Builder
   private renderTopControls(): void {
-    <Stack className="top-controls">
-      <Button className="back-button" onClick={this.handleBack}>
-        ← 返回
-      </Button>
-      <Stack className="title-container">
-        <Text className="media-title" numberOfLines={1}>{this.mediaTitle}</Text>
-        {this.episodeName && (
-          <Text className="episode-name" numberOfLines={1}>{this.episodeName}</Text>
-        )}
-      </Stack>
-      <Button className="settings-button" onClick={() => this.showSpeedMenu = !this.showSpeedMenu}>
-        {this.playbackSpeed}x
-      </Button>
-    </Stack>
+    Stack.create();
+    Stack.className("top-controls");
+    Button.create();
+    Button.className("back-button");
+    Button.onClick(this.handleBack);
+    Text.create();
+    Text.content("← 返回");
+    Text.pop();
+    Button.pop();
+    Stack.create();
+    Stack.className("title-container");
+    Text.create();
+    Text.className("media-title");
+    Text.numberOfLines(1);
+    Text.content(this.mediaTitle);
+    Text.pop();
+    if (this.episodeName) {
+      Text.create();
+      Text.className("episode-name");
+      Text.numberOfLines(1);
+      Text.content(this.episodeName);
+      Text.pop();
+    }
+    Stack.pop();
+    Button.create();
+    Button.className("settings-button");
+    Button.onClick(() => this.showSpeedMenu = !this.showSpeedMenu);
+    Text.create();
+    Text.content(`${this.playbackSpeed}x`);
+    Text.pop();
+    Button.pop();
+    Stack.pop();
   }
   
   /**
@@ -654,47 +693,73 @@ struct PlaybackPage {
    */
   @Builder
   private renderBottomControls(): void {
-    <Stack className="bottom-controls">
-      <Button className="play-pause-button" onClick={this.togglePlayPause}>
-        {this.isPlaying ? '⏸' : '▶'}
-      </Button>
-      
-      <Stack className="progress-container">
-        <Slider
-          className="progress-slider"
-          value={(this.currentTime / this.duration) * 100 || 0}
-          min={0}
-          max={100}
-          onChange={this.handleProgressChange}
-        ></Slider>
-        <Flex className="time-display">
-          <Text className="current-time">{this.formatTime(this.currentTime)}</Text>
-          <Text className="duration">{this.formatTime(this.duration)}</Text>
-        </Flex>
-      </Stack>
-      
-      <Button className="mute-button" onClick={this.toggleMute}>
-        {this.isMuted ? '🔇' : '🔊'}
-      </Button>
-      
-      <Stack className="volume-container">
-        <Slider
-          className="volume-slider"
-          value={this.volume * 100}
-          min={0}
-          max={100}
-          onChange={this.handleVolumeChange}
-        ></Slider>
-      </Stack>
-      
-      <Button className="source-button" onClick={() => this.showSourceMenu = !this.showSourceMenu}>
-        源
-      </Button>
-      
-      <Button className="fullscreen-button" onClick={this.toggleFullscreen}>
-        {this.isFullscreen ? '⤢' : '⤡'}
-      </Button>
-    </Stack>
+    Stack.create();
+    Stack.className("bottom-controls");
+    Button.create();
+    Button.className("play-pause-button");
+    Button.onClick(this.togglePlayPause);
+    Text.create();
+    Text.content(this.isPlaying ? '⏸' : '▶');
+    Text.pop();
+    Button.pop();
+    
+    Stack.create();
+    Stack.className("progress-container");
+    Slider.create();
+    Slider.className("progress-slider");
+    Slider.value((this.currentTime / this.duration) * 100 || 0);
+    Slider.min(0);
+    Slider.max(100);
+    Slider.onChange(this.handleProgressChange);
+    Slider.pop();
+    Flex.create();
+    Flex.className("time-display");
+    Text.create();
+    Text.className("current-time");
+    Text.content(this.formatTime(this.currentTime));
+    Text.pop();
+    Text.create();
+    Text.className("duration");
+    Text.content(this.formatTime(this.duration));
+    Text.pop();
+    Flex.pop();
+    Stack.pop();
+    
+    Button.create();
+    Button.className("mute-button");
+    Button.onClick(this.toggleMute);
+    Text.create();
+    Text.content(this.isMuted ? '🔇' : '🔊');
+    Text.pop();
+    Button.pop();
+    
+    Stack.create();
+    Stack.className("volume-container");
+    Slider.create();
+    Slider.className("volume-slider");
+    Slider.value(this.volume * 100);
+    Slider.min(0);
+    Slider.max(100);
+    Slider.onChange(this.handleVolumeChange);
+    Slider.pop();
+    Stack.pop();
+    
+    Button.create();
+    Button.className("source-button");
+    Button.onClick(() => this.showSourceMenu = !this.showSourceMenu);
+    Text.create();
+    Text.content("源");
+    Text.pop();
+    Button.pop();
+    
+    Button.create();
+    Button.className("fullscreen-button");
+    Button.onClick(this.toggleFullscreen);
+    Text.create();
+    Text.content(this.isFullscreen ? '⤢' : '⤡');
+    Text.pop();
+    Button.pop();
+    Stack.pop();
   }
   
   /**
@@ -704,17 +769,19 @@ struct PlaybackPage {
   private renderSpeedMenu(): void {
     if (!this.showSpeedMenu) return;
     
-    <Stack className="speed-menu">
-      {playbackService.getSupportedPlaybackSpeeds().map((speed) => (
-        <Button
-          key={speed}
-          className={`speed-option ${this.playbackSpeed === speed ? 'selected' : ''}`}
-          onClick={() => this.setPlaybackSpeed(speed)}
-        >
-          {playbackService.getPlaybackSpeedText(speed)}
-        </Button>
-      ))}
-    </Stack>
+    Stack.create();
+    Stack.className("speed-menu");
+    playbackService.getSupportedPlaybackSpeeds().forEach((speed) => {
+      Button.create();
+      Button.key(speed.toString());
+      Button.className(`speed-option ${this.playbackSpeed === speed ? 'selected' : ''}`);
+      Button.onClick(() => this.setPlaybackSpeed(speed));
+      Text.create();
+      Text.content(playbackService.getPlaybackSpeedText(speed));
+      Text.pop();
+      Button.pop();
+    });
+    Stack.pop();
   }
   
   /**
@@ -724,56 +791,75 @@ struct PlaybackPage {
   private renderSourceMenu(): void {
     if (!this.showSourceMenu || this.playSources.length === 0) return;
     
-    <List className="source-menu">
-      {this.playSources.map((source, index) => (
-        <ListItem 
-          key={index} 
-          onClick={() => this.switchPlaySource(source)}
-          className={this.playSource?.url === source.url ? 'selected' : ''}
-        >
-          <Text className="source-name">{source.name || `播放源${index + 1}`}</Text>
-          {source.quality && <Text className="source-quality">{source.quality}</Text>}
-        </ListItem>
-      ))}
-    </List>
+    List.create();
+    List.className("source-menu");
+    this.playSources.forEach((source, index) => {
+      ListItem.create();
+      ListItem.key(index.toString());
+      ListItem.onClick(() => this.switchPlaySource(source));
+      ListItem.className(this.playSource?.url === source.url ? 'selected' : '');
+      Text.create();
+      Text.className("source-name");
+      Text.content(source.name || `播放源${index + 1}`);
+      Text.pop();
+      if (source.quality) {
+        Text.create();
+        Text.className("source-quality");
+        Text.content(source.quality);
+        Text.pop();
+      }
+      ListItem.pop();
+    });
+    List.pop();
   }
   
   /**
    * 组件渲染
    */
   build() {
-    <Stack className={`playback-page ${this.isFullscreen ? 'fullscreen' : ''}`} onClick={this.handleScreenTap}>
-      {/* 视频播放区域 */}
-      <Stack className="video-container">
-        {/* 这里应该使用实际的视频播放器组件 */}
-        {/* 由于HarmonyOS的Video组件具体API可能不同，这里用占位符表示 */}
-        <Image 
-          src="https://via.placeholder.com/1920x1080?text=Video+Player" 
-          className="video-placeholder"
-          objectFit="cover"
-        />
-        
-        {/* 加载状态 */}
-        {this.isLoading && this.renderLoading()}
-        
-        {/* 错误状态 */}
-        {this.errorMessage && this.renderError()}
-        
-        {/* 播放控制界面 */}
-        {this.showControls && (
-          <Stack className="controls-overlay">
-            {this.renderTopControls()}
-            {this.renderBottomControls()}
-          </Stack>
-        )}
-        
-        {/* 播放速度菜单 */}
-        {this.renderSpeedMenu()}
-        
-        {/* 播放源菜单 */}
-        {this.renderSourceMenu()}
-      </Stack>
-    </Stack>
+    Stack.create();
+    Stack.className(`playback-page ${this.isFullscreen ? 'fullscreen' : ''}`);
+    Stack.onClick(this.handleScreenTap);
+    
+    // 视频播放区域
+    Stack.create();
+    Stack.className("video-container");
+    
+    // 这里应该使用实际的视频播放器组件
+    // 由于HarmonyOS的Video组件具体API可能不同，这里用占位符表示
+    Image.create();
+    Image.src("https://via.placeholder.com/1920x1080?text=Video+Player");
+    Image.className("video-placeholder");
+    Image.objectFit("cover");
+    Image.pop();
+    
+    // 加载状态
+    if (this.isLoading) {
+      this.renderLoading();
+    }
+    
+    // 错误状态
+    if (this.errorMessage) {
+      this.renderError();
+    }
+    
+    // 播放控制界面
+    if (this.showControls) {
+      Stack.create();
+      Stack.className("controls-overlay");
+      this.renderTopControls();
+      this.renderBottomControls();
+      Stack.pop();
+    }
+    
+    // 播放速度菜单
+    this.renderSpeedMenu();
+    
+    // 播放源菜单
+    this.renderSourceMenu();
+    
+    Stack.pop();
+    Stack.pop();
   }
 }
 

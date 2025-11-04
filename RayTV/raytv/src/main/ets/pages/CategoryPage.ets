@@ -258,13 +258,16 @@ struct CategoryPage {
    */
   @Builder
   private renderHeader(): void {
-    <Stack className="header">
-      <Button className="back-button" onClick={this.handleBack}>
-        ←
-      </Button>
-      <Text className="page-title">分类浏览</Text>
-      <Blank className="header-right" />
-    </Stack>
+    Stack.create({ className: "header" });
+    Button.create({ className: "back-button", onClick: this.handleBack });
+    Button.content("←");
+    Button.pop();
+    Text.create({ className: "page-title" });
+    Text.content("分类浏览");
+    Text.pop();
+    Blank.create({ className: "header-right" });
+    Blank.pop();
+    Stack.pop();
   }
   
   /**
@@ -272,19 +275,21 @@ struct CategoryPage {
    */
   @Builder
   private renderCategorySelector(): void {
-    <ScrollView className="category-scroll" scrollBar="auto">
-      <Flex className="category-list" wrap="nowrap">
-        {this.categories.map((category) => (
-          <Button
-            key={`category-${category}`}
-            className={`category-button ${this.selectedCategory === category ? 'selected' : ''}`}
-            onClick={() => this.handleCategorySelect(category)}
-          >
-            <Text>{category}</Text>
-          </Button>
-        ))}
-      </Flex>
-    </ScrollView>
+    ScrollView.create({ className: "category-scroll", scrollBar: "auto" });
+    Flex.create({ className: "category-list", wrap: "nowrap" });
+    for (let category of this.categories) {
+      Button.create({ 
+        key: `category-${category}`,
+        className: `category-button ${this.selectedCategory === category ? 'selected' : ''}`,
+        onClick: () => this.handleCategorySelect(category)
+      });
+      Text.create();
+      Text.content(category);
+      Text.pop();
+      Button.pop();
+    }
+    Flex.pop();
+    ScrollView.pop();
   }
   
   /**
@@ -292,37 +297,44 @@ struct CategoryPage {
    */
   @Builder
   private renderFilters(): void {
-    <Flex className="filters-container">
-      <Flex className="filter-item">
-        <Text className="filter-label">地区</Text>
-        <Select
-          value={this.selectedRegion}
-          options={this.regions}
-          onChange={this.handleRegionSelect}
-          className="filter-select"
-        />
-      </Flex>
-      
-      <Flex className="filter-item">
-        <Text className="filter-label">年份</Text>
-        <Select
-          value={this.selectedYear}
-          options={this.years}
-          onChange={this.handleYearSelect}
-          className="filter-select"
-        />
-      </Flex>
-      
-      <Flex className="filter-item">
-        <Text className="filter-label">排序</Text>
-        <Select
-          value={this.selectedSort}
-          options={this.sortOptions}
-          onChange={this.handleSortSelect}
-          className="filter-select"
-        />
-      </Flex>
-    </Flex>
+    Flex.create({ className: "filters-container" });
+    Flex.create({ className: "filter-item" });
+    Text.create({ className: "filter-label" });
+    Text.content("地区");
+    Text.pop();
+    Select.create({
+      value: this.selectedRegion,
+      options: this.regions,
+      onChange: this.handleRegionSelect,
+      className: "filter-select"
+    });
+    Select.pop();
+    Flex.pop();
+    Flex.create({ className: "filter-item" });
+    Text.create({ className: "filter-label" });
+    Text.content("年份");
+    Text.pop();
+    Select.create({
+      value: this.selectedYear,
+      options: this.years,
+      onChange: this.handleYearSelect,
+      className: "filter-select"
+    });
+    Select.pop();
+    Flex.pop();
+    Flex.create({ className: "filter-item" });
+    Text.create({ className: "filter-label" });
+    Text.content("排序");
+    Text.pop();
+    Select.create({
+      value: this.selectedSort,
+      options: this.sortOptions,
+      onChange: this.handleSortSelect,
+      className: "filter-select"
+    });
+    Select.pop();
+    Flex.pop();
+    Flex.pop();
   }
   
   /**
@@ -330,26 +342,31 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    <ListItem onClick={() => this.handleMediaItemClick(media)}>
-          <Flex className="media-item">
-            <Image
-              src={media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image"}
-              className="media-cover"
-              objectFit="cover"
-            />
-            <Flex className="media-info" direction="column">
-              <Text className="media-title" numberOfLines={2}>
-                {media.title}
-              </Text>
-              {media.year && (
-                <Text className="media-year">{media.year}</Text>
-              )}
-              {media.score && (
-                <Text className="media-score">评分: {media.score}</Text>
-              )}
-            </Flex>
-          </Flex>
-        </ListItem>
+    ListItem.create({ onClick: () => this.handleMediaItemClick(media) });
+    Flex.create({ className: "media-item" });
+    Image.create({
+      src: media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image",
+      className: "media-cover",
+      objectFit: "cover"
+    });
+    Image.pop();
+    Flex.create({ className: "media-info", direction: "column" });
+    Text.create({ className: "media-title", numberOfLines: 2 });
+    Text.content(media.title);
+    Text.pop();
+    if (media.year) {
+      Text.create({ className: "media-year" });
+      Text.content(media.year);
+      Text.pop();
+    }
+    if (media.score) {
+      Text.create({ className: "media-score" });
+      Text.content("评分: " + media.score);
+      Text.pop();
+    }
+    Flex.pop();
+    Flex.pop();
+    ListItem.pop();
   }
   
   /**
@@ -358,39 +375,49 @@ struct CategoryPage {
   @Builder
   private renderMediaList(): void {
     if (this.isLoading && this.currentPage === 1) {
-      <Stack className="loading-container">
-        <LoadingProgress className="loading-progress" color="#FF4500" />
-        <Text>加载中...</Text>
-      </Stack>
+      Stack.create({ className: "loading-container" });
+      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
+      LoadingProgress.pop();
+      Text.create();
+      Text.content("加载中...");
+      Text.pop();
+      Stack.pop();
       return;
     }
     
     if (this.errorMessage) {
-      <Stack className="error-container">
-        <Text className="error-icon">⚠️</Text>
-        <Text className="error-message">{this.errorMessage}</Text>
-        <Button className="retry-button" onClick={() => this.loadMediaList(true)}>
-          重试
-        </Button>
-      </Stack>
+      Stack.create({ className: "error-container" });
+      Text.create({ className: "error-icon" });
+      Text.content("⚠️");
+      Text.pop();
+      Text.create({ className: "error-message" });
+      Text.content(this.errorMessage);
+      Text.pop();
+      Button.create({ className: "retry-button", onClick: () => this.loadMediaList(true) });
+      Button.content("重试");
+      Button.pop();
+      Stack.pop();
       return;
     }
     
     if (this.mediaList.length === 0) {
-      <Empty className="empty-container">
-        <Text>暂无相关内容</Text>
-      </Empty>
+      Empty.create({ className: "empty-container" });
+      Text.create();
+      Text.content("暂无相关内容");
+      Text.pop();
+      Empty.pop();
       return;
     }
     
-    <List
-      className="media-list"
-      itemTemplate={this.renderMediaItem}
-      data={this.mediaList}
-      onScrollBottom={() => this.handleLoadMore()}
-      onRefresh={() => this.handleRefresh()}
-      refreshing={this.isRefreshing}
-    />
+    List.create({
+      className: "media-list",
+      itemTemplate: this.renderMediaItem,
+      data: this.mediaList,
+      onScrollBottom: () => this.handleLoadMore(),
+      onRefresh: () => this.handleRefresh(),
+      refreshing: this.isRefreshing
+    });
+    List.pop();
   }
   
   /**
@@ -399,12 +426,17 @@ struct CategoryPage {
   @Builder
   private renderLoadMore(): void {
     if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
-      <Stack className="load-more-container">
-        <LoadingProgress className="loading-progress" color="#FF4500" />
-        <Text>加载更多...</Text>
-      </Stack>
+      Stack.create({ className: "load-more-container" });
+      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
+      LoadingProgress.pop();
+      Text.create();
+      Text.content("加载更多...");
+      Text.pop();
+      Stack.pop();
     } else if (!this.hasMoreResults && this.mediaList.length > 0) {
-      <Text className="no-more-text">没有更多内容了</Text>
+      Text.create({ className: "no-more-text" });
+      Text.content("没有更多内容了");
+      Text.pop();
     }
   }
   
@@ -412,23 +444,25 @@ struct CategoryPage {
    * 组件渲染
    */
   build() {
-    <Stack className="category-page">
-      {/* 页面头部 */}
-      {this.renderHeader()}
-      
-      {/* 分类选择 */}
-      {this.renderCategorySelector()}
-      
-      {/* 筛选条件 */}
-      {this.renderFilters()}
-      
-      {/* 媒体列表 */}
-      <ScrollView className="content-scroll" scrollBar="auto">
-        {this.renderMediaList()}
-        {this.renderLoadMore()}
-        <Blank className="bottom-space" />
-      </ScrollView>
-    </Stack>
+    Stack.create({ className: "category-page" });
+    // 页面头部
+    this.renderHeader();
+    
+    // 分类选择
+    this.renderCategorySelector();
+    
+    // 筛选条件
+    this.renderFilters();
+    
+    // 媒体列表
+    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
+    this.renderMediaList();
+    this.renderLoadMore();
+    Blank.create({ className: "bottom-space" });
+    Blank.pop();
+    ScrollView.pop();
+    
+    Stack.pop();
   }
 }
 

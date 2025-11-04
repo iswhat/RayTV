@@ -270,15 +270,17 @@ struct FavoritesPage {
    */
   @Builder
   private renderHeader(): void {
-    <Stack className="header">
-      <Button className="back-button" onClick={this.handleBack}>
-        ←
-      </Button>
-      <Text className="page-title">我的收藏</Text>
-      <Button className="action-button" onClick={this.toggleEditMode}>
-        {this.isEditMode ? '取消' : '编辑'}
-      </Button>
-    </Stack>
+    Stack.create({ className: "header" });
+    Button.create({ className: "back-button", onClick: this.handleBack });
+    Button.content("←");
+    Button.pop();
+    Text.create({ className: "page-title" });
+    Text.content("我的收藏");
+    Text.pop();
+    Button.create({ className: "action-button", onClick: this.toggleEditMode });
+    Button.content(this.isEditMode ? "取消" : "编辑");
+    Button.pop();
+    Stack.pop();
   }
   
   /**
@@ -288,25 +290,27 @@ struct FavoritesPage {
   private renderEditToolbar(): void {
     if (!this.isEditMode || this.favorites.length === 0) return;
     
-    <Flex className="edit-toolbar">
-      <Flex className="select-all">
-        <Checkbox
-          checked={this.selectedItems.size === this.favorites.length && this.favorites.length > 0}
-          onCheckChange={this.handleSelectAll}
-        />
-        <Text>全选</Text>
-      </Flex>
-      <Text className="selected-count">
-        已选择 {this.selectedItems.size} 项
-      </Text>
-      <Button
-        className="delete-button"
-        onClick={this.handleDeleteSelected}
-        disabled={this.selectedItems.size === 0}
-      >
-        删除
-      </Button>
-    </Flex>
+    Flex.create({ className: "edit-toolbar" });
+    Flex.create({ className: "select-all" });
+    Checkbox.create();
+    Checkbox.checked(this.selectedItems.size === this.favorites.length && this.favorites.length > 0);
+    Checkbox.onCheckChange(this.handleSelectAll);
+    Checkbox.pop();
+    Text.create();
+    Text.content("全选");
+    Text.pop();
+    Flex.pop();
+    Text.create({ className: "selected-count" });
+    Text.content("已选择 " + this.selectedItems.size + " 项");
+    Text.pop();
+    Button.create({ 
+      className: "delete-button", 
+      onClick: this.handleDeleteSelected,
+      disabled: this.selectedItems.size === 0 
+    });
+    Button.content("删除");
+    Button.pop();
+    Flex.pop();
   }
   
   /**
@@ -316,27 +320,29 @@ struct FavoritesPage {
   private renderSortOption(): void {
     if (this.isEditMode || this.favorites.length === 0) return;
     
-    <Flex className="sort-option">
-      <Text>排序：</Text>
-      <Button
-        className={`sort-button ${this.sortBy === 'time' ? 'selected' : ''}`}
-        onClick={() => {
-          this.sortBy = 'time';
-          this.loadFavorites();
-        }}
-      >
-        时间
-      </Button>
-      <Button
-        className={`sort-button ${this.sortBy === 'title' ? 'selected' : ''}`}
-        onClick={() => {
-          this.sortBy = 'title';
-          this.loadFavorites();
-        }}
-      >
-        标题
-      </Button>
-    </Flex>
+    Flex.create({ className: "sort-option" });
+    Text.create();
+    Text.content("排序：");
+    Text.pop();
+    Button.create({ 
+      className: `sort-button ${this.sortBy === 'time' ? 'selected' : ''}`,
+      onClick: () => {
+        this.sortBy = 'time';
+        this.loadFavorites();
+      }
+    });
+    Button.content("时间");
+    Button.pop();
+    Button.create({ 
+      className: `sort-button ${this.sortBy === 'title' ? 'selected' : ''}`,
+      onClick: () => {
+        this.sortBy = 'title';
+        this.loadFavorites();
+      }
+    });
+    Button.content("标题");
+    Button.pop();
+    Flex.pop();
   }
   
   /**
@@ -346,39 +352,52 @@ struct FavoritesPage {
   private renderFavoriteItem(favorite: FavoriteItem): void {
     const media = this.mediaItems.get(favorite.id);
     
-    <ListItem onClick={() => this.handleMediaClick(favorite)}>
-      <Flex className="favorite-item">
-        {this.isEditMode && (
-          <Checkbox
-            checked={this.selectedItems.has(favorite.id)}
-            onCheckChange={() => this.handleItemSelect(favorite.id)}
-          />
-        )}
-        <Image
-          src={media?.coverUrl || favorite.coverUrl || "https://via.placeholder.com/120x160?text=No+Image"}
-          className="media-cover"
-          objectFit="cover"
-        />
-        <Flex className="media-info" direction="column">
-          <Text className="media-title" numberOfLines={2}>
-            {media?.title || favorite.title}
-          </Text>
-          <Flex className="media-meta">
-            {favorite.type && <Tag className="meta-tag">{favorite.type}</Tag>}
-            {favorite.year && <Tag className="meta-tag">{favorite.year}</Tag>}
-            {media?.score && <Tag className="meta-tag score">{media.score}</Tag>}
-          </Flex>
-          <Text className="add-time">
-            收藏时间: {new Date(favorite.addTime).toLocaleDateString()}
-          </Text>
-          {media?.description && (
-            <Text className="media-description" numberOfLines={2}>
-              {media.description}
-            </Text>
-          )}
-        </Flex>
-      </Flex>
-      </ListItem>
+    ListItem.create({ onClick: () => this.handleMediaClick(favorite) });
+    Flex.create({ className: "favorite-item" });
+    if (this.isEditMode) {
+      Checkbox.create();
+      Checkbox.checked(this.selectedItems.has(favorite.id));
+      Checkbox.onCheckChange(() => this.handleItemSelect(favorite.id));
+      Checkbox.pop();
+    }
+    Image.create({
+      src: media?.coverUrl || favorite.coverUrl || "https://via.placeholder.com/120x160?text=No+Image",
+      className: "media-cover",
+      objectFit: "cover"
+    });
+    Image.pop();
+    Flex.create({ className: "media-info", direction: "column" });
+    Text.create({ className: "media-title", numberOfLines: 2 });
+    Text.content(media?.title || favorite.title);
+    Text.pop();
+    Flex.create({ className: "media-meta" });
+    if (favorite.type) {
+      Tag.create({ className: "meta-tag" });
+      Tag.content(favorite.type);
+      Tag.pop();
+    }
+    if (favorite.year) {
+      Tag.create({ className: "meta-tag" });
+      Tag.content(favorite.year);
+      Tag.pop();
+    }
+    if (media?.score) {
+      Tag.create({ className: "meta-tag score" });
+      Tag.content(media.score);
+      Tag.pop();
+    }
+    Flex.pop();
+    Text.create({ className: "add-time" });
+    Text.content("收藏时间: " + new Date(favorite.addTime).toLocaleDateString());
+    Text.pop();
+    if (media?.description) {
+      Text.create({ className: "media-description", numberOfLines: 2 });
+      Text.content(media.description);
+      Text.pop();
+    }
+    Flex.pop();
+    Flex.pop();
+    ListItem.pop();
   }
   
   /**
@@ -387,64 +406,78 @@ struct FavoritesPage {
   @Builder
   private renderFavoritesList(): void {
     if (this.isLoading && !this.isRefreshing) {
-      <Stack className="loading-container">
-        <LoadingProgress className="loading-progress" color="#FF4500" />
-        <Text>加载中...</Text>
-      </Stack>
+      Stack.create({ className: "loading-container" });
+      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
+      LoadingProgress.pop();
+      Text.create();
+      Text.content("加载中...");
+      Text.pop();
+      Stack.pop();
       return;
     }
     
     if (this.errorMessage) {
-      <Stack className="error-container">
-        <Text className="error-icon">⚠️</Text>
-        <Text className="error-message">{this.errorMessage}</Text>
-        <Button className="retry-button" onClick={this.loadFavorites}>
-          重试
-        </Button>
-      </Stack>
+      Stack.create({ className: "error-container" });
+      Text.create({ className: "error-icon" });
+      Text.content("⚠️");
+      Text.pop();
+      Text.create({ className: "error-message" });
+      Text.content(this.errorMessage);
+      Text.pop();
+      Button.create({ className: "retry-button", onClick: this.loadFavorites });
+      Button.content("重试");
+      Button.pop();
+      Stack.pop();
       return;
     }
     
     if (this.favorites.length === 0) {
-      <Empty className="empty-container">
-        <Text className="empty-icon">🌟</Text>
-        <Text>暂无收藏内容</Text>
-        <Button className="explore-button" onClick={() => Router.push({ url: 'pages/HomePage' })}>
-          去探索
-        </Button>
-      </Empty>
+      Empty.create({ className: "empty-container" });
+      Text.create({ className: "empty-icon" });
+      Text.content("🌟");
+      Text.pop();
+      Text.create();
+      Text.content("暂无收藏内容");
+      Text.pop();
+      Button.create({ className: "explore-button", onClick: () => Router.push({ url: 'pages/HomePage' }) });
+      Button.content("去探索");
+      Button.pop();
+      Empty.pop();
       return;
     }
     
-    <List
-      className="favorites-list"
-      itemTemplate={this.renderFavoriteItem}
-      data={this.favorites}
-      onRefresh={() => this.handleRefresh()}
-      refreshing={this.isRefreshing}
-    />
+    List.create({
+      className: "favorites-list",
+      itemTemplate: this.renderFavoriteItem,
+      data: this.favorites,
+      onRefresh: () => this.handleRefresh(),
+      refreshing: this.isRefreshing
+    });
+    List.pop();
   }
   
   /**
    * 组件渲染
    */
   build() {
-    <Stack className="favorites-page">
-      {/* 页面头部 */}
-      {this.renderHeader()}
-      
-      {/* 编辑工具栏 */}
-      {this.renderEditToolbar()}
-      
-      {/* 排序选项 */}
-      {this.renderSortOption()}
-      
-      {/* 收藏列表 */}
-      <ScrollView className="content-scroll" scrollBar="auto">
-        {this.renderFavoritesList()}
-        <Blank className="bottom-space" />
-      </ScrollView>
-    </Stack>
+    Stack.create({ className: "favorites-page" });
+    // 页面头部
+    this.renderHeader();
+    
+    // 编辑工具栏
+    this.renderEditToolbar();
+    
+    // 排序选项
+    this.renderSortOption();
+    
+    // 收藏列表
+    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
+    this.renderFavoritesList();
+    Blank.create({ className: "bottom-space" });
+    Blank.pop();
+    ScrollView.pop();
+    
+    Stack.pop();
   }
 }
 

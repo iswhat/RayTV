@@ -6,10 +6,43 @@ import { DEVICE_INFO_TABLE } from '../db/TableSchema';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
 import Logger from '../../common/util/Logger';
 import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
-import codec from '@ohos.media.codec';
+// import codec from '@ohos.media.codec'; // 暂时注释，等待SDK支持
 import { BusinessError } from '@ohos.base';
 
 const TAG = 'DeviceInfoRepository';
+
+// 模拟编解码器检测类
+class MockCodecDetector {
+  /**
+   * 模拟获取编解码器列表
+   */
+  static async getCodecList(codecName: string): Promise<string[]> {
+    Logger.info('MockCodecDetector', `Checking support for codec: ${codecName}`);
+    
+    // 模拟编解码器支持检测
+    const supportedCodecs: Record<string, string[]> = {
+      // 视频编解码器
+      'h264': ['h264'],
+      'h265': ['h265'],
+      'vp8': ['vp8'],
+      'vp9': ['vp9'],
+      'av1': [], // 模拟不支持AV1
+      'mpeg4': ['mpeg4'],
+      
+      // 音频编解码器
+      'aac': ['aac'],
+      'mp3': ['mp3'],
+      'opus': ['opus'],
+      'flac': ['flac'],
+      'vorbis': ['vorbis'],
+      'ac3': [], // 模拟不支持AC3
+      'eac3': []  // 模拟不支持EAC3
+    };
+    
+    // 返回模拟的编解码器列表
+    return supportedCodecs[codecName.toLowerCase()] || [];
+  }
+}
 
 // 设备信息键常量
 export const DeviceInfoKeys = {
@@ -159,7 +192,7 @@ export class DeviceInfoRepository {
         [DeviceInfoKeys.OS_VERSION]: this.getSafeValue(DeviceInfoKeys.OS_VERSION, '1.0.0'),
         [DeviceInfoKeys.APP_VERSION]: this.getSafeValue(DeviceInfoKeys.APP_VERSION, '1.0.0'),
         
-        // 设备能力 - 使用codec API检测真实的编解码支持
+        // 设备能力 - 使用模拟编解码器检测
         [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
         [DeviceInfoKeys.SUPPORTED_AUDIO_CODECS]: await this.detectSupportedAudioCodecs(),
         [DeviceInfoKeys.MAX_RESOLUTION]: await this.detectMaxResolution(),
@@ -506,11 +539,11 @@ export class DeviceInfoRepository {
       const videoCodecs = ['h264', 'h265', 'vp8', 'vp9', 'av1', 'mpeg4'];
       const supportedCodecs: string[] = [];
       
-      // 使用codec API检测每个编解码器
+      // 使用模拟编解码器检测
       for (const codecName of videoCodecs) {
         try {
           // 检查是否支持该编解码器的解码能力
-          const isSupported = await this.checkCodecSupport(codecName, codec.CodecMode.DECODER);
+          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
           if (isSupported) {
             supportedCodecs.push(codecName);
           }
@@ -519,7 +552,7 @@ export class DeviceInfoRepository {
         }
       }
       
-      // 如果API检测失败，回退到基本编解码器列表
+      // 如果模拟检测失败，回退到基本编解码器列表
       return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
     } catch (error) {
       Logger.error(TAG, `Failed to detect video codecs: ${error}`);
@@ -536,11 +569,11 @@ export class DeviceInfoRepository {
       const audioCodecs = ['aac', 'mp3', 'opus', 'flac', 'vorbis', 'ac3', 'eac3'];
       const supportedCodecs: string[] = [];
       
-      // 使用codec API检测每个编解码器
+      // 使用模拟编解码器检测
       for (const codecName of audioCodecs) {
         try {
           // 检查是否支持该编解码器的解码能力
-          const isSupported = await this.checkCodecSupport(codecName, codec.CodecMode.DECODER);
+          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
           if (isSupported) {
             supportedCodecs.push(codecName);
           }
@@ -549,7 +582,7 @@ export class DeviceInfoRepository {
         }
       }
       
-      // 如果API检测失败，回退到基本编解码器列表
+      // 如果模拟检测失败，回退到基本编解码器列表
       return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
     } catch (error) {
       Logger.error(TAG, `Failed to detect audio codecs: ${error}`);
@@ -613,10 +646,10 @@ export class DeviceInfoRepository {
   /**
    * 检查特定编解码器的支持情况
    */
-  private async checkCodecSupport(codecName: string, mode: codec.CodecMode): Promise<boolean> {
+  private async checkCodecSupport(codecName: string, mode: number): Promise<boolean> {
     try {
-      // 使用codec API查询编解码器信息
-      const codecInfos = await codec.getCodecList(codecName);
+      // 使用模拟编解码器检测器查询编解码器信息
+      const codecInfos = await MockCodecDetector.getCodecList(codecName);
       return codecInfos.length > 0;
     } catch (error) {
       Logger.warn(TAG, `Error checking codec ${codecName} support: ${error}`);

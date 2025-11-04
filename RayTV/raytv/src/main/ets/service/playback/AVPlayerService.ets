@@ -1,5 +1,103 @@
 import Logger from '../../common/util/Logger';
-import player from '@ohos.multimedia.player';
+// import player from '@ohos.multimedia.player'; // 暂时注释，等待SDK支持
+
+// 模拟播放器状态枚举
+enum PlayerState {
+  READY = 0,
+  PLAYING = 1,
+  PAUSED = 2,
+  STOPPED = 3,
+  COMPLETED = 4,
+  ERROR = 5
+}
+
+// 模拟播放器类
+class MockPlayer {
+  private currentTime: number = 0;
+  private duration: number = 0;
+  private volume: number = 1.0;
+  private isMuted: boolean = false;
+  private speed: number = 1.0;
+  private listeners: Map<string, Function[]> = new Map();
+
+  async createPlayer(): Promise<MockPlayer> {
+    return this;
+  }
+
+  async setSource(source: string): Promise<void> {
+    Logger.info('MockPlayer', `Source set: ${source}`);
+    this.duration = 60000; // 模拟60秒时长
+  }
+
+  async prepare(): Promise<void> {
+    Logger.info('MockPlayer', 'Player prepared');
+    this.emit('stateChange', PlayerState.READY);
+  }
+
+  async play(): Promise<void> {
+    Logger.info('MockPlayer', 'Player started');
+    this.emit('stateChange', PlayerState.PLAYING);
+  }
+
+  async pause(): Promise<void> {
+    Logger.info('MockPlayer', 'Player paused');
+    this.emit('stateChange', PlayerState.PAUSED);
+  }
+
+  async stop(): Promise<void> {
+    Logger.info('MockPlayer', 'Player stopped');
+    this.emit('stateChange', PlayerState.STOPPED);
+  }
+
+  async seek(timeMs: number, mode: any): Promise<void> {
+    this.currentTime = timeMs;
+    Logger.info('MockPlayer', `Seeked to: ${timeMs}ms`);
+  }
+
+  async setVolume(volume: number): Promise<void> {
+    this.volume = volume;
+    Logger.info('MockPlayer', `Volume set to: ${volume}`);
+  }
+
+  async setMute(mute: boolean): Promise<void> {
+    this.isMuted = mute;
+    Logger.info('MockPlayer', `Mute set to: ${mute}`);
+  }
+
+  async setSpeed(speed: number): Promise<void> {
+    this.speed = speed;
+    Logger.info('MockPlayer', `Speed set to: ${speed}`);
+  }
+
+  async getCurrentTime(): Promise<number> {
+    return this.currentTime;
+  }
+
+  async getDuration(): Promise<number> {
+    return this.duration;
+  }
+
+  async release(): Promise<void> {
+    Logger.info('MockPlayer', 'Player released');
+  }
+
+  on(event: string, callback: Function): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(callback);
+  }
+
+  private emit(event: string, ...args: any[]): void {
+    const callbacks = this.listeners.get(event) || [];
+    callbacks.forEach(callback => callback(...args));
+  }
+}
+
+// 模拟SeekMode
+const MockSeekMode = {
+  Accurate: 'accurate'
+};
 
 /**
  * 播放状态枚举
@@ -85,11 +183,11 @@ export interface AVPlayerService {
 
 /**
  * AVPlayerService实现类
- * 基于HarmonyOS AVPlayer API实现媒体播放功能
+ * 基于模拟播放器实现媒体播放功能
  */
 export class AVPlayerServiceImpl implements AVPlayerService {
   private readonly TAG: string = 'AVPlayerServiceImpl';
-  private avPlayer: player.Player | null = null;
+  private avPlayer: MockPlayer | null = null;
   private currentStatus: PlaybackStatus = PlaybackStatus.IDLE;
   private sourceUrl: string = '';
   private statusChangeCallback?: (status: PlaybackStatus) => void;
@@ -101,8 +199,9 @@ export class AVPlayerServiceImpl implements AVPlayerService {
    */
   public async init(): Promise<void> {
     try {
-      // 创建播放器实例
-      this.avPlayer = await player.createPlayer();
+      // 创建模拟播放器实例
+      this.avPlayer = new MockPlayer();
+      await this.avPlayer.createPlayer();
       
       // 设置状态监听
       this.setupPlayerListeners();
@@ -216,7 +315,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
         throw new Error('Player not initialized');
       }
       
-      await this.avPlayer.seek(timeMs, player.SeekMode.Accurate);
+      await this.avPlayer.seek(timeMs, MockSeekMode.Accurate);
       Logger.info(this.TAG, `Seeked to: ${timeMs}ms`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to seek: ${error}`);
@@ -369,22 +468,22 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       Logger.info(this.TAG, `Player state changed: ${state}, reason: ${reason}`);
       
       switch (state) {
-        case player.State.READY: // 准备就绪
+        case PlayerState.READY: // 准备就绪
           this.updateStatus(PlaybackStatus.PREPARED);
           break;
-        case player.State.PLAYING:
+        case PlayerState.PLAYING:
           this.updateStatus(PlaybackStatus.PLAYING);
           break;
-        case player.State.PAUSED:
+        case PlayerState.PAUSED:
           this.updateStatus(PlaybackStatus.PAUSED);
           break;
-        case player.State.STOPPED:
+        case PlayerState.STOPPED:
           this.updateStatus(PlaybackStatus.STOPPED);
           break;
-        case player.State.COMPLETED:
+        case PlayerState.COMPLETED:
           this.updateStatus(PlaybackStatus.COMPLETED);
           break;
-        case player.State.ERROR:
+        case PlayerState.ERROR:
           this.updateStatus(PlaybackStatus.ERROR);
           if (this.errorCallback && reason) {
             this.errorCallback(new Error(`Player error: ${reason}`));

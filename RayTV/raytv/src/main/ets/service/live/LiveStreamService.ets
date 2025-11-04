@@ -3,8 +3,8 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
-import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
-import { NetworkRepository } from '../../data/repository/NetworkRepository';
+import DatabaseRepository from '../../data/repository/DatabaseRepository';
+import NetworkRepository from '../../data/repository/NetworkRepository';
 
 // 导入模型和DTO
 import ApiResponse, { ResponseCode } from '../dto/ApiResponse';

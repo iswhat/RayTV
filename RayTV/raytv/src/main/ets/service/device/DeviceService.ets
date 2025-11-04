@@ -1,7 +1,7 @@
 // DeviceService - 设备服务类
 import Logger from '../../common/util/Logger';
-import { DeviceInfo, DeviceType, DeviceCapability } from '../bean/DeviceInfo';
-import DeviceInfoRepository from '../repository/DeviceInfoRepository';
+import { DeviceInfo, DeviceType, DeviceCapability } from '../../data/bean/DeviceInfo';
+import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
 import deviceInfo from '@ohos.deviceInfo';
 import i18n from '@kit.I18nKit';

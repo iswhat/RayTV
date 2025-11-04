@@ -8,8 +8,8 @@ import NetworkUtil from '../../common/util/NetworkUtil';
 import ConfigService from '../config/ConfigService';
 import DatabaseManager from '../../data/db/DatabaseManager';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
-import { NetworkRepository } from '../../data/repository/NetworkRepository';
-import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
+import NetworkRepository from '../../data/repository/NetworkRepository';
+import DatabaseRepository from '../../data/repository/DatabaseRepository';
 import { BusinessError } from '@ohos.base';
 import { http } from '@ohos.net.http';
 
@@ -256,7 +256,7 @@ export default class UserService {
   private loginAttempts: number = 0;
   private lastLoginAttempt: number = 0;
   private deviceInfo: DeviceInfo | null = null;
-  private tokenRefreshTimer: NodeJS.Timeout | null = null;
+  private tokenRefreshTimer: number | null = null;
   
   // 监听器
   private userChangeListeners: Array<(user: User | null) => void> = [];

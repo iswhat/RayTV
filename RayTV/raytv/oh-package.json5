@@ -17,7 +17,33 @@
     "@kit.ArkTS": "^9.0.0",
     "@kit.DistributedDataKit": "^9.0.0",
     "@kit.I18nKit": "^9.0.0",
-    "@ohos.multimedia.player": "^9.0.0"
+    // "@ohos.multimedia.player": "^9.0.0", // 暂时注释，等待SDK支持
+    // "@ohos.media.codec": "^9.0.0", // 暂时注释，等待SDK支持
+    "@ohos.base": "^9.0.0",
+    "@ohos.net.http": "^9.0.0",
+    "@ohos.fileio": "^9.0.0",
+    "@ohos.sandbox": "^9.0.0",
+    "@ohos.file.fs": "^9.0.0",
+    "@ohos.data.preferences": "^9.0.0",
+    "@ohos.distributedHardware.deviceManager": "^9.0.0",
+    "@ohos.net.connection": "^9.0.0",
+    "@ohos.multimedia.media": "^9.0.0",
+    "@ohos.multimedia.audio": "^9.0.0",
+    "@ohos.data.rdb": "^9.0.0",
+    "@ohos.data.relationalStore": "^9.0.0",
+    "@ohos.router": "^9.0.0",
+    "@ohos.components": "^9.0.0",
+    "@ohos.deviceInfo": "^9.0.0",
+    "@ohos.display": "^9.0.0",
+    "@ohos.multimodalInput.gesture": "^9.0.0",
+    "@ohos.multimodalInput.input": "^9.0.0",
+    "@ohos.notificationManager": "^9.0.0",
+    "@ohos.app.ability.Ability": "^9.0.0",
+    "@ohos.app.ability.AbilityConstant": "^9.0.0",
+    "@ohos.app.ability.Want": "^9.0.0",
+    "@ohos.ability.kits.context": "^9.0.0",
+    "@ohos.data.distributedData": "^9.0.0",
+    "@ohos.taskpool": "^9.0.0"
   }
 }
 

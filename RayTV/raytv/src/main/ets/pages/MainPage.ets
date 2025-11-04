@@ -71,72 +71,79 @@ struct MainPage {
   // 渲染媒体项
   @Builder
   renderMediaItem(media: any) {
-    return (
-      <ListItem onClick={() => Router.push({ url: `pages/MediaDetailPage?id=${media.id}` })}>
-        <Column padding={10}>
-          <Image
-            src={media.cover}
-            width={150}
-            height={200}
-            objectFit={ImageFit.Cover}
-            borderRadius={8}
-            alt={media.title}
-          ></Image>
-          <Text marginTop={8} fontSize={14} maxLines={2}>{media.title}</Text>
-        </Column>
-      </ListItem>
-    );
+    ListItem.create({ onClick: () => Router.push({ url: `pages/MediaDetailPage?id=${media.id}` }) });
+    Column.create({ padding: 10 });
+    Image.create({
+      src: media.cover,
+      width: 150,
+      height: 200,
+      objectFit: ImageFit.Cover,
+      borderRadius: 8,
+      alt: media.title
+    });
+    Image.pop();
+    Text.create({ marginTop: 8, fontSize: 14, maxLines: 2 });
+    Text.text(media.title);
+    Text.pop();
+    Column.pop();
+    ListItem.pop();
   }
   
   build() {
-    return (
-      <Flex direction={FlexDirection.Column} padding={20}>
-        {/* 标题栏 */}
-        <Row justifyContent={FlexAlign.SpaceBetween} alignItems={ItemAlign.Center} marginBottom={20}>
-          <Text fontSize={24} fontWeight={FontWeight.Bold}>RayTV</Text>
-          <Row>
-            <Button onClick={this.navigateToSearch} marginRight={10}>
-              搜索
-            </Button>
-            <Button onClick={this.navigateToSettings}>
-              设置
-            </Button>
-          </Row>
-        </Row>
-        
-        {/* 分类入口 */}
-        <Button 
-          onClick={this.navigateToCategory}
-          backgroundColor="#007AFF"
-          color="white"
-          width="100%"
-          padding={12}
-          fontSize={16}
-          marginBottom={20}
-        >
-          浏览分类
-        </Button>
-        
-        {/* 推荐内容 */}
-        <Text fontSize={20} fontWeight={FontWeight.Bold} marginBottom={15}>推荐内容</Text>
-        
-        {this.isLoading ? (
-          <Text>加载中...</Text>
-        ) : (
-          <List
-            scroller={new Scroller()}
-            horizontal={true}
-            itemGenerator={(index) => this.renderMediaItem(this.featuredMedia[index])}
-            data={this.featuredMedia}
-            height={250}
-          />
-        )}
-        
-        {/* 底部提示 */}
-        <Text fontSize={12} color="#888888" marginTop={20} textAlign={TextAlign.Center}>
-          请确保已配置视频源以获得最佳体验
-        </Text>
-      </Flex>
-    );
+    Flex.create({ direction: FlexDirection.Column, padding: 20 });
+    // 标题栏
+    Row.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center, marginBottom: 20 });
+    Text.create({ fontSize: 24, fontWeight: FontWeight.Bold });
+    Text.content("RayTV");
+    Text.pop();
+    Row.create();
+    Button.create({ onClick: this.navigateToSearch, marginRight: 10 });
+    Button.content("搜索");
+    Button.pop();
+    Button.create({ onClick: this.navigateToSettings });
+    Button.content("设置");
+    Button.pop();
+    Row.pop();
+    Row.pop();
+    
+    // 分类入口
+    Button.create({ 
+      onClick: this.navigateToCategory,
+      backgroundColor: "#007AFF",
+      color: "white",
+      width: "100%",
+      padding: 12,
+      fontSize: 16,
+      marginBottom: 20
+    });
+    Button.content("浏览分类");
+    Button.pop();
+    
+    // 推荐内容
+    Text.create({ fontSize: 20, fontWeight: FontWeight.Bold, marginBottom: 15 });
+    Text.content("推荐内容");
+    Text.pop();
+    
+    if (this.isLoading) {
+      Text.create();
+      Text.content("加载中...");
+      Text.pop();
+    } else {
+      List.create({
+        scroller: new Scroller(),
+        horizontal: true,
+        itemGenerator: (index) => this.renderMediaItem(this.featuredMedia[index]),
+        data: this.featuredMedia,
+        height: 250
+      });
+      List.pop();
+    }
+    
+    // 底部提示
+    Text.create({ fontSize: 12, color: "#888888", marginTop: 20, textAlign: TextAlign.Center });
+    Text.content("请确保已配置视频源以获得最佳体验");
+    Text.pop();
+    
+    Flex.pop();
   }
 }

@@ -2,7 +2,7 @@
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
-import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
+import DatabaseRepository from '../../data/repository/DatabaseRepository';
 import ConfigParser from './ConfigParser';
 
 // 导入模型和DTO

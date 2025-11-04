@@ -1,5 +1,5 @@
 import Logger from '../../../common/util/Logger';
-import { Site, SiteType } from '../bean/Site';
+import { Site, SiteType } from '../../data/bean/Site';
 import { SiteDao } from '../db/dao/SiteDao';
 import JsonUtil from '../../../common/util/JsonUtil';
 

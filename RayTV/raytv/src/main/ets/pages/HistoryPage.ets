@@ -351,7 +351,7 @@ struct HistoryPage {
     Button.pop();
     Stack.pop();
   }
-  
+
   /**
    * 渲染编辑工具栏
    */
@@ -384,7 +384,7 @@ struct HistoryPage {
     Button.pop();
     Flex.pop();
   }
-  
+
   /**
    * 渲染设置选项
    */
@@ -406,7 +406,7 @@ struct HistoryPage {
     Switch.pop();
     Flex.pop();
   }
-  
+
   /**
    * 渲染历史记录项
    */
@@ -468,7 +468,7 @@ struct HistoryPage {
     Flex.pop();
     ListItem.pop();
   }
-  
+
   /**
    * 渲染历史记录列表
    */
@@ -524,7 +524,7 @@ struct HistoryPage {
     });
     List.pop();
   }
-  
+
   /**
    * 组件渲染
    */

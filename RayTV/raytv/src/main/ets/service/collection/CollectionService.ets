@@ -2,7 +2,7 @@
 import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
-import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
+import DatabaseRepository from '../../data/repository/DatabaseRepository';
 
 // 导入模型和DTO
 import { VideoType } from '../../data/model/Movie';

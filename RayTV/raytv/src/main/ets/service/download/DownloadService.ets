@@ -5,8 +5,8 @@ import DateUtil from '../../common/util/DateUtil';
 import FileUtil from '../../common/util/FileUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
-import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
-import { NetworkRepository } from '../../data/repository/NetworkRepository';
+import DatabaseRepository from '../../data/repository/DatabaseRepository';
+import NetworkRepository from '../../data/repository/NetworkRepository';
 import ConfigService from '../config/ConfigService';
 
 // 导入模型和DTO

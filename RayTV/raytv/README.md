@@ -15,11 +15,12 @@
 
 ## 技术栈
 
-- HarmonyOS/OpenHarmony SDK
-- ArkTS/TypeScript
-- React
-- Redux (状态管理)
-- Less (样式预处理器)
+- HarmonyOS/OpenHarmony SDK 9.0+
+- ArkTS (基于TypeScript的HarmonyOS开发语言)
+- ArkUI Native (声明式UI框架)
+- @kit组件库 (HarmonyOS API 9标准组件)
+- 分布式数据管理
+- 多媒体播放框架
 
 ## 快速开始
 

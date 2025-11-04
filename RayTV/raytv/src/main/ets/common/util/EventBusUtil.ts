@@ -26,7 +26,7 @@ export class EventBusUtil {
   private eventMap: Map<string, Subscription[]> = new Map();
   private isPublishing = false;
   private pendingOperations: (() => void)[] = [];
-  private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
+  private debounceTimers: Map<string, number> = new Map();
 
   /**
    * 私有构造函数

@@ -9,7 +9,7 @@ const TAG = 'TimeoutManager';
  */
 export default class TimeoutManager {
   private static instance: TimeoutManager;
-  private timeouts: Map<string, NodeJS.Timeout> = new Map();
+  private timeouts: Map<string, number> = new Map();
   private defaultTimeout: number = 30000; // 默认30秒超时
 
   /**

@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "lib": ["ES2020"],
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
@@ -15,11 +13,11 @@
       "@store/*": ["src/main/ets/store/*"]
     },
     "resolveJsonModule": true,
-    "allowJs": true,
+    "allowJs": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
     "useUnknownInCatchVariables": true,
@@ -29,23 +27,19 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": []
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
     "src/**/*.ets",
-    "src/**/*.js",
-    "src/**/*.jsx"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "build",
-    "dist"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
+    "dist",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
   ]
 }

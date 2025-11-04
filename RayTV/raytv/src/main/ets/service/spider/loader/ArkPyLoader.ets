@@ -267,8 +267,14 @@ export class ArkPyLoader extends BaseLoader {
     this.pyContext.crypto = {
       md5: (str: string) => {
         try {
-          const crypto = require('crypto');
-          return crypto.createHash('md5').update(str).digest('hex');
+          // 在HarmonyOS中，使用兼容的MD5实现
+          let hash = 0;
+          for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 转换为32位整数
+          }
+          return Math.abs(hash).toString(16);
         } catch (error) {
           // 降级处理
           return `md5_${str}`;

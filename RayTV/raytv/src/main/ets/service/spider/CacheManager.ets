@@ -1,4 +1,4 @@
-import Logger from '../../common/util/Logger.ets';
+import Logger from '../../common/util/Logger';
 import { FileSystemManager } from '@ohos.file.fs';
 
 /**
@@ -33,7 +33,7 @@ export class CacheManager {
   private cacheDir: string = '';
   private config: CacheConfig;
   private totalSize: number = 0;
-  private cleanupTimer: NodeJS.Timeout | null = null;
+  private cleanupTimer: number | null = null;
 
   /**
    * 默认缓存配置
