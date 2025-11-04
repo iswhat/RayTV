@@ -1,18 +1,22 @@
 import Logger from '../../common/util/Logger';
-// import player from '@ohos.multimedia.player'; // 暂时注释，等待SDK支持
+import media from '@ohos.multimedia.media';
 
-// 模拟播放器状态枚举
-enum PlayerState {
-  READY = 0,
-  PLAYING = 1,
-  PAUSED = 2,
-  STOPPED = 3,
-  COMPLETED = 4,
-  ERROR = 5
-}
+// 真实播放器状态枚举（基于HarmonyOS媒体播放器状态）
+const PlayerState = {
+  IDLE: 0,
+  INITIALIZED: 1,
+  PREPARED: 2,
+  PLAYING: 3,
+  PAUSED: 4,
+  STOPPED: 5,
+  PLAYBACK_COMPLETE: 6,
+  ERROR: 7,
+  RELEASED: 8
+} as const;
 
-// 模拟播放器类
-class MockPlayer {
+// 真实播放器类 - 基于HarmonyOS AVPlayer
+class RealPlayer {
+  private avPlayer: media.AVPlayer | null = null;
   private currentTime: number = 0;
   private duration: number = 0;
   private volume: number = 1.0;
@@ -20,65 +24,204 @@ class MockPlayer {
   private speed: number = 1.0;
   private listeners: Map<string, Function[]> = new Map();
 
-  async createPlayer(): Promise<MockPlayer> {
-    return this;
+  async createPlayer(): Promise<RealPlayer> {
+    try {
+      // 创建AVPlayer实例
+      this.avPlayer = await media.createAVPlayer();
+      
+      // 设置播放器回调
+      this.setupPlayerCallbacks();
+      
+      Logger.info('RealPlayer', 'AVPlayer created successfully');
+      return this;
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to create AVPlayer: ${error}`);
+      throw error;
+    }
   }
 
   async setSource(source: string): Promise<void> {
-    Logger.info('MockPlayer', `Source set: ${source}`);
-    this.duration = 60000; // 模拟60秒时长
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 设置播放源
+      await this.avPlayer.setSource(source);
+      Logger.info('RealPlayer', `Source set: ${source}`);
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to set source: ${error}`);
+      throw error;
+    }
   }
 
   async prepare(): Promise<void> {
-    Logger.info('MockPlayer', 'Player prepared');
-    this.emit('stateChange', PlayerState.READY);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 准备播放器
+      await this.avPlayer.prepare();
+      Logger.info('RealPlayer', 'Player prepared');
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to prepare: ${error}`);
+      throw error;
+    }
   }
 
   async play(): Promise<void> {
-    Logger.info('MockPlayer', 'Player started');
-    this.emit('stateChange', PlayerState.PLAYING);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 开始播放
+      await this.avPlayer.play();
+      Logger.info('RealPlayer', 'Player started');
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to play: ${error}`);
+      throw error;
+    }
   }
 
   async pause(): Promise<void> {
-    Logger.info('MockPlayer', 'Player paused');
-    this.emit('stateChange', PlayerState.PAUSED);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 暂停播放
+      await this.avPlayer.pause();
+      Logger.info('RealPlayer', 'Player paused');
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to pause: ${error}`);
+      throw error;
+    }
   }
 
   async stop(): Promise<void> {
-    Logger.info('MockPlayer', 'Player stopped');
-    this.emit('stateChange', PlayerState.STOPPED);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 停止播放
+      await this.avPlayer.stop();
+      Logger.info('RealPlayer', 'Player stopped');
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to stop: ${error}`);
+      throw error;
+    }
   }
 
-  async seek(timeMs: number, mode: any): Promise<void> {
-    this.currentTime = timeMs;
-    Logger.info('MockPlayer', `Seeked to: ${timeMs}ms`);
+  async seek(timeMs: number, mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC): Promise<void> {
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 跳转到指定位置
+      await this.avPlayer.seek(timeMs, mode);
+      Logger.info('RealPlayer', `Seeked to: ${timeMs}ms`);
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to seek: ${error}`);
+      throw error;
+    }
   }
 
   async setVolume(volume: number): Promise<void> {
-    this.volume = volume;
-    Logger.info('MockPlayer', `Volume set to: ${volume}`);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 设置音量
+      await this.avPlayer.setVolume(volume);
+      this.volume = volume;
+      Logger.info('RealPlayer', `Volume set to: ${volume}`);
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to set volume: ${error}`);
+      throw error;
+    }
   }
 
   async setMute(mute: boolean): Promise<void> {
-    this.isMuted = mute;
-    Logger.info('MockPlayer', `Mute set to: ${mute}`);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 设置静音
+      await this.avPlayer.setMute(mute);
+      this.isMuted = mute;
+      Logger.info('RealPlayer', `Mute set to: ${mute}`);
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to set mute: ${error}`);
+      throw error;
+    }
   }
 
   async setSpeed(speed: number): Promise<void> {
-    this.speed = speed;
-    Logger.info('MockPlayer', `Speed set to: ${speed}`);
+    try {
+      if (!this.avPlayer) {
+        throw new Error('Player not created');
+      }
+      
+      // 设置播放速度
+      await this.avPlayer.setSpeed(speed);
+      this.speed = speed;
+      Logger.info('RealPlayer', `Speed set to: ${speed}`);
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to set speed: ${error}`);
+      throw error;
+    }
   }
 
   async getCurrentTime(): Promise<number> {
-    return this.currentTime;
+    try {
+      if (!this.avPlayer) {
+        return 0;
+      }
+      
+      // 获取当前播放位置
+      const currentTime = await this.avPlayer.getCurrentTime();
+      this.currentTime = currentTime;
+      return currentTime;
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to get current time: ${error}`);
+      return this.currentTime;
+    }
   }
 
   async getDuration(): Promise<number> {
-    return this.duration;
+    try {
+      if (!this.avPlayer) {
+        return 0;
+      }
+      
+      // 获取总时长
+      const duration = await this.avPlayer.getDuration();
+      this.duration = duration;
+      return duration;
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to get duration: ${error}`);
+      return this.duration;
+    }
   }
 
   async release(): Promise<void> {
-    Logger.info('MockPlayer', 'Player released');
+    try {
+      if (this.avPlayer) {
+        // 释放播放器资源
+        await this.avPlayer.release();
+        this.avPlayer = null;
+        Logger.info('RealPlayer', 'Player released');
+      }
+    } catch (error) {
+      Logger.error('RealPlayer', `Failed to release player: ${error}`);
+      throw error;
+    }
   }
 
   on(event: string, callback: Function): void {
@@ -92,12 +235,41 @@ class MockPlayer {
     const callbacks = this.listeners.get(event) || [];
     callbacks.forEach(callback => callback(...args));
   }
-}
 
-// 模拟SeekMode
-const MockSeekMode = {
-  Accurate: 'accurate'
-};
+  private setupPlayerCallbacks(): void {
+    if (!this.avPlayer) return;
+
+    // 状态变化回调
+    this.avPlayer.on('stateChange', (state: string, reason: number) => {
+      Logger.info('RealPlayer', `Player state changed: ${state}, reason: ${reason}`);
+      this.emit('stateChange', state, reason);
+    });
+
+    // 错误回调
+    this.avPlayer.on('error', (error: media.AVPlayerError) => {
+      Logger.error('RealPlayer', `Player error: ${error.code}, message: ${error.message}`);
+      this.emit('error', error.code, error.message);
+    });
+
+    // 缓冲更新回调
+    this.avPlayer.on('bufferingUpdate', (info: media.BufferingInfo) => {
+      Logger.info('RealPlayer', `Buffering update: ${info.bufferingPercentage}%`);
+      this.emit('bufferingChange', info.bufferingPercentage);
+    });
+
+    // 播放完成回调
+    this.avPlayer.on('playbackComplete', () => {
+      Logger.info('RealPlayer', 'Playback completed');
+      this.emit('playbackComplete');
+    });
+
+    // 时间更新回调
+    this.avPlayer.on('timeUpdate', (currentTime: number) => {
+      this.currentTime = currentTime;
+      this.emit('timeUpdate', currentTime);
+    });
+  }
+}
 
 /**
  * 播放状态枚举
@@ -183,11 +355,11 @@ export interface AVPlayerService {
 
 /**
  * AVPlayerService实现类
- * 基于模拟播放器实现媒体播放功能
+ * 基于HarmonyOS AVPlayer实现媒体播放功能
  */
 export class AVPlayerServiceImpl implements AVPlayerService {
   private readonly TAG: string = 'AVPlayerServiceImpl';
-  private avPlayer: MockPlayer | null = null;
+  private avPlayer: RealPlayer | null = null;
   private currentStatus: PlaybackStatus = PlaybackStatus.IDLE;
   private sourceUrl: string = '';
   private statusChangeCallback?: (status: PlaybackStatus) => void;
@@ -199,8 +371,8 @@ export class AVPlayerServiceImpl implements AVPlayerService {
    */
   public async init(): Promise<void> {
     try {
-      // 创建模拟播放器实例
-      this.avPlayer = new MockPlayer();
+      // 创建真实播放器实例
+      this.avPlayer = new RealPlayer();
       await this.avPlayer.createPlayer();
       
       // 设置状态监听
