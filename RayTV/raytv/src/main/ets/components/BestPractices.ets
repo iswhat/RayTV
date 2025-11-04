@@ -3,7 +3,7 @@
  * 提供标准化的组件使用模板
  */
 
-import { ListItem, Text, Button, ProgressBar, Flex, Image } from '@arkui/native';
+import { ListItem, Text, Button, ProgressBar, Flex, Image } from '@kit.ArkUI';
 import { MediaItem, HistoryItem } from '../model/DataModel';
 
 /**

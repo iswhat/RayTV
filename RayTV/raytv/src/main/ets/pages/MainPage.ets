@@ -1,4 +1,4 @@
-import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@arkui/native';
+import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';

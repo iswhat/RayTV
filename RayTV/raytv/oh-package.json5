@@ -13,7 +13,10 @@
     "@kit.AbilityKit": "^9.0.0",
     "@kit.PerformanceAnalysisKit": "^9.0.0",
     "@kit.ArkUI": "^9.0.0",
-    "@kit.CoreServicesKit": "^9.0.0"
+    "@kit.CoreServicesKit": "^9.0.0",
+    "@kit.ArkTS": "^9.0.0",
+    "@kit.DistributedDataKit": "^9.0.0",
+    "@kit.I18nKit": "^9.0.0"
   }
 }
 

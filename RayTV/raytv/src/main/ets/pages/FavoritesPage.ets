@@ -3,7 +3,7 @@ import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { favoriteService } from '../service/media/FavoriteService';
 import { mediaService } from '../service/media/MediaService';
-import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem } from '@arkui/native';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem } from '@kit.ArkUI';
 
 /**
  * 收藏项接口定义
@@ -355,7 +355,7 @@ struct FavoritesPage {
           />
         )}
         <Image
-          src={media?.coverUrl || favorite.coverUrl || 'https://via.placeholder.com/120x160?text=No+Image'}
+          src={media?.coverUrl || favorite.coverUrl || "https://via.placeholder.com/120x160?text=No+Image"}
           className="media-cover"
           objectFit="cover"
         />

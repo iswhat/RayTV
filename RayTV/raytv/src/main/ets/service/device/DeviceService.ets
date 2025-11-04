@@ -4,7 +4,7 @@ import { DeviceInfo, DeviceType, DeviceCapability } from '../bean/DeviceInfo';
 import DeviceInfoRepository from '../repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
 import deviceInfo from '@ohos.deviceInfo';
-import systemLanguage from '@ohos.systemLanguage';
+import i18n from '@kit.I18nKit';
 import connection from '@ohos.net.connection';
 import display from '@ohos.display';
 

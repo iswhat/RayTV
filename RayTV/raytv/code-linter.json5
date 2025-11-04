@@ -1,11 +1,19 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "rules": {
+    // HarmonyOS API 9组件库导入检查
+    "harmonyos-api9-import": {
+      "level": "error",
+      "description": "必须使用HarmonyOS API 9标准的组件库导入",
+      "pattern": "from '@arkui/native'",
+      "message": "请使用@kit.ArkUI替代@arkui/native，符合HarmonyOS API 9规范"
+    },
+    
     // ArkTS组件导入规范检查
     "arkts-component-import": {
       "level": "error",
       "description": "禁止使用组件别名导入，必须使用标准导入方式",
-      "pattern": "import.*as.*Component",
+      "pattern": "import\s+[^\s]+\s+as\s+[A-Z][a-zA-Z]*",
       "message": "请使用标准组件导入方式，避免别名导入"
     },
     
@@ -13,7 +21,7 @@
     "arkts-property-syntax": {
       "level": "error", 
       "description": "组件属性必须使用独立属性语法，禁止使用style对象",
-      "pattern": "style={{.*}}",
+      "pattern": "style\\s*=\\s*\\{\\{.*\\}\\}",
       "message": "请将style对象拆分为独立属性设置"
     },
     
@@ -21,24 +29,48 @@
     "consistent-component-usage": {
       "level": "warning",
       "description": "确保组件使用方式在整个项目中保持一致",
-      "pattern": "ListItemComponent",
-      "message": "请使用标准ListItem组件名称"
-    },
-    
-    // ArkUI Native组件库导入检查
-    "arkui-native-import": {
-      "level": "info",
-      "description": "确保正确导入ArkUI Native组件库",
-      "pattern": "from '@arkui/native'",
-      "message": "✅ ArkUI Native组件库导入正确"
+      "pattern": "ListItemComponent|CustomComponent",
+      "message": "请使用标准组件名称，避免自定义组件命名"
     },
     
     // ProgressBar组件属性检查
     "progressbar-property-check": {
       "level": "warning",
       "description": "ProgressBar组件必须设置正确的属性",
-      "pattern": "ProgressBar",
+      "pattern": "<ProgressBar[^>]*?(?!(strokeWidth|color))[^>]*>.*?</ProgressBar>",
       "message": "请检查ProgressBar组件的strokeWidth和color属性设置"
+    },
+    
+    // 系统API导入检查
+    "system-api-import": {
+      "level": "info",
+      "description": "检查系统API导入是否正确",
+      "pattern": "from '@ohos\\.(?!data|net|multimedia|ability|router|deviceInfo|display|notificationManager|taskpool|preferences|file|base)",
+      "message": "请检查系统API导入路径是否正确"
+    },
+    
+    // @kit依赖导入检查
+    "kit-dependency-import": {
+      "level": "info",
+      "description": "检查@kit依赖导入是否正确",
+      "pattern": "from '@kit\\.(ArkUI|ArkTS|I18nKit|DistributedDataKit|AbilityKit|PerformanceAnalysisKit|CoreServicesKit)'",
+      "message": "✅ @kit依赖导入正确"
+    },
+    
+    // 字符串引号规范检查
+    "string-quote-consistency": {
+      "level": "warning",
+      "description": "确保字符串引号使用一致",
+      "pattern": "['\"](https?:\\/\\/|ftp:\\/\\/)[^'\"]*['\"]",
+      "message": "URL字符串建议使用双引号，避免编译器误识别为正则表达式"
+    },
+    
+    // TypeScript类型导入检查
+    "typescript-type-import": {
+      "level": "warning",
+      "description": "检查TypeScript类型导入规范",
+      "pattern": "import\\s+type\\s+[^\s]+\\s+from\\s+['\"][^'\"]+['\"]",
+      "message": "建议使用标准类型导入语法"
     }
   },
   
@@ -46,11 +78,13 @@
     "node_modules",
     "build",
     "dist",
-    ".hvigor"
+    ".hvigor",
+    "**/*.d.ts"
   ],
   
   "include": [
     "src/**/*.ets",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }

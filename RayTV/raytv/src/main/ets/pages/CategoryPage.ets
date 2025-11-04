@@ -2,7 +2,7 @@
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
-import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem } from '@arkui/native';
+import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem } from '@kit.ArkUI';
 
 /**
  * 媒体项接口定义
@@ -333,7 +333,7 @@ struct CategoryPage {
     <ListItem onClick={() => this.handleMediaItemClick(media)}>
           <Flex className="media-item">
             <Image
-              src={media.coverUrl || 'https://via.placeholder.com/80x120?text=No+Image'}
+              src={media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image"}
               className="media-cover"
               objectFit="cover"
             />

@@ -1,4 +1,4 @@
-import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@arkui/native';
+import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';

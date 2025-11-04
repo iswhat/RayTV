@@ -1,4 +1,4 @@
-import { Stack, Flex, List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem, ProgressBar, ListItem } from '@arkui/native';
+import { Stack, Flex, List, Grid, GridItem, ScrollView, Image, Text, TextInput, Button, Blank, LoadingProgress, Swiper, SwiperItem, ProgressBar, ListItem } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
