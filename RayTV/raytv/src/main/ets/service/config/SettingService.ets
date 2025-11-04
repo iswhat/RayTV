@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import ConfigService from '../../service/config/ConfigService';
 import UserService, { UserPreferences } from '../../service/user/UserService';
-import DatabaseManager from '../db/DatabaseManager';
+import DatabaseManager from '../../data/db/DatabaseManager';
 import { Configuration, UIExtensionAbility } from '@kit.AbilityKit';
 import { CommonConstants } from '@kit.Constants';
 import { BusinessError } from '@ohos.base';

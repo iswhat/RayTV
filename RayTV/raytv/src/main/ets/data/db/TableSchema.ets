@@ -340,6 +340,37 @@ export const SEARCH_HISTORY_TABLE = {
 };
 
 /**
+ * 订阅表定义
+ */
+export const SUBSCRIPTION_TABLE = {
+  NAME: 'subscription',
+  CREATE_SQL: `
+    CREATE TABLE IF NOT EXISTS subscription (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      url TEXT NOT NULL,
+      description TEXT,
+      update_time INTEGER NOT NULL,
+      create_time INTEGER NOT NULL,
+      site_count INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      current INTEGER NOT NULL DEFAULT 0
+    );
+  `,
+  COLUMNS: {
+    ID: 'id',
+    NAME: 'name',
+    URL: 'url',
+    DESCRIPTION: 'description',
+    UPDATE_TIME: 'update_time',
+    CREATE_TIME: 'create_time',
+    SITE_COUNT: 'site_count',
+    ENABLED: 'enabled',
+    CURRENT: 'current'
+  }
+};
+
+/**
  * 直播频道表定义
  */
 export const LIVE_CHANNEL_TABLE = {
@@ -446,6 +477,7 @@ export function getAllTables(): string[] {
     CONFIG_TABLE.CREATE_SQL,
     KEEP_FOLDER_TABLE.CREATE_SQL,
     SEARCH_HISTORY_TABLE.CREATE_SQL,
+    SUBSCRIPTION_TABLE.CREATE_SQL,
     LIVE_CHANNEL_TABLE.CREATE_SQL,
     LIVE_GROUP_TABLE.CREATE_SQL
   ];
@@ -462,6 +494,7 @@ export function getAllTableNames(): string[] {
     CONFIG_TABLE.NAME,
     KEEP_FOLDER_TABLE.NAME,
     SEARCH_HISTORY_TABLE.NAME,
+    SUBSCRIPTION_TABLE.NAME,
     LIVE_CHANNEL_TABLE.NAME,
     LIVE_GROUP_TABLE.NAME
   ];

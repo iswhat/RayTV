@@ -2,7 +2,7 @@ import Logger from '../../../common/util/Logger';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import ConfigService from '../../service/config/ConfigService';
 import HistoryService from '../../service/media/HistoryService';
-import { SiteService } from './SiteService';
+import { SiteService } from './spider/SiteService';
 import { ConfigManager } from './ConfigManager';
 import { HistoryManager } from './HistoryManager';
 

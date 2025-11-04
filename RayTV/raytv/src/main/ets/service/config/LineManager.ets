@@ -4,7 +4,7 @@ import { SiteManager } from '../spider/SiteManager';
 import { ConfigLoader } from './ConfigLoader';
 import { ConfigParser } from './ConfigParser';
 import { SiteDao } from '../../data/db/dao/SiteDao';
-import { LineDao } from '../../data/dao/LineDao';
+import { LineDao } from '../../data/db/dao/LineDao';
 import http from '@ohos.net.http';
 
 const TAG = 'LineManager';

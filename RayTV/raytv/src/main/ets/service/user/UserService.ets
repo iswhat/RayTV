@@ -6,7 +6,7 @@ import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import ConfigService from '../config/ConfigService';
-import DatabaseManager from '../db/DatabaseManager';
+import DatabaseManager from '../../data/db/DatabaseManager';
 import RepositoryFactory from '../repository/RepositoryFactory';
 import { NetworkRepository } from '../repository/NetworkRepository';
 import { DatabaseRepository } from '../repository/DatabaseRepository';

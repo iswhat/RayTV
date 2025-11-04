@@ -3,7 +3,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import FileUtil from '../../common/util/FileUtil';
-import { SubtitleStyle, DEFAULT_SUBTITLE_STYLE } from './PlayerService';
+import { SubtitleStyle, DEFAULT_SUBTITLE_STYLE } from '../player/PlayerService';
 
 // 常量定义
 const TAG = 'SubtitleService';

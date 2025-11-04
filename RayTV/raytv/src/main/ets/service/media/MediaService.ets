@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
 import DistributedDataService from '../sync/DistributedDataService';
 import DeviceManager from '../device/DeviceManager';
-import PlayerService from './PlayerService';
+import PlayerService from '../player/PlayerService';
 import { SyncDataType } from '../sync/DistributedDataService';
 import { Vod, Episode, VodCategory, VodTag } from '../../data/bean/Vod';
 import { LiveChannel, LiveGroup, EpgItem } from '../../data/bean/Live';

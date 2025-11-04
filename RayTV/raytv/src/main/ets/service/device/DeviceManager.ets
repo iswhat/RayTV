@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import deviceManager from '@ohos.distributedHardware.deviceManager';
 import { BusinessError } from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
-import DistributedDataService from './DistributedDataService';
+import DistributedDataService from '../sync/DistributedDataService';
 
 // 常量定义
 const TAG = 'DeviceManager';
