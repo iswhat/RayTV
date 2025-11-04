@@ -1,5 +1,5 @@
 import Logger from '../../../common/util/Logger';
-import RepositoryFactory from '../repository/RepositoryFactory';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import ConfigService from '../../service/config/ConfigService';
 import HistoryService from '../../service/media/HistoryService';
 import { SiteService } from './spider/SiteService';

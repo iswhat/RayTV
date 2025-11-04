@@ -7,9 +7,9 @@ import DateUtil from '../../common/util/DateUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import ConfigService from '../config/ConfigService';
 import DatabaseManager from '../../data/db/DatabaseManager';
-import RepositoryFactory from '../repository/RepositoryFactory';
-import { NetworkRepository } from '../repository/NetworkRepository';
-import { DatabaseRepository } from '../repository/DatabaseRepository';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
+import { NetworkRepository } from '../../data/repository/NetworkRepository';
+import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
 import { BusinessError } from '@ohos.base';
 import { http } from '@ohos.net.http';
 

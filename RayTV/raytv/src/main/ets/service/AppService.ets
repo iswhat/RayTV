@@ -14,7 +14,7 @@ import PlayerService from './player/PlayerService';
 import LiveStreamService from './live/LiveStreamService';
 import SubtitleService from './media/SubtitleService';
 import FileService from './storage/FileService';
-import RepositoryFactory from '../repository/RepositoryFactory';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import { parserService } from './parser/index';
 
 // 常量定义

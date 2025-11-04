@@ -1,4 +1,4 @@
-import Logger from '../../common/util/Logger';
+import Logger from '../../../common/util/Logger';
 import { BaseLoader, LoaderType, Site } from './BaseLoader';
 import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
 import HttpService from '../../http/HttpService';

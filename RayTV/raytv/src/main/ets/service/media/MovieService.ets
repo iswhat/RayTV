@@ -3,9 +3,9 @@ import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
-import RepositoryFactory from '../repository/RepositoryFactory';
-import { NetworkRepository } from '../repository/NetworkRepository';
-import { DatabaseRepository } from '../repository/DatabaseRepository';
+import RepositoryFactory from '../../data/repository/RepositoryFactory';
+import { NetworkRepository } from '../../data/repository/NetworkRepository';
+import { DatabaseRepository } from '../../data/repository/DatabaseRepository';
 
 // 导入模型和DTO
 import Movie, { VideoType, VideoQuality, RatingInfo, VideoSource, Episode } from '../model/Movie';
