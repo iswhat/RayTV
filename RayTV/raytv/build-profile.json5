@@ -5,10 +5,6 @@
       "copyCodeResource": {
         "enable": false
       }
-    },
-    "strictMode": {
-      "caseSensitiveCheck": true,
-      "useNormalizedOHMUrl": true
     }
   },
   "buildOptionSet": [
@@ -19,10 +15,6 @@
           "ruleOptions": {
             "enable": false
           }
-        },
-        "buildProfile": {
-          "sourceMap": true,
-          "hotReload": true
         }
       }
     },
@@ -36,10 +28,6 @@
               "./obfuscation-rules.txt"
             ]
           }
-        },
-        "buildProfile": {
-          "sourceMap": false,
-          "optimize": true
         }
       }
     }
@@ -49,8 +37,7 @@
       "name": "default"
     },
     {
-      "name": "ohosTest",
-      "runtimeOS": "HarmonyOS"
+      "name": "ohosTest"
     }
   ]
 }
