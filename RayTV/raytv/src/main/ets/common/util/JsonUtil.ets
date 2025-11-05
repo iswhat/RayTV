@@ -92,7 +92,7 @@ export default class JsonUtil {
       }
       
       if (obj instanceof Date) {
-        return new Date(obj.getTime()) as unknown as T;
+        return new Date(obj.getTime()) as T;
       }
       
       if (Array.isArray(obj)) {
@@ -100,7 +100,7 @@ export default class JsonUtil {
         for (let i = 0; i < obj.length; i++) {
           cloneArr[i] = JsonUtil.deepClone(obj[i]);
         }
-        return cloneArr as unknown as T;
+        return cloneArr as T;
       }
       
       if (typeof obj === 'object' && obj !== null) {
@@ -111,7 +111,7 @@ export default class JsonUtil {
           const key = keys[i];
           cloneObj[key] = JsonUtil.deepClone((obj as Record<string, unknown>)[key]);
         }
-        return cloneObj as unknown as T;
+        return cloneObj as T;
       }
       
       return obj;

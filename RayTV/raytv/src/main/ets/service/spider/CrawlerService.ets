@@ -348,9 +348,9 @@ export class CrawlerService {
   /**
    * 调用爬虫实例方法
    */
-  private async callSpiderMethod<T>(spider: SiteSpider, methodName: string, args: any[]): Promise<T> {
+  private async callSpiderMethod<T>(spider: SiteSpider, methodName: string, args: unknown[]): Promise<T> {
     try {
-      const method = (spider as any)[methodName];
+      const method = (spider as Record<string, unknown>)[methodName];
       if (typeof method === 'function') {
         return await method.apply(spider, args) as T;
       } else {

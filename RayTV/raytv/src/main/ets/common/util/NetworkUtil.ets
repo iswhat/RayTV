@@ -6,6 +6,8 @@ import connection from '@ohos.net.connection';
 import { BusinessError } from '@ohos.base';
 import { fileIO } from '@ohos.file.fs';
 import { CacheManager } from '../../service/spider/CacheManager';
+import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'NetworkUtil';
 
@@ -41,6 +43,26 @@ export default class NetworkUtil {
   private static readonly MAX_RETRY_COUNT = 3;
   private static networkStatusListeners: Set<(isOnline: boolean, networkType: string) => void> = new Set();
   private static isInitialized: boolean = false;
+  private static context: common.Context | null = null;
+
+  /**
+   * 设置应用上下文
+   * @param ctx 应用上下文
+   */
+  public static setContext(ctx: common.Context): void {
+    NetworkUtil.context = ctx;
+  }
+
+  /**
+   * 获取应用上下文
+   * @returns 应用上下文
+   */
+  private static getContext(): common.Context {
+    if (!NetworkUtil.context) {
+      throw new Error('NetworkUtil context not set. Please call NetworkUtil.setContext() first.');
+    }
+    return NetworkUtil.context;
+  }
 
   /**
    * 发送HTTP请求
@@ -60,6 +82,15 @@ export default class NetworkUtil {
     } = config;
 
     try {
+      // 检查网络权限
+      try {
+        const atManager = abilityAccessCtrl.createAtManager();
+        await atManager.requestPermissionsFromUser(getContext(), ['ohos.permission.INTERNET']);
+      } catch (permissionError) {
+        Logger.error(TAG, 'Failed to request INTERNET permission', permissionError);
+        throw new Error('Network permission denied');
+      }
+
       // 构建完整URL（添加查询参数）
       let fullUrl = url;
       if (Object.keys(params).length > 0) {
@@ -120,7 +151,7 @@ export default class NetworkUtil {
         return {
           status: response.responseCode,
           statusText: String(response.responseCode),
-          data: responseData,
+          data: responseData as T,
           headers: responseHeaders
         };
       } catch (error) {

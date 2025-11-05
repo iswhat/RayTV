@@ -43,7 +43,7 @@ export class CommonUtil {
     }
     
     if (obj instanceof Date) {
-      return new Date(obj.getTime()) as unknown as T;
+      return new Date(obj.getTime()) as T;
     }
     
     if (obj instanceof Array) {
@@ -51,7 +51,7 @@ export class CommonUtil {
       for (const item of obj) {
         clonedArray.push(this.deepClone(item));
       }
-      return clonedArray as unknown as T;
+      return clonedArray as T;
     }
     
     if (obj instanceof Object) {
@@ -504,7 +504,7 @@ export class CommonUtil {
    * @param defaultValue 默认值
    * @returns 属性值或默认值
    */
-  public getNestedProperty<T>(obj: any, path: string, defaultValue: T): T {
+  public getNestedProperty<T>(obj: unknown, path: string, defaultValue: T): T {
     const keys = path.split('.');
     let result = obj;
     
@@ -512,10 +512,10 @@ export class CommonUtil {
       if (result === null || result === undefined || (typeof result !== 'object' && !Array.isArray(result))) {
         return defaultValue;
       }
-      result = result[key];
+      result = (result as Record<string, unknown>)[key];
     }
     
-    return result !== undefined && result !== null ? result as unknown as T : defaultValue;
+    return result !== undefined && result !== null ? result as T : defaultValue;
   }
   
   /**

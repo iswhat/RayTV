@@ -65,6 +65,12 @@
   "requestPermissions": [
     {
       "name": "ohos.permission.INTERNET"
+    },
+    {
+      "name": "ohos.permission.DISTRIBUTED_DATASYNC"
+    },
+    {
+      "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE"
     }
   ],
   "deviceConfig": {

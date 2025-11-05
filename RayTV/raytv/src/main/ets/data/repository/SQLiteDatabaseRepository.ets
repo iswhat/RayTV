@@ -11,8 +11,9 @@ import Movie from '../model/Movie';
 import User from '../model/User';
 import History from '../model/History';
 import SearchResult, { ResultType } from '../model/SearchResult';
-import dataRdb from '@ohos.data.rdb';
+import relationalStore from '@ohos.data.relationalStore';
 import { BusinessError } from '@ohos.base';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'SQLiteDatabaseRepository';
 const DATABASE_NAME = 'raytv.db';
@@ -23,7 +24,7 @@ const DATABASE_VERSION = 1;
  * 实现了DatabaseRepository接口，提供基于SQLite的数据库操作功能
  */
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
-  private rdbStore: dataRdb.RdbStore | null = null;
+  private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
   private configMap: Map<string, any> = new Map(); // 用于缓存配置
 
@@ -34,20 +35,25 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     try {
       Logger.info(TAG, 'Initializing database...');
       
-      const config: dataRdb.StoreConfig = {
+      const config: relationalStore.StoreConfig = {
         name: DATABASE_NAME,
-        securityLevel: dataRdb.SecurityLevel.S1
+        securityLevel: relationalStore.SecurityLevel.S1
       };
 
       // 创建或打开数据库
-      const rdbStore = await dataRdb.getRdbStore(config, DATABASE_VERSION, {
-        onCreate: (rdb: dataRdb.RdbStore) => {
-          this.onCreateDatabase(rdb);
-        },
-        onUpgrade: (rdb: dataRdb.RdbStore, oldVersion: number, newVersion: number) => {
-          this.onUpgradeDatabase(rdb, oldVersion, newVersion);
-        }
-      });
+      const context = getContext(this) as common.UIAbilityContext;
+      const rdbStore = await relationalStore.getRdbStore(context, config);
+      
+      // 设置数据库版本和升级回调
+      await rdbStore.setVersion(DATABASE_VERSION);
+      
+      // 检查是否需要创建或升级数据库
+      const currentVersion = await rdbStore.getVersion();
+      if (currentVersion === 0) {
+        await this.onCreateDatabase(rdbStore);
+      } else if (currentVersion < DATABASE_VERSION) {
+        await this.onUpgradeDatabase(rdbStore, currentVersion, DATABASE_VERSION);
+      }
 
       this.rdbStore = rdbStore;
       this.status = DatabaseStatus.READY;
@@ -114,12 +120,12 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 创建数据库表
    */
-  private onCreateDatabase(rdb: dataRdb.RdbStore): void {
+  private async onCreateDatabase(rdb: relationalStore.RdbStore): Promise<void> {
     try {
       Logger.info(TAG, 'Creating database tables...');
       
       // 创建电影表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS movies (
           id TEXT PRIMARY KEY,
           title TEXT NOT NULL,

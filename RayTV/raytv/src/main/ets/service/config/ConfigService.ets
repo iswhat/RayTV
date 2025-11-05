@@ -451,7 +451,7 @@ export default class ConfigService {
           ...customConfig[configKey]
         };
       } else if (customConfig[configKey] !== undefined) {
-        merged[configKey] = customConfig[configKey] as any;
+        merged[configKey] = customConfig[configKey] as unknown as Config[keyof Config];
       }
     });
     

@@ -181,7 +181,7 @@ export class FavoriteService {
         [favoriteId]
       );
 
-      return (result.rows as any[]).length > 0;
+      return (result.rows as Record<string, unknown>[]).length > 0;
     } catch (error) {
       Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
       return false;
@@ -213,7 +213,7 @@ export class FavoriteService {
 
       // 构建查询条件
       let whereClause = '';
-      const whereParams: any[] = [];
+      const whereParams: unknown[] = [];
       
       if (type) {
         whereClause = 'WHERE type = ?';
@@ -243,7 +243,7 @@ export class FavoriteService {
       );
 
       // 解析结果
-      return this.parseFavoriteRows(result.rows as any[]);
+      return this.parseFavoriteRows(result.rows as Record<string, unknown>[]);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get favorite list: ${error}`);
       return [];
@@ -265,7 +265,7 @@ export class FavoriteService {
         [favoriteId]
       );
 
-      const rows = result.rows as any[];
+      const rows = result.rows as Record<string, unknown>[];
       if (rows.length > 0) {
         return this.parseFavoriteRow(rows[0]);
       }

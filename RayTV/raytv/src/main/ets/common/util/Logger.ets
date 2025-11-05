@@ -304,34 +304,46 @@ class Logger {
    * @param args 格式化参数
    */
   public static format(tag: string, format: string, ...args: Array<string | number | boolean | object | undefined | null>): void {
-    // 不使用正则表达式，使用简单的字符串替换
-    let message = format;
-    for (let i = 0; i < args.length; i++) {
-      const placeholder = `\{${i}\}`;
-      const arg = args[i];
-      const argStr = arg !== undefined && arg !== null ? String(arg) : '';
-      
-      // 避免使用replace方法，手动实现字符串替换
-      let newMessage = '';
-      let lastIndex = 0;
-      let index = message.indexOf(placeholder);
-      
-      while (index !== -1) {
-        newMessage += message.substring(lastIndex, index);
-        newMessage += argStr;
-        lastIndex = index + placeholder.length;
-        index = message.indexOf(placeholder, lastIndex);
-      }
-      
-      newMessage += message.substring(lastIndex);
-      message = newMessage;
-    }
+    // 使用formatMessage方法进行字符串格式化
+    const formattedMessage = Logger.formatMessage(format, ...args);
     
     // 不使用logInternal，直接调用log方法
     const instance = Logger.getInstance();
     if (instance.shouldLog(LogLevel.INFO)) {
-      instance.log(LogLevel.INFO, `[${tag}] ${message}`);
+      instance.log(LogLevel.INFO, `[${tag}] ${formattedMessage}`);
     }
+  }
+
+  /**
+   * 格式化日志消息（手动实现字符串替换，避免使用正则表达式）
+   * @param message 原始消息
+   * @param args 替换参数
+   * @returns 格式化后的消息
+   */
+  private static formatMessage(message: string, ...args: unknown[]): string {
+    if (!args || args.length === 0) {
+      return message;
+    }
+    
+    let result = message;
+    for (let i = 0; i < args.length; i++) {
+      const placeholder = `{${i}}`;
+      const value = String(args[i]);
+      
+      // 手动替换占位符，避免使用正则表达式
+      let startIndex = 0;
+      while (true) {
+        const index = result.indexOf(placeholder, startIndex);
+        if (index === -1) {
+          break;
+        }
+        
+        result = result.substring(0, index) + value + result.substring(index + placeholder.length);
+        startIndex = index + value.length;
+      }
+    }
+    
+    return result;
   }
 
   /**

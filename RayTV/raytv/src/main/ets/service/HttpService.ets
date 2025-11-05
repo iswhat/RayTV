@@ -4,11 +4,14 @@
 import http from '@ohos.net.http';
 import { ConfigService } from './config/ConfigService';
 import { AdBlockManager } from './adblock/AdBlockManager';
+import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
+import common from '@ohos.app.ability.common';
 
 export class HttpService {
   private static instance: HttpService;
-  private httpConfig: any;
+  private httpConfig: Record<string, unknown>;
   private adBlockManager: AdBlockManager;
+  private context: common.Context | null = null;
 
   private constructor() {
     this.httpConfig = ConfigService.getInstance().getConfig('network') || {
@@ -16,6 +19,25 @@ export class HttpService {
       retryCount: 3
     };
     this.adBlockManager = AdBlockManager.getInstance();
+  }
+
+  /**
+   * 设置应用上下文
+   * @param ctx 应用上下文
+   */
+  public setContext(ctx: common.Context): void {
+    this.context = ctx;
+  }
+
+  /**
+   * 获取应用上下文
+   * @returns 应用上下文
+   */
+  private getContext(): common.Context {
+    if (!this.context) {
+      throw new Error('HttpService context not set. Please call setContext() first.');
+    }
+    return this.context;
   }
 
   /**
@@ -46,7 +68,7 @@ export class HttpService {
    * @param data 请求数据
    * @param options 请求选项
    */
-  public async post<T>(url: string, data?: any, options?: HttpOptions): Promise<HttpResponse<T>> {
+  public async post<T>(url: string, data?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
     return this.request<T>(url, {
       method: 'POST',
       data,
@@ -61,6 +83,15 @@ export class HttpService {
    */
   public async request<T>(url: string, options: HttpRequestOptions): Promise<HttpResponse<T>> {
     try {
+      // 检查网络权限
+      try {
+        const atManager = abilityAccessCtrl.createAtManager();
+        await atManager.requestPermissionsFromUser(this.getContext(), ['ohos.permission.INTERNET']);
+      } catch (permissionError) {
+        console.error('Failed to request INTERNET permission', permissionError);
+        throw new Error('Network permission denied');
+      }
+
       // 检查URL是否在广告屏蔽列表中
       if (this.adBlockManager.isEnabled() && this.adBlockManager.shouldBlockUrl(url)) {
         throw new Error(`URL blocked by ad blocker: ${url}`);
@@ -145,6 +176,15 @@ export class HttpService {
    */
   public async downloadFile(url: string, filePath: string, options?: DownloadOptions): Promise<DownloadResult> {
     try {
+      // 检查网络权限
+      try {
+        const atManager = abilityAccessCtrl.createAtManager();
+        await atManager.requestPermissionsFromUser(this.getContext(), ['ohos.permission.INTERNET']);
+      } catch (permissionError) {
+        console.error('Failed to request INTERNET permission', permissionError);
+        throw new Error('Network permission denied');
+      }
+
       // 检查URL是否在广告屏蔽列表中
       if (this.adBlockManager.isEnabled() && this.adBlockManager.shouldBlockUrl(url)) {
         throw new Error(`URL blocked by ad blocker: ${url}`);
@@ -226,7 +266,7 @@ export interface HttpOptions {
  */
 export interface HttpRequestOptions extends HttpOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  data?: any;
+  data?: unknown;
 }
 
 /**

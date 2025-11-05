@@ -194,12 +194,13 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     try {
       const cached = await StorageUtil.get(key);
       if (cached && typeof cached === 'object' && 'data' in cached && 'timestamp' in cached) {
+        const cacheItem = cached as Record<string, unknown>;
         const now = Date.now();
-        const expiry = (cached as any).timestamp + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
+        const expiry = (cacheItem.timestamp as number) + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
         
         if (now < expiry) {
           Logger.debug(TAG, `Cache hit for key: ${key}`);
-          return (cached as any).data;
+          return cacheItem.data as T;
         } else {
           Logger.debug(TAG, `Cache expired for key: ${key}`);
           await StorageUtil.remove(key);
@@ -215,7 +216,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   /**
    * 设置缓存数据
    */
-  private async setCachedData(key: string, data: any): Promise<void> {
+  private async setCachedData(key: string, data: unknown): Promise<void> {
     if (!this.config.cacheEnabled) {
       return;
     }

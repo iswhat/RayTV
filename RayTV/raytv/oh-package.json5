@@ -35,7 +35,12 @@
     "@ohos.app.ability.AbilityConstant": "^9.0.0",
     "@ohos.app.ability.Want": "^9.0.0",
     "@ohos.ability.kits.context": "^9.0.0",
-    "@ohos.taskpool": "^9.0.0"
+    "@ohos.taskpool": "^9.0.0",
+    "@ohos.data.distributedKVStore": "^9.0.0",
+    "@ohos.data.relationalStore": "^9.0.0",
+    "@ohos.abilityAccessCtrl": "^9.0.0",
+    "@ohos.app.ability.common": "^9.0.0",
+    "@ohos.security.cryptoFramework": "^9.0.0"
   }
 }
 
