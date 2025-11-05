@@ -1,7 +1,7 @@
 import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../db/DatabaseManager';
 import { TableSchema } from '../db/TableSchema';
-import { ValuesBucket, RelationalPredicates, ResultSet } from '@kit.RelationalStore';
+import { ValuesBucket, RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
 
 /**
  * 订阅项数据结构

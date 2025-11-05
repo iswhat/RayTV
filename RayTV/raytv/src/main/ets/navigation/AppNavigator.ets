@@ -5,11 +5,11 @@ import router from '@ohos.router';
 import { StorageUtil } from '../common/util/StorageUtil';
 
 export class AppNavigator {
-  private static instance: AppNavigator;
-  private storageUtil: StorageUtil;
-  private navigationHistory: NavigationHistoryItem[] = [];
+  static instance: AppNavigator;
+  storageUtil: StorageUtil;
+  navigationHistory: NavigationHistoryItem[] = [];
 
-  private constructor() {
+  constructor() {
     this.storageUtil = StorageUtil.getInstance();
     this.loadNavigationHistory();
   }
@@ -17,7 +17,7 @@ export class AppNavigator {
   /**
    * 获取单例实例
    */
-  public static getInstance(): AppNavigator {
+  static getInstance(): AppNavigator {
     if (!AppNavigator.instance) {
       AppNavigator.instance = new AppNavigator();
     }
@@ -27,7 +27,7 @@ export class AppNavigator {
   /**
    * 导航到首页
    */
-  public async navigateToHome(): Promise<void> {
+  async navigateToHome(): Promise<void> {
     await this.navigateTo(PageRoute.HOME);
   }
 
@@ -35,21 +35,21 @@ export class AppNavigator {
    * 导航到视频播放页
    * @param params 播放参数
    */
-  public async navigateToVideoPlay(params: VideoPlayParams): Promise<void> {
+  async navigateToVideoPlay(params: VideoPlayParams): Promise<void> {
     await this.navigateTo(PageRoute.VIDEO_PLAY, params);
   }
 
   /**
    * 导航到线路管理页
    */
-  public async navigateToLineManager(): Promise<void> {
+  async navigateToLineManager(): Promise<void> {
     await this.navigateTo(PageRoute.LINE_MANAGER);
   }
 
   /**
    * 导航到设置页
    */
-  public async navigateToSettings(): Promise<void> {
+  async navigateToSettings(): Promise<void> {
     await this.navigateTo(PageRoute.SETTINGS);
   }
 
@@ -57,21 +57,21 @@ export class AppNavigator {
    * 导航到搜索页
    * @param prefilledKeyword 预填关键词
    */
-  public async navigateToSearch(prefilledKeyword?: string): Promise<void> {
+  async navigateToSearch(prefilledKeyword?: string): Promise<void> {
     await this.navigateTo(PageRoute.SEARCH, { keyword: prefilledKeyword });
   }
 
   /**
    * 导航到收藏页
    */
-  public async navigateToFavorites(): Promise<void> {
+  async navigateToFavorites(): Promise<void> {
     await this.navigateTo(PageRoute.FAVORITES);
   }
 
   /**
    * 导航到历史记录页
    */
-  public async navigateToHistory(): Promise<void> {
+  async navigateToHistory(): Promise<void> {
     await this.navigateTo(PageRoute.HISTORY);
   }
 
@@ -79,7 +79,7 @@ export class AppNavigator {
    * 导航到分类页
    * @param category 分类信息
    */
-  public async navigateToCategory(category?: CategoryInfo): Promise<void> {
+  async navigateToCategory(category?: CategoryInfo): Promise<void> {
     await this.navigateTo(PageRoute.CATEGORY, category);
   }
 
@@ -87,14 +87,14 @@ export class AppNavigator {
    * 导航到详情页
    * @param params 详情参数
    */
-  public async navigateToDetail(params: DetailParams): Promise<void> {
+  async navigateToDetail(params: DetailParams): Promise<void> {
     await this.navigateTo(PageRoute.DETAIL, params);
   }
 
   /**
    * 导航到直播页
    */
-  public async navigateToLive(): Promise<void> {
+  async navigateToLive(): Promise<void> {
     await this.navigateTo(PageRoute.LIVE);
   }
 
@@ -131,7 +131,7 @@ export class AppNavigator {
   /**
    * 返回上一页
    */
-  public async back(): Promise<void> {
+  async back(): Promise<void> {
     try {
       await router.back();
       this.removeLastFromHistory();
@@ -144,7 +144,7 @@ export class AppNavigator {
   /**
    * 返回首页（清空导航栈）
    */
-  public async backToHome(): Promise<void> {
+  async backToHome(): Promise<void> {
     try {
       await router.clear();
       await router.pushUrl({
@@ -163,7 +163,7 @@ export class AppNavigator {
    * @param route 目标路由
    * @param params 路由参数
    */
-  public async replace(route: string, params?: any): Promise<void> {
+  async replace(route: string, params?: any): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       await router.replaceUrl({
@@ -181,7 +181,7 @@ export class AppNavigator {
    * 获取页面URL
    * @param route 页面路由
    */
-  private getPageUrl(route: string): string {
+  getPageUrl(route: string): string {
     const urlMap: Record<string, string> = {
       [PageRoute.HOME]: 'pages/HomePage',
       [PageRoute.VIDEO_PLAY]: 'pages/VideoPlayPage',
@@ -202,7 +202,7 @@ export class AppNavigator {
    * 添加到导航历史
    * @param item 历史记录项
    */
-  private addToHistory(item: NavigationHistoryItem): void {
+  addToHistory(item: NavigationHistoryItem): void {
     this.navigationHistory.push(item);
     // 限制历史记录长度
     if (this.navigationHistory.length > 50) {
@@ -214,7 +214,7 @@ export class AppNavigator {
   /**
    * 从历史记录中移除最后一项
    */
-  private removeLastFromHistory(): void {
+  removeLastFromHistory(): void {
     if (this.navigationHistory.length > 0) {
       this.navigationHistory.pop();
       this.saveNavigationHistory();
@@ -225,7 +225,7 @@ export class AppNavigator {
    * 替换历史记录中的最后一项
    * @param item 新的历史记录项
    */
-  private replaceLastInHistory(item: NavigationHistoryItem): void {
+  replaceLastInHistory(item: NavigationHistoryItem): void {
     if (this.navigationHistory.length > 0) {
       this.navigationHistory[this.navigationHistory.length - 1] = item;
       this.saveNavigationHistory();
@@ -235,7 +235,7 @@ export class AppNavigator {
   /**
    * 保存导航历史到存储
    */
-  private async saveNavigationHistory(): Promise<void> {
+  async saveNavigationHistory(): Promise<void> {
     try {
       await this.storageUtil.save('navigationHistory', this.navigationHistory);
     } catch (error) {
@@ -246,7 +246,7 @@ export class AppNavigator {
   /**
    * 从存储加载导航历史
    */
-  private async loadNavigationHistory(): Promise<void> {
+  async loadNavigationHistory(): Promise<void> {
     try {
       const history = await this.storageUtil.get<any[]>('navigationHistory', []);
       this.navigationHistory = history || [];
@@ -259,7 +259,7 @@ export class AppNavigator {
   /**
    * 获取当前页面路由
    */
-  public getCurrentRoute(): string {
+  getCurrentRoute(): string {
     const state = router.getState();
     const url = state.path;
     
@@ -285,16 +285,16 @@ export class AppNavigator {
  * 页面路由常量
  */
 export class PageRoute {
-  public static readonly HOME = 'home';
-  public static readonly VIDEO_PLAY = 'videoPlay';
-  public static readonly LINE_MANAGER = 'lineManager';
-  public static readonly SETTINGS = 'settings';
-  public static readonly SEARCH = 'search';
-  public static readonly FAVORITES = 'favorites';
-  public static readonly HISTORY = 'history';
-  public static readonly CATEGORY = 'category';
-  public static readonly DETAIL = 'detail';
-  public static readonly LIVE = 'live';
+  static readonly HOME = 'home';
+  static readonly VIDEO_PLAY = 'videoPlay';
+  static readonly LINE_MANAGER = 'lineManager';
+  static readonly SETTINGS = 'settings';
+  static readonly SEARCH = 'search';
+  static readonly FAVORITES = 'favorites';
+  static readonly HISTORY = 'history';
+  static readonly CATEGORY = 'category';
+  static readonly DETAIL = 'detail';
+  static readonly LIVE = 'live';
 }
 
 /**

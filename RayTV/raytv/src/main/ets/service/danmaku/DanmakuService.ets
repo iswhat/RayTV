@@ -5,15 +5,15 @@ import { StorageUtil } from '../../common/util/StorageUtil';
 import { HttpService } from '../HttpService';
 
 export class DanmakuService {
-  private static instance: DanmakuService;
-  private storageUtil: StorageUtil;
-  private httpService: HttpService;
-  private danmakuConfig: DanmakuConfig;
-  private danmakuHistory: DanmakuHistoryItem[] = [];
-  private customDanmakus: DanmakuItem[] = [];
-  private listeners: DanmakuListener[] = [];
+  static instance: DanmakuService;
+  storageUtil: StorageUtil;
+  httpService: HttpService;
+  danmakuConfig: DanmakuConfig;
+  danmakuHistory: DanmakuHistoryItem[] = [];
+  customDanmakus: DanmakuItem[] = [];
+  listeners: DanmakuListener[] = [];
 
-  private constructor() {
+  constructor() {
     this.storageUtil = StorageUtil.getInstance();
     this.httpService = HttpService.getInstance();
     this.initialize();
@@ -22,7 +22,7 @@ export class DanmakuService {
   /**
    * 获取单例实例
    */
-  public static getInstance(): DanmakuService {
+  static getInstance(): DanmakuService {
     if (!DanmakuService.instance) {
       DanmakuService.instance = new DanmakuService();
     }
@@ -32,7 +32,7 @@ export class DanmakuService {
   /**
    * 初始化弹幕服务
    */
-  private async initialize(): Promise<void> {
+  async initialize(): Promise<void> {
     // 加载配置
     this.danmakuConfig = await this.storageUtil.get<DanmakuConfig>('danmakuConfig', {
       enabled: true,
@@ -54,7 +54,7 @@ export class DanmakuService {
    * 设置弹幕配置
    * @param config 弹幕配置
    */
-  public async setConfig(config: Partial<DanmakuConfig>): Promise<void> {
+  async setConfig(config: Partial<DanmakuConfig>): Promise<void> {
     this.danmakuConfig = { ...this.danmakuConfig, ...config };
     await this.storageUtil.save('danmakuConfig', this.danmakuConfig);
     this.notifyConfigChanged();
@@ -63,7 +63,7 @@ export class DanmakuService {
   /**
    * 获取弹幕配置
    */
-  public getConfig(): DanmakuConfig {
+  getConfig(): DanmakuConfig {
     return { ...this.danmakuConfig };
   }
 
@@ -73,7 +73,7 @@ export class DanmakuService {
    * @param siteKey 站点键
    * @param episodeIndex 剧集索引
    */
-  public async loadDanmakus(videoId: string, siteKey: string, episodeIndex?: number): Promise<DanmakuItem[]> {
+  async loadDanmakus(videoId: string, siteKey: string, episodeIndex?: number): Promise<DanmakuItem[]> {
     try {
       // 首先从本地历史加载
       const cacheKey = this.getCacheKey(videoId, siteKey, episodeIndex);
@@ -102,7 +102,7 @@ export class DanmakuService {
    * 发送弹幕
    * @param danmaku 弹幕内容
    */
-  public async sendDanmaku(danmaku: Omit<DanmakuItem, 'id' | 'timestamp'>): Promise<boolean> {
+  async sendDanmaku(danmaku: Omit<DanmakuItem, 'id' | 'timestamp'>): Promise<boolean> {
     try {
       const newDanmaku: DanmakuItem = {
         ...danmaku,
@@ -134,7 +134,7 @@ export class DanmakuService {
    * @param danmakus 弹幕列表
    * @param episodeIndex 剧集索引
    */
-  public async saveDanmakusToHistory(videoId: string, siteKey: string, danmakus: DanmakuItem[], episodeIndex?: number): Promise<void> {
+  async saveDanmakusToHistory(videoId: string, siteKey: string, danmakus: DanmakuItem[], episodeIndex?: number): Promise<void> {
     try {
       const cacheKey = this.getCacheKey(videoId, siteKey, episodeIndex);
       
@@ -163,7 +163,7 @@ export class DanmakuService {
    * 添加弹幕过滤关键词
    * @param keyword 关键词
    */
-  public async addFilterKeyword(keyword: string): Promise<void> {
+  async addFilterKeyword(keyword: string): Promise<void> {
     if (!this.danmakuConfig.filterKeywords.includes(keyword)) {
       this.danmakuConfig.filterKeywords.push(keyword);
       await this.setConfig(this.danmakuConfig);
@@ -174,7 +174,7 @@ export class DanmakuService {
    * 移除弹幕过滤关键词
    * @param keyword 关键词
    */
-  public async removeFilterKeyword(keyword: string): Promise<void> {
+  async removeFilterKeyword(keyword: string): Promise<void> {
     this.danmakuConfig.filterKeywords = this.danmakuConfig.filterKeywords.filter(k => k !== keyword);
     await this.setConfig(this.danmakuConfig);
   }
@@ -183,7 +183,7 @@ export class DanmakuService {
    * 添加弹幕监听器
    * @param listener 监听器
    */
-  public addListener(listener: DanmakuListener): void {
+  addListener(listener: DanmakuListener): void {
     if (!this.listeners.includes(listener)) {
       this.listeners.push(listener);
     }
@@ -193,7 +193,7 @@ export class DanmakuService {
    * 移除弹幕监听器
    * @param listener 监听器
    */
-  public removeListener(listener: DanmakuListener): void {
+  removeListener(listener: DanmakuListener): void {
     this.listeners = this.listeners.filter(l => l !== listener);
   }
 

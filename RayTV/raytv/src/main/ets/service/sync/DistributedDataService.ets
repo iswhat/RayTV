@@ -77,20 +77,20 @@ export interface SyncState {
 type DataChangeListener = (key: string, data: any, deviceId: string) => void;
 
 export default class DistributedDataService {
-  private static instance: DistributedDataService;
-  private kvStore: distributedData.KVStore | null = null;
-  private configService: ConfigService;
-  private syncConfig: SyncConfig = DEFAULT_SYNC_CONFIG;
-  private syncState: SyncState = { status: SyncStatus.IDLE };
-  private dataListeners: Map<string, DataChangeListener[]> = new Map();
-  private syncTimerId: number | null = null;
-  private deviceIds: string[] = [];
-  private isInitialized: boolean = false;
+  static instance: DistributedDataService;
+  kvStore: distributedData.KVStore | null = null;
+  configService: ConfigService;
+  syncConfig: SyncConfig = DEFAULT_SYNC_CONFIG;
+  syncState: SyncState = { status: SyncStatus.IDLE };
+  dataListeners: Map<string, DataChangeListener[]> = new Map();
+  syncTimerId: number | null = null;
+  deviceIds: string[] = [];
+  isInitialized: boolean = false;
 
   /**
    * 获取单例实例
    */
-  public static getInstance(): DistributedDataService {
+  static getInstance(): DistributedDataService {
     if (!DistributedDataService.instance) {
       DistributedDataService.instance = new DistributedDataService();
     }
@@ -100,14 +100,14 @@ export default class DistributedDataService {
   /**
    * 构造函数
    */
-  private constructor() {
+  constructor() {
   }
 
   /**
    * 初始化分布式数据服务
    * @param context 应用上下文
    */
-  public async initialize(context: Context): Promise<void> {
+  async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
       Logger.info(TAG, 'Distributed data service already initialized');
       return;
@@ -147,7 +147,7 @@ export default class DistributedDataService {
   /**
    * 加载同步配置
    */
-  private async loadSyncConfig(): Promise<void> {
+  async loadSyncConfig(): Promise<void> {
     try {
       const savedConfig = await this.configService.getConfig('syncConfig', DEFAULT_SYNC_CONFIG);
       if (savedConfig) {
@@ -161,7 +161,7 @@ export default class DistributedDataService {
   /**
    * 保存同步配置
    */
-  public async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
+  async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = { ...this.syncConfig, ...config };
       await this.configService.setConfig('syncConfig', this.syncConfig);
@@ -181,14 +181,14 @@ export default class DistributedDataService {
   /**
    * 获取同步配置
    */
-  public getSyncConfig(): SyncConfig {
+  getSyncConfig(): SyncConfig {
     return { ...this.syncConfig };
   }
 
   /**
    * 注册数据变化监听
    */
-  private async registerDataChangeListener(): Promise<void> {
+  async registerDataChangeListener(): Promise<void> {
     if (!this.kvStore) {
       throw new Error('KVStore not initialized');
     }
@@ -228,7 +228,7 @@ export default class DistributedDataService {
    * @param dataType 数据类型
    * @param listener 监听回调
    */
-  public addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
+  addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
     
     if (!this.dataListeners.has(keyPrefix)) {
@@ -244,7 +244,7 @@ export default class DistributedDataService {
    * @param dataType 数据类型
    * @param listener 监听回调
    */
-  public removeDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
+  removeDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
     
     if (this.dataListeners.has(keyPrefix)) {
@@ -264,7 +264,7 @@ export default class DistributedDataService {
    * @param data 数据内容
    * @param deviceId 目标设备ID（可选，不指定则同步到所有设备）
    */
-  public async saveSyncData(dataType: SyncDataType, key: string, data: any, deviceId?: string): Promise<void> {
+  async saveSyncData(dataType: SyncDataType, key: string, data: any, deviceId?: string): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -298,7 +298,7 @@ export default class DistributedDataService {
    * @param key 数据键
    * @param deviceId 设备ID（可选，不指定则获取本地数据）
    */
-  public async getSyncData(dataType: SyncDataType, key: string, deviceId?: string): Promise<any | null> {
+  async getSyncData(dataType: SyncDataType, key: string, deviceId?: string): Promise<any | null> {
     if (!this.kvStore) {
       return null;
     }
@@ -332,7 +332,7 @@ export default class DistributedDataService {
    * @param dataType 数据类型
    * @param key 数据键
    */
-  public async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
+  async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -377,7 +377,7 @@ export default class DistributedDataService {
   /**
    * 手动触发数据同步
    */
-  public async synchronizeData(): Promise<void> {
+  async synchronizeData(): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled || this.syncState.status === SyncStatus.SYNCHRONIZING) {
       return;
     }
@@ -617,14 +617,14 @@ export default class DistributedDataService {
   /**
    * 获取同步状态
    */
-  public getSyncState(): SyncState {
+  getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
    * 关闭分布式数据服务
    */
-  public close(): void {
+  close(): void {
     this.stopAutoSync();
     // KVStore会由系统自动管理生命周期，不需要手动关闭
     Logger.info(TAG, 'Distributed data service closed');

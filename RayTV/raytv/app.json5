@@ -3,8 +3,8 @@
   "name": "RayTV",
   "versionName": "1.0.0",
   "versionCode": 1,
-  "minAPIVersion": 19,
-  "targetAPIVersion": 19,
+  "minAPIVersion": 9,
+  "targetAPIVersion": 9,
   "description": "一个功能强大的视频播放应用",
   "icon": "./assets/icon.png",
   "splashscreen": {
@@ -12,11 +12,17 @@
     "color": "#ffffff"
   },
   "orientation": ["portrait"],
-  "modules": [],
+  "modules": [
+    {
+      "name": "raytv",
+      "srcEntry": "./src/main/ets",
+      "description": "RayTV主模块"
+    }
+  ],
   "abilities": [
     {
-      "name": "raytvability.RaytvAbility",
-      "srcEntrance": "./src/main/ets/raytvability/RaytvAbility.ets",
+      "name": "MainAbility",
+      "srcEntrance": "./src/main/ets/MainAbility.ts",
       "description": "应用主入口",
       "icon": "./assets/icon.png",
       "label": "RayTV",

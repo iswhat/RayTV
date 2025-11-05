@@ -9,6 +9,16 @@
   },
   "buildOptionSet": [
     {
+      "name": "debug",
+      "arkOptions": {
+        "obfuscation": {
+          "ruleOptions": {
+            "enable": false
+          }
+        }
+      }
+    },
+    {
       "name": "release",
       "arkOptions": {
         "obfuscation": {
@@ -20,7 +30,7 @@
           }
         }
       }
-    },
+    }
   ],
   "targets": [
     {

@@ -4,7 +4,7 @@ import { DeviceInfo, DeviceType, DeviceCapability } from '../../data/bean/Device
 import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
 import deviceInfo from '@ohos.deviceInfo';
-import i18n from '@kit.I18nKit';
+import i18n from '@ohos.i18n';
 import connection from '@ohos.net.connection';
 import display from '@ohos.display';
 
@@ -288,8 +288,8 @@ export default class DeviceService {
    */
   private getDeviceLanguage(): string {
     try {
-      // 使用HarmonyOS系统语言API获取设备语言
-      return systemLanguage.getSystemLanguageSync() || 'zh-CN';
+      // 使用HarmonyOS i18n模块获取设备语言
+      return i18n.system.getSystemLanguageSync() || 'zh-CN';
     } catch (error) {
       Logger.error(TAG, 'Failed to get device language', error);
       return 'zh-CN';
@@ -526,7 +526,7 @@ export default class DeviceService {
       properties.osFullName = deviceInfo.osFullName || '';
       properties.apiVersion = deviceInfo.apiVersion.toString() || '';
       properties.deviceType = deviceInfo.deviceType || '';
-      properties.language = systemLanguage.getSystemLanguageSync() || '';
+      properties.language = i18n.system.getSystemLanguageSync() || '';
     } catch (error) {
       Logger.error(TAG, 'Error getting system properties', error);
     }

@@ -3,7 +3,6 @@ import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
-import Logger from '../common/util/Logger';
 
 /**
  * 应用主页面

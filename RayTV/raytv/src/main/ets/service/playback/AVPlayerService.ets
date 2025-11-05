@@ -636,40 +636,50 @@ export class AVPlayerServiceImpl implements AVPlayerService {
     if (!this.avPlayer) return;
     
     // 状态变化监听
-    this.avPlayer.on('stateChange', (state: number, reason?: number) => {
+    this.avPlayer.on('stateChange', (state: string, reason: number) => {
       Logger.info(this.TAG, `Player state changed: ${state}, reason: ${reason}`);
       
+      // 根据HarmonyOS AVPlayer状态映射到应用状态
       switch (state) {
-        case PlayerState.READY: // 准备就绪
+        case 'idle':
+          this.updateStatus(PlaybackStatus.IDLE);
+          break;
+        case 'initialized':
+          this.updateStatus(PlaybackStatus.INITIALIZED);
+          break;
+        case 'prepared':
           this.updateStatus(PlaybackStatus.PREPARED);
           break;
-        case PlayerState.PLAYING:
+        case 'playing':
           this.updateStatus(PlaybackStatus.PLAYING);
           break;
-        case PlayerState.PAUSED:
+        case 'paused':
           this.updateStatus(PlaybackStatus.PAUSED);
           break;
-        case PlayerState.STOPPED:
+        case 'stopped':
           this.updateStatus(PlaybackStatus.STOPPED);
           break;
-        case PlayerState.COMPLETED:
+        case 'playbackComplete':
           this.updateStatus(PlaybackStatus.COMPLETED);
           break;
-        case PlayerState.ERROR:
+        case 'error':
           this.updateStatus(PlaybackStatus.ERROR);
-          if (this.errorCallback && reason) {
+          if (this.errorCallback) {
             this.errorCallback(new Error(`Player error: ${reason}`));
           }
+          break;
+        default:
+          Logger.warn(this.TAG, `Unknown player state: ${state}`);
           break;
       }
     });
     
     // 错误监听
-    this.avPlayer.on('error', (error: number, errorMsg: string) => {
-      Logger.error(this.TAG, `Player error: ${error}, message: ${errorMsg}`);
+    this.avPlayer.on('error', (errorCode: number, errorMsg: string) => {
+      Logger.error(this.TAG, `Player error: ${errorCode}, message: ${errorMsg}`);
       this.updateStatus(PlaybackStatus.ERROR);
       if (this.errorCallback) {
-        this.errorCallback(new Error(`Player error: ${errorMsg}`));
+        this.errorCallback(new Error(`Player error: ${errorMsg} (code: ${errorCode})`));
       }
     });
     
@@ -679,6 +689,18 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       if (this.bufferUpdateCallback) {
         this.bufferUpdateCallback(bufferingRate);
       }
+    });
+    
+    // 播放完成监听
+    this.avPlayer.on('playbackComplete', () => {
+      Logger.info(this.TAG, 'Playback completed');
+      this.updateStatus(PlaybackStatus.COMPLETED);
+    });
+    
+    // 时间更新监听
+    this.avPlayer.on('timeUpdate', (currentTime: number) => {
+      // 实时更新当前播放时间
+      Logger.debug(this.TAG, `Time updated: ${currentTime}ms`);
     });
   }
   

@@ -1,11 +1,10 @@
 import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar, Stack, Flex, Blank, TextInput, Grid, GridItem, Swiper, SwiperItem } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
-import { mediaService } from '../service/media/MediaService';
-import { favoriteService } from '../service/media/FavoriteService';
-import { historyService } from '../service/media/HistoryService';
-import { playbackService } from '../service/media/PlaybackService';
-import { Stack, Flex, Image, Text, Button, ScrollView, Grid, GridItem, List, ListItem, Tag, SearchBar, LoadingProgress, Blank } from '@kit.ArkUI';
+import ConfigService from '../service/config/ConfigService';
+import MediaService from '../service/media/MediaService';
+import HistoryService from '../service/media/HistoryService';
+import FavoriteService from '../service/media/FavoriteService';
 // 类型定义
 export interface MediaItem {
   id: string;

@@ -17,8 +17,10 @@
     "@kit.ArkTS": "^9.0.0",
     "@kit.DistributedDataKit": "^9.0.0",
     "@kit.I18nKit": "^9.0.0",
-    // "@ohos.multimedia.player": "^9.0.0", // 暂时注释，等待SDK支持
-    // "@ohos.media.codec": "^9.0.0", // 暂时注释，等待SDK支持
+    "@kit.BasicServicesKit": "^9.0.0",
+    "@kit.Constants": "^9.0.0",
+    "@ohos.multimedia.player": "^9.0.0",
+    "@ohos.media.codec": "^9.0.0",
     "@ohos.base": "^9.0.0",
     "@ohos.net.http": "^9.0.0",
     "@ohos.fileio": "^9.0.0",

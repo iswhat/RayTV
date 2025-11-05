@@ -3,7 +3,7 @@
     "name": "raytv",
     "type": "entry",
     "description": "$string:module_desc",
-    "mainElement": "MainAbility",
+    "mainElement": "raytvability.RaytvAbility",
     "deviceTypes": [
       "phone",
       "tablet",

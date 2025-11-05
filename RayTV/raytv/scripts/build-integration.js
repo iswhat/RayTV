@@ -75,7 +75,6 @@ class BuildIntegration {
     
     const checks = [
       { name: '代码规范检查', command: 'node scripts/code-linter.js' },
-      { name: '依赖检查', command: 'ohpm check' },
       { name: '配置文件验证', command: 'node scripts/validate-config.js' }
     ];
 

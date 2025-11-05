@@ -1,5 +1,5 @@
-import { UIAbility, Want, AbilityConstant } from '@kit.AbilityKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
+import { UIAbility, Want, AbilityConstant } from '@ohos.app.ability.UIAbility';
+import { hilog } from '@ohos.hilog';
 import { window } from '@kit.ArkUI';
 
 export default class MainAbility extends UIAbility {

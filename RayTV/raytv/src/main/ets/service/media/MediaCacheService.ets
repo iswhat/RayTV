@@ -3,7 +3,7 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError } from '@ohos.base';
 
 // 常量定义
 const TAG = 'MediaCacheService';

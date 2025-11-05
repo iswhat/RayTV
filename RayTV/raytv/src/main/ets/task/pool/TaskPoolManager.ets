@@ -44,17 +44,17 @@ export interface Task<T = any> {
  * 提供基于TaskPool的任务调度和管理功能
  */
 export class TaskPoolManager {
-  private static instance: TaskPoolManager;
-  private taskQueue: Task[] = [];
-  private runningTasks: Map<string, Task> = new Map();
-  private maxConcurrentTasks: number = 3;
-  private isProcessing: boolean = false;
-  private memoryManager: MemoryManager;
+  static instance: TaskPoolManager;
+  taskQueue: Task[] = [];
+  runningTasks: Map<string, Task> = new Map();
+  maxConcurrentTasks: number = 3;
+  isProcessing: boolean = false;
+  memoryManager: MemoryManager;
 
   /**
-   * 私有构造函数
+   * 构造函数
    */
-  private constructor() {
+  constructor() {
     Logger.info(TAG, 'TaskPoolManager initialized');
     this.memoryManager = MemoryManager.getInstance();
   }
@@ -62,7 +62,7 @@ export class TaskPoolManager {
   /**
    * 获取单例实例
    */
-  public static getInstance(): TaskPoolManager {
+  static getInstance(): TaskPoolManager {
     if (!TaskPoolManager.instance) {
       TaskPoolManager.instance = new TaskPoolManager();
     }
@@ -73,7 +73,7 @@ export class TaskPoolManager {
    * 设置最大并发任务数
    * @param max 最大并发任务数
    */
-  public setMaxConcurrentTasks(max: number): void {
+  setMaxConcurrentTasks(max: number): void {
     if (max > 0) {
       this.maxConcurrentTasks = max;
       Logger.info(TAG, `Max concurrent tasks set to: ${max}`);
@@ -86,7 +86,7 @@ export class TaskPoolManager {
    * 提交任务到队列
    * @param task 任务对象
    */
-  public submit<T = any>(task: Task<T>): void {
+  submit<T = any>(task: Task<T>): void {
     if (!task || !task.execute) {
       Logger.error(TAG, 'Invalid task submitted');
       return;
@@ -108,7 +108,7 @@ export class TaskPoolManager {
    * @param priority 自定义优先级
    * @returns taskPool.Priority 对应的TaskPool优先级
    */
-  private getTaskPoolPriority(priority: TaskPriority): taskPool.Priority {
+  getTaskPoolPriority(priority: TaskPriority): taskPool.Priority {
     switch (priority) {
       case TaskPriority.HIGH:
       case TaskPriority.CRITICAL:
@@ -126,7 +126,7 @@ export class TaskPoolManager {
    * 执行单个任务
    * @param task 要执行的任务
    */
-  public async execute<T = any>(task: Task<T>): Promise<T> {
+  async execute<T = any>(task: Task<T>): Promise<T> {
     if (!task || !task.execute) {
       throw new Error('Invalid task');
     }
@@ -163,7 +163,7 @@ export class TaskPoolManager {
    * @param taskId 任务ID
    * @returns 是否成功取消
    */
-  public cancelTask(taskId: string): boolean {
+  cancelTask(taskId: string): boolean {
     // 检查运行中的任务
     const runningTask = this.runningTasks.get(taskId);
     if (runningTask) {

@@ -6,10 +6,10 @@ import StorageUtil from '../../common/util/StorageUtil';
 import ConfigService from '../../service/config/ConfigService';
 import UserService, { UserPreferences } from '../../service/user/UserService';
 import DatabaseManager from '../../data/db/DatabaseManager';
-import { Configuration, UIExtensionAbility } from '@kit.AbilityKit';
-import { CommonConstants } from '@kit.Constants';
+import { Configuration, UIExtensionAbility } from '@ohos.app.ability.UIAbility';
+import { CommonConstants } from '@ohos.app.ability.Constants';
 import { BusinessError } from '@ohos.base';
-import type { ApplicationInfo } from '@kit.AbilityKit';
+import type { ApplicationInfo } from '@ohos.bundle.bundleManager';
 
 // 常量定义
 const TAG = 'SettingService';

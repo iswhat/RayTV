@@ -95,7 +95,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 初始化手势识别
    */
-  public async init(config?: GestureConfig): Promise<void> {
+  async init(config?: GestureConfig): Promise<void> {
     try {
       if (this.isInitialized) {
         Logger.warn(this.TAG, 'Gesture service already initialized');
@@ -133,7 +133,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 设置全局手势监听
    */
-  public onGesture(callback: (event: GestureEvent) => void): void {
+  onGesture(callback: (event: GestureEvent) => void): void {
     this.globalCallback = callback;
     Logger.info(this.TAG, 'Global gesture callback set');
   }
@@ -141,7 +141,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 设置特定类型手势监听
    */
-  public on(type: GestureType, callback: (event: GestureEvent) => void): void {
+  on(type: GestureType, callback: (event: GestureEvent) => void): void {
     this.gestureCallbacks.set(type, callback);
     Logger.info(this.TAG, `Gesture callback set for type: ${type}`);
   }
@@ -149,7 +149,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 取消特定类型手势监听
    */
-  public off(type: GestureType): void {
+  off(type: GestureType): void {
     this.gestureCallbacks.delete(type);
     Logger.info(this.TAG, `Gesture callback removed for type: ${type}`);
   }
@@ -157,7 +157,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 取消所有手势监听
    */
-  public offAll(): void {
+  offAll(): void {
     this.globalCallback = undefined;
     this.gestureCallbacks.clear();
     Logger.info(this.TAG, 'All gesture callbacks removed');
@@ -166,7 +166,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 销毁手势服务
    */
-  public destroy(): void {
+  destroy(): void {
     try {
       if (this.subscription >= 0) {
         input.off(this.subscription);
@@ -186,7 +186,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 订阅手势事件
    */
-  private subscribeToGestureEvents(): void {
+  subscribeToGestureEvents(): void {
     try {
       this.subscription = input.on('multimodalGesture', (event) => {
         this.handleGestureEvent(event);
@@ -201,7 +201,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 处理手势事件
    */
-  private handleGestureEvent(event: any): void {
+  handleGestureEvent(event: any): void {
     try {
       // 构建标准化的手势事件
       const gestureEvent: GestureEvent = this.buildGestureEvent(event);
@@ -225,7 +225,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 构建标准化的手势事件
    */
-  private buildGestureEvent(event: any): GestureEvent | null {
+  buildGestureEvent(event: any): GestureEvent | null {
     try {
       // 根据事件类型转换为标准手势事件
       switch (event.type) {

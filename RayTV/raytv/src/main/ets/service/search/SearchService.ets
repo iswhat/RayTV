@@ -163,26 +163,26 @@ type SearchListener = (response: SearchResponse) => void;
 type SuggestionListener = (suggestions: SearchSuggestionItem[]) => void;
 
 export class SearchService {
-  private static instance: SearchService;
-  private storageUtil: StorageUtil;
-  private siteManager: SiteManager;
-  private analyticsService: AnalyticsService;
-  private configService: ConfigService;
-  private searchHistory: SearchHistoryItem[] = [];
-  private searchCache: Map<string, SearchResponse> = new Map();
-  private hotSearches: HotSearchItem[] = [];
-  private lastHotSearchUpdate: number = 0;
-  private activeSearches: Map<string, SearchResponse> = new Map();
-  private searchListeners: SearchListener[] = [];
-  private suggestionListeners: SuggestionListener[] = [];
-  private isInitialized: boolean = false;
-  private debounceTimerId: number | null = null;
-  private lastSearchQuery: string = '';
-  private config: SearchConfig = DEFAULT_SEARCH_CONFIG;
-  private maxHistoryCount = 50;
-  private maxCacheSize = 20;
+  static instance: SearchService;
+  storageUtil: StorageUtil;
+  siteManager: SiteManager;
+  analyticsService: AnalyticsService;
+  configService: ConfigService;
+  searchHistory: SearchHistoryItem[] = [];
+  searchCache: Map<string, SearchResponse> = new Map();
+  hotSearches: HotSearchItem[] = [];
+  lastHotSearchUpdate: number = 0;
+  activeSearches: Map<string, SearchResponse> = new Map();
+  searchListeners: SearchListener[] = [];
+  suggestionListeners: SuggestionListener[] = [];
+  isInitialized: boolean = false;
+  debounceTimerId: number | null = null;
+  lastSearchQuery: string = '';
+  config: SearchConfig = DEFAULT_SEARCH_CONFIG;
+  maxHistoryCount = 50;
+  maxCacheSize = 20;
 
-  private constructor() {
+  constructor() {
     this.storageUtil = StorageUtil.getInstance();
     this.siteManager = SiteManager.getInstance();
     this.analyticsService = AnalyticsService.getInstance();
@@ -193,7 +193,7 @@ export class SearchService {
   /**
    * 获取单例实例
    */
-  public static getInstance(): SearchService {
+  static getInstance(): SearchService {
     if (!SearchService.instance) {
       SearchService.instance = new SearchService();
     }
@@ -203,7 +203,7 @@ export class SearchService {
   /**
    * 初始化搜索服务
    */
-  private async initialize(): Promise<void> {
+  async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing search service...');
 
@@ -228,7 +228,7 @@ export class SearchService {
   /**
    * 搜索视频（高级搜索，支持多种过滤条件）
    */
-  public async search(options: {
+  async search(options: {
     query: string;
     type?: SearchType;
     page?: number;
@@ -331,7 +331,7 @@ export class SearchService {
   /**
    * 兼容旧版搜索接口
    */
-  public async searchVod(keyword: string, options?: SearchOptions): Promise<SearchResult> {
+  async searchVod(keyword: string, options?: SearchOptions): Promise<SearchResult> {
     try {
       const response = await this.search({
         query: keyword,
