@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "RayTV - HarmonyOS video player",
   "scripts": {
-    "build": ".\\ohos.cmd build --product-type phone",
-    "version": ".\\ohos.cmd --version"
+    "build": "hvigorw assembleHap --mode module -p module=raytv@default",
+    "build-debug": "hvigorw assembleHap --mode module -p module=raytv@default -p debug=true",
+    "build-release": "hvigorw assembleHap --mode module -p module=raytv@default -p release=true",
+    "clean": "hvigorw clean",
+    "install": "hvigorw installHsp",
+    "version": "hvigorw --version"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@ohos/hvigor-ohos-plugin": "4.0.5"
   },
   "dependencies": {
     "json5": "^2.2.3"

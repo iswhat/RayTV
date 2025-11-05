@@ -12,6 +12,9 @@
           "strictMode": {
             "caseSensitiveCheck": true,
             "useNormalizedOHMUrl": true
+          },
+          "aot": {
+            "enable": true
           }
         }
       }
@@ -19,9 +22,13 @@
     "buildModeSet": [
       {
         "name": "debug",
+        "debuggable": true,
+        "compileMode": "debug"
       },
       {
-        "name": "release"
+        "name": "release",
+        "debuggable": false,
+        "compileMode": "release"
       }
     ]
   },
@@ -34,7 +41,15 @@
           "name": "default",
           "applyToProducts": [
             "default"
-          ]
+          ],
+          "runtimeOS": "HarmonyOS"
+        },
+        {
+          "name": "ohosTest",
+          "applyToProducts": [
+            "default"
+          ],
+          "runtimeOS": "HarmonyOS"
         }
       ]
     }
