@@ -46,7 +46,7 @@ export interface NotificationAction {
   id: string;              // 操作ID
   title: string;           // 按钮标题
   icon?: number;           // 按钮图标
-  actionData?: any;        // 操作数据
+  actionData?: unknown;        // 操作数据
 }
 
 // 通知内容接口
@@ -61,7 +61,7 @@ export interface NotificationContent {
   vibrate?: boolean;       // 是否振动
   badge?: number;          // 角标数字
   actions?: NotificationAction[]; // 操作按钮
-  data?: any;              // 附加数据
+  data?: unknown;              // 附加数据
   type?: NotificationType; // 通知类型
   priority?: NotificationPriority; // 优先级
   level?: NotificationLevel; // 通知级别
@@ -124,10 +124,8 @@ export const DEFAULT_NOTIFICATION_SERVICE_CONFIG: NotificationServiceConfig = {
 };
 
 // 通知点击回调类型
-type NotificationClickCallback = (notificationId: string, actionId?: string, data?: any) => void;
-
-// 通知操作回调映射
-type NotificationActionCallback = (actionId: string, data?: any) => void;
+type NotificationClickCallback = (notificationId: string, actionId?: string, data?: unknown) => void;
+  type NotificationActionCallback = (actionId: string, data?: unknown) => void;
 
 export default class NotificationService {
   private static instance: NotificationService;
@@ -554,7 +552,7 @@ export default class NotificationService {
   /**
    * 格式化进度文本
    */
-  private formatProgressText(format: string, config: any): string {
+  private formatProgressText(format: string, config: unknown): string {
     return format
       .replace('{{fileName}}', config.fileName || '')
       .replace('{{progress}}', config.progress || 0)

@@ -558,7 +558,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       updateTime: resultSet.getLong(resultSet.getColumnIndex('updateTime')) || Date.now(),
       sourceId: resultSet.getString(resultSet.getColumnIndex('sourceId')),
       sourceName: resultSet.getString(resultSet.getColumnIndex('sourceName')),
-      quality: resultSet.getString(resultSet.getColumnIndex('quality')) as any,
+      quality: resultSet.getString(resultSet.getColumnIndex('quality')) as string,
       videoSources: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('videoSources')) || '[]'),
       episodes: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('episodes')) || '[]'),
       ratingInfo: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('ratingInfo')) || '{}'),

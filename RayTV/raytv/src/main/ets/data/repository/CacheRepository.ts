@@ -736,7 +736,7 @@ export class CacheRepository {
    * 计算值的大小（字节）
    * @param value 要计算大小的值
    */
-  private calculateSize(value: any): number {
+  private calculateSize(value: unknown): number {
     try {
       const jsonString = JSON.stringify(value);
       // 简单估算，实际大小可能有所不同

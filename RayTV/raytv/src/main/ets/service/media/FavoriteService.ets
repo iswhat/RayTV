@@ -299,7 +299,7 @@ export class FavoriteService {
 
       // 构建更新语句
       const fields: string[] = [];
-      const values: any[] = [];
+      const values: unknown[] = [];
 
       if (updateData.title !== undefined) {
         fields.push('title = ?');
@@ -365,7 +365,7 @@ export class FavoriteService {
   public async getFavoriteCount(type?: MediaType): Promise<number> {
     try {
       let query = `SELECT COUNT(*) as count FROM ${this.favoriteTable}`;
-      const params: any[] = [];
+      const params: unknown[] = [];
 
       if (type) {
         query += ' WHERE type = ?';
@@ -373,7 +373,7 @@ export class FavoriteService {
       }
 
       const result = await this.dbManager.executeSql(query, params);
-      return (result.rows as any[])[0].count || 0;
+      return ((result.rows as Record<string, unknown>[])[0] as Record<string, unknown>).count as number || 0;
     } catch (error) {
       Logger.error(this.TAG, `Failed to get favorite count: ${error}`);
       return 0;
@@ -467,7 +467,7 @@ export class FavoriteService {
   public async searchFavorites(keyword: string, type?: MediaType): Promise<FavoriteItem[]> {
     try {
       let whereClause = 'WHERE title LIKE ?';
-      const params: any[] = [`%${keyword}%`];
+      const params: unknown[] = [`%${keyword}%`];
 
       if (type) {
         whereClause += ' AND type = ?';
@@ -481,7 +481,7 @@ export class FavoriteService {
         params
       );
 
-      return this.parseFavoriteRows(result.rows as any[]);
+      return this.parseFavoriteRows(result.rows as Record<string, unknown>[]);
     } catch (error) {
       Logger.error(this.TAG, `Failed to search favorites: ${error}`);
       return [];
@@ -505,7 +505,7 @@ export class FavoriteService {
    * @returns FavoriteItem
    * @private
    */
-  private parseFavoriteRow(row: any): FavoriteItem {
+  private parseFavoriteRow(row: Record<string, unknown>): FavoriteItem {
     return {
       id: row.id,
       mediaId: row.mediaId,
@@ -528,7 +528,7 @@ export class FavoriteService {
    * @returns FavoriteItem[]
    * @private
    */
-  private parseFavoriteRows(rows: any[]): FavoriteItem[] {
+  private parseFavoriteRows(rows: Record<string, unknown>[]): FavoriteItem[] {
     return rows.map(row => this.parseFavoriteRow(row));
   }
 }

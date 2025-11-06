@@ -28,7 +28,7 @@ export class ConfigParser {
    * 验证站点配置
    * @param site 站点配置
    */
-  public validateSite(site: any): site is Site {
+  public validateSite(site: unknown): site is Site {
     try {
       // 基本字段验证
       if (!site || typeof site !== 'object') {
@@ -89,7 +89,7 @@ export class ConfigParser {
   private isValidSiteType(type: string): boolean {
     return type === SiteType.ALL || type === SiteType.MOVIE || type === SiteType.SERIES || type === SiteType.ANIME;
   }
-  private ensureDefaultValues(site: any): void {
+  private ensureDefaultValues(site: Record<string, unknown>): void {
     site.type = site.type || SiteType.ALL;
     site.searchable = site.searchable !== false;
     site.categories = site.categories || [];
@@ -153,7 +153,7 @@ export class ConfigParser {
   /**
    * 判断是否为Fongmi格式配置
    */
-  private isFongmiFormat(config: any): boolean {
+  private isFongmiFormat(config: unknown): boolean {
     if (typeof config !== 'object' || config === null) return false;
     
     // Fongmi格式通常是对象，每个键对应一个站点
@@ -170,7 +170,7 @@ export class ConfigParser {
    * 转换Fongmi格式配置
    * @param fongmiConfig Fongmi格式配置
    */
-  public convertFongmiFormat(fongmiConfig: any): Site[] {
+  public convertFongmiFormat(fongmiConfig: Record<string, unknown>): Site[] {
     try {
       Logger.info(TAG, 'Converting Fongmi format config');
       
@@ -180,7 +180,7 @@ export class ConfigParser {
       if (typeof fongmiConfig === 'object' && fongmiConfig !== null) {
         // 遍历配置中的每个站点
         for (const [key, value] of Object.entries(fongmiConfig)) {
-          const siteData = value as any;
+          const siteData = value as Record<string, unknown>;
           
           // 转换为标准站点格式
           const site: Site = {
@@ -222,7 +222,7 @@ export class ConfigParser {
    * 自动检测站点类型
    * @param siteData 站点数据
    */
-  public detectSiteType(siteData: any): SiteType {
+  public detectSiteType(siteData: Record<string, unknown>): SiteType {
     // 根据站点配置特征自动判断类型
     if (siteData.type) {
       return siteData.type as SiteType;
@@ -251,7 +251,7 @@ export class ConfigParser {
    * 安全解析JSON内容
    * @param content JSON字符串内容
    */
-  public parseJsonContent(content: string): any {
+  public parseJsonContent(content: string): Record<string, unknown> {
     try {
       // 预处理，移除注释和多余空格
       const cleanContent = this.cleanJsonContent(content);
@@ -280,7 +280,7 @@ export class ConfigParser {
    * 解析单个站点配置项
    * @param siteData 站点数据
    */
-  private parseSiteItem(siteData: any): Site {
+  private parseSiteItem(siteData: Record<string, unknown>): Site {
     if (!siteData || typeof siteData !== 'object') {
       throw new Error('Invalid site data format');
     }
@@ -337,7 +337,7 @@ export class ConfigParser {
    * 转换请求头
    * @param headers 原始请求头
    */
-  public convertHeaders(headers: any): Record<string, string> {
+  public convertHeaders(headers: unknown): Record<string, string> {
     const result: Record<string, string> = {};
     
     if (!headers) {
@@ -367,7 +367,7 @@ export class ConfigParser {
    * 转换分类配置
    * @param categories 原始分类
    */
-  public convertCategories(categories: any): Array<{ key: string; name: string }> {
+  public convertCategories(categories: unknown): Array<{ key: string; name: string }> {
     const result: Array<{ key: string; name: string }> = [];
     
     if (!categories) {
@@ -376,7 +376,7 @@ export class ConfigParser {
     
     // 处理数组格式分类
     if (Array.isArray(categories)) {
-      categories.forEach((cat: any) => {
+      categories.forEach((cat: unknown) => {
         if (typeof cat === 'string') {
           result.push({ key: cat, name: cat });
         } else if (typeof cat === 'object' && cat.key && cat.name) {
@@ -409,7 +409,7 @@ export class ConfigParser {
    * 转换搜索规则
    * @param searchData 原始搜索配置
    */
-  public convertSearchRules(searchData: any): any {
+  public convertSearchRules(searchData: unknown): Record<string, unknown> {
     if (!searchData) return {};
     
     // 标准化搜索规则格式
@@ -428,7 +428,7 @@ export class ConfigParser {
    * 转换详情页规则
    * @param detailData 原始详情配置
    */
-  public convertDetailRules(detailData: any): any {
+  public convertDetailRules(detailData: unknown): Record<string, unknown> {
     if (!detailData) return {};
     
     // 标准化详情页规则格式
@@ -444,7 +444,7 @@ export class ConfigParser {
    * 转换播放规则
    * @param playData 原始播放配置
    */
-  public convertPlayRules(playData: any): any {
+  public convertPlayRules(playData: unknown): Record<string, unknown> {
     if (!playData) return {};
     
     // 标准化播放规则格式

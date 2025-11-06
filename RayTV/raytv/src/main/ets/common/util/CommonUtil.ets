@@ -301,8 +301,8 @@ export class CommonUtil {
    * @param obj2 对象2
    * @returns 差异对象
    */
-  public getObjectDiff(obj1: any, obj2: any): any {
-    const diff: any = {};
+  public getObjectDiff(obj1: Record<string, unknown>, obj2: Record<string, unknown>): Record<string, unknown> {
+    const diff: Record<string, unknown> = {};
     
     for (const key in obj1) {
       if (obj1.hasOwnProperty(key)) {
@@ -338,7 +338,7 @@ export class CommonUtil {
    * @param sources 源对象
    * @returns 合并后的对象
    */
-  public mergeObjects(target: any, ...sources: any[]): any {
+  public mergeObjects(target: Record<string, unknown>, ...sources: Record<string, unknown>[]): Record<string, unknown> {
     if (!sources.length) return target;
     
     const source = sources.shift();
@@ -470,7 +470,7 @@ export class CommonUtil {
    * @param params 查询参数
    * @returns 构建后的URL
    */
-  public buildUrl(baseUrl: string, params?: Record<string, any>): string {
+  public buildUrl(baseUrl: string, params?: Record<string, unknown>): string {
     if (!params || Object.keys(params).length === 0) {
       return baseUrl;
     }
@@ -489,7 +489,7 @@ export class CommonUtil {
    * @param value 要检查的值
    * @returns 是否为空
    */
-  public isEmpty(value: any): boolean {
+  public isEmpty(value: unknown): boolean {
     if (value === null || value === undefined) return true;
     if (typeof value === 'string') return value.trim() === '';
     if (Array.isArray(value)) return value.length === 0;
@@ -525,11 +525,11 @@ export class CommonUtil {
    * @param value 属性值
    * @returns 是否设置成功
    */
-  public setNestedProperty(obj: any, path: string, value: any): boolean {
+  public setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): boolean {
     if (!obj || typeof obj !== 'object') return false;
     
     const keys = path.split('.');
-    let current: any = obj;
+    let current: Record<string, unknown> = obj;
     
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
@@ -619,7 +619,7 @@ export class CommonUtil {
    * @param value 要检查的值
    * @returns 是否为数字
    */
-  public isNumber(value: any): boolean {
+  public isNumber(value: unknown): boolean {
     return typeof value === 'number' && !isNaN(value);
   }
   
@@ -628,7 +628,7 @@ export class CommonUtil {
    * @param value 要检查的值
    * @returns 是否为整数
    */
-  public isInteger(value: any): boolean {
+  public isInteger(value: unknown): boolean {
     return Number.isInteger(value);
   }
   

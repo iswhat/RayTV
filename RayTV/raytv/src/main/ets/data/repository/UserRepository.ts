@@ -960,10 +960,10 @@ export class UserRepository {
     const sanitized = { ...userInfo };
     
     // 移除敏感信息（如果有）
-    if (sanitized as any) {
-      delete (sanitized as any).password;
-      delete (sanitized as any).resetToken;
-      delete (sanitized as any).verificationToken;
+    if (sanitized) {
+        delete (sanitized as Record<string, unknown>).password;
+        delete (sanitized as Record<string, unknown>).resetToken;
+        delete (sanitized as Record<string, unknown>).verificationToken;
     }
     
     return sanitized;

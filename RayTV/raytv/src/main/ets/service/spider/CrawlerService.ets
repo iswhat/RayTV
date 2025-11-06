@@ -142,7 +142,7 @@ export class CrawlerService {
   /**
    * 创建爬虫实例
    */
-  private createSpider(key: string, config: any): SiteSpider | null {
+  private createSpider(key: string, config: Record<string, unknown>): SiteSpider | null {
     try {
       // 根据站点类型和配置创建对应的爬虫实例
       // 目前只支持创建模拟爬虫
@@ -323,7 +323,7 @@ export class CrawlerService {
   /**
    * 调用站点方法
    */
-  public async callSiteMethod<T>(siteKey: string, methodName: string, args: any[]): Promise<T> {
+  public async callSiteMethod<T>(siteKey: string, methodName: string, args: unknown[]): Promise<T> {
     await this.initialize();
     
     const spider = this.siteSpiders.get(siteKey);
@@ -366,7 +366,7 @@ export class CrawlerService {
   /**
    * 根据方法名返回模拟数据
    */
-  private getMockDataByMethod<T>(methodName: string, args: any[]): T {
+  private getMockDataByMethod<T>(methodName: string, args: unknown[]): T {
     const mockDataGenerator = new MockDataGenerator();
     
     switch (methodName) {
@@ -412,15 +412,15 @@ class MockSiteSpider implements SiteSpider {
     return this.siteInfo;
   }
   
-  async getRecommendList(): Promise<any[]> {
+  async getRecommendList(): Promise<Record<string, unknown>[]> {
     return this.dataGenerator.generateRecommendList();
   }
   
-  async getHotList(): Promise<any[]> {
+  async getHotList(): Promise<Record<string, unknown>[]> {
     return this.dataGenerator.generateHotList();
   }
   
-  async getLatestList(): Promise<any[]> {
+  async getLatestList(): Promise<Record<string, unknown>[]> {
     return this.dataGenerator.generateLatestList();
   }
   
@@ -428,15 +428,15 @@ class MockSiteSpider implements SiteSpider {
     return this.dataGenerator.generateCategories();
   }
   
-  async getCategoryList(category: string, page: number = 1): Promise<any[]> {
+  async getCategoryList(category: string, page: number = 1): Promise<Record<string, unknown>[]> {
     return this.dataGenerator.generateCategoryList(category, page);
   }
   
-  async search(keyword: string, page: number = 1): Promise<any[]> {
+  async search(keyword: string, page: number = 1): Promise<Record<string, unknown>[]> {
     return this.dataGenerator.generateSearchResults(keyword, page);
   }
   
-  async getDetail(id: string): Promise<any> {
+  async getDetail(id: string): Promise<Record<string, unknown>> {
     return this.dataGenerator.generateDetail(id);
   }
   
@@ -459,7 +459,7 @@ class MockDataGenerator {
     this.siteKey = siteKey;
   }
   
-  generateRecommendList(): any[] {
+  generateRecommendList(): Record<string, unknown>[] {
     return [
       { id: '1', title: '流浪地球2', cover: '', url: '', rating: 9.2, type: 'movie' },
       { id: '2', title: '满江红', cover: '', url: '', rating: 8.7, type: 'movie' },
@@ -469,7 +469,7 @@ class MockDataGenerator {
     ];
   }
   
-  generateHotList(): any[] {
+  generateHotList(): Record<string, unknown>[] {
     return [
       { id: '101', title: '狂飙', cover: '', url: '', updateInfo: '全39集', type: 'tv', hot: 123456 },
       { id: '102', title: '三体', cover: '', url: '', updateInfo: '全30集', type: 'tv', hot: 98765 },
@@ -484,7 +484,7 @@ class MockDataGenerator {
     ];
   }
   
-  generateLatestList(): any[] {
+  generateLatestList(): Record<string, unknown>[] {
     return [
       { id: '201', title: '新神榜：杨戬', cover: '', url: '', updateInfo: 'HD国语', type: 'movie', updateTime: new Date().toISOString() },
       { id: '202', title: '阿凡达：水之道', cover: '', url: '', updateInfo: 'HD英语', type: 'movie', updateTime: new Date().toISOString() },
@@ -507,8 +507,8 @@ class MockDataGenerator {
     ];
   }
   
-  generateCategoryList(category: string, page: number = 1): any[] {
-    const results: any[] = [];
+  generateCategoryList(category: string, page: number = 1): Record<string, unknown>[] {
+    const results: Record<string, unknown>[] = [];
     const startId = (page - 1) * 20 + 1;
     
     for (let i = 0; i < 20; i++) {
@@ -527,8 +527,8 @@ class MockDataGenerator {
     return results;
   }
   
-  generateSearchResults(keyword: string, page: number = 1): any[] {
-    const results: any[] = [];
+  generateSearchResults(keyword: string, page: number = 1): Record<string, unknown>[] {
+    const results: Record<string, unknown>[] = [];
     const startId = (page - 1) * 20 + 1000;
     
     for (let i = 0; i < 20; i++) {
@@ -547,7 +547,7 @@ class MockDataGenerator {
     return results;
   }
   
-  generateDetail(id: string): any {
+  generateDetail(id: string): Record<string, unknown> {
     return {
       id,
       title: `模拟视频详情 ${id}`,

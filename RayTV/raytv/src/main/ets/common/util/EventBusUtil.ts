@@ -293,7 +293,7 @@ export class EventBusUtil {
    */
   public emitMultiple(events: Array<{
     eventName: string;
-    data?: any;
+    data?: unknown;
   }>): void {
     events.forEach(event => {
       this.emit(event.eventName, event.data);

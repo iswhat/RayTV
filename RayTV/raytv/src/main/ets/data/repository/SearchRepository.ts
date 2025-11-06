@@ -309,7 +309,7 @@ export class SearchRepository {
       }
       
       // 构建建议参数
-      const params: any = {
+      const params: Record<string, unknown> = {
         q: query.trim(),
         limit: 10
       };

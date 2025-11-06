@@ -187,7 +187,7 @@ export interface SettingGroup {
   id: string;
   title: string;
   description?: string;
-  settings: SettingItem<any>[];
+  settings: SettingItem<unknown>[];
   icon?: string;
 }
 
@@ -1054,12 +1054,12 @@ export default class SettingService {
       this.specificListeners[keyStr] = [];
     }
     
-    this.specificListeners[keyStr].push(listener as any);
+    this.specificListeners[keyStr].push(listener as SettingChangeListener<unknown>);
     
     // 返回取消监听函数
     return () => {
       if (this.specificListeners[keyStr]) {
-        const index = this.specificListeners[keyStr].indexOf(listener as any);
+        const index = this.specificListeners[keyStr].indexOf(listener as SettingChangeListener<unknown>);
         if (index > -1) {
           this.specificListeners[keyStr].splice(index, 1);
         }

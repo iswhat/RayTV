@@ -258,7 +258,7 @@ export class HistoryService {
 
       // 构建查询条件
       let whereClause = '';
-      const whereParams: any[] = [];
+      const whereParams: unknown[] = [];
       
       if (type) {
         whereClause = 'WHERE type = ?';
@@ -279,7 +279,7 @@ export class HistoryService {
       
       if (result !== null) {
         while (result.goToNextRow()) {
-          const item: any = {};
+          const item: Record<string, unknown> = {};
           for (let i = 0; i < result.rowCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -311,7 +311,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: any = {};
+          const item: Record<string, unknown> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -346,7 +346,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: any = {};
+          const item: Record<string, unknown> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -385,7 +385,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: any = {};
+          const item: Record<string, unknown> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -496,7 +496,7 @@ export class HistoryService {
   public async getHistoryCount(type?: MediaType): Promise<number> {
     try {
       let query = `SELECT COUNT(*) as count FROM ${this.historyTable}`;
-      const params: any[] = [];
+      const params: unknown[] = [];
 
       if (type) {
         query += ' WHERE type = ?';
@@ -582,7 +582,7 @@ export class HistoryService {
    * @returns HistoryItem
    * @private
    */
-  private parseHistoryRow(row: any): HistoryItem {
+  private parseHistoryRow(row: Record<string, unknown>): HistoryItem {
     return {
       id: row.id,
       mediaId: row.mediaId,
@@ -607,7 +607,7 @@ export class HistoryService {
    * @returns HistoryItem[]
    * @private
    */
-  private parseHistoryRows(rows: any[]): HistoryItem[] {
+  private parseHistoryRows(rows: Record<string, unknown>[]): HistoryItem[] {
     return rows.map(row => this.parseHistoryRow(row));
   }
 

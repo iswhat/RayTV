@@ -159,7 +159,7 @@ export interface PlaybackError {
   code: number;             // 错误码
   message: string;          // 错误信息
   type: PlaybackErrorType;  // 错误类型
-  details?: any;            // 错误详情
+  details?: unknown;            // 错误详情
 }
 
 // 缓冲信息接口

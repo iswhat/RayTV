@@ -90,7 +90,7 @@ export interface CacheItem {
   accessCount: number;            // 访问次数
   sourceId: string;               // 源ID
   sourceName: string;             // 源名称
-  metadata?: any;                 // 额外元数据
+  metadata?: unknown;                 // 额外元数据
   error?: string;                 // 错误信息
 }
 
@@ -134,7 +134,7 @@ export interface PreloadOptions {
   priority: number;               // 预加载优先级
   maxSize?: number;               // 最大预加载大小
   quality?: string;               // 优先质量
-  metadata?: any;                 // 元数据
+  metadata?: unknown;                 // 元数据
 }
 
 // 缓存查询选项接口
@@ -602,7 +602,7 @@ export default class MediaCacheService {
   public async cacheMedia(options: {
     url: string;
     quality?: string;
-    metadata?: any;
+    metadata?: unknown;
     priority?: number;
     headers?: Record<string, string>;
   }): Promise<CacheItem> {
@@ -1063,8 +1063,8 @@ export default class MediaCacheService {
     // 应用排序
     if (options?.sortBy) {
       items.sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
+        let aValue: unknown;
+  let bValue: unknown;
         
         switch (options.sortBy) {
           case 'size':

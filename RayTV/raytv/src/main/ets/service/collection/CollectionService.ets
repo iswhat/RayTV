@@ -631,7 +631,7 @@ export default class CollectionService {
       return items.map(item => ({ ...item }));
     } catch (error) {
       Logger.error(TAG, 'Failed to enhance collection with movie info', error);
-      return items as any;
+      return items;
     }
   }
 

@@ -497,7 +497,7 @@ export class FormatUtil {
    * 格式化错误消息
    * @param error 错误对象或消息
    */
-  public formatErrorMessage(error: any): string {
+  public formatErrorMessage(error: unknown): string {
     try {
       if (!error) {
         return 'Unknown error';

@@ -117,7 +117,7 @@ export class ValidatorUtil {
    * @param value 值
    * @param options 验证选项
    */
-  public isValidNumber(value: any, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
+  public isValidNumber(value: unknown, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
     try {
       const num = Number(value);
 
@@ -283,7 +283,7 @@ export class ValidatorUtil {
    * 验证日期是否有效
    * @param date 日期
    */
-  public isValidDate(date: any): boolean {
+  public isValidDate(date: unknown): boolean {
     try {
       const d = new Date(date);
       return !isNaN(d.getTime());
@@ -297,7 +297,7 @@ export class ValidatorUtil {
    * 验证是否为空值
    * @param value 值
    */
-  public isEmpty(value: any): boolean {
+  public isEmpty(value: unknown): boolean {
     if (value === null || value === undefined) {
       return true;
     }
@@ -539,7 +539,7 @@ export class ValidatorUtil {
    * 验证是否为有效对象
    * @param obj 对象
    */
-  public isValidObject(obj: any): boolean {
+  public isValidObject(obj: unknown): boolean {
     try {
       return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
     } catch (error) {
@@ -553,7 +553,7 @@ export class ValidatorUtil {
    * @param arr 数组
    * @param options 验证选项
    */
-  public isValidArray(arr: any, options: { minLength?: number; maxLength?: number } = {}): boolean {
+  public isValidArray(arr: unknown, options: { minLength?: number; maxLength?: number } = {}): boolean {
     try {
       if (!Array.isArray(arr)) {
         return false;
@@ -571,7 +571,7 @@ export class ValidatorUtil {
    * 验证是否为有效函数
    * @param fn 函数
    */
-  public isValidFunction(fn: any): boolean {
+  public isValidFunction(fn: unknown): boolean {
     try {
       return typeof fn === 'function';
     } catch (error) {
@@ -609,7 +609,7 @@ export class ValidatorUtil {
    * @param obj 要验证的对象
    * @param schema 验证模式
    */
-  public validateObject(obj: any, schema: Record<string, (value: any) => boolean>): { isValid: boolean; errors: string[] } {
+  public validateObject(obj: unknown, schema: Record<string, (value: unknown) => boolean>): { isValid: boolean; errors: string[] } {
     try {
       if (!this.isValidObject(obj)) {
         return { isValid: false, errors: ['Invalid object'] };
@@ -635,7 +635,7 @@ export class ValidatorUtil {
    * @param value1 值1
    * @param value2 值2
    */
-  public isEqual(value1: any, value2: any): boolean {
+  public isEqual(value1: unknown, value2: unknown): boolean {
     try {
       // 处理基本类型和null/undefined
       if (value1 === value2) {
