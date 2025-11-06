@@ -181,20 +181,20 @@ export default class DeviceService {
       const mobileKeywords = ['phone', 'mobile', 'cell'];
       
       if (tvKeywords.some(keyword => deviceModel.includes(keyword))) {
-        return DeviceType.SMART_TV;
+        return DeviceType.TV;
       }
       if (tabletKeywords.some(keyword => deviceModel.includes(keyword))) {
         return DeviceType.TABLET;
       }
       if (mobileKeywords.some(keyword => deviceModel.includes(keyword))) {
-        return DeviceType.MOBILE;
+        return DeviceType.PHONE;
       }
       
       // 默认返回TV类型，因为这是TV应用
-      return DeviceType.SMART_TV;
+      return DeviceType.TV;
     } catch (error) {
       Logger.error(TAG, 'Failed to detect device type', error);
-      return DeviceType.SMART_TV;
+      return DeviceType.TV;
     }
   }
 
@@ -204,7 +204,7 @@ export default class DeviceService {
   private getDeviceName(): string {
     try {
       // 使用HarmonyOS设备信息API获取设备名称
-      return `${deviceInfo.manufacturer} ${deviceInfo.productModel}` || 'RayTV Device';
+      return `${deviceInfo.manufacture} ${deviceInfo.productModel}` || 'RayTV Device';
     } catch (error) {
       Logger.error(TAG, 'Failed to get device name', error);
       return 'RayTV Device';
@@ -217,7 +217,7 @@ export default class DeviceService {
   private getManufacturer(): string {
     try {
       // 使用HarmonyOS设备信息API获取制造商
-      return deviceInfo.manufacturer || 'Unknown Manufacturer';
+      return deviceInfo.manufacture || 'Unknown Manufacturer';
     } catch (error) {
       Logger.error(TAG, 'Failed to get manufacturer', error);
       return 'Unknown';
@@ -243,7 +243,7 @@ export default class DeviceService {
   private getOSVersion(): string {
     try {
       // 使用HarmonyOS设备信息API获取系统版本
-      return deviceInfo.osFullName || deviceInfo.apiVersion || 'Unknown';
+      return deviceInfo.osFullName || deviceInfo.sdkApiVersion.toString() || 'Unknown';
     } catch (error) {
       Logger.error(TAG, 'Failed to get OS version', error);
       return 'Unknown';
@@ -268,7 +268,7 @@ export default class DeviceService {
   private getScreenResolution(): { width: number; height: number } {
     try {
       // 使用HarmonyOS display API获取屏幕分辨率
-      const displays = display.getAllDisplaysSync();
+      const displays = display.getAllDisplays();
       if (displays && displays.length > 0) {
         const defaultDisplay = displays[0];
         return {
@@ -289,7 +289,7 @@ export default class DeviceService {
   private getDeviceLanguage(): string {
     try {
       // 使用HarmonyOS i18n模块获取设备语言
-      return i18n.system.getSystemLanguageSync() || 'zh-CN';
+      return i18n.System.getSystemLanguageSync() || 'zh-CN';
     } catch (error) {
       Logger.error(TAG, 'Failed to get device language', error);
       return 'zh-CN';
@@ -315,7 +315,7 @@ export default class DeviceService {
     
     // 音频能力
     if (await this.checkAudioCapability()) {
-      capabilities.push(DeviceCapability.AUDIO_PLAYBACK);
+      capabilities.push(DeviceCapability.AUDIO_OUTPUT);
     }
     
     // 视频能力
@@ -324,19 +324,19 @@ export default class DeviceService {
     }
     
     // 网络能力
-    capabilities.push(DeviceCapability.NETWORK);
+    capabilities.push(DeviceCapability.WIFI_DIRECT);
     
     // 存储能力
-    capabilities.push(DeviceCapability.STORAGE);
+    capabilities.push(DeviceCapability.FILE_SHARING);
     
     // 触摸能力检测
     if (await this.checkTouchCapability()) {
-      capabilities.push(DeviceCapability.TOUCH);
+      capabilities.push(DeviceCapability.TOUCH_SCREEN);
     }
     
     // 键盘能力检测
     if (await this.checkKeyboardCapability()) {
-      capabilities.push(DeviceCapability.KEYBOARD);
+      capabilities.push(DeviceCapability.KEYBOARD_INPUT);
     }
     
     // 遥控器能力检测
@@ -344,12 +344,12 @@ export default class DeviceService {
     
     // 硬件解码能力检测
     if (await this.checkHardwareDecoding()) {
-      capabilities.push(DeviceCapability.HARDWARE_DECODING);
+      capabilities.push(DeviceCapability.HIGHER_RESOLUTION);
     }
     
     // HDR能力检测
     if (await this.checkHDRCapability()) {
-      capabilities.push(DeviceCapability.HDR);
+      capabilities.push(DeviceCapability.HDR_SUPPORT);
     }
     
     return capabilities;
@@ -461,20 +461,17 @@ export default class DeviceService {
       // 使用HarmonyOS网络连接API获取网络信息
       const netInfo = connection.getDefaultNetSync();
       if (netInfo) {
-        const networkType = connection.getNetCapabilitiesSync(netInfo).netCap?.bearerTypes[0] || 'unknown';
+        const netCapabilities = connection.getNetCapabilitiesSync(netInfo);
+        const bearerTypes = netCapabilities.bearerTypes || [];
         
         // 将网络类型转换为可读字符串
         let typeStr = 'unknown';
-        switch (networkType) {
-          case connection.NetBearType.WIFI:
-            typeStr = 'wifi';
-            break;
-          case connection.NetBearType.CELLULAR:
-            typeStr = 'cellular';
-            break;
-          case connection.NetBearType.ETHERNET:
-            typeStr = 'ethernet';
-            break;
+        if (bearerTypes.includes(connection.NetBearType.WIFI)) {
+          typeStr = 'wifi';
+        } else if (bearerTypes.includes(connection.NetBearType.CELLULAR)) {
+          typeStr = 'cellular';
+        } else if (bearerTypes.includes(connection.NetBearType.ETHERNET)) {
+          typeStr = 'ethernet';
         }
         
         return {
@@ -521,12 +518,12 @@ export default class DeviceService {
     
     try {
       // 使用HarmonyOS设备信息API获取系统属性
-      properties.manufacturer = deviceInfo.manufacturer || '';
+      properties.manufacturer = deviceInfo.manufacture || '';
       properties.model = deviceInfo.productModel || '';
       properties.osFullName = deviceInfo.osFullName || '';
-      properties.apiVersion = deviceInfo.apiVersion.toString() || '';
+      properties.apiVersion = deviceInfo.sdkApiVersion.toString() || '';
       properties.deviceType = deviceInfo.deviceType || '';
-      properties.language = i18n.system.getSystemLanguageSync() || '';
+      properties.language = i18n.System.getSystemLanguageSync() || '';
     } catch (error) {
       Logger.error(TAG, 'Error getting system properties', error);
     }

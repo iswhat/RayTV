@@ -584,7 +584,7 @@ export class ValidatorUtil {
    * 验证URL参数是否有效
    * @param params URL参数对象
    */
-  public isValidUrlParams(params: Record<string, any>): boolean {
+  public isValidUrlParams(params: Record<string, unknown>): boolean {
     try {
       if (!this.isValidObject(params)) {
         return false;

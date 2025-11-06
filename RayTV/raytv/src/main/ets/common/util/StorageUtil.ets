@@ -21,7 +21,7 @@ export enum StorageType {
  * 存储数据结构
  */
 export interface StorageData {
-  value: unknown;
+  value: string | number | boolean | object | null;
   timestamp: number;
   expireTime: number;
 }
@@ -30,7 +30,7 @@ export interface StorageData {
  * 内存缓存项结构
  */
 export interface MemoryCacheItem {
-  value: unknown;
+  value: string | number | boolean | object | null;
   expireTime: number;
 }
 
@@ -54,7 +54,7 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: unknown, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: string | number | boolean | object | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
     try {
       const dataToSave: StorageData = {
         value,
@@ -91,7 +91,7 @@ export default class StorageUtil {
    * @param defaultValue 默认值
    * @returns 读取的数据或默认值
    */
-  public static async get<T = unknown>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T> {
+  public static async get<T = string | number | boolean | object | null>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T> {
     try {
       let data: StorageData | null = null;
 
@@ -263,7 +263,7 @@ export default class StorageUtil {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       const jsonData = await pref.getString(key, null);
-      return jsonData ? (JsonUtil.parse(jsonData) as StorageData) : null;
+      return jsonData ? (JsonUtil.parse<StorageData>(jsonData)) : null;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to get from preferences for key ${key}: ${errorMessage}`);
@@ -331,7 +331,7 @@ export default class StorageUtil {
     const filePath = `${AppConstant.FILE_STORAGE_PATH}/${key}.json`;
     if (await FileUtil.exists(filePath)) {
       const jsonData = await FileUtil.readFile(filePath);
-      return (JsonUtil.parse(jsonData) as StorageData) || null;
+      return JsonUtil.parse<StorageData>(jsonData) || null;
     }
     return null;
   }
@@ -421,7 +421,7 @@ export default class StorageUtil {
   private static hasInMemory(key: string): boolean {
     const item = StorageUtil.memoryCache[key];
     return !!item && 
-           (!item.expireTime || Date.now() <= item.expireTime);
+           (item.expireTime === 0 || Date.now() <= item.expireTime);
   }
 
   // ===== 内存缓存清理 =====

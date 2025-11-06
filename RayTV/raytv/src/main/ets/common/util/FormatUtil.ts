@@ -550,7 +550,7 @@ export class FormatUtil {
    * @param json JSON字符串或对象
    * @param indent 缩进空格数
    */
-  public formatJSON(json: string | any, indent: number = 2): string {
+  public formatJSON(json: string | object, indent: number = 2): string {
     try {
       let obj;
       if (typeof json === 'string') {

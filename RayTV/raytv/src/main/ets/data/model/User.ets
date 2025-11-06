@@ -67,7 +67,7 @@ export default class User {
   watchHistoryEnabled?: boolean; // 是否启用观看历史
   favoritesEnabled?: boolean;    // 是否启用收藏
   totalWatchTime?: number;       // 总观看时长（分钟）
-  settings?: Record<string, unknown>; // 其他设置
+  settings?: Record<string, string | number | boolean | object | null>; // 其他设置
 
   /**
    * 构造函数
@@ -114,6 +114,32 @@ export default class User {
   }
 
   /**
+   * 合并偏好设置（替代Object.assign）
+   * @param base 基础偏好设置
+   * @param updates 要更新的偏好设置
+   * @returns 合并后的偏好设置
+   */
+  private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences>): UserPreferences {
+    const result: UserPreferences = { ...base };
+    
+    // 手动合并每个属性
+    if (updates.theme !== undefined) result.theme = updates.theme;
+    if (updates.language !== undefined) result.language = updates.language;
+    if (updates.playerDefaultQuality !== undefined) result.playerDefaultQuality = updates.playerDefaultQuality;
+    if (updates.autoplay !== undefined) result.autoplay = updates.autoplay;
+    if (updates.subtitleEnabled !== undefined) result.subtitleEnabled = updates.subtitleEnabled;
+    if (updates.defaultSubtitleLanguage !== undefined) result.defaultSubtitleLanguage = updates.defaultSubtitleLanguage;
+    if (updates.audioLanguage !== undefined) result.audioLanguage = updates.audioLanguage;
+    if (updates.maxConcurrentDownloads !== undefined) result.maxConcurrentDownloads = updates.maxConcurrentDownloads;
+    if (updates.parentalControlEnabled !== undefined) result.parentalControlEnabled = updates.parentalControlEnabled;
+    if (updates.parentalControlLevel !== undefined) result.parentalControlLevel = updates.parentalControlLevel;
+    if (updates.searchHistoryEnabled !== undefined) result.searchHistoryEnabled = updates.searchHistoryEnabled;
+    if (updates.playbackSpeed !== undefined) result.playbackSpeed = updates.playbackSpeed;
+    
+    return result;
+  }
+
+  /**
    * 更新用户偏好设置
    * @param preferences 要更新的偏好设置
    */
@@ -121,7 +147,7 @@ export default class User {
     if (!this.preferences) {
       this.preferences = {} as UserPreferences;
     }
-    this.preferences = Object.assign({}, this.preferences, preferences);
+    this.preferences = this.mergePreferences(this.preferences, preferences);
   }
 
   /**
@@ -190,16 +216,27 @@ export default class User {
     
     if (existingIndex >= 0) {
       // 更新现有设备的信息
-      this.activeDevices[existingIndex] = Object.assign(
-        {},
-        this.activeDevices[existingIndex],
-        deviceInfo,
-        { lastActiveTime: DateUtil.format(new Date()) }
-      );
+      const existingDevice = this.activeDevices[existingIndex];
+      this.activeDevices[existingIndex] = {
+        deviceId: deviceInfo.deviceId || existingDevice.deviceId,
+        deviceName: deviceInfo.deviceName || existingDevice.deviceName,
+        deviceType: deviceInfo.deviceType || existingDevice.deviceType,
+        lastActiveTime: DateUtil.format(new Date()),
+        osVersion: deviceInfo.osVersion || existingDevice.osVersion,
+        appVersion: deviceInfo.appVersion || existingDevice.appVersion,
+        ipAddress: deviceInfo.ipAddress || existingDevice.ipAddress
+      };
     } else {
       // 添加新设备
-      const newDevice = Object.assign({}, deviceInfo);
-      newDevice.lastActiveTime = DateUtil.format(new Date());
+      const newDevice: DeviceInfo = {
+        deviceId: deviceInfo.deviceId,
+        deviceName: deviceInfo.deviceName,
+        deviceType: deviceInfo.deviceType,
+        lastActiveTime: DateUtil.format(new Date()),
+        osVersion: deviceInfo.osVersion,
+        appVersion: deviceInfo.appVersion,
+        ipAddress: deviceInfo.ipAddress
+      };
       this.activeDevices.push(newDevice);
     }
   }
@@ -248,21 +285,25 @@ export default class User {
    * @returns 是否有权限
    */
   public hasPermission(permission: string): boolean {
-    // 基础权限映射 - 使用接口定义和具体属性名
-    interface PermissionsMap {
-      GUEST: string[];
-      REGULAR: string[];
-      VIP: string[];
-      ADMIN: string[];
+    // 基础权限映射 - 使用switch语句替代索引访问
+    let userPermissions: string[] = [];
+    
+    switch (this.role) {
+      case UserRole.GUEST:
+        userPermissions = ['basic_view', 'limited_search'];
+        break;
+      case UserRole.REGULAR:
+        userPermissions = ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'];
+        break;
+      case UserRole.VIP:
+        userPermissions = ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_full', 'hd_content', 'ad_free', 'exclusive_content'];
+        break;
+      case UserRole.ADMIN:
+        userPermissions = ['*'];
+        break;
+      default:
+        userPermissions = [];
     }
-    const permissions: PermissionsMap = {
-      GUEST: ['basic_view', 'limited_search'],
-      REGULAR: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'],
-      VIP: ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_full', 'hd_content', 'ad_free', 'exclusive_content'],
-      ADMIN: ['*'] // 管理员拥有所有权限
-    };
-
-    const userPermissions = permissions[this.role] || [];
     
     // 管理员拥有所有权限
     if (userPermissions.includes('*')) {
@@ -271,7 +312,8 @@ export default class User {
 
     // VIP权限检查：如果是VIP但订阅已过期，降级为普通用户权限
     if (this.role === UserRole.VIP && !this.isVip()) {
-      return permissions[UserRole.REGULAR]?.includes(permission) || false;
+      const regularPermissions = ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'];
+      return regularPermissions.includes(permission);
     }
 
     return userPermissions.includes(permission);
@@ -326,7 +368,7 @@ export default class User {
    * @param data 序列化的数据
    * @returns User实例
    */
-  public static fromSerializable(data: Record<string, unknown>): User {
+  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): User {
     return new User(data as Partial<User>);
   }
 

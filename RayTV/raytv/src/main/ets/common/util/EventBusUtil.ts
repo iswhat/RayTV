@@ -6,7 +6,7 @@ import Logger from '../common/util/Logger';
 /**
  * 事件处理器函数类型
  */
-export type EventHandler<T = any> = (data?: T) => void;
+export type EventHandler<T = unknown> = (data?: T) => void;
 
 /**
  * 事件订阅信息接口
@@ -51,7 +51,7 @@ export class EventBusUtil {
    * @param handler 事件处理器
    * @param options 订阅选项
    */
-  public on<T = any>(eventName: string, handler: EventHandler<T>, options: { once?: boolean; priority?: number } = {}): () => void {
+  public on<T = unknown>(eventName: string, handler: EventHandler<T>, options: { once?: boolean; priority?: number } = {}): () => void {
     try {
       this.logger.debug(`Subscribing to event: ${eventName}, once: ${options.once || false}`);
       
@@ -93,7 +93,7 @@ export class EventBusUtil {
    * @param handler 事件处理器
    * @param options 订阅选项
    */
-  public once<T = any>(eventName: string, handler: EventHandler<T>, options: { priority?: number } = {}): () => void {
+  public once<T = unknown>(eventName: string, handler: EventHandler<T>, options: { priority?: number } = {}): () => void {
     return this.on(eventName, handler, { ...options, once: true });
   }
 
@@ -145,7 +145,7 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T = any>(eventName: string, data?: T): void {
+  public emit<T = unknown>(eventName: string, data?: T): void {
     try {
       this.logger.debug(`Emitting event: ${eventName}`);
       
@@ -306,7 +306,7 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param delay 延迟时间（毫秒）
    */
-  public emitDelayed<T = any>(eventName: string, data?: T, delay: number = 0): () => void {
+  public emitDelayed<T = unknown>(eventName: string, data?: T, delay: number = 0): () => void {
     const timeoutId = setTimeout(() => {
       this.emit(eventName, data);
     }, delay);
@@ -324,7 +324,7 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param wait 等待时间（毫秒）
    */
-  public emitDebounced<T = any>(eventName: string, data?: T, wait: number = 300): void {
+  public emitDebounced<T = unknown>(eventName: string, data?: T, wait: number = 300): void {
     const debounceKey = `__debounce_${eventName}`;
     
     // 清除之前的定时器
@@ -404,7 +404,7 @@ export class EventNamespace {
    * @param handler 事件处理器
    * @param options 订阅选项
    */
-  public on<T = any>(eventName: string, handler: EventHandler<T>, options?: { once?: boolean; priority?: number }): () => void {
+  public on<T = unknown>(eventName: string, handler: EventHandler<T>, options?: { once?: boolean; priority?: number }): () => void {
     return this.eventBus.on(this.getNamespacedEventName(eventName), handler, options);
   }
 
@@ -414,7 +414,7 @@ export class EventNamespace {
    * @param handler 事件处理器
    * @param options 订阅选项
    */
-  public once<T = any>(eventName: string, handler: EventHandler<T>, options?: { priority?: number }): () => void {
+  public once<T = unknown>(eventName: string, handler: EventHandler<T>, options?: { priority?: number }): () => void {
     return this.eventBus.once(this.getNamespacedEventName(eventName), handler, options);
   }
 
@@ -432,7 +432,7 @@ export class EventNamespace {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T = any>(eventName: string, data?: T): void {
+  public emit<T = unknown>(eventName: string, data?: T): void {
     this.eventBus.emit(this.getNamespacedEventName(eventName), data);
   }
 

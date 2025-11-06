@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\iswhat\\.ohos\\config\\default_RayTV_77w_utBkXDSTks4LAhWJD3DZYzyl4NGuBhXGdJs_qaA=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BE3628126332746846FB4DB4367DDFAF2989AD7B5B623CAA2C5E44BC5A8A0F2D654CE101CACDBB2",
+          "profile": "C:\\Users\\iswhat\\.ohos\\config\\default_RayTV_77w_utBkXDSTks4LAhWJD3DZYzyl4NGuBhXGdJs_qaA=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\iswhat\\.ohos\\config\\default_RayTV_77w_utBkXDSTks4LAhWJD3DZYzyl4NGuBhXGdJs_qaA=.p12",
+          "storePassword": "0000001B21DF989FFE5CF2958F0B3BF877195380CD687C9A3E72EB9FEC2F45AF1768FCC8665FA06831C3C1"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",

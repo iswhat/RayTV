@@ -117,7 +117,12 @@ export class PinyinUtil {
    * @param map 要添加的映射
    */
   public extendPinyinMap(map: Record<string, string>): void {
-    Object.assign(PINYIN_MAP, map);
+    // 手动合并映射表，避免使用Object.assign（ArkTS限制）
+    for (const key in map) {
+      if (map.hasOwnProperty(key)) {
+        PINYIN_MAP[key] = map[key];
+      }
+    }
     Logger.debug(TAG, `Pinyin map extended with ${Object.keys(map).length} entries`);
   }
 

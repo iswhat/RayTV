@@ -9,10 +9,6 @@ import ConfigService from '../../service/config/ConfigService';
 // 常量定义
 const TAG = 'DistributedDataService';
 const STORE_ID = 'raytv_distributed_data';
-const STORE_CONFIG = {
-  name: STORE_ID,
-  securityLevel: distributedData.SecurityLevel.S1
-};
 
 // 数据同步类型枚举
 export enum SyncDataType {
@@ -78,7 +74,8 @@ type DataChangeListener = (key: string, data: any, deviceId: string) => void;
 
 export default class DistributedDataService {
   static instance: DistributedDataService;
-  kvStore: distributedData.KVStore | null = null;
+  kvManager: distributedData.KVManager | null = null;
+  kvStore: distributedData.SingleKVStore | null = null;
   configService: ConfigService;
   syncConfig: SyncConfig = DEFAULT_SYNC_CONFIG;
   syncState: SyncState = { status: SyncStatus.IDLE };
@@ -116,8 +113,27 @@ export default class DistributedDataService {
     try {
       Logger.info(TAG, 'Initializing distributed data service...');
 
-      // 初始化KVStore
-      this.kvStore = await distributedData.getKVStore(context, STORE_CONFIG);
+      // 创建KVManager
+      this.kvManager = distributedData.createKVManager({
+        context: context,
+        bundleName: 'com.example.raytv'
+      });
+
+      if (!this.kvManager) {
+        throw new Error('Failed to create KVManager instance');
+      }
+
+      // 获取KVStore
+      const options: distributedData.Options = {
+        createIfMissing: true,
+        encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedData.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedData.SecurityLevel.S1
+      };
+
+      this.kvStore = await this.kvManager.getKVStore<distributedData.SingleKVStore>(STORE_ID, options);
       if (!this.kvStore) {
         throw new Error('Failed to get KVStore instance');
       }
@@ -194,28 +210,30 @@ export default class DistributedDataService {
     }
 
     try {
-      await this.kvStore.on('dataChange', (changeData) => {
-        Logger.debug(TAG, `Data change detected: ${JSON.stringify(changeData)}`);
+      await this.kvStore.on('dataChange', distributedData.SubscribeType.SUBSCRIBE_TYPE_ALL, (data) => {
+        Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
         
-        if (changeData.changeType === distributedData.DataChangeType.SET) {
-          const key = changeData.key;
-          const deviceId = changeData.deviceId;
-          
-          // 获取数据并通知监听器
-          this.kvStore?.get(key).then((value) => {
-            if (this.dataListeners.has(key)) {
-              const listeners = this.dataListeners.get(key)!;
-              for (const listener of listeners) {
-                try {
-                  listener(key, value, deviceId);
-                } catch (error) {
-                  Logger.error(TAG, `Error in data listener: ${error}`);
+        if (data && data.insertData && data.insertData.length > 0) {
+          for (const entry of data.insertData) {
+            const key = entry.key;
+            const deviceId = entry.deviceId;
+            
+            // 获取数据并通知监听器
+            this.kvStore?.get(key).then((value) => {
+              if (this.dataListeners.has(key)) {
+                const listeners = this.dataListeners.get(key)!;
+                for (const listener of listeners) {
+                  try {
+                    listener(key, value, deviceId);
+                  } catch (error) {
+                    Logger.error(TAG, `Error in data listener: ${error}`);
+                  }
                 }
               }
-            }
-          }).catch(error => {
-            Logger.error(TAG, `Failed to get changed data: ${error}`);
-          });
+            }).catch(error => {
+              Logger.error(TAG, `Failed to get changed data: ${error}`);
+            });
+          }
         }
       });
     } catch (error) {
@@ -262,9 +280,8 @@ export default class DistributedDataService {
    * @param dataType 数据类型
    * @param key 数据键
    * @param data 数据内容
-   * @param deviceId 目标设备ID（可选，不指定则同步到所有设备）
    */
-  async saveSyncData(dataType: SyncDataType, key: string, data: any, deviceId?: string): Promise<void> {
+  async saveSyncData(dataType: SyncDataType, key: string, data: any): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -274,18 +291,12 @@ export default class DistributedDataService {
       const syncData = {
         data,
         timestamp: Date.now(),
-        deviceId: distributedData.getLocalDeviceId()
+        deviceId: await this.getLocalDeviceId()
       };
 
-      if (deviceId) {
-        // 同步到指定设备
-        await this.kvStore.set(fullKey, syncData, deviceId);
-        Logger.debug(TAG, `Saved sync data to device ${deviceId}: ${fullKey}`);
-      } else {
-        // 同步到所有设备
-        await this.kvStore.set(fullKey, syncData);
-        Logger.debug(TAG, `Saved sync data to all devices: ${fullKey}`);
-      }
+      // 保存数据到KVStore
+      await this.kvStore.put(fullKey, syncData);
+      Logger.debug(TAG, `Saved sync data: ${fullKey}`);
     } catch (error) {
       Logger.error(TAG, `Failed to save sync data: ${error}`);
       throw error;
@@ -296,24 +307,15 @@ export default class DistributedDataService {
    * 获取同步数据
    * @param dataType 数据类型
    * @param key 数据键
-   * @param deviceId 设备ID（可选，不指定则获取本地数据）
    */
-  async getSyncData(dataType: SyncDataType, key: string, deviceId?: string): Promise<any | null> {
+  async getSyncData(dataType: SyncDataType, key: string): Promise<any | null> {
     if (!this.kvStore) {
       return null;
     }
 
     try {
       const fullKey = `${dataType}_${key}`;
-      let value: any = null;
-
-      if (deviceId) {
-        // 从指定设备获取数据
-        value = await this.kvStore.get(fullKey, deviceId);
-      } else {
-        // 获取本地数据
-        value = await this.kvStore.get(fullKey);
-      }
+      const value = await this.kvStore.get(fullKey);
 
       if (value) {
         Logger.debug(TAG, `Retrieved sync data: ${fullKey}`);
@@ -422,12 +424,33 @@ export default class DistributedDataService {
    */
   private async getAvailableDevices(): Promise<string[]> {
     try {
-      const devices = await distributedData.getConnectedDevices();
-      this.deviceIds = devices.map(device => device.deviceId);
+      if (!this.kvManager) {
+        return [];
+      }
+      
+      const deviceInfoList = await this.kvManager.getConnectedDevicesInfo();
+      this.deviceIds = deviceInfoList.map(device => device.deviceId);
       return this.deviceIds;
     } catch (error) {
       Logger.error(TAG, `Failed to get available devices: ${error}`);
       return [];
+    }
+  }
+
+  /**
+   * 获取本地设备ID
+   */
+  private async getLocalDeviceId(): Promise<string> {
+    try {
+      if (!this.kvManager) {
+        return 'unknown';
+      }
+      
+      const deviceInfo = await this.kvManager.getLocalDeviceInfo();
+      return deviceInfo.deviceId;
+    } catch (error) {
+      Logger.error(TAG, `Failed to get local device ID: ${error}`);
+      return 'unknown';
     }
   }
 
@@ -452,35 +475,8 @@ export default class DistributedDataService {
         const localData = await this.kvStore.get(fullKey);
         if (!localData) continue;
 
-        // 与每个设备的数据进行同步
-        for (const deviceId of deviceIds) {
-          try {
-            // 获取远程设备的数据
-            const remoteData = await this.kvStore.get(fullKey, deviceId);
-
-            if (!remoteData) {
-              // 远程没有数据，直接同步过去
-              Logger.debug(TAG, `Synced ${fullKey} to device ${deviceId}`);
-            } else if (remoteData.timestamp !== localData.timestamp) {
-              // 数据不同，需要解决冲突
-              const resolvedData = this.resolveConflict(localData, remoteData);
-              
-              // 更新本地和远程数据
-              if (JSON.stringify(resolvedData) !== JSON.stringify(localData)) {
-                await this.kvStore.set(fullKey, resolvedData);
-              }
-              
-              if (JSON.stringify(resolvedData) !== JSON.stringify(remoteData)) {
-                await this.kvStore.set(fullKey, resolvedData, deviceId);
-              }
-              
-              Logger.debug(TAG, `Resolved conflict for ${fullKey} with device ${deviceId}`);
-            }
-          } catch (error) {
-            Logger.error(TAG, `Failed to sync ${fullKey} with device ${deviceId}: ${error}`);
-            // 继续处理其他设备
-          }
-        }
+        // 数据会自动通过分布式同步到其他设备
+        Logger.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
       }
     } catch (error) {
       Logger.error(TAG, `Failed to sync data type ${dataType}: ${error}`);
@@ -497,8 +493,15 @@ export default class DistributedDataService {
     }
 
     try {
-      const allKeys = await this.kvStore.getAllKeys();
-      return allKeys.filter(key => key.startsWith(prefix));
+      const allKeys = await this.kvStore.getEntries('');
+      const keys: string[] = [];
+      for (let i = 0; i < allKeys.length; i++) {
+        const key = allKeys[i].key;
+        if (key.startsWith(prefix)) {
+          keys.push(key);
+        }
+      }
+      return keys;
     } catch (error) {
       Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}`);
       return [];
@@ -508,7 +511,7 @@ export default class DistributedDataService {
   /**
    * 处理同步冲突
    */
-  private resolveConflict(localData: any, remoteData: any): any {
+  private async resolveConflict(localData: any, remoteData: any): Promise<any> {
     switch (this.syncConfig.conflictStrategy) {
       case ConflictResolutionStrategy.LOCAL_WIN:
         return localData;
@@ -518,7 +521,7 @@ export default class DistributedDataService {
         return localData.timestamp >= remoteData.timestamp ? localData : remoteData;
       case ConflictResolutionStrategy.MERGE:
         // TODO: 实现合并策略
-        return this.mergeData(localData, remoteData);
+        return await this.mergeData(localData, remoteData);
       default:
         return localData;
     }
@@ -527,7 +530,7 @@ export default class DistributedDataService {
   /**
    * 合并数据（根据不同数据类型实现智能合并策略）
    */
-  private mergeData(localData: any, remoteData: any): any {
+  private async mergeData(localData: any, remoteData: any): Promise<any> {
     // 确保输入是对象
     if (typeof localData !== 'object' || localData === null) {
       return remoteData;
@@ -598,7 +601,7 @@ export default class DistributedDataService {
                 typeof remoteData[key] === 'object' && 
                 !Array.isArray(localData[key]) && 
                 !Array.isArray(remoteData[key])) {
-              merged[key] = this.mergeData(localData[key], remoteData[key]);
+              merged[key] = await this.mergeData(localData[key], remoteData[key]);
             } else {
               // 对于数组和基本类型，使用远程数据
               merged[key] = remoteData[key];
@@ -609,7 +612,7 @@ export default class DistributedDataService {
     
     // 更新合并后的时间戳和设备ID
     merged.timestamp = Date.now();
-    merged.deviceId = distributedData.getLocalDeviceId();
+    merged.deviceId = await this.getLocalDeviceId();
     
     return merged;
   }

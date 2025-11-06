@@ -206,8 +206,8 @@ class Logger {
    * @param config 日志配置
    */
   public initialize(config: Partial<LoggerConfig>): void {
-    // 使用Object.assign合并对象属性，符合ArkTS规范
-    this.config = Object.assign({}, this.config, config);
+    // 手动合并对象属性，避免使用Object.assign（ArkTS限制）
+    this.config = this.mergeConfig(this.config, config);
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
@@ -320,7 +320,7 @@ class Logger {
    * @param args 替换参数
    * @returns 格式化后的消息
    */
-  private static formatMessage(message: string, ...args: unknown[]): string {
+  private static formatMessage(message: string, ...args: Array<string | number | boolean | object | undefined | null>): string {
     if (!args || args.length === 0) {
       return message;
     }
@@ -507,7 +507,7 @@ class Logger {
    */
   private logInternal(level: LogLevel, message: string): void {
     if (this.shouldLog(level)) {
-      this.log(level, message);
+      this.log(level, message, undefined, undefined);
     }
   }
 
@@ -765,6 +765,47 @@ class Logger {
    */
   private checkLogFileSize(): void {
     // 这里需要实现文件大小检查和日志轮转
+  }
+
+  /**
+   * 手动合并配置对象，避免使用Object.assign
+   * @param target 目标配置
+   * @param source 源配置
+   */
+  private mergeConfig(target: LoggerConfig, source: Partial<LoggerConfig>): LoggerConfig {
+    const result: LoggerConfig = {
+      level: source.level !== undefined ? source.level : target.level,
+      consoleEnabled: source.consoleEnabled !== undefined ? source.consoleEnabled : target.consoleEnabled,
+      fileEnabled: source.fileEnabled !== undefined ? source.fileEnabled : target.fileEnabled,
+      formatEnabled: source.formatEnabled !== undefined ? source.formatEnabled : target.formatEnabled,
+      showTimestamp: source.showTimestamp !== undefined ? source.showTimestamp : target.showTimestamp,
+      showLevel: source.showLevel !== undefined ? source.showLevel : target.showLevel,
+      showCaller: source.showCaller !== undefined ? source.showCaller : target.showCaller,
+      showProcessId: source.showProcessId !== undefined ? source.showProcessId : target.showProcessId,
+      showThreadId: source.showThreadId !== undefined ? source.showThreadId : target.showThreadId,
+      enableStackTrace: source.enableStackTrace !== undefined ? source.enableStackTrace : target.enableStackTrace,
+    };
+
+    // 处理可选属性
+    if (source.logFilePath !== undefined) {
+      result.logFilePath = source.logFilePath;
+    } else if (target.logFilePath !== undefined) {
+      result.logFilePath = target.logFilePath;
+    }
+
+    if (source.maxFileSize !== undefined) {
+      result.maxFileSize = source.maxFileSize;
+    } else if (target.maxFileSize !== undefined) {
+      result.maxFileSize = target.maxFileSize;
+    }
+
+    if (source.maxFileCount !== undefined) {
+      result.maxFileCount = source.maxFileCount;
+    } else if (target.maxFileCount !== undefined) {
+      result.maxFileCount = target.maxFileCount;
+    }
+
+    return result;
   }
 }
 

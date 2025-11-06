@@ -41,7 +41,7 @@ export default class FileUtil {
       
       const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
       const buf = new TextEncoder().encode(content);
-      await fs.write(file.fd, buf.buffer);
+      await fs.write(file.fd, buf);
       await fs.close(file.fd);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -62,7 +62,7 @@ export default class FileUtil {
       
       const file = await fs.open(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.APPEND);
       const buf = new TextEncoder().encode(content);
-      await fs.write(file.fd, buf.buffer);
+      await fs.write(file.fd, buf);
       await fs.close(file.fd);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

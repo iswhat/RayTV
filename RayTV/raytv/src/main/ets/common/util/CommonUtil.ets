@@ -347,10 +347,14 @@ export class CommonUtil {
       for (const key in source) {
         if (source.hasOwnProperty(key)) {
           if (source[key] && typeof source[key] === 'object') {
-            if (!target[key]) Object.assign(target, { [key]: {} });
-            this.mergeObjects(target[key], source[key]);
+            if (!target[key]) {
+              // 手动创建新属性，避免使用Object.assign（ArkTS限制）
+              target[key] = {};
+            }
+            this.mergeObjects(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
           } else {
-            Object.assign(target, { [key]: source[key] });
+            // 手动设置属性值，避免使用Object.assign（ArkTS限制）
+            target[key] = source[key];
           }
         }
       }

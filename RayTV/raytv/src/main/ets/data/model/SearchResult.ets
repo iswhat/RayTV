@@ -47,7 +47,7 @@ export default class SearchResult {
   directors?: string[];    // 导演列表（针对内容类型）
   popularity?: number;     // 热度/流行度
   matchScore?: number;     // 匹配分数（搜索相关性）
-  extraInfo?: Record<string, unknown>; // 额外信息，使用unknown类型提高类型安全性
+  extraInfo?: Record<string, string | number | boolean | object | null>; // 额外信息，使用具体的类型联合
   link?: string;           // 关联链接
   sourceId?: string;       // 来源ID
   sourceName?: string;     // 来源名称
@@ -321,32 +321,34 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, unknown> {
-    return {
-      id: this.id,
-      title: this.title,
-      originalTitle: this.originalTitle,
-      type: this.type,
-      coverUrl: this.coverUrl,
-      backdropUrl: this.backdropUrl,
-      description: this.description,
-      score: this.score,
-      year: this.year,
-      releaseDate: this.releaseDate,
-      genres: this.genres,
-      tags: this.tags,
-      duration: this.duration,
-      totalEpisodes: this.totalEpisodes,
-      currentSeason: this.currentSeason,
-      actors: this.actors,
-      directors: this.directors,
-      popularity: this.popularity,
-      matchScore: this.matchScore,
-      extraInfo: this.extraInfo,
-      link: this.link,
-      sourceId: this.sourceId,
-      sourceName: this.sourceName
-    };
+  public toSerializable(): Record<string, string | number | boolean | object | null> {
+    const result: Record<string, string | number | boolean | object | null> = {};
+    
+    result.id = this.id;
+    result.title = this.title;
+    if (this.originalTitle !== undefined) result.originalTitle = this.originalTitle;
+    result.type = this.type;
+    if (this.coverUrl !== undefined) result.coverUrl = this.coverUrl;
+    if (this.backdropUrl !== undefined) result.backdropUrl = this.backdropUrl;
+    if (this.description !== undefined) result.description = this.description;
+    if (this.score !== undefined) result.score = this.score;
+    if (this.year !== undefined) result.year = this.year;
+    if (this.releaseDate !== undefined) result.releaseDate = this.releaseDate;
+    if (this.genres !== undefined) result.genres = this.genres;
+    if (this.tags !== undefined) result.tags = this.tags;
+    if (this.duration !== undefined) result.duration = this.duration;
+    if (this.totalEpisodes !== undefined) result.totalEpisodes = this.totalEpisodes;
+    if (this.currentSeason !== undefined) result.currentSeason = this.currentSeason;
+    if (this.actors !== undefined) result.actors = this.actors;
+    if (this.directors !== undefined) result.directors = this.directors;
+    if (this.popularity !== undefined) result.popularity = this.popularity;
+    if (this.matchScore !== undefined) result.matchScore = this.matchScore;
+    if (this.extraInfo !== undefined) result.extraInfo = this.extraInfo;
+    if (this.link !== undefined) result.link = this.link;
+    if (this.sourceId !== undefined) result.sourceId = this.sourceId;
+    if (this.sourceName !== undefined) result.sourceName = this.sourceName;
+    
+    return result;
   }
 
   /**
@@ -354,8 +356,36 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, unknown>): SearchResult {
-    return new SearchResult(data);
+  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): SearchResult {
+    // 将Record类型转换为Partial<SearchResult>类型
+    const searchResultData: Partial<SearchResult> = {};
+    
+    // 手动赋值每个属性，确保类型安全
+    if (typeof data.id === 'string') searchResultData.id = data.id;
+    if (typeof data.title === 'string') searchResultData.title = data.title;
+    if (typeof data.originalTitle === 'string') searchResultData.originalTitle = data.originalTitle;
+    if (typeof data.type === 'number') searchResultData.type = data.type;
+    if (typeof data.coverUrl === 'string') searchResultData.coverUrl = data.coverUrl;
+    if (typeof data.backdropUrl === 'string') searchResultData.backdropUrl = data.backdropUrl;
+    if (typeof data.description === 'string') searchResultData.description = data.description;
+    if (typeof data.score === 'number') searchResultData.score = data.score;
+    if (typeof data.year === 'number') searchResultData.year = data.year;
+    if (typeof data.releaseDate === 'string') searchResultData.releaseDate = data.releaseDate;
+    if (Array.isArray(data.genres)) searchResultData.genres = data.genres as string[];
+    if (Array.isArray(data.tags)) searchResultData.tags = data.tags as string[];
+    if (typeof data.duration === 'number') searchResultData.duration = data.duration;
+    if (typeof data.totalEpisodes === 'number') searchResultData.totalEpisodes = data.totalEpisodes;
+    if (typeof data.currentSeason === 'number') searchResultData.currentSeason = data.currentSeason;
+    if (Array.isArray(data.actors)) searchResultData.actors = data.actors as string[];
+    if (Array.isArray(data.directors)) searchResultData.directors = data.directors as string[];
+    if (typeof data.popularity === 'number') searchResultData.popularity = data.popularity;
+    if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
+    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) searchResultData.extraInfo = data.extraInfo as Record<string, string | number | boolean | object | null>;
+    if (typeof data.link === 'string') searchResultData.link = data.link;
+    if (typeof data.sourceId === 'string') searchResultData.sourceId = data.sourceId;
+    if (typeof data.sourceName === 'string') searchResultData.sourceName = data.sourceName;
+    
+    return new SearchResult(searchResultData);
   }
 
   /**

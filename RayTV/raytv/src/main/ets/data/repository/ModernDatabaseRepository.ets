@@ -43,7 +43,7 @@ export default class ModernDatabaseRepository implements DatabaseRepository {
       };
 
       // 创建或打开数据库
-      const context = getContext() as common.UIAbilityContext;
+      const context = this.context as common.UIAbilityContext;
       const rdbStore = await relationalStore.getRdbStore(context, config);
       
       // 设置数据库版本

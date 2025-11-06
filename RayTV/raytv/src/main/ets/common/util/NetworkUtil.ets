@@ -85,7 +85,7 @@ export default class NetworkUtil {
       // 检查网络权限
       try {
         const atManager = abilityAccessCtrl.createAtManager();
-        await atManager.requestPermissionsFromUser(getContext(), ['ohos.permission.INTERNET']);
+        await atManager.requestPermissionsFromUser(NetworkUtil.getContext(), ['ohos.permission.INTERNET']);
       } catch (permissionError) {
         Logger.error(TAG, 'Failed to request INTERNET permission', permissionError);
         throw new Error('Network permission denied');

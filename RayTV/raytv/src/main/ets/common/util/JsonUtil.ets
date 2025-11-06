@@ -32,7 +32,7 @@ export default class JsonUtil {
    * @param jsonStr JSON字符串
    * @returns 反序列化后的对象
    */
-  public static parse<T>(jsonStr: string): T | null {
+  public static parse<T extends object>(jsonStr: string): T | null {
     try {
       if (!jsonStr || typeof jsonStr !== 'string') {
         throw new Error('Invalid JSON string');
@@ -51,7 +51,7 @@ export default class JsonUtil {
    * @param defaultValue 默认值
    * @returns 解析结果或默认值
    */
-  public static safeParse<T>(jsonStr: string, defaultValue: T): T | null {
+  public static safeParse<T extends object>(jsonStr: string, defaultValue: T): T | null {
     try {
       return JsonUtil.parse<T>(jsonStr);
     } catch (error) {
@@ -96,20 +96,20 @@ export default class JsonUtil {
       }
       
       if (Array.isArray(obj)) {
-        const cloneArr: unknown[] = [];
+        const cloneArr: T[] = [];
         for (let i = 0; i < obj.length; i++) {
-          cloneArr[i] = JsonUtil.deepClone(obj[i]);
+          cloneArr.push(JsonUtil.deepClone(obj[i]));
         }
         return cloneArr as T;
       }
       
       if (typeof obj === 'object' && obj !== null) {
-        const cloneObj: Record<string, unknown> = {};
+        const cloneObj: Record<string, T> = {};
         // 使用Object.keys替代for..in循环
-        const keys = Object.keys(obj as Record<string, unknown>);
+        const keys = Object.keys(obj);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
-          cloneObj[key] = JsonUtil.deepClone((obj as Record<string, unknown>)[key]);
+          cloneObj[key] = JsonUtil.deepClone((obj as Record<string, T>)[key]);
         }
         return cloneObj as T;
       }
@@ -128,7 +128,7 @@ export default class JsonUtil {
    * @param source 源对象
    * @returns 合并后的对象
    */
-  public static merge<T>(target: T, source: Record<string, unknown>): T {
+  public static merge<T extends Record<string, unknown>>(target: T, source: Record<string, unknown>): T {
     try {
       const result = JsonUtil.deepClone(target);
       
@@ -145,7 +145,7 @@ export default class JsonUtil {
         // 递归合并对象属性
         if (sourceValue !== null && typeof sourceValue === 'object' &&
             targetValue !== null && typeof targetValue === 'object') {
-          resultObj[key] = JsonUtil.merge(targetValue, sourceValue as Record<string, unknown>);
+          resultObj[key] = JsonUtil.merge(targetValue as Record<string, unknown>, sourceValue as Record<string, unknown>);
         } else {
           resultObj[key] = sourceValue;
         }
@@ -165,19 +165,19 @@ export default class JsonUtil {
    * @param keys 要提取的属性名数组
    * @returns 提取后的新对象
    */
-  public static pick<T extends Record<string, unknown>>(obj: unknown, keys: string[]): T {
+  public static pick<T extends Record<string, unknown>>(obj: T, keys: string[]): Partial<T> {
     try {
-      const result: Record<string, unknown> = {};
+      const result: Partial<T> = {};
       
       // 使用标准for循环替代forEach
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
-          result[key] = (obj as Record<string, unknown>)[key];
+          (result as Record<string, unknown>)[key] = obj[key];
         }
       }
       
-      return result as T;
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to pick properties: ${errorMessage}`);
@@ -191,13 +191,13 @@ export default class JsonUtil {
    * @param keys 要排除的属性名数组
    * @returns 排除后的新对象
    */
-  public static omit<T extends Record<string, unknown>>(obj: unknown, keys: string[]): T {
+  public static omit<T extends Record<string, unknown>>(obj: T, keys: string[]): Partial<T> {
     try {
-      const result: Record<string, unknown> = {};
+      const result: Partial<T> = {};
       
       if (obj && typeof obj === 'object') {
         // 使用Object.keys替代for..in循环
-        const objKeys = Object.keys(obj as Record<string, unknown>);
+        const objKeys = Object.keys(obj);
         for (let i = 0; i < objKeys.length; i++) {
           const key = objKeys[i];
           // 检查key是否在排除列表中
@@ -209,12 +209,12 @@ export default class JsonUtil {
             }
           }
           if (!shouldExclude) {
-            result[key] = (obj as Record<string, unknown>)[key];
+            (result as Record<string, unknown>)[key] = obj[key];
           }
         }
       }
       
-      return result as T;
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to omit properties: ${errorMessage}`);
@@ -229,9 +229,9 @@ export default class JsonUtil {
    */
   public static compress(jsonStr: string): string {
     try {
-      const parsed = this.parse<object>(jsonStr);
+      const parsed = JsonUtil.parse<Record<string, unknown>>(jsonStr);
       if (parsed) {
-        return this.stringify(parsed);
+        return JsonUtil.stringify(parsed);
       }
       return jsonStr;
     } catch (error) {
@@ -248,9 +248,9 @@ export default class JsonUtil {
    */
   public static format(jsonStr: string): string {
     try {
-      const parsed = this.parse<object>(jsonStr);
+      const parsed = JsonUtil.parse<Record<string, unknown>>(jsonStr);
       if (parsed) {
-        return this.stringify(parsed, true);
+        return JsonUtil.stringify(parsed, true);
       }
       return jsonStr;
     } catch (error) {

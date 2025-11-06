@@ -41,6 +41,32 @@ export interface PaginatedResult<T> {
 }
 
 /**
+ * 电影筛选条件接口
+ */
+export interface MovieFilter {
+  genres?: string[];      // 类型筛选
+  yearRange?: {          // 年份范围
+    min?: number;
+    max?: number;
+  };
+  ratingRange?: {        // 评分范围
+    min?: number;
+    max?: number;
+  };
+  country?: string[];     // 国家/地区
+  language?: string[];    // 语言
+  isVip?: boolean;       // 是否VIP内容
+  hasSubtitle?: boolean; // 是否有字幕
+  sortBy?: 'year' | 'rating' | 'popularity' | 'releaseDate'; // 排序字段
+  sortOrder?: 'asc' | 'desc'; // 排序顺序
+}
+
+/**
+ * 配置值类型
+ */
+export type ConfigValue = string | number | boolean | Record<string, any> | string[] | number[] | boolean[];
+
+/**
  * 数据库操作状态枚举
  */
 export enum DatabaseStatus {
@@ -119,7 +145,7 @@ export default interface DatabaseRepository {
    */
   getMoviesPaginated(
     params: PaginationParams,
-    filters?: Record<string, any>
+    filters?: MovieFilter
   ): Promise<DatabaseResult<PaginatedResult<Movie>>>;
 
   /**
@@ -132,7 +158,7 @@ export default interface DatabaseRepository {
   searchMovies(
     keyword: string,
     params: PaginationParams,
-    filters?: Record<string, any>
+    filters?: MovieFilter
   ): Promise<DatabaseResult<PaginatedResult<Movie>>>;
 
   // ========== 用户相关操作 ==========
@@ -399,7 +425,7 @@ export default interface DatabaseRepository {
    */
   saveConfig(
     key: string,
-    value: any,
+    value: ConfigValue,
     group?: string
   ): Promise<DatabaseResult<boolean>>;
 
@@ -412,7 +438,7 @@ export default interface DatabaseRepository {
   getConfig(
     key: string,
     group?: string
-  ): Promise<DatabaseResult<any>>;
+  ): Promise<DatabaseResult<ConfigValue | null>>;
 
   /**
    * 删除配置项
@@ -432,7 +458,7 @@ export default interface DatabaseRepository {
    */
   getConfigGroup(
     group: string
-  ): Promise<DatabaseResult<Record<string, any>>>;
+  ): Promise<DatabaseResult<Record<string, ConfigValue>>>;
 
   /**
    * 清空配置分组

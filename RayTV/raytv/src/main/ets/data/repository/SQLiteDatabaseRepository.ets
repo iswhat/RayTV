@@ -5,7 +5,8 @@ import DatabaseRepository, {
   DatabaseResult,
   DatabaseStatus,
   PaginationParams,
-  PaginatedResult
+  PaginatedResult,
+  ConfigValue
 } from './DatabaseRepository';
 import Movie from '../model/Movie';
 import User from '../model/User';
@@ -26,7 +27,15 @@ const DATABASE_VERSION = 1;
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, any> = new Map(); // 用于缓存配置
+  private configMap: Map<string, string | number | boolean | object | null> = new Map(); // 用于缓存配置
+  private context: common.UIAbilityContext | null = null;
+
+  /**
+   * 设置上下文
+   */
+  setContext(context: common.UIAbilityContext): void {
+    this.context = context;
+  }
 
   /**
    * 初始化数据库
@@ -35,14 +44,17 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     try {
       Logger.info(TAG, 'Initializing database...');
       
+      if (!this.context) {
+        throw new Error('Context not set. Call setContext() before initialize().');
+      }
+
       const config: relationalStore.StoreConfig = {
         name: DATABASE_NAME,
         securityLevel: relationalStore.SecurityLevel.S1
       };
 
       // 创建或打开数据库
-      const context = getContext(this) as common.UIAbilityContext;
-      const rdbStore = await relationalStore.getRdbStore(context, config);
+      const rdbStore = await relationalStore.getRdbStore(this.context, config);
       
       // 设置数据库版本和升级回调
       await rdbStore.setVersion(DATABASE_VERSION);
@@ -162,7 +174,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建用户表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
           username TEXT NOT NULL UNIQUE,
@@ -189,7 +201,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建观看历史表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS history (
           id TEXT PRIMARY KEY,
           userId TEXT NOT NULL,
@@ -211,7 +223,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建收藏表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS favorites (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           userId TEXT NOT NULL,
@@ -225,7 +237,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建搜索历史表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS search_history (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           userId TEXT NOT NULL,
@@ -236,7 +248,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建缓存表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS cache (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           key TEXT NOT NULL UNIQUE,
@@ -253,40 +265,59 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           key TEXT NOT NULL,
           value TEXT NOT NULL,
-          group TEXT DEFAULT 'default',
+          config_group TEXT DEFAULT 'default',
           createTime INTEGER NOT NULL,
           updateTime INTEGER NOT NULL,
-          UNIQUE(key, group)
+          UNIQUE(key, config_group)
         );
       `);
 
       // 创建索引以提高查询性能
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_user ON history(userId);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_content ON history(contentId, contentType);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_time ON history(lastWatchTime);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(userId);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_collection ON favorites(userId, collectionName);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_search_history ON search_history(userId, searchTime);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_type ON movies(type);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_score ON movies(score);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_cache_key ON cache(key);');
-      rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_config_group ON config(group);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_user ON history(userId);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_content ON history(contentId, contentType);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_time ON history(lastWatchTime);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(userId);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_collection ON favorites(userId, collectionName);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_search_history ON search_history(userId, searchTime);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_type ON movies(type);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_score ON movies(score);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_cache_key ON cache(key);');
+      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_config_group ON config(config_group);');
 
       Logger.info(TAG, 'Database tables created successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw new Error(`Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
    * 数据库升级
    */
-  private onUpgradeDatabase(rdb: dataRdb.RdbStore, oldVersion: number, newVersion: number): void {
-    Logger.info(TAG, `Upgrading database from version ${oldVersion} to ${newVersion}`);
-    
-    // 这里可以添加数据库升级逻辑
-    // 例如添加新表、修改表结构、添加新字段等
+  private async onUpgradeDatabase(rdb: relationalStore.RdbStore, oldVersion: number, newVersion: number): Promise<void> {
+    try {
+      Logger.info(TAG, `Upgrading database from version ${oldVersion} to ${newVersion}`);
+      
+      // 这里可以添加数据库升级逻辑
+      // 例如添加新表、修改表结构、添加新字段等
+      
+      // 示例：从版本1升级到版本2
+      if (oldVersion === 1 && newVersion >= 2) {
+        // 添加新表或修改表结构
+        Logger.info(TAG, 'Applying database upgrade from version 1 to 2');
+      }
+      
+      // 示例：从版本2升级到版本3
+      if (oldVersion === 2 && newVersion >= 3) {
+        // 添加新表或修改表结构
+        Logger.info(TAG, 'Applying database upgrade from version 2 to 3');
+      }
+      
+      Logger.info(TAG, 'Database upgrade completed successfully');
+    } catch (error) {
+      Logger.error(TAG, `Failed to upgrade database: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Database upgrade failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
@@ -296,20 +327,20 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     try {
       if (!this.rdbStore) return;
 
-      const resultSet = await this.rdbStore.querySql('SELECT key, value, group FROM config');
+      const resultSet = await this.rdbStore.querySql('SELECT key, value, config_group FROM config');
       if (resultSet) {
         while (resultSet.goToNextRow()) {
           const key = resultSet.getString(resultSet.getColumnIndex('key'));
           const value = resultSet.getString(resultSet.getColumnIndex('value'));
-          const group = resultSet.getString(resultSet.getColumnIndex('group')) || 'default';
+          const config_group = resultSet.getString(resultSet.getColumnIndex('config_group')) || 'default';
           
           if (key) {
             try {
               const parsedValue = JsonUtil.safeParse(value || '');
-              this.configMap.set(`${group}:${key}`, parsedValue);
+              this.configMap.set(`${config_group}:${key}`, parsedValue);
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
-              this.configMap.set(`${group}:${key}`, value);
+              this.configMap.set(`${config_group}:${key}`, value);
             }
           }
         }
@@ -328,7 +359,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      const valuesBucket: dataRdb.ValuesBucket = {
+      const valuesBucket: relationalStore.ValuesBucket = {
         'id': movie.id,
         'title': movie.title,
         'originalTitle': movie.originalTitle || null,
@@ -389,7 +420,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      const valuesBucket: dataRdb.ValuesBucket = {
+      const valuesBucket: relationalStore.ValuesBucket = {
         'title': movie.title,
         'originalTitle': movie.originalTitle || null,
         'type': movie.type,
@@ -421,7 +452,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         'extraInfo': JsonUtil.stringify(movie.extraInfo || {})
       };
 
-      const predicates = new dataRdb.RdbPredicates('movies');
+      const predicates = new relationalStore.RdbPredicates('movies');
       predicates.equalTo('id', movie.id);
       
       const rowsUpdated = await this.rdbStore.update(valuesBucket, predicates);
@@ -455,7 +486,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      const predicates = new dataRdb.RdbPredicates('movies');
+      const predicates = new relationalStore.RdbPredicates('movies');
       predicates.equalTo('id', movieId);
       
       const rowsDeleted = await this.rdbStore.delete(predicates);
@@ -463,7 +494,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       if (rowsDeleted > 0) {
         Logger.info(TAG, `Movie deleted successfully: ${movieId}`);
         // 同时删除相关的收藏记录
-        const favPredicates = new dataRdb.RdbPredicates('favorites');
+        const favPredicates = new relationalStore.RdbPredicates('favorites');
         favPredicates.equalTo('movieId', movieId);
         await this.rdbStore.delete(favPredicates);
         
@@ -494,7 +525,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      const predicates = new dataRdb.RdbPredicates('movies');
+      const predicates = new relationalStore.RdbPredicates('movies');
       predicates.equalTo('id', movieId);
       
       const resultSet = await this.rdbStore.query(predicates);
@@ -530,7 +561,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 从结果集解析Movie对象
    */
-  private parseMovieFromResultSet(resultSet: dataRdb.ResultSet): Movie {
+  private parseMovieFromResultSet(resultSet: relationalStore.ResultSet): Movie {
     const movie = new Movie({
       id: resultSet.getString(resultSet.getColumnIndex('id')) || '',
       title: resultSet.getString(resultSet.getColumnIndex('title')) || '',
@@ -570,7 +601,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): any {
+  private safeParseJson(jsonStr: string): Record<string, any> | any[] | string | number | boolean | null {
     try {
       return JsonUtil.safeParse(jsonStr);
     } catch (error) {
@@ -615,9 +646,9 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   async clearExpiredCache(): Promise<DatabaseResult<number>> { return { success: false, message: 'Not implemented' }; }
   async getCacheSize(): Promise<DatabaseResult<number>> { return { success: false, message: 'Not implemented' }; }
   async clearAllCache(): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async saveConfig(key: string, value: any, group?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getConfig(key: string, group?: string): Promise<DatabaseResult<any>> { return { success: false, message: 'Not implemented' }; }
+  async saveConfig(key: string, value: ConfigValue, group?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
+  async getConfig(key: string, group?: string): Promise<DatabaseResult<ConfigValue | null>> { return { success: false, message: 'Not implemented' }; }
   async deleteConfig(key: string, group?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, any>>> { return { success: false, message: 'Not implemented' }; }
+  async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, ConfigValue>>> { return { success: false, message: 'Not implemented' }; }
   async clearConfigGroup(group: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
 }

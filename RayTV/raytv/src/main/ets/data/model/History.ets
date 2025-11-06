@@ -194,27 +194,28 @@ export default class History {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Partial<History> {
-    const result: Partial<History> = {
-      id: this.id,
-      userId: this.userId,
-      contentId: this.contentId,
-      contentTitle: this.contentTitle,
-      contentType: this.contentType,
-      coverUrl: this.coverUrl,
-      episodeId: this.episodeId,
-      episodeTitle: this.episodeTitle,
-      season: this.season,
-      episode: this.episode,
-      progress: this.progress,
-      totalDuration: this.totalDuration,
-      lastWatchTime: this.lastWatchTime,
-      playCount: this.playCount,
-      isFinished: this.isFinished,
-      sourceId: this.sourceId,
-      quality: this.quality,
-      deviceId: this.deviceId
-    };
+  public toSerializable(): Record<string, string | number | boolean | object | null> {
+    const result: Record<string, string | number | boolean | object | null> = {};
+    
+    result.id = this.id;
+    result.userId = this.userId;
+    result.contentId = this.contentId;
+    result.contentTitle = this.contentTitle;
+    result.contentType = this.contentType;
+    if (this.coverUrl !== undefined) result.coverUrl = this.coverUrl;
+    if (this.episodeId !== undefined) result.episodeId = this.episodeId;
+    if (this.episodeTitle !== undefined) result.episodeTitle = this.episodeTitle;
+    if (this.season !== undefined) result.season = this.season;
+    if (this.episode !== undefined) result.episode = this.episode;
+    result.progress = this.progress;
+    result.totalDuration = this.totalDuration;
+    result.lastWatchTime = this.lastWatchTime;
+    result.playCount = this.playCount;
+    result.isFinished = this.isFinished;
+    if (this.sourceId !== undefined) result.sourceId = this.sourceId;
+    if (this.quality !== undefined) result.quality = this.quality;
+    if (this.deviceId !== undefined) result.deviceId = this.deviceId;
+    
     return result;
   }
 
@@ -223,8 +224,29 @@ export default class History {
    * @param data 序列化的数据
    * @returns History实例
    */
-  public static fromSerializable(data: Record<string, unknown>): History {
-    return new History(data as Partial<History>);
+  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): History {
+    const historyData: Partial<History> = {};
+    
+    if (typeof data.id === 'string') historyData.id = data.id;
+    if (typeof data.userId === 'string') historyData.userId = data.userId;
+    if (typeof data.contentId === 'string') historyData.contentId = data.contentId;
+    if (typeof data.contentTitle === 'string') historyData.contentTitle = data.contentTitle;
+    if (typeof data.contentType === 'number') historyData.contentType = data.contentType;
+    if (typeof data.coverUrl === 'string') historyData.coverUrl = data.coverUrl;
+    if (typeof data.episodeId === 'string') historyData.episodeId = data.episodeId;
+    if (typeof data.episodeTitle === 'string') historyData.episodeTitle = data.episodeTitle;
+    if (typeof data.season === 'number') historyData.season = data.season;
+    if (typeof data.episode === 'number') historyData.episode = data.episode;
+    if (typeof data.progress === 'number') historyData.progress = data.progress;
+    if (typeof data.totalDuration === 'number') historyData.totalDuration = data.totalDuration;
+    if (typeof data.lastWatchTime === 'string') historyData.lastWatchTime = data.lastWatchTime;
+    if (typeof data.playCount === 'number') historyData.playCount = data.playCount;
+    if (typeof data.isFinished === 'boolean') historyData.isFinished = data.isFinished;
+    if (typeof data.sourceId === 'string') historyData.sourceId = data.sourceId;
+    if (typeof data.quality === 'string') historyData.quality = data.quality;
+    if (typeof data.deviceId === 'string') historyData.deviceId = data.deviceId;
+    
+    return new History(historyData);
   }
 
   /**
