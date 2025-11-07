@@ -5,6 +5,16 @@ import { MediaItem } from '../data/bean/MediaItem';
 import { SearchHistoryItem } from '../../data/repository/SearchHistoryRepository';
 import { mediaService } from '../service/media/MediaService';
 import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
+import { siteManager } from '../service/spider/SiteManager';
+import { lineManager } from '../service/config/LineManager';
+
+// 快速搜索结果接口
+interface QuickSearchResult {
+  id: string;
+  title: string;
+  quality: string;
+  sourceType: string;
+}
 
 /**
  * 搜索页面组件
@@ -28,6 +38,8 @@ struct SearchPage {
   @State displayMode: 'list' | 'grid' = 'list'; // 显示模式：列表或网格
   @State showFilterPanel: boolean = false; // 是否显示筛选面板
   @State filters: SearchFilter = {}; // 当前筛选条件
+  @State showSourceList: boolean = false; // 是否显示快速搜索片源列表
+  @State quickSearchResults: QuickSearchResult[] = []; // 快速搜索结果
   
   // 分页配置
   private pageSize: number = 20;
@@ -117,6 +129,125 @@ struct SearchPage {
   }
   
   /**
+   * 快速搜索片源
+   */
+  private quickSearch(keyword: string): void {
+    try {
+      // 获取从线路配置文件加载的真实站点列表
+      const sites = siteManager.getAllSites();
+      
+      // 使用真实站点信息生成快速搜索结果
+      this.quickSearchResults = [];
+      
+      // 如果有站点，使用真实站点信息
+      if (sites.length > 0) {
+        sites.forEach((site) => {
+          // 确保站点信息有效且可搜索
+          if (site && site.enabled !== false && (site.searchable === true || site.quickSearch === 1)) {
+            // 尝试获取站点名称，如果名称不存在则使用key作为备用
+            const siteName = site.name || site.key || '未知站点';
+            
+            this.quickSearchResults.push({
+              id: `${keyword}-${site.key || Math.random().toString(36).substr(2, 9)}`,
+              title: `${keyword} - ${siteName}`,
+              quality: site.quality || '高清',
+              sourceType: siteName
+            });
+          }
+        });
+        
+        // 如果从站点列表中没有获取到可搜索的站点，添加一些默认站点
+        if (this.quickSearchResults.length === 0) {
+          this.addDefaultQuickSearchResults(keyword);
+        }
+      } else {
+        // 如果没有站点信息，使用备用的默认站点
+        this.addDefaultQuickSearchResults(keyword);
+      }
+      
+      // 限制结果数量，避免显示过多
+      this.quickSearchResults = this.quickSearchResults.slice(0, 10);
+      
+      // 显示快速搜索结果
+      this.showSourceList = true;
+      Logger.info(this.TAG, `Quick search for: ${keyword}, results: ${this.quickSearchResults.length}`);
+      
+      // 获取当前线路信息并记录日志
+      const currentLine = lineManager.getCurrentLine();
+      if (currentLine) {
+        Logger.info(this.TAG, `Current line: ${currentLine.name || '未知名称'}, sources loaded from: ${currentLine.url}`);
+      }
+    } catch (error) {
+      Logger.error(this.TAG, `Quick search failed: ${JSON.stringify(error)}`);
+      // 即使出错，也添加一些默认站点供用户选择
+      this.quickSearchResults = [];
+      this.addDefaultQuickSearchResults(keyword);
+      this.showSourceList = this.quickSearchResults.length > 0;
+    }
+  }
+  
+  /**
+   * 添加默认的快速搜索结果
+   */
+  private addDefaultQuickSearchResults(keyword: string): void {
+    // 从典型线路配置中提取的常见站点列表
+    const defaultSources = [
+      {key: 'lebei', name: '乐贝视频'},
+      {key: 'qimi', name: '奇米影视'},
+      {key: 'jiumo', name: '九猫影视'},
+      {key: 'yiso', name: '易发影视'},
+      {key: 'lengfan', name: '冷番影视'},
+      {key: 'jinlian', name: '金濂视频'},
+      {key: 'miaofan', name: '秒番影视'},
+      {key: 'zhuifan', name: '追番视频'},
+      {key: 'kanfan', name: '看番视频'},
+      {key: 'haokan', name: '好看视频'}
+    ];
+    
+    defaultSources.forEach((source) => {
+      this.quickSearchResults.push({
+        id: `${keyword}-${source.key}`,
+        title: `${keyword} - ${source.name}`,
+        quality: '高清全片',
+        sourceType: source.name
+      });
+    });
+  }
+
+  /**
+   * 处理快速搜索结果点击事件
+   */
+  private handleQuickSearchResultClick(result: QuickSearchResult): void {
+    try {
+      Logger.info(this.TAG, `Quick search result clicked: ${JSON.stringify(result)}`);
+      
+      // 隐藏快速搜索结果
+      this.showSourceList = false;
+      
+      // 跳转到MediaDetailPage页面，携带相关参数
+      Router.pushUrl({
+        url: 'pages/MediaDetailPage',
+        params: {
+          title: result.title,
+          sourceId: result.id,
+          sourceType: result.sourceType,
+          mediaType: 'video',
+          keyword: this.searchText,
+          // 传递站点信息，以便在详情页能够使用正确的搜索源
+          siteName: result.sourceType,
+          // 记录当前使用的线路信息
+          currentLine: lineManager.getCurrentLine() ? lineManager.getCurrentLine().name : 'Default'
+        }
+      });
+      
+      // 记录搜索历史
+      this.saveSearchHistory(this.searchText);
+    } catch (error) {
+      Logger.error(this.TAG, `Error handling quick search result click: ${error}`);
+    }
+  }
+
+  /**
    * 清除搜索历史
    */
   private clearSearchHistory(): void {
@@ -140,14 +271,23 @@ struct SearchPage {
       clearTimeout(this.searchDebounceTimer);
     }
     
-    // 输入停止300ms后执行搜索
-    this.searchDebounceTimer = setTimeout(() => {
-      if (value.trim().length >= 2) {
+    // 输入为空时重置状态
+    if (value.trim().length === 0) {
+      this.resetSearchState();
+      this.showSourceList = false;
+      return;
+    }
+    
+    // 快速搜索片源（当输入达到一定长度时）
+    if (value.trim().length >= 2) {
+      // 立即执行快速搜索
+      this.quickSearch(value.trim());
+      
+      // 输入停止300ms后执行常规搜索
+      this.searchDebounceTimer = setTimeout(() => {
         this.performSearch();
-      } else if (value.trim().length === 0) {
-        this.resetSearchState();
-      }
-    }, 300);
+      }, 300);
+    }
   }
   
   /**
@@ -156,6 +296,9 @@ struct SearchPage {
   private performSearch(): void {
     const query = this.searchQuery.trim();
     if (!query) return;
+    
+    // 隐藏快速搜索结果
+    this.showSourceList = false;
     
     this.isSearching = true;
     this.isLoading = true;
@@ -270,13 +413,27 @@ struct SearchPage {
    * 处理搜索结果项点击
    */
   private handleSearchResultClick(media: MediaItem): void {
+    if (!media || !media.id) {
+      Logger.error(this.TAG, `Invalid media item: ${JSON.stringify(media)}`);
+      return;
+    }
+    
     Logger.info(this.TAG, `Search result clicked: ${media.title}`);
-    // 跳转到详情页
+    
+    // 跳转到今日详情页
     Router.push({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,
-        siteKey: media.siteKey
+        siteKey: media.siteKey || '',
+        title: media.title || '',
+        coverUrl: media.coverUrl || '',
+        description: media.description || '',
+        year: media.year || '',
+        type: media.type || '',
+        score: media.score || '',
+        directors: media.directors || [],
+        actors: media.actors || []
       }
     });
   }
@@ -680,30 +837,80 @@ struct SearchPage {
    */
   @Builder
   private renderGridItem(item: MediaItem): void {
+    if (!item) return;
+    
     GridItem.create();
-    GridItem.className("grid-item");
+    GridItem.className("green-grid-item");
     GridItem.onClick(() => this.handleSearchResultClick(item));
     Stack.create();
-    Stack.className("grid-item-content");
-    Image.create();
-    Image.className("grid-item-image");
-    Image.src(item.coverUrl || item.posterUrl || "https://via.placeholder.com/100x150?text=No+Image");
-    Image.objectFit("cover");
-    Image.pop();
-    Stack.create();
-    Stack.className("grid-item-overlay");
-    Text.create();
-    Text.className("grid-item-title");
-    Text.numberOfLines(2);
-    Text.content(item.title);
-    Text.pop();
-    if (item.year) {
+    Stack.className("green-grid-item-content");
+    
+    // 来源标签 - 改为绿色主题
+    if (item.siteKey) {
       Text.create();
-      Text.className("grid-item-year");
-      Text.content(item.year);
+      Text.style({
+        backgroundColor: '#4CAF50',
+        color: '#FFFFFF',
+        fontSize: 16,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        zIndex: 10,
+        fontWeight: 600
+      });
+      Text.content(`${item.siteKey} | APP`);
       Text.pop();
     }
-    Stack.pop();
+    
+    // 图片
+    Image.create();
+    Image.style({
+      width: '100%',
+      aspectRatio: 2/3,
+      borderRadius: 8
+    });
+    Image.src(item.coverUrl || "https://via.placeholder.com/200x300?text=No+Image");
+    Image.objectFit("cover");
+    Image.pop();
+    
+    // 标题
+    Text.create();
+    Text.style({
+      fontSize: 20,
+      color: '#FFFFFF',
+      marginTop: 8,
+      fontWeight: 600,
+      textShadowColor: 'rgba(0, 0, 0, 0.8)',
+      textShadowOffset: {
+        dx: 1,
+        dy: 1
+      },
+      textShadowRadius: 3
+    });
+    Text.numberOfLines(2);
+    Text.content(item.title || '未知标题');
+    Text.pop();
+    
+    // 评分标签 - 如果有评分则显示
+    if (item.score) {
+      Text.create();
+      Text.style({
+        backgroundColor: '#FFEB3B',
+        color: '#000000',
+        fontSize: 16,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginTop: 4,
+        fontWeight: 700
+      });
+      Text.content(`${item.score}分`);
+      Text.pop();
+    }
+    
     Stack.pop();
     GridItem.pop();
   }
@@ -713,24 +920,100 @@ struct SearchPage {
    */
   @Builder
   private renderSearchResults(): void {
-    if (this.displayMode === 'list') {
-      List.create();
-      List.className("search-results-list");
-      this.searchResults.forEach((item) => {
-        this.renderSearchResultItem(item);
+    // 渲染分类筛选按钮
+    ScrollView.create();
+    ScrollView.style({
+      whiteSpace: 'nowrap',
+      marginBottom: 20
+    });
+    Flex.create();
+    Flex.style({
+      paddingHorizontal: 15,
+      alignItems: 'center',
+      gap: 10
+    });
+    
+    // 全部显示按钮
+    Button.create();
+    Button.style({
+      backgroundColor: '#4CAF50',
+      borderRadius: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 8,
+      marginRight: 10
+    });
+    Button.onClick(() => {});
+    Text.create();
+    Text.style({
+      fontSize: 22,
+      color: '#FFFFFF',
+      fontWeight: 600
+    });
+    Text.content("全部显示");
+    Text.pop();
+    Button.pop();
+    
+    // 分类按钮
+    const categories = ["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"];
+    categories.forEach((category) => {
+      Button.create();
+      Button.style({
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        marginRight: 10
       });
-      List.pop();
+      Button.onClick(() => {});
+      Text.create();
+      Text.style({
+        fontSize: 22,
+        color: '#4CAF50',
+        fontWeight: 600
+      });
+      Text.content(category);
+      Text.pop();
+      Button.pop();
+    });
+    Flex.pop();
+    ScrollView.pop();
+    
+    // 渲染网格结果
+    Grid.create();
+    Grid.style({
+      paddingHorizontal: 15,
+      gap: 15
+    });
+    Grid.columnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    Grid.rowsTemplate("auto");
+    
+    if (this.searchResults.length === 0) {
+      // 无搜索结果时的提示
+      GridItem.create();
+      GridItem.style({
+        gridColumnStart: 1,
+        gridColumnEnd: 6,
+        padding: 30,
+        alignItems: 'center',
+        justifyContent: 'center'
+      });
+      Text.create();
+      Text.style({
+        fontSize: 24,
+        color: '#FFFFFF',
+        textAlign: 'center'
+      });
+      Text.content('没有找到相关内容');
+      Text.pop();
+      GridItem.pop();
     } else {
-      Grid.create();
-      Grid.className("search-results-grid");
-      Grid.columnsTemplate("1fr 1fr 1fr");
-      Grid.rowsTemplate("auto");
-      Grid.gap("8px");
+      // 渲染搜索结果项
       this.searchResults.forEach((item) => {
         this.renderGridItem(item);
       });
-      Grid.pop();
     }
+    
+    Grid.pop();
   }
   
   /**
@@ -750,6 +1033,139 @@ struct SearchPage {
     Stack.pop();
   }
   
+  /**
+   * 渲染快速搜索结果（片源切换界面）
+   */
+  @Builder
+  private renderQuickSearchResults(): void {
+    if (this.showSourceList && this.quickSearchResults.length > 0) {
+      Stack.create();
+      Stack.style({
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        borderRadius: 15,
+        padding: 20,
+        marginHorizontal: 20,
+        marginVertical: 10,
+        position: 'absolute',
+        top: 120,
+        left: 0,
+        right: 0,
+        zIndex: 100
+      });
+      
+      // 标题栏
+      Flex.create();
+      Flex.style({
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15
+      });
+      Text.create();
+      Text.style({
+        fontSize: 28,
+        color: '#FFFFFF',
+        fontWeight: 700
+      });
+      Text.content(`为您找到相关片源: ${this.quickSearchResults.length}个`);
+      Text.pop();
+      Button.create();
+      Button.style({
+        backgroundColor: 'transparent'
+      });
+      Button.onClick(() => {
+        this.showSourceList = false;
+      });
+      Text.create();
+      Text.style({
+        fontSize: 28,
+        color: '#FFFFFF'
+      });
+      Text.content('✕');
+      Text.pop();
+      Button.pop();
+      Flex.pop();
+      
+      // 片源列表
+      List.create();
+      List.style({
+        width: '100%',
+        height: 500
+      });
+      
+      this.quickSearchResults.forEach((item, index) => {
+        ListItem.create();
+        ListItem.key(`${item.id || index}`);
+        ListItem.style({
+          backgroundColor: '#66BB6A',
+          marginBottom: 10,
+          padding: 15,
+          borderRadius: 10
+        });
+        ListItem.onClick(() => {
+          this.handleQuickSearchResultClick(item);
+        });
+        
+        Flex.create();
+        Flex.style({
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        });
+        
+        // 标题和来源
+        Flex.create();
+        Flex.style({
+          flex: 1,
+          flexDirection: 'column'
+        });
+        Text.create();
+        Text.style({
+          fontSize: 26,
+          color: '#FFFFFF',
+          fontWeight: 700,
+          marginBottom: 5
+        });
+        Text.content(item.title);
+        Text.pop();
+        Text.create();
+        Text.style({
+          fontSize: 20,
+          color: '#E0E0E0'
+        });
+        Text.content(item.sourceType);
+        Text.pop();
+        Flex.pop();
+        
+        // 质量标签
+        if (item.quality) {
+          Flex.create();
+          Flex.style({
+            backgroundColor: '#FFEB3B',
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 12
+          });
+          Text.create();
+          Text.style({
+            fontSize: 22,
+            color: '#000000',
+            fontWeight: 700
+          });
+          Text.content(item.quality);
+          Text.pop();
+          Flex.pop();
+        }
+        
+        Flex.pop();
+        ListItem.pop();
+      });
+      
+      List.pop();
+      Stack.pop();
+    }
+  }
+
   /**
    * 渲染错误状态
    */
@@ -780,20 +1196,47 @@ struct SearchPage {
    */
   build() {
     Stack.create();
-    Stack.className("search-page");
+    Stack.style({
+      backgroundColor: '#2E7D32',
+      flex: 1
+    });
+    
     // 搜索输入区域
     this.renderSearchInput();
     
+    // 快速搜索片源切换界面
+    this.renderQuickSearchResults();
+    
     // 主内容区域
     ScrollView.create();
-    ScrollView.className("content-scroll");
-    ScrollView.scrollBar("auto");
+    ScrollView.style({
+      flex: 1,
+      scrollBar: 'auto'
+    });
+    
+    // 显示搜索结果数量
+    if (!this.showHistory && this.searchResults.length > 0) {
+      Text.create();
+      Text.style({
+        fontSize: 22,
+        color: '#FFFFFF',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        fontWeight: 600
+      });
+      Text.content(`搜索(${this.searchResults.length}/${this.searchResults.length})`);
+      Text.pop();
+    }
+    
     if (this.isSearching && this.isLoading && this.currentPage === 1) {
       this.renderLoading();
     } else if (this.errorMessage) {
       this.renderError();
     } else if (this.showHistory) {
       Stack.create();
+      Stack.style({
+        paddingHorizontal: 15
+      });
       this.renderHotKeywords();
       this.renderSearchHistory();
       Stack.pop();
@@ -802,7 +1245,9 @@ struct SearchPage {
     }
     
     Blank.create();
-    Blank.className("bottom-space");
+    Blank.style({
+      height: 50
+    });
     Blank.pop();
     ScrollView.pop();
     Stack.pop();

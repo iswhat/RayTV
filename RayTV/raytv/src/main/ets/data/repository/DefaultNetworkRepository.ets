@@ -318,9 +318,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async getSearchSuggestions(keyword: string, limit: number = 10): Promise<NetworkResult<string[]>> {
     try {
       const requestUrl = '/api/search/suggestions';
-      const params = { keyword, limit };
+      const params: Record<string, string | number> = { keyword, limit };
       
-      const response = await NetworkUtil.request(requestUrl, this.createRequestConfig(requestUrl, 'GET', undefined, params));
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
+      const response = await NetworkUtil.request(requestUrl, requestConfig);
       return this.processNetworkResponse<string[]>(response);
     } catch (error) {
       Logger.error(TAG, `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
@@ -348,7 +349,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
         };
       }
 
-      const response = await NetworkUtil.request(requestUrl, this.createRequestConfig(requestUrl, 'GET'));
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET');
+      const response = await NetworkUtil.request(requestUrl, requestConfig);
       const result = this.processNetworkResponse<Movie>(response);
       
       // 缓存成功的响应
@@ -384,7 +386,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
         };
       }
 
-      const response = await NetworkUtil.request(requestUrl, this.createRequestConfig(requestUrl, 'GET', undefined, params));
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
+      const response = await NetworkUtil.request(requestUrl, requestConfig);
       const result = this.processNetworkResponse<PaginatedResponse<Movie>>(response);
       
       // 缓存成功的响应并转换数据
@@ -407,9 +410,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
   // ========== 通用网络方法实现 ==========
 
-  async get<T>(url: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async get<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const response = await NetworkUtil.request(url, this.createRequestConfig(url, 'GET', undefined, params, headers));
+      const requestConfig = this.createRequestConfig(url, 'GET', undefined, params, headers);
+      const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
       Logger.error(TAG, `Failed to send GET request: ${error instanceof Error ? error.message : String(error)}`);
@@ -421,9 +425,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
   }
 
-  async post<T>(url: string, data?: Record<string, any>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async post<T>(url: string, data?: Record<string, string | number | boolean | object>, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const response = await NetworkUtil.request(url, this.createRequestConfig(url, 'POST', data, undefined, headers));
+      const requestConfig = this.createRequestConfig(url, 'POST', data, params, headers);
+      const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
       Logger.error(TAG, `Failed to send POST request: ${error instanceof Error ? error.message : String(error)}`);
@@ -435,9 +440,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
   }
 
-  async put<T>(url: string, data?: Record<string, any>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async put<T>(url: string, data?: Record<string, string | number | boolean | object>, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const response = await NetworkUtil.request(url, this.createRequestConfig(url, 'PUT', data, undefined, headers));
+      const requestConfig = this.createRequestConfig(url, 'PUT', data, params, headers);
+      const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
       Logger.error(TAG, `Failed to send PUT request: ${error instanceof Error ? error.message : String(error)}`);
@@ -449,9 +455,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
   }
 
-  async delete<T>(url: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async delete<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const response = await NetworkUtil.request(url, this.createRequestConfig(url, 'DELETE', undefined, params, headers));
+      const requestConfig = this.createRequestConfig(url, 'DELETE', undefined, params, headers);
+      const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
       Logger.error(TAG, `Failed to send DELETE request: ${error instanceof Error ? error.message : String(error)}`);
@@ -463,25 +470,38 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
   }
 
-  async upload<T>(url: string, file: any, params?: Record<string, any>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async upload<T>(url: string, file: File, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       // 上传文件时需要特殊处理Content-Type
-      const uploadHeaders = { ...headers };
-      delete uploadHeaders['Content-Type']; // 让浏览器自动设置multipart/form-data
+      const uploadHeaders: Record<string, string> = {};
+      
+      // 手动复制headers，排除Content-Type
+      if (headers) {
+        for (const [key, value] of Object.entries(headers)) {
+          if (key.toLowerCase() !== 'content-type') {
+            uploadHeaders[key] = value;
+          }
+        }
+      }
 
       const formData = new FormData();
       formData.append('file', file);
       
       if (params) {
-        Object.entries(params).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
+        // 使用for循环替代forEach
+        const entries = Object.entries(params);
+        for (let i = 0; i < entries.length; i++) {
+          const [key, value] = entries[i];
+          formData.append(key, String(value));
+        }
       }
 
-      const response = await NetworkUtil.request(url, {
-        ...this.createRequestConfig(url, 'POST', undefined, undefined, uploadHeaders),
-        data: formData
-      });
+      // 创建请求配置
+      const requestConfig = this.createRequestConfig(url, 'POST', undefined, undefined, uploadHeaders);
+      // 设置请求数据
+      requestConfig.data = formData;
+      
+      const response = await NetworkUtil.request(url, requestConfig);
       
       return this.processNetworkResponse<T>(response);
     } catch (error) {
@@ -496,8 +516,25 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
   async download(url: string, savePath: string, headers?: Record<string, string>): Promise<NetworkResult<boolean>> {
     try {
+      // 手动合并headers
+      const mergedHeaders: Record<string, string> = {};
+      
+      // 复制默认headers
+      if (this.config.headers) {
+        for (const [key, value] of Object.entries(this.config.headers)) {
+          mergedHeaders[key] = value;
+        }
+      }
+      
+      // 复制自定义headers（覆盖默认值）
+      if (headers) {
+        for (const [key, value] of Object.entries(headers)) {
+          mergedHeaders[key] = value;
+        }
+      }
+      
       const response = await NetworkUtil.downloadFile(url, savePath, {
-        headers: { ...this.config.headers, ...headers },
+        headers: mergedHeaders,
         timeout: this.config.timeout
       });
       

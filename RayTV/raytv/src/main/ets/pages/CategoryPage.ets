@@ -219,7 +219,7 @@ struct CategoryPage {
   private handleMediaItemClick(media: MediaItem): void {
     Logger.info(this.TAG, `Media item clicked: ${media.title}`);
     // 跳转到详情页
-    Router.push({
+    Router.pushUrl({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,

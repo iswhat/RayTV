@@ -3,10 +3,10 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
-import DistributedDataService from '../sync/DistributedDataService';
+import ModernDistributedDataService from '../sync/ModernDistributedDataService';
 import DeviceManager from '../device/DeviceManager';
 import PlayerService from '../player/PlayerService';
-import { SyncDataType } from '../sync/DistributedDataService';
+import { SyncDataType } from '../sync/ModernDistributedDataService';
 import { Vod, Episode, VodCategory, VodTag } from '../../data/bean/Vod';
 import { LiveChannel, LiveGroup, EpgItem } from '../../data/bean/Live';
 import { VodRepository } from '../../data/repository/VodRepository';
@@ -179,7 +179,7 @@ export default class MediaService {
   private static instance: MediaService;
   // 服务层依赖
   private configService: ConfigService;
-  private distributedDataService: DistributedDataService;
+  private distributedDataService: ModernDistributedDataService;
   private deviceManager: DeviceManager;
   private playerService: PlayerService;
   
@@ -221,7 +221,7 @@ export default class MediaService {
   private constructor() {
     // 初始化服务层依赖
     this.configService = ConfigService.getInstance();
-    this.distributedDataService = DistributedDataService.getInstance();
+    this.distributedDataService = ModernDistributedDataService.getInstance();
     this.deviceManager = DeviceManager.getInstance();
     this.playerService = PlayerService.getInstance();
     

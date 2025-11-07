@@ -101,10 +101,10 @@ export default class DeviceService {
         customProperties: {}
       };
       
-      Logger.info(TAG, `Device information collected: ${deviceInfo.deviceName} (${deviceInfo.deviceType})`);
+      Logger.info(TAG, 'Device information collected: ' + deviceInfo.deviceName + ' (' + deviceInfo.deviceType + ')');
       return deviceInfo;
     } catch (error) {
-      Logger.error(TAG, 'Error collecting device information', error);
+      Logger.error(TAG, 'Error collecting device information: ' + (error instanceof Error ? error.message : String(error)));
       return this.createDefaultDeviceInfo();
     }
   }

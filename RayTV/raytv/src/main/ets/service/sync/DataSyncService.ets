@@ -3,8 +3,8 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
-import DistributedDataService from './DistributedDataService';
-import { SyncDataType } from './DistributedDataService';
+import ModernDistributedDataService from './ModernDistributedDataService';
+import { SyncDataType } from './ModernDistributedDataService';
 
 // 常量定义
 const TAG = 'DataSyncService';
@@ -156,7 +156,7 @@ type SyncEventListener = (event: SyncEvent, data: any) => void;
 export default class DataSyncService {
   private static instance: DataSyncService;
   private configService: ConfigService;
-  private distributedDataService: DistributedDataService;
+  private distributedDataService: ModernDistributedDataService;
   private config: DataSyncConfig = DEFAULT_DATA_SYNC_CONFIG;
   private syncTasks: Map<string, SyncTask> = new Map();
   private syncRecords: SyncRecord[] = [];
@@ -184,7 +184,7 @@ export default class DataSyncService {
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
-    this.distributedDataService = DistributedDataService.getInstance();
+    this.distributedDataService = ModernDistributedDataService.getInstance();
   }
 
   /**

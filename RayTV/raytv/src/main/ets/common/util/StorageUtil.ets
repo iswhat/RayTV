@@ -1,6 +1,6 @@
 // StorageUtil - 本地存储管理工具类
-import { Logger } from './Logger';
-import JsonUtil from './JsonUtil';
+import Logger from './Logger';
+import { safeParseJson, safeStringify } from './JsonUtil';
 import AppConstant from '../constant/AppConstant';
 import FileUtil from './FileUtil';
 import preferences from '@ohos.data.preferences';
@@ -116,7 +116,7 @@ export default class StorageUtil {
         return defaultValue as T;
       }
 
-      return data ? (data.value as T) : (defaultValue as T);
+      return data ? (data.value as unknown as T) : (defaultValue as T);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to get data for key ${key}: ${errorMessage}`);
@@ -246,7 +246,7 @@ export default class StorageUtil {
 
   // ===== Preferences 相关方法 =====
   private static async saveToPreferences(key: string, data: StorageData): Promise<void> {
-    const jsonData = JsonUtil.stringify(data);
+    const jsonData = safeStringify(data);
     // 在HarmonyOS中使用Preferences API
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
@@ -263,7 +263,7 @@ export default class StorageUtil {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       const jsonData = await pref.getString(key, null);
-      return jsonData ? (JsonUtil.parse<StorageData>(jsonData)) : null;
+      return jsonData ? safeParseJson<StorageData>(jsonData, null) : null;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to get from preferences for key ${key}: ${errorMessage}`);
@@ -287,8 +287,8 @@ export default class StorageUtil {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       const keys = await StorageUtil.getAllKeysFromPreferences();
-      for (const key of keys) {
-        await pref.delete(key);
+      for (let i = 0; i < keys.length; i++) {
+        await pref.delete(keys[i]);
       }
       await pref.flush();
     } catch (error) {
@@ -323,7 +323,7 @@ export default class StorageUtil {
   // ===== File 相关方法 =====
   private static async saveToFile(key: string, data: StorageData): Promise<void> {
     const filePath = `${AppConstant.FILE_STORAGE_PATH}/${key}.json`;
-    const jsonData = JsonUtil.stringify(data);
+    const jsonData = safeStringify(data);
     await FileUtil.writeFile(filePath, jsonData);
   }
 
@@ -331,7 +331,7 @@ export default class StorageUtil {
     const filePath = `${AppConstant.FILE_STORAGE_PATH}/${key}.json`;
     if (await FileUtil.exists(filePath)) {
       const jsonData = await FileUtil.readFile(filePath);
-      return JsonUtil.parse<StorageData>(jsonData) || null;
+      return safeParseJson<StorageData>(jsonData, null);
     }
     return null;
   }
@@ -347,7 +347,8 @@ export default class StorageUtil {
     if (await FileUtil.exists(AppConstant.FILE_STORAGE_PATH)) {
       // 这里使用listFiles方法替代不存在的readDir方法
       const files = await FileUtil.listFiles(AppConstant.FILE_STORAGE_PATH);
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         if (file.endsWith('.json')) {
           await FileUtil.deleteFile(`${AppConstant.FILE_STORAGE_PATH}/${file}`);
         }
@@ -365,7 +366,8 @@ export default class StorageUtil {
     if (await FileUtil.exists(AppConstant.FILE_STORAGE_PATH)) {
       // 这里使用listFiles方法替代不存在的readDir方法
       const files = await FileUtil.listFiles(AppConstant.FILE_STORAGE_PATH);
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         if (file.endsWith('.json')) {
           keys.push(file.replace('.json', ''));
         }

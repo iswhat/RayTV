@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import deviceManager from '@ohos.distributedHardware.deviceManager';
 import { BusinessError } from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
-import DistributedDataService from '../sync/DistributedDataService';
+import ModernDistributedDataService from '../sync/ModernDistributedDataService';
 
 // 常量定义
 const TAG = 'DeviceManager';
@@ -126,7 +126,7 @@ export default class DeviceManager {
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
-    this.distributedDataService = DistributedDataService.getInstance();
+    this.distributedDataService = ModernDistributedDataService.getInstance();
   }
 
   /**

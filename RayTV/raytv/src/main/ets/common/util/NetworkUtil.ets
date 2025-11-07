@@ -18,8 +18,8 @@ export interface RequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  params?: Record<string, unknown>;
-  data?: unknown;
+  params?: Record<string, string | number | boolean | string[]>;
+  data?: string | number | boolean | object;
   timeout?: number;
   responseType?: 'text' | 'json' | 'arraybuffer';
 }
@@ -27,7 +27,7 @@ export interface RequestConfig {
 /**
  * 网络响应接口
  */
-export interface Response<T = unknown> {
+export interface Response<T = object | string | number | boolean> {
   status: number;
   statusText: string;
   data: T;
@@ -70,16 +70,14 @@ export default class NetworkUtil {
    * @param retryCount 当前重试次数
    * @returns Promise<Response>
    */
-  public static async request<T = unknown>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
-    const { 
-      url, 
-      method = 'GET', 
-      headers = {}, 
-      params = {}, 
-      data,
-      timeout = NetworkUtil.DEFAULT_TIMEOUT,
-      responseType = 'json'
-    } = config;
+  public static async request<T = object>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
+    const url = config.url;
+    const method = config.method || 'GET';
+    const headers = config.headers || {};
+    const params = config.params || {};
+    const data = config.data;
+    const timeout = config.timeout || NetworkUtil.DEFAULT_TIMEOUT;
+    const responseType = config.responseType || 'json';
 
     try {
       // 检查网络权限
@@ -87,7 +85,8 @@ export default class NetworkUtil {
         const atManager = abilityAccessCtrl.createAtManager();
         await atManager.requestPermissionsFromUser(NetworkUtil.getContext(), ['ohos.permission.INTERNET']);
       } catch (permissionError) {
-        Logger.error(TAG, 'Failed to request INTERNET permission', permissionError);
+        const errorMessage = permissionError instanceof Error ? permissionError.message : String(permissionError);
+        Logger.error(TAG, `Failed to request INTERNET permission: ${errorMessage}`);
         throw new Error('Network permission denied');
       }
 
@@ -96,7 +95,7 @@ export default class NetworkUtil {
       if (Object.keys(params).length > 0) {
         const queryString = NetworkUtil.buildQueryString(params);
         fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
-
+      }
 
       Logger.info(TAG, `Sending ${method} request to ${fullUrl}`);
 
@@ -107,16 +106,24 @@ export default class NetworkUtil {
       const httpOptions: http.HttpRequestOptions = {
         method,
         header: {
-          'Content-Type': 'application/json',
-          ...headers
+          'Content-Type': 'application/json'
         },
         connectTimeout: timeout,
         readTimeout: timeout
       };
+      
+      // 手动合并headers，避免数组展开操作
+      if (headers) {
+        const headerKeys = Object.keys(headers);
+        for (let i = 0; i < headerKeys.length; i++) {
+          const key = headerKeys[i];
+          httpOptions.header[key] = headers[key];
+        }
+      }
 
       // 添加请求体
       if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
-        httpOptions.extraData = JSON.stringify(data);
+        httpOptions.extraData = typeof data === 'string' ? data : JSON.stringify(data);
       }
 
       try {
@@ -131,17 +138,20 @@ export default class NetworkUtil {
           try {
             responseData = JSON.parse(responseData);
           } catch (parseError) {
-            Logger.error(TAG, 'Failed to parse JSON response', parseError);
+            const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+            Logger.error(TAG, `Failed to parse JSON response: ${errorMessage}`);
           }
         }
 
         // 构建响应头
-        const responseHeaders: Record<string, string> = {};
-        if (response.header) {
-          Object.keys(response.header).forEach(key => {
-            responseHeaders[key] = String(response.header![key]);
-          });
-        }
+    const responseHeaders: Record<string, string> = {};
+    if (response.header) {
+      const headerKeys = Object.keys(response.header);
+      for (let i = 0; i < headerKeys.length; i++) {
+        const key = headerKeys[i];
+        responseHeaders[key] = String(response.header[key]);
+      }
+    }
 
         // 检查状态码
         if (response.responseCode < 200 || response.responseCode >= 300) {
@@ -157,114 +167,25 @@ export default class NetworkUtil {
       } catch (error) {
         // 重试逻辑
         if (retryCount < NetworkUtil.MAX_RETRY_COUNT && NetworkUtil.isRetryableError(error)) {
-          Logger.warn(TAG, `Request failed, retrying (${retryCount + 1}/${NetworkUtil.MAX_RETRY_COUNT})`, error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.warn(TAG, `Request failed, retrying (${retryCount + 1}/${NetworkUtil.MAX_RETRY_COUNT}): ${errorMessage}`);
           // 指数退避策略
           const delay = Math.pow(2, retryCount) * 1000;
           await NetworkUtil.sleep(delay);
           return NetworkUtil.request(config, retryCount + 1);
         }
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error(TAG, `Request error: ${errorMessage}`, error);
+        Logger.error(TAG, `Request error: ${errorMessage}`);
         throw error instanceof Error ? error : new Error(errorMessage);
       } finally {
         // 销毁HTTP请求
         httpRequest.destroy();
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(TAG, `Request failed with error: ${errorMessage}`);
+      throw error instanceof Error ? error : new Error(errorMessage);
     }
-  }
-
-  /**
-   * 发送GET请求
-   * @param url 请求URL
-   * @param params 查询参数
-   * @param headers 请求头
-   * @returns Promise<Response>
-   */
-  public static async get<T = unknown>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<Response<T>> {
-    return NetworkUtil.request<T>({
-      url,
-      method: 'GET',
-      params,
-      headers
-    });
-  }
-
-  /**
-   * 发送POST请求
-   * @param url 请求URL
-   * @param data 请求数据
-   * @param headers 请求头
-   * @returns Promise<Response>
-   */
-  public static async post<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
-    return NetworkUtil.request<T>({
-      url,
-      method: 'POST',
-      data,
-      headers
-    });
-  }
-
-  /**
-   * 发送PUT请求
-   * @param url 请求URL
-   * @param data 请求数据
-   * @param headers 请求头
-   * @returns Promise<Response>
-   */
-  public static async put<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
-    return NetworkUtil.request<T>({
-      url,
-      method: 'PUT',
-      data,
-      headers
-    });
-  }
-
-  /**
-   * 发送DELETE请求
-   * @param url 请求URL
-   * @param headers 请求头
-   * @returns Promise<Response>
-   */
-  public static async delete<T = unknown>(url: string, headers?: Record<string, string>): Promise<Response<T>> {
-    return NetworkUtil.request<T>({
-      url,
-      method: 'DELETE',
-      headers
-    });
-  }
-
-  /**
-   * 发送PATCH请求
-   * @param url 请求URL
-   * @param data 请求数据
-   * @param headers 请求头
-   * @returns Promise<Response>
-   */
-  public static async patch<T = unknown>(url: string, data?: unknown, headers?: Record<string, string>): Promise<Response<T>> {
-    return NetworkUtil.request<T>({
-      url,
-      method: 'PATCH',
-      data,
-      headers
-    });
-  }
-
-  /**
-   * 构建查询字符串
-   * @param params 查询参数对象
-   * @returns 查询字符串
-   */
-  private static buildQueryString(params: Record<string, unknown>): string {
-    return Object.entries(params)
-      .filter(([_, value]) => value !== undefined && value !== null)
-      .map(([key, value]) => {
-        if (Array.isArray(value)) {
-          return value.map(v => `${encodeURIComponent(key)}=${encodeURIComponent(v)}`).join('&');
-        }
-        return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-      })
-      .join('&');
   }
 
   /**
@@ -274,9 +195,14 @@ export default class NetworkUtil {
    */
   private static isRetryableError(error: unknown): boolean {
     // 网络错误、超时、服务器错误(5xx)可重试
-    return error.name === 'AbortError' || 
-           error.message.includes('Network') ||
-           error.message.includes('timeout');
+    if (error instanceof Error) {
+      const errorName = error.name;
+      const errorMessage = error.message;
+      return errorName === 'AbortError' || 
+             errorMessage.includes('Network') ||
+             errorMessage.includes('timeout');
+    }
+    return false;
   }
 
   /**
@@ -378,8 +304,9 @@ export default class NetworkUtil {
         await fileIO.close(file.fd);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to download file: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(TAG, `Failed to download file: ${errorMessage}`);
+      throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
   
@@ -387,30 +314,31 @@ export default class NetworkUtil {
    * 初始化网络状态监听
    */
   private static async initializeNetworkListener(): Promise<void> {
-    if (this.isInitialized) return;
+    if (NetworkUtil.isInitialized) return;
     
     try {
       // 订阅网络状态变化
       await connection.on('netStatusChange', async (data) => {
         const isOnline = data !== null && data.isInternetAvailable !== false;
-        const networkType = isOnline ? await this.getNetworkType() : 'NONE';
+        const networkType = isOnline ? await NetworkUtil.getNetworkType() : 'NONE';
         
         Logger.info(TAG, `Network status changed: online=${isOnline}, type=${networkType}`);
         
         // 通知所有监听器
-        this.notifyNetworkStatusChanged(isOnline, networkType);
+        NetworkUtil.notifyNetworkStatusChanged(isOnline, networkType);
       });
       
       // 获取初始网络状态
       const status = await connection.getStatus();
       const isOnline = status !== null && status.isInternetAvailable !== false;
-      const initialNetworkType = isOnline ? await this.getNetworkType() : 'NONE';
+      const initialNetworkType = isOnline ? await NetworkUtil.getNetworkType() : 'NONE';
       
       Logger.info(TAG, `Initial network status: online=${isOnline}, type=${initialNetworkType}`);
       
-      this.isInitialized = true;
+      NetworkUtil.isInitialized = true;
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize network listener: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(TAG, `Failed to initialize network listener: ${errorMessage}`);
     }
   }
 
@@ -420,11 +348,12 @@ export default class NetworkUtil {
    * @param networkType 网络类型
    */
   private static notifyNetworkStatusChanged(isOnline: boolean, networkType: string): void {
-    this.networkStatusListeners.forEach((listener) => {
+    NetworkUtil.networkStatusListeners.forEach((listener) => {
       try {
         listener(isOnline, networkType);
       } catch (error) {
-        Logger.error(TAG, `Error in network status listener: ${error}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(TAG, `Error in network status listener: ${errorMessage}`);
       }
     });
   }
@@ -435,16 +364,16 @@ export default class NetworkUtil {
    * @returns 取消监听的函数
    */
   public static addNetworkStatusListener(listener: (isOnline: boolean, networkType: string) => void): () => void {
-    this.networkStatusListeners.add(listener);
+    NetworkUtil.networkStatusListeners.add(listener);
     
     // 自动初始化监听
-    this.initializeNetworkListener().catch((error) => {
+    NetworkUtil.initializeNetworkListener().catch((error) => {
       Logger.error(TAG, `Failed to initialize network listener after adding: ${error}`);
     });
     
     // 返回取消监听的函数
     return () => {
-      this.removeNetworkStatusListener(listener);
+      NetworkUtil.removeNetworkStatusListener(listener);
     };
   }
 
@@ -453,7 +382,7 @@ export default class NetworkUtil {
    * @param listener 要移除的监听器
    */
   public static removeNetworkStatusListener(listener: (isOnline: boolean, networkType: string) => void): void {
-    this.networkStatusListeners.delete(listener);
+    NetworkUtil.networkStatusListeners.delete(listener);
   }
 
   /**
@@ -583,13 +512,15 @@ export default class NetworkUtil {
         try {
           const cachedData = await cacheManager.get(cacheKey);
           if (cachedData) {
-            const { data, timestamp } = JSON.parse(cachedData);
+            const parsedData = JSON.parse(cachedData);
+            const cacheData = parsedData.data;
+            const timestamp = parsedData.timestamp;
             const now = Date.now();
             
             // 检查缓存是否有效
             if (now - timestamp < cacheTime) {
               Logger.info(TAG, `Using cached data for ${url}`);
-              return data as T;
+              return cacheData as T;
             }
           }
         } catch (cacheError) {
@@ -599,7 +530,7 @@ export default class NetworkUtil {
       }
       
       // 检查网络状态
-      const isNetworkAvailable = await this.checkNetworkStatus();
+      const isNetworkAvailable = await NetworkUtil.checkNetworkStatus();
       if (!isNetworkAvailable) {
         // 离线模式，尝试返回旧缓存（即使过期）
         if (cacheManager) {
@@ -607,8 +538,9 @@ export default class NetworkUtil {
             const oldCachedData = await cacheManager.get(cacheKey);
             if (oldCachedData) {
               Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
-              const { data } = JSON.parse(oldCachedData);
-              return data as T;
+              const parsedData = JSON.parse(oldCachedData);
+              const cacheData = parsedData.data;
+              return cacheData as T;
             }
           } catch (offlineCacheError) {
             Logger.error(TAG, `Offline cache error: ${offlineCacheError}`);
@@ -618,7 +550,7 @@ export default class NetworkUtil {
       }
       
       // 缓存无效或不存在，发送新请求
-      const response = await this.get<T>(url);
+      const response = await NetworkUtil.get<T>(url);
       
       // 保存新缓存
       const cacheData = {
@@ -640,7 +572,30 @@ export default class NetworkUtil {
       return response.data;
     } catch (error) {
       Logger.error(TAG, `Cached request failed: ${error}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
+}
+
+// 定义接口以替代对象字面量作为类型
+export interface CacheData {
+  data: string;
+  timestamp: number;
+  expirationTime?: number;
+}
+
+export interface NetworkCacheItem {
+  key: string;
+  data: string;
+  timestamp: number;
+  expirationTime?: number;
+}
+
+// 修复throw语句不能接受任意类型的问题
+export function createNetworkError(message: string, code?: number): Error {
+  const error = new Error(message);
+  if (code) {
+    Object.assign(error, { code });
+  }
+  return error;
 }

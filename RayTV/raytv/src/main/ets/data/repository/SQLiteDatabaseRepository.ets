@@ -559,49 +559,100 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   // 其他方法的实现会继续添加...
 
   /**
-   * 从结果集解析Movie对象
+   * 从结果集中解析电影数据
    */
-  private parseMovieFromResultSet(resultSet: relationalStore.ResultSet): Movie {
-    const movie = new Movie({
-      id: resultSet.getString(resultSet.getColumnIndex('id')) || '',
-      title: resultSet.getString(resultSet.getColumnIndex('title')) || '',
-      originalTitle: resultSet.getString(resultSet.getColumnIndex('originalTitle')),
-      type: resultSet.getLong(resultSet.getColumnIndex('type')) || 0,
-      coverUrl: resultSet.getString(resultSet.getColumnIndex('coverUrl')),
-      backdropUrl: resultSet.getString(resultSet.getColumnIndex('backdropUrl')),
-      description: resultSet.getString(resultSet.getColumnIndex('description')),
-      releaseDate: resultSet.getString(resultSet.getColumnIndex('releaseDate')),
-      year: resultSet.getLong(resultSet.getColumnIndex('year')) || 0,
-      genres: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('genres')) || '[]'),
-      tags: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('tags')) || '[]'),
-      duration: resultSet.getLong(resultSet.getColumnIndex('duration')) || 0,
-      totalEpisodes: resultSet.getLong(resultSet.getColumnIndex('totalEpisodes')) || 0,
-      currentSeason: resultSet.getLong(resultSet.getColumnIndex('currentSeason')) || 1,
-      score: resultSet.getDouble(resultSet.getColumnIndex('score')) || 0,
-      directors: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('directors')) || '[]'),
-      actors: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('actors')) || '[]'),
-      studio: resultSet.getString(resultSet.getColumnIndex('studio')),
-      country: resultSet.getString(resultSet.getColumnIndex('country')),
-      language: resultSet.getString(resultSet.getColumnIndex('language')),
-      plot: resultSet.getString(resultSet.getColumnIndex('plot')),
-      status: resultSet.getLong(resultSet.getColumnIndex('status')) || 0,
-      createTime: resultSet.getLong(resultSet.getColumnIndex('createTime')) || Date.now(),
-      updateTime: resultSet.getLong(resultSet.getColumnIndex('updateTime')) || Date.now(),
-      sourceId: resultSet.getString(resultSet.getColumnIndex('sourceId')),
-      sourceName: resultSet.getString(resultSet.getColumnIndex('sourceName')),
-      quality: resultSet.getString(resultSet.getColumnIndex('quality')) as string,
-      videoSources: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('videoSources')) || '[]'),
-      episodes: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('episodes')) || '[]'),
-      ratingInfo: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('ratingInfo')) || '{}'),
-      extraInfo: this.safeParseJson(resultSet.getString(resultSet.getColumnIndex('extraInfo')) || '{}')
-    });
-    return movie;
+  private parseMovieFromResultSet(resultSet: relationalStore.ResultSet): Movie | null {
+    try {
+      if (!resultSet || resultSet.rowCount === 0) {
+        return null;
+      }
+
+      const movie = new Movie({
+        id: this.safeGetString(resultSet, 'id') || '',
+        title: this.safeGetString(resultSet, 'title') || '',
+        originalTitle: this.safeGetString(resultSet, 'originalTitle'),
+        type: this.safeGetLong(resultSet, 'type') || 0,
+        coverUrl: this.safeGetString(resultSet, 'coverUrl'),
+        backdropUrl: this.safeGetString(resultSet, 'backdropUrl'),
+        description: this.safeGetString(resultSet, 'description'),
+        releaseDate: this.safeGetString(resultSet, 'releaseDate'),
+        year: this.safeGetLong(resultSet, 'year') || 0,
+        genres: this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]'),
+        tags: this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]'),
+        duration: this.safeGetLong(resultSet, 'duration') || 0,
+        totalEpisodes: this.safeGetLong(resultSet, 'totalEpisodes') || 0,
+        currentSeason: this.safeGetLong(resultSet, 'currentSeason') || 1,
+        score: this.safeGetDouble(resultSet, 'score') || 0,
+        directors: this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]'),
+        actors: this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]'),
+        studio: this.safeGetString(resultSet, 'studio'),
+        country: this.safeGetString(resultSet, 'country'),
+        language: this.safeGetString(resultSet, 'language'),
+        plot: this.safeGetString(resultSet, 'plot'),
+        status: this.safeGetLong(resultSet, 'status') || 0,
+        createTime: this.safeGetLong(resultSet, 'createTime') || Date.now(),
+        updateTime: this.safeGetLong(resultSet, 'updateTime') || Date.now(),
+        sourceId: this.safeGetString(resultSet, 'sourceId'),
+        sourceName: this.safeGetString(resultSet, 'sourceName'),
+        quality: this.safeGetString(resultSet, 'quality') as string,
+        videoSources: this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]'),
+        episodes: this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]'),
+        ratingInfo: this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '{}'),
+        extraInfo: this.safeParseJson(this.safeGetString(resultSet, 'extraInfo') || '{}')
+      });
+      return movie;
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse movie from result set: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    }
+  }
+
+  /**
+   * 安全获取字符串类型字段
+   */
+  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string): string | null {
+    try {
+      const columnIndex = resultSet.getColumnIndex(columnName);
+      if (columnIndex === -1) return null;
+      return resultSet.getString(columnIndex);
+    } catch (error) {
+      Logger.warn(TAG, `Failed to get string column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    }
+  }
+
+  /**
+   * 安全获取长整型字段
+   */
+  private safeGetLong(resultSet: relationalStore.ResultSet, columnName: string): number | null {
+    try {
+      const columnIndex = resultSet.getColumnIndex(columnName);
+      if (columnIndex === -1) return null;
+      return resultSet.getLong(columnIndex);
+    } catch (error) {
+      Logger.warn(TAG, `Failed to get long column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    }
+  }
+
+  /**
+   * 安全获取双精度字段
+   */
+  private safeGetDouble(resultSet: relationalStore.ResultSet, columnName: string): number | null {
+    try {
+      const columnIndex = resultSet.getColumnIndex(columnName);
+      if (columnIndex === -1) return null;
+      return resultSet.getDouble(columnIndex);
+    } catch (error) {
+      Logger.warn(TAG, `Failed to get double column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    }
   }
 
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): Record<string, any> | any[] | string | number | boolean | null {
+  private safeParseJson(jsonStr: string): Record<string, unknown> | unknown[] | string | number | boolean | null {
     try {
       return JsonUtil.safeParse(jsonStr);
     } catch (error) {
@@ -617,8 +668,8 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   // ========== 占位实现 ==========
   // 为了代码能编译通过，提供基础的占位实现
   async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> { return { success: false, message: 'Not implemented' }; }
-  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, any>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, any>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, unknown>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, unknown>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
   async addUser(user: User): Promise<DatabaseResult<string>> { return { success: false, message: 'Not implemented' }; }
   async updateUser(user: User): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
   async deleteUser(userId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }

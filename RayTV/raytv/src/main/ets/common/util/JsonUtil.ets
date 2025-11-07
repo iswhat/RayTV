@@ -1,262 +1,224 @@
-// JsonUtil - JSON数据处理工具类
-import { Logger, LogLevel } from './Logger';
+// JsonUtil.ets - JSON工具类
+// 提供JSON序列化、反序列化、深拷贝、对象合并等功能
+
+import Logger from './Logger';
 
 const TAG = 'JsonUtil';
 
 /**
- * JSON工具类
- * 提供JSON数据的序列化和反序列化功能，包含异常处理和格式化
+ * 安全的JSON解析
+ * @param jsonString JSON字符串
+ * @param defaultValue 默认值
  */
-export default class JsonUtil {
-  /**
-   * 将对象序列化为JSON字符串
-   * @param obj 要序列化的对象
-   * @param pretty 是否格式化输出
-   * @returns JSON字符串
-   */
-  public static stringify(obj: object, pretty: boolean = false): string {
-    try {
-      if (pretty) {
-        return JSON.stringify(obj, null, 2);
+export function safeParseJson<T>(jsonString: string, defaultValue: T): T {
+  if (!jsonString) {
+    Logger.warn(TAG, 'Empty JSON string provided');
+    return defaultValue;
+  }
+
+  try {
+    const parsed = JSON.parse(jsonString) as T;
+    return parsed;
+  } catch (error) {
+    Logger.error(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
+    Logger.debug(TAG, `JSON string: ${jsonString}`);
+    return defaultValue;
+  }
+}
+
+/**
+ * 安全的JSON字符串化
+ * @param obj 要序列化的对象
+ * @param indent 缩进空格数
+ */
+export function safeStringify(obj: object, indent: number = 0): string {
+  try {
+    if (obj === null || typeof obj === 'undefined') {
+      return 'null';
+    }
+    return JSON.stringify(obj, null, indent);
+  } catch (error) {
+    Logger.error(TAG, `Failed to stringify object: ${error instanceof Error ? error.message : String(error)}`);
+    return '{}';
+  }
+}
+
+/**
+ * 深拷贝对象
+ * @param source 源对象
+ */
+export function deepClone<T>(source: T): T {
+  if (source === null || typeof source !== 'object') {
+    return source;
+  }
+
+  try {
+    // 对于循环引用，使用JSON方法处理会失败
+    // 这里使用简单的实现，对于复杂对象可能需要更复杂的深拷贝算法
+    const serialized = JSON.stringify(source);
+    return JSON.parse(serialized) as T;
+  } catch (error) {
+    Logger.error(TAG, `Failed to deep clone object: ${error instanceof Error ? error.message : String(error)}`);
+    // 如果克隆失败，返回原始对象
+    return source;
+  }
+}
+
+/**
+ * 合并两个对象
+ * @param target 目标对象
+ * @param source 源对象
+ */
+export function merge<T extends object, U extends object>(target: T, source: U): object {
+  const result = { ...target } as object;
+  
+  // 遍历源对象的属性
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      const sourceValue = source[key];
+      const targetValue = (result as any)[key];
+      
+      if (sourceValue !== null && typeof sourceValue === 'object' && 
+          !Array.isArray(sourceValue) && 
+          targetValue !== null && 
+          typeof targetValue === 'object' && 
+          !Array.isArray(targetValue)) {
+        // 递归合并对象
+        (result as any)[key] = merge(targetValue, sourceValue);
+      } else {
+        // 对于基本类型、数组和null，直接赋值
+        (result as any)[key] = sourceValue;
       }
-      return JSON.stringify(obj);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to stringify object: ${errorMessage}`);
-      throw new Error(errorMessage);
     }
   }
+  
+  return result;
+}
 
-  /**
-   * 将JSON字符串反序列化为对象
-   * @param jsonStr JSON字符串
-   * @returns 反序列化后的对象
-   */
-  public static parse<T extends object>(jsonStr: string): T | null {
-    try {
-      if (!jsonStr || typeof jsonStr !== 'string') {
-        throw new Error('Invalid JSON string');
-      }
-      return JSON.parse(jsonStr) as T;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to parse JSON: ${errorMessage}`);
-      throw new Error(errorMessage);
+/**
+ * 从对象中提取指定属性
+ * @param obj 源对象
+ * @param keys 要提取的属性键数组
+ */
+export function pick<T extends object>(obj: T, keys: string[]): object {
+  const result: Record<string, any> = {};
+  
+  // 使用循环处理属性提取
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (key in obj) {
+      result[key] = obj[key];
     }
   }
+  
+  return result;
+}
 
-  /**
-   * 安全的JSON解析，解析失败时返回默认值
-   * @param jsonStr JSON字符串
-   * @param defaultValue 默认值
-   * @returns 解析结果或默认值
-   */
-  public static safeParse<T extends object>(jsonStr: string, defaultValue: T): T | null {
-    try {
-      return JsonUtil.parse<T>(jsonStr);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().warn(`${TAG} - Safe parse fallback to default value: ${errorMessage}`);
-      return defaultValue;
+/**
+ * 从对象中排除指定属性
+ * @param obj 源对象
+ * @param keys 要排除的属性键数组
+ */
+export function omit<T extends object>(obj: T, keys: string[]): object {
+  const result: Record<string, any> = { ...obj };
+  
+  // 使用循环处理属性排除
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (key in result) {
+      delete result[key];
     }
   }
+  
+  return result;
+}
 
-  /**
-   * 检查字符串是否为有效的JSON格式
-   * @param jsonStr 待检查的字符串
-   * @returns 是否为有效JSON
-   */
-  public static isValidJson(jsonStr: string): boolean {
-    if (!jsonStr || typeof jsonStr !== 'string') {
+/**
+ * 检查对象是否为空
+ * @param obj 要检查的对象
+ */
+export function isEmptyObject(obj: object): boolean {
+  if (obj === null || typeof obj !== 'object') {
+    return true;
+  }
+  
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
       return false;
     }
+  }
+  
+  return true;
+}
+
+/**
+ * 比较两个对象是否深度相等
+ * @param obj1 第一个对象
+ * @param obj2 第二个对象
+ */
+export function deepEqual(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) {
+    return true;
+  }
+  
+  if (obj1 === null || obj2 === null || typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+    return false;
+  }
+  
+  try {
+    // 使用JSON序列化进行比较（不处理循环引用）
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  } catch (error) {
+    Logger.warn(TAG, `Failed to compare objects deeply: ${error instanceof Error ? error.message : String(error)}`);
+    return false;
+  }
+}
+
+/**
+ * 将对象的键值对转换为URL查询参数
+ * @param params 参数对象
+ */
+export function toQueryString(params: Record<string, string | number | boolean>): string {
+  const queryParts: string[] = [];
+  
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      const value = params[key];
+      const encodedKey = encodeURIComponent(key);
+      const encodedValue = encodeURIComponent(String(value));
+      queryParts.push(`${encodedKey}=${encodedValue}`);
+    }
+  }
+  
+  return queryParts.join('&');
+}
+
+/**
+ * 从URL查询参数解析为对象
+ * @param queryString 查询参数字符串
+ */
+export function parseQueryString(queryString: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  
+  if (!queryString) {
+    return result;
+  }
+  
+  // 移除开头的问号
+  const cleanQuery = queryString.startsWith('?') ? queryString.substring(1) : queryString;
+  
+  const pairs = cleanQuery.split('&');
+  
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i];
+    const [key, value] = pair.split('=');
     
-    try {
-      JSON.parse(jsonStr);
-      return true;
-    } catch (error) {
-      return false;
+    if (key) {
+      const decodedKey = decodeURIComponent(key);
+      const decodedValue = value ? decodeURIComponent(value) : '';
+      result[decodedKey] = decodedValue;
     }
   }
-
-  /**
-   * 深拷贝对象（通过JSON序列化）
-   * @param obj 要拷贝的对象
-   * @returns 拷贝后的新对象
-   */
-  public static deepClone<T>(obj: T): T {
-    try {
-      // 处理循环引用和特殊类型
-      if (obj === null || typeof obj !== 'object') {
-        return obj;
-      }
-      
-      if (obj instanceof Date) {
-        return new Date(obj.getTime()) as T;
-      }
-      
-      if (Array.isArray(obj)) {
-        const cloneArr: T[] = [];
-        for (let i = 0; i < obj.length; i++) {
-          cloneArr.push(JsonUtil.deepClone(obj[i]));
-        }
-        return cloneArr as T;
-      }
-      
-      if (typeof obj === 'object' && obj !== null) {
-        const cloneObj: Record<string, T> = {};
-        // 使用Object.keys替代for..in循环
-        const keys = Object.keys(obj);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          cloneObj[key] = JsonUtil.deepClone((obj as Record<string, T>)[key]);
-        }
-        return cloneObj as T;
-      }
-      
-      return obj;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to deep clone object: ${errorMessage}`);
-      return obj;
-    }
-  }
-
-  /**
-   * 合并两个JSON对象
-   * @param target 目标对象
-   * @param source 源对象
-   * @returns 合并后的对象
-   */
-  public static merge<T extends Record<string, unknown>>(target: T, source: Record<string, unknown>): T {
-    try {
-      const result = JsonUtil.deepClone(target);
-      
-      // 安全地转换result为可索引对象
-      const resultObj = result as Record<string, unknown>;
-      
-      // 使用Object.keys替代for..in循环
-      const sourceKeys = Object.keys(source);
-      for (let i = 0; i < sourceKeys.length; i++) {
-        const key = sourceKeys[i];
-        const sourceValue = source[key];
-        const targetValue = resultObj[key];
-        
-        // 递归合并对象属性
-        if (sourceValue !== null && typeof sourceValue === 'object' &&
-            targetValue !== null && typeof targetValue === 'object') {
-          resultObj[key] = JsonUtil.merge(targetValue as Record<string, unknown>, sourceValue as Record<string, unknown>);
-        } else {
-          resultObj[key] = sourceValue;
-        }
-      }
-      
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to merge JSON objects: ${errorMessage}`);
-      throw new Error(errorMessage);
-    }
-  }
-
-  /**
-   * 从对象中提取指定的属性
-   * @param obj 源对象
-   * @param keys 要提取的属性名数组
-   * @returns 提取后的新对象
-   */
-  public static pick<T extends Record<string, unknown>>(obj: T, keys: string[]): Partial<T> {
-    try {
-      const result: Partial<T> = {};
-      
-      // 使用标准for循环替代forEach
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
-          (result as Record<string, unknown>)[key] = obj[key];
-        }
-      }
-      
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to pick properties: ${errorMessage}`);
-      throw new Error(errorMessage);
-    }
-  }
-
-  /**
-   * 从对象中排除指定的属性
-   * @param obj 源对象
-   * @param keys 要排除的属性名数组
-   * @returns 排除后的新对象
-   */
-  public static omit<T extends Record<string, unknown>>(obj: T, keys: string[]): Partial<T> {
-    try {
-      const result: Partial<T> = {};
-      
-      if (obj && typeof obj === 'object') {
-        // 使用Object.keys替代for..in循环
-        const objKeys = Object.keys(obj);
-        for (let i = 0; i < objKeys.length; i++) {
-          const key = objKeys[i];
-          // 检查key是否在排除列表中
-          let shouldExclude = false;
-          for (let j = 0; j < keys.length; j++) {
-            if (keys[j] === key) {
-              shouldExclude = true;
-              break;
-            }
-          }
-          if (!shouldExclude) {
-            (result as Record<string, unknown>)[key] = obj[key];
-          }
-        }
-      }
-      
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to omit properties: ${errorMessage}`);
-      throw new Error(errorMessage);
-    }
-  }
-
-  /**
-   * 压缩JSON字符串（去除空格和换行）
-   * @param jsonStr 原始JSON字符串
-   * @returns 压缩后的JSON字符串
-   */
-  public static compress(jsonStr: string): string {
-    try {
-      const parsed = JsonUtil.parse<Record<string, unknown>>(jsonStr);
-      if (parsed) {
-        return JsonUtil.stringify(parsed);
-      }
-      return jsonStr;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to compress JSON: ${errorMessage}`);
-      throw new Error(errorMessage);
-    }
-  }
-
-  /**
-   * 格式化JSON字符串
-   * @param jsonStr 原始JSON字符串
-   * @returns 格式化后的JSON字符串
-   */
-  public static format(jsonStr: string): string {
-    try {
-      const parsed = JsonUtil.parse<Record<string, unknown>>(jsonStr);
-      if (parsed) {
-        return JsonUtil.stringify(parsed, true);
-      }
-      return jsonStr;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to format JSON: ${errorMessage}`);
-      throw new Error(errorMessage);
-    }
-  }
+  
+  return result;
 }

@@ -40,6 +40,8 @@ struct PlaybackPage {
   @State showSourceMenu: boolean = false;
   @State showSubtitleMenu: boolean = false;
   @State playSources: PlaySource[] = [];
+  @State filteredSources: PlaySource[] = [];
+  @State searchText: string = '';
   @State subtitles: Subtitle[] = [];
   @State selectedSubtitle: Subtitle | null = null;
   @State isFullscreen: boolean = false;
@@ -48,6 +50,7 @@ struct PlaybackPage {
   @State controlsTimeout: number | null = null;
   @State lastProgressSaveTime: number = 0;
   @State saveProgressInterval: number = 30000; // 30秒保存一次进度
+  @State searchFocused: boolean = false;
   private autoSwitchSourceOnError: boolean = true; // 是否自动切换片源
   private lastSaveTime: number = 0; // 上次保存进度的时间(毫秒)
   private currentPosition: number = 0; // 当前播放位置
@@ -122,6 +125,9 @@ struct PlaybackPage {
     try {
       // 加载播放源
       this.loadPlaySources().then(() => {
+        // 初始化过滤后的片源列表
+        this.filteredSources = [...this.playSources];
+        
         // 设置播放源并开始播放
         if (this.playSource) {
           this.setupPlayback(this.playSource);
@@ -325,6 +331,40 @@ struct PlaybackPage {
   }
   
   /**
+   * 处理搜索文本变化
+   */
+  private handleSearchChange(text: string) {
+    this.searchText = text;
+    
+    // 根据搜索文本过滤片源
+    if (text.trim()) {
+      const searchLower = text.toLowerCase();
+      this.filteredSources = this.playSources.filter(source => 
+        (source.name && source.name.toLowerCase().includes(searchLower)) ||
+        (source.description && source.description.toLowerCase().includes(searchLower))
+      );
+    } else {
+      // 如果搜索文本为空，显示所有片源
+      this.filteredSources = [...this.playSources];
+    }
+  }
+  
+  /**
+   * 处理搜索框焦点变化
+   */
+  private handleSearchFocusChange(focused: boolean) {
+    this.searchFocused = focused;
+  }
+  
+  /**
+   * 清除搜索文本
+   */
+  private clearSearchText() {
+    this.searchText = '';
+    this.filteredSources = [...this.playSources];
+  }
+  
+  /**
    * 切换播放/暂停
    */
   private togglePlayPause(): void {
@@ -499,6 +539,9 @@ struct PlaybackPage {
       
       this.isLoading = false;
       this.showSourceMenu = false;
+      
+      // 显示切换成功提示
+      Toast.show('片源切换成功');
     } catch (error) {
       Logger.error(this.TAG, `Failed to switch play source: ${error}`);
       this.errorMessage = '切换播放源失败';
@@ -789,28 +832,191 @@ struct PlaybackPage {
    */
   @Builder
   private renderSourceMenu(): void {
-    if (!this.showSourceMenu || this.playSources.length === 0) return;
+    if (!this.showSourceMenu) return;
     
-    List.create();
-    List.className("source-menu");
-    this.playSources.forEach((source, index) => {
-      ListItem.create();
-      ListItem.key(index.toString());
-      ListItem.onClick(() => this.switchPlaySource(source));
-      ListItem.className(this.playSource?.url === source.url ? 'selected' : '');
-      Text.create();
-      Text.className("source-name");
-      Text.content(source.name || `播放源${index + 1}`);
-      Text.pop();
-      if (source.quality) {
-        Text.create();
-        Text.className("source-quality");
-        Text.content(source.quality);
-        Text.pop();
-      }
-      ListItem.pop();
+    Stack.create();
+    Stack.style({
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#4CAF50',
+      height: '80%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      zIndex: 1000
     });
-    List.pop();
+    
+    // 菜单标题
+    Flex.create();
+    Flex.style({
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20
+    });
+    Text.create();
+    Text.style({
+      fontSize: 28,
+      color: '#FFFFFF',
+      fontWeight: 700
+    });
+    Text.content('切换片源');
+    Text.pop();
+    Button.create();
+    Button.style({
+      backgroundColor: 'transparent'
+    });
+    Button.onClick(() => this.showSourceMenu = false);
+    Text.create();
+    Text.style({
+      fontSize: 24,
+      color: '#FFFFFF'
+    });
+    Text.content('✕');
+    Text.pop();
+    Button.pop();
+    Flex.pop();
+    
+    // 搜索框
+    Stack.create();
+    Stack.style({
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 25,
+      paddingHorizontal: 20,
+      marginBottom: 20,
+      height: 50
+    });
+    Text.create();
+    Text.style({
+      fontSize: 24,
+      color: '#999999',
+      marginRight: 10
+    });
+    Text.content('🔍');
+    Text.pop();
+    TextInput.create();
+    TextInput.style({
+      flex: 1,
+      fontSize: 24,
+      color: '#333333'
+    });
+    TextInput.value(this.searchText);
+    TextInput.onChange((text) => this.handleSearchChange(text));
+    TextInput.onFocusChange((focused) => this.handleSearchFocusChange(focused));
+    TextInput.placeholder('搜索片源...');
+    TextInput.placeholderColor('#999999');
+    TextInput.pop();
+    if (this.searchText.length > 0) {
+      Button.create();
+      Button.style({
+        backgroundColor: 'transparent'
+      });
+      Button.onClick(() => this.clearSearchText());
+      Text.create();
+      Text.style({
+        fontSize: 24,
+        color: '#999999'
+      });
+      Text.content('✕');
+      Text.pop();
+      Button.pop();
+    }
+    Stack.pop();
+    
+    // 搜索结果数量提示
+    Text.create();
+    Text.style({
+      fontSize: 24,
+      color: '#FFFFFF',
+      fontWeight: 600,
+      marginBottom: 10
+    });
+    Text.content(`共找到 ${this.filteredSources.length} 个片源`);
+    Text.pop();
+    
+    // 片源列表
+    if (this.filteredSources.length === 0) {
+      Stack.create();
+      Stack.style({
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+      });
+      Text.create();
+      Text.style({
+        fontSize: 24,
+        color: '#FFFFFF'
+      });
+      Text.content('暂无匹配的片源');
+      Text.pop();
+      Stack.pop();
+    } else {
+      List.create();
+      List.style({
+        flex: 1
+      });
+      this.filteredSources.forEach((source, index) => {
+        ListItem.create();
+        ListItem.key(index.toString());
+        ListItem.style({
+          paddingVertical: 15
+        });
+        Button.create();
+        Button.style({
+          backgroundColor: '#66BB6A',
+          padding: 20,
+          borderRadius: 10,
+          width: '100%'
+        });
+        Button.onClick(() => {
+          this.switchPlaySource(source);
+          this.showSourceMenu = false;
+        });
+        Flex.create();
+        Flex.style({
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%'
+        });
+        Text.create();
+        Text.style({
+          fontSize: 26,
+          color: '#FFFFFF',
+          fontWeight: 600
+        });
+        Text.content(source.name || `播放源${index + 1}`);
+        Text.pop();
+        if (source.quality) {
+          Flex.create();
+          Flex.style({
+            backgroundColor: '#FFEB3B',
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 12
+          });
+          Text.create();
+          Text.style({
+            fontSize: 20,
+            color: '#000000',
+            fontWeight: 700
+          });
+          Text.content(source.quality);
+          Text.pop();
+          Flex.pop();
+        }
+        Flex.pop();
+        Button.pop();
+        ListItem.pop();
+      });
+      List.pop();
+    }
+    
+    Stack.pop();
   }
   
   /**

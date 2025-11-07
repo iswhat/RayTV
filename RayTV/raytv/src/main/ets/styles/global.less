@@ -598,6 +598,107 @@ html, body {
   padding-right: 40px;
 }
 
+/* 绿色主题搜索页面样式 */
+.green-search-page {
+  backgroundColor: #4CAF50;
+  padding: 15vp;
+  flex: 1;
+}
+
+.green-content-scroll {
+  flex: 1;
+  backgroundColor: #4CAF50;
+}
+
+.green-result-count {
+  fontSize: 24vp;
+  color: #FFFFFF;
+  marginBottom: 10vp;
+  fontWeight: 600;
+}
+
+/* 分类筛选按钮样式 */
+.green-category-buttons {
+  flexDirection: Row;
+  flexWrap: Wrap;
+  marginBottom: 20vp;
+  gap: 10vp;
+}
+
+.green-category-button {
+  backgroundColor: #66BB6A;
+  color: #FFFFFF;
+  paddingHorizontal: 15vp;
+  paddingVertical: 8vp;
+  borderRadius: 15vp;
+  fontSize: 22vp;
+  minWidth: 100vp;
+}
+
+.green-category-button.active {
+  backgroundColor: #FFFFFF;
+  color: #4CAF50;
+  fontWeight: 700;
+}
+
+/* 网格布局样式 */
+.green-search-results-grid {
+  backgroundColor: #4CAF50;
+}
+
+.green-grid-item {
+  aspectRatio: 0.67;
+  backgroundColor: #66BB6A;
+  borderRadius: 10vp;
+  overflow: Hidden;
+}
+
+.green-grid-item-content {
+  flex: 1;
+  padding: 10vp;
+  alignItems: Center;
+}
+
+.green-source-tag {
+  position: absolute;
+  top: 10vp;
+  left: 10vp;
+  backgroundColor: #000000;
+  color: #FFFFFF;
+  paddingHorizontal: 8vp;
+  paddingVertical: 3vp;
+  borderRadius: 5vp;
+  fontSize: 18vp;
+  opacity: 0.8;
+}
+
+.green-grid-item-image {
+  width: 100%;
+  aspectRatio: 0.67;
+  borderRadius: 8vp;
+  marginBottom: 8vp;
+}
+
+.green-grid-item-title {
+  color: #FFFFFF;
+  fontSize: 22vp;
+  textAlign: Center;
+  marginBottom: 5vp;
+}
+
+.green-status-tag {
+  color: #FFFFFF;
+  fontSize: 20vp;
+  backgroundColor: #388E3C;
+  paddingHorizontal: 10vp;
+  paddingVertical: 3vp;
+  borderRadius: 5vp;
+}
+
+.green-bottom-space {
+  height: 30vp;
+}
+
 .search-icon {
   position: absolute;
   left: @spacing-sm;

@@ -282,15 +282,36 @@ struct SettingsPage {
    */
   @Builder
   private renderHeader(): void {
-    Stack.create({ className: "header" });
-    Button.create({ className: "back-button", onClick: this.handleBack });
-    Button.text("←");
-    Button.pop();
-    Text.create({ className: "page-title" });
-    Text.text("设置");
+    Stack.create();
+    Stack.width('100%');
+    Stack.height('80vp');
+    Stack.backgroundColor('#00AA00');
+    Stack.justifyContent(FlexAlign.Center);
+    Stack.alignItems(FlexAlign.Start);
+    Stack.padding({ left: '20vp' });
+    
+    Button.create();
+    Button.width('60vp');
+    Button.height('60vp');
+    Button.backgroundColor('transparent');
+    Button.justifyContent(FlexAlign.Center);
+    Button.alignItems(FlexAlign.Center);
+    Button.onClick(this.handleBack);
+    Text.create();
+    Text.fontSize('30vp');
+    Text.text("←");
+    Text.fontColor('#FFFFFF');
     Text.pop();
-    Blank.create({ className: "header-right" });
-    Blank.pop();
+    Button.pop();
+    
+    Text.create();
+    Text.fontSize('32vp');
+    Text.fontColor('#FFFFFF');
+    Text.fontWeight(FontWeight.Bold);
+    Text.text("设置");
+    Text.margin({ left: '20vp' });
+    Text.pop();
+    
     Stack.pop();
   }
   
@@ -299,14 +320,21 @@ struct SettingsPage {
    */
   @Builder
   private renderSettingGroup(title: string, content: () => void): void {
-    Stack.create({ className: "setting-group" });
-    Text.create({ className: "group-title" });
+    Column.create();
+    Column.width('100%');
+    Column.margin({ top: '20vp' });
+    
+    Text.create();
+    Text.fontSize('24vp');
+    Text.fontColor('#333333');
+    Text.fontWeight(FontWeight.Bold);
+    Text.margin({ left: '20vp', bottom: '10vp' });
     Text.text(title);
     Text.pop();
-    Stack.create({ className: "group-content" });
+    
     content();
-    Stack.pop();
-    Stack.pop();
+    
+    Column.pop();
   }
   
   /**
@@ -314,22 +342,52 @@ struct SettingsPage {
    */
   @Builder
   private renderSwitchItem(label: string, checked: boolean, onValueChange: (value: boolean) => void, description?: string): void {
-    ListItem.create({ className: "setting-item" });
-    Flex.create({ direction: FlexDirection.Column, className: "setting-info" });
-    Text.create({ className: "setting-label" });
+    Stack.create();
+    Stack.width('90%');
+    Stack.height('100vp');
+    Stack.margin({ left: '5%', right: '5%', bottom: '10vp' });
+    Stack.backgroundColor('#FFFFFF');
+    Stack.borderRadius('12vp');
+    Stack.padding({ left: '20vp', right: '20vp' });
+    Stack.justifyContent(FlexAlign.Center);
+    Stack.shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 });
+    
+    Flex.create();
+    Flex.width('100%');
+    Flex.justifyContent(FlexAlign.SpaceBetween);
+    Flex.alignItems(FlexAlign.Center);
+    
+    Flex.create();
+    Flex.direction(FlexDirection.Column);
+    
+    Text.create();
+    Text.fontSize('20vp');
+    Text.fontColor('#333333');
     Text.text(label);
     Text.pop();
+    
     if (description) {
-      Text.create({ className: "setting-description" });
+      Text.create();
+      Text.fontSize('14vp');
+      Text.fontColor('#666666');
+      Text.margin({ top: '5vp' });
       Text.text(description);
       Text.pop();
     }
+    
     Flex.pop();
+    
     Switch.create();
     Switch.checked(checked);
     Switch.onValueChange(onValueChange);
+    Switch.trackColor({ checked: '#00AA00', unchecked: '#DDDDDD' });
+    Switch.thumbColor('#FFFFFF');
+    Switch.width('80vp');
+    Switch.height('40vp');
     Switch.pop();
-    ListItem.pop();
+    
+    Flex.pop();
+    Stack.pop();
   }
   
   /**
@@ -337,28 +395,76 @@ struct SettingsPage {
    */
   @Builder
   private renderOptionItem(label: string, value: string, onClick: () => void, icon?: string): void {
-    ListItem.create({ className: "setting-item", onClick: onClick });
-    Flex.create({ className: "setting-info" });
+    Stack.create();
+    Stack.width('90%');
+    Stack.height('100vp');
+    Stack.margin({ left: '5%', right: '5%', bottom: '10vp' });
+    Stack.backgroundColor('#FFFFFF');
+    Stack.borderRadius('12vp');
+    Stack.padding({ left: '20vp', right: '20vp' });
+    Stack.justifyContent(FlexAlign.Center);
+    Stack.shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 });
+    Stack.onClick(onClick);
+    
+    Flex.create();
+    Flex.width('100%');
+    Flex.justifyContent(FlexAlign.SpaceBetween);
+    Flex.alignItems(FlexAlign.Center);
+    
+    Flex.create();
+    Flex.alignItems(FlexAlign.Center);
+    
     if (icon) {
-      Text.create({ className: "setting-icon" });
+      Text.create();
+      Text.fontSize('24vp');
+      Text.margin({ right: '15vp' });
       Text.text(icon);
       Text.pop();
     }
-    Flex.create({ direction: FlexDirection.Column });
-    Text.create({ className: "setting-label" });
+    
+    Flex.create();
+    Flex.direction(FlexDirection.Column);
+    
+    Text.create();
+    Text.fontSize('20vp');
+    Text.fontColor('#333333');
     Text.text(label);
     Text.pop();
+    
     if (value) {
-      Text.create({ className: "setting-value" });
+      Text.create();
+      Text.fontSize('16vp');
+      Text.fontColor('#666666');
+      Text.margin({ top: '5vp' });
       Text.text(value);
       Text.pop();
     }
+    
     Flex.pop();
     Flex.pop();
-    Text.create({ className: "setting-arrow" });
+    
+    Flex.create();
+    Flex.alignItems(FlexAlign.Center);
+    
+    if (value) {
+      Text.create();
+      Text.fontSize('16vp');
+      Text.fontColor('#666666');
+      Text.margin({ right: '10vp' });
+      Text.text(value);
+      Text.pop();
+    }
+    
+    Text.create();
+    Text.fontSize('20vp');
+    Text.fontColor('#999999');
     Text.text("→");
     Text.pop();
-    ListItem.pop();
+    
+    Flex.pop();
+    
+    Flex.pop();
+    Stack.pop();
   }
   
   /**
@@ -367,43 +473,78 @@ struct SettingsPage {
   @Builder
   private renderThemeSettings(): void {
     this.renderSettingGroup('外观设置', () => {
-      ListItem.create({ className: "setting-item" });
-      Text.create({ className: "setting-label" });
+      Stack.create();
+      Stack.width('90%');
+      Stack.height('140vp');
+      Stack.margin({ left: '5%', right: '5%', bottom: '10vp' });
+      Stack.backgroundColor('#FFFFFF');
+      Stack.borderRadius('12vp');
+      Stack.padding({ left: '20vp', right: '20vp' });
+      Stack.justifyContent(FlexAlign.Center);
+      Stack.shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 });
+      
+      Column.create();
+      Column.width('100%');
+      
+      Text.create();
+      Text.fontSize('20vp');
+      Text.fontColor('#333333');
+      Text.margin({ bottom: '20vp' });
       Text.text("主题模式");
       Text.pop();
-      Flex.create({ className: "theme-options" });
-      Button.create({ 
-        className: `theme-option ${this.themeMode === 'light' ? 'selected' : ''}`,
-        onClick: () => this.handleThemeChange('light')
-      });
-      Button.text("浅色");
-      Button.pop();
-      Button.create({ 
-        className: `theme-option ${this.themeMode === 'dark' ? 'selected' : ''}`,
-        onClick: () => this.handleThemeChange('dark')
-      });
-      Button.text("深色");
-      Button.pop();
-      Button.create({ 
-        className: `theme-option ${this.themeMode === 'auto' ? 'selected' : ''}`,
-        onClick: () => this.handleThemeChange('auto')
-      });
-      Button.text("自动");
-      Button.pop();
-      Flex.pop();
-      ListItem.pop();
       
-      Divider.create();
-      Divider.pop();
+      Flex.create();
+      Flex.width('100%');
+      Flex.justifyContent(FlexAlign.SpaceBetween);
       
-      ListItem.create({ className: "setting-item" });
-      Text.create({ className: "setting-label" });
-      Text.text("语言");
+      Button.create();
+      Button.width('30%');
+      Button.height('50vp');
+      Button.backgroundColor(this.themeMode === 'light' ? '#00AA00' : '#F0F0F0');
+      Button.borderRadius('8vp');
+      Button.onClick(() => this.handleThemeChange('light'));
+      Text.create();
+      Text.fontSize('16vp');
+      Text.fontColor(this.themeMode === 'light' ? '#FFFFFF' : '#333333');
+      Text.text("浅色");
       Text.pop();
-      Button.create({ className: "language-option", onClick: () => {} });
-      Button.text(this.language === 'zh' ? '简体中文' : 'English' + " →");
       Button.pop();
-      ListItem.pop();
+      
+      Button.create();
+      Button.width('30%');
+      Button.height('50vp');
+      Button.backgroundColor(this.themeMode === 'dark' ? '#00AA00' : '#F0F0F0');
+      Button.borderRadius('8vp');
+      Button.onClick(() => this.handleThemeChange('dark'));
+      Text.create();
+      Text.fontSize('16vp');
+      Text.fontColor(this.themeMode === 'dark' ? '#FFFFFF' : '#333333');
+      Text.text("深色");
+      Text.pop();
+      Button.pop();
+      
+      Button.create();
+      Button.width('30%');
+      Button.height('50vp');
+      Button.backgroundColor(this.themeMode === 'auto' ? '#00AA00' : '#F0F0F0');
+      Button.borderRadius('8vp');
+      Button.onClick(() => this.handleThemeChange('auto'));
+      Text.create();
+      Text.fontSize('16vp');
+      Text.fontColor(this.themeMode === 'auto' ? '#FFFFFF' : '#333333');
+      Text.text("自动");
+      Text.pop();
+      Button.pop();
+      
+      Flex.pop();
+      Column.pop();
+      Stack.pop();
+      
+      this.renderOptionItem(
+        '语言', 
+        this.language === 'zh' ? '简体中文' : 'English', 
+        () => {}
+      );
     });
   }
   
@@ -468,38 +609,42 @@ struct SettingsPage {
   @Builder
   private renderCacheSettings(): void {
     this.renderSettingGroup('缓存设置', () => {
-      ListItem.create();
-      ListItem.className("setting-item");
-      Text.create();
-      Text.className("setting-label");
-      Text.content("缓存策略");
-      Text.pop();
-      Button.create();
-      Button.className("cache-option");
-      Button.onClick(() => {});
-      Text.create();
-      Text.content(this.getCacheStrategyText() + " →");
-      Text.pop();
-      Button.pop();
-      ListItem.pop();
+      this.renderOptionItem(
+        '缓存策略', 
+        this.getCacheStrategyText(), 
+        () => {}
+      );
       
-      Divider.create();
-      Divider.pop();
+      Stack.create();
+      Stack.width('90%');
+      Stack.height('100vp');
+      Stack.margin({ left: '5%', right: '5%', bottom: '10vp' });
+      Stack.backgroundColor('#FFFFFF');
+      Stack.borderRadius('12vp');
+      Stack.padding({ left: '20vp', right: '20vp' });
+      Stack.justifyContent(FlexAlign.Center);
+      Stack.shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 });
       
-      ListItem.create();
-      ListItem.className("setting-item");
-      Text.create();
-      Text.className("setting-label");
-      Text.content("最大缓存大小");
-      Text.pop();
-      Text.create();
-      Text.className("setting-value");
-      Text.content(this.maxCacheSize + " MB");
-      Text.pop();
-      ListItem.pop();
+      Flex.create();
+      Flex.width('100%');
+      Flex.justifyContent(FlexAlign.SpaceBetween);
+      Flex.alignItems(FlexAlign.Center);
       
-      Divider.create();
-      Divider.pop();
+      Text.create();
+      Text.fontSize('20vp');
+      Text.fontColor('#333333');
+      Text.text("最大缓存大小");
+      Text.pop();
+      
+      Text.create();
+      Text.fontSize('18vp');
+      Text.fontColor('#00AA00');
+      Text.fontWeight(FontWeight.Bold);
+      Text.text(this.maxCacheSize + " MB");
+      Text.pop();
+      
+      Flex.pop();
+      Stack.pop();
       
       this.renderOptionItem(
         '清除缓存', 
@@ -619,26 +764,11 @@ struct SettingsPage {
         '自定义应用背景壁纸'
       );
       
-      Divider.create();
-      Divider.pop();
-      
-      ListItem.create();
-      ListItem.className("setting-item");
-      Text.create();
-      Text.className("setting-label");
-      Text.content("壁纸类型");
-      Text.pop();
-      Button.create();
-      Button.className("wallpaper-option");
-      Button.onClick(() => {});
-      Text.create();
-      Text.content(this.getWallpaperTypeText() + " →");
-      Text.pop();
-      Button.pop();
-      ListItem.pop();
-      
-      Divider.create();
-      Divider.pop();
+      this.renderOptionItem(
+        '壁纸类型', 
+        this.getWallpaperTypeText(), 
+        () => {}
+      );
       
       this.renderOptionItem(
         '选择壁纸', 
@@ -737,23 +867,36 @@ struct SettingsPage {
         'ℹ️'
       );
       
-      Divider.create();
-      Divider.pop();
+      Stack.create();
+      Stack.width('90%');
+      Stack.height('100vp');
+      Stack.margin({ left: '5%', right: '5%', bottom: '10vp' });
+      Stack.backgroundColor('#FFFFFF');
+      Stack.borderRadius('12vp');
+      Stack.padding({ left: '20vp', right: '20vp' });
+      Stack.justifyContent(FlexAlign.Center);
+      Stack.shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 });
       
-      ListItem.create();
-      ListItem.className("setting-item");
-      Text.create();
-      Text.className("setting-label");
-      Text.content("版本");
-      Text.pop();
-      Text.create();
-      Text.className("setting-value");
-      Text.content("v" + this.version);
-      Text.pop();
-      ListItem.pop();
+      Flex.create();
+      Flex.width('100%');
+      Flex.justifyContent(FlexAlign.SpaceBetween);
+      Flex.alignItems(FlexAlign.Center);
       
-      Divider.create();
-      Divider.pop();
+      Text.create();
+      Text.fontSize('20vp');
+      Text.fontColor('#333333');
+      Text.text("版本");
+      Text.pop();
+      
+      Text.create();
+      Text.fontSize('18vp');
+      Text.fontColor('#00AA00');
+      Text.fontWeight(FontWeight.Bold);
+      Text.text("v" + this.version);
+      Text.pop();
+      
+      Flex.pop();
+      Stack.pop();
       
       this.renderOptionItem(
         '用户协议', 
@@ -762,9 +905,6 @@ struct SettingsPage {
         '📄'
       );
       
-      Divider.create();
-      Divider.pop();
-      
       this.renderOptionItem(
         '隐私政策', 
         '', 
@@ -772,13 +912,19 @@ struct SettingsPage {
         '🔒'
       );
       
-      Divider.create();
-      Divider.pop();
-      
       Button.create();
-      Button.className("reset-button");
+      Button.width('90%');
+      Button.height('80vp');
+      Button.margin({ left: '5%', right: '5%', top: '10vp', bottom: '20vp' });
+      Button.backgroundColor('#00AA00');
+      Button.borderRadius('12vp');
       Button.onClick(this.resetSettings);
-      Button.content("恢复默认设置");
+      Text.create();
+      Text.fontSize('20vp');
+      Text.fontColor('#FFFFFF');
+      Text.fontWeight(FontWeight.Bold);
+      Text.content("恢复默认设置");
+      Text.pop();
       Button.pop();
     });
   }
@@ -808,20 +954,64 @@ struct SettingsPage {
     Dialog.open(this.showClearCacheDialog);
     Dialog.onCancel(() => { this.showClearCacheDialog = false; });
     Dialog.onClose(() => { this.showClearCacheDialog = false; });
-    Stack.create({ className: "dialog-container" });
-    Text.create({ className: "dialog-title" });
+    Stack.create();
+    Stack.width('80%');
+    Stack.height('280vp');
+    Stack.backgroundColor('#FFFFFF');
+    Stack.borderRadius('16vp');
+    Stack.padding({ left: '20vp', right: '20vp', top: '30vp', bottom: '20vp' });
+    Stack.justifyContent(FlexAlign.SpaceBetween);
+    
+    Column.create();
+    Column.alignItems(FlexAlign.Center);
+    
+    Text.create();
+    Text.fontSize('24vp');
+    Text.fontColor('#333333');
+    Text.fontWeight(FontWeight.Bold);
+    Text.margin({ bottom: '20vp' });
     Text.content("清除缓存");
     Text.pop();
-    Text.create({ className: "dialog-content" });
+    
+    Text.create();
+    Text.fontSize('18vp');
+    Text.fontColor('#666666');
+    Text.textAlign(TextAlign.Center);
     Text.content("确定要清除所有缓存吗？这将删除所有离线内容。");
     Text.pop();
-    Flex.create({ className: "dialog-actions" });
-    Button.create({ className: "dialog-button cancel", onClick: () => { this.showClearCacheDialog = false; } });
-    Button.content("取消");
+    
+    Column.pop();
+    
+    Flex.create();
+    Flex.width('100%');
+    Flex.justifyContent(FlexAlign.SpaceBetween);
+    
+    Button.create();
+    Button.width('48%');
+    Button.height('60vp');
+    Button.backgroundColor('#F0F0F0');
+    Button.borderRadius('30vp');
+    Button.onClick(() => { this.showClearCacheDialog = false; });
+    Text.create();
+    Text.fontSize('18vp');
+    Text.fontColor('#333333');
+    Text.content("取消");
+    Text.pop();
     Button.pop();
-    Button.create({ className: "dialog-button confirm", onClick: this.clearCache });
-    Button.content("确定");
+    
+    Button.create();
+    Button.width('48%');
+    Button.height('60vp');
+    Button.backgroundColor('#00AA00');
+    Button.borderRadius('30vp');
+    Button.onClick(this.clearCache);
+    Text.create();
+    Text.fontSize('18vp');
+    Text.fontColor('#FFFFFF');
+    Text.content("确定");
+    Text.pop();
     Button.pop();
+    
     Flex.pop();
     Stack.pop();
     Dialog.pop();
@@ -836,24 +1026,77 @@ struct SettingsPage {
     Dialog.open(this.showAboutDialog);
     Dialog.onCancel(() => { this.showAboutDialog = false; });
     Dialog.onClose(() => { this.showAboutDialog = false; });
-    Stack.create({ className: "dialog-container about-dialog" });
-    Image.create({ src: "https://via.placeholder.com/100x100?text=Logo", className: "app-logo" });
-    Image.pop();
-    Text.create({ className: "app-name" });
+    Stack.create();
+    Stack.width('85%');
+    Stack.height('400vp');
+    Stack.backgroundColor('#FFFFFF');
+    Stack.borderRadius('16vp');
+    Stack.padding({ left: '20vp', right: '20vp', top: '30vp', bottom: '20vp' });
+    Stack.justifyContent(FlexAlign.Center);
+    Stack.alignItems(FlexAlign.Center);
+    
+    Column.create();
+    Column.alignItems(FlexAlign.Center);
+    
+    Stack.create();
+    Stack.width('120vp');
+    Stack.height('120vp');
+    Stack.backgroundColor('#00AA00');
+    Stack.borderRadius('24vp');
+    Stack.justifyContent(FlexAlign.Center);
+    Stack.alignItems(FlexAlign.Center);
+    Text.create();
+    Text.fontSize('60vp');
+    Text.fontColor('#FFFFFF');
+    Text.text('RT');
+    Text.pop();
+    Stack.pop();
+    
+    Text.create();
+    Text.fontSize('28vp');
+    Text.fontColor('#333333');
+    Text.fontWeight(FontWeight.Bold);
+    Text.margin({ top: '20vp' });
     Text.content("RayTV");
     Text.pop();
-    Text.create({ className: "app-version" });
+    
+    Text.create();
+    Text.fontSize('18vp');
+    Text.fontColor('#00AA00');
+    Text.margin({ top: '10vp' });
     Text.content("版本 v" + this.version);
     Text.pop();
-    Text.create({ className: "app-description" });
+    
+    Text.create();
+    Text.fontSize('16vp');
+    Text.fontColor('#666666');
+    Text.textAlign(TextAlign.Center);
+    Text.margin({ top: '20vp', left: '10vp', right: '10vp' });
     Text.content("一款功能强大的媒体播放器应用，为您提供优质的观影体验。");
     Text.pop();
-    Text.create({ className: "copyright" });
+    
+    Text.create();
+    Text.fontSize('14vp');
+    Text.fontColor('#999999');
+    Text.margin({ top: '20vp' });
     Text.content("© 2024 RayTV Team");
     Text.pop();
-    Button.create({ className: "dialog-button close", onClick: () => { this.showAboutDialog = false; } });
-    Button.content("确定");
+    
+    Button.create();
+    Button.width('60%');
+    Button.height('60vp');
+    Button.backgroundColor('#00AA00');
+    Button.borderRadius('30vp');
+    Button.margin({ top: '20vp' });
+    Button.onClick(() => { this.showAboutDialog = false; });
+    Text.create();
+    Text.fontSize('18vp');
+    Text.fontColor('#FFFFFF');
+    Text.content("确定");
+    Text.pop();
     Button.pop();
+    
+    Column.pop();
     Stack.pop();
     Dialog.pop();
   }
@@ -862,12 +1105,26 @@ struct SettingsPage {
    * 组件渲染
    */
   build() {
-    Stack.create({ className: "settings-page" });
+    Stack.create();
+    Stack.width('100%');
+    Stack.height('100%');
+    Stack.backgroundColor('#F5F5F5');
+    
     // 页面头部
     this.renderHeader();
     
     // 设置内容
-    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
+    ScrollView.create();
+    ScrollView.width('100%');
+    ScrollView.height('100%');
+    ScrollView.scrollBar(ScrollBarState.Auto);
+    ScrollView.padding({ top: '10vp', bottom: '30vp' });
+    
+    // 创建设置项网格布局
+    Column.create();
+    Column.width('100%');
+    
+    // 渲染各种设置分组
     this.renderThemeSettings();
     this.renderPlaybackSettings();
     this.renderAdBlockSettings();
@@ -876,8 +1133,13 @@ struct SettingsPage {
     this.renderCacheSettings();
     this.renderNotificationSettings();
     this.renderAboutSettings();
-    Blank.create({ className: "bottom-space" });
+    
+    // 底部空间
+    Blank.create();
+    Blank.height('30vp');
     Blank.pop();
+    
+    Column.pop();
     ScrollView.pop();
     
     // 对话框

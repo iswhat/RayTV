@@ -9,15 +9,25 @@ import common from '@ohos.app.ability.common';
 
 export class HttpService {
   private static instance: HttpService;
-  private httpConfig: Record<string, unknown>;
+  private httpConfig: Record<string, string | number>;
   private adBlockManager: AdBlockManager;
   private context: common.Context | null = null;
 
   private constructor() {
-    this.httpConfig = ConfigService.getInstance().getConfig('network') || {
+    // 初始化默认配置
+    const defaultConfig = {
       timeout: 30,
       retryCount: 3
     };
+    const networkConfig = ConfigService.getInstance().getConfig('network');
+    
+    // 手动合并配置，避免使用对象字面量作为类型
+    this.httpConfig = {
+      timeout: networkConfig?.timeout !== undefined ? networkConfig.timeout as number : defaultConfig.timeout,
+      retryCount: networkConfig?.retryCount !== undefined ? networkConfig.retryCount as number : defaultConfig.retryCount,
+      userAgent: networkConfig?.userAgent as string
+    };
+    
     this.adBlockManager = AdBlockManager.getInstance();
   }
 
@@ -56,10 +66,19 @@ export class HttpService {
    * @param options 请求选项
    */
   public async get<T>(url: string, options?: HttpOptions): Promise<HttpResponse<T>> {
-    return this.request<T>(url, {
-      method: 'GET',
-      ...options
-    });
+    const requestOptions: HttpRequestOptions = {
+      method: 'GET'
+    };
+    
+    // 手动合并选项
+    if (options) {
+      if (options.headers) requestOptions.headers = options.headers;
+      if (options.timeout !== undefined) requestOptions.timeout = options.timeout;
+      if (options.retryCount !== undefined) requestOptions.retryCount = options.retryCount;
+      if (options.responseType) requestOptions.responseType = options.responseType;
+    }
+    
+    return this.request<T>(url, requestOptions);
   }
 
   /**
@@ -69,11 +88,20 @@ export class HttpService {
    * @param options 请求选项
    */
   public async post<T>(url: string, data?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
-    return this.request<T>(url, {
+    const requestOptions: HttpRequestOptions = {
       method: 'POST',
-      data,
-      ...options
-    });
+      data: data
+    };
+    
+    // 手动合并选项
+    if (options) {
+      if (options.headers) requestOptions.headers = options.headers;
+      if (options.timeout !== undefined) requestOptions.timeout = options.timeout;
+      if (options.retryCount !== undefined) requestOptions.retryCount = options.retryCount;
+      if (options.responseType) requestOptions.responseType = options.responseType;
+    }
+    
+    return this.request<T>(url, requestOptions);
   }
 
   /**
@@ -97,7 +125,10 @@ export class HttpService {
         throw new Error(`URL blocked by ad blocker: ${url}`);
       }
 
-      const { method = 'GET', headers = {}, data = null, timeout = this.httpConfig.timeout * 1000 } = options;
+      const method = options.method || 'GET';
+      const headers = options.headers || {};
+      const requestData = options.data || null;
+      const timeout = options.timeout !== undefined ? options.timeout : (this.httpConfig.timeout as number) * 1000;
 
       // 创建HTTP请求对象
       const httpRequest = http.createHttp();
@@ -108,41 +139,55 @@ export class HttpService {
         connectTimeout: timeout,
         readTimeout: timeout,
         header: {
-          'User-Agent': this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
-          'Content-Type': 'application/json',
-          ...headers
+          'User-Agent': (this.httpConfig.userAgent as string) || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+          'Content-Type': 'application/json'
         }
       };
+      
+      // 手动合并headers
+      if (headers) {
+        const headerKeys = Object.keys(headers);
+        for (let i = 0; i < headerKeys.length; i++) {
+          const key = headerKeys[i];
+          requestConfig.header[key] = headers[key];
+        }
+      }
 
       // 添加请求数据
-      if (data) {
+      if (requestData !== null && requestData !== undefined) {
         if (requestConfig.header['Content-Type']?.includes('json')) {
-          requestConfig.extraData = JSON.stringify(data);
+          requestConfig.extraData = JSON.stringify(requestData);
         } else {
-          requestConfig.extraData = data;
+          requestConfig.extraData = requestData;
         }
       }
 
       // 发送请求
-      let response: http.HttpResponse;
+      let response: http.HttpResponse | null = null;
       let retryCount = 0;
       let lastError: Error | null = null;
+      const maxRetryCount = options.retryCount !== undefined ? options.retryCount : (this.httpConfig.retryCount as number);
 
-      while (retryCount <= (options.retryCount || this.httpConfig.retryCount)) {
+      while (retryCount <= maxRetryCount) {
         try {
           response = await httpRequest.request(url, requestConfig);
           break;
         } catch (error) {
-          lastError = error as Error;
+          lastError = error instanceof Error ? error : new Error(String(error));
           retryCount++;
           
-          if (retryCount > (options.retryCount || this.httpConfig.retryCount)) {
+          if (retryCount > maxRetryCount) {
             throw lastError;
           }
           
           // 重试前等待
           await this.sleep(1000 * retryCount);
         }
+      }
+
+      // 确保response有值
+      if (!response) {
+        throw new Error('Failed to get HTTP response');
       }
 
       // 处理响应
@@ -158,13 +203,14 @@ export class HttpService {
 
       // 检查状态码
       if (result.status < 200 || result.status >= 300) {
-        throw new Error(`HTTP Error: ${result.status} - ${url}`);
+        const error = new Error(`HTTP Error: ${result.status} - ${url}`);
+        throw error;
       }
 
       return result;
     } catch (error) {
       console.error(`HTTP request failed: ${url}`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -190,7 +236,8 @@ export class HttpService {
         throw new Error(`URL blocked by ad blocker: ${url}`);
       }
 
-      const { headers = {}, timeout = this.httpConfig.timeout * 1000 } = options || {};
+      const headers = options?.headers || {};
+      const timeout = options?.timeout !== undefined ? options.timeout : (this.httpConfig.timeout as number) * 1000;
       
       // 创建HTTP请求对象
       const httpRequest = http.createHttp();
@@ -201,16 +248,42 @@ export class HttpService {
         connectTimeout: timeout,
         readTimeout: timeout,
         header: {
-          'User-Agent': this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
-          ...headers
+          'User-Agent': (this.httpConfig.userAgent as string) || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
         }
       };
+      
+      // 手动合并headers
+      if (headers) {
+        const headerKeys = Object.keys(headers);
+        for (let i = 0; i < headerKeys.length; i++) {
+          const key = headerKeys[i];
+          requestConfig.header[key] = headers[key];
+        }
+      }
 
+      // 为下载配置创建明确的类型
+      interface DownloadConfig {
+        filePath: string;
+        method: string;
+        connectTimeout: number;
+        readTimeout: number;
+        header: Record<string, string>;
+        extraData?: string | Record<string, string | number | boolean>;
+        expectDataType?: http.HttpDataType;
+      }
+      
       // 发送请求
-      const response = await httpRequest.downloadFile(url, {
-        filePath,
-        ...requestConfig
-      });
+      const downloadConfig: DownloadConfig = {
+        filePath: filePath,
+        method: requestConfig.method,
+        connectTimeout: requestConfig.connectTimeout,
+        readTimeout: requestConfig.readTimeout,
+        header: requestConfig.header,
+        extraData: requestConfig.extraData,
+        expectDataType: requestConfig.expectDataType
+      };
+      
+      const response = await httpRequest.downloadFile(url, downloadConfig);
 
       // 关闭请求对象
       httpRequest.destroy();
@@ -225,7 +298,7 @@ export class HttpService {
       return result;
     } catch (error) {
       console.error(`File download failed: ${url}`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -262,11 +335,11 @@ export interface HttpOptions {
 }
 
 /**
- * HTTP请求配置
- */
+   * HTTP请求配置
+   */
 export interface HttpRequestOptions extends HttpOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  data?: unknown;
+  data?: string | Record<string, string | number | boolean>;
 }
 
 /**

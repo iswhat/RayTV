@@ -37,6 +37,13 @@ export class ParserService {
     retryCount: 2
   };
   
+  // 自定义解析器接口
+  interface CustomParser extends ParserInfo {
+    // 可能的额外属性
+    version?: string;
+    priority?: number;
+  }
+  
   private constructor() {
     // 初始化默认解析器
     this.initializeDefaultParsers();
@@ -68,7 +75,7 @@ export class ParserService {
       Logger.info(ParserService.TAG, `ParserService initialized with ${this.parsers.size} parsers`);
     } catch (error) {
       Logger.error(ParserService.TAG, `Failed to initialize ParserService: ${error}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -117,10 +124,17 @@ export class ParserService {
       }
       
       // 执行解析
+      // 手动合并配置，避免对象展开操作
+      const config: ParserConfig = {
+        enabled: this.defaultConfig.enabled,
+        timeout: this.defaultConfig.timeout,
+        retryCount: this.defaultConfig.retryCount
+      };
+      
       const context: ParserContext = {
         parserId: parser.id,
         sourceUrl,
-        config: { ...this.defaultConfig }
+        config: config
       };
       
       const result = await this.executeParser(context);
@@ -194,7 +208,17 @@ export class ParserService {
   public updateParserConfig(parserId: string, config: Partial<ParserInfo>): void {
     const parser = this.parsers.get(parserId);
     if (parser) {
-      this.parsers.set(parserId, { ...parser, ...config });
+      // 手动合并解析器配置，避免对象展开操作
+      const updatedParser: ParserInfo = {
+        id: parser.id,
+        name: parser.name,
+        description: config.description !== undefined ? config.description : parser.description,
+        type: config.type !== undefined ? config.type : parser.type,
+        url: config.url !== undefined ? config.url : parser.url,
+        enabled: config.enabled !== undefined ? config.enabled : parser.enabled
+      };
+      
+      this.parsers.set(parserId, updatedParser);
       Logger.info(ParserService.TAG, `Updated parser config: ${parserId}`);
     }
   }
@@ -246,8 +270,17 @@ export class ParserService {
       // 从配置服务加载解析器配置
       const parserConfig = await configService.getConfig('parserConfig', {});
       
-      if (parserConfig) {
-        this.defaultConfig = { ...this.defaultConfig, ...parserConfig };
+      if (parserConfig && typeof parserConfig === 'object') {
+        // 手动合并默认配置，避免对象展开操作
+        if (parserConfig.enabled !== undefined) {
+          this.defaultConfig.enabled = parserConfig.enabled as boolean;
+        }
+        if (parserConfig.timeout !== undefined) {
+          this.defaultConfig.timeout = parserConfig.timeout as number;
+        }
+        if (parserConfig.retryCount !== undefined) {
+          this.defaultConfig.retryCount = parserConfig.retryCount as number;
+        }
       }
     } catch (error) {
       Logger.warn(ParserService.TAG, `Failed to load parser config: ${error}`);
@@ -260,18 +293,26 @@ export class ParserService {
   private async loadCustomParsers(): Promise<void> {
     try {
       // 从配置服务加载自定义解析器
-      const customParsers = await configService.getConfig('customParsers', []);
+    const customParsers: CustomParser[] = await configService.getConfig('customParsers', []);
       
       if (Array.isArray(customParsers)) {
-        customParsers.forEach(parser => {
+        for (let i = 0; i < customParsers.length; i++) {
+          const parser = customParsers[i];
           try {
-            if (parser && parser.id && parser.name) {
-              this.addParser(parser as ParserInfo);
+            if (parser && typeof parser === 'object' && parser.id && parser.name) {
+              this.addParser({
+                id: parser.id,
+                name: parser.name,
+                description: parser.description,
+                type: parser.type,
+                url: parser.url,
+                enabled: parser.enabled !== undefined ? parser.enabled : true
+              } as ParserInfo);
             }
           } catch (error) {
             Logger.warn(ParserService.TAG, `Failed to add custom parser: ${error}`);
           }
-        });
+        }
       }
     } catch (error) {
       Logger.warn(ParserService.TAG, `Failed to load custom parsers: ${error}`);
@@ -328,7 +369,7 @@ export class ParserService {
         Logger.warn(ParserService.TAG, `Parse attempt ${attempts} failed: ${error}`);
         
         if (attempts > context.config.retryCount!) {
-          throw error;
+          throw error instanceof Error ? error : new Error(String(error));
         }
         
         // 指数退避重试

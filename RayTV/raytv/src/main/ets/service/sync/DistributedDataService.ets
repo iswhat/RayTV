@@ -2,9 +2,10 @@
 // 基于HarmonyOS分布式能力实现多设备数据同步
 
 import Logger from '../../common/util/Logger';
-import distributedData from '@ohos.data.distributedData';
+import distributedKVStore from '@ohos.data.distributedKVStore';
 import { BusinessError } from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
+import common from '@ohos.app.ability.common';
 
 // 常量定义
 const TAG = 'DistributedDataService';
@@ -74,8 +75,8 @@ type DataChangeListener = (key: string, data: any, deviceId: string) => void;
 
 export default class DistributedDataService {
   static instance: DistributedDataService;
-  kvManager: distributedData.KVManager | null = null;
-  kvStore: distributedData.SingleKVStore | null = null;
+  kvManager: distributedKVStore.KVManager | null = null;
+  kvStore: distributedKVStore.SingleKVStore | null = null;
   configService: ConfigService;
   syncConfig: SyncConfig = DEFAULT_SYNC_CONFIG;
   syncState: SyncState = { status: SyncStatus.IDLE };
@@ -83,6 +84,7 @@ export default class DistributedDataService {
   syncTimerId: number | null = null;
   deviceIds: string[] = [];
   isInitialized: boolean = false;
+  private context: common.Context | null = null;
 
   /**
    * 获取单例实例
@@ -104,36 +106,51 @@ export default class DistributedDataService {
    * 初始化分布式数据服务
    * @param context 应用上下文
    */
-  async initialize(context: Context): Promise<void> {
+  async initialize(context: common.Context): Promise<void> {
     if (this.isInitialized) {
       Logger.info(TAG, 'Distributed data service already initialized');
       return;
     }
 
+    this.context = context;
+
     try {
       Logger.info(TAG, 'Initializing distributed data service...');
 
       // 创建KVManager
-      this.kvManager = distributedData.createKVManager({
+      const managerConfig: distributedKVStore.KVManagerConfig = {
         context: context,
         bundleName: 'com.example.raytv'
-      });
+      };
+      
+      try {
+        this.kvManager = await distributedKVStore.createKVManager(managerConfig);
+      } catch (error) {
+        Logger.error(TAG, `Failed to create KVManager: ${JSON.stringify(error)}`);
+        throw new Error(`KVManager creation failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
 
       if (!this.kvManager) {
         throw new Error('Failed to create KVManager instance');
       }
 
       // 获取KVStore
-      const options: distributedData.Options = {
+      const options: distributedKVStore.Options = {
         createIfMissing: true,
         encrypt: false,
         backup: false,
         autoSync: true,
-        kvStoreType: distributedData.KVStoreType.SINGLE_VERSION,
-        securityLevel: distributedData.SecurityLevel.S1
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
       };
 
-      this.kvStore = await this.kvManager.getKVStore<distributedData.SingleKVStore>(STORE_ID, options);
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options);
+      } catch (error) {
+        Logger.error(TAG, `Failed to get KVStore: ${JSON.stringify(error)}`);
+        throw new Error(`KVStore initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      
       if (!this.kvStore) {
         throw new Error('Failed to get KVStore instance');
       }
@@ -155,7 +172,7 @@ export default class DistributedDataService {
       this.isInitialized = true;
       Logger.info(TAG, 'Distributed data service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize distributed data service: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to initialize distributed data service: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -170,7 +187,7 @@ export default class DistributedDataService {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load sync config: ${error}`);
+      Logger.error(TAG, `Failed to load sync config: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -189,7 +206,7 @@ export default class DistributedDataService {
         this.stopAutoSync();
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to save sync config: ${error}`);
+      Logger.error(TAG, `Failed to save sync config: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -210,34 +227,52 @@ export default class DistributedDataService {
     }
 
     try {
-      await this.kvStore.on('dataChange', distributedData.SubscribeType.SUBSCRIBE_TYPE_ALL, (data) => {
-        Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
-        
-        if (data && data.insertData && data.insertData.length > 0) {
-          for (const entry of data.insertData) {
-            const key = entry.key;
-            const deviceId = entry.deviceId;
-            
-            // 获取数据并通知监听器
-            this.kvStore?.get(key).then((value) => {
-              if (this.dataListeners.has(key)) {
-                const listeners = this.dataListeners.get(key)!;
-                for (const listener of listeners) {
-                  try {
-                    listener(key, value, deviceId);
-                  } catch (error) {
-                    Logger.error(TAG, `Error in data listener: ${error}`);
-                  }
+      const subscriptionCallback = async (data: distributedKVStore.SubscribeResult) => {
+        try {
+          Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
+          
+          if (data && data.insertEntries && data.insertEntries.length > 0) {
+            for (const entry of data.insertEntries) {
+              const key = entry.key;
+              const deviceId = entry.deviceId || 'local';
+              
+              try {
+                // 获取数据并通知监听器
+                const value = await this.kvStore?.get(key);
+                if (value && this.dataListeners.size > 0) {
+                  // 查找所有匹配的监听器
+                  this.notifyRelevantListeners(key, value, deviceId);
                 }
+              } catch (error) {
+                Logger.error(TAG, `Failed to process changed data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
               }
-            }).catch(error => {
-              Logger.error(TAG, `Failed to get changed data: ${error}`);
-            });
+            }
+          }
+        } catch (error) {
+          Logger.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      };
+      
+      await this.kvStore.on('dataChange', distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, subscriptionCallback);
+    } catch (error) {
+      Logger.error(TAG, `Failed to register data change listener: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * 通知相关的监听器
+   */
+  private notifyRelevantListeners(key: string, value: any, deviceId: string): void {
+    for (const [prefix, listeners] of this.dataListeners.entries()) {
+      if (key.startsWith(prefix)) {
+        for (const listener of listeners) {
+          try {
+            listener(key, value, deviceId);
+          } catch (error) {
+            Logger.error(TAG, `Error in data listener for prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
-      });
-    } catch (error) {
-      Logger.error(TAG, `Failed to register data change listener: ${error}`);
+      }
     }
   }
 
@@ -271,6 +306,10 @@ export default class DistributedDataService {
       
       if (index > -1) {
         listeners.splice(index, 1);
+        // 如果没有监听器了，移除这个前缀
+        if (listeners.length === 0) {
+          this.dataListeners.delete(keyPrefix);
+        }
       }
     }
   }
@@ -298,7 +337,7 @@ export default class DistributedDataService {
       await this.kvStore.put(fullKey, syncData);
       Logger.debug(TAG, `Saved sync data: ${fullKey}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to save sync data: ${error}`);
+      Logger.error(TAG, `Failed to save sync data: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -317,14 +356,14 @@ export default class DistributedDataService {
       const fullKey = `${dataType}_${key}`;
       const value = await this.kvStore.get(fullKey);
 
-      if (value) {
+      if (value && typeof value === 'object' && 'data' in value) {
         Logger.debug(TAG, `Retrieved sync data: ${fullKey}`);
         return value.data;
       }
       
       return null;
     } catch (error) {
-      Logger.error(TAG, `Failed to get sync data: ${error}`);
+      Logger.error(TAG, `Failed to get sync data: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
@@ -344,7 +383,7 @@ export default class DistributedDataService {
       await this.kvStore.delete(fullKey);
       Logger.debug(TAG, `Deleted sync data: ${fullKey}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to delete sync data: ${error}`);
+      Logger.error(TAG, `Failed to delete sync data: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -355,14 +394,17 @@ export default class DistributedDataService {
   private startAutoSync(): void {
     this.stopAutoSync(); // 先停止现有的定时器
     
-    this.syncTimerId = setInterval(async () => {
-      try {
-        await this.synchronizeData();
-      } catch (error) {
-        Logger.error(TAG, `Auto sync failed: ${error}`);
-      }
-    }, this.syncConfig.syncInterval * 1000);
-    
+    try {
+      this.syncTimerId = setInterval(async () => {
+        try {
+          await this.synchronizeData();
+        } catch (error) {
+          Logger.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }, this.syncConfig.syncInterval * 1000);
+    } catch (error) {
+      Logger.error(TAG, `Failed to start auto sync: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
@@ -410,10 +452,10 @@ export default class DistributedDataService {
       
       Logger.info(TAG, 'Data synchronization completed successfully');
     } catch (error) {
-      Logger.error(TAG, `Data synchronization failed: ${error}`);
+      Logger.error(TAG, `Data synchronization failed: ${error instanceof Error ? error.message : String(error)}`);
       this.syncState = {
         status: SyncStatus.FAILED,
-        error: String(error),
+        error: error instanceof Error ? error.message : String(error),
       };
       throw error;
     }
@@ -429,10 +471,10 @@ export default class DistributedDataService {
       }
       
       const deviceInfoList = await this.kvManager.getConnectedDevicesInfo();
-      this.deviceIds = deviceInfoList.map(device => device.deviceId);
+      this.deviceIds = deviceInfoList.map(device => device.deviceId).filter(id => id);
       return this.deviceIds;
     } catch (error) {
-      Logger.error(TAG, `Failed to get available devices: ${error}`);
+      Logger.error(TAG, `Failed to get available devices: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -447,9 +489,9 @@ export default class DistributedDataService {
       }
       
       const deviceInfo = await this.kvManager.getLocalDeviceInfo();
-      return deviceInfo.deviceId;
+      return deviceInfo?.deviceId || 'unknown';
     } catch (error) {
-      Logger.error(TAG, `Failed to get local device ID: ${error}`);
+      Logger.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error)}`);
       return 'unknown';
     }
   }
@@ -471,15 +513,20 @@ export default class DistributedDataService {
       Logger.debug(TAG, `Found ${keys.length} keys for data type ${dataType}`);
 
       for (const fullKey of keys) {
-        // 获取本地数据
-        const localData = await this.kvStore.get(fullKey);
-        if (!localData) continue;
-
-        // 数据会自动通过分布式同步到其他设备
-        Logger.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
+        try {
+          // 获取本地数据
+          const localData = await this.kvStore.get(fullKey);
+          if (localData) {
+            Logger.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
+          }
+        } catch (error) {
+          Logger.error(TAG, `Error processing key ${fullKey}: ${error instanceof Error ? error.message : String(error)}`);
+          // 继续处理下一个键，不中断整个同步流程
+          continue;
+        }
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error}`);
+      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -493,17 +540,21 @@ export default class DistributedDataService {
     }
 
     try {
-      const allKeys = await this.kvStore.getEntries('');
+      const allEntries = await this.kvStore.getEntries('');
       const keys: string[] = [];
-      for (let i = 0; i < allKeys.length; i++) {
-        const key = allKeys[i].key;
-        if (key.startsWith(prefix)) {
-          keys.push(key);
+      
+      if (Array.isArray(allEntries)) {
+        for (let i = 0; i < allEntries.length; i++) {
+          const entry = allEntries[i];
+          if (entry && entry.key && entry.key.startsWith(prefix)) {
+            keys.push(entry.key);
+          }
         }
       }
+      
       return keys;
     } catch (error) {
-      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}`);
+      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -512,18 +563,25 @@ export default class DistributedDataService {
    * 处理同步冲突
    */
   private async resolveConflict(localData: any, remoteData: any): Promise<any> {
-    switch (this.syncConfig.conflictStrategy) {
-      case ConflictResolutionStrategy.LOCAL_WIN:
-        return localData;
-      case ConflictResolutionStrategy.REMOTE_WIN:
-        return remoteData;
-      case ConflictResolutionStrategy.LATEST_WIN:
-        return localData.timestamp >= remoteData.timestamp ? localData : remoteData;
-      case ConflictResolutionStrategy.MERGE:
-        // TODO: 实现合并策略
-        return await this.mergeData(localData, remoteData);
-      default:
-        return localData;
+    try {
+      switch (this.syncConfig.conflictStrategy) {
+        case ConflictResolutionStrategy.LOCAL_WIN:
+          return localData;
+        case ConflictResolutionStrategy.REMOTE_WIN:
+          return remoteData;
+        case ConflictResolutionStrategy.LATEST_WIN:
+          const localTime = localData?.timestamp || 0;
+          const remoteTime = remoteData?.timestamp || 0;
+          return localTime >= remoteTime ? localData : remoteData;
+        case ConflictResolutionStrategy.MERGE:
+          // 实现合并策略
+          return await this.mergeData(localData, remoteData);
+        default:
+          return localData;
+      }
+    } catch (error) {
+      Logger.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
+      return localData; // 出错时默认保留本地数据
     }
   }
 
@@ -531,90 +589,97 @@ export default class DistributedDataService {
    * 合并数据（根据不同数据类型实现智能合并策略）
    */
   private async mergeData(localData: any, remoteData: any): Promise<any> {
-    // 确保输入是对象
-    if (typeof localData !== 'object' || localData === null) {
-      return remoteData;
-    }
-    if (typeof remoteData !== 'object' || remoteData === null) {
-      return localData;
-    }
+    try {
+      // 确保输入是对象
+      if (typeof localData !== 'object' || localData === null) {
+        return remoteData;
+      }
+      if (typeof remoteData !== 'object' || remoteData === null) {
+        return localData;
+      }
 
-    // 创建合并结果对象
-    const merged = { ...localData };
-    
-    // 根据数据类型实现不同的合并策略
-    for (const key in remoteData) {
-      if (remoteData.hasOwnProperty(key)) {
-        // 跳过时间戳和设备ID，这些不应被合并
-        if (key === 'timestamp' || key === 'deviceId') {
-          continue;
-        }
+      // 创建合并结果对象
+      const merged = { ...localData };
+      
+      // 根据数据类型实现不同的合并策略
+      for (const key in remoteData) {
+        if (remoteData.hasOwnProperty(key)) {
+          // 跳过时间戳和设备ID，这些不应被合并
+          if (key === 'timestamp' || key === 'deviceId') {
+            continue;
+          }
 
-        const keyPrefix = key.split('_')[0];
-        
-        switch (keyPrefix) {
-          case SyncDataType.HISTORY:
-            // 历史记录合并：保留最新的观看记录
-            if (remoteData[key] && localData[key]) {
-              merged[key] = {
-                ...remoteData[key],
-                // 保留本地数据中可能存在的额外字段
-                ...localData[key],
-                // 但使用最新的时间戳
-                lastWatched: Math.max(remoteData[key].lastWatched || 0, localData[key].lastWatched || 0)
-              };
-            } else {
-              merged[key] = remoteData[key] || localData[key];
-            }
-            break;
-            
-          case SyncDataType.FAVORITES:
-            // 收藏合并：合并两个列表
-            if (Array.isArray(localData[key]) && Array.isArray(remoteData[key])) {
-              // 创建一个集合以避免重复
-              const mergedSet = new Set([...localData[key], ...remoteData[key]]);
-              merged[key] = Array.from(mergedSet);
-            } else {
-              merged[key] = remoteData[key] || localData[key];
-            }
-            break;
-            
-          case SyncDataType.PLAYBACK_PROGRESS:
-            // 播放进度合并：保留最新的进度
-            if (remoteData[key] && localData[key]) {
-              const remoteProgress = remoteData[key].progress || 0;
-              const localProgress = localData[key].progress || 0;
-              
-              if (remoteProgress > localProgress) {
-                merged[key] = remoteData[key];
+          const keyPrefix = key.split('_')[0];
+          
+          switch (keyPrefix) {
+            case SyncDataType.HISTORY:
+              // 历史记录合并：保留最新的观看记录
+              if (remoteData[key] && localData[key]) {
+                merged[key] = {
+                  ...remoteData[key],
+                  // 保留本地数据中可能存在的额外字段
+                  ...localData[key],
+                  // 但使用最新的时间戳
+                  lastWatched: Math.max(
+                    remoteData[key].lastWatched || 0, 
+                    localData[key].lastWatched || 0
+                  )
+                };
               } else {
-                merged[key] = localData[key];
+                merged[key] = remoteData[key] || localData[key];
               }
-            } else {
-              merged[key] = remoteData[key] || localData[key];
-            }
-            break;
-            
-          default:
-            // 默认策略：如果两个都是对象，递归合并
-            if (typeof localData[key] === 'object' && 
-                typeof remoteData[key] === 'object' && 
-                !Array.isArray(localData[key]) && 
-                !Array.isArray(remoteData[key])) {
-              merged[key] = await this.mergeData(localData[key], remoteData[key]);
-            } else {
-              // 对于数组和基本类型，使用远程数据
-              merged[key] = remoteData[key];
-            }
+              break;
+              
+            case SyncDataType.FAVORITES:
+              // 收藏合并：合并两个列表
+              if (Array.isArray(localData[key]) && Array.isArray(remoteData[key])) {
+                // 创建一个集合以避免重复
+                const mergedSet = new Set([...localData[key], ...remoteData[key]]);
+                merged[key] = Array.from(mergedSet);
+              } else {
+                merged[key] = remoteData[key] || localData[key];
+              }
+              break;
+              
+            case SyncDataType.PLAYBACK_PROGRESS:
+              // 播放进度合并：保留最新的进度
+              if (remoteData[key] && localData[key]) {
+                const remoteProgress = remoteData[key].progress || 0;
+                const localProgress = localData[key].progress || 0;
+                
+                if (remoteProgress > localProgress) {
+                  merged[key] = remoteData[key];
+                } else {
+                  merged[key] = localData[key];
+                }
+              } else {
+                merged[key] = remoteData[key] || localData[key];
+              }
+              break;
+              
+            default:
+              // 默认策略：如果两个都是对象，递归合并
+              if (typeof localData[key] === 'object' && 
+                  typeof remoteData[key] === 'object' && 
+                  !Array.isArray(localData[key]) && 
+                  !Array.isArray(remoteData[key])) {
+                merged[key] = await this.mergeData(localData[key], remoteData[key]);
+              } else {
+                // 对于数组和基本类型，使用远程数据
+                merged[key] = remoteData[key];
+              }
         }
       }
+      
+      // 更新合并后的时间戳和设备ID
+      merged.timestamp = Date.now();
+      merged.deviceId = await this.getLocalDeviceId();
+      
+      return merged;
+    } catch (error) {
+      Logger.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
+      return localData; // 出错时默认保留本地数据
     }
-    
-    // 更新合并后的时间戳和设备ID
-    merged.timestamp = Date.now();
-    merged.deviceId = await this.getLocalDeviceId();
-    
-    return merged;
   }
 
   /**
@@ -628,8 +693,17 @@ export default class DistributedDataService {
    * 关闭分布式数据服务
    */
   close(): void {
-    this.stopAutoSync();
-    // KVStore会由系统自动管理生命周期，不需要手动关闭
-    Logger.info(TAG, 'Distributed data service closed');
+    try {
+      this.stopAutoSync();
+      // 清理监听器
+      this.dataListeners.clear();
+      // KVStore会由系统自动管理生命周期，但可以进行明确的资源释放
+      this.kvStore = null;
+      this.kvManager = null;
+      this.isInitialized = false;
+      Logger.info(TAG, 'Distributed data service closed and resources released');
+    } catch (error) {
+      Logger.error(TAG, `Error closing distributed data service: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }

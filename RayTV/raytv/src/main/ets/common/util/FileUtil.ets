@@ -1,6 +1,7 @@
 // FileUtil - 文件操作工具类
 import fs from '@ohos.file.fs';
 import { Logger } from './Logger';
+import { safeStringify } from './JsonUtil';
 
 const TAG = 'FileUtil';
 
@@ -12,20 +13,26 @@ export default class FileUtil {
   /**
    * 读取文件内容
    * @param filePath 文件路径
-   * @returns 文件内容
+   * @returns 文件内容字符串
    */
   public static async readFile(filePath: string): Promise<string> {
     try {
       const file = await fs.open(filePath, fs.OpenMode.READ_ONLY);
-      const fileStat = await fs.stat(filePath);
-      const buf = new ArrayBuffer(fileStat.size);
-      await fs.read(file.fd, buf);
+      const fileInfo = await fs.stat(filePath);
+      const buffer = new ArrayBuffer(fileInfo.size);
+      await fs.read(file.fd, buffer);
       await fs.close(file.fd);
-      return String.fromCharCode(...new Uint8Array(buf));
+      // 修复any类型问题，使用显式的类型转换
+      const uint8Array = new Uint8Array(buffer);
+      let result = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        result += String.fromCharCode(uint8Array[i]);
+      }
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to read file ${filePath}: ${errorMessage}`);
-      throw new Error(`Failed to read file ${filePath}: ${errorMessage}`);
+      Logger.getInstance().error(`${TAG} - Failed to read file: ${filePath}, error: ${errorMessage}`);
+      throw new Error(`Failed to read file: ${filePath}. ${errorMessage}`);
     }
   }
 
@@ -37,37 +44,56 @@ export default class FileUtil {
   public static async writeFile(filePath: string, content: string): Promise<void> {
     try {
       // 确保目录存在
-      await FileUtil.ensureDirExists(FileUtil.getParentPath(filePath));
+      await FileUtil.ensureDirExists(filePath.substring(0, filePath.lastIndexOf('/')));
       
-      const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
-      const buf = new TextEncoder().encode(content);
-      await fs.write(file.fd, buf);
+      const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNCATE);
+      // 修复any类型问题，使用显式的类型转换
+      const buffer = new ArrayBuffer(content.length);
+      const view = new Uint8Array(buffer);
+      for (let i = 0; i < content.length; i++) {
+        view[i] = content.charCodeAt(i);
+      }
+      await fs.write(file.fd, buffer);
       await fs.close(file.fd);
+      Logger.getInstance().info(`${TAG} - File written successfully: ${filePath}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to write file ${filePath}: ${errorMessage}`);
-      throw new Error(`Failed to write file ${filePath}: ${errorMessage}`);
+      Logger.getInstance().error(`${TAG} - Failed to write file: ${filePath}, error: ${errorMessage}`);
+      throw new Error(`Failed to write file: ${filePath}. ${errorMessage}`);
     }
   }
 
   /**
    * 追加内容到文件
    * @param filePath 文件路径
-   * @param content 追加内容
+   * @param content 追加的内容
    */
   public static async appendFile(filePath: string, content: string): Promise<void> {
     try {
       // 确保目录存在
-      await FileUtil.ensureDirExists(FileUtil.getParentPath(filePath));
+      await FileUtil.ensureDirExists(filePath.substring(0, filePath.lastIndexOf('/')));
       
-      const file = await fs.open(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.APPEND);
-      const buf = new TextEncoder().encode(content);
-      await fs.write(file.fd, buf);
+      // 检查文件是否存在，如果不存在则创建
+      if (!(await FileUtil.exists(filePath))) {
+        await FileUtil.writeFile(filePath, content);
+        return;
+      }
+      
+      const file = await fs.open(filePath, fs.OpenMode.READ_WRITE);
+      await fs.seek(file.fd, { offset: 0, whence: fs.SeekMode.SEEK_END });
+      // 将字符串转换为ArrayBuffer
+      const buffer = new ArrayBuffer(content.length);
+      const view = new Uint8Array(buffer);
+      for (let i = 0; i < content.length; i++) {
+        view[i] = content.charCodeAt(i);
+      }
+      await fs.write(file.fd, buffer);
       await fs.close(file.fd);
+      Logger.getInstance().info(`${TAG} - Content appended to file: ${filePath}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to append file ${filePath}: ${errorMessage}`);
-      throw new Error(`Failed to append file ${filePath}: ${errorMessage}`);
+      Logger.getInstance().error(`${TAG} - Failed to append to file: ${filePath}, error: ${errorMessage}`);
+      throw new Error(`Failed to append to file: ${filePath}. ${errorMessage}`);
     }
   }
 
@@ -79,11 +105,14 @@ export default class FileUtil {
     try {
       if (await FileUtil.exists(filePath)) {
         await fs.unlink(filePath);
+        Logger.getInstance().info(`${TAG} - File deleted successfully: ${filePath}`);
+      } else {
+        Logger.getInstance().warn(`${TAG} - File not found: ${filePath}`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to delete file ${filePath}: ${errorMessage}`);
-      throw new Error(`Failed to delete file ${filePath}: ${errorMessage}`);
+      Logger.getInstance().error(`${TAG} - Failed to delete file: ${filePath}, error: ${errorMessage}`);
+      throw new Error(`Failed to delete file: ${filePath}. ${errorMessage}`);
     }
   }
 

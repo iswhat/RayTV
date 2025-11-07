@@ -48,20 +48,31 @@ export interface PaginationInfo {
 }
 
 /**
- * 错误详情接口
- */
+   * 错误详情接口
+   */
 export interface ErrorDetail {
   field?: string;      // 字段名称（用于验证错误）
   message: string;     // 错误消息
   code?: string;       // 错误代码
-  value?: unknown;     // 错误值
+  value?: any;     // 错误值
 }
 
 /**
  * API响应类
  * 用于标准化API响应结构
  */
-export default class ApiResponse<T = unknown> {
+// API响应参数接口
+export interface ApiResponseParams<T = unknown> {
+  code: ResponseCode;
+  message: string;
+  data?: T;
+  errors?: ErrorDetail[];
+  pagination?: PaginationInfo;
+  requestId?: string;
+  trace?: string;
+}
+
+export default class ApiResponse<T = any> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据
@@ -74,15 +85,7 @@ export default class ApiResponse<T = unknown> {
   /**
    * 构造函数
    */
-  constructor(params: {
-    code: ResponseCode;
-    message: string;
-    data?: T;
-    errors?: ErrorDetail[];
-    pagination?: PaginationInfo;
-    requestId?: string;
-    trace?: string;
-  }) {
+  constructor(params: ApiResponseParams<T>) {
     this.code = params.code;
     this.message = params.message;
     this.data = params.data;
@@ -208,7 +211,7 @@ export default class ApiResponse<T = unknown> {
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): Record<string, unknown> {
+  toObject(): ApiResponseParams<T> {
     return {
       code: this.code,
       message: this.message,
@@ -225,16 +228,17 @@ export default class ApiResponse<T = unknown> {
    * 从对象创建实例
    * @param obj 对象数据
    */
-  static fromObject<T = unknown>(obj: Record<string, unknown>): ApiResponse<T> {
-    return new ApiResponse<T>({
-      code: obj.code || ResponseCode.SUCCESS,
-      message: obj.message || 'Unknown response',
+  static fromObject<T = any>(obj: Record<string, any>): ApiResponse<T> {
+    const params: ApiResponseParams<T> = {
+      code: typeof obj.code === 'number' ? obj.code : ResponseCode.SUCCESS,
+      message: typeof obj.message === 'string' ? obj.message : 'Unknown response',
       data: obj.data,
-      errors: obj.errors,
-      pagination: obj.pagination,
-      requestId: obj.requestId,
-      trace: obj.trace
-    });
+      errors: Array.isArray(obj.errors) ? obj.errors : undefined,
+      pagination: typeof obj.pagination === 'object' && obj.pagination !== null ? obj.pagination : undefined,
+      requestId: typeof obj.requestId === 'string' ? obj.requestId : undefined,
+      trace: typeof obj.trace === 'string' ? obj.trace : undefined
+    };
+    return new ApiResponse<T>(params);
   }
 
   // ========== 静态工厂方法 ==========
@@ -242,7 +246,7 @@ export default class ApiResponse<T = unknown> {
   /**
    * 创建成功响应
    */
-  static success<T = unknown>(data?: T, message: string = 'Success'): ApiResponse<T> {
+  static success<T = any>(data?: T, message: string = 'Success'): ApiResponse<T> {
     return new ApiResponse<T>({
       code: ResponseCode.SUCCESS,
       message,
