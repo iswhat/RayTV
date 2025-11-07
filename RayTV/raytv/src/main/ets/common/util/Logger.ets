@@ -291,9 +291,9 @@ class Logger {
   public static exception(tag: string, error: string | Error, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
     if (error instanceof Error) {
-      instance.logException(error, `[${tag}] ${error.message}`, extra);
+      instance.logException(error, `[${tag}] ${error.message}`);
     } else {
-      instance.error(`[${tag}] ${String(error)}`, undefined, extra);
+      instance.error(`[${tag}] ${String(error)}`);
     }
   }
 
@@ -405,13 +405,8 @@ class Logger {
    */
   public fatal(message: string, error?: Error, extra?: LoggerExtraData): void {
     if (this.shouldLog(LogLevel.FATAL)) {
-      let stackTrace = '';
-      if (error && error.stack) {
-        stackTrace = error.stack;
-      } else if (this.config.enableStackTrace) {
-        stackTrace = this.getStackTrace();
-      }
-      this.log(LogLevel.FATAL, message, extra, stackTrace);
+      // 简化实现，只传递必要的参数
+      this.log(LogLevel.FATAL, message, extra);
     }
   }
 
@@ -433,9 +428,8 @@ class Logger {
    */
   public logException(error: Error, message?: string): void {
     const errorMessage = error.message || 'Unknown error';
-    const stackTrace = error.stack || this.getStackTrace();
     const finalMessage = message ? `${message}: ${errorMessage}` : errorMessage;
-    this.error(finalMessage, undefined, { stackTrace });
+    this.error(finalMessage);
   }
 
   /**

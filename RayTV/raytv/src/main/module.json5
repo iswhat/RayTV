@@ -39,7 +39,7 @@
       {
         "type": "backup",
         "name": "raytvbackupability.RayTVBackupAbility",
-        "srcEntrance": "./ets/raytvbackupability/RayTVBackupAbility.ts",
+        "srcEntrance": "./ets/raytvbackupability/RayTVBackupAbility.ets",
         "exported": true,
         "metadata": [
           {

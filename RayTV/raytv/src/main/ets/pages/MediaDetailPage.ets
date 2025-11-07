@@ -294,7 +294,7 @@ struct MediaDetailPage {
         
         // 如果有播放源且选择了剧集，跳转到播放页面
         if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
-          Router.push({
+          Router.pushUrl({
             url: 'pages/PlaybackPage',
             params: {
               mediaId: this.mediaId,
@@ -475,7 +475,7 @@ struct MediaDetailPage {
     playSource: PlaySource,
     startPosition: number
   ): void {
-    Router.push({
+    Router.pushUrl({
       url: 'pages/PlaybackPage',
       params: {
         mediaId: this.mediaId,
@@ -529,7 +529,7 @@ struct MediaDetailPage {
    */
   private handleRelatedMediaClick(media: MediaItem): void {
     // 跳转到对应媒体详情页
-    Router.push({
+    Router.pushUrl({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,

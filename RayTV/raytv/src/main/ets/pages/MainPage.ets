@@ -54,23 +54,23 @@ struct MainPage {
   
   // 跳转到分类页面
   private navigateToCategory() {
-    Router.push({ url: 'pages/CategoryPage' });
+    Router.pushUrl({ url: 'pages/CategoryPage' });
   }
   
   // 跳转到搜索页面
   private navigateToSearch() {
-    Router.push({ url: 'pages/SearchPage' });
+    Router.pushUrl({ url: 'pages/SearchPage' });
   }
   
   // 跳转到设置页面
   private navigateToSettings() {
-    Router.push({ url: 'pages/SettingsPage' });
+    Router.pushUrl({ url: 'pages/SettingsPage' });
   }
   
   // 渲染媒体项
   @Builder
   renderMediaItem(media: any) {
-    ListItem.create({ onClick: () => Router.push({ url: `pages/MediaDetailPage?id=${media.id}` }) });
+    ListItem.create({ onClick: () => Router.pushUrl({ url: `pages/MediaDetailPage?id=${media.id}` }) });
     Column.create({ padding: 10 });
     Image.create({
       src: media.cover,

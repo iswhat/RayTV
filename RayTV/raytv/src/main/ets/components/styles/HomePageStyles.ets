@@ -3,8 +3,153 @@
 
 import { Color, FlexAlign, ImageFit } from '@ohos.arkui';
 
+// 定义样式对象类型
+export interface HomePageStylesType {
+  homePage: {
+    flexDirection: string;
+    backgroundColor: string;
+  };
+  greenHeader: {
+    backgroundColor: string;
+    paddingTop: number;
+    paddingBottom: number;
+    minHeight: number;
+  };
+  navBar: {
+    flexDirection: string;
+    justifyContent: number;
+    paddingHorizontal: number;
+    marginBottom: number;
+    flexWrap: boolean;
+  };
+  navItem: {
+    fontSize: number;
+    color: string;
+    paddingHorizontal: number;
+    paddingVertical: number;
+    borderRadius: number;
+    backgroundColor: string;
+    marginHorizontal: number;
+    marginBottom: number;
+  };
+  navItemActive: {
+    color: string;
+    backgroundColor: string;
+    fontWeight: number;
+  };
+  functionButtons: {
+    flexDirection: string;
+    justifyContent: number;
+    paddingHorizontal: number;
+    marginBottom: number;
+  };
+  functionButton: {
+    fontSize: number;
+    color: string;
+    backgroundColor: string;
+    paddingHorizontal: number;
+    paddingVertical: number;
+    borderRadius: number;
+    marginLeft: number;
+    height: number;
+    minWidth: number;
+  };
+  timeDisplay: {
+    fontSize: number;
+    color: string;
+    textAlign: string;
+    paddingRight: number;
+    marginBottom: number;
+  };
+  contentScroll: {
+    flex: number;
+    padding: number;
+  };
+  mainMediaGrid: {
+    columnGap: number;
+    rowGap: number;
+    width: string;
+  };
+  mediaCard: {
+    flexDirection: string;
+    width: string;
+    aspectRatio: number;
+  };
+  mediaCover: {
+    width: string;
+    aspectRatio: number;
+    borderRadius: number;
+    objectFit: number;
+    backgroundColor: string;
+  };
+  mediaInfo: {
+    marginTop: number;
+    alignItems: number;
+  };
+  mediaTitle: {
+    fontSize: number;
+    color: string;
+    fontWeight: number;
+    numberOfLines: number;
+    height: number;
+    textAlign: string;
+  };
+  mediaScore: {
+    fontSize: number;
+    color: string;
+    fontWeight: number;
+    marginBottom: number;
+  };
+  mediaYear: {
+    fontSize: number;
+    color: string;
+    marginTop: number;
+  };
+  loadingContainer: {
+    flex: number;
+    justifyContent: number;
+    alignItems: number;
+  };
+  loadingProgress: {
+    width: number;
+    height: number;
+    color: string;
+  };
+  loadingText: {
+    fontSize: number;
+    color: string;
+    marginTop: number;
+  };
+  errorContainer: {
+    flex: number;
+    justifyContent: number;
+    alignItems: number;
+  };
+  errorIcon: {
+    fontSize: number;
+    marginBottom: number;
+  };
+  errorMessage: {
+    fontSize: number;
+    color: string;
+    textAlign: string;
+    marginBottom: number;
+  };
+  retryButton: {
+    fontSize: number;
+    paddingHorizontal: number;
+    paddingVertical: number;
+    backgroundColor: string;
+    color: string;
+    borderRadius: number;
+  };
+  bottomSpace: {
+    height: number;
+  };
+}
+
 // 使用ArkTS支持的样式定义方式
-export const homePageStyles = {
+export const homePageStyles: HomePageStylesType = {
   // 主页面容器
   homePage: {
     flexDirection: 'column',

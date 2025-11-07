@@ -236,7 +236,7 @@ struct HistoryPage {
       historyService.updateHistoryTime(history.id)
         .then(() => {
           // 跳转到播放页面，带上上次播放的进度
-          Router.push({
+          Router.pushUrl({
             url: 'pages/PlaybackPage',
             params: {
               mediaId: history.mediaId,
@@ -251,7 +251,7 @@ struct HistoryPage {
         .catch(error => {
           Logger.error(this.TAG, `Failed to update history time: ${error}`);
           // 即使更新失败，也跳转到播放页面
-          Router.push({
+          Router.pushUrl({
             url: 'pages/PlaybackPage',
             params: {
               mediaId: history.mediaId,
@@ -266,7 +266,7 @@ struct HistoryPage {
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle history click: ${error}`);
       // 错误处理：跳转到播放页面
-      Router.push({
+      Router.pushUrl({
       url: 'pages/PlaybackPage',
       params: {
         mediaId: history.mediaId,
@@ -287,17 +287,17 @@ struct HistoryPage {
     Logger.info(this.TAG, `Continue playing: ${history.title} from ${history.playbackPosition}ms`);
     
     // 跳转到播放页面，带上上次播放的进度
-    Router.push({
-      url: 'pages/PlaybackPage',
-      params: {
-        mediaId: history.mediaId,
-        siteKey: history.siteKey,
-        episodeId: history.episodeId,
-        playbackPosition: history.progress * 1000,
-        title: history.title,
-        coverUrl: history.cover || ''
-      }
-    });
+    Router.pushUrl({
+        url: 'pages/PlaybackPage',
+        params: {
+          mediaId: history.mediaId,
+          siteKey: history.siteKey,
+          episodeId: history.episodeId,
+          playbackPosition: history.progress * 1000,
+          title: history.title,
+          coverUrl: history.cover || ''
+        }
+      });
   }
   
   /**
@@ -508,7 +508,7 @@ struct HistoryPage {
       Text.create();
       Text.text("暂无播放历史");
       Text.pop();
-      Button.create({ className: "explore-button", onClick: () => Router.push({ url: 'pages/HomePage' }) });
+      Button.create({ className: "explore-button", onClick: () => Router.pushUrl({ url: 'pages/HomePage' }) });
       Button.text("去探索");
       Button.pop();
       Empty.pop();

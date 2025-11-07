@@ -1,6 +1,8 @@
-import { UIAbility, Want, AbilityConstant } from '@ohos.app.ability.UIAbility';
-import { hilog } from '@ohos.hilog';
-import { window } from '@kit.ArkUI';
+import UIAbility from '@ohos.app.ability.UIAbility';
+import Want from '@ohos.app.ability.Want';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
+import hilog from '@ohos.hilog';
+import window from '@ohos.window';
 
 export default class MainAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
@@ -14,8 +16,8 @@ export default class MainAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     try {
       // 设置WindowStage的事件监听回调
-      windowStage.on('windowStageEvent', (event) => {
-        hilog.info(0x0000, 'MainAbility', 'WindowStage event: %{public}s', event.type);
+      windowStage.on('windowStageEvent', () => {
+        hilog.info(0x0000, 'MainAbility', 'WindowStage event occurred');
       });
 
       // 设置UI页面加载

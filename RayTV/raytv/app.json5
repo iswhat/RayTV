@@ -54,7 +54,7 @@
     },
     {
       "name": "raytvbackupability.RayTVBackupAbility",
-      "srcEntrance": "./src/main/ets/raytvbackupability/RayTVBackupAbility.ts",
+      "srcEntrance": "./src/main/ets/raytvbackupability/RayTVBackupAbility.ets",
       "description": "RayTV应用备份还原能力",
       "exported": true,
       "type": "extension"

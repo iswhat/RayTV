@@ -421,7 +421,7 @@ struct SearchPage {
     Logger.info(this.TAG, `Search result clicked: ${media.title}`);
     
     // 跳转到今日详情页
-    Router.push({
+    Router.pushUrl({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,
