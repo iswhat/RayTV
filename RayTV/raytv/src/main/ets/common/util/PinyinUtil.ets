@@ -118,8 +118,13 @@ export class PinyinUtil {
    */
   public extendPinyinMap(map: Record<string, string>): void {
     // 手动合并映射表，避免使用Object.assign（ArkTS限制）
-    // 使用Object.keys替代for...in循环（ArkTS兼容性）
-    const keys = Object.keys(map);
+    // 使用for...in循环实现（ArkTS兼容性）
+    const keys: string[] = [];
+    for (const key in map) {
+      if (Object.prototype.hasOwnProperty.call(map, key)) {
+        keys.push(key);
+      }
+    }
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (Object.prototype.hasOwnProperty.call(map, key)) {

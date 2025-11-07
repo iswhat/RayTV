@@ -428,6 +428,20 @@ export default class ConfigService {
   }
   
   /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+  
+  /**
    * 获取完整配置
    */
   public async getFullConfig(): Promise<Config> {
@@ -443,7 +457,7 @@ export default class ConfigService {
   private mergeConfig(defaultConfig: Config, customConfig: Partial<Config>): Config {
     const merged = { ...defaultConfig };
     
-    Object.keys(customConfig).forEach(key => {
+    this.getObjectKeys(customConfig).forEach(key => {
       const configKey = key as keyof Config;
       if (typeof customConfig[configKey] === 'object' && customConfig[configKey] !== null) {
         merged[configKey] = {

@@ -365,6 +365,20 @@ export default class FileService {
     }
     return FileService.instance;
   }
+  
+  /**
+   * 获取对象的所有值
+   * 替代Object.values，兼容ArkTS语法
+   */
+  private getObjectValues<T extends object>(obj: T): any[] {
+    const values: any[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        values.push(obj[key]);
+      }
+    }
+    return values;
+  }
 
   /**
    * 初始化文件服务
@@ -889,7 +903,7 @@ export default class FileService {
     const extension = FileUtil.getExtension(filePath).toLowerCase();
     
     // 尝试将扩展名转换为枚举值
-    const format = Object.values(FileFormat).find(f => f.toLowerCase() === extension);
+    const format = this.getObjectValues(FileFormat).find(f => f.toLowerCase() === extension);
     return format || FileFormat.UNKNOWN;
   }
 

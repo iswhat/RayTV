@@ -503,7 +503,7 @@ export class CommonUtil {
    * @returns 构建后的URL
    */
   public buildUrl(baseUrl: string, params?: Record<string, unknown>): string {
-    if (!params || Object.keys(params).length === 0) {
+    if (!params || this.getObjectKeys(params).length === 0) {
       return baseUrl;
     }
     
@@ -525,7 +525,7 @@ export class CommonUtil {
     if (value === null || value === undefined) return true;
     if (typeof value === 'string') return value.trim() === '';
     if (Array.isArray(value)) return value.length === 0;
-    if (typeof value === 'object') return Object.keys(value).length === 0;
+    if (typeof value === 'object') return this.getObjectKeys(value).length === 0;
     return false;
   }
   

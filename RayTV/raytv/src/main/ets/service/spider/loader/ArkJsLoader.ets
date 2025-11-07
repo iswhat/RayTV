@@ -543,6 +543,20 @@ export class ArkJsLoader extends BaseLoader {
   }
   
   /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+
+  /**
    * 检查集合大小
    * @private
    */
@@ -561,7 +575,7 @@ export class ArkJsLoader extends BaseLoader {
         }
       }
     } else if (typeof obj === 'object' && obj !== null) {
-      const keys = Object.keys(obj);
+      const keys = this.getObjectKeys(obj);
       if (keys.length > 1000) {
         throw new Error('Object has too many properties');
       }

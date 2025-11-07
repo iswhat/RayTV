@@ -6,7 +6,7 @@
   "minAPIVersion": 9,
   "targetAPIVersion": 9,
   "description": "一个功能强大的视频播放应用",
-  "icon": "./assets/icon.png",
+  "icon": "$media:app_icon"
   "splashscreen": {
     "image": "./assets/splash.png",
     "color": "#ffffff"
@@ -24,7 +24,7 @@
       "name": "MainAbility",
       "srcEntrance": "./src/main/ets/MainAbility.ts",
       "description": "应用主入口",
-      "icon": "./assets/icon.png",
+      "icon": "$media:app_icon",
       "label": "RayTV",
       "orientation": "portrait",
       "launchType": "standard",

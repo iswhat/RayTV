@@ -18,13 +18,41 @@ export class ValidatorUtil {
   }
 
   /**
-   * 获取ValidatorUtil单例实例
+   * 获取验证器单例
    */
   public static getInstance(): ValidatorUtil {
     if (!ValidatorUtil.instance) {
       ValidatorUtil.instance = new ValidatorUtil();
     }
     return ValidatorUtil.instance;
+  }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private static getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+  
+  /**
+   * 获取对象的所有值
+   * 替代Object.values，兼容ArkTS语法
+   */
+  private static getObjectValues<T extends object>(obj: T): any[] {
+    const values: any[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        values.push(obj[key]);
+      }
+    }
+    return values;
   }
 
   /**
@@ -311,7 +339,7 @@ export class ValidatorUtil {
     }
 
     if (typeof value === 'object') {
-      return Object.keys(value).length === 0;
+      return this.getObjectKeys(value).length === 0;
     }
 
     return false;
@@ -591,7 +619,7 @@ export class ValidatorUtil {
       }
 
       // 检查参数值是否有效
-      for (const value of Object.values(params)) {
+      for (const value of this.getObjectValues(params)) {
         if (value === undefined || typeof value === 'function' || this.isValidObject(value) || Array.isArray(value)) {
           return false;
         }
@@ -644,8 +672,8 @@ export class ValidatorUtil {
 
       // 处理对象类型
       if (this.isValidObject(value1) && this.isValidObject(value2)) {
-        const keys1 = Object.keys(value1);
-        const keys2 = Object.keys(value2);
+        const keys1 = this.getObjectKeys(value1);
+         const keys2 = this.getObjectKeys(value2);
 
         if (keys1.length !== keys2.length) {
           return false;

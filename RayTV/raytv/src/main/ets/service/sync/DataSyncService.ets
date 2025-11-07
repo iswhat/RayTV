@@ -178,6 +178,20 @@ export default class DataSyncService {
     }
     return DataSyncService.instance;
   }
+  
+  /**
+   * 获取对象的所有值
+   * 替代Object.values，兼容ArkTS语法
+   */
+  private getObjectValues<T extends object>(obj: T): any[] {
+    const values: any[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        values.push(obj[key]);
+      }
+    }
+    return values;
+  }
 
   /**
    * 构造函数
@@ -301,7 +315,7 @@ export default class DataSyncService {
    */
   private registerDistributedDataListeners(): void {
     // 监听所有数据类型的变化
-    const syncDataTypes = Object.values(SyncDataType);
+    const syncDataTypes = this.getObjectValues(SyncDataType);
     
     syncDataTypes.forEach(dataType => {
       this.distributedDataService.addDataChangeListener(

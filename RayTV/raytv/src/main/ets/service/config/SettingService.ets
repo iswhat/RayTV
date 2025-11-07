@@ -865,7 +865,7 @@ export default class SettingService {
     }
     
     // 应用设置
-    if (Object.keys(settingsToApply).length > 0) {
+    if (this.getObjectKeys(settingsToApply).length > 0) {
       await this.setMultipleSettings(settingsToApply, false);
     }
   }
@@ -895,7 +895,7 @@ export default class SettingService {
         settingsToApply.defaultPlaybackQuality = defaultPlaybackQuality;
       }
       
-      if (Object.keys(settingsToApply).length > 0) {
+      if (this.getObjectKeys(settingsToApply).length > 0) {
         await this.setMultipleSettings(settingsToApply, false);
       }
     } catch (error) {
@@ -1194,5 +1194,19 @@ export default class SettingService {
     } catch (error) {
       Logger.error(TAG, `Error closing setting service: ${error}`);
     }
+  }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
   }
 }

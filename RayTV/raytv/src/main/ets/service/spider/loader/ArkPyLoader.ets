@@ -220,7 +220,7 @@ export class ArkPyLoader extends BaseLoader {
         Logger.info(`${this.TAG}[${this.site.name}]`, args.map(String).join(' '));
       },
       len: (obj: any) => {
-        return Array.isArray(obj) ? obj.length : Object.keys(obj || {}).length;
+        return Array.isArray(obj) ? obj.length : this.getObjectKeys(obj || {}).length;
       },
       str: (obj: any) => String(obj),
       int: (obj: any) => parseInt(obj, 10),
@@ -507,6 +507,21 @@ export class ArkPyLoader extends BaseLoader {
    * 获取安全的内置函数
    * @private
    */
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+  
   /**
    * 预处理Python代码
    * @private
@@ -673,7 +688,7 @@ export class ArkPyLoader extends BaseLoader {
         }
       }
     } else if (typeof obj === 'object' && obj !== null) {
-      const keys = Object.keys(obj);
+      const keys = this.getObjectKeys(obj);
       if (keys.length > 2000) {
         throw new Error('Object has too many properties');
       }

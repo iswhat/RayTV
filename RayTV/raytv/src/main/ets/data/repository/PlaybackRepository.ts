@@ -204,6 +204,20 @@ class PlaybackRepository {
   }
   
   /**
+   * 获取对象的所有值
+   * 替代Object.values，兼容ArkTS语法
+   */
+  private getObjectValues<T extends object>(obj: T): any[] {
+    const values: any[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        values.push(obj[key]);
+      }
+    }
+    return values;
+  }
+  
+  /**
    * 初始化
    */
   private async initialize(): Promise<void> {
@@ -266,12 +280,12 @@ class PlaybackRepository {
     const byContentType = new Map<'video' | 'live', number>();
     
     // 初始化画质统计
-    Object.values(VideoQuality).forEach(quality => {
+    this.getObjectValues(VideoQuality).forEach(quality => {
       byQuality.set(quality, 0);
     });
     
     // 初始化播放速度统计
-    Object.values(PlaybackSpeed).forEach(speed => {
+    this.getObjectValues(PlaybackSpeed).forEach(speed => {
       bySpeed.set(speed, 0);
     });
     
