@@ -70,12 +70,15 @@ export function deepClone<T>(source: T): T {
  * @param source 源对象
  */
 export function merge<T extends object, U extends object>(target: T, source: U): object {
-  const result = { ...target } as object;
+  // 使用Object.assign替代spread操作符
+  const result = Object.assign({}, target) as object;
   
-  // 遍历源对象的属性
-  for (const key in source) {
-    if (source.hasOwnProperty(key)) {
-      const sourceValue = source[key];
+  // 使用Object.keys替代for...in循环
+  const sourceKeys = Object.keys(source);
+  for (let i = 0; i < sourceKeys.length; i++) {
+    const key = sourceKeys[i];
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const sourceValue = (source as any)[key];
       const targetValue = (result as any)[key];
       
       if (sourceValue !== null && typeof sourceValue === 'object' && 
@@ -120,7 +123,8 @@ export function pick<T extends object>(obj: T, keys: string[]): object {
  * @param keys 要排除的属性键数组
  */
 export function omit<T extends object>(obj: T, keys: string[]): object {
-  const result: Record<string, any> = { ...obj };
+  // 使用Object.assign替代spread操作符
+  const result: Record<string, any> = Object.assign({}, obj);
   
   // 使用循环处理属性排除
   for (let i = 0; i < keys.length; i++) {
@@ -142,8 +146,10 @@ export function isEmptyObject(obj: object): boolean {
     return true;
   }
   
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+  // 使用Object.keys替代for...in循环
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, keys[i])) {
       return false;
     }
   }
@@ -181,8 +187,11 @@ export function deepEqual(obj1: any, obj2: any): boolean {
 export function toQueryString(params: Record<string, string | number | boolean>): string {
   const queryParts: string[] = [];
   
-  for (const key in params) {
-    if (params.hasOwnProperty(key)) {
+  // 使用Object.keys替代for...in循环
+  const keys = Object.keys(params);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
       const value = params[key];
       const encodedKey = encodeURIComponent(key);
       const encodedValue = encodeURIComponent(String(value));
