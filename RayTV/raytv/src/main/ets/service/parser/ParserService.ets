@@ -28,7 +28,8 @@ interface ParserContext {
  */
 export class ParserService {
   private static readonly TAG: string = 'ParserService';
-  private static instance: ParserService;
+  // 使用静态私有成员变量存储单例实例
+  private static instance: ParserService | null = null;
   
   private parsers: Map<string, ParserInfo> = new Map();
   private defaultConfig: ParserConfig = {
@@ -52,11 +53,15 @@ export class ParserService {
   /**
    * 获取单例实例
    */
+  /**
+   * 获取单例实例
+   */
   public static getInstance(): ParserService {
     if (!ParserService.instance) {
+      // 创建新实例
       ParserService.instance = new ParserService();
     }
-    return ParserService.instance;
+    return ParserService.instance!;
   }
   
   /**

@@ -233,6 +233,26 @@ export class RecommendationRepository {
     }
     return RecommendationRepository.instance;
   }
+  
+  /**
+   * 获取推荐类型枚举的所有值
+   * 替代Object.values，兼容ArkTS语法
+   */
+  private getRecommendationTypeValues(): string[] {
+    return [
+      RecommendationType.PERSONALIZED,
+      RecommendationType.TRENDING,
+      RecommendationType.NEW_RELEASES,
+      RecommendationType.SIMILAR,
+      RecommendationType.CONTINUE_WATCHING,
+      RecommendationType.FEATURED,
+      RecommendationType.POPULAR,
+      RecommendationType.RECOMMENDED_FOR_YOU,
+      RecommendationType.BASED_ON_WATCH_HISTORY,
+      RecommendationType.STAFF_PICKS,
+      RecommendationType.LIVE_NOW
+    ];
+  }
 
   /**
    * 初始化推荐仓库
@@ -1174,7 +1194,7 @@ export class RecommendationRepository {
   private validateRecommendationRequest(request: RecommendationRequest): void {
     const errors: string[] = [];
     
-    if (!request.type || !Object.values(RecommendationType).includes(request.type)) {
+    if (!request.type || !this.getRecommendationTypeValues().includes(request.type)) {
       errors.push('Invalid recommendation type');
     }
     

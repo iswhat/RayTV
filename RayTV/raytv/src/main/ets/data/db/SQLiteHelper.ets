@@ -8,6 +8,32 @@ import Logger from '../../common/util/Logger';
 const TAG = 'SQLiteHelper';
 
 /**
+ * 获取对象的键数组（ArkTS兼容方法）
+ */
+private getObjectKeys<T extends Record<string, any>>(obj: T): string[] {
+  const keys: string[] = [];
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      keys.push(key);
+    }
+  }
+  return keys;
+}
+
+/**
+ * 获取对象的值数组（ArkTS兼容方法）
+ */
+private getObjectValues<T extends Record<string, any>>(obj: T): any[] {
+  const values: any[] = [];
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      values.push(obj[key]);
+    }
+  }
+  return values;
+}
+
+/**
  * SQL查询条件接口
  */
 export interface QueryCondition {
@@ -65,9 +91,9 @@ export class SQLiteHelper {
       const database = this.dbManager.getDatabase();
       
       // 构建插入语句
-      const columns = Object.keys(values);
+      const columns = this.getObjectKeys(values);
       const placeholders = columns.map(() => '?').join(', ');
-      const bindArgs = Object.values(values);
+      const bindArgs = this.getObjectValues(values);
       
       const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
       
@@ -110,9 +136,9 @@ export class SQLiteHelper {
       
       await this.dbManager.executeTransaction(async (db) => {
         for (const values of dataList) {
-          const columns = Object.keys(values);
+          const columns = this.getObjectKeys(values);
           const placeholders = columns.map(() => '?').join(', ');
-          const bindArgs = Object.values(values);
+          const bindArgs = this.getObjectValues(values);
           
           const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
           await db.executeSql(sql, bindArgs);
@@ -150,12 +176,13 @@ export class SQLiteHelper {
       const database = this.dbManager.getDatabase();
       
       // 构建更新语句
-      const setClause = Object.keys(values)
+      const columns = this.getObjectKeys(values);
+      const setClause = columns
         .map(key => `${key} = ?`)
         .join(', ');
       
       let sql = `UPDATE ${tableName} SET ${setClause}`;
-      const bindArgs: ValueType[] = Object.values(values);
+      const bindArgs: ValueType[] = this.getObjectValues(values);
       
       // 添加条件
       if (conditions && conditions.length > 0) {

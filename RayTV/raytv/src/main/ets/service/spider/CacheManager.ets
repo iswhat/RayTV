@@ -527,6 +527,22 @@ export class CacheManager {
   }
 
   /**
+   * 获取对象的所有键
+   * @param obj 输入对象
+   * @returns 键数组
+   * @private
+   */
+  private getObjectKeys(obj: any): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+
+  /**
    * 排序参数对象，确保相同内容的参数生成相同的哈希值
    * @param params 方法参数
    * @returns any
@@ -542,7 +558,7 @@ export class CacheManager {
     }
     
     const sorted: any = {};
-    Object.keys(params).sort().forEach(key => {
+    this.getObjectKeys(params).sort().forEach(key => {
       sorted[key] = this.sortParams(params[key]);
     });
     

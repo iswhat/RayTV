@@ -211,8 +211,9 @@ export default class MemoryManager {
     if (this.memoryUsageHistory.length > 0) {
       const sum = this.memoryUsageHistory.reduce((acc, val) => acc + val, 0);
       average = sum / this.memoryUsageHistory.length;
-      max = Math.max(...this.memoryUsageHistory);
-      min = Math.min(...this.memoryUsageHistory);
+      // 使用Math.max.apply替代spread操作符（ArkTS兼容性）
+      max = Math.max.apply(null, this.memoryUsageHistory);
+      min = Math.min.apply(null, this.memoryUsageHistory);
     } else {
       average = current;
       max = current;

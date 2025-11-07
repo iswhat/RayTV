@@ -352,11 +352,11 @@ class ConfigRepository {
    */
   public async setConfigs(configs: Record<string, any>): Promise<void> {
     try {
-      for (const [key, value] of Object.entries(configs)) {
+      for (const [key, value] of this.getObjectEntries(configs)) {
         const type = this.getValueType(value);
         await this.setConfig(key, value, type);
       }
-      Logger.debug(`Batch set ${Object.keys(configs).length} configs`);
+      Logger.debug(`Batch set ${this.getObjectKeys(configs).length} configs`);
     } catch (error) {
       Logger.error('Failed to set configs in batch', error);
       throw error;
@@ -451,7 +451,7 @@ class ConfigRepository {
         }
       }
       
-      Logger.info(`Imported ${Object.keys(configs).length} configs`);
+      Logger.info(`Imported ${this.getObjectKeys(configs).length} configs`);
     } catch (error) {
       Logger.error('Failed to import configs', error);
       throw error;
@@ -485,6 +485,34 @@ class ConfigRepository {
    */
   public getAllConfigKeys(): string[] {
     return Array.from(this.configCache.keys());
+  }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+  
+  /**
+   * 获取对象的所有键值对
+   * 替代Object.entries，兼容ArkTS语法
+   */
+  private getObjectEntries<T extends object>(obj: T): [string, any][] {
+    const entries: [string, any][] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        entries.push([key, obj[key]]);
+      }
+    }
+    return entries;
   }
 
   /**

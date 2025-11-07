@@ -46,6 +46,20 @@ export class ConfigParser {
     }
     return ConfigParser.instance;
   }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
 
   /**
    * 验证站点配置
@@ -191,12 +205,13 @@ export class ConfigParser {
     
     // Fongmi格式通常是对象，每个键对应一个站点
     return !Array.isArray(config) && 
-           Object.keys(config).length > 0 &&
-           Object.entries(config).some(([_, value]) => 
-             typeof value === 'object' && 
-             value !== null && 
-             ('api' in value || 'name' in value)
-           );
+           this.getObjectKeys(config).length > 0 &&
+           this.getObjectKeys(config).some(key => {
+             const value = (config as Record<string, unknown>)[key];
+             return typeof value === 'object' && 
+                    value !== null && 
+                    ('api' in value || 'name' in value);
+           });
   }
   
   /**

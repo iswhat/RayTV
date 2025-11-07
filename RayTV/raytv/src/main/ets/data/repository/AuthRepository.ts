@@ -161,6 +161,20 @@ export interface PermissionCheckRequest {
  */
 export class AuthRepository {
   private static instance: AuthRepository;
+
+  /**
+   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法）
+   */
+  private getAuthStatusValues(): string[] {
+    return [
+      AuthStatus.UNAUTHENTICATED,
+      AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
   private networkUtil = NetworkUtil.getInstance();
@@ -526,7 +540,7 @@ export class AuthRepository {
         LocalStorageType.DEFAULT
       );
       
-      if (savedStatus && Object.values(AuthStatus).includes(savedStatus as AuthStatus)) {
+      if (savedStatus && this.getAuthStatusValues().includes(savedStatus)) {
         this.currentStatus = savedStatus as AuthStatus;
       }
       

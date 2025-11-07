@@ -305,7 +305,7 @@ class Logger {
    */
   public static format(tag: string, format: string, ...args: Array<string | number | boolean | object | undefined | null>): void {
     // 使用formatMessage方法进行字符串格式化
-    const formattedMessage = Logger.formatMessage(format, ...args);
+    const formattedMessage = Logger.formatMessage(format, args);
     
     // 不使用logInternal，直接调用log方法
     const instance = Logger.getInstance();
@@ -320,7 +320,7 @@ class Logger {
    * @param args 替换参数
    * @returns 格式化后的消息
    */
-  private static formatMessage(message: string, ...args: Array<string | number | boolean | object | undefined | null>): string {
+  private static formatMessage(message: string, args: Array<string | number | boolean | object | undefined | null>): string {
     if (!args || args.length === 0) {
       return message;
     }
@@ -731,7 +731,8 @@ class Logger {
     }
     
     this.isWriting = true;
-    const entriesToWrite = [...this.logQueue];
+    // 使用slice替代spread操作符
+    const entriesToWrite = this.logQueue.slice();
     this.logQueue = [];
     
     try {

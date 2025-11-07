@@ -46,6 +46,20 @@ export default class NetworkUtil {
   private static context: common.Context | null = null;
 
   /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private static getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+
+  /**
    * 设置应用上下文
    * @param ctx 应用上下文
    */
@@ -92,7 +106,7 @@ export default class NetworkUtil {
 
       // 构建完整URL（添加查询参数）
       let fullUrl = url;
-      if (Object.keys(params).length > 0) {
+      if (NetworkUtil.getObjectKeys(params).length > 0) {
         const queryString = NetworkUtil.buildQueryString(params);
         fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
       }
@@ -114,7 +128,7 @@ export default class NetworkUtil {
       
       // 手动合并headers，避免数组展开操作
       if (headers) {
-        const headerKeys = Object.keys(headers);
+        const headerKeys = NetworkUtil.getObjectKeys(headers);
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
           httpOptions.header[key] = headers[key];
@@ -146,7 +160,7 @@ export default class NetworkUtil {
         // 构建响应头
     const responseHeaders: Record<string, string> = {};
     if (response.header) {
-      const headerKeys = Object.keys(response.header);
+      const headerKeys = NetworkUtil.getObjectKeys(response.header);
       for (let i = 0; i < headerKeys.length; i++) {
         const key = headerKeys[i];
         responseHeaders[key] = String(response.header[key]);

@@ -154,7 +154,8 @@ export class EventBusUtil {
 
       try {
         if (this.eventMap.has(eventName)) {
-          const subscriptions = [...this.eventMap.get(eventName)!]; // 创建副本，避免执行过程中的修改影响循环
+          // 使用slice()替代spread操作符创建副本（ArkTS兼容性）
+          const subscriptions = this.eventMap.get(eventName)!.slice(); // 创建副本，避免执行过程中的修改影响循环
           
           for (const subscription of subscriptions) {
             try {

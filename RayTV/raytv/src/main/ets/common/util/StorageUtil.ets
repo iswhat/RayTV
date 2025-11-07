@@ -46,6 +46,20 @@ export default class StorageUtil {
     // 启动内存缓存自动清理
     StorageUtil.startMemoryCacheCleanup();
   }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private static getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
 
   /**
    * 保存数据到存储
@@ -230,7 +244,7 @@ export default class StorageUtil {
           keys = await StorageUtil.getAllKeysFromFiles();
           break;
         case StorageType.MEMORY:
-          keys = Object.keys(StorageUtil.memoryCache);
+          keys = StorageUtil.getObjectKeys(StorageUtil.memoryCache);
           break;
         default:
           throw new Error(`Unsupported storage type: ${type}`);
@@ -391,7 +405,7 @@ export default class StorageUtil {
     if (item.expireTime > 0 && Date.now() > item.expireTime) {
       // 使用创建新对象的方式替代delete操作符
       const newCache = {} as Record<string, MemoryCacheItem>;
-      const keys = Object.keys(StorageUtil.memoryCache);
+      const keys = StorageUtil.getObjectKeys(StorageUtil.memoryCache);
       for (let i = 0; i < keys.length; i++) {
         if (keys[i] !== key) {
           newCache[keys[i]] = StorageUtil.memoryCache[keys[i]];
@@ -407,7 +421,7 @@ export default class StorageUtil {
   private static removeFromMemory(key: string): void {
     // 使用创建新对象的方式替代delete操作符
     const newCache = {} as Record<string, MemoryCacheItem>;
-    const keys = Object.keys(StorageUtil.memoryCache);
+    const keys = StorageUtil.getObjectKeys(StorageUtil.memoryCache);
     for (let i = 0; i < keys.length; i++) {
       if (keys[i] !== key) {
         newCache[keys[i]] = StorageUtil.memoryCache[keys[i]];
@@ -437,15 +451,15 @@ export default class StorageUtil {
     const now = Date.now();
     let removedCount = 0;
     
-    // 使用Object.keys替代for..in循环
-    const keys = Object.keys(StorageUtil.memoryCache);
+    // 使用getObjectKeys替代Object.keys
+    const keys = StorageUtil.getObjectKeys(StorageUtil.memoryCache);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const item = StorageUtil.memoryCache[key];
       if (item.expireTime > 0 && now > item.expireTime) {
         // 使用创建新对象的方式替代delete操作符
         const newCache = {} as Record<string, MemoryCacheItem>;
-        const allKeys = Object.keys(StorageUtil.memoryCache);
+        const allKeys = StorageUtil.getObjectKeys(StorageUtil.memoryCache);
         for (let j = 0; j < allKeys.length; j++) {
           if (allKeys[j] !== key) {
             newCache[allKeys[j]] = StorageUtil.memoryCache[allKeys[j]];

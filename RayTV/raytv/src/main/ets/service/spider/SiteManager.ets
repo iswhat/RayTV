@@ -47,6 +47,16 @@ export class SiteManager {
   }
 
   /**
+   * 验证加载器类型
+   */
+  private validateLoaderType(type: string): void {
+    const validTypes = ['jar', 'js', 'py']; // 对应LoaderType的所有值
+    if (!validTypes.includes(type)) {
+      throw new Error(`Invalid loader type: ${type}`);
+    }
+  }
+
+  /**
    * 构造函数
    * 私有构造函数防止外部实例化
    */
@@ -356,9 +366,8 @@ export class SiteManager {
       throw new Error('Invalid site: key, name and type are required');
     }
     
-    if (!Object.values(LoaderType).includes(site.type)) {
-      throw new Error(`Invalid loader type: ${site.type}`);
-    }
+    // 在ArkTS中，枚举不能直接作为对象使用
+    this.validateLoaderType(site.type);
     
     if (site.url && !site.url.startsWith('http://') && !site.url.startsWith('https://')) {
       throw new Error(`Invalid URL: ${site.url}`);

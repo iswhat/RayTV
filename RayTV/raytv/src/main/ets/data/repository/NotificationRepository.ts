@@ -303,13 +303,45 @@ export class NotificationRepository {
     lastSyncTime: 'notification:lastSyncTime'
   };
   
+  // 获取所有有效的通知类型值
+  private getNotificationTypeValues(): NotificationType[] {
+    return [
+      NotificationType.LIVE_START,
+      NotificationType.LIVE_END,
+      NotificationType.VIDEO_UPDATED,
+      NotificationType.SERIES_NEW_EPISODE,
+      NotificationType.RECOMMENDATION,
+      NotificationType.FOLLOWED_CHANNEL_LIVE,
+      NotificationType.COMMENT_REPLY,
+      NotificationType.MENTIONED,
+      NotificationType.LIKE,
+      NotificationType.SHARE,
+      NotificationType.SYSTEM_ANNOUNCEMENT,
+      NotificationType.MAINTENANCE_ALERT,
+      NotificationType.FEATURE_UPDATE,
+      NotificationType.ACCOUNT_VERIFICATION,
+      NotificationType.PASSWORD_CHANGE,
+      NotificationType.LOGIN_ACTIVITY,
+      NotificationType.SUBSCRIPTION_REMINDER,
+      NotificationType.SUBSCRIPTION_EXPIRY,
+      NotificationType.PAYMENT_SUCCESS,
+      NotificationType.PAYMENT_FAILED,
+      NotificationType.DOWNLOAD_COMPLETE,
+      NotificationType.DOWNLOAD_FAILED,
+      NotificationType.PLAYBACK_ERROR,
+      NotificationType.WATCHLIST_ADD,
+      NotificationType.WATCHLIST_REMOVE,
+      NotificationType.CUSTOM
+    ];
+  }
+
   // 默认配置
   private defaultConfig: NotificationConfig = {
     enableNotifications: true,
     enableSound: true,
     enableVibration: true,
     enableLight: true,
-    enabledTypes: Object.values(NotificationType).filter(type => type !== NotificationType.UNKNOWN),
+    enabledTypes: this.getNotificationTypeValues(),
     mutedTypes: [],
     enableDoNotDisturb: false,
     doNotDisturbStart: '22:00',
@@ -2079,8 +2111,7 @@ export class NotificationRepository {
       const config = await this.getConfig();
       
       // 获取所有通知类型及其设置
-      const notificationTypes = Object.values(NotificationType)
-        .filter(type => type !== NotificationType.UNKNOWN)
+      const notificationTypes = this.getNotificationTypeValues()
         .map(type => ({
           type,
           enabled: config.enabledTypes.includes(type),

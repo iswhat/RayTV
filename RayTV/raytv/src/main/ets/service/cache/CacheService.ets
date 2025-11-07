@@ -234,6 +234,20 @@ export default class CacheService {
     }
     return CacheService.instance;
   }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
 
   /**
    * 初始化缓存服务
@@ -361,7 +375,7 @@ export default class CacheService {
       const indexContent = JsonUtil.stringify(indexData);
       await FileUtil.writeFile(this.indexFile, indexContent, { create: true });
       
-      Logger.debug(TAG, `Saved cache index with ${Object.keys(indexData).length} entries`);
+      Logger.debug(TAG, `Saved cache index with ${this.getObjectKeys(indexData).length} entries`);
     } catch (error) {
       Logger.error(TAG, 'Failed to save cache index', error);
       this.recordError(error as Error, 'saveCacheIndex');

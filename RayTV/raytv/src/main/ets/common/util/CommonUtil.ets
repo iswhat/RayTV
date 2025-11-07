@@ -12,13 +12,27 @@ export class CommonUtil {
   }
   
   /**
-   * 获取实例
+   * 获取CommonUtil单例实例
    */
   public static getInstance(): CommonUtil {
     if (!CommonUtil.instance) {
       CommonUtil.instance = new CommonUtil();
     }
     return CommonUtil.instance;
+  }
+  
+  /**
+   * 获取对象的所有键
+   * 替代Object.keys，兼容ArkTS语法
+   */
+  private getObjectKeys<T extends object>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
   }
   
   /**
@@ -56,8 +70,11 @@ export class CommonUtil {
     
     if (obj instanceof Object) {
       const clonedObj: Record<string, unknown> = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+      // 使用getObjectKeys替代Object.keys
+      const keys = this.getObjectKeys(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           clonedObj[key] = this.deepClone(obj[key]);
         }
       }
@@ -78,7 +95,7 @@ export class CommonUtil {
     
     return (...args: Parameters<T>) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func(...args), delay);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
     };
   }
   
@@ -93,7 +110,7 @@ export class CommonUtil {
     
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
-        func(...args);
+        func.apply(null, args);
         inThrottle = true;
         setTimeout(() => inThrottle = false, limit);
       }
@@ -230,7 +247,8 @@ export class CommonUtil {
    * @returns 打乱后的新数组
    */
   public shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
+    // 使用slice替代spread操作符
+    const shuffled = array.slice();
     
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -304,13 +322,16 @@ export class CommonUtil {
   public getObjectDiff(obj1: Record<string, unknown>, obj2: Record<string, unknown>): Record<string, unknown> {
     const diff: Record<string, unknown> = {};
     
-    for (const key in obj1) {
-      if (obj1.hasOwnProperty(key)) {
-        if (obj2.hasOwnProperty(key)) {
+    // 使用getObjectKeys替代Object.keys
+    const keys1 = this.getObjectKeys(obj1);
+    for (let i = 0; i < keys1.length; i++) {
+      const key = keys1[i];
+      if (Object.prototype.hasOwnProperty.call(obj1, key)) {
+        if (Object.prototype.hasOwnProperty.call(obj2, key)) {
           if (obj1[key] !== obj2[key]) {
             if (typeof obj1[key] === 'object' && typeof obj2[key] === 'object') {
               const nestedDiff = this.getObjectDiff(obj1[key], obj2[key]);
-              if (Object.keys(nestedDiff).length > 0) {
+              if (this.getObjectKeys(nestedDiff).length > 0) {
                 diff[key] = nestedDiff;
               }
             } else {
@@ -323,8 +344,11 @@ export class CommonUtil {
       }
     }
     
-    for (const key in obj2) {
-      if (obj2.hasOwnProperty(key) && !obj1.hasOwnProperty(key)) {
+    // 使用getObjectKeys替代Object.keys
+    const keys2 = this.getObjectKeys(obj2);
+    for (let i = 0; i < keys2.length; i++) {
+      const key = keys2[i];
+      if (Object.prototype.hasOwnProperty.call(obj2, key) && !Object.prototype.hasOwnProperty.call(obj1, key)) {
         diff[key] = obj2[key];
       }
     }
@@ -344,8 +368,11 @@ export class CommonUtil {
     const source = sources.shift();
     
     if (target && source && (typeof target === 'object' && typeof source === 'object')) {
-      for (const key in source) {
-        if (source.hasOwnProperty(key)) {
+      // 使用getObjectKeys替代Object.keys
+      const keys = this.getObjectKeys(source);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
           if (source[key] && typeof source[key] === 'object') {
             if (!target[key]) {
               // 手动创建新属性，避免使用Object.assign（ArkTS限制）
@@ -360,7 +387,8 @@ export class CommonUtil {
       }
     }
     
-    return this.mergeObjects(target, ...sources);
+    // 使用apply替代spread操作符
+    return this.mergeObjects.apply(this, [target].concat(sources));
   }
   
   /**

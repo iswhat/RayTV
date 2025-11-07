@@ -73,6 +73,39 @@ export interface TrendingSearch {
  */
 export class SearchRepository {
   private static instance: SearchRepository;
+
+  /**
+   * 获取SearchType枚举的所有有效值（ArkTS兼容方法）
+   */
+  private getSearchTypeValues(): string[] {
+    return [
+      SearchType.ALL,
+      SearchType.MOVIE,
+      SearchType.TV_SERIES,
+      SearchType.LIVE,
+      SearchType.ANIME,
+      SearchType.VARIETY,
+      SearchType.DOCUMENTARY,
+      SearchType.SPORTS,
+      SearchType.MUSIC,
+      SearchType.KIDS
+    ];
+  }
+
+  /**
+   * 获取SearchSort枚举的所有有效值（ArkTS兼容方法）
+   */
+  private getSearchSortValues(): string[] {
+    return [
+      SearchSort.DEFAULT,
+      SearchSort.LATEST,
+      SearchSort.HOTTEST,
+      SearchSort.RATING_DESC,
+      SearchSort.RATING_ASC,
+      SearchSort.RELEASE_DATE_DESC,
+      SearchSort.RELEASE_DATE_ASC
+    ];
+  }
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
   private networkUtil = NetworkUtil.getInstance();
@@ -599,11 +632,11 @@ export class SearchRepository {
       errors.push(`Search query must be at least ${this.searchConfig.minSearchLength} characters`);
     }
     
-    if (!Object.values(SearchType).includes(request.type)) {
+    if (!this.getSearchTypeValues().includes(request.type)) {
       errors.push('Invalid search type');
     }
     
-    if (!Object.values(SearchSort).includes(request.sort)) {
+    if (!this.getSearchSortValues().includes(request.sort)) {
       errors.push('Invalid sort option');
     }
     
