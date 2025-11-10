@@ -58,28 +58,114 @@ export class PinyinUtil {
    */
   public getFirstLetter(text: string): string {
     if (!text || typeof text !== 'string') {
+      Logger.debug(TAG, 'Invalid text parameter in getFirstLetter');
       return '';
     }
 
     let result = '';
+    
+    // 遍历字符串中的每个字符
     for (let i = 0; i < text.length; i++) {
       const char = text.charAt(i);
+      
       // 如果是英文字母，直接转为小写
-      if (/^[a-zA-Z]$/.test(char)) {
-        result += char.toLowerCase();
+      // 避免使用正则表达式，使用字符码范围判断
+      const charCode = char.charCodeAt(0);
+      if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
+        // 确保是小写
+        if (charCode >= 65 && charCode <= 90) {
+          result += String.fromCharCode(charCode + 32);
+        } else {
+          result += char;
+        }
       }
       // 如果是数字，直接添加
-      else if (/^[0-9]$/.test(char)) {
+      else if (charCode >= 48 && charCode <= 57) {
         result += char;
       }
       // 如果是汉字，查找首字母
-      else if (char in PINYIN_MAP) {
-        result += PINYIN_MAP[char];
+      else {
+        // 避免使用in操作符，通过获取所有键并查找
+        let found = false;
+        const mapKeys = this.getMapKeys(PINYIN_MAP);
+        for (let j = 0; j < mapKeys.length; j++) {
+          if (mapKeys[j] === char) {
+            result += PINYIN_MAP[char];
+            found = true;
+            break;
+          }
+        }
+        
+        // 对于未找到映射的字符，可以添加默认处理逻辑
+        // 例如使用原字符或跳过
+        if (!found) {
+          // 可选：记录未识别的字符
+          Logger.debug(TAG, `Unrecognized character: ${char}`);
+        }
       }
-      // 其他字符，跳过
     }
 
     return result;
+  }
+  
+  /**
+   * 获取映射表的键数组
+   * 兼容ArkTS语法的安全实现
+   */
+  private getMapKeys(map: Record<string, string>): string[] {
+    const keys: string[] = [];
+    
+    try {
+      // 使用JSON序列化方法获取键
+      const jsonStr = JSON.stringify(map);
+      let inKey = false;
+      let currentKey = '';
+      let isEscaped = false;
+      
+      // 跳过JSON对象的开始大括号
+      for (let i = 1; i < jsonStr.length - 1; i++) {
+        const char = jsonStr[i];
+        
+        if (isEscaped) {
+          if (inKey) {
+            currentKey += char;
+          }
+          isEscaped = false;
+        } else if (char === '\\') {
+          isEscaped = true;
+        } else if (char === '"' && !inKey) {
+          inKey = true;
+          currentKey = '';
+        } else if (char === '"' && inKey) {
+          inKey = false;
+          if (currentKey.length > 0) {
+            keys.push(currentKey);
+            currentKey = '';
+          }
+          // 跳过值部分直到下一个键开始或结束
+          let j = i + 1;
+          let depth = 0;
+          while (j < jsonStr.length - 1) {
+            const nextChar = jsonStr[j];
+            if (nextChar === '{' || nextChar === '[') {
+              depth++;
+            } else if ((nextChar === '}' || nextChar === ']') && depth > 0) {
+              depth--;
+            } else if (nextChar === ',' && depth === 0) {
+              i = j;
+              break;
+            }
+            j++;
+          }
+        } else if (inKey) {
+          currentKey += char;
+        }
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to get map keys: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    
+    return keys;
   }
 
   /**
@@ -89,12 +175,18 @@ export class PinyinUtil {
    * @returns 是否匹配
    */
   public containsPinyin(text: string, pinyin: string): boolean {
-    if (!text || !pinyin) {
+    // 参数验证
+    if (!text || !pinyin || typeof text !== 'string' || typeof pinyin !== 'string') {
+      Logger.debug(TAG, 'Invalid parameters in containsPinyin');
       return false;
     }
 
+    // 获取拼音首字母
     const firstLetters = this.getFirstLetter(text);
-    return firstLetters.includes(pinyin.toLowerCase());
+    const lowerPinyin = this.toLowercase(pinyin);
+    
+    // 实现字符串包含检查（不使用内置的includes方法）
+    return this.stringContains(firstLetters, lowerPinyin);
   }
 
   /**
@@ -104,12 +196,82 @@ export class PinyinUtil {
    * @returns 是否匹配
    */
   public startsWithPinyin(text: string, pinyin: string): boolean {
-    if (!text || !pinyin) {
+    // 参数验证
+    if (!text || !pinyin || typeof text !== 'string' || typeof pinyin !== 'string') {
+      Logger.debug(TAG, 'Invalid parameters in startsWithPinyin');
       return false;
     }
 
+    // 获取拼音首字母
     const firstLetters = this.getFirstLetter(text);
-    return firstLetters.startsWith(pinyin.toLowerCase());
+    const lowerPinyin = this.toLowercase(pinyin);
+    
+    // 实现字符串开头匹配检查（不使用内置的startsWith方法）
+    return this.stringStartsWith(firstLetters, lowerPinyin);
+  }
+  
+  /**
+   * 将字符串转换为小写
+   * 兼容ArkTS语法的实现
+   */
+  private toLowercase(str: string): string {
+    if (!str || typeof str !== 'string') {
+      return str || '';
+    }
+    
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charAt(i);
+      const charCode = char.charCodeAt(0);
+      // 大写字母A-Z (65-90) 转换为小写 a-z (97-122)
+      if (charCode >= 65 && charCode <= 90) {
+        result += String.fromCharCode(charCode + 32);
+      } else {
+        result += char;
+      }
+    }
+    return result;
+  }
+  
+  /**
+   * 检查字符串是否包含子字符串
+   * 兼容ArkTS语法的实现
+   */
+  private stringContains(str: string, substr: string): boolean {
+    if (!str || !substr || substr.length > str.length) {
+      return false;
+    }
+    
+    for (let i = 0; i <= str.length - substr.length; i++) {
+      let match = true;
+      for (let j = 0; j < substr.length; j++) {
+        if (str.charAt(i + j) !== substr.charAt(j)) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * 检查字符串是否以指定子字符串开头
+   * 兼容ArkTS语法的实现
+   */
+  private stringStartsWith(str: string, prefix: string): boolean {
+    if (!str || !prefix || prefix.length > str.length) {
+      return false;
+    }
+    
+    for (let i = 0; i < prefix.length; i++) {
+      if (str.charAt(i) !== prefix.charAt(i)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -117,21 +279,145 @@ export class PinyinUtil {
    * @param map 要添加的映射
    */
   public extendPinyinMap(map: Record<string, string>): void {
-    // 手动合并映射表，避免使用Object.assign（ArkTS限制）
-    // 使用for...in循环实现（ArkTS兼容性）
-    const keys: string[] = [];
-    for (const key in map) {
-      if (Object.prototype.hasOwnProperty.call(map, key)) {
-        keys.push(key);
+    try {
+      // 验证输入参数
+      if (!map || typeof map !== 'object') {
+        Logger.warn(TAG, 'Invalid map parameter provided to extendPinyinMap');
+        return;
       }
-    }
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (Object.prototype.hasOwnProperty.call(map, key)) {
-        PINYIN_MAP[key] = map[key];
+      
+      let addedCount = 0;
+      let updatedCount = 0;
+      
+      // 使用JSON序列化和健壮的解析逻辑获取对象键值对
+      // 这种方法可以避免使用for..in循环和Object.keys，符合ArkTS语法规范
+      const mapStr = JSON.stringify(map);
+      
+      // 健壮的JSON解析逻辑
+      let inKey = false;
+      let inValue = false;
+      let currentKey = '';
+      let currentValue = '';
+      let isEscaped = false;
+      let valueStartIndex = 0;
+      
+      // 跳过JSON对象的开始大括号
+      let i = 1;
+      
+      while (i < mapStr.length) {
+        const char = mapStr[i];
+        
+        if (isEscaped) {
+          // 处理转义字符
+          if (inKey) {
+            currentKey += char;
+          } else if (inValue) {
+            currentValue += char;
+          }
+          isEscaped = false;
+        } else if (char === '\\') {
+          // 检测转义符号
+          isEscaped = true;
+        } else if (char === '"' && !inKey && !inValue) {
+          // 开始解析键
+          inKey = true;
+          currentKey = '';
+        } else if (char === '"' && inKey) {
+          // 键解析结束
+          inKey = false;
+        } else if (char === ':' && !inKey && !inValue) {
+          // 开始解析值
+          inValue = true;
+          currentValue = '';
+          i++;
+          valueStartIndex = i;
+          
+          // 处理值的不同类型：字符串、数字、布尔值等
+          if (i < mapStr.length) {
+            const nextChar = mapStr[i];
+            if (nextChar === '"') {
+              // 字符串值，需要处理引号
+              i++; // 跳过开始引号
+              while (i < mapStr.length) {
+                const valueChar = mapStr[i];
+                if (valueChar === '\\') {
+                  // 转义字符
+                  if (i + 1 < mapStr.length) {
+                    currentValue += mapStr[i + 1];
+                    i += 2;
+                  } else {
+                    i++;
+                  }
+                } else if (valueChar === '"') {
+                  // 字符串结束
+                  i++;
+                  break;
+                } else {
+                  currentValue += valueChar;
+                  i++;
+                }
+              }
+              inValue = false;
+            } else {
+              // 非字符串值（数字、布尔值等）
+              while (i < mapStr.length) {
+                const valueChar = mapStr[i];
+                if (valueChar === ',' || valueChar === '}') {
+                  break;
+                }
+                currentValue += valueChar;
+                i++;
+              }
+              // 去除空格并转换为字符串
+              currentValue = currentValue.trim();
+              inValue = false;
+            }
+            
+            // 处理当前键值对
+            if (currentKey && currentValue) {
+              const isUpdate = currentKey in PINYIN_MAP;
+              
+              // 验证值的有效性 - 确保是单字符拼音（通常是字母）
+              // 但也允许特殊情况，如多字符拼音或音调标记
+              if (typeof currentValue === 'string' && currentValue.length > 0) {
+                // 在ArkTS中安全地设置属性
+                const keyToSet = currentKey;
+                const valueToSet = currentValue;
+                PINYIN_MAP[keyToSet] = valueToSet;
+                
+                if (isUpdate) {
+                  updatedCount++;
+                } else {
+                  addedCount++;
+                }
+              }
+              
+              // 重置键值缓冲区
+              currentKey = '';
+              currentValue = '';
+            }
+          }
+        } else if (char === ',' && !inKey && !inValue) {
+          // 跳过逗号，准备下一个键值对
+        } else if (char === '}' && !inKey && !inValue) {
+          // 解析结束
+          break;
+        } else if (inKey) {
+          // 构建键字符串
+          currentKey += char;
+        }
+        
+        i++;
       }
+      
+      // 记录操作结果
+      Logger.debug(TAG, `Pinyin map extended: ${addedCount} entries added, ${updatedCount} entries updated`);
+      
+    } catch (error) {
+      Logger.error(TAG, `Failed to extend pinyin map: ${error instanceof Error ? error.message : String(error)}`);
+      // 可以考虑抛出错误或返回失败状态
+      throw error instanceof Error ? error : new Error(String(error));
     }
-    Logger.debug(TAG, `Pinyin map extended with ${keys.length} entries`);
   }
 
   /**
@@ -142,21 +428,92 @@ export class PinyinUtil {
    * @returns 过滤后的数组
    */
   public filterByPinyin<T>(items: T[], keyword: string, textExtractor: (item: T) => string): T[] {
-    if (!keyword || keyword.trim() === '') {
+    // 参数验证
+    if (!items || !Array.isArray(items)) {
+      Logger.warn(TAG, 'Invalid items array in filterByPinyin');
+      return [];
+    }
+    
+    if (!keyword || typeof keyword !== 'string') {
+      Logger.debug(TAG, 'Empty or invalid keyword in filterByPinyin');
       return items;
     }
-
-    const lowerKeyword = keyword.toLowerCase();
     
-    return items.filter(item => {
-      const text = textExtractor(item);
-      // 文本直接匹配
-      if (text.toLowerCase().includes(lowerKeyword)) {
-        return true;
+    if (!textExtractor || typeof textExtractor !== 'function') {
+      Logger.error(TAG, 'Invalid textExtractor function in filterByPinyin');
+      return [];
+    }
+    
+    // 去除关键词前后空格
+    const trimmedKeyword = this.trimString(keyword);
+    if (trimmedKeyword === '') {
+      return items;
+    }
+    
+    const lowerKeyword = this.toLowercase(trimmedKeyword);
+    
+    // 实现自定义的filter逻辑，避免使用数组的filter方法
+    const filteredItems: T[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      try {
+        const text = textExtractor(item);
+        if (typeof text === 'string') {
+          // 文本直接匹配
+          const lowerText = this.toLowercase(text);
+          if (this.stringContains(lowerText, lowerKeyword)) {
+            filteredItems.push(item);
+            continue;
+          }
+          
+          // 拼音首字母匹配
+          if (this.containsPinyin(text, lowerKeyword)) {
+            filteredItems.push(item);
+          }
+        }
+      } catch (error) {
+        // 处理单个项处理失败的情况
+        Logger.warn(TAG, `Error processing item in filterByPinyin: ${error instanceof Error ? error.message : String(error)}`);
       }
-      // 拼音首字母匹配
-      return this.containsPinyin(text, lowerKeyword);
-    });
+    }
+    
+    Logger.debug(TAG, `Filtered array from ${items.length} to ${filteredItems.length} items`);
+    return filteredItems;
+  }
+  
+  /**
+   * 去除字符串前后空格
+   * 兼容ArkTS语法的实现
+   */
+  private trimString(str: string): string {
+    if (!str || typeof str !== 'string') {
+      return str || '';
+    }
+    
+    let start = 0;
+    let end = str.length;
+    
+    // 查找起始非空格位置
+    while (start < end && this.isWhitespace(str.charAt(start))) {
+      start++;
+    }
+    
+    // 查找结束非空格位置
+    while (end > start && this.isWhitespace(str.charAt(end - 1))) {
+      end--;
+    }
+    
+    return str.substring(start, end);
+  }
+  
+  /**
+   * 检查字符是否为空白字符
+   */
+  private isWhitespace(char: string): boolean {
+    const charCode = char.charCodeAt(0);
+    // 空格、制表符、换行符、回车符等
+    return charCode === 32 || charCode === 9 || charCode === 10 || charCode === 13;
   }
 }
 

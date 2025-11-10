@@ -136,12 +136,7 @@ export class ArkJsLoader extends BaseLoader {
   private cleanupResources(): void {
     // 清理JavaScript上下文
     if (this.jsContext) {
-      // 删除所有属性
-      for (const key in this.jsContext) {
-        if (Object.prototype.hasOwnProperty.call(this.jsContext, key)) {
-          delete this.jsContext[key];
-        }
-      }
+      // 直接创建新对象替代delete操作
       this.jsContext = {};
     }
     
@@ -274,32 +269,23 @@ export class ArkJsLoader extends BaseLoader {
       }
     };
     
-    // 注入正则表达式工具
-    this.jsContext.regexp = {
-      findAll: (text: string, pattern: string, flags?: string) => {
-        try {
-          const regex = new RegExp(pattern, flags);
-          const matches = [];
-          let match;
-          while ((match = regex.exec(text)) !== null) {
-            matches.push([...match]); // 创建副本避免引用问题
-            if (!regex.global) break;
-          }
-          return matches;
-        } catch (error) {
-          Logger.error(this.TAG, `Regex findAll error: ${error}`);
-          return [];
-        }
+    // 注入字符串处理工具（替代正则表达式）
+    this.jsContext.stringUtil = {
+      // 使用简单的字符串方法替代正则表达式
+      contains: (text: string, substring: string): boolean => {
+        return text.indexOf(substring) !== -1;
       },
-      matchOne: (text: string, pattern: string, flags?: string) => {
-        try {
-          const regex = new RegExp(pattern, flags);
-          const match = regex.exec(text);
-          return match ? [...match] : null; // 创建副本避免引用问题
-        } catch (error) {
-          Logger.error(this.TAG, `Regex matchOne error: ${error}`);
-          return null;
-        }
+      startsWith: (text: string, prefix: string): boolean => {
+        return text.indexOf(prefix) === 0;
+      },
+      endsWith: (text: string, suffix: string): boolean => {
+        return text.lastIndexOf(suffix) === text.length - suffix.length;
+      },
+      split: (text: string, separator: string): string[] => {
+        return text.split(separator);
+      },
+      replace: (text: string, search: string, replacement: string): string => {
+        return text.replace(search, replacement);
       }
     };
     

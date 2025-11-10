@@ -392,10 +392,26 @@ export class FormatUtil {
         return text;
       }
 
-      // 创建正则表达式，忽略大小写
-      const regex = new RegExp(`(${keyword})`, 'gi');
-      // 替换匹配的关键词为高亮版本
-      return text.replace(regex, '<mark>$1</mark>');
+      // 不使用正则表达式，改用字符串方法实现关键词高亮
+      const lowerText = text.toLowerCase();
+      const lowerKeyword = keyword.toLowerCase();
+      let result = '';
+      let lastIndex = 0;
+      let currentIndex = lowerText.indexOf(lowerKeyword, lastIndex);
+      
+      while (currentIndex !== -1) {
+        // 添加关键词前的文本
+        result += text.substring(lastIndex, currentIndex);
+        // 添加高亮的关键词
+        result += '<mark>' + text.substring(currentIndex, currentIndex + keyword.length) + '</mark>';
+        // 更新索引继续查找
+        lastIndex = currentIndex + keyword.length;
+        currentIndex = lowerText.indexOf(lowerKeyword, lastIndex);
+      }
+      
+      // 添加最后一部分文本
+      result += text.substring(lastIndex);
+      return result;
     } catch (error) {
       this.logger.error('Failed to format search keyword', error as Error);
       return text || '';

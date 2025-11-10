@@ -150,7 +150,7 @@ export class ParserService {
       return result;
     } catch (error) {
       Logger.error(ParserService.TAG, `Failed to parse video source: ${error}`);
-      return { success: false, message: `Parse failed: ${error}` };
+      return { success: false, message: `Parse failed: ${error instanceof Error ? error.message : String(error)}` };
     }
   }
   
@@ -371,7 +371,7 @@ export class ParserService {
         
         return { success: true, data: result };
       } catch (error) {
-        Logger.warn(ParserService.TAG, `Parse attempt ${attempts} failed: ${error}`);
+        Logger.warn(ParserService.TAG, `Parse attempt ${attempts} failed: ${error instanceof Error ? error.message : String(error)}`);
         
         if (attempts > context.config.retryCount!) {
           throw error instanceof Error ? error : new Error(String(error));
@@ -379,6 +379,7 @@ export class ParserService {
         
         // 指数退避重试
         const backoffTime = Math.pow(2, attempts - 1) * 1000 + Math.random() * 500;
+        // 等待一段时间后重试
         await new Promise(resolve => setTimeout(resolve, backoffTime));
       }
     }
@@ -430,12 +431,17 @@ export class ParserService {
       let m3u8Url = url;
       if (!url.includes('.m3u8')) {
         // 尝试获取重定向后的URL
-        const response = await HttpService.getInstance().head(url, { timeout: 10000 });
-        if (response.headers) {
-          const contentType = response.headers['content-type'] || response.headers['Content-Type'];
-          if (contentType && contentType.includes('application/x-mpegURL')) {
-            m3u8Url = url;
+        try {
+          const response = await HttpService.getInstance().head(url, { timeout: 10000 });
+          if (response.headers) {
+            const contentType = response.headers['content-type'] || response.headers['Content-Type'];
+            if (contentType && contentType.includes('application/x-mpegURL')) {
+              m3u8Url = url;
+            }
           }
+        } catch (headError) {
+          // HEAD请求失败，继续使用原始URL
+          Logger.debug(ParserService.TAG, `HEAD request failed: ${headError instanceof Error ? headError.message : String(headError)}`);
         }
       }
       
@@ -448,7 +454,7 @@ export class ParserService {
         duration: 0
       };
     } catch (error) {
-      Logger.warn(ParserService.TAG, `Failed to parse HLS stream: ${error}`);
+      Logger.warn(ParserService.TAG, `Failed to parse HLS stream: ${error instanceof Error ? error.message : String(error)}`);
       // 降级为直接解析
       return this.directParse(url);
     }
@@ -463,12 +469,17 @@ export class ParserService {
       let mpdUrl = url;
       if (!url.includes('.mpd')) {
         // 尝试获取重定向后的URL
-        const response = await HttpService.getInstance().head(url, { timeout: 10000 });
-        if (response.headers) {
-          const contentType = response.headers['content-type'] || response.headers['Content-Type'];
-          if (contentType && contentType.includes('application/dash+xml')) {
-            mpdUrl = url;
+        try {
+          const response = await HttpService.getInstance().head(url, { timeout: 10000 });
+          if (response.headers) {
+            const contentType = response.headers['content-type'] || response.headers['Content-Type'];
+            if (contentType && contentType.includes('application/dash+xml')) {
+              mpdUrl = url;
+            }
           }
+        } catch (headError) {
+          // HEAD请求失败，继续使用原始URL
+          Logger.debug(ParserService.TAG, `HEAD request failed: ${headError instanceof Error ? headError.message : String(headError)}`);
         }
       }
       
@@ -481,7 +492,7 @@ export class ParserService {
         duration: 0
       };
     } catch (error) {
-      Logger.warn(ParserService.TAG, `Failed to parse DASH stream: ${error}`);
+      Logger.warn(ParserService.TAG, `Failed to parse DASH stream: ${error instanceof Error ? error.message : String(error)}`);
       // 降级为直接解析
       return this.directParse(url);
     }

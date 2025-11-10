@@ -1594,8 +1594,9 @@ export default class CacheService {
         
         // 检查键模式
         if (params.keyPattern) {
-          const regex = new RegExp(params.keyPattern, 'i');
-          if (!regex.test(key)) {
+          // 不使用正则表达式，改用字符串方法实现大小写不敏感的匹配
+          const searchPattern = params.keyPattern.toLowerCase();
+          if (key.toLowerCase().indexOf(searchPattern) === -1) {
             continue;
           }
         }

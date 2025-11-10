@@ -1,22 +1,20 @@
 // JsonUtil.ets - JSON工具类
-// 提供JSON序列化、反序列化、深拷贝、对象合并等功能
+// 提供JSON序列化、反序列化等基本功能
 
 import Logger from './Logger';
 
 const TAG = 'JsonUtil';
 
 /**
- * 获取对象的所有键
- * 替代Object.keys，兼容ArkTS语法
+ * 基本JSON值类型
  */
-export function getObjectKeys<T extends object>(obj: T): string[] {
-  const keys: string[] = [];
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      keys.push(key);
-    }
-  }
-  return keys;
+export type JsonValue = string | number | boolean | null | object;
+
+/**
+ * 定义一个简单的对象接口
+ */
+export interface SimpleObject {
+  [key: string]: JsonValue;
 }
 
 /**
@@ -25,14 +23,14 @@ export function getObjectKeys<T extends object>(obj: T): string[] {
  * @param defaultValue 默认值
  */
 export function safeParseJson<T>(jsonString: string, defaultValue: T): T {
-  if (!jsonString) {
+  if (!jsonString || jsonString.trim() === '') {
     Logger.warn(TAG, 'Empty JSON string provided');
     return defaultValue;
   }
 
   try {
-    const parsed = JSON.parse(jsonString) as T;
-    return parsed;
+    const parsed = JSON.parse(jsonString);
+    return parsed as T;
   } catch (error) {
     Logger.error(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
     Logger.debug(TAG, `JSON string: ${jsonString}`);
@@ -43,14 +41,13 @@ export function safeParseJson<T>(jsonString: string, defaultValue: T): T {
 /**
  * 安全的JSON字符串化
  * @param obj 要序列化的对象
- * @param indent 缩进空格数
  */
-export function safeStringify(obj: object, indent: number = 0): string {
+export function safeStringify(obj: JsonValue): string {
   try {
     if (obj === null || typeof obj === 'undefined') {
       return 'null';
     }
-    return JSON.stringify(obj, null, indent);
+    return JSON.stringify(obj, null, 0);
   } catch (error) {
     Logger.error(TAG, `Failed to stringify object: ${error instanceof Error ? error.message : String(error)}`);
     return '{}';
@@ -58,53 +55,89 @@ export function safeStringify(obj: object, indent: number = 0): string {
 }
 
 /**
- * 深拷贝对象
- * @param source 源对象
+ * 获取对象的所有键
  */
-export function deepClone<T>(source: T): T {
-  if (source === null || typeof source !== 'object') {
-    return source;
-  }
-
+export function getObjectKeys(obj: object): string[] {
+  const keys: string[] = [];
+  
   try {
-    // 对于循环引用，使用JSON方法处理会失败
-    // 这里使用简单的实现，对于复杂对象可能需要更复杂的深拷贝算法
-    const serialized = JSON.stringify(source);
-    return JSON.parse(serialized) as T;
+    const allKeys = Object.keys(obj);
+    for (let i = 0; i < allKeys.length; i++) {
+      keys.push(allKeys[i]);
+    }
   } catch (error) {
-    Logger.error(TAG, `Failed to deep clone object: ${error instanceof Error ? error.message : String(error)}`);
-    // 如果克隆失败，返回原始对象
-    return source;
+    Logger.warn(TAG, `Failed to get object keys: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  
+  return keys;
+}
+
+/**
+ * 检查对象是否包含指定键
+ */
+export function hasKey(obj: object, key: string): boolean {
+  try {
+    const keys = getObjectKeys(obj);
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i] === key) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return false;
   }
 }
 
 /**
- * 合并两个对象
- * @param target 目标对象
- * @param source 源对象
+ * 安全获取对象属性值
  */
-export function merge<T extends object, U extends object>(target: T, source: U): object {
-  // 使用Object.assign替代spread操作符
-  const result = Object.assign({}, target) as object;
+export function getValue(obj: object, key: string): JsonValue {
+  try {
+    if (hasKey(obj, key)) {
+      return (obj as SimpleObject)[key];
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 简单的对象合并
+ */
+export function merge(target: object, source: object): SimpleObject {
+  const result: SimpleObject = {} as SimpleObject;
   
-  // 使用getObjectKeys替代Object.keys
+  // 复制目标对象属性
+  const targetKeys = getObjectKeys(target);
+  for (let i = 0; i < targetKeys.length; i++) {
+    const key = targetKeys[i];
+    if (hasKey(target, key)) {
+      result[key] = getValue(target, key);
+    }
+  }
+  
+  // 合并源对象的属性
   const sourceKeys = getObjectKeys(source);
   for (let i = 0; i < sourceKeys.length; i++) {
     const key = sourceKeys[i];
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = (source as any)[key];
-      const targetValue = (result as any)[key];
+    if (hasKey(source, key)) {
+      const sourceValue = getValue(source, key);
+      const targetValue = getValue(target, key);
       
-      if (sourceValue !== null && typeof sourceValue === 'object' && 
+      // 判断是否需要递归合并
+      if (sourceValue !== null && 
+          typeof sourceValue === 'object' && 
           !Array.isArray(sourceValue) && 
           targetValue !== null && 
           typeof targetValue === 'object' && 
           !Array.isArray(targetValue)) {
         // 递归合并对象
-        (result as any)[key] = merge(targetValue, sourceValue);
+        result[key] = merge(targetValue, sourceValue);
       } else {
-        // 对于基本类型、数组和null，直接赋值
-        (result as any)[key] = sourceValue;
+        // 直接设置源对象的值
+        result[key] = sourceValue;
       }
     }
   }
@@ -114,17 +147,14 @@ export function merge<T extends object, U extends object>(target: T, source: U):
 
 /**
  * 从对象中提取指定属性
- * @param obj 源对象
- * @param keys 要提取的属性键数组
  */
-export function pick<T extends object>(obj: T, keys: string[]): object {
-  const result: Record<string, any> = {};
+export function pick(obj: object, keys: string[]): SimpleObject {
+  const result: SimpleObject = {} as SimpleObject;
   
-  // 使用循环处理属性提取
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (key in obj) {
-      result[key] = obj[key];
+    if (hasKey(obj, key)) {
+      result[key] = getValue(obj, key);
     }
   }
   
@@ -133,18 +163,25 @@ export function pick<T extends object>(obj: T, keys: string[]): object {
 
 /**
  * 从对象中排除指定属性
- * @param obj 源对象
- * @param keys 要排除的属性键数组
  */
-export function omit<T extends object>(obj: T, keys: string[]): object {
-  // 使用Object.assign替代spread操作符
-  const result: Record<string, any> = Object.assign({}, obj);
+export function omit(obj: object, keys: string[]): SimpleObject {
+  const result: SimpleObject = {} as SimpleObject;
+  const allKeys = getObjectKeys(obj);
   
-  // 使用循环处理属性排除
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (key in result) {
-      delete result[key];
+  for (let i = 0; i < allKeys.length; i++) {
+    const key = allKeys[i];
+    let shouldExclude = false;
+    
+    // 检查是否需要排除
+    for (let j = 0; j < keys.length; j++) {
+      if (keys[j] === key) {
+        shouldExclude = true;
+        break;
+      }
+    }
+    
+    if (!shouldExclude && hasKey(obj, key)) {
+      result[key] = getValue(obj, key);
     }
   }
   
@@ -153,95 +190,97 @@ export function omit<T extends object>(obj: T, keys: string[]): object {
 
 /**
  * 检查对象是否为空
- * @param obj 要检查的对象
  */
 export function isEmptyObject(obj: object): boolean {
   if (obj === null || typeof obj !== 'object') {
     return true;
   }
   
-  // 使用getObjectKeys替代Object.keys
-  const keys = getObjectKeys(obj);
-  for (let i = 0; i < keys.length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, keys[i])) {
-      return false;
-    }
+  try {
+    const keys = getObjectKeys(obj);
+    return keys.length === 0;
+  } catch (error) {
+    Logger.warn(TAG, `Failed to check if object is empty: ${error instanceof Error ? error.message : String(error)}`);
+    return false;
   }
-  
-  return true;
 }
 
 /**
- * 比较两个对象是否深度相等
- * @param obj1 第一个对象
- * @param obj2 第二个对象
+ * 比较两个对象是否相等（浅比较）
  */
-export function deepEqual(obj1: any, obj2: any): boolean {
+export function isEqual(obj1: JsonValue, obj2: JsonValue): boolean {
   if (obj1 === obj2) {
     return true;
   }
   
-  if (obj1 === null || obj2 === null || typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+  if (obj1 === null || obj2 === null) {
     return false;
   }
   
-  try {
-    // 使用JSON序列化进行比较（不处理循环引用）
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
-  } catch (error) {
-    Logger.warn(TAG, `Failed to compare objects deeply: ${error instanceof Error ? error.message : String(error)}`);
+  const type1 = typeof obj1;
+  const type2 = typeof obj2;
+  
+  if (type1 !== type2) {
     return false;
   }
-}
-
-/**
- * 将对象的键值对转换为URL查询参数
- * @param params 参数对象
- */
-export function toQueryString(params: Record<string, string | number | boolean>): string {
-  const queryParts: string[] = [];
   
-  // 使用getObjectKeys替代Object.keys
-  const keys = getObjectKeys(params);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (Object.prototype.hasOwnProperty.call(params, key)) {
-      const value = params[key];
-      const encodedKey = encodeURIComponent(key);
-      const encodedValue = encodeURIComponent(String(value));
-      queryParts.push(`${encodedKey}=${encodedValue}`);
-    }
+  if (type1 !== 'object') {
+    return obj1 === obj2;
   }
   
-  return queryParts.join('&');
-}
-
-/**
- * 从URL查询参数解析为对象
- * @param queryString 查询参数字符串
- */
-export function parseQueryString(queryString: string): Record<string, string> {
-  const result: Record<string, string> = {};
-  
-  if (!queryString) {
-    return result;
-  }
-  
-  // 移除开头的问号
-  const cleanQuery = queryString.startsWith('?') ? queryString.substring(1) : queryString;
-  
-  const pairs = cleanQuery.split('&');
-  
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i];
-    const [key, value] = pair.split('=');
+  // 处理数组
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    const arr1 = obj1 as Array<JsonValue>;
+    const arr2 = obj2 as Array<JsonValue>;
     
-    if (key) {
-      const decodedKey = decodeURIComponent(key);
-      const decodedValue = value ? decodeURIComponent(value) : '';
-      result[decodedKey] = decodedValue;
+    if (arr1.length !== arr2.length) {
+      return false;
     }
+    
+    for (let i = 0; i < arr1.length; i++) {
+      if (!isEqual(arr1[i], arr2[i])) {
+        return false;
+      }
+    }
+    
+    return true;
   }
   
-  return result;
+  // 处理对象
+  if (!Array.isArray(obj1) && !Array.isArray(obj2)) {
+    const keys1 = getObjectKeys(obj1);
+    const keys2 = getObjectKeys(obj2);
+    
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    
+    for (let i = 0; i < keys1.length; i++) {
+      const key = keys1[i];
+      
+      // 检查key是否存在于obj2
+      let keyExists = false;
+      for (let j = 0; j < keys2.length; j++) {
+        if (keys2[j] === key) {
+          keyExists = true;
+          break;
+        }
+      }
+      
+      if (!keyExists) {
+        return false;
+      }
+      
+      // 比较值
+      const val1 = getValue(obj1, key);
+      const val2 = getValue(obj2, key);
+      if (!isEqual(val1, val2)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  return false;
 }

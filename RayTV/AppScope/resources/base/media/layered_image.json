@@ -1,7 +1,10 @@
 {
-  "layered-image":
-  {
-    "background" : "$media:background",
-    "foreground" : "$media:foreground"
-  }
+  "item": [
+    {
+      "name": "app_icon",
+      "type": "image",
+      "image": "app_icon.svg",
+      "enableScale": true
+    }
+  ]
 }

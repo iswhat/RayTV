@@ -665,8 +665,18 @@ class Logger {
       for (let i = 3; i < stack.length; i++) {
         const line = stack[i];
         if (line && !line.includes('Logger.ets')) {
-          const match = line.match(/at\s+(\S+)\s+/);
-          return match ? match[1] : 'unknown';
+          // 使用字符串操作替代正则表达式
+          const atIndex = line.indexOf('at ');
+          if (atIndex !== -1) {
+            const start = atIndex + 3;
+            // 查找空格或换行
+            let end = line.indexOf(' ', start);
+            if (end === -1) {
+              end = line.length;
+            }
+            return line.substring(start, end) || 'unknown';
+          }
+          return 'unknown';
         }
       }
     } catch (error) {

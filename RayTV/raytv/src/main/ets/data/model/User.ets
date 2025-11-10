@@ -120,7 +120,16 @@ export default class User {
    * @returns 合并后的偏好设置
    */
   private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences>): UserPreferences {
-    const result: UserPreferences = { ...base };
+    // 不使用展开操作符，手动创建并复制属性
+    const result: UserPreferences = {
+      theme: base.theme,
+      language: base.language,
+      playerDefaultQuality: base.playerDefaultQuality,
+      // 确保复制所有必要的属性
+      autoPlayNext: base.autoPlayNext,
+      subtitlesEnabled: base.subtitlesEnabled,
+      notificationsEnabled: base.notificationsEnabled
+    };
     
     // 手动合并每个属性
     if (updates.theme !== undefined) result.theme = updates.theme;
@@ -337,11 +346,34 @@ export default class User {
   }
 
   /**
-   * 序列化对象（用于存储）
-   * @returns 序列化后的对象
-   */
-  public toSerializable(): Partial<User> {
-    const result: Partial<User> = {
+ * 用户可序列化数据接口
+ */
+export interface UserSerializable {
+  id?: string;
+  username?: string;
+  nickname?: string;
+  email?: string;
+  avatarUrl?: string;
+  role?: UserRole;
+  preferences?: UserPreferences;
+  lastLoginTime?: string;
+  registrationDate?: string;
+  activeDevices?: DeviceInfo[];
+  isVerified?: boolean;
+  status?: 'active' | 'inactive' | 'suspended';
+  subscriptionEndDate?: string;
+  watchHistoryEnabled?: boolean;
+  favoritesEnabled?: boolean;
+  totalWatchTime?: number;
+  settings?: Record<string, string | number | boolean | object | null>;
+}
+
+/**
+ * 序列化对象（用于存储）
+ * @returns 序列化后的对象
+ */
+  public toSerializable(): UserSerializable {
+    const result: UserSerializable = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,

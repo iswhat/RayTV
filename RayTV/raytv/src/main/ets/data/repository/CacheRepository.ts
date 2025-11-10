@@ -975,7 +975,7 @@ export class CacheRepository {
    */
   private matchesSearchCriteria(key: string, metadata: CacheMetadata, params: CacheSearchParams): boolean {
     // 检查键匹配
-    if (params.keyPattern && !new RegExp(params.keyPattern).test(key)) {
+    if (params.keyPattern && key.indexOf(params.keyPattern) === -1) {
       return false;
     }
     

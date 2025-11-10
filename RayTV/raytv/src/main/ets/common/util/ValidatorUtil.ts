@@ -272,11 +272,43 @@ export class ValidatorUtil {
       // 构建正则表达式
       let pattern = '^[a-zA-Z0-9';
       if (allowUnderscore) pattern += '_';
-      if (allowHyphen) pattern += '-';
-      pattern += ']+$';
-
-      const usernameRegex = new RegExp(pattern);
-      return usernameRegex.test(username);
+      // 不使用正则表达式，改用字符串方法实现用户名验证
+      if (!username || username.length === 0) {
+        return false;
+      }
+      
+      // 检查第一个字符是否是字母或数字
+      const firstChar = username[0];
+      const isFirstCharValid = (firstChar >= 'a' && firstChar <= 'z') || 
+                            (firstChar >= 'A' && firstChar <= 'Z') || 
+                            (firstChar >= '0' && firstChar <= '9');
+      if (!isFirstCharValid) {
+        return false;
+      }
+      
+      // 检查最后一个字符是否是字母或数字
+      const lastChar = username[username.length - 1];
+      const isLastCharValid = (lastChar >= 'a' && lastChar <= 'z') || 
+                            (lastChar >= 'A' && lastChar <= 'Z') || 
+                            (lastChar >= '0' && lastChar <= '9');
+      if (!isLastCharValid) {
+        return false;
+      }
+      
+      // 检查所有字符是否符合要求
+      for (let i = 0; i < username.length; i++) {
+        const char = username[i];
+        const isLetter = (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
+        const isDigit = (char >= '0' && char <= '9');
+        const isUnderscore = char === '_';
+        const isHyphen = allowHyphen && char === '-';
+        
+        if (!(isLetter || isDigit || isUnderscore || isHyphen)) {
+          return false;
+        }
+      }
+      
+      return true;
     } catch (error) {
       this.logger.error('Failed to validate username', error as Error);
       return false;

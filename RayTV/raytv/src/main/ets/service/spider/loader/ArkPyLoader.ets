@@ -142,11 +142,7 @@ export class ArkPyLoader extends BaseLoader {
   private cleanupResources(): void {
     // 清理Python上下文
     if (this.pyContext) {
-      for (const key in this.pyContext) {
-        if (Object.prototype.hasOwnProperty.call(this.pyContext, key)) {
-          delete this.pyContext[key];
-        }
-      }
+      // 直接创建新对象替代delete操作
       this.pyContext = {};
     }
 
@@ -300,41 +296,23 @@ export class ArkPyLoader extends BaseLoader {
       }
     };
 
-    // 注入正则表达式工具
-    this.pyContext.regex = {
-      findall: (pattern: string, text: string, flags: string = '') => {
-        try {
-          const regex = new RegExp(pattern, flags);
-          const matches = [];
-          let match;
-          while ((match = regex.exec(text)) !== null) {
-            matches.push([...match]);
-            if (!regex.global) break;
-          }
-          return matches;
-        } catch (error) {
-          Logger.error(this.TAG, `Regex findall error: ${error}`);
-          return [];
-        }
+    // 注入字符串处理工具（替代正则表达式）
+    this.pyContext.stringUtil = {
+      // 使用简单的字符串方法替代正则表达式
+      contains: (text: string, substring: string): boolean => {
+        return text.indexOf(substring) !== -1;
       },
-      search: (pattern: string, text: string, flags: string = '') => {
-        try {
-          const regex = new RegExp(pattern, flags);
-          const match = regex.exec(text);
-          return match ? [...match] : null;
-        } catch (error) {
-          Logger.error(this.TAG, `Regex search error: ${error}`);
-          return null;
-        }
+      startsWith: (text: string, prefix: string): boolean => {
+        return text.indexOf(prefix) === 0;
       },
-      sub: (pattern: string, replacement: string, text: string, flags: string = '') => {
-        try {
-          const regex = new RegExp(pattern, flags);
-          return text.replace(regex, replacement);
-        } catch (error) {
-          Logger.error(this.TAG, `Regex sub error: ${error}`);
-          return text;
-        }
+      endsWith: (text: string, suffix: string): boolean => {
+        return text.lastIndexOf(suffix) === text.length - suffix.length;
+      },
+      split: (text: string, separator: string): string[] => {
+        return text.split(separator);
+      },
+      replace: (text: string, search: string, replacement: string): string => {
+        return text.replace(search, replacement);
       }
     };
 

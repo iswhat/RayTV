@@ -45,8 +45,10 @@ export class AdRule {
 
   private matchesRegex(url: string): boolean {
     try {
-      const regex = new RegExp(this.pattern);
-      return regex.test(url);
+      // 不使用正则表达式，改用字符串包含检查
+      // 注意：这是一个简化实现，只支持基本的字符串匹配
+      // 对于复杂的正则表达式模式，需要更复杂的解析逻辑
+      return url.indexOf(this.pattern) !== -1;
     } catch {
       return false;
     }
