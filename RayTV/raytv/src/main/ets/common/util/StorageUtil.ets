@@ -3,7 +3,6 @@ import Logger from './Logger';
 import AppConstant from '../constant/AppConstant';
 import FileUtil from './FileUtil';
 import preferences from '@ohos.data.preferences';
-import { JsonValue } from './JsonUtil';
 
 const TAG = 'StorageUtil';
 
@@ -21,7 +20,7 @@ export enum StorageType {
  * 存储数据结构
  */
 export interface StorageData {
-  value: string | number | boolean | object | null;
+  value: string | number | boolean | Record<string, string | number | boolean> | null;
   timestamp: number;
   expireTime: number;
 }
@@ -30,9 +29,15 @@ export interface StorageData {
  * 内存缓存项结构
  */
 export interface MemoryCacheItem {
-  value: string | number | boolean | object | null;
+  value: string | number | boolean | Record<string, string | number | boolean> | null;
   expireTime: number;
 }
+
+/**
+ * JSON数据类型 - 替代any类型
+ * 使用Record类型避免索引签名
+ */
+export type JsonData = Record<string, string | number | boolean | JsonData | null>;
 
 /**
  * 存储工具类
@@ -54,7 +59,11 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: string | number | boolean | object | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: string | number | boolean | JsonData | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    if (!key || typeof key !== 'string') {
+      throw new Error('Invalid key');
+    }
+
     try {
       // 确保value的类型安全
       const safeValue = StorageUtil.validateValue(value);
@@ -80,8 +89,9 @@ export default class StorageUtil {
       }
 
       Logger.getInstance().info(`${TAG} - Saved data for key: ${key}, type: ${type}`);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to save data for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -94,7 +104,11 @@ export default class StorageUtil {
    * @param defaultValue 默认值
    * @returns 读取的数据或默认值
    */
-  public static async get(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: string | number | boolean | object | null): Promise<string | number | boolean | object | null> {
+  public static async get(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: string | number | boolean | JsonData | null): Promise<string | number | boolean | JsonData | null> {
+    if (!key || typeof key !== 'string') {
+      return defaultValue !== undefined ? defaultValue : null;
+    }
+
     try {
       let data: StorageData | null = null;
 
@@ -135,8 +149,9 @@ export default class StorageUtil {
         return defaultValue;
       }
       return null;
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to get data for key ${key}: ${errorMessage}`);
       // 出错时返回默认值
       if (defaultValue !== undefined) {
@@ -152,6 +167,10 @@ export default class StorageUtil {
    * @param type 存储类型
    */
   public static async remove(key: string, type: StorageType = StorageType.PREFERENCES): Promise<void> {
+    if (!key) {
+      return;
+    }
+
     try {
       switch (type) {
         case StorageType.PREFERENCES:
@@ -163,11 +182,10 @@ export default class StorageUtil {
         case StorageType.MEMORY:
           // 创建新对象，不包含要删除的键
           const newCache: Record<string, MemoryCacheItem> = {};
-          const keys = Object.keys(StorageUtil.memoryCache);
-          for (let i = 0; i < keys.length; i++) {
-            const k = keys[i];
-            if (k !== key) {
-              newCache[k] = StorageUtil.memoryCache[k];
+          for (const cacheKey in StorageUtil.memoryCache) {
+            // 使用简单的检查方式
+            if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
+              newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
             }
           }
           StorageUtil.memoryCache = newCache;
@@ -177,8 +195,9 @@ export default class StorageUtil {
       }
 
       Logger.getInstance().info(`${TAG} - Removed data for key: ${key}, type: ${type}`);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to remove data for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -205,8 +224,9 @@ export default class StorageUtil {
       }
 
       Logger.getInstance().info(`${TAG} - Cleared all data for type: ${type}`);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to clear data for type ${type}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -244,22 +264,27 @@ export default class StorageUtil {
   private static startMemoryCacheCleanup(): void {
     // 设置定时清理任务
     setInterval(() => {
-      const now = Date.now();
-      const keys = Object.keys(StorageUtil.memoryCache);
-      const newCache: Record<string, MemoryCacheItem> = {};
-      
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const item = StorageUtil.memoryCache[key];
-        if (item.expireTime > 0 && now > item.expireTime) {
-          Logger.getInstance().info(`${TAG} - Removed expired memory cache item: ${key}`);
-        } else {
-          // 保留未过期的项
-          newCache[key] = item;
+      try {
+        const now = Date.now();
+        const newCache: Record<string, MemoryCacheItem> = {};
+
+        // 过滤过期的缓存项
+        for (const key in StorageUtil.memoryCache) {
+          // 使用简单的检查方式
+          const item = StorageUtil.memoryCache[key];
+          if (item !== undefined && (item.expireTime === 0 || now < item.expireTime)) {
+            newCache[key] = item;
+          } else {
+            Logger.getInstance().info(`${TAG} - Removed expired memory cache item: ${key}`);
+          }
         }
+
+        StorageUtil.memoryCache = newCache;
+      } catch (error) {
+        // 直接使用String()转换错误信息
+        const errorMessage = String(error);
+        Logger.getInstance().error(`${TAG} - Failed to clean memory cache: ${errorMessage}`);
       }
-      
-      StorageUtil.memoryCache = newCache;
     }, StorageUtil.MEMORY_CACHE_CLEAN_INTERVAL);
   }
 
@@ -268,12 +293,13 @@ export default class StorageUtil {
    */
   private static async saveToPreferences(key: string, data: StorageData): Promise<void> {
     try {
-      const pref: preferences.Preferences = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const jsonData = JSON.stringify(data) as string;
+      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
+      const jsonData = JSON.stringify(data);
       await pref.putString(key, jsonData);
       await pref.flush();
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to save to preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -284,8 +310,8 @@ export default class StorageUtil {
    */
   private static async getFromPreferences(key: string): Promise<StorageData | null> {
     try {
-      const pref: preferences.Preferences = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const jsonData = await pref.getString(key, '') as string;
+      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
+      const jsonData = await pref.getString(key, '');
       
       if (jsonData === '') {
         return null;
@@ -299,8 +325,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to get from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -311,11 +338,12 @@ export default class StorageUtil {
    */
   private static async removeFromPreferences(key: string): Promise<void> {
     try {
-      const pref: preferences.Preferences = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
+      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       await pref.delete(key);
       await pref.flush();
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to remove from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -326,17 +354,24 @@ export default class StorageUtil {
    */
   private static async clearPreferences(): Promise<void> {
     try {
-      const pref: preferences.Preferences = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const keys = await pref.getAllKeys() as string[];
+      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
+      const keys = await pref.getAllKeys();
+      
+      // 检查keys是否为数组
       if (Array.isArray(keys)) {
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
-          await pref.delete(key);
+          // 确保key是字符串类型
+          if (typeof key === 'string') {
+            await pref.delete(key);
+          }
         }
       }
+      
       await pref.flush();
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to clear preferences: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -349,10 +384,11 @@ export default class StorageUtil {
     try {
       const fileName = `${key}.json`;
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
-      const jsonData = JSON.stringify(data) as string;
+      const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to save to file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -371,7 +407,17 @@ export default class StorageUtil {
         return null;
       }
       
-      const jsonData = await FileUtil.readFile(filePath) as string;
+      // 确保FileUtil.readFile返回字符串类型
+      const readResult = await FileUtil.readFile(filePath);
+      let jsonData: string = '';
+      if (typeof readResult === 'string') {
+        jsonData = readResult;
+      } else {
+        // 如果返回的不是字符串，转换为字符串
+        jsonData = String(readResult);
+      }
+      
+      // 确保jsonData是字符串
       if (jsonData === '') {
         return null;
       }
@@ -384,8 +430,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to get from file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -399,8 +446,9 @@ export default class StorageUtil {
       const fileName = `${key}.json`;
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       await FileUtil.deleteFile(filePath);
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 直接使用String()转换错误信息
+      const errorMessage = String(error);
       Logger.getInstance().error(`${TAG} - Failed to remove from file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -412,18 +460,21 @@ export default class StorageUtil {
   private static async clearFiles(): Promise<void> {
     try {
       const dirPath = await FileUtil.getApplicationDataDir();
-      const files = await FileUtil.listFiles(dirPath) as string[];
+      const files = await FileUtil.listFiles(dirPath);
       
+      // 检查files是否为数组
       if (Array.isArray(files)) {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          if (file.endsWith('.json')) {
+          // 确保file是字符串类型
+          if (typeof file === 'string' && file.endsWith('.json')) {
             await FileUtil.deleteFile(dirPath + '/' + file);
           }
         }
       }
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error);
+    } catch (error: Error) {
+      // 安全处理错误信息，避免使用String()函数
+      const errorMessage = error.message || 'Unknown error';
       Logger.getInstance().error(`${TAG} - Failed to clear files: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -432,19 +483,32 @@ export default class StorageUtil {
   /**
    * 安全解析JSON字符串
    */
-  private static safeParseJSON(jsonStr: string): Record<string, unknown> | null {
+  private static safeParseJSON(jsonStr: string): JsonData | null {
+    if (!jsonStr || typeof jsonStr !== 'string') {
+      return null;
+    }
     try {
-      // JSON.parse可能返回各种类型，我们需要确保返回的是对象类型
-      const result = JSON.parse(jsonStr);
-      // 严格检查是否为对象且不是null
-      if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
-        // 转换为Record类型以提供更好的类型提示
-        return result as Record<string, unknown>;
+      const parsed = JSON.parse(jsonStr);
+      // 确保解析结果是对象且不是数组
+      if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        const safeData: JsonData = {};
+        // 获取对象的所有自有属性键
+        const keys = Object.keys(parsed);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = parsed[key];
+          // 类型安全地设置值
+          if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+            safeData[key] = value;
+          } else if (typeof value === 'object' && value !== null) {
+            safeData[key] = {} as JsonData;
+          }
+        }
+        return safeData;
       }
       return null;
-    } catch (parseError) {
-      const errorMessage = StorageUtil.getErrorMessage(parseError);
-      Logger.getInstance().error(`${TAG} - Failed to parse JSON string: ${errorMessage}`);
+    } catch (error: Error) {
+      Logger.getInstance().error(`${TAG} - Failed to parse JSON string: ${error.message || 'Unknown error'}`);
       return null;
     }
   }
@@ -452,52 +516,58 @@ export default class StorageUtil {
   /**
    * 构建并验证StorageData对象
    */
-  private static buildStorageData(data: object): StorageData {
+  private static buildStorageData(data: JsonData): StorageData {
     const result: StorageData = {
       value: null,
       timestamp: 0,
       expireTime: 0
     };
     
+    // 安全地处理所有属性，避免使用索引访问和任何原型方法
     try {
-      // 安全获取value属性
-      if (Object.prototype.hasOwnProperty.call(data, 'value')) {
-        const valueProp = Object.getOwnPropertyDescriptor(data, 'value')?.value;
-        if (valueProp !== undefined) {
-          if (typeof valueProp === 'string' || typeof valueProp === 'number' || typeof valueProp === 'boolean' || valueProp === null) {
-            result.value = valueProp;
-          } else if (typeof valueProp === 'object') {
-            result.value = valueProp;
+      // 获取对象的所有自有属性键，避免使用in操作符
+      const keys = Object.keys(data);
+      
+      // 处理value属性
+      if (keys.includes('value')) {
+        const valueData = data['value'];
+        if (typeof valueData === 'string' || typeof valueData === 'number' || 
+            typeof valueData === 'boolean' || valueData === null) {
+          result.value = valueData;
+        } else if (typeof valueData === 'object' && valueData !== null) {
+          // 创建新的安全对象
+          const safeObject: Record<string, string | number | boolean> = {};
+          result.value = safeObject;
+        }
+      }
+      
+      // 处理timestamp属性
+      if (keys.includes('timestamp')) {
+        const tsValue = data['timestamp'];
+        if (typeof tsValue === 'number') {
+          result.timestamp = tsValue;
+        } else if (typeof tsValue === 'string') {
+          const numValue = Number(tsValue);
+          if (!isNaN(numValue)) {
+            result.timestamp = numValue;
           }
         }
       }
       
-      // 安全获取timestamp属性
-      if (Object.prototype.hasOwnProperty.call(data, 'timestamp')) {
-        const timestampProp = Object.getOwnPropertyDescriptor(data, 'timestamp')?.value;
-        if (timestampProp !== undefined) {
-          if (typeof timestampProp === 'number') {
-            result.timestamp = timestampProp;
-          } else if (typeof timestampProp === 'string') {
-            result.timestamp = Number(timestampProp) || 0;
+      // 处理expireTime属性
+      if (keys.includes('expireTime')) {
+        const expValue = data['expireTime'];
+        if (typeof expValue === 'number') {
+          result.expireTime = expValue;
+        } else if (typeof expValue === 'string') {
+          const numValue = Number(expValue);
+          if (!isNaN(numValue)) {
+            result.expireTime = numValue;
           }
         }
       }
-      
-      // 安全获取expireTime属性
-      if (Object.prototype.hasOwnProperty.call(data, 'expireTime')) {
-        const expireTimeProp = Object.getOwnPropertyDescriptor(data, 'expireTime')?.value;
-        if (expireTimeProp !== undefined) {
-          if (typeof expireTimeProp === 'number') {
-            result.expireTime = expireTimeProp;
-          } else if (typeof expireTimeProp === 'string') {
-            result.expireTime = Number(expireTimeProp) || 0;
-          }
-        }
-      }
-    } catch (error) {
-      const errorMessage = StorageUtil.getErrorMessage(error as Error | string);
-      Logger.getInstance().error(`${TAG} - Failed to build StorageData: ${errorMessage}`);
+    } catch (error: Error) {
+      Logger.getInstance().error(`${TAG} - Failed to build StorageData: ${String(error)}`);
     }
     
     return result;
@@ -506,20 +576,33 @@ export default class StorageUtil {
   /**
    * 验证值的类型安全性
    */
-  private static validateValue(value: string | number | boolean | object | null): string | number | boolean | object | null {
+  private static validateValue(value: string | number | boolean | JsonData | null): string | number | boolean | JsonData | null {
     if (value === null) {
       return null;
     }
     
     switch (typeof value) {
       case 'string':
-        return value;
       case 'number':
-        return value;
       case 'boolean':
         return value;
       case 'object':
-        return value;
+        // 创建新对象确保类型安全
+        const safeObj: JsonData = {};
+        // 获取对象的所有自有属性键
+        const keys = Object.keys(value);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const propValue = value[key];
+          // 类型安全地处理每个属性值
+          if (typeof propValue === 'string' || typeof propValue === 'number' || 
+              typeof propValue === 'boolean' || propValue === null) {
+            safeObj[key] = propValue;
+          } else if (typeof propValue === 'object' && propValue !== null) {
+            safeObj[key] = {} as JsonData;
+          }
+        }
+        return safeObj;
       default:
         // 对于不支持的类型，转换为字符串
         return String(value);
@@ -529,26 +612,29 @@ export default class StorageUtil {
   /**
    * 安全获取数字值
    */
-  private static safeNumber(value: string | number): number {
+  private static safeNumber(value: string | number | boolean, defaultValue: number = 0): number {
+    // 类型安全检查
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+    
+    // 直接处理不同类型
     if (typeof value === 'number') {
-      return value;
+      // 检查是否为有效数字
+      if (!Number.isNaN(value)) {
+        return value;
+      }
+    } else if (typeof value === 'string') {
+      // 对于字符串，安全转换为数字
+      const num = Number(value);
+      if (!Number.isNaN(num)) {
+        return num;
+      }
+    } else if (typeof value === 'boolean') {
+      // 对于布尔值，转换为数字
+      return value ? 1 : 0;
     }
-    if (typeof value === 'string') {
-      return Number(value) || 0;
-    }
-    return 0;
-  }
-
-  /**
-   * 安全获取错误消息
-   */
-  private static getErrorMessage(error: Error | string): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    if (typeof error === 'string') {
-      return error;
-    }
-    return 'Unknown error';
+    
+    return defaultValue;
   }
 }

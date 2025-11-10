@@ -28,7 +28,8 @@ export class CommonUtil {
   private getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
         keys.push(key);
       }
     }
@@ -74,7 +75,8 @@ export class CommonUtil {
       const keys = this.getObjectKeys(obj);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
           clonedObj[key] = this.deepClone(obj[key]);
         }
       }
@@ -326,8 +328,10 @@ export class CommonUtil {
     const keys1 = this.getObjectKeys(obj1);
     for (let i = 0; i < keys1.length; i++) {
       const key = keys1[i];
-      if (Object.prototype.hasOwnProperty.call(obj1, key)) {
-        if (Object.prototype.hasOwnProperty.call(obj2, key)) {
+      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+      if (typeof obj1 === 'object' && obj1 !== null && Object.keys(obj1).includes(key)) {
+        // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+            if (typeof obj2 === 'object' && obj2 !== null && Object.keys(obj2).includes(key)) {
           if (obj1[key] !== obj2[key]) {
             if (typeof obj1[key] === 'object' && typeof obj2[key] === 'object') {
               const nestedDiff = this.getObjectDiff(obj1[key], obj2[key]);
@@ -348,7 +352,9 @@ export class CommonUtil {
     const keys2 = this.getObjectKeys(obj2);
     for (let i = 0; i < keys2.length; i++) {
       const key = keys2[i];
-      if (Object.prototype.hasOwnProperty.call(obj2, key) && !Object.prototype.hasOwnProperty.call(obj1, key)) {
+      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+      if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null && 
+          Object.keys(obj2).includes(key) && !Object.keys(obj1).includes(key)) {
         diff[key] = obj2[key];
       }
     }
@@ -372,7 +378,8 @@ export class CommonUtil {
       const keys = this.getObjectKeys(source);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
+        // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
+        if (typeof source === 'object' && source !== null && Object.keys(source).includes(key)) {
           if (source[key] && typeof source[key] === 'object') {
             if (!target[key]) {
               // 手动创建新属性，避免使用Object.assign（ArkTS限制）
