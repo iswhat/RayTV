@@ -21,7 +21,7 @@ export enum RepositoryType {
  */
 export default class RepositoryFactory {
   private static instance: RepositoryFactory;
-  private repositoryMap: Map<RepositoryType, any> = new Map();
+  private repositoryMap: Map<RepositoryType, DatabaseRepository | NetworkRepository> = new Map();
   private isInitialized: boolean = false;
 
   /**
@@ -110,7 +110,7 @@ export default class RepositoryFactory {
    * @param type 仓库类型
    * @param repository 仓库实例
    */
-  public setRepository(type: RepositoryType, repository: any): void {
+  public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository): void {
     this.repositoryMap.set(type, repository);
     Logger.info(TAG, `Custom repository set for type: ${type}`);
   }

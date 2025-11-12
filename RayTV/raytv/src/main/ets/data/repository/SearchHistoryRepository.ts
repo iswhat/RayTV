@@ -62,7 +62,7 @@ export const SearchHistoryEventType = {
 export interface SearchHistoryEvent {
   type: string;
   timestamp: number;
-  data?: any;
+  data?: unknown;
   error?: Error;
 }
 
@@ -1055,26 +1055,27 @@ export class SearchHistoryRepository {
   /**
    * 验证历史记录项
    */
-  private isValidHistoryItem(item: any): boolean {
+  private isValidHistoryItem(item: unknown): boolean {
     return item && 
-           typeof item.query === 'string' && 
-           item.query.trim().length > 0 &&
-           typeof item.type === 'string' &&
-           typeof item.timestamp === 'number';
+           typeof (item as SearchHistoryItem).query === 'string' && 
+           (item as SearchHistoryItem).query.trim().length > 0 &&
+           typeof (item as SearchHistoryItem).type === 'string' &&
+           typeof (item as SearchHistoryItem).timestamp === 'number';
   }
 
   /**
    * 规范化历史记录项
    */
-  private normalizeHistoryItem(item: any): SearchHistoryItem {
+  private normalizeHistoryItem(item: unknown): SearchHistoryItem {
+    const historyItem = item as SearchHistoryItem;
     return {
-      id: item.id || this.generateId(),
-      query: item.query.trim().toLowerCase(),
-      type: item.type as SearchType,
-      timestamp: item.timestamp || Date.now(),
-      resultCount: item.resultCount,
-      category: item.category,
-      isFavorite: !!item.isFavorite
+      id: historyItem.id || this.generateId(),
+      query: historyItem.query.trim().toLowerCase(),
+      type: historyItem.type as SearchType,
+      timestamp: historyItem.timestamp || Date.now(),
+      resultCount: historyItem.resultCount,
+      category: historyItem.category,
+      isFavorite: !!historyItem.isFavorite
     };
   }
 

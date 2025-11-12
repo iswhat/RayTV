@@ -506,7 +506,7 @@ class ConfigRepository {
    * 替代Object.entries，兼容ArkTS语法
    */
   private getObjectEntries<T extends object>(obj: T): [string, string | number | boolean | null][] {
-    const entries: [string, any][] = [];
+    const entries: [string, string | number | boolean | null][] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         entries.push([key, obj[key]]);

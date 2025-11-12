@@ -50,7 +50,7 @@ export interface VideoEvent {
   videoId: string;
   type: string;
   timestamp: number;
-  data?: any;
+  data?: unknown;
   error?: Error;
 }
 
@@ -250,7 +250,7 @@ export class VideoRepository {
       const url = this.apiEndpoints.videoDetail.replace(':id', videoId);
       
       // 构建请求配置
-      const config: any = {};
+      const config: Record<string, unknown> = {};
       
       // 如果用户已登录，添加认证头
       const authToken = this.userRepository.getAuthToken();
@@ -335,7 +335,7 @@ export class VideoRepository {
       const params = this.buildVideoListParams(request);
       
       // 构建请求配置
-      const config: any = {
+      const config: Record<string, unknown> = {
         params
       };
       
@@ -908,7 +908,13 @@ export class VideoRepository {
     watchedAt: number;
   }>> {
     try {
-      const history = await this.storageUtil.getObject<any[]>(this.storageKeys.watchHistory, LocalStorageType.DEFAULT) || [];
+      const history = await this.storageUtil.getObject<Array<{
+        videoId: string;
+        title: string;
+        thumbnailUrl: string;
+        duration: number;
+        watchedAt: number;
+      }>>(this.storageKeys.watchHistory, LocalStorageType.DEFAULT) || [];
       
       // 限制数量
       if (limit && limit > 0) {
@@ -1165,8 +1171,8 @@ export class VideoRepository {
   /**
    * 构建视频列表请求参数
    */
-  private buildVideoListParams(request: VideoListRequest): any {
-    const params: any = {
+  private buildVideoListParams(request: VideoListRequest): Record<string, string | number> {
+    const params: Record<string, string | number> = {
       page: request.page || 1,
       pageSize: request.pageSize || 20,
       sortBy: request.sortBy || 'latest'

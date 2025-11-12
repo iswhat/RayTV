@@ -121,7 +121,7 @@ export const RecommendationEventType = {
 export interface RecommendationEvent {
   type: string;
   timestamp: number;
-  data?: any;
+  data?: string | number | boolean | null | Record<string, unknown> | unknown[];
   error?: Error;
 }
 
@@ -295,7 +295,7 @@ export class RecommendationRepository {
     });
     
     // 监听播放进度更新事件
-    this.eventBus.on('playback:progressUpdated', async (data: any) => {
+    this.eventBus.on('playback:progressUpdated', async (data: { videoId?: string; progress?: number; duration?: number; type?: string }) => {
       if (data.videoId && data.progress) {
         // 更新继续观看数据
         await this.updateContinueWatching(data.videoId, data.progress, data.duration, data.type);
@@ -303,7 +303,7 @@ export class RecommendationRepository {
     });
     
     // 监听搜索事件
-    this.eventBus.on('search:completed', async (data: any) => {
+    this.eventBus.on('search:completed', async (data: { query?: string; results?: unknown[] }) => {
       // 搜索完成后可以更新搜索历史相关的推荐
       await this.clearCache(RecommendationType.BASED_ON_WATCH_HISTORY);
     });
@@ -440,7 +440,7 @@ export class RecommendationRepository {
   ): Promise<RecommendationResponse> {
     // 确定API端点
     let endpoint = this.apiEndpoints.recommendations;
-    let params: any = { ...request };
+    let params: Record<string, unknown> = { ...request };
     
     // 特殊处理不同类型的推荐
     switch (request.type) {
@@ -466,7 +466,7 @@ export class RecommendationRepository {
     }
     
     // 构建请求配置
-    const requestConfig: any = {
+    const requestConfig: Record<string, unknown> = {
       params: {
         limit: Math.min(request.limit || config.pageSize, config.maxRecommendationsPerRequest),
         offset: request.offset || 0,
@@ -685,7 +685,7 @@ export class RecommendationRepository {
       const continueWatchingData = await this.storageUtil.getObject<Array<{
         id: string;
         type: 'video' | 'live';
-        data: any;
+        data: Record<string, unknown>;
         progress: number;
         lastWatchTime: number;
         duration: number;
@@ -978,7 +978,7 @@ export class RecommendationRepository {
     // 在真实应用中，这里应该使用机器学习模型或更复杂的相似度计算
     
     // 获取观看历史
-    const watchHistory = await this.storageUtil.getObject<any[]>(
+    const watchHistory = await this.storageUtil.getObject<Array<{ videoId: string; title: string; thumbnailUrl: string; duration: number; watchedAt: number; }>>(
       this.storageKeys.watchHistory,
       LocalStorageType.DEFAULT
     ) || [];
@@ -1346,19 +1346,19 @@ export class RecommendationRepository {
    */
   public async exportData(): Promise<{
     userPreferences: UserPreferences;
-    continueWatching: any[];
-    watchHistory: any[];
+    continueWatching: Array<{ id: string; type: 'video' | 'live'; data: Record<string, unknown>; progress: number; lastWatchTime: number; duration: number; }>;
+    watchHistory: Array<{ videoId: string; title: string; thumbnailUrl: string; duration: number; watchedAt: number; }>;
     config: RecommendationConfig;
     exportTime: number;
   }> {
     try {
       const data = {
         userPreferences: await this.getUserPreferences(),
-        continueWatching: await this.storageUtil.getObject<any[]>(
+        continueWatching: await this.storageUtil.getObject<Array<{ id: string; type: 'video' | 'live'; data: Record<string, unknown>; progress: number; lastWatchTime: number; duration: number; }>>(
           this.storageKeys.continueWatching,
           LocalStorageType.DEFAULT
         ) || [],
-        watchHistory: await this.storageUtil.getObject<any[]>(
+        watchHistory: await this.storageUtil.getObject<Array<{ videoId: string; title: string; thumbnailUrl: string; duration: number; watchedAt: number; }>>(
           this.storageKeys.watchHistory,
           LocalStorageType.DEFAULT
         ) || [],

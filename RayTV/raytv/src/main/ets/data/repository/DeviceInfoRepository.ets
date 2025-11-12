@@ -100,7 +100,7 @@ export class DeviceInfoRepository {
   private static instance: DeviceInfoRepository;
   private sqliteHelper: SQLiteHelper;
   private storageUtil: StorageUtil;
-  private deviceInfoCache: Map<string, any> = new Map();
+  private deviceInfoCache: Map<string, unknown> = new Map();
   private deviceInfo: DeviceInfo | null = null;
   private isInitialized: boolean = false;
   
@@ -184,7 +184,7 @@ export class DeviceInfoRepository {
   private async collectDeviceInfo(): Promise<void> {
     try {
       // 使用HarmonyOS API获取设备信息
-      const collectedInfo: Record<string, any> = {
+      const collectedInfo: Record<string, unknown> = {
         // 设备基础信息
         [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
         [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'),
@@ -323,7 +323,7 @@ export class DeviceInfoRepository {
    * @param value 信息值
    * @returns 是否保存成功
    */
-  public async setDeviceInfo(key: string, value: any): Promise<boolean> {
+  public async setDeviceInfo(key: string, value: unknown): Promise<boolean> {
     try {
       Logger.debug(TAG, `Setting device info: ${key}`);
       
@@ -378,7 +378,7 @@ export class DeviceInfoRepository {
    * @param defaultValue 默认值
    * @returns 设备信息值或默认值
    */
-  public async getDeviceInfo<T = any>(key: string, defaultValue?: T): Promise<T | null> {
+  public async getDeviceInfo<T = unknown>(key: string, defaultValue?: T): Promise<T | null> {
     try {
       // 优先从缓存获取
       if (this.deviceInfoCache.has(key)) {
@@ -401,7 +401,7 @@ export class DeviceInfoRepository {
         return defaultValue !== undefined ? defaultValue : null;
       }
       
-      let value: any = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
+      let value: unknown = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
       const isObject = record[DEVICE_INFO_TABLE.COLUMNS.IS_OBJECT] === 1;
       
       if (isObject) {

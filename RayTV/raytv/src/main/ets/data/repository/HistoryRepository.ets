@@ -103,7 +103,7 @@ export class HistoryRepository {
   /**
    * 查找是否存在相同内容的历史记录
    */
-  private async findExistingHistory(history: History): Promise<any | null> {
+  private async findExistingHistory(history: History): Promise<unknown | null> {
     const conditions: QueryCondition[] = [{
       column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE,
       value: history.contentType
@@ -638,7 +638,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录转换为History对象
    */
-  private convertToHistoryObject(record: any): History {
+  private convertToHistoryObject(record: unknown): History {
     return {
       id: record[HISTORY_TABLE.COLUMNS.ID]?.toString(),
       title: record[HISTORY_TABLE.COLUMNS.TITLE],
@@ -662,7 +662,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录列表转换为History对象列表
    */
-  private convertToHistoryObjects(records: any[]): History[] {
+  private convertToHistoryObjects(records: unknown[]): History[] {
     return records.map(record => this.convertToHistoryObject(record));
   }
 }

@@ -656,8 +656,8 @@ export class SearchRepository {
   /**
    * 构建搜索参数
    */
-  private buildSearchParams(request: SearchRequest): any {
-    const params: any = {
+  private buildSearchParams(request: SearchRequest): Record<string, string | number | boolean | null> {
+    const params: Record<string, string | number | boolean | null> = {
       q: request.query.trim(),
       type: request.type,
       sort: request.sort,

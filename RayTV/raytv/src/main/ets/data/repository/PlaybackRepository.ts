@@ -158,7 +158,7 @@ class PlaybackRepository {
   private playbackQueue: PlaybackQueueItem[];
   
   // 过滤器缓存
-  private filterCache: Map<string, any[]>;
+  private filterCache: Map<string, unknown[]>;
   
   // 自动保存间隔（毫秒）
   private readonly autoSaveInterval = 30000; // 30秒
@@ -207,8 +207,8 @@ class PlaybackRepository {
    * 获取对象的所有值
    * 替代Object.values，兼容ArkTS语法
    */
-  private getObjectValues<T extends object>(obj: T): any[] {
-    const values: any[] = [];
+  private getObjectValues<T extends object>(obj: T): unknown[] {
+    const values: unknown[] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         values.push(obj[key]);
@@ -406,7 +406,7 @@ class PlaybackRepository {
    */
   private async loadStats(): Promise<void> {
     try {
-      const statsData = await this.storageUtil.getObject<any>(
+      const statsData = await this.storageUtil.getObject<Record<string, unknown>>(
         this.storageKeys.playbackStats,
         LocalStorageType.DEFAULT
       );
@@ -1452,7 +1452,7 @@ class PlaybackRepository {
   /**
    * 导出播放数据
    */
-  public async exportPlaybackData(): Promise<Record<string, any>> {
+  public async exportPlaybackData(): Promise<Record<string, unknown>> {
     try {
       const exportData = {
         version: '1.0.0',
@@ -1476,7 +1476,7 @@ class PlaybackRepository {
    * 导入播放数据
    */
   public async importPlaybackData(
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     options?: {
       importSettings?: boolean;
       importHistory?: boolean;

@@ -86,7 +86,7 @@ export interface LiveChat {
   isModerator?: boolean;
   isBroadcaster?: boolean;
   messageType: 'text' | 'emoji' | 'system' | 'donation' | 'subscription';
-  metadata?: any;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 /**
@@ -166,7 +166,7 @@ export interface LiveStreamEvent {
   streamId: string;
   type: string;
   timestamp: number;
-  data?: any;
+  data?: Record<string, string | number | boolean | null>;
   error?: Error;
 }
 
@@ -347,7 +347,7 @@ export class LiveStreamRepository {
       const url = this.apiEndpoints.liveStreamDetail.replace(':id', streamId);
       
       // 构建请求配置
-      const config: any = {};
+      const config: Record<string, string | number | boolean | null> = {};
       
       // 如果用户已登录，添加认证头
       const authToken = this.userRepository.getAuthToken();
@@ -444,7 +444,7 @@ export class LiveStreamRepository {
       }
       
       // 构建请求配置
-      const config: any = {
+      const config: Record<string, string | number | boolean | null> = {
         params
       };
       
@@ -669,7 +669,7 @@ export class LiveStreamRepository {
       const url = this.apiEndpoints.liveStreamChat.replace(':id', streamId);
       
       // 构建请求参数
-      const params: any = {
+      const params: Record<string, string | number | boolean | null> = {
         limit: Math.min(limit, this.liveConfig.chatMessageBatchSize)
       };
       
@@ -678,7 +678,7 @@ export class LiveStreamRepository {
       }
       
       // 构建请求配置
-      const config: any = {
+      const config: Record<string, string | number | boolean | null> = {
         params
       };
       
@@ -947,7 +947,7 @@ export class LiveStreamRepository {
    */
   private async sendWatchHeartbeat(streamId: string, event: 'start' | 'heartbeat' | 'end', duration?: number): Promise<void> {
     try {
-      const data: any = {
+      const data: Record<string, string | number | boolean | null> = {
         event,
         timestamp: Date.now()
       };
@@ -957,7 +957,7 @@ export class LiveStreamRepository {
       }
       
       // 构建请求配置
-      const config: any = {};
+      const config: Record<string, string | number | boolean | null> = {};
       
       // 如果用户已登录，添加认证头
       const authToken = this.userRepository.getAuthToken();
@@ -1135,8 +1135,8 @@ export class LiveStreamRepository {
   /**
    * 构建直播列表请求参数
    */
-  private buildLiveStreamListParams(request: LiveStreamListRequest): any {
-    const params: any = {
+  private buildLiveStreamListParams(request: LiveStreamListRequest): Record<string, string | number | boolean | null> {
+    const params: Record<string, string | number | boolean | null> = {
       page: request.page || 1,
       pageSize: request.pageSize || 20,
       sortBy: request.sortBy || 'viewers'

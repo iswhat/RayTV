@@ -157,7 +157,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   /**
    * 处理网络响应
    */
-  private processNetworkResponse<T>(response: Response<any>): NetworkResult<T> {
+  private processNetworkResponse<T>(response: Response<unknown>): NetworkResult<T> {
     if (response.success) {
       return {
         success: true,

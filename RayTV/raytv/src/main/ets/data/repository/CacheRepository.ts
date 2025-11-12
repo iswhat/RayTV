@@ -36,7 +36,7 @@ export const CacheEventType = {
 /**
  * 缓存变更事件数据
  */
-export interface CacheChangeEvent<T = any> {
+export interface CacheChangeEvent<T = unknown> {
   key: string;          // 缓存键
   type: CacheType;      // 缓存类型
   value?: T;            // 缓存值（添加/更新时）
@@ -55,7 +55,7 @@ export class CacheRepository {
   private formatUtil = FormatUtil.getInstance();
   
   // 内存缓存
-  private memoryCache: Map<string, CacheItem<any>> = new Map();
+  private memoryCache: Map<string, CacheItem<unknown>> = new Map();
   
   // 缓存配置
   private cacheConfig: CacheConfig = {
@@ -951,7 +951,7 @@ export class CacheRepository {
   /**
    * 检查项是否应该被清空
    */
-  private shouldClearItem(item: CacheItem<any>, options?: {olderThan?: number; tags?: string[]}): boolean {
+  private shouldClearItem(item: CacheItem<unknown>, options?: {olderThan?: number; tags?: string[]}): boolean {
     // 检查时间
     if (options?.olderThan) {
       const cutoffTime = Date.now() - options.olderThan;

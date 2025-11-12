@@ -147,7 +147,7 @@ export class UserRepository {
       this.logger.error('Failed to initialize UserRepository', error as Error);
       
       // 发布用户错误事件
-      this.eventBus.emit(UserEventType.USER_ERROR, { error });
+      this.eventBus.emit(UserEventType.USER_ERROR, { error: error as Error });
     }
   }
 
