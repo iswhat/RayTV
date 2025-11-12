@@ -178,7 +178,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   /**
    * 生成缓存键
    */
-  private generateCacheKey(url: string, method: string, params?: Record<string, any>): string {
+  private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
     const paramsStr = params ? JsonUtil.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
   }
@@ -595,7 +595,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, any>>> { 
+  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, string | number | boolean | null>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   

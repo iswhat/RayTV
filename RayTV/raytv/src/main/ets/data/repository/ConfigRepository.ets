@@ -273,7 +273,7 @@ class ConfigRepository {
    * @param type 值类型
    * @param category 配置分类
    */
-  public async setConfig(key: string, value: any, type: string = 'string', category: string = ConfigCategory.GENERAL): Promise<void> {
+  public async setConfig(key: string, value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL): Promise<void> {
     try {
       // 更新缓存
       this.configCache.set(key, {
@@ -350,7 +350,7 @@ class ConfigRepository {
    * 批量设置配置
    * @param configs 配置对象
    */
-  public async setConfigs(configs: Record<string, any>): Promise<void> {
+  public async setConfigs(configs: Record<string, string | number | boolean | null>): Promise<void> {
     try {
       for (const [key, value] of this.getObjectEntries(configs)) {
         const type = this.getValueType(value);
@@ -463,7 +463,7 @@ class ConfigRepository {
    * @param value 值
    * @returns 类型字符串
    */
-  private getValueType(value: any): string {
+  private getValueType(value: string | number | boolean | null): string {
     if (value === null) return 'null';
     if (Array.isArray(value)) return 'array';
     if (typeof value === 'object') return 'object';
@@ -505,7 +505,7 @@ class ConfigRepository {
    * 获取对象的所有键值对
    * 替代Object.entries，兼容ArkTS语法
    */
-  private getObjectEntries<T extends object>(obj: T): [string, any][] {
+  private getObjectEntries<T extends object>(obj: T): [string, string | number | boolean | null][] {
     const entries: [string, any][] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {

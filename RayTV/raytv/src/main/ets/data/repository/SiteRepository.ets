@@ -588,7 +588,7 @@ export class SiteRepository {
   /**
    * 将数据库记录转换为Site对象
    */
-  private convertToSiteObject(record: any): Site {
+  private convertToSiteObject(record: Record<string, string | number | boolean | null>): Site {
     return {
       id: record[SITE_TABLE.COLUMNS.ID]?.toString(),
       name: record[SITE_TABLE.COLUMNS.NAME],

@@ -76,7 +76,7 @@ class LocalRepository {
    * @param value 存储值
    * @param type 存储类型
    */
-  public async saveData(key: string, value: any, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<void> {
+  public async saveData(key: string, value: string | number | boolean | null, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<void> {
     try {
       const prefixedKey = this.getPrefixedKey(key, type);
       
@@ -262,7 +262,7 @@ class LocalRepository {
    * @param data JSON数据
    * @returns 是否保存成功
    */
-  public async saveJsonFile(filePath: string, data: any): Promise<boolean> {
+  public async saveJsonFile(filePath: string, data: string | number | boolean | null): Promise<boolean> {
     try {
       const jsonString = JSON.stringify(data, null, 2);
       return await this.saveTextFile(filePath, jsonString);
