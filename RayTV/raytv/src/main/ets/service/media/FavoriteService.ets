@@ -1,4 +1,4 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../../data/db/DatabaseManager';
 import { MediaItem, MediaType } from './MediaService';
 import { ValuesBucket, RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';

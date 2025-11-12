@@ -1,4 +1,4 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { DeviceFlowStatus } from '../../data/bean/DeviceInfo';
 import { configService } from '../config/ConfigService';
 import { playerManager } from '../media/PlayerManager';

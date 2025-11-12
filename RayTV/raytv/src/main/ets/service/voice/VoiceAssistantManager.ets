@@ -1,4 +1,4 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import { configService } from '../config/ConfigService';
 import { mediaService } from '../media/MediaService';
 import { playerManager } from '../media/PlayerManager';

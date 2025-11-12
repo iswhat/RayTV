@@ -119,20 +119,36 @@ export class HttpService {
   }
 
   /**
+   * 检查并请求网络权限
+   * 只在需要时请求权限，避免重复申请
+   */
+  private async checkAndRequestNetworkPermission(): Promise<void> {
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      const context = this.getContext();
+      
+      // 先检查权限状态，避免重复申请
+      const permissionResult = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
+      
+      // 只有当权限未授权时才请求
+      if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+        await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
+      }
+    } catch (error) {
+      console.error('Failed to check or request INTERNET permission', error);
+      // 不抛出错误，允许应用继续尝试网络操作
+    }
+  }
+
+  /**
    * 发送网络请求
    * @param url 请求URL
    * @param options 请求选项
    */
   public async request<T>(url: string, options: HttpRequestOptions): Promise<HttpResponse<T>> {
     try {
-      // 检查网络权限
-      try {
-        const atManager = abilityAccessCtrl.createAtManager();
-        await atManager.requestPermissionsFromUser(this.getContext(), ['ohos.permission.INTERNET']);
-      } catch (permissionError) {
-        console.error('Failed to request INTERNET permission', permissionError);
-        throw new Error('Network permission denied');
-      }
+      // 检查网络权限（只在需要时请求）
+      await this.checkAndRequestNetworkPermission();
 
       // 检查URL是否在广告屏蔽列表中
       if (this.adBlockManager.isEnabled() && this.adBlockManager.shouldBlockUrl(url)) {

@@ -20,7 +20,7 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
+    "useUnknownInCatchVariables": false,
     "alwaysStrict": true,
     "skipLibCheck": true,
     "noEmit": true,

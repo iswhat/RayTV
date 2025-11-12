@@ -612,35 +612,19 @@ export class ConfigParser {
       
       // 创建HarmonyOS专用配置
       const harmonyConfig: HarmonyConfig = {
-        app: {
-          name: config.app?.name || 'RayTV',
-          version: config.app?.version || '1.0.0',
-          debug: config.app?.debug || false
-        },
-        services: {
-          autoStart: config.services?.autoStart || false,
-          backgroundRefresh: config.services?.backgroundRefresh || false,
-          dataSync: config.services?.dataSync || false
-        },
-        player: {
-          defaultEngine: config.player?.defaultEngine || 'system',
-          autoPlayNext: config.player?.autoPlayNext || true,
-          rememberPosition: config.player?.rememberPosition || true,
-          subtitles: config.player?.subtitles || { enabled: true }
-        },
-        ui: {
-          theme: config.ui?.theme || 'system',
-          fontSize: config.ui?.fontSize || 'medium',
-          layout: config.ui?.layout || 'default'
-        },
-        security: {
-          enableScreenLock: config.security?.enableScreenLock || false,
-          allowScreenshots: config.security?.allowScreenshots || true,
-          dataEncryption: config.security?.dataEncryption || false
-        },
-        // 兼容Fongmi配置
-        sites: this.parseSites(configContent),
-        updateTime: Date.now()
+        enableVoiceAssistant: config.harmony?.enableVoiceAssistant || false,
+        enableDeviceFlow: config.harmony?.enableDeviceFlow || false,
+        enableGestureControl: config.harmony?.enableGestureControl || false,
+        enableWidget: config.harmony?.enableWidget || false,
+        enableNotification: config.harmony?.enableNotification || false,
+        enableAutoStart: config.harmony?.enableAutoStart || false,
+        enableBackgroundSync: config.harmony?.enableBackgroundSync || false,
+        enableMultiWindow: config.harmony?.enableMultiWindow || false,
+        enableHiAI: config.harmony?.enableHiAI || false,
+        enableSuperDevice: config.harmony?.enableSuperDevice || false,
+        deviceSharingEnabled: config.harmony?.deviceSharingEnabled || false,
+        notificationChannels: config.harmony?.notificationChannels || [],
+        quickActions: config.harmony?.quickActions || []
       };
       
       return harmonyConfig;

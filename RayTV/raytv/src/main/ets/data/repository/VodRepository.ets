@@ -332,11 +332,11 @@ export class VodRepository {
    * @param offset 偏移量
    * @returns 播放历史列表
    */
-  public async getVodHistory(limit: number = 50, offset: number = 0): Promise<any[]> {
+  public async getVodHistory(limit: number = 50, offset: number = 0): Promise<Record<string, string | number | boolean | null>[]> {
     try {
       const sortOptions: SortOption[] = [{
         column: VOD_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-        ascending: false
+        order: 'DESC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -435,7 +435,7 @@ export class VodRepository {
       
       const sortOptions: SortOption[] = [{
         column: VOD_CACHE_TABLE.COLUMNS.UPDATE_TIME,
-        ascending: false
+        order: 'DESC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -489,7 +489,7 @@ export class VodRepository {
       
       const sortOptions: SortOption[] = [{
         column: VOD_CACHE_TABLE.COLUMNS.UPDATE_TIME,
-        ascending: false
+        order: 'DESC'
       }];
       
       const records = await this.sqliteHelper.query(

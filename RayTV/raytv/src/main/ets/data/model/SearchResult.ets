@@ -47,7 +47,7 @@ export default class SearchResult {
   directors?: string[];    // 导演列表（针对内容类型）
   popularity?: number;     // 热度/流行度
   matchScore?: number;     // 匹配分数（搜索相关性）
-  extraInfo?: Record<string, string | number | boolean | object | null>; // 额外信息，使用具体的类型联合
+  extraInfo?: Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>; // 额外信息，使用具体的类型联合
   link?: string;           // 关联链接
   sourceId?: string;       // 来源ID
   sourceName?: string;     // 来源名称
@@ -321,8 +321,8 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | object | null> {
-    const result: Record<string, string | number | boolean | object | null> = {};
+  public toSerializable(): Record<string, any> {
+    const result: Record<string, any> = {};
     
     result.id = this.id;
     result.title = this.title;
@@ -356,7 +356,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): SearchResult {
+  public static fromSerializable(data: Record<string, any>): SearchResult {
     // 将Record类型转换为Partial<SearchResult>类型
     const searchResultData: Partial<SearchResult> = {};
     
@@ -380,7 +380,7 @@ export default class SearchResult {
     if (Array.isArray(data.directors)) searchResultData.directors = data.directors as string[];
     if (typeof data.popularity === 'number') searchResultData.popularity = data.popularity;
     if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
-    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) searchResultData.extraInfo = data.extraInfo as Record<string, string | number | boolean | object | null>;
+    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) searchResultData.extraInfo = data.extraInfo as Record<string, any>;
     if (typeof data.link === 'string') searchResultData.link = data.link;
     if (typeof data.sourceId === 'string') searchResultData.sourceId = data.sourceId;
     if (typeof data.sourceName === 'string') searchResultData.sourceName = data.sourceName;

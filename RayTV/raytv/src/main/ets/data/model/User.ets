@@ -125,10 +125,15 @@ export default class User {
       theme: base.theme,
       language: base.language,
       playerDefaultQuality: base.playerDefaultQuality,
-      // 确保复制所有必要的属性
-      autoPlayNext: base.autoPlayNext,
-      subtitlesEnabled: base.subtitlesEnabled,
-      notificationsEnabled: base.notificationsEnabled
+      autoplay: base.autoplay,
+      subtitleEnabled: base.subtitleEnabled,
+      defaultSubtitleLanguage: base.defaultSubtitleLanguage,
+      audioLanguage: base.audioLanguage,
+      maxConcurrentDownloads: base.maxConcurrentDownloads,
+      parentalControlEnabled: base.parentalControlEnabled,
+      parentalControlLevel: base.parentalControlLevel,
+      searchHistoryEnabled: base.searchHistoryEnabled,
+      playbackSpeed: base.playbackSpeed
     };
     
     // 手动合并每个属性
@@ -346,34 +351,11 @@ export default class User {
   }
 
   /**
- * 用户可序列化数据接口
- */
-export interface UserSerializable {
-  id?: string;
-  username?: string;
-  nickname?: string;
-  email?: string;
-  avatarUrl?: string;
-  role?: UserRole;
-  preferences?: UserPreferences;
-  lastLoginTime?: string;
-  registrationDate?: string;
-  activeDevices?: DeviceInfo[];
-  isVerified?: boolean;
-  status?: 'active' | 'inactive' | 'suspended';
-  subscriptionEndDate?: string;
-  watchHistoryEnabled?: boolean;
-  favoritesEnabled?: boolean;
-  totalWatchTime?: number;
-  settings?: Record<string, string | number | boolean | object | null>;
-}
-
-/**
- * 序列化对象（用于存储）
- * @returns 序列化后的对象
- */
-  public toSerializable(): UserSerializable {
-    const result: UserSerializable = {
+   * 序列化对象（用于存储）
+   * @returns 序列化后的对象
+   */
+  public toSerializable(): Record<string, any> {
+    const result: Record<string, any> = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -400,7 +382,7 @@ export interface UserSerializable {
    * @param data 序列化的数据
    * @returns User实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): User {
+  public static fromSerializable(data: Record<string, any>): User {
     return new User(data as Partial<User>);
   }
 

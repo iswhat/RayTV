@@ -1,10 +1,11 @@
 import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar, Stack, Flex, Blank, TextInput, Grid, GridItem, Swiper, SwiperItem } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
-import ConfigService from '../service/config/ConfigService';
-import MediaService from '../service/media/MediaService';
-import HistoryService from '../service/media/HistoryService';
-import FavoriteService from '../service/media/FavoriteService';
+import { configService } from '../service/config/ConfigService';
+import { mediaService } from '../service/media/MediaService';
+import { historyService } from '../service/media/HistoryService';
+import { favoriteService } from '../service/media/FavoriteService';
+import { playbackService } from '../service/media/PlaybackService';
 // 类型定义
 export interface MediaItem {
   id: string;
@@ -591,19 +592,44 @@ struct MediaDetailPage {
   @Builder
   private renderError(): void {
     Stack.create();
-    Stack.className("error-container");
+    Stack.style({
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#4CAF50',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20
+    });
     Text.create();
-    Text.className("error-icon");
+    Text.style({
+      fontSize: 48,
+      marginBottom: 20
+    });
     Text.content("⚠️");
     Text.pop();
     Text.create();
-    Text.className("error-message");
+    Text.style({
+      fontSize: 24,
+      color: '#FFFFFF',
+      textAlign: 'center',
+      marginBottom: 30
+    });
     Text.content(this.errorMessage);
     Text.pop();
     Button.create();
-    Button.className("retry-button");
+    Button.style({
+      backgroundColor: '#FFFFFF',
+      paddingHorizontal: 40,
+      paddingVertical: 15,
+      borderRadius: 25
+    });
     Button.onClick(() => this.loadMediaDetail());
     Text.create();
+    Text.style({
+      fontSize: 24,
+      color: '#4CAF50',
+      fontWeight: 700
+    });
     Text.content("重试");
     Text.pop();
     Button.pop();
@@ -1126,23 +1152,36 @@ struct MediaDetailPage {
   private renderRelatedMedia(): void {
     if (this.relatedMedia.length === 0) return;
     
-    <Stack className="related-section">
-      <Text className="section-title">相关推荐</Text>
-      <ScrollView scrollable="horizontal" className="related-scroll">
-        <Flex>
-          {this.relatedMedia.map((media) => (
-            <Stack key={`${media.siteKey}-${media.id}`} className="related-item" onClick={() => this.handleRelatedMediaClick(media)}>
-              <Image
-                src={media.coverUrl || "https://via.placeholder.com/150x200?text=No+Image"}
-                className="related-cover"
-                objectFit="cover"
-              ></Image>
-              <Text className="related-title" numberOfLines={2}>{media.title}</Text>
-            </Stack>
-          ))}
-        </Flex>
-      </ScrollView>
-    </Stack>
+    Stack.create();
+    Stack.className("related-section");
+    Text.create();
+    Text.className("section-title");
+    Text.content("相关推荐");
+    Text.pop();
+    ScrollView.create();
+    ScrollView.scrollable("horizontal");
+    ScrollView.className("related-scroll");
+    Flex.create();
+    this.relatedMedia.forEach((media) => {
+      Stack.create();
+      Stack.key(`${media.siteKey}-${media.id}`);
+      Stack.className("related-item");
+      Stack.onClick(() => this.handleRelatedMediaClick(media));
+      Image.create();
+      Image.src(media.coverUrl || "https://via.placeholder.com/150x200?text=No+Image");
+      Image.className("related-cover");
+      Image.objectFit("cover");
+      Image.pop();
+      Text.create();
+      Text.className("related-title");
+      Text.numberOfLines(2);
+      Text.content(media.title);
+      Text.pop();
+      Stack.pop();
+    });
+    Flex.pop();
+    ScrollView.pop();
+    Stack.pop();
   }
   
   /**

@@ -28,7 +28,7 @@ const DATABASE_VERSION = 1;
 export default class ModernDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, any> = new Map();
+  private configMap: Map<string, string | number | boolean | null> = new Map();
 
   /**
    * 初始化数据库

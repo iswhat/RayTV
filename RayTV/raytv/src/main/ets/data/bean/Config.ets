@@ -46,7 +46,7 @@ export interface DisplayConfig {
   screenSaverDelay?: number;         // 屏幕保护延迟（分钟）
   colorPrimary?: string;             // 主题色
   colorAccent?: string;              // 强调色
-  customStyles?: Map<string, any>;   // 自定义样式
+  customStyles?: Map<string, string | number | boolean>;   // 自定义样式
   tvMode: boolean;                   // TV模式
   tabletMode: boolean;               // 平板模式
   phoneMode: boolean;                // 手机模式
@@ -211,7 +211,7 @@ export interface AppConfig {
   version: string;                   // 配置版本
   lastUpdated: number;               // 最后更新时间
   migrationVersion?: string;         // 迁移版本
-  customSettings?: Map<string, any>; // 自定义设置
+  customSettings?: Map<string, string | number | boolean>; // 自定义设置
 }
 
 /**
@@ -229,8 +229,8 @@ export interface ConfigVersion {
  */
 export interface ConfigChange {
   keyPath: string;                   // 配置路径
-  oldValue: any;                     // 旧值
-  newValue: any;                     // 新值
+  oldValue: string | number | boolean | null; // 旧值
+  newValue: string | number | boolean | null; // 新值
   changedAt: number;                 // 变更时间
   changedBy: 'user' | 'system' | 'sync'; // 变更来源
 }
@@ -388,7 +388,7 @@ export interface ConfigValidationResult {
   }[];
   suggestions?: {
     field: string;
-    value: any;
+    value: string | number | boolean | null;
     reason: string;
   }[];
 }

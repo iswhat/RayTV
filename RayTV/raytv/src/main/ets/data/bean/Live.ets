@@ -82,12 +82,7 @@ export interface LiveChannel {
   tags?: string[];       // 标签
   createdAt?: number;    // 创建时间
   updatedAt?: number;    // 更新时间
-  userConfig?: {
-    selectedStream?: string; // 用户选择的流ID
-    volume?: number;         // 用户设置的音量
-    brightness?: number;     // 用户设置的亮度
-    contrast?: number;       // 用户设置的对比度
-  };
+  userConfig?: LiveChannelUserConfig; // 用户配置信息
 }
 
 /**
@@ -195,6 +190,16 @@ export interface LiveWatchHistory {
   lastPlayTime: number;  // 最后观看时间
   playCount: number;     // 观看次数
   totalWatchTime?: number; // 总观看时长（毫秒）
+}
+
+/**
+ * 直播频道用户配置接口
+ */
+export interface LiveChannelUserConfig {
+  selectedStream?: string; // 用户选择的流ID
+  volume?: number;         // 用户设置的音量
+  brightness?: number;     // 用户设置的亮度
+  contrast?: number;       // 用户设置的对比度
 }
 
 /**

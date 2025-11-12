@@ -228,7 +228,7 @@ export interface DeviceInfo {
   createdAt: number;     // 创建时间
   updatedAt: number;     // 更新时间
   lastSeenAt?: number;   // 最后在线时间
-  customProperties?: Map<string, any>; // 自定义属性
+  customProperties?: Map<string, string | number | boolean | null>; // 自定义属性
 }
 
 /**
@@ -259,12 +259,7 @@ export interface DeviceFlowStatus {
   startTime?: number;    // 开始时间
   endTime?: number;      // 结束时间
   errorMessage?: string; // 错误信息
-  contentInfo?: {
-    type: string;
-    id?: string;
-    title?: string;
-    position?: number;
-  };
+  contentInfo?: DeviceFlowContentInfo; // 流转内容信息
 }
 
 /**
@@ -276,10 +271,7 @@ export interface DeviceStats {
   totalWatchTime: number; // 总观看时长
   batteryUsage?: number; // 电池使用量
   storageUsage?: number; // 存储使用量
-  dataUsage?: {
-    wifi: number;
-    mobile: number;
-  };
+  dataUsage?: DeviceDataUsage; // 数据使用情况
   errorCount?: number;   // 错误计数
   lastErrorTime?: number; // 最后错误时间
   featureUsage?: Map<string, number>; // 功能使用统计
@@ -295,12 +287,7 @@ export interface DeviceDiagnostics {
   storageUsage?: number; // 存储使用率
   batteryHealth?: 'excellent' | 'good' | 'fair' | 'poor'; // 电池健康状态
   networkStatus: 'excellent' | 'good' | 'fair' | 'poor'; // 网络状态
-  issues?: {
-    type: string;
-    severity: 'low' | 'medium' | 'high';
-    description: string;
-    solution?: string;
-  }[];
+  issues?: DeviceIssue[]; // 设备问题列表
   recommendedActions?: string[]; // 推荐操作
   diagnosticTime: number; // 诊断时间
 }
@@ -313,7 +300,35 @@ export interface DeviceEvent {
   deviceId: string;      // 设备ID
   eventType: string;     // 事件类型
   timestamp: number;     // 事件时间
-  details?: any;         // 事件详情
+  details?: string | number | boolean | null;         // 事件详情
   isProcessed: boolean;  // 是否已处理
   priority: 'low' | 'medium' | 'high'; // 优先级
+}
+
+/**
+ * 设备流转内容信息接口
+ */
+export interface DeviceFlowContentInfo {
+  type: string;        // 内容类型
+  id?: string;         // 内容ID
+  title?: string;      // 内容标题
+  position?: number;   // 播放位置
+}
+
+/**
+ * 设备数据使用情况接口
+ */
+export interface DeviceDataUsage {
+  wifi: number;        // WiFi数据使用量
+  mobile: number;      // 移动数据使用量
+}
+
+/**
+ * 设备问题接口
+ */
+export interface DeviceIssue {
+  type: string;        // 问题类型
+  severity: 'low' | 'medium' | 'high'; // 严重程度
+  description: string; // 问题描述
+  solution?: string;   // 解决方案
 }

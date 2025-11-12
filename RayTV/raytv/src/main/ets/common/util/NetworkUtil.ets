@@ -1,10 +1,10 @@
 // NetworkUtil - 网络请求和连接管理工具类
 import Logger from './Logger';
-import AppConstant from '../constant/AppConstant';
+import { AppConstant } from '../constant/AppConstant';
 import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';
 import { BusinessError } from '@ohos.base';
-import { fileIO } from '@ohos.file.fs';
+import fs from '@ohos.file.fs';
 import { CacheManager } from '../../service/spider/CacheManager';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
@@ -80,6 +80,40 @@ export default class NetworkUtil {
   }
 
   /**
+   * 检查并请求网络权限
+   * 只在需要时请求权限，避免重复申请
+   */
+  private static async checkAndRequestNetworkPermission(): Promise<void> {
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      const context = NetworkUtil.getContext();
+      
+      // 先检查权限状态，避免重复申请
+      const permissionResult = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
+      
+      // 只有当权限未授权时才请求
+      if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+        await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(TAG, `Failed to check or request INTERNET permission: ${errorMessage}`);
+      // 不抛出错误，允许应用继续尝试网络操作
+    }
+  }
+
+  /**
+   * 初始化网络工具，在应用启动时调用
+   */
+  public static async initialize(): Promise<void> {
+    if (!NetworkUtil.isInitialized) {
+      // 初始化时检查权限
+      await NetworkUtil.checkAndRequestNetworkPermission();
+      NetworkUtil.isInitialized = true;
+    }
+  }
+
+  /**
    * 发送HTTP请求
    * @param config 请求配置
    * @param retryCount 当前重试次数
@@ -95,14 +129,9 @@ export default class NetworkUtil {
     const responseType = config.responseType || 'json';
 
     try {
-      // 检查网络权限
-      try {
-        const atManager = abilityAccessCtrl.createAtManager();
-        await atManager.requestPermissionsFromUser(NetworkUtil.getContext(), ['ohos.permission.INTERNET']);
-      } catch (permissionError) {
-        const errorMessage = permissionError instanceof Error ? permissionError.message : String(permissionError);
-        Logger.error(TAG, `Failed to request INTERNET permission: ${errorMessage}`);
-        throw new Error('Network permission denied');
+      // 确保已初始化（如果未初始化，会自动检查权限）
+      if (!NetworkUtil.isInitialized) {
+        await NetworkUtil.initialize();
       }
 
       // 构建完整URL（添加查询参数）

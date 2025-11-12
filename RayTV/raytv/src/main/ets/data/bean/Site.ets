@@ -37,7 +37,7 @@ export interface SiteAuth {
  */
 export interface SiteConfigItem {
   key: string;          // 配置键
-  value: any;           // 配置值
+  value: string | number | boolean; // 配置值
   type: 'string' | 'number' | 'boolean' | 'select' | 'password'; // 配置类型
   label?: string;       // 显示标签
   description?: string; // 描述
@@ -46,7 +46,7 @@ export interface SiteConfigItem {
   min?: number;         // 最小值（用于number类型）
   max?: number;         // 最大值（用于number类型）
   required?: boolean;   // 是否必填
-  default?: any;        // 默认值
+  default?: string | number | boolean;        // 默认值
 }
 
 /**
@@ -137,7 +137,7 @@ export interface Site {
   description?: string; // 站点描述
   siteAuth?: SiteAuth;  // 认证信息
   headers?: SiteHeaders; // 请求头配置
-  config?: Map<string, any>; // 站点配置
+  config?: Map<string, string | number | boolean>; // 站点配置
   configItems?: SiteConfigItem[]; // 可配置项定义
   searchConfig: SiteSearchConfig; // 搜索配置
   filterConfig: SiteFilterConfig; // 筛选配置
@@ -198,7 +198,7 @@ export interface SiteTestResult {
   responseTime: number; // 响应时间（毫秒）
   errorMessage?: string; // 错误信息
   testTime: number;     // 测试时间
-  details?: any;        // 测试详情
+  details?: string | number | boolean | null;        // 测试详情
 }
 
 /**
@@ -238,7 +238,7 @@ export interface SiteErrorReport {
   errorType: string;    // 错误类型
   errorMessage: string; // 错误信息
   stackTrace?: string;  // 堆栈跟踪
-  requestInfo?: any;    // 请求信息
+  requestInfo?: string | number | boolean | null;    // 请求信息
   timestamp: number;    // 发生时间
   deviceInfo?: string;  // 设备信息
   appVersion?: string;  // 应用版本
@@ -263,7 +263,7 @@ export interface SiteTemplate {
   id: string;           // 模板ID
   name: string;         // 模板名称
   loaderType: LoaderType; // 加载器类型
-  configTemplate: any;  // 配置模板
+  configTemplate: string | number | boolean | null;  // 配置模板
   description?: string; // 描述
   tags?: string[];      // 标签
   author?: string;      // 作者

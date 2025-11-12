@@ -1,152 +1,199 @@
-// JsonUtil.ets - 简化版JSON工具类
-
-import Logger from './Logger';
-
-const TAG = 'JsonUtil';
-
 /**
- * 基本JSON值类型
+ * JSON工具类 - 全功能版本
+ * 提供安全的JSON序列化和反序列化功能
  */
-export type JsonValue = string | number | boolean | null | object;
-
-/**
- * 安全的JSON解析
- * @param jsonString JSON字符串
- * @param defaultValue 默认值
- */
-export function safeParseJson(jsonString: string, defaultValue: object): object {
-  if (!jsonString || jsonString.trim() === '') {
-    Logger.warn(TAG, 'Empty JSON string provided');
-    return defaultValue;
-  }
-
-  try {
-    const parsed = JSON.parse(jsonString);
-    return parsed ?? defaultValue;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    Logger.error(TAG, `Failed to parse JSON: ${errorMessage}`);
-    return defaultValue;
-  }
-}
-
-/**
- * 安全的JSON字符串化
- * @param obj 要序列化的对象
- */
-export function safeStringify(obj: object): string {
-  try {
-    if (obj === null || typeof obj === 'undefined') {
-      return 'null';
+export default class JsonUtil {
+  /**
+   * 将对象序列化为JSON字符串
+   * @param value - 要序列化的对象
+   * @returns JSON字符串
+   */
+  static stringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "{}";
     }
-    return JSON.stringify(obj);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    Logger.error(TAG, `Failed to stringify object: ${errorMessage}`);
-    return 'null';
   }
-}
 
-/**
- * 检查对象是否具有指定的自有属性
- * @param obj 要检查的对象
- * @param key 属性名
- */
-export function hasKey(obj: object, key: string): boolean {
-  if (obj === null || typeof obj !== 'object') {
-    return false;
-  }
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-/**
- * 获取对象的所有自有属性键
- * @param obj 要获取键的对象
- */
-export function getObjectKeys(obj: object): string[] {
-  if (obj === null || typeof obj !== 'object') {
-    return [];
-  }
-  return Object.keys(obj);
-}
-
-/**
- * 安全获取对象属性值
- * @param obj 要获取属性的对象
- * @param key 属性名
- */
-export function getValue(obj: object, key: string): JsonValue {
-  try {
-    if (obj === null || typeof obj !== 'object') {
-      return null;
+  /**
+   * 将JSON字符串解析为对象
+   * @param jsonStr - JSON字符串
+   * @returns 解析后的对象
+   */
+  static parse(jsonStr: string): Record<string, string | number | boolean | null> {
+    try {
+      const result = JSON.parse(jsonStr);
+      return typeof result === 'object' && result !== null ? result : {};
+    } catch {
+      return {};
     }
-    
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-      if (descriptor && descriptor.value !== undefined) {
-        return descriptor.value;
+  }
+
+  /**
+   * 安全的JSON解析，不会抛出异常
+   * @param jsonStr - JSON字符串
+   * @returns 解析后的对象，解析失败返回空对象
+   */
+  static safeParse(jsonStr: string): Record<string, string | number | boolean | null> {
+    return JsonUtil.parse(jsonStr);
+  }
+
+  /**
+   * 深度克隆对象
+   * @param obj - 要克隆的对象
+   * @returns 克隆后的新对象
+   */
+  static deepClone<T>(obj: T): T {
+    try {
+      return JSON.parse(JSON.stringify(obj)) as T;
+    } catch {
+      return {} as T;
+    }
+  }
+
+  /**
+   * 检查字符串是否为有效的JSON
+   * @param str - 要检查的字符串
+   * @returns 是否为有效JSON
+   */
+  static isValidJSON(str: string): boolean {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * 美化JSON字符串
+   * @param jsonStr - JSON字符串
+   * @param indent - 缩进空格数，默认2
+   * @returns 美化后的JSON字符串
+   */
+  static prettyPrint(jsonStr: string, indent: number = 2): string {
+    try {
+      const obj = JSON.parse(jsonStr);
+      return JSON.stringify(obj, null, indent);
+    } catch {
+      return jsonStr;
+    }
+  }
+
+  /**
+   * 合并多个JSON对象
+   * @param objects - 要合并的对象数组
+   * @returns 合并后的对象
+   */
+  static merge(...objects: Record<string, string | number | boolean | null>[]): Record<string, string | number | boolean | null> {
+    const result: Record<string, string | number | boolean | null> = {};
+    for (let i = 0; i < objects.length; i++) {
+      const current = objects[i];
+      const keys = Object.keys(current);
+      for (let j = 0; j < keys.length; j++) {
+        const key = keys[j];
+        result[key] = current[key];
       }
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * 创建一个新的空对象
- */
-export function createObject(): object {
-  return Object.create(null);
-}
-
-/**
- * 设置对象属性
- * @param obj 对象
- * @param key 属性名
- * @param value 属性值
- */
-export function setValue(obj: object, key: string, value: JsonValue): void {
-  if (obj === null || typeof obj !== 'object') {
-    return;
-  }
-  
-  Object.defineProperty(obj, key, {
-    value: value,
-    writable: true,
-    enumerable: true,
-    configurable: true
-  });
-}
-
-/**
- * 深度克隆简单对象
- * @param obj 要克隆的对象
- */
-export function deepClone(obj: JsonValue): JsonValue {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  
-  if (Array.isArray(obj)) {
-    const result = [];
-    const length = obj.length;
-    for (let i = 0; i < length; i++) {
-      const item = obj[i];
-      result.push(deepClone(item));
     }
     return result;
   }
-  
-  const result = createObject();
-  const keys = getObjectKeys(obj);
-  const keysLength = keys.length;
-  
-  for (let i = 0; i < keysLength; i++) {
-    const key = keys[i];
-    const value = getValue(obj, key);
-    setValue(result, key, deepClone(value));
+
+  /**
+   * 过滤对象中的null和undefined值
+   * @param obj - 要过滤的对象
+   * @returns 过滤后的对象
+   */
+  static filterNullUndefined(obj: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
+    const result: Record<string, string | number | boolean | null> = {};
+    const entries = Object.entries(obj);
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const key = entry[0];
+      const value = entry[1];
+      if (value !== null && value !== undefined) {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+}
+
+/**
+ * 安全的JSON序列化函数
+ * @param value - 要序列化的对象
+ * @returns JSON字符串
+ */
+export function safeStringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
+  return JsonUtil.stringify(value);
+}
+
+/**
+ * 快速解析JSON字符串（别名）
+ * @param jsonStr - JSON字符串
+ * @returns 解析后的对象
+ */
+export function quickParse(jsonStr: string): Record<string, string | number | boolean | null> {
+  return JsonUtil.parse(jsonStr);
+}
+
+/**
+ * 类型安全的JSON工具类
+ */
+export class JSONUtils {
+  /**
+   * 序列化对象为JSON字符串
+   */
+  static stringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
+    return JsonUtil.stringify(value);
   }
   
-  return result;
+  /**
+   * 解析JSON字符串为对象
+   */
+  static parse(jsonStr: string): Record<string, string | number | boolean | null> {
+    return JsonUtil.parse(jsonStr);
+  }
+  
+  /**
+   * 安全的JSON解析
+   */
+  static safeParse(jsonStr: string): Record<string, string | number | boolean | null> {
+    return JsonUtil.safeParse(jsonStr);
+  }
+  
+  /**
+   * 深度克隆对象
+   */
+  static deepClone<T>(obj: T): T {
+    return JsonUtil.deepClone(obj);
+  }
+  
+  /**
+   * 检查JSON有效性
+   */
+  static isValid(str: string): boolean {
+    return JsonUtil.isValidJSON(str);
+  }
+  
+  /**
+   * 美化JSON输出
+   */
+  static pretty(jsonStr: string, indent: number = 2): string {
+    return JsonUtil.prettyPrint(jsonStr, indent);
+  }
+  
+  /**
+   * 合并对象
+   */
+  static merge(...objects: Record<string, string | number | boolean | null>[]): Record<string, string | number | boolean | null> {
+    return JsonUtil.merge(...objects);
+  }
+  
+  /**
+   * 过滤null/undefined值
+   */
+  static filterNull(obj: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
+    return JsonUtil.filterNullUndefined(obj);
+  }
 }

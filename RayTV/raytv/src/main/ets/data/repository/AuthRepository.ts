@@ -59,7 +59,7 @@ export interface RefreshTokenResponse {
 export interface AuthError {
   code: string;
   message: string;
-  details?: any;
+  details?: string | number | boolean | null;
   timestamp: number;
 }
 
@@ -107,7 +107,7 @@ export const AuthEventType = {
 export interface AuthEvent {
   type: string;
   timestamp: number;
-  data?: any;
+  data?: string | number | boolean | null;
   error?: AuthError;
 }
 
@@ -153,7 +153,7 @@ export interface UserPermissions {
 export interface PermissionCheckRequest {
   permissionId: string;
   userId?: string;
-  context?: any;
+  context?: string | number | boolean | null;
 }
 
 /**
@@ -1371,7 +1371,7 @@ export class AuthRepository {
   /**
    * 检查用户权限
    */
-  public async checkPermission(permissionId: string, context?: any): Promise<boolean> {
+  public async checkPermission(permissionId: string, context?: string | number | boolean | null): Promise<boolean> {
     try {
       // 确保用户已认证
       if (!this.isAuthenticated() || !this.cachedUser) {

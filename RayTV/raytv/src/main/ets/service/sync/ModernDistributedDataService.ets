@@ -137,11 +137,8 @@ export default class ModernDistributedDataService {
 
       // 创建KVManager
       const kvManagerConfig: distributedKVStore.KVManagerConfig = {
-        bundleName: 'com.example.raytv',
-        userInfo: {
-          userId: '0',
-          userType: distributedKVStore.UserType.SAME_USER_ID
-        }
+        context: context,
+        bundleName: 'com.example.raytv'
       };
 
       this.kvManager = distributedKVStore.createKVManager(kvManagerConfig);

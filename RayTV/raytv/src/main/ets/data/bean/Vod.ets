@@ -89,19 +89,9 @@ export interface Vod {
   relatedVods?: string[];       // 相关内容ID列表
   userRating?: number;          // 用户评分
   categoryIds?: string[];       // 分类ID列表
-  seasonInfo?: {
-    current: number;            // 当前季数
-    total: number;              // 总季数
-  };
-  episodeInfo?: {
-    total: number;              // 总集数
-    watched: number;            // 已看集数
-  };
-  playHistory?: {
-    episodeIndex: number;       // 上次观看剧集索引
-    position: number;           // 上次观看位置
-    lastPlayTime: number;       // 上次观看时间
-  };
+  seasonInfo?: SeasonInfo;            // 季数信息
+  episodeInfo?: EpisodeInfo;          // 集数信息
+  playHistory?: PlayHistory;          // 播放历史信息
 }
 
 /**
@@ -207,4 +197,29 @@ export interface Comment {
   createdAt: number;            // 创建时间
   updatedAt: number;            // 更新时间
   isLiked?: boolean;            // 当前用户是否点赞
+}
+
+/**
+ * 季数信息接口
+ */
+export interface SeasonInfo {
+  current: number;            // 当前季数
+  total: number;              // 总季数
+}
+
+/**
+ * 集数信息接口
+ */
+export interface EpisodeInfo {
+  total: number;              // 总集数
+  watched: number;            // 已看集数
+}
+
+/**
+ * 播放历史信息接口
+ */
+export interface PlayHistory {
+  episodeIndex: number;       // 上次观看剧集索引
+  position: number;           // 上次观看位置
+  lastPlayTime: number;       // 上次观看时间
 }

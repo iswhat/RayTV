@@ -211,7 +211,7 @@ export default class ApiResponse<T = any> {
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): ApiResponseParams<T> {
+  toObject(): Record<string, any> {
     return {
       code: this.code,
       message: this.message,

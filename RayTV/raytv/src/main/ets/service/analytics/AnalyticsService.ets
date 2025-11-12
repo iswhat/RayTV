@@ -243,8 +243,6 @@ export class AnalyticsService {
     try {
       // 这里应该发送到分析服务器
       // 由于是本地实现，可以保存到本地存储或日志文件
-      console.log('Reporting analytics events:', eventsToReport.length);
-      
       // 模拟上报
       // await this.httpService.post('https://analytics-api.example.com/events', {
       //   events: eventsToReport
@@ -253,7 +251,7 @@ export class AnalyticsService {
       // 保存到本地日志
       await this.saveEventsToLog(eventsToReport);
     } catch (error) {
-      console.error('Failed to report analytics events:', error);
+      // 上报失败，将事件重新加入队列
       // 上报失败，将事件重新加入队列
       this.eventQueue = [...eventsToReport, ...this.eventQueue];
     }
@@ -270,7 +268,7 @@ export class AnalyticsService {
       const newLogs = events.map(e => JSON.stringify(e)).join('\n');
       await this.storageUtil.save(logKey, existingLogs + newLogs + '\n');
     } catch (error) {
-      console.error('Failed to save analytics log:', error);
+      // 保存日志失败
     }
   }
 

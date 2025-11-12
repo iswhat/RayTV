@@ -82,11 +82,7 @@ export interface History {
   saturation?: number;  // 饱和度设置
   hue?: number;         // 色调设置
   playbackNotes?: string; // 播放笔记
-  watchTimeList?: {
-    startTime: number;  // 开始时间
-    endTime: number;    // 结束时间
-    duration: number;   // 观看时长
-  }[];
+  watchTimeList?: WatchTimeRecord[]; // 观看时间记录列表
 }
 
 /**
@@ -232,4 +228,13 @@ export interface DeviceWatchRecord {
     lastPlayedAt: number;
     progress: number;
   };
+}
+
+/**
+ * 观看时间记录接口
+ */
+export interface WatchTimeRecord {
+  startTime: number;  // 开始时间
+  endTime: number;    // 结束时间
+  duration: number;   // 观看时长
 }

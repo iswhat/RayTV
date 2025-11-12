@@ -142,7 +142,7 @@ export class LiveRepository {
       
       const sortOptions: SortOption[] = [{
         column: LIVE_GROUP_TABLE.COLUMNS.ORDER_INDEX,
-        ascending: true
+        order: 'ASC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -251,7 +251,7 @@ export class LiveRepository {
       
       const sortOptions: SortOption[] = [{
         column: LIVE_CHANNEL_TABLE.COLUMNS.ORDER_INDEX,
-        ascending: true
+        order: 'ASC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -295,10 +295,10 @@ export class LiveRepository {
       
       const sortOptions: SortOption[] = [{
         column: LIVE_CHANNEL_TABLE.COLUMNS.GROUP_ID,
-        ascending: true
+        order: 'ASC'
       }, {
         column: LIVE_CHANNEL_TABLE.COLUMNS.ORDER_INDEX,
-        ascending: true
+        order: 'ASC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -543,7 +543,7 @@ export class LiveRepository {
       
       const sortOptions: SortOption[] = [{
         column: EPG_TABLE.COLUMNS.START_TIME,
-        ascending: true
+        order: 'ASC'
       }];
       
       const records = await this.sqliteHelper.query(
@@ -659,11 +659,11 @@ export class LiveRepository {
    * @param limit 限制数量
    * @returns 播放历史列表
    */
-  public async getPlayHistory(limit: number = 50): Promise<any[]> {
+  public async getPlayHistory(limit: number = 50): Promise<Record<string, string | number | boolean | null>[]> {
     try {
       const sortOptions: SortOption[] = [{
         column: LIVE_PLAY_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-        ascending: false
+        order: 'DESC'
       }];
       
       const records = await this.sqliteHelper.query(
