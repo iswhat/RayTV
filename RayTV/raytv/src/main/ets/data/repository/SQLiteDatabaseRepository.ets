@@ -27,7 +27,7 @@ const DATABASE_VERSION = 1;
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, string | number | boolean | object | null> = new Map(); // 用于缓存配置
+  private configMap: Map<string, string | number | boolean | null> = new Map(); // 用于缓存配置
   private context: common.UIAbilityContext | null = null;
 
   /**
