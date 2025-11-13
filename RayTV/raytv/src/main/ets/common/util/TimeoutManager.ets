@@ -190,7 +190,10 @@ export default class TimeoutManager {
       onRetry?: (attempt: number, error: Error) => void;
     } = {}
   ): Promise<T> {
-    const { maxRetries = 3, retryDelay = 1000, timeout, onRetry } = options;
+    const maxRetries = options.maxRetries ?? 3;
+    const retryDelay = options.retryDelay ?? 1000;
+    const timeout = options.timeout;
+    const onRetry = options.onRetry;
     let lastError: Error;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {

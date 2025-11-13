@@ -214,7 +214,11 @@ export class ValidatorUtil {
         return false;
       }
 
-      const { minLength = 8, requireUppercase = true, requireLowercase = true, requireNumber = true, requireSpecial = true } = options;
+      const minLength = options.minLength ?? 8;
+      const requireUppercase = options.requireUppercase ?? true;
+      const requireLowercase = options.requireLowercase ?? true;
+      const requireNumber = options.requireNumber ?? true;
+      const requireSpecial = options.requireSpecial ?? true;
 
       // 检查最小长度
       if (password.length < minLength) {
@@ -264,7 +268,10 @@ export class ValidatorUtil {
         return false;
       }
 
-      const { minLength = 3, maxLength = 20, allowUnderscore = true, allowHyphen = true } = options;
+      const minLength = options.minLength ?? 3;
+      const maxLength = options.maxLength ?? 20;
+      const allowUnderscore = options.allowUnderscore ?? true;
+      const allowHyphen = options.allowHyphen ?? true;
 
       // 检查长度
       if (username.length < minLength || username.length > maxLength) {
@@ -621,7 +628,8 @@ export class ValidatorUtil {
         return false;
       }
 
-      const { minLength = 0, maxLength = Infinity } = options;
+      const minLength = options.minLength ?? 0;
+      const maxLength = options.maxLength ?? Infinity;
       return arr.length >= minLength && arr.length <= maxLength;
     } catch (error) {
       this.logger.error('Failed to validate array', error as Error);

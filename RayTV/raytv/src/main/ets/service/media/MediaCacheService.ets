@@ -610,7 +610,11 @@ export default class MediaCacheService {
       throw new Error('Media cache is disabled');
     }
 
-    const { url, quality = 'auto', metadata = {}, priority = 5, headers = {} } = options;
+    const url = options.url;
+    const quality = options.quality ?? 'auto';
+    const metadata = options.metadata ?? {};
+    const priority = options.priority ?? 5;
+    const headers = options.headers ?? {};
     
     // 生成缓存项ID
     const cacheId = this.generateCacheId(url, quality);

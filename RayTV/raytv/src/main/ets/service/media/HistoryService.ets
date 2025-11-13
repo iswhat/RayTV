@@ -252,7 +252,10 @@ export class HistoryService {
     limit?: number;
   } = {}): Promise<HistoryItem[]> {
     try {
-      const { type, page = 1, pageSize = 20, limit } = params;
+      const type = params.type;
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 20;
+      const limit = params.limit;
       const offset = (page - 1) * pageSize;
       const limitValue = limit || pageSize;
 

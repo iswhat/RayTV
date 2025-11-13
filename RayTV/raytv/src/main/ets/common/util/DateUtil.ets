@@ -114,8 +114,12 @@ export default class DateUtil {
       const minuteMatch = format.match(/mm/g);
       const secondMatch = format.match(/ss/g);
 
-      let year = 1970, month = 0, day = 1;
-      let hour = 0, minute = 0, second = 0;
+      let year = 1970;
+      let month = 0;
+      let day = 1;
+      let hour = 0;
+      let minute = 0;
+      let second = 0;
 
       // 提取年月日
       if (yearMatch && yearMatch.index !== undefined) {
