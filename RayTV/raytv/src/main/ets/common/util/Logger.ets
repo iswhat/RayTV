@@ -188,7 +188,7 @@ class Logger {
       showProcessId: false,
       showThreadId: false,
       enableStackTrace: true,
-    };
+    } as LoggerConfig;
   }
 
   /**

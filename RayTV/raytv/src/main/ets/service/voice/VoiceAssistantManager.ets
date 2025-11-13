@@ -65,7 +65,7 @@ export class VoiceAssistantManager {
       // 暂时只进行基本初始化
       
       Logger.info(VoiceAssistantManager.TAG, 'VoiceAssistantManager initialized successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to initialize VoiceAssistantManager: ${error}`);
       throw error;
     }
@@ -89,7 +89,7 @@ export class VoiceAssistantManager {
       // 这里应该调用HarmonyOS的语音识别API
       // 暂时使用模拟识别
       await this.simulateVoiceRecognition();
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to start listening: ${error}`);
       
       // 重置状态
@@ -116,7 +116,7 @@ export class VoiceAssistantManager {
       this.notifyStateChanged();
       
       // 这里应该停止HarmonyOS的语音识别API
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to stop listening: ${error}`);
       throw error;
     }
@@ -160,7 +160,7 @@ export class VoiceAssistantManager {
         // 如果没有匹配的命令，尝试搜索内容
         await this.handleSearchCommand(lowercaseText);
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to process voice text: ${error}`);
       throw error;
     }
@@ -203,7 +203,7 @@ export class VoiceAssistantManager {
       }
       
       Logger.info(VoiceAssistantManager.TAG, `Voice assistant ${enabled ? 'enabled' : 'disabled'}`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to set voice assistant enabled state: ${error}`);
       throw error;
     }
@@ -351,7 +351,7 @@ export class VoiceAssistantManager {
           params: { keyword }
         });
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to handle search command: ${error}`);
     }
   }
@@ -392,7 +392,7 @@ export class VoiceAssistantManager {
     this.recognitionListeners.forEach(listener => {
       try {
         listener(result);
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(VoiceAssistantManager.TAG, `Error in recognition listener: ${error}`);
       }
     });

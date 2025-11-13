@@ -90,7 +90,7 @@ export interface SyncEntity {
   timestamp?: number;             // 时间戳
   version?: number;               // 版本号
   checksum?: string;              // 校验和
-  [key: string]: any;             // 其他属性
+  extraData?: Record<string, unknown>; // 其他属性
 }
 
 // 同步记录接口
@@ -246,7 +246,7 @@ export default class DataSyncService {
       
       this.isInitialized = true;
       Logger.info(TAG, 'Data sync service initialized successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to initialize data sync service: ${JSON.stringify(error)}`);
       throw error;
     }
@@ -261,7 +261,7 @@ export default class DataSyncService {
       if (savedConfig) {
         this.config = { ...DEFAULT_DATA_SYNC_CONFIG, ...savedConfig };
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load data sync config: ${error}`);
     }
   }
@@ -280,7 +280,7 @@ export default class DataSyncService {
       } else {
         this.stopAutoSync();
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to save data sync config: ${error}`);
       throw error;
     }
@@ -301,7 +301,7 @@ export default class DataSyncService {
       const records = await this.configService.getConfig<SyncRecord[]>('syncRecords', []);
       this.syncRecords = records;
       Logger.info(TAG, `Loaded ${this.syncRecords.length} sync records`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load sync records: ${error}`);
     }
   }
@@ -314,7 +314,7 @@ export default class DataSyncService {
       // 只保留最近100条记录
       const recentRecords = this.syncRecords.slice(-100);
       await this.configService.setConfig('syncRecords', recentRecords);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to save sync records: ${error}`);
     }
   }
@@ -372,7 +372,7 @@ export default class DataSyncService {
           await provider.saveData([data]);
           break;
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to sync remote data: ${error}`);
     }
   }
@@ -539,7 +539,7 @@ export default class DataSyncService {
       
       // 通知冲突解决事件
       this.notifyEvent(SyncEvent.CONFLICT_RESOLVED, conflict);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to resolve conflict: ${error}`);
     }
   }
@@ -607,7 +607,7 @@ export default class DataSyncService {
       try {
         this.notifyEvent(SyncEvent.AUTO_SYNC_STARTED, null);
         await this.synchronizeAll();
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Auto sync failed: ${error}`);
       } finally {
         this.notifyEvent(SyncEvent.AUTO_SYNC_STOPPED, null);
@@ -664,7 +664,7 @@ export default class DataSyncService {
       });
       
       Logger.info(TAG, `Full data synchronization completed in ${duration}ms`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Full data synchronization failed: ${error}`);
       
       // 记录失败的同步
@@ -732,7 +732,7 @@ export default class DataSyncService {
       this.notifyTaskUpdate(task);
       this.notifyEvent(SyncEvent.SYNC_COMPLETED, task);
       
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to sync data type ${dataType}: ${error}`);
       
       task.state = SyncState.FAILED;
@@ -779,7 +779,7 @@ export default class DataSyncService {
           change.data
         );
         successCount++;
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Failed to upload change for ${change.entityId}: ${error}`);
         failedCount++;
       }
@@ -823,7 +823,7 @@ export default class DataSyncService {
     
     try {
       await this.synchronizeDataType(task.dataType);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Retry failed for task ${task.id}: ${error}`);
     }
   }
@@ -905,7 +905,7 @@ export default class DataSyncService {
     for (const listener of listeners) {
       try {
         listener({ ...task });
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Error in sync listener: ${error}`);
       }
     }
@@ -973,7 +973,7 @@ export default class DataSyncService {
       for (const listener of listeners) {
         try {
           listener(event, data);
-        } catch (error) {
+        } catch (error: Error) {
           Logger.error(TAG, `Error in sync event listener: ${error}`);
         }
       }

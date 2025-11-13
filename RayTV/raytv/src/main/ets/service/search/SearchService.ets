@@ -73,7 +73,7 @@ export interface SearchResultItem {
     title?: string[];       // 标题高亮位置
     description?: string[]; // 描述高亮位置
   };
-  meta?: { viewCount?: number; [key: string]: any }; // 额外元数据
+  meta?: { viewCount?: number; extraData?: Record<string, unknown> }; // 额外元数据
   siteKey?: string;         // 站点键
   siteName?: string;        // 站点名称
 }

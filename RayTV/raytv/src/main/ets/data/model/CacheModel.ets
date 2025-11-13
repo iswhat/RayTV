@@ -803,9 +803,7 @@ export interface BatchCacheResult {
   /**
    * 失败原因
    */
-  failures: {
-    [key: string]: string;
-  };
+  failures: Record<string, string>;
   
   /**
    * 总操作时间

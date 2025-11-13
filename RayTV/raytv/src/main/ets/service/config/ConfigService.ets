@@ -328,7 +328,7 @@ export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
   autoPlay: true,
   autoNextEpisode: true,
   backgroundPlayEnabled: false,
-  videoPlayerSettings: {},
+  videoPlayerSettings: {} as Record<string, unknown>,
   
   // 字幕相关
   subtitleEnabled: true,
@@ -345,8 +345,8 @@ export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
   proxyEnabled: false,
   proxyConfig: null,
   dataSaverEnabled: false,
-  customHeaders: {},
-  customCookies: {},
+  customHeaders: {} as Record<string, string>,
+  customCookies: {} as Record<string, string>,
   
   // 通知相关
   notificationEnabled: true,

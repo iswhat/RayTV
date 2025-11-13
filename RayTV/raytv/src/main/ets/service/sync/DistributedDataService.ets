@@ -125,7 +125,7 @@ export default class DistributedDataService {
       
       try {
         this.kvManager = await distributedKVStore.createKVManager(managerConfig);
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Failed to create KVManager: ${JSON.stringify(error)}`);
         throw new Error(`KVManager creation failed: ${error instanceof Error ? error.message : String(error)}`);
       }
@@ -146,7 +146,7 @@ export default class DistributedDataService {
 
       try {
         this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options);
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Failed to get KVStore: ${JSON.stringify(error)}`);
         throw new Error(`KVStore initialization failed: ${error instanceof Error ? error.message : String(error)}`);
       }
@@ -171,7 +171,7 @@ export default class DistributedDataService {
 
       this.isInitialized = true;
       Logger.info(TAG, 'Distributed data service initialized successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to initialize distributed data service: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
@@ -186,7 +186,7 @@ export default class DistributedDataService {
       if (savedConfig) {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load sync config: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -205,7 +205,7 @@ export default class DistributedDataService {
       } else {
         this.stopAutoSync();
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to save sync config: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
@@ -243,18 +243,18 @@ export default class DistributedDataService {
                   // 查找所有匹配的监听器
                   this.notifyRelevantListeners(key, value, deviceId);
                 }
-              } catch (error) {
+              } catch (error: Error) {
                 Logger.error(TAG, `Failed to process changed data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
               }
             }
           }
-        } catch (error) {
+        } catch (error: Error) {
           Logger.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error)}`);
         }
       };
       
       await this.kvStore.on('dataChange', distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, subscriptionCallback);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to register data change listener: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -268,7 +268,7 @@ export default class DistributedDataService {
         for (const listener of listeners) {
           try {
             listener(key, value, deviceId);
-          } catch (error) {
+          } catch (error: Error) {
             Logger.error(TAG, `Error in data listener for prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
@@ -336,8 +336,8 @@ export default class DistributedDataService {
       // 保存数据到KVStore
       await this.kvStore.put(fullKey, syncData);
       Logger.debug(TAG, `Saved sync data: ${fullKey}`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to save sync data: ${error instanceof Error ? error.message : String(error)}`);
+    } catch (error: Error) {
+      Logger.error(TAG, `Failed to get sync data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -362,7 +362,7 @@ export default class DistributedDataService {
       }
       
       return null;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get sync data: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
@@ -382,7 +382,7 @@ export default class DistributedDataService {
       const fullKey = `${dataType}_${key}`;
       await this.kvStore.delete(fullKey);
       Logger.debug(TAG, `Deleted sync data: ${fullKey}`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to delete sync data: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
@@ -398,11 +398,11 @@ export default class DistributedDataService {
       this.syncTimerId = setInterval(async () => {
         try {
           await this.synchronizeData();
-        } catch (error) {
+        } catch (error: Error) {
           Logger.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }, this.syncConfig.syncInterval * 1000);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to start auto sync: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -451,7 +451,7 @@ export default class DistributedDataService {
       };
       
       Logger.info(TAG, 'Data synchronization completed successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Data synchronization failed: ${error instanceof Error ? error.message : String(error)}`);
       this.syncState = {
         status: SyncStatus.FAILED,
@@ -473,7 +473,7 @@ export default class DistributedDataService {
       const deviceInfoList = await this.kvManager.getConnectedDevicesInfo();
       this.deviceIds = deviceInfoList.map(device => device.deviceId).filter(id => id);
       return this.deviceIds;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get available devices: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
@@ -490,7 +490,7 @@ export default class DistributedDataService {
       
       const deviceInfo = await this.kvManager.getLocalDeviceInfo();
       return deviceInfo?.deviceId || 'unknown';
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error)}`);
       return 'unknown';
     }
@@ -519,13 +519,13 @@ export default class DistributedDataService {
           if (localData) {
             Logger.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
           }
-        } catch (error) {
+        } catch (error: Error) {
           Logger.error(TAG, `Error processing key ${fullKey}: ${error instanceof Error ? error.message : String(error)}`);
           // 继续处理下一个键，不中断整个同步流程
           continue;
         }
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
@@ -553,7 +553,7 @@ export default class DistributedDataService {
       }
       
       return keys;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
@@ -579,7 +579,7 @@ export default class DistributedDataService {
         default:
           return localData;
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
       return localData; // 出错时默认保留本地数据
     }
@@ -676,7 +676,7 @@ export default class DistributedDataService {
       merged.deviceId = await this.getLocalDeviceId();
       
       return merged;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
       return localData; // 出错时默认保留本地数据
     }
@@ -702,7 +702,7 @@ export default class DistributedDataService {
       this.kvManager = null;
       this.isInitialized = false;
       Logger.info(TAG, 'Distributed data service closed and resources released');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Error closing distributed data service: ${error instanceof Error ? error.message : String(error)}`);
     }
   }

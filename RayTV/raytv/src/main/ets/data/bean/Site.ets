@@ -53,7 +53,7 @@ export interface SiteConfigItem {
  * 站点请求头配置接口
  */
 export interface SiteHeaders {
-  [key: string]: string; // 键值对形式的请求头
+  headers?: Map<string, string>; // 键值对形式的请求头
 }
 
 /**

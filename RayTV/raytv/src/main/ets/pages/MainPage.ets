@@ -1,11 +1,4 @@
-import Button from '@ohos.widget.Button';
-import Text from '@ohos.widget.Text';
-import Image from '@ohos.widget.Image';
-import List from '@ohos.widget.List';
-import ListItem from '@ohos.widget.ListItem';
-import Row from '@ohos.widget.Row';
-import Column from '@ohos.widget.Column';
-import Flex from '@ohos.widget.Flex';
+import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
 import { Router } from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';

@@ -24,6 +24,20 @@ export enum ResultType {
 }
 
 /**
+ * 额外信息类型定义
+ */
+export interface ExtraInfo {
+  extraData?: Record<string, string | number | boolean | null | NestedExtraInfo>;
+}
+
+/**
+ * 嵌套额外信息类型定义
+ */
+export interface NestedExtraInfo {
+  nestedData?: Record<string, string | number | boolean | null>;
+}
+
+/**
  * 搜索结果实体类
  * 定义搜索结果的数据结构和相关操作
  */
@@ -47,7 +61,7 @@ export default class SearchResult {
   directors?: string[];    // 导演列表（针对内容类型）
   popularity?: number;     // 热度/流行度
   matchScore?: number;     // 匹配分数（搜索相关性）
-  extraInfo?: Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>; // 额外信息，使用具体的类型联合
+  extraInfo?: ExtraInfo; // 额外信息，使用更明确的类型定义
   link?: string;           // 关联链接
   sourceId?: string;       // 来源ID
   sourceName?: string;     // 来源名称
@@ -77,10 +91,10 @@ export default class SearchResult {
     this.matchScore = data.matchScore;
     // 确保extraInfo是有效的对象类型，使用明确的类型初始化
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
-      this.extraInfo = data.extraInfo;
+      this.extraInfo = data.extraInfo as ExtraInfo;
     } else {
       // 使用空对象字面量，但确保类型安全
-      this.extraInfo = {} as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+      this.extraInfo = {} as ExtraInfo;
     }
     this.link = data.link;
     this.sourceId = data.sourceId;
@@ -326,8 +340,8 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined> {
-    const result: Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined> = {};
+  public toSerializable(): Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined> {
+    const result: Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined> = {};
     
     result.id = this.id;
     result.title = this.title;
@@ -361,7 +375,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined>): SearchResult {
+  public static fromSerializable(data: Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined>): SearchResult {
     // 将Record类型转换为Partial<SearchResult>类型
     const searchResultData: Partial<SearchResult> = {};
     
@@ -387,7 +401,7 @@ export default class SearchResult {
     if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
     // 安全处理extraInfo，确保类型正确
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
-      searchResultData.extraInfo = data.extraInfo as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+      searchResultData.extraInfo = data.extraInfo as ExtraInfo;
     }
     if (typeof data.link === 'string') searchResultData.link = data.link;
     if (typeof data.sourceId === 'string') searchResultData.sourceId = data.sourceId;

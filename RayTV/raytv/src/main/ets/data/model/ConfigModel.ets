@@ -498,7 +498,7 @@ export interface SubtitleConfig {
   /**
    * 字幕扩展名映射
    */
-  extensionMapping?: { [key: string]: string };
+  extensionMapping?: Record<string, string>;
 }
 
 /**
@@ -668,7 +668,7 @@ export interface PresetConfig {
   /**
    * 预设配置项
    */
-  config: { [key: string]: unknown };
+  config: Record<string, unknown>;
   
   /**
    * 是否为默认预设

@@ -453,9 +453,9 @@ class LocalRepository {
    * 获取存储使用情况
    * @returns 使用情况统计
    */
-  public async getStorageUsage(): Promise<{ [key: string]: number }> {
+  public async getStorageUsage(): Promise<Record<string, number>> {
     try {
-      const usage: { [key: string]: number } = {};
+      const usage: Record<string, number> = {};
       const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
       
       for (const dir of directories) {

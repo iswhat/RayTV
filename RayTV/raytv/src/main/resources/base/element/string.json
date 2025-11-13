@@ -1,6 +1,10 @@
 {
   "string": [
     {
+      "name": "app_name",
+      "value": "RayTV"
+    },
+    {
       "name": "module_desc",
       "value": "module description"
     },
@@ -11,6 +15,34 @@
     {
       "name": "RaytvAbility_label",
       "value": "label"
+    },
+    {
+      "name": "permission_distributed_datasync_label",
+      "value": "分布式数据同步"
+    },
+    {
+      "name": "permission_distributed_datasync_desc",
+      "value": "允许应用在设备间同步数据"
+    },
+    {
+      "name": "permission_access_distributed_service_label",
+      "value": "访问分布式服务"
+    },
+    {
+      "name": "permission_access_distributed_service_desc",
+      "value": "允许应用访问分布式服务能力"
+    },
+    {
+      "name": "permission_distributed_datasync",
+      "value": "需要同步数据"
+    },
+    {
+      "name": "permission_access_distributed_service",
+      "value": "需要访问分布式服务"
+    },
+    {
+      "name": "permission_internet",
+      "value": "需要访问网络以获取视频资源"
     }
   ]
 }

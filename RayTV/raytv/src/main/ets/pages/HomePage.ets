@@ -30,7 +30,7 @@ struct HomePage {
     Logger.info('Search button clicked');
     try {
       // 跳转到搜索页面
-      Router.pushUrl({
+      Router.push({
         url: 'pages/SearchPage'
       });
     } catch (error) {

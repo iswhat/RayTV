@@ -6,7 +6,7 @@ export default class JsonUtil {
   /**
    * 检查对象是否包含指定属性
    */
-  private static hasOwnProperty(obj: Object, key: string): boolean {
+  private static hasOwnProperty(obj: Record<string, string | number | boolean | object | null>, key: string): boolean {
     return Object.getOwnPropertyNames(obj).includes(key);
   }
   /**
@@ -14,7 +14,7 @@ export default class JsonUtil {
    * @param value - 要序列化的对象
    * @returns JSON字符串
    */
-  static stringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
+  static stringify<T>(value: T): string {
     try {
       return JSON.stringify(value);
     } catch {
@@ -27,16 +27,16 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象
    */
-  static parse(jsonStr: string): Record<string, string | number | boolean | null> {
+  static parse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     try {
       const result = JSON.parse(jsonStr);
       // 确保返回类型安全
-      if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
-        return result as Record<string, string | number | boolean | null>;
+      if (typeof result === 'object' && result !== null) {
+        return result as T;
       }
-      return {};
+      return {} as T;
     } catch {
-      return {};
+      return {} as T;
     }
   }
 
@@ -45,8 +45,8 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象，解析失败返回空对象
    */
-  static safeParse(jsonStr: string): Record<string, string | number | boolean | null> {
-    return JsonUtil.parse(jsonStr);
+  static safeParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+    return JsonUtil.parse<T>(jsonStr);
   }
 
   /**
@@ -106,8 +106,8 @@ export default class JsonUtil {
    * @param objects - 要合并的对象数组
    * @returns 合并后的对象
    */
-  static merge(...objects: Record<string, string | number | boolean | null>[]): Record<string, string | number | boolean | null> {
-    const result: Record<string, string | number | boolean | null> = {};
+  static merge<T extends Record<string, string | number | boolean | object | null>>(...objects: T[]): T {
+    const result: Record<string, string | number | boolean | object | null> = {};
     for (let i = 0; i < objects.length; i++) {
       const current = objects[i];
       const keys = Object.getOwnPropertyNames(current);
@@ -118,7 +118,7 @@ export default class JsonUtil {
         }
       }
     }
-    return result;
+    return result as T;
   }
 
   /**
@@ -126,9 +126,9 @@ export default class JsonUtil {
    * @param obj - 要过滤的对象
    * @returns 过滤后的对象
    */
-  static filterNullUndefined(obj: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
+  static filterNullUndefined<T extends Record<string, string | number | boolean | object | null>>(obj: T): Partial<T> {
     // 创建明确类型的结果对象
-    const result: Record<string, string | number | boolean | null> = {};
+    const result: Record<string, string | number | boolean | object | null> = {};
     const keys = Object.getOwnPropertyNames(obj);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -140,7 +140,7 @@ export default class JsonUtil {
         }
       }
     }
-    return result;
+    return result as Partial<T>;
   }
 }
 
@@ -149,8 +149,8 @@ export default class JsonUtil {
  * @param value - 要序列化的对象
  * @returns JSON字符串
  */
-export function safeStringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
-  return JsonUtil.stringify(value);
+export function safeStringify<T>(value: T): string {
+  return JsonUtil.stringify<T>(value);
 }
 
 /**
@@ -158,8 +158,8 @@ export function safeStringify(value: string | number | boolean | Record<string, 
  * @param jsonStr - JSON字符串
  * @returns 解析后的对象
  */
-export function quickParse(jsonStr: string): Record<string, string | number | boolean | null> {
-  return JsonUtil.parse(jsonStr);
+export function quickParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  return JsonUtil.parse<T>(jsonStr);
 }
 
 /**
@@ -169,29 +169,29 @@ export class JSONUtils {
   /**
    * 序列化对象为JSON字符串
    */
-  static stringify(value: string | number | boolean | Record<string, string | number | boolean> | null): string {
-    return JsonUtil.stringify(value);
+  static stringify<T>(value: T): string {
+    return JsonUtil.stringify<T>(value);
   }
   
   /**
    * 解析JSON字符串为对象
    */
-  static parse(jsonStr: string): Record<string, string | number | boolean | null> {
-    return JsonUtil.parse(jsonStr);
+  static parse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+    return JsonUtil.parse<T>(jsonStr);
   }
   
   /**
    * 安全的JSON解析
    */
-  static safeParse(jsonStr: string): Record<string, string | number | boolean | null> {
-    return JsonUtil.safeParse(jsonStr);
+  static safeParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+    return JsonUtil.safeParse<T>(jsonStr);
   }
   
   /**
    * 深度克隆对象
    */
   static deepClone<T>(obj: T): T {
-    return JsonUtil.deepClone(obj);
+    return JsonUtil.deepClone<T>(obj);
   }
   
   /**
@@ -211,14 +211,14 @@ export class JSONUtils {
   /**
    * 合并对象
    */
-  static merge(...objects: Record<string, string | number | boolean | null>[]): Record<string, string | number | boolean | null> {
-    return JsonUtil.merge(...objects);
+  static merge<T extends Record<string, string | number | boolean | object | null>>(...objects: T[]): T {
+    return JsonUtil.merge<T>(...objects);
   }
   
   /**
    * 过滤null/undefined值
    */
-  static filterNull(obj: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
-    return JsonUtil.filterNullUndefined(obj);
+  static filterNull<T extends Record<string, string | number | boolean | object | null>>(obj: T): Partial<T> {
+    return JsonUtil.filterNullUndefined<T>(obj);
   }
 }

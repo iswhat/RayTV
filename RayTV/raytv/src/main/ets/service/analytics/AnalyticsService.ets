@@ -250,7 +250,7 @@ export class AnalyticsService {
 
       // 保存到本地日志
       await this.saveEventsToLog(eventsToReport);
-    } catch (error) {
+    } catch (error: Error) {
       // 上报失败，将事件重新加入队列
       // 上报失败，将事件重新加入队列
       this.eventQueue = [...eventsToReport, ...this.eventQueue];
@@ -267,7 +267,7 @@ export class AnalyticsService {
       const existingLogs = await this.storageUtil.get<string>(logKey, '');
       const newLogs = events.map(e => JSON.stringify(e)).join('\n');
       await this.storageUtil.save(logKey, existingLogs + newLogs + '\n');
-    } catch (error) {
+    } catch (error: Error) {
       // 保存日志失败
     }
   }
@@ -328,7 +328,7 @@ export class AnalyticsService {
               totalSearches++;
               break;
           }
-        } catch (e) {
+        } catch (e: Error) {
           // 忽略解析错误
         }
       }

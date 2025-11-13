@@ -67,7 +67,8 @@ export default class User {
   watchHistoryEnabled?: boolean; // 是否启用观看历史
   favoritesEnabled?: boolean;    // 是否启用收藏
   totalWatchTime?: number;       // 总观看时长（分钟）
-  settings?: Record<string, string | number | boolean | object | null>; // 其他设置
+  // 使用更具体的类型替代Record
+  settings?: UserSettings; // 其他设置
 
   /**
    * 构造函数
@@ -89,7 +90,7 @@ export default class User {
     this.watchHistoryEnabled = data.watchHistoryEnabled !== undefined ? data.watchHistoryEnabled : true;
     this.favoritesEnabled = data.favoritesEnabled !== undefined ? data.favoritesEnabled : true;
     this.totalWatchTime = data.totalWatchTime || 0;
-    this.settings = data.settings || {};
+    this.settings = data.settings ? (data.settings as UserSettings) : {} as UserSettings;
   }
 
   /**
@@ -122,7 +123,21 @@ export default class User {
   private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences> | null | undefined): UserPreferences {
     // 安全检查更新对象
     if (!updates || typeof updates !== 'object') {
-      return { ...base };
+      // 手动复制属性，替代展开操作符
+      return {
+        theme: base.theme,
+        language: base.language,
+        playerDefaultQuality: base.playerDefaultQuality,
+        autoplay: base.autoplay,
+        subtitleEnabled: base.subtitleEnabled,
+        defaultSubtitleLanguage: base.defaultSubtitleLanguage,
+        audioLanguage: base.audioLanguage,
+        maxConcurrentDownloads: base.maxConcurrentDownloads,
+        parentalControlEnabled: base.parentalControlEnabled,
+        parentalControlLevel: base.parentalControlLevel,
+        searchHistoryEnabled: base.searchHistoryEnabled,
+        playbackSpeed: base.playbackSpeed
+      };
     }
     
     // 确保基础偏好设置存在
@@ -361,11 +376,18 @@ export default class User {
   }
 
   /**
+   * 用户设置类型定义
+   */
+  export interface UserSettings {
+    settings?: Record<string, string | number | boolean | null>;
+  }
+
+  /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | Record<string, string | number | boolean | object | null> | null> {
-    const result: Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | Record<string, string | number | boolean | object | null> | null> = {
+  public toSerializable(): Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null> {
+    const result: Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null> = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -392,7 +414,7 @@ export default class User {
    * @param data 序列化数据
    * @returns User对象
    */
-  public static fromSerializable(data: Record<string, unknown>): User {
+  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): User {
     // 创建安全的用户数据对象，添加类型检查和默认值
     const safeUserData: Partial<User> = {};
     
@@ -415,7 +437,7 @@ export default class User {
     if (typeof data.favoritesEnabled === 'boolean') safeUserData.favoritesEnabled = data.favoritesEnabled;
     if (typeof data.totalWatchTime === 'number') safeUserData.totalWatchTime = data.totalWatchTime;
     if (data.settings && typeof data.settings === 'object') {
-      safeUserData.settings = data.settings as Record<string, string | number | boolean | object | null>;
+      safeUserData.settings = data.settings as UserSettings;
     }
     
     return new User(safeUserData);

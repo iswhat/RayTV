@@ -110,7 +110,7 @@ export class StringUtils {
   public static escapeHtml(html: string): string {
     if (StringUtils.isEmpty(html)) return html || '';
     
-    const entityMap: { [key: string]: string } = {
+    const entityMap: Record<string, string> = {
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',

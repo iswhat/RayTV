@@ -9,7 +9,7 @@ import TimeoutManager from '../../../common/util/TimeoutManager';
  * Python执行上下文
  */
 interface PyContext {
-  [key: string]: unknown;
+  contextData?: Record<string, unknown>;
 }
 
 /**

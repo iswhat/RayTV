@@ -5,7 +5,7 @@ import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
 import { historyService } from '../service/media/HistoryService';
 import { favoriteService } from '../service/media/FavoriteService';
-import { playbackService } from '../service/media/PlaybackService';
+import { playbackService } from '../service/playback/PlaybackService';
 // 类型定义
 export interface MediaItem {
   id: string;

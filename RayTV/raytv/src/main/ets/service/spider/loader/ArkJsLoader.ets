@@ -9,7 +9,7 @@ import TimeoutManager from '../../../common/util/TimeoutManager';
  * JavaScript执行上下文
  */
 interface JsContext {
-  [key: string]: unknown;
+  contextData?: Record<string, unknown>;
 }
 
 /**

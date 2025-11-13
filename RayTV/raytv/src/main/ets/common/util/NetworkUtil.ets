@@ -175,7 +175,7 @@ export default class NetworkUtil {
         const response = await httpRequest.request(fullUrl, httpOptions);
         
         // 读取响应数据
-        let responseData: unknown = response.result;
+        let responseData: string | object | null = response.result;
         
         // 处理不同响应类型
         if (responseType === 'json' && typeof responseData === 'string') {
@@ -237,7 +237,7 @@ export default class NetworkUtil {
    * @param error 错误对象
    * @returns 是否可重试
    */
-  private static isRetryableError(error: unknown): boolean {
+  private static isRetryableError(error: Error | string): boolean {
     // 网络错误、超时、服务器错误(5xx)可重试
     if (error instanceof Error) {
       const errorName = error.name;

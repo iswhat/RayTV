@@ -18,15 +18,15 @@ interface SearchRules {
   pageKey: string;
   resultPath: string;
   list: unknown[];
-  [key: string]: unknown;
+  extraFields?: Record<string, unknown>;
 }
 
 interface DetailRules {
-  [key: string]: unknown;
+  extraFields?: Record<string, unknown>;
 }
 
 interface PlayRules {
-  [key: string]: unknown;
+  extraFields?: Record<string, unknown>;
 }
 
 /**

@@ -48,6 +48,44 @@
           }
         ]
       }
+    ],
+    "definePermissions": [
+      {
+        "name": "ohos.permission.DISTRIBUTED_DATASYNC",
+        "grantMode": "user_grant",
+        "availableLevel": "system_basic",
+        "label": "$string:permission_distributed_datasync_label",
+        "description": "$string:permission_distributed_datasync_desc"
+      },
+      {
+        "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE",
+        "grantMode": "user_grant",
+        "availableLevel": "system_basic",
+        "label": "$string:permission_access_distributed_service_label",
+        "description": "$string:permission_access_distributed_service_desc"
+      }
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET",
+        "reason": "$string:permission_internet"
+      },
+      {
+        "name": "ohos.permission.DISTRIBUTED_DATASYNC",
+        "reason": "$string:permission_distributed_datasync",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE",
+        "reason": "$string:permission_access_distributed_service",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "inuse"
+        }
+      }
     ]
   }
 }

@@ -29,7 +29,7 @@ import { UserRepository } from './UserRepository';
 /**
  * 视频事件类型
  */
-export const VideoEventType = {
+export const VideoEventType: Record<string, string> = {
   VIDEO_LOADED: 'video:loaded',
   VIDEO_LIST_LOADED: 'video:listLoaded',
   VIDEO_UPDATED: 'video:updated',

@@ -51,7 +51,7 @@ export class PlayLiveUseCase {
       );
       
       return groupStats;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load live groups: ${error}`);
       throw error;
     }
@@ -82,7 +82,7 @@ export class PlayLiveUseCase {
       );
       
       return channelsWithCollectionStatus;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load live channels: ${error}`);
       throw error;
     }
@@ -97,7 +97,7 @@ export class PlayLiveUseCase {
     try {
       Logger.info(TAG, `Searching live channels with keyword: ${keyword}`);
       return await this.liveRepository.searchLiveChannels(keyword);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to search live channels: ${error}`);
       return [];
     }
@@ -144,7 +144,7 @@ export class PlayLiveUseCase {
       await this.liveRepository.incrementWatchCount(liveChannel.id, liveChannel.sourceKey);
       
       return resolvedLive;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to prepare live playback: ${error}`);
       throw error;
     }
@@ -163,7 +163,7 @@ export class PlayLiveUseCase {
     try {
       Logger.info(TAG, `Loading EPG for channel: ${channelId}, date: ${date.toDateString()}`);
       return await this.liveStreamRepository.getEpgForChannel(channelId, date);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load EPG: ${error}`);
       return [];
     }
@@ -200,7 +200,7 @@ export class PlayLiveUseCase {
         Logger.info(TAG, `Collected live channel: ${liveChannel.name}`);
         return true;
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to toggle live channel collection: ${error}`);
       throw error;
     }
@@ -229,7 +229,7 @@ export class PlayLiveUseCase {
       await this.liveRepository.updateLiveChannel(refreshedChannel);
       
       return refreshedChannel;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to refresh live source: ${error}`);
       throw error;
     }

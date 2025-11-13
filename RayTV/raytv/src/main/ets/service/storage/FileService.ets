@@ -180,7 +180,7 @@ export interface FileConfig {
 
 // 文件元数据接口
 export interface FileMetadata {
-  [key: string]: string | number | boolean | null;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 // 文件信息扩展接口

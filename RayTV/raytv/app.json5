@@ -6,7 +6,7 @@
   "minAPIVersion": 9,
   "targetAPIVersion": 9,
   "description": "一个功能强大的视频播放应用",
-  "icon": "$media:app_icon"
+  "icon": "$media:app_icon",
   "splashscreen": {
     "image": "./assets/splash.png",
     "color": "#ffffff"
@@ -49,6 +49,12 @@
         },
         {
           "name": "ohos.permission.GET_NETWORK_INFO"
+        },
+        {
+          "name": "ohos.permission.DISTRIBUTED_DATASYNC"
+        },
+        {
+          "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE"
         }
       ]
     },
@@ -64,13 +70,24 @@
   "defaultColorMode": "automatic",
   "requestPermissions": [
     {
-      "name": "ohos.permission.INTERNET"
+      "name": "ohos.permission.INTERNET",
+      "reason": "$string:permission_internet"
     },
     {
-      "name": "ohos.permission.DISTRIBUTED_DATASYNC"
+      "name": "ohos.permission.DISTRIBUTED_DATASYNC",
+      "reason": "$string:permission_distributed_datasync",
+      "usedScene": {
+        "abilities": ["MainAbility"],
+        "when": "inuse"
+      }
     },
     {
-      "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE"
+      "name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE",
+      "reason": "$string:permission_access_distributed_service",
+      "usedScene": {
+        "abilities": ["MainAbility"],
+        "when": "inuse"
+      }
     }
   ],
   "deviceConfig": {

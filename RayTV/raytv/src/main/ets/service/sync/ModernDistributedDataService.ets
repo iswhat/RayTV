@@ -181,7 +181,7 @@ export default class ModernDistributedDataService {
 
       this.isInitialized = true;
       Logger.info(TAG, 'Modern distributed data service initialized successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to initialize modern distributed data service: ${JSON.stringify(error)}`);
       throw error;
     }
@@ -196,7 +196,7 @@ export default class ModernDistributedDataService {
       if (savedConfig) {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to load sync config: ${error}`);
     }
   }
@@ -215,7 +215,7 @@ export default class ModernDistributedDataService {
       } else {
         this.stopAutoSync();
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to save sync config: ${error}`);
       throw error;
     }
@@ -253,18 +253,18 @@ export default class ModernDistributedDataService {
                 for (const listener of listeners) {
                   try {
                     listener(key, value, deviceId);
-                  } catch (error) {
+                  } catch (error: Error) {
                     Logger.error(TAG, `Error in data listener: ${error}`);
                   }
                 }
               }
-            }).catch(error => {
+            }).catch((error: Error) => {
               Logger.error(TAG, `Failed to get changed data: ${error}`);
             });
           });
         }
       });
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to register data change listener: ${error}`);
     }
   }
@@ -324,7 +324,7 @@ export default class ModernDistributedDataService {
 
       await this.kvStore.put(fullKey, syncData);
       Logger.debug(TAG, `Saved sync data: ${fullKey}`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to save sync data: ${error}`);
       throw error;
     }
@@ -350,7 +350,7 @@ export default class ModernDistributedDataService {
       }
       
       return null;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get sync data: ${error}`);
       return null;
     }
@@ -370,7 +370,7 @@ export default class ModernDistributedDataService {
       const fullKey = `${dataType}_${key}`;
       await this.kvStore.delete(fullKey);
       Logger.debug(TAG, `Deleted sync data: ${fullKey}`);
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to delete sync data: ${error}`);
       throw error;
     }
@@ -383,7 +383,7 @@ export default class ModernDistributedDataService {
     try {
       const deviceInfo = await deviceManager.getLocalDeviceInfo();
       return deviceInfo.deviceId;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get local device ID: ${error}`);
       return 'unknown';
     }
@@ -397,7 +397,7 @@ export default class ModernDistributedDataService {
       const devices = await deviceManager.getAvailableDeviceListSync();
       this.deviceIds = devices.map(device => device.deviceId);
       return this.deviceIds;
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get available devices: ${error}`);
       return [];
     }
@@ -412,7 +412,7 @@ export default class ModernDistributedDataService {
     this.syncTimerId = setInterval(async () => {
       try {
         await this.synchronizeData();
-      } catch (error) {
+      } catch (error: Error) {
         Logger.error(TAG, `Auto sync failed: ${error}`);
       }
     }, this.syncConfig.syncInterval * 1000);
@@ -464,7 +464,7 @@ export default class ModernDistributedDataService {
       };
       
       Logger.info(TAG, 'Data synchronization completed successfully');
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Data synchronization failed: ${error}`);
       this.syncState = {
         status: SyncStatus.FAILED,
@@ -498,7 +498,7 @@ export default class ModernDistributedDataService {
         // 数据会自动同步到其他设备，无需手动处理
         Logger.debug(TAG, `Auto-synced ${fullKey}`);
       }
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to sync data type ${dataType}: ${error}`);
       throw error;
     }
@@ -517,7 +517,7 @@ export default class ModernDistributedDataService {
       return allKeys.result.filter((entry: distributedKVStore.Entry) => 
         entry.key.toString().startsWith(prefix)
       ).map((entry: distributedKVStore.Entry) => entry.key.toString());
-    } catch (error) {
+    } catch (error: Error) {
       Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}`);
       return [];
     }

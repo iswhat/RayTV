@@ -219,7 +219,7 @@ export class ParserService {
         name: parser.name,
         description: config.description !== undefined ? config.description : parser.description,
         url: config.url !== undefined ? config.url : parser.url,
-        isEnabled: config.enabled !== undefined ? config.enabled : parser.isEnabled
+        isEnabled: config.isEnabled !== undefined ? config.isEnabled : parser.isEnabled
       };
       
       this.parsers.set(parserId, updatedParser);

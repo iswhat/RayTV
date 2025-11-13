@@ -6,6 +6,31 @@ import { VideoType } from './Movie';
 const TAG = 'History';
 
 /**
+ * 历史记录序列化接口
+ * 定义历史记录对象在序列化和反序列化时的结构
+ */
+export interface HistorySerializable {
+  id: string;
+  userId: string;
+  contentId: string;
+  contentTitle: string;
+  contentType: number;
+  progress: number;
+  totalDuration: number;
+  lastWatchTime: string;
+  playCount: number;
+  isFinished: boolean;
+  coverUrl?: string;
+  episodeId?: string;
+  episodeTitle?: string;
+  season?: number;
+  episode?: number;
+  sourceId?: string;
+  quality?: string;
+  deviceId?: string;
+}
+
+/**
  * 观看历史实体类
  * 记录用户的观看历史信息
  */
@@ -194,9 +219,9 @@ export default class History {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | object | null> {
+  public toSerializable(): HistorySerializable {
     // 使用对象字面量直接初始化，避免空对象字面量
-    const result: Record<string, string | number | boolean | object | null> = {
+    const result: HistorySerializable = {
       id: this.id,
       userId: this.userId,
       contentId: this.contentId,
@@ -227,29 +252,30 @@ export default class History {
    * @param data 序列化的数据
    * @returns History实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): History {
+  public static fromSerializable(data: HistorySerializable): History {
     // 直接创建包含所有有效数据的对象，避免空对象字面量
-    const historyData: Partial<History> = {};
+    const historyData: Partial<History> = {
+      id: data.id,
+      userId: data.userId,
+      contentId: data.contentId,
+      contentTitle: data.contentTitle,
+      contentType: data.contentType,
+      progress: data.progress,
+      totalDuration: data.totalDuration,
+      lastWatchTime: data.lastWatchTime,
+      playCount: data.playCount,
+      isFinished: data.isFinished
+    };
     
-    // 添加类型检查并设置属性
-    if (typeof data.id === 'string') historyData.id = data.id;
-    if (typeof data.userId === 'string') historyData.userId = data.userId;
-    if (typeof data.contentId === 'string') historyData.contentId = data.contentId;
-    if (typeof data.contentTitle === 'string') historyData.contentTitle = data.contentTitle;
-    if (typeof data.contentType === 'number') historyData.contentType = data.contentType;
-    if (typeof data.coverUrl === 'string') historyData.coverUrl = data.coverUrl;
-    if (typeof data.episodeId === 'string') historyData.episodeId = data.episodeId;
-    if (typeof data.episodeTitle === 'string') historyData.episodeTitle = data.episodeTitle;
-    if (typeof data.season === 'number') historyData.season = data.season;
-    if (typeof data.episode === 'number') historyData.episode = data.episode;
-    if (typeof data.progress === 'number') historyData.progress = data.progress;
-    if (typeof data.totalDuration === 'number') historyData.totalDuration = data.totalDuration;
-    if (typeof data.lastWatchTime === 'string') historyData.lastWatchTime = data.lastWatchTime;
-    if (typeof data.playCount === 'number') historyData.playCount = data.playCount;
-    if (typeof data.isFinished === 'boolean') historyData.isFinished = data.isFinished;
-    if (typeof data.sourceId === 'string') historyData.sourceId = data.sourceId;
-    if (typeof data.quality === 'string') historyData.quality = data.quality;
-    if (typeof data.deviceId === 'string') historyData.deviceId = data.deviceId;
+    // 添加可选属性
+    if (data.coverUrl !== undefined) historyData.coverUrl = data.coverUrl;
+    if (data.episodeId !== undefined) historyData.episodeId = data.episodeId;
+    if (data.episodeTitle !== undefined) historyData.episodeTitle = data.episodeTitle;
+    if (data.season !== undefined) historyData.season = data.season;
+    if (data.episode !== undefined) historyData.episode = data.episode;
+    if (data.sourceId !== undefined) historyData.sourceId = data.sourceId;
+    if (data.quality !== undefined) historyData.quality = data.quality;
+    if (data.deviceId !== undefined) historyData.deviceId = data.deviceId;
     
     return new History(historyData);
   }
