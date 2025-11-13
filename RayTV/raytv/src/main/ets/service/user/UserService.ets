@@ -11,7 +11,7 @@ import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import NetworkRepository from '../../data/repository/NetworkRepository';
 import DatabaseRepository from '../../data/repository/DatabaseRepository';
 import { BusinessError } from '@ohos.base';
-import { http } from '@ohos.net.http';
+import http from '@ohos.net.http';
 
 // 常量定义
 const TAG = 'UserService';

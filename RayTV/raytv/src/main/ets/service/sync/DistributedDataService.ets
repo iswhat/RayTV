@@ -3,7 +3,7 @@
 
 import Logger from '../../common/util/Logger';
 import distributedKVStore from '@ohos.data.distributedKVStore';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
 import { SyncData, DataChangeListener } from '../../types/common';

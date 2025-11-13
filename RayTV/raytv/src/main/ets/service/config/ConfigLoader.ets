@@ -1,6 +1,7 @@
 // ConfigLoader - 配置加载器
 import Logger from '../../common/util/Logger';
-import { http, HttpMethod } from '@ohos.net.http';
+import http from '@ohos.net.http';
+import HttpMethod from '@ohos.net.http';
 import fs from '@ohos.file.fs';
 import { Site } from '../../data/bean/Site';
 import { AppConfig } from '../../data/bean/Config';

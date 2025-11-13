@@ -5,7 +5,7 @@ import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import media from '@ohos.multimedia.media';
 import notificationManager from '@ohos.notificationManager';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 
 // 常量定义
 const TAG = 'NotificationService';

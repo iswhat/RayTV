@@ -2,7 +2,7 @@ import Logger from '../../../common/util/Logger';
 import { DatabaseManager } from '../DatabaseManager';
 import { SQLiteHelper } from '../SQLiteHelper';
 import { LINE_TABLE } from '../TableSchema';
-import { Context } from '@ohos.ability.featureAbility';
+import Context from '@ohos.ability.featureAbility';
 
 const TAG = 'LineDao';
 

@@ -19,7 +19,8 @@ import { Stack, Flex, ScrollView } from '@kit.ArkUI';
 import { Video, Slider, ProgressBar } from '@kit.ArkUI';
 
 // ❌ 错误
-import { Button, Text } from '@ohos.arkui'; // 旧版路径
+import Button from '@ohos.arkui';
+import Text from '@ohos.arkui'; // 旧版路径
 ```
 
 #### 数据存储导入
@@ -28,31 +29,34 @@ import { Button, Text } from '@ohos.arkui'; // 旧版路径
 import { ValuesBucket, RelationalPredicates, ResultSet } from '@kit.RelationalStore';
 
 // ✅ 也正确（系统服务）
-import { ValuesBucket, RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
+import ValuesBucket from '@ohos.data.relationalStore';
+import RelationalPredicates from '@ohos.data.relationalStore';
+import ResultSet from '@ohos.data.relationalStore';
 ```
 
 #### 网络请求导入
 ```typescript
 // ✅ 正确
-import { HttpRequestOptions, HttpResponse } from '@ohos.net.http';
+import HttpRequestOptions from '@ohos.net.http';
+import HttpResponse from '@ohos.net.http';
 ```
 
 #### 路由系统导入
 ```typescript
 // ✅ 正确
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 ```
 
 #### 多媒体服务导入
 ```typescript
 // ✅ 正确
-import { MediaPlayer } from '@ohos.multimedia.media';
+import MediaPlayer from '@ohos.multimedia.media';
 ```
 
 #### 文件系统导入
 ```typescript
 // ✅ 正确
-import { fileAccess } from '@ohos.file.fs';
+import fileAccess from '@ohos.file.fs';
 ```
 
 ## 已修复的文件列表

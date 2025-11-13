@@ -44,6 +44,25 @@ export type JsonData = Record<string, string | number | boolean | JsonData | nul
  * 提供多种存储方式的统一接口，包括偏好设置、文件存储等
  */
 export default class StorageUtil {
+  private static instance: StorageUtil | null = null;
+
+  /**
+   * 获取单例实例
+   * @returns StorageUtil实例
+   */
+  public static getInstance(): StorageUtil {
+    if (!StorageUtil.instance) {
+      StorageUtil.instance = new StorageUtil();
+    }
+    return StorageUtil.instance;
+  }
+
+  /**
+   * 私有构造函数，确保单例模式
+   */
+  private constructor() {
+    // 初始化操作
+  }
   private static memoryCache: Record<string, MemoryCacheItem> = {};
   private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
 
@@ -92,9 +111,9 @@ export default class StorageUtil {
       }
 
       Logger.info(TAG, `Saved data for key: ${key}, type: ${type}`);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save data for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -152,9 +171,9 @@ export default class StorageUtil {
         return defaultValue;
       }
       return null;
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get data for key ${key}: ${errorMessage}`);
       // 出错时返回默认值
       if (defaultValue !== undefined) {
@@ -162,6 +181,105 @@ export default class StorageUtil {
       }
       return null;
     }
+  }
+
+  /**
+   * 设置字符串值（set方法的别名）
+   * @param key 键名
+   * @param value 字符串值
+   * @param type 存储类型
+   * @param expireTime 过期时间（毫秒，0表示永不过期）
+   */
+  public static async set(key: string, value: string | number | boolean | JsonData | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    await StorageUtil.save(key, value, type, expireTime);
+  }
+
+  /**
+   * 设置字符串值
+   * @param key 键名
+   * @param value 字符串值
+   * @param type 存储类型
+   * @param expireTime 过期时间（毫秒，0表示永不过期）
+   */
+  public static async setString(key: string, value: string | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    await StorageUtil.save(key, value, type, expireTime);
+  }
+
+  /**
+   * 设置数字值
+   * @param key 键名
+   * @param value 数字值
+   * @param type 存储类型
+   * @param expireTime 过期时间（毫秒，0表示永不过期）
+   */
+  public static async setNumber(key: string, value: number | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    await StorageUtil.save(key, value, type, expireTime);
+  }
+
+  /**
+   * 设置布尔值
+   * @param key 键名
+   * @param value 布尔值
+   * @param type 存储类型
+   * @param expireTime 过期时间（毫秒，0表示永不过期）
+   */
+  public static async setBoolean(key: string, value: boolean | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    await StorageUtil.save(key, value, type, expireTime);
+  }
+
+  /**
+   * 设置对象值
+   * @param key 键名
+   * @param value 对象值
+   * @param type 存储类型
+   * @param expireTime 过期时间（毫秒，0表示永不过期）
+   */
+  public static async setObject<T extends JsonData>(key: string, value: T | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    await StorageUtil.save(key, value, type, expireTime);
+  }
+
+  /**
+   * 获取对象值
+   * @param key 键名
+   * @param type 存储类型
+   * @param defaultValue 默认值
+   * @returns 读取的对象或默认值
+   */
+  public static async getObject<T extends JsonData>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T | null> {
+    return await StorageUtil.get<T>(key, type, defaultValue);
+  }
+
+  /**
+   * 获取字符串值
+   * @param key 键名
+   * @param type 存储类型
+   * @param defaultValue 默认值
+   * @returns 读取的字符串或默认值
+   */
+  public static async getString(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: string): Promise<string | null> {
+    return await StorageUtil.get<string>(key, type, defaultValue);
+  }
+
+  /**
+   * 获取数字值
+   * @param key 键名
+   * @param type 存储类型
+   * @param defaultValue 默认值
+   * @returns 读取的数字或默认值
+   */
+  public static async getNumber(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: number): Promise<number | null> {
+    return await StorageUtil.get<number>(key, type, defaultValue);
+  }
+
+  /**
+   * 获取布尔值
+   * @param key 键名
+   * @param type 存储类型
+   * @param defaultValue 默认值
+   * @returns 读取的布尔值或默认值
+   */
+  public static async getBoolean(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: boolean): Promise<boolean | null> {
+    return await StorageUtil.get<boolean>(key, type, defaultValue);
   }
 
   /**
@@ -215,9 +333,9 @@ export default class StorageUtil {
       }
 
       Logger.info(TAG, `Removed data for key: ${key}, type: ${type}`);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to remove data for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -244,9 +362,9 @@ export default class StorageUtil {
       }
 
       Logger.info(TAG, `Cleared all data for type: ${type}`);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear data for type ${type}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -302,9 +420,9 @@ export default class StorageUtil {
         }
 
         StorageUtil.memoryCache = newCache;
-      } catch (error: unknown) {
+      } catch (error) {
         // 安全处理错误信息
-        const errorMessage = (error as Error).message || 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         Logger.error(TAG, `Failed to clean memory cache: ${errorMessage}`);
       }
     }, StorageUtil.MEMORY_CACHE_CLEAN_INTERVAL);
@@ -319,9 +437,9 @@ export default class StorageUtil {
       const jsonData = JSON.stringify(data);
       await pref.putString(key, jsonData);
       await pref.flush();
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save to preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -347,9 +465,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -363,9 +481,9 @@ export default class StorageUtil {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       await pref.delete(key);
       await pref.flush();
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to remove from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -391,9 +509,9 @@ export default class StorageUtil {
       }
       
       await pref.flush();
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear preferences: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -408,9 +526,9 @@ export default class StorageUtil {
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save to file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -452,9 +570,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error: unknown) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get from file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -668,3 +786,6 @@ export default class StorageUtil {
     return defaultValue;
   }
 }
+
+// 导出单例实例
+export default StorageUtil.getInstance();

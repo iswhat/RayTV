@@ -1,5 +1,5 @@
 import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction } from '@kit.ArkUI';
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { playbackService } from '../service/media/PlaybackService';
 import { historyService } from '../service/media/HistoryService';

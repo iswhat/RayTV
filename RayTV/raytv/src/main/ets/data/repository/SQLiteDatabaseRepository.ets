@@ -13,7 +13,7 @@ import User from '../model/User';
 import History from '../model/History';
 import SearchResult, { ResultType } from '../model/SearchResult';
 import relationalStore from '@ohos.data.relationalStore';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 import common from '@ohos.app.ability.common';
 
 const TAG = 'SQLiteDatabaseRepository';

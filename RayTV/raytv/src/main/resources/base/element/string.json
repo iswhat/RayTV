@@ -43,6 +43,10 @@
     {
       "name": "permission_internet",
       "value": "需要访问网络以获取视频资源"
+    },
+    {
+      "name": "permission_get_network_info",
+      "value": "需要获取网络状态信息以优化视频播放"
     }
   ]
 }

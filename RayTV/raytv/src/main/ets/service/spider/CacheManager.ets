@@ -1,5 +1,5 @@
 import Logger from '../../common/util/Logger';
-import { FileSystemManager } from '@ohos.file.fs';
+import FileSystemManager from '@ohos.file.fs';
 
 /**
  * 缓存项接口

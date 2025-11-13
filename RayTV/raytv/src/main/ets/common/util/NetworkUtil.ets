@@ -3,7 +3,7 @@ import Logger from './Logger';
 import { AppConstant } from '../constant/AppConstant';
 import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 import fs from '@ohos.file.fs';
 import { CacheManager } from '../../service/spider/CacheManager';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';

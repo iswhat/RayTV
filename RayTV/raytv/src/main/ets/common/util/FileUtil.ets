@@ -1,5 +1,6 @@
 // FileUtil - 文件操作工具类
 import fs from '@ohos.file.fs';
+import common from '@ohos.app.ability.common';
 import { Logger } from './Logger';
 import { safeStringify } from './JsonUtil';
 
@@ -289,5 +290,32 @@ export default class FileUtil {
       Logger.getInstance().error(`${TAG} - Failed to clear directory ${dirPath}: ${errorMessage}`);
       throw new Error(`Failed to clear directory ${dirPath}: ${errorMessage}`);
     }
+  }
+
+  /**
+   * 获取应用程序数据目录
+   * @returns 应用程序数据目录路径
+   */
+  public static async getApplicationDataDir(): Promise<string> {
+    try {
+      // 在HarmonyOS中，可以使用context来获取应用数据目录
+      // 这里返回一个默认的应用数据目录路径
+      const context = getContext() as common.UIAbilityContext;
+      return context.filesDir;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.getInstance().error(`${TAG} - Failed to get application data directory: ${errorMessage}`);
+      // 如果获取失败，返回一个默认路径
+      return '/data/app/';
+    }
+  }
+
+  /**
+   * 检查文件是否存在
+   * @param filePath 文件路径
+   * @returns 文件是否存在
+   */
+  public static async isFileExists(filePath: string): Promise<boolean> {
+    return await FileUtil.exists(filePath);
   }
 }

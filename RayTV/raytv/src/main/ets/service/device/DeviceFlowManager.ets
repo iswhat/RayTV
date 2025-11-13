@@ -3,7 +3,7 @@ import { DeviceFlowStatus } from '../../data/bean/DeviceInfo';
 import { configService } from '../config/ConfigService';
 import { playerManager } from '../media/PlayerManager';
 import deviceManager from '@ohos.distributedHardware.deviceManager';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 
 /**
  * 设备信息接口

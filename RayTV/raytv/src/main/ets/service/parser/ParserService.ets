@@ -59,7 +59,8 @@ export class ParserService {
   public static getInstance(): ParserService {
     if (!ParserService.instance) {
       // 创建新实例
-      ParserService.instance = new ParserService();
+      const instance = new ParserService();
+      ParserService.instance = instance;
     }
     return ParserService.instance;
   }

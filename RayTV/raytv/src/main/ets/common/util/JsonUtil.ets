@@ -7,7 +7,7 @@ export default class JsonUtil {
    * 检查对象是否包含指定属性
    */
   private static hasOwnProperty(obj: Record<string, string | number | boolean | object | null>, key: string): boolean {
-    return Object.getOwnPropertyNames(obj).includes(key);
+    return Object.prototype.hasOwnProperty.call(obj, key);
   }
   /**
    * 将对象序列化为JSON字符串

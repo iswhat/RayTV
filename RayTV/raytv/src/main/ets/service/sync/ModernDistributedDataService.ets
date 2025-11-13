@@ -4,7 +4,7 @@
 import Logger from '../../common/util/Logger';
 import distributedKVStore from '@ohos.data.distributedKVStore';
 import deviceManager from '@ohos.distributedDeviceManager';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
 

@@ -1,5 +1,5 @@
 
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem } from '@kit.ArkUI';
@@ -23,6 +23,7 @@ interface MediaItem {
  * 分类页面组件
  * 实现媒体分类浏览、筛选和列表展示功能
  */
+@Entry
 @Component
 struct CategoryPage {
   private readonly TAG: string = 'CategoryPage';
@@ -258,16 +259,15 @@ struct CategoryPage {
    */
   @Builder
   private renderHeader(): void {
-    Stack.create({ className: "header" });
-    Button.create({ className: "back-button", onClick: this.handleBack });
-    Button.content("←");
-    Button.pop();
-    Text.create({ className: "page-title" });
-    Text.content("分类浏览");
-    Text.pop();
-    Blank.create({ className: "header-right" });
-    Blank.pop();
-    Stack.pop();
+    Stack({ className: "header" }) {
+      Button("←")
+        .className("back-button")
+        .onClick(() => this.handleBack())
+      Text("分类浏览")
+        .className("page-title")
+      Blank()
+        .className("header-right")
+    }
   }
   
   /**
@@ -275,21 +275,16 @@ struct CategoryPage {
    */
   @Builder
   private renderCategorySelector(): void {
-    ScrollView.create({ className: "category-scroll", scrollBar: "auto" });
-    Flex.create({ className: "category-list", wrap: "nowrap" });
-    for (let category of this.categories) {
-      Button.create({ 
-        key: `category-${category}`,
-        className: `category-button ${this.selectedCategory === category ? 'selected' : ''}`,
-        onClick: () => this.handleCategorySelect(category)
-      });
-      Text.create();
-      Text.content(category);
-      Text.pop();
-      Button.pop();
+    ScrollView({ className: "category-scroll", scrollBar: "auto" }) {
+      Flex({ className: "category-list", wrap: "nowrap" }) {
+        ForEach(this.categories, (category: string) => {
+          Button(category)
+            .key(`category-${category}`)
+            .className(`category-button ${this.selectedCategory === category ? 'selected' : ''}`)
+            .onClick(() => this.handleCategorySelect(category))
+        }, (category: string) => category)
+      }
     }
-    Flex.pop();
-    ScrollView.pop();
   }
   
   /**
@@ -297,44 +292,29 @@ struct CategoryPage {
    */
   @Builder
   private renderFilters(): void {
-    Flex.create({ className: "filters-container" });
-    Flex.create({ className: "filter-item" });
-    Text.create({ className: "filter-label" });
-    Text.content("地区");
-    Text.pop();
-    Select.create({
-      value: this.selectedRegion,
-      options: this.regions,
-      onChange: this.handleRegionSelect,
-      className: "filter-select"
-    });
-    Select.pop();
-    Flex.pop();
-    Flex.create({ className: "filter-item" });
-    Text.create({ className: "filter-label" });
-    Text.content("年份");
-    Text.pop();
-    Select.create({
-      value: this.selectedYear,
-      options: this.years,
-      onChange: this.handleYearSelect,
-      className: "filter-select"
-    });
-    Select.pop();
-    Flex.pop();
-    Flex.create({ className: "filter-item" });
-    Text.create({ className: "filter-label" });
-    Text.content("排序");
-    Text.pop();
-    Select.create({
-      value: this.selectedSort,
-      options: this.sortOptions,
-      onChange: this.handleSortSelect,
-      className: "filter-select"
-    });
-    Select.pop();
-    Flex.pop();
-    Flex.pop();
+    Flex({ className: "filters-container" }) {
+      Flex({ className: "filter-item" }) {
+        Text("地区")
+          .className("filter-label")
+        Select(this.selectedRegion, this.regions)
+          .className("filter-select")
+          .onChange((value: string) => this.handleRegionSelect(value))
+      }
+      Flex({ className: "filter-item" }) {
+        Text("年份")
+          .className("filter-label")
+        Select(this.selectedYear, this.years)
+          .className("filter-select")
+          .onChange((value: string) => this.handleYearSelect(value))
+      }
+      Flex({ className: "filter-item" }) {
+        Text("排序")
+          .className("filter-label")
+        Select(this.selectedSort, this.sortOptions)
+          .className("filter-select")
+          .onChange((value: string) => this.handleSortSelect(value))
+      }
+    }
   }
   
   /**
@@ -342,31 +322,27 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    ListItem.create({ onClick: () => this.handleMediaItemClick(media) });
-    Flex.create({ className: "media-item" });
-    Image.create({
-      src: media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image",
-      className: "media-cover",
-      objectFit: "cover"
-    });
-    Image.pop();
-    Flex.create({ className: "media-info", direction: "column" });
-    Text.create({ className: "media-title", numberOfLines: 2 });
-    Text.content(media.title);
-    Text.pop();
-    if (media.year) {
-      Text.create({ className: "media-year" });
-      Text.content(media.year);
-      Text.pop();
+    ListItem()
+      .onClick(() => this.handleMediaItemClick(media)) {
+      Flex({ className: "media-item" }) {
+        Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
+          .className("media-cover")
+          .objectFit("cover")
+        Flex({ className: "media-info", direction: "column" }) {
+          Text(media.title)
+            .className("media-title")
+            .maxLines(2)
+          if (media.year) {
+            Text(media.year)
+              .className("media-year")
+          }
+          if (media.score) {
+            Text("评分: " + media.score)
+              .className("media-score")
+          }
+        }
+      }
     }
-    if (media.score) {
-      Text.create({ className: "media-score" });
-      Text.content("评分: " + media.score);
-      Text.pop();
-    }
-    Flex.pop();
-    Flex.pop();
-    ListItem.pop();
   }
   
   /**
@@ -375,49 +351,43 @@ struct CategoryPage {
   @Builder
   private renderMediaList(): void {
     if (this.isLoading && this.currentPage === 1) {
-      Stack.create({ className: "loading-container" });
-      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
-      LoadingProgress.pop();
-      Text.create();
-      Text.content("加载中...");
-      Text.pop();
-      Stack.pop();
+      Stack({ className: "loading-container" }) {
+        LoadingProgress()
+          .className("loading-progress")
+          .color("#FF4500")
+        Text("加载中...")
+      }
       return;
     }
     
     if (this.errorMessage) {
-      Stack.create({ className: "error-container" });
-      Text.create({ className: "error-icon" });
-      Text.content("⚠️");
-      Text.pop();
-      Text.create({ className: "error-message" });
-      Text.content(this.errorMessage);
-      Text.pop();
-      Button.create({ className: "retry-button", onClick: () => this.loadMediaList(true) });
-      Button.content("重试");
-      Button.pop();
-      Stack.pop();
+      Stack({ className: "error-container" }) {
+        Text("⚠️")
+          .className("error-icon")
+        Text(this.errorMessage)
+          .className("error-message")
+        Button("重试")
+          .className("retry-button")
+          .onClick(() => this.loadMediaList(true))
+      }
       return;
     }
     
     if (this.mediaList.length === 0) {
-      Empty.create({ className: "empty-container" });
-      Text.create();
-      Text.content("暂无相关内容");
-      Text.pop();
-      Empty.pop();
+      Empty({ className: "empty-container" }) {
+        Text("暂无相关内容")
+      }
       return;
     }
     
-    List.create({
-      className: "media-list",
-      itemTemplate: this.renderMediaItem,
-      data: this.mediaList,
-      onScrollBottom: () => this.handleLoadMore(),
-      onRefresh: () => this.handleRefresh(),
-      refreshing: this.isRefreshing
-    });
-    List.pop();
+    List({ className: "media-list" }) {
+      ForEach(this.mediaList, (item: MediaItem) => {
+        this.renderMediaItem(item)
+      }, (item: MediaItem) => item.id)
+    }
+    .onScrollBottom(() => this.handleLoadMore())
+    .onRefresh(() => this.handleRefresh())
+    .refreshing(this.isRefreshing)
   }
   
   /**
@@ -426,17 +396,15 @@ struct CategoryPage {
   @Builder
   private renderLoadMore(): void {
     if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
-      Stack.create({ className: "load-more-container" });
-      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
-      LoadingProgress.pop();
-      Text.create();
-      Text.content("加载更多...");
-      Text.pop();
-      Stack.pop();
+      Stack({ className: "load-more-container" }) {
+        LoadingProgress()
+          .className("loading-progress")
+          .color("#FF4500")
+        Text("加载更多...")
+      }
     } else if (!this.hasMoreResults && this.mediaList.length > 0) {
-      Text.create({ className: "no-more-text" });
-      Text.content("没有更多内容了");
-      Text.pop();
+      Text("没有更多内容了")
+        .className("no-more-text")
     }
   }
   
@@ -444,25 +412,24 @@ struct CategoryPage {
    * 组件渲染
    */
   build() {
-    Stack.create({ className: "category-page" });
-    // 页面头部
-    this.renderHeader();
-    
-    // 分类选择
-    this.renderCategorySelector();
-    
-    // 筛选条件
-    this.renderFilters();
-    
-    // 媒体列表
-    ScrollView.create({ className: "content-scroll", scrollBar: "auto" });
-    this.renderMediaList();
-    this.renderLoadMore();
-    Blank.create({ className: "bottom-space" });
-    Blank.pop();
-    ScrollView.pop();
-    
-    Stack.pop();
+    Stack({ className: "category-page" }) {
+      // 页面头部
+      this.renderHeader()
+      
+      // 分类选择
+      this.renderCategorySelector()
+      
+      // 筛选条件
+      this.renderFilters()
+      
+      // 媒体列表
+      ScrollView({ className: "content-scroll", scrollBar: "auto" }) {
+        this.renderMediaList()
+        this.renderLoadMore()
+        Blank()
+          .className("bottom-space")
+      }
+    }
   }
 }
 

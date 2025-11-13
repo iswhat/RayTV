@@ -4,9 +4,10 @@
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import HistoryManager from './HistoryManager';
-import { AVPlay } from '@ohos.multimedia.media';
-import { AudioManager, AudioRendererInfo } from '@ohos.multimedia.audio';
-import { BusinessError } from '@ohos.base';
+import AVPlay from '@ohos.multimedia.media';
+import AudioManager from '@ohos.multimedia.audio';
+import AudioRendererInfo from '@ohos.multimedia.audio';
+import BusinessError from '@ohos.base';
 import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 
 // 常量定义

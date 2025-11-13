@@ -1,5 +1,5 @@
 import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
@@ -78,7 +78,7 @@ struct MainPage {
   
   // 渲染媒体项
   @Builder
-  renderMediaItem(media: unknown) {
+  renderMediaItem(media: FeaturedMediaItem) {
     ListItem() {
       Column({ padding: 10 }) {
         Image(media.cover)
@@ -138,9 +138,11 @@ struct MainPage {
         Text("加载中...")
       } else {
         List() {
-          ForEach(this.featuredMedia, (item) => {
-            this.renderMediaItem(item)
-          }, item => item.id)
+          ForEach(this.featuredMedia, (item: FeaturedMediaItem) => {
+            ListItem() {
+              this.renderMediaItem(item)
+            }
+          }, (item: FeaturedMediaItem) => item.id)
         }
         .scroller(this.scroller)
         .orientation("horizontal")

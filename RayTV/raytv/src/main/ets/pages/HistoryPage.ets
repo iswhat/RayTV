@@ -1,5 +1,5 @@
 import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch, Stack, ProgressBar, Blank, BarState } from '@kit.ArkUI';
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { historyService, HistoryItem } from '../service/media/HistoryService';
 import { mediaService, MediaItem, MediaType } from '../service/media/MediaService';

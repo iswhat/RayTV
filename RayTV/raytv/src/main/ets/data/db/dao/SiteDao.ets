@@ -2,7 +2,9 @@ import Logger from '../../common/util/Logger';
 import { Site } from '../bean/Site';
 import { DatabaseManager } from '../db/DatabaseManager';
 import { TableSchema } from '../db/TableSchema';
-import { ValuesBucket, RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
+import ValuesBucket from '@ohos.data.relationalStore';
+import RelationalPredicates from '@ohos.data.relationalStore';
+import ResultSet from '@ohos.data.relationalStore';
 
 /**
  * 站点数据访问对象

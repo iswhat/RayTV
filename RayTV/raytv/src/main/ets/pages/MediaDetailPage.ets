@@ -1,5 +1,5 @@
 import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar, Stack, Flex, Blank, TextInput, Grid, GridItem, Swiper, SwiperItem } from '@kit.ArkUI';
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
@@ -84,6 +84,7 @@ export interface WatchHistory {
  * 媒体详情页组件
  * 展示媒体详细信息、集数列表和操作按钮
  */
+@Entry
 @Component
 struct MediaDetailPage {
   private readonly TAG: string = 'MediaDetailPage';

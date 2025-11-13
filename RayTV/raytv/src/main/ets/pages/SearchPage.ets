@@ -1,5 +1,5 @@
 
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { MediaItem } from '../data/bean/MediaItem';
 import { SearchHistoryItem } from '../../data/repository/SearchHistoryRepository';
@@ -20,6 +20,7 @@ interface QuickSearchResult {
  * 搜索页面组件
  * 实现媒体搜索功能，包括搜索输入、结果展示、历史搜索等
  */
+@Entry
 @Component
 struct SearchPage {
   private readonly TAG: string = 'SearchPage';
@@ -695,121 +696,187 @@ struct SearchPage {
   private renderFilterPanel(): void {
     if (!this.showFilterPanel) return;
     
-    Stack.create();
-    Stack.className("filter-panel-overlay");
-    Stack.onClick(this.toggleFilterPanel);
-    Stack.create();
-    Stack.className("filter-panel");
-    Stack.onClick((e) => e.stopPropagation());
-    Stack.create();
-    Stack.className("filter-header");
-    Text.create();
-    Text.className("filter-title");
-    Text.content("筛选条件");
-    Text.pop();
-    Button.create();
-    Button.onClick(this.toggleFilterPanel);
-    Button.type("text");
-    Button.size("small");
-    Button.pop();
-    Stack.pop();
-    
-    ScrollView.create();
-    ScrollView.className("filter-content");
-    // 媒体类型筛选
-    Stack.create();
-    Stack.className("filter-section");
-    Text.create();
-    Text.className("filter-section-title");
-    Text.content("媒体类型");
-    Text.pop();
-    Flex.create();
-    Flex.className("filter-options");
-    CheckboxGroup.create();
-    Checkbox.create();
-    Checkbox.value("movie");
-    Checkbox.onChange((value) => this.updateMediaTypeFilter('movie', value));
-    Text.create();
-    Text.content("电影");
-    Text.pop();
-    Checkbox.pop();
-    Checkbox.create();
-    Checkbox.value("tv");
-    Checkbox.onChange((value) => this.updateMediaTypeFilter('tv', value));
-    Text.create();
-    Text.content("电视剧");
-    Text.pop();
-    Checkbox.pop();
-    Checkbox.create();
-    Checkbox.value("anime");
-    Checkbox.onChange((value) => this.updateMediaTypeFilter('anime', value));
-    Text.create();
-    Text.content("动漫");
-    Text.pop();
-    Checkbox.pop();
-    Checkbox.create();
-    Checkbox.value("variety");
-    Checkbox.onChange((value) => this.updateMediaTypeFilter('variety', value));
-    Text.create();
-    Text.content("综艺");
-    Text.pop();
-    Checkbox.pop();
-    CheckboxGroup.pop();
-    Flex.pop();
-    Stack.pop();
-    
-    // 排序方式
-    Stack.create();
-    Stack.className("filter-section");
-    Text.create();
-    Text.className("filter-section-title");
-    Text.content("排序方式");
-    Text.pop();
-    RadioGroup.create();
-    RadioGroup.onChange((value) => {
-      this.filters.sortBy = value;
-    });
-    Radio.create();
-    Radio.value("time");
-    Text.create();
-    Text.content("最新");
-    Text.pop();
-    Radio.pop();
-    Radio.create();
-    Radio.value("score");
-    Text.create();
-    Text.content("评分");
-    Text.pop();
-    Radio.pop();
-    Radio.create();
-    Radio.value("hot");
-    Text.create();
-    Text.content("热度");
-    Text.pop();
-    Radio.pop();
-    RadioGroup.pop();
-    Stack.pop();
-    ScrollView.pop();
-    
-    Stack.create();
-    Stack.className("filter-actions");
-    Button.create();
-    Button.onClick(this.resetFilters);
-    Button.type("text");
-    Text.create();
-    Text.content("重置");
-    Text.pop();
-    Button.pop();
-    Button.create();
-    Button.onClick(this.applyFilters);
-    Button.type("capsule");
-    Text.create();
-    Text.content("应用筛选");
-    Text.pop();
-    Button.pop();
-    Stack.pop();
-    Stack.pop();
-    Stack.pop();
+    Stack({
+      style: {
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 100
+      }
+    }) {
+      Stack({
+        style: {
+          backgroundColor: '#4CAF50',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: 20,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20
+        }
+      }) {
+        // 标题栏
+        Flex({
+          style: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20
+          }
+        }) {
+          Text('筛选条件')
+            .style({
+              fontSize: 28,
+              color: '#FFFFFF',
+              fontWeight: 700
+            })
+          Button({
+            style: {
+              backgroundColor: 'transparent'
+            },
+            onClick: () => {
+              this.showFilterPanel = false;
+            }
+          }) {
+            Text('✕')
+              .style({
+                fontSize: 28,
+                color: '#FFFFFF'
+              })
+          }
+        }
+        
+        // 媒体类型筛选
+        Text('媒体类型:')
+          .style({
+            fontSize: 24,
+            color: '#FFFFFF',
+            marginBottom: 15,
+            fontWeight: 600
+          })
+        
+        Flex({
+          style: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 10,
+            marginBottom: 20
+          }
+        }) {
+          const mediaTypes = [
+            { label: '电影', value: 'movie' },
+            { label: '电视剧', value: 'tv' },
+            { label: '动漫', value: 'anime' },
+            { label: '综艺', value: 'variety' },
+            { label: '纪录片', value: 'documentary' }
+          ];
+          
+          ForEach(mediaTypes, (type) => {
+            Button({
+              style: {
+                backgroundColor: this.filters.types?.includes(type.value) ? '#FFEB3B' : '#FFFFFF',
+                borderRadius: 15,
+                paddingHorizontal: 15,
+                paddingVertical: 8
+              },
+              onClick: () => {
+                this.updateMediaTypeFilter(type.value, !this.filters.types?.includes(type.value));
+              }
+            }) {
+              Text(type.label)
+                .style({
+                  fontSize: 22,
+                  color: this.filters.types?.includes(type.value) ? '#000000' : '#4CAF50',
+                  fontWeight: 600
+                })
+            }
+          })
+        }
+        
+        // 排序方式
+        Text('排序方式:')
+          .style({
+            fontSize: 24,
+            color: '#FFFFFF',
+            marginBottom: 15,
+            fontWeight: 600
+          })
+        
+        Flex({
+          style: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 10,
+            marginBottom: 20
+          }
+        }) {
+          const sortOptions = [
+            { label: '默认排序', value: 'default' },
+            { label: '最新发布', value: 'latest' },
+            { label: '评分最高', value: 'rating' },
+            { label: '播放最多', value: 'popular' }
+          ];
+          
+          ForEach(sortOptions, (option) => {
+            Button({
+              style: {
+                backgroundColor: this.filters.sort === option.value ? '#FFEB3B' : '#FFFFFF',
+                borderRadius: 15,
+                paddingHorizontal: 15,
+                paddingVertical: 8
+              },
+              onClick: () => {
+                this.filters.sort = option.value;
+              }
+            }) {
+              Text(option.label)
+                .style({
+                  fontSize: 22,
+                  color: this.filters.sort === option.value ? '#000000' : '#4CAF50',
+                  fontWeight: 600
+                })
+            }
+          })
+        }
+        
+        // 操作按钮
+        Flex({
+          style: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 15
+          }
+        }) {
+          Button({
+            style: {
+              backgroundColor: '#FFFFFF',
+              borderRadius: 15,
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              flex: 1
+            },
+            onClick: this.resetFilters
+          }) {
+            Text('重置')
+              .style({
+                fontSize: 22,
+                color: '#4CAF50',
+                fontWeight: 600
+              })
+          }
+          Button({
+            type: 'capsule',
+            onClick: this.applyFilters
+          }) {
+            Text('应用筛选')
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -839,80 +906,72 @@ struct SearchPage {
   private renderGridItem(item: MediaItem): void {
     if (!item) return;
     
-    GridItem.create();
-    GridItem.className("green-grid-item");
-    GridItem.onClick(() => this.handleSearchResultClick(item));
-    Stack.create();
-    Stack.className("green-grid-item-content");
-    
-    // 来源标签 - 改为绿色主题
-    if (item.siteKey) {
-      Text.create();
-      Text.style({
-        backgroundColor: '#4CAF50',
-        color: '#FFFFFF',
-        fontSize: 16,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        zIndex: 10,
-        fontWeight: 600
-      });
-      Text.content(`${item.siteKey} | APP`);
-      Text.pop();
+    GridItem({
+      className: "green-grid-item",
+      onClick: () => this.handleSearchResultClick(item)
+    }) {
+      Stack({
+        className: "green-grid-item-content"
+      }) {
+        // 来源标签 - 改为绿色主题
+        if (item.siteKey) {
+          Text(`${item.siteKey} | APP`)
+            .style({
+              backgroundColor: '#4CAF50',
+              color: '#FFFFFF',
+              fontSize: 16,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 4,
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              zIndex: 10,
+              fontWeight: 600
+            })
+        }
+        
+        // 图片
+        Image(item.coverUrl || "https://via.placeholder.com/200x300?text=No+Image")
+          .style({
+            width: '100%',
+            aspectRatio: 2/3,
+            borderRadius: 8
+          })
+          .objectFit("cover")
+        
+        // 标题
+        Text(item.title || '未知标题')
+          .style({
+            fontSize: 20,
+            color: '#FFFFFF',
+            marginTop: 8,
+            fontWeight: 600,
+            textShadowColor: 'rgba(0, 0, 0, 0.8)',
+            textShadowOffset: {
+              dx: 1,
+              dy: 1
+            },
+            textShadowRadius: 3
+          })
+          .numberOfLines(2)
+        
+        // 评分标签 - 如果有评分则显示
+        if (item.score) {
+          Text(`${item.score}分`)
+            .style({
+              backgroundColor: '#FFEB3B',
+              color: '#000000',
+              fontSize: 16,
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 4,
+              marginTop: 4,
+              fontWeight: 700
+            })
+        }
+      }
     }
-    
-    // 图片
-    Image.create();
-    Image.style({
-      width: '100%',
-      aspectRatio: 2/3,
-      borderRadius: 8
-    });
-    Image.src(item.coverUrl || "https://via.placeholder.com/200x300?text=No+Image");
-    Image.objectFit("cover");
-    Image.pop();
-    
-    // 标题
-    Text.create();
-    Text.style({
-      fontSize: 20,
-      color: '#FFFFFF',
-      marginTop: 8,
-      fontWeight: 600,
-      textShadowColor: 'rgba(0, 0, 0, 0.8)',
-      textShadowOffset: {
-        dx: 1,
-        dy: 1
-      },
-      textShadowRadius: 3
-    });
-    Text.numberOfLines(2);
-    Text.content(item.title || '未知标题');
-    Text.pop();
-    
-    // 评分标签 - 如果有评分则显示
-    if (item.score) {
-      Text.create();
-      Text.style({
-        backgroundColor: '#FFEB3B',
-        color: '#000000',
-        fontSize: 16,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-        marginTop: 4,
-        fontWeight: 700
-      });
-      Text.content(`${item.score}分`);
-      Text.pop();
-    }
-    
-    Stack.pop();
-    GridItem.pop();
   }
 
   /**
@@ -921,99 +980,96 @@ struct SearchPage {
   @Builder
   private renderSearchResults(): void {
     // 渲染分类筛选按钮
-    ScrollView.create();
-    ScrollView.style({
-      whiteSpace: 'nowrap',
-      marginBottom: 20
-    });
-    Flex.create();
-    Flex.style({
-      paddingHorizontal: 15,
-      alignItems: 'center',
-      gap: 10
-    });
-    
-    // 全部显示按钮
-    Button.create();
-    Button.style({
-      backgroundColor: '#4CAF50',
-      borderRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 8,
-      marginRight: 10
-    });
-    Button.onClick(() => {});
-    Text.create();
-    Text.style({
-      fontSize: 22,
-      color: '#FFFFFF',
-      fontWeight: 600
-    });
-    Text.content("全部显示");
-    Text.pop();
-    Button.pop();
-    
-    // 分类按钮
-    const categories = ["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"];
-    categories.forEach((category) => {
-      Button.create();
-      Button.style({
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        marginRight: 10
-      });
-      Button.onClick(() => {});
-      Text.create();
-      Text.style({
-        fontSize: 22,
-        color: '#4CAF50',
-        fontWeight: 600
-      });
-      Text.content(category);
-      Text.pop();
-      Button.pop();
-    });
-    Flex.pop();
-    ScrollView.pop();
-    
-    // 渲染网格结果
-    Grid.create();
-    Grid.style({
-      paddingHorizontal: 15,
-      gap: 15
-    });
-    Grid.columnsTemplate("1fr 1fr 1fr 1fr 1fr");
-    Grid.rowsTemplate("auto");
-    
-    if (this.searchResults.length === 0) {
-      // 无搜索结果时的提示
-      GridItem.create();
-      GridItem.style({
-        gridColumnStart: 1,
-        gridColumnEnd: 6,
-        padding: 30,
-        alignItems: 'center',
-        justifyContent: 'center'
-      });
-      Text.create();
-      Text.style({
-        fontSize: 24,
-        color: '#FFFFFF',
-        textAlign: 'center'
-      });
-      Text.content('没有找到相关内容');
-      Text.pop();
-      GridItem.pop();
-    } else {
-      // 渲染搜索结果项
-      this.searchResults.forEach((item) => {
-        this.renderGridItem(item);
-      });
+    ScrollView({
+      style: {
+        whiteSpace: 'nowrap',
+        marginBottom: 20
+      }
+    }) {
+      Flex({
+        style: {
+          paddingHorizontal: 15,
+          alignItems: 'center',
+          gap: 10
+        }
+      }) {
+        // 全部显示按钮
+        Button({
+          style: {
+            backgroundColor: '#4CAF50',
+            borderRadius: 20,
+            paddingHorizontal: 20,
+            paddingVertical: 8,
+            marginRight: 10
+          },
+          onClick: () => {}
+        }) {
+          Text("全部显示")
+            .style({
+              fontSize: 22,
+              color: '#FFFFFF',
+              fontWeight: 600
+            })
+        }
+        
+        // 分类按钮
+        const categories = ["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"];
+        ForEach(categories, (category) => {
+          Button({
+            style: {
+              backgroundColor: '#FFFFFF',
+              borderRadius: 20,
+              paddingHorizontal: 20,
+              paddingVertical: 8,
+              marginRight: 10
+            },
+            onClick: () => {}
+          }) {
+            Text(category)
+              .style({
+                fontSize: 22,
+                color: '#4CAF50',
+                fontWeight: 600
+              })
+          }
+        })
+      }
     }
     
-    Grid.pop();
+    // 渲染网格结果
+    Grid({
+      style: {
+        paddingHorizontal: 15,
+        gap: 15
+      },
+      columnsTemplate: "1fr 1fr 1fr 1fr 1fr",
+      rowsTemplate: "auto"
+    }) {
+      if (this.searchResults.length === 0) {
+        // 无搜索结果时的提示
+        GridItem({
+          style: {
+            gridColumnStart: 1,
+            gridColumnEnd: 6,
+            padding: 30,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }
+        }) {
+          Text('没有找到相关内容')
+            .style({
+              fontSize: 24,
+              color: '#FFFFFF',
+              textAlign: 'center'
+            })
+        }
+      } else {
+        // 渲染搜索结果项
+        ForEach(this.searchResults, (item) => {
+          this.renderGridItem(item)
+        })
+      }
+    }
   }
   
   /**
@@ -1021,16 +1077,14 @@ struct SearchPage {
    */
   @Builder
   private renderLoading(): void {
-    Stack.create();
-    Stack.className("loading-container");
-    LoadingProgress.create();
-    LoadingProgress.className("loading-progress");
-    LoadingProgress.color("#FF4500");
-    LoadingProgress.pop();
-    Text.create();
-    Text.content("搜索中...");
-    Text.pop();
-    Stack.pop();
+    Stack({
+      className: "loading-container"
+    }) {
+      LoadingProgress()
+        .className("loading-progress")
+        .color("#FF4500")
+      Text("搜索中...")
+    }
   }
   
   /**
@@ -1039,130 +1093,122 @@ struct SearchPage {
   @Builder
   private renderQuickSearchResults(): void {
     if (this.showSourceList && this.quickSearchResults.length > 0) {
-      Stack.create();
-      Stack.style({
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        borderRadius: 15,
-        padding: 20,
-        marginHorizontal: 20,
-        marginVertical: 10,
-        position: 'absolute',
-        top: 120,
-        left: 0,
-        right: 0,
-        zIndex: 100
-      });
-      
-      // 标题栏
-      Flex.create();
-      Flex.style({
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 15
-      });
-      Text.create();
-      Text.style({
-        fontSize: 28,
-        color: '#FFFFFF',
-        fontWeight: 700
-      });
-      Text.content(`为您找到相关片源: ${this.quickSearchResults.length}个`);
-      Text.pop();
-      Button.create();
-      Button.style({
-        backgroundColor: 'transparent'
-      });
-      Button.onClick(() => {
-        this.showSourceList = false;
-      });
-      Text.create();
-      Text.style({
-        fontSize: 28,
-        color: '#FFFFFF'
-      });
-      Text.content('✕');
-      Text.pop();
-      Button.pop();
-      Flex.pop();
-      
-      // 片源列表
-      List.create();
-      List.style({
-        width: '100%',
-        height: 500
-      });
-      
-      this.quickSearchResults.forEach((item, index) => {
-        ListItem.create();
-        ListItem.key(`${item.id || index}`);
-        ListItem.style({
-          backgroundColor: '#66BB6A',
-          marginBottom: 10,
-          padding: 15,
-          borderRadius: 10
-        });
-        ListItem.onClick(() => {
-          this.handleQuickSearchResultClick(item);
-        });
-        
-        Flex.create();
-        Flex.style({
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        });
-        
-        // 标题和来源
-        Flex.create();
-        Flex.style({
-          flex: 1,
-          flexDirection: 'column'
-        });
-        Text.create();
-        Text.style({
-          fontSize: 26,
-          color: '#FFFFFF',
-          fontWeight: 700,
-          marginBottom: 5
-        });
-        Text.content(item.title);
-        Text.pop();
-        Text.create();
-        Text.style({
-          fontSize: 20,
-          color: '#E0E0E0'
-        });
-        Text.content(item.sourceType);
-        Text.pop();
-        Flex.pop();
-        
-        // 质量标签
-        if (item.quality) {
-          Flex.create();
-          Flex.style({
-            backgroundColor: '#FFEB3B',
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 12
-          });
-          Text.create();
-          Text.style({
-            fontSize: 22,
-            color: '#000000',
-            fontWeight: 700
-          });
-          Text.content(item.quality);
-          Text.pop();
-          Flex.pop();
+      Stack({
+        style: {
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          borderRadius: 15,
+          padding: 20,
+          marginHorizontal: 20,
+          marginVertical: 10,
+          position: 'absolute',
+          top: 120,
+          left: 0,
+          right: 0,
+          zIndex: 100
+        }
+      }) {
+        // 标题栏
+        Flex({
+          style: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 15
+          }
+        }) {
+          Text(`为您找到相关片源: ${this.quickSearchResults.length}个`)
+            .style({
+              fontSize: 28,
+              color: '#FFFFFF',
+              fontWeight: 700
+            })
+          Button({
+            style: {
+              backgroundColor: 'transparent'
+            },
+            onClick: () => {
+              this.showSourceList = false;
+            }
+          }) {
+            Text('✕')
+              .style({
+                fontSize: 28,
+                color: '#FFFFFF'
+              })
+          }
         }
         
-        Flex.pop();
-        ListItem.pop();
-      });
-      
-      List.pop();
-      Stack.pop();
+        // 片源列表
+        List({
+          style: {
+            width: '100%',
+            height: 500
+          }
+        }) {
+          ForEach(this.quickSearchResults, (item, index) => {
+            ListItem({
+              key: `${item.id || index}`,
+              style: {
+                backgroundColor: '#66BB6A',
+                marginBottom: 10,
+                padding: 15,
+                borderRadius: 10
+              },
+              onClick: () => {
+                this.handleQuickSearchResultClick(item);
+              }
+            }) {
+              Flex({
+                style: {
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }
+              }) {
+                // 标题和来源
+                Flex({
+                  style: {
+                    flex: 1,
+                    flexDirection: 'column'
+                  }
+                }) {
+                  Text(item.title)
+                    .style({
+                      fontSize: 26,
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      marginBottom: 5
+                    })
+                  Text(item.sourceType)
+                    .style({
+                      fontSize: 20,
+                      color: '#E0E0E0'
+                    })
+                }
+                
+                // 质量标签
+                if (item.quality) {
+                  Flex({
+                    style: {
+                      backgroundColor: '#FFEB3B',
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 12
+                    }
+                  }) {
+                    Text(item.quality)
+                      .style({
+                        fontSize: 22,
+                        color: '#000000',
+                        fontWeight: 700
+                      })
+                  }
+                }
+              }
+            }
+          })
+        }
+      }
     }
   }
 
@@ -1171,86 +1217,80 @@ struct SearchPage {
    */
   @Builder
   private renderError(): void {
-    Stack.create();
-    Stack.className("error-container");
-    Text.create();
-    Text.className("error-icon");
-    Text.content("⚠️");
-    Text.pop();
-    Text.create();
-    Text.className("error-message");
-    Text.content(this.errorMessage);
-    Text.pop();
-    Button.create();
-    Button.className("retry-button");
-    Button.onClick(this.performSearch);
-    Text.create();
-    Text.content("重试");
-    Text.pop();
-    Button.pop();
-    Stack.pop();
+    Stack({
+      className: "error-container"
+    }) {
+      Text("⚠️")
+        .className("error-icon")
+      Text(this.errorMessage)
+        .className("error-message")
+      Button({
+        className: "retry-button",
+        onClick: this.performSearch
+      }) {
+        Text("重试")
+      }
+    }
   }
   
   /**
    * 组件渲染
    */
   build() {
-    Stack.create();
-    Stack.style({
-      backgroundColor: '#2E7D32',
-      flex: 1
-    });
-    
-    // 搜索输入区域
-    this.renderSearchInput();
-    
-    // 快速搜索片源切换界面
-    this.renderQuickSearchResults();
-    
-    // 主内容区域
-    ScrollView.create();
-    ScrollView.style({
-      flex: 1,
-      scrollBar: 'auto'
-    });
-    
-    // 显示搜索结果数量
-    if (!this.showHistory && this.searchResults.length > 0) {
-      Text.create();
-      Text.style({
-        fontSize: 22,
-        color: '#FFFFFF',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        fontWeight: 600
-      });
-      Text.content(`搜索(${this.searchResults.length}/${this.searchResults.length})`);
-      Text.pop();
+    Stack({
+      style: {
+        backgroundColor: '#2E7D32',
+        flex: 1
+      }
+    }) {
+      // 搜索输入区域
+      this.renderSearchInput()
+      
+      // 快速搜索片源切换界面
+      this.renderQuickSearchResults()
+      
+      // 主内容区域
+      ScrollView({
+        style: {
+          flex: 1,
+          scrollBar: 'auto'
+        }
+      }) {
+        // 显示搜索结果数量
+        if (!this.showHistory && this.searchResults.length > 0) {
+          Text(`搜索(${this.searchResults.length}/${this.searchResults.length})`)
+            .style({
+              fontSize: 22,
+              color: '#FFFFFF',
+              paddingHorizontal: 15,
+              paddingVertical: 10,
+              fontWeight: 600
+            })
+        }
+        
+        if (this.isSearching && this.isLoading && this.currentPage === 1) {
+          this.renderLoading()
+        } else if (this.errorMessage) {
+          this.renderError()
+        } else if (this.showHistory) {
+          Stack({
+            style: {
+              paddingHorizontal: 15
+            }
+          }) {
+            this.renderHotKeywords()
+            this.renderSearchHistory()
+          }
+        } else {
+          this.renderSearchResults()
+        }
+        
+        Blank()
+          .style({
+            height: 50
+          })
+      }
     }
-    
-    if (this.isSearching && this.isLoading && this.currentPage === 1) {
-      this.renderLoading();
-    } else if (this.errorMessage) {
-      this.renderError();
-    } else if (this.showHistory) {
-      Stack.create();
-      Stack.style({
-        paddingHorizontal: 15
-      });
-      this.renderHotKeywords();
-      this.renderSearchHistory();
-      Stack.pop();
-    } else {
-      this.renderSearchResults();
-    }
-    
-    Blank.create();
-    Blank.style({
-      height: 50
-    });
-    Blank.pop();
-    ScrollView.pop();
-    Stack.pop();
   }
 }
 

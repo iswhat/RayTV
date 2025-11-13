@@ -2,11 +2,11 @@ import Logger from '../../../common/util/Logger';
 import { BaseLoader, LoaderType, Site } from './BaseLoader';
 import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
 import HttpService from '../../http/HttpService';
-import { fileio } from '@ohos.fileio';
+import fileio from '@ohos.fileio';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
 import sandbox from '@ohos.sandbox';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 
 /**
  * JAR加载器配置

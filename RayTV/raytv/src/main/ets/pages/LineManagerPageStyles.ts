@@ -2,7 +2,11 @@
  * LineManagerPage样式定义
  */
 // 使用ArkTS样式系统
-import { FlexDirection, FlexAlign, ItemAlign, FontStyle, TextAlign } from '@ohos.components';
+import FlexDirection from '@ohos.components';
+import FlexAlign from '@ohos.components';
+import ItemAlign from '@ohos.components';
+import FontStyle from '@ohos.components';
+import TextAlign from '@ohos.components';
 
 export default {
   container: {

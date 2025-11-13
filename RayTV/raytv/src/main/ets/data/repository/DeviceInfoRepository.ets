@@ -7,7 +7,7 @@ import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../
 import Logger from '../../common/util/Logger';
 import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
 // import codec from '@ohos.media.codec'; // 暂时注释，等待SDK支持
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 
 const TAG = 'DeviceInfoRepository';
 

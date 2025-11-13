@@ -74,6 +74,10 @@
       "reason": "$string:permission_internet"
     },
     {
+      "name": "ohos.permission.GET_NETWORK_INFO",
+      "reason": "$string:permission_get_network_info"
+    },
+    {
       "name": "ohos.permission.DISTRIBUTED_DATASYNC",
       "reason": "$string:permission_distributed_datasync",
       "usedScene": {

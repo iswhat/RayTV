@@ -5,7 +5,11 @@ import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../db/DatabaseManager';
 import { TableSchema } from '../db/TableSchema';
 import { Collection } from '../bean/Collection';
-import { ValuesBucket, RelationalPredicates, ResultSet, Order, OrderDirection } from '@ohos.data.relationalStore';
+import ValuesBucket from '@ohos.data.relationalStore';
+import RelationalPredicates from '@ohos.data.relationalStore';
+import ResultSet from '@ohos.data.relationalStore';
+import Order from '@ohos.data.relationalStore';
+import OrderDirection from '@ohos.data.relationalStore';
 
 /**
  * 收藏数据访问对象

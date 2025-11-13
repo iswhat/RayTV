@@ -1,5 +1,5 @@
 import { ScrollView, Text, Button, Switch, List, ListItem, Divider, Image, Dialog, Toast } from '@kit.ArkUI';
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
@@ -8,6 +8,7 @@ import { mediaService } from '../service/media/MediaService';
  * 设置页面组件
  * 实现应用配置管理，包括主题、语言、缓存、播放等设置
  */
+@Entry
 @Component
 struct SettingsPage {
   private readonly TAG: string = 'SettingsPage';

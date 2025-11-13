@@ -1,7 +1,9 @@
 // HomePage样式文件
 // 定义首页UI布局所需的所有样式
 
-import { Color, FlexAlign, ImageFit } from '@ohos.arkui';
+import Color from '@ohos.arkui';
+import FlexAlign from '@ohos.arkui';
+import ImageFit from '@ohos.arkui';
 
 // 定义样式对象类型
 export interface HomePageStylesType {

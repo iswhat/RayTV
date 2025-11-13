@@ -1,5 +1,5 @@
 
-import { Router } from '@ohos.router';
+import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { favoriteService } from '../service/media/FavoriteService';
 import { mediaService } from '../service/media/MediaService';

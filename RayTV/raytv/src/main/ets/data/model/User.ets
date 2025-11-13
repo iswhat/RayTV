@@ -440,7 +440,8 @@ export default class User {
       safeUserData.settings = data.settings as UserSettings;
     }
     
-    return new User(safeUserData);
+    const instance = new User(safeUserData);
+    return instance;
   }
 
   /**
@@ -448,6 +449,7 @@ export default class User {
    * @returns 克隆后的实例
    */
   public clone(): User {
-    return new User(this.toSerializable());
+    const instance = new User(this.toSerializable());
+    return instance;
   }
 }

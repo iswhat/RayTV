@@ -1,7 +1,7 @@
 import Logger from '../../common/util/Logger';
 import gesture from '@ohos.multimodalInput.gesture';
 import input from '@ohos.multimodalInput.input';
-import { BusinessError } from '@ohos.base';
+import BusinessError from '@ohos.base';
 
 /**
  * 手势原始事件接口

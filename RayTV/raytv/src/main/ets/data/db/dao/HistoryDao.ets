@@ -2,7 +2,11 @@ import Logger from '../../common/util/Logger';
 import { History } from '../bean/History';
 import { DatabaseManager } from '../db/DatabaseManager';
 import { TableSchema } from '../db/TableSchema';
-import { ValuesBucket, RelationalPredicates, ResultSet, Order, OrderDirection } from '@ohos.data.relationalStore';
+import ValuesBucket from '@ohos.data.relationalStore';
+import RelationalPredicates from '@ohos.data.relationalStore';
+import ResultSet from '@ohos.data.relationalStore';
+import Order from '@ohos.data.relationalStore';
+import OrderDirection from '@ohos.data.relationalStore';
 
 /**
  * 历史记录数据访问对象
