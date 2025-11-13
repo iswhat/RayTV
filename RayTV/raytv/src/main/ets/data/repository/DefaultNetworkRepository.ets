@@ -595,7 +595,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, string | number | boolean | null>>> { 
+  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -635,7 +635,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<unknown[]>> { 
+  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, string | number | boolean>[]>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -675,7 +675,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, unknown>>> { 
+  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -719,11 +719,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, unknown>>> { 
+  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getAppConfig(): Promise<NetworkResult<Record<string, unknown>>> { 
+  async getAppConfig(): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   

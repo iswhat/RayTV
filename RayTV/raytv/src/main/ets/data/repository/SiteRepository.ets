@@ -57,7 +57,7 @@ export class SiteRepository {
         [SITE_TABLE.COLUMNS.EXTRA_DATA]: JSON.stringify(site.extraData || {})
       };
       
-      let result;
+      let result: number | undefined;
       if (site.id) {
         // 更新现有站点
         const conditions: QueryCondition[] = [{
@@ -457,7 +457,7 @@ export class SiteRepository {
         [SITE_GROUP_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
       };
       
-      let result;
+      let result: number | undefined;
       if (group.id) {
         // 更新现有分组
         const conditions: QueryCondition[] = [{
@@ -610,7 +610,7 @@ export class SiteRepository {
   /**
    * 将数据库记录列表转换为Site对象列表
    */
-  private convertToSiteObjects(records: any[]): Site[] {
+  private convertToSiteObjects(records: unknown[]): Site[] {
     return records.map(record => this.convertToSiteObject(record));
   }
 }

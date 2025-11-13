@@ -4,6 +4,32 @@ import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import FileUtil from '../../common/util/FileUtil';
 import { SubtitleStyle, DEFAULT_SUBTITLE_STYLE } from '../player/PlayerService';
+import { ResponseCode } from '../../common/constant/ResponseCode';
+
+// API响应类
+export class ApiResponse<T> {
+  code: number;
+  message: string;
+  data?: T;
+  
+  constructor(code: number, message: string, data?: T) {
+    this.code = code;
+    this.message = message;
+    this.data = data;
+  }
+  
+  static success<T>(data: T, message: string = 'Success'): ApiResponse<T> {
+    return new ApiResponse(200, message, data);
+  }
+  
+  static error<T>(code: number, message: string): ApiResponse<T> {
+    return new ApiResponse(code, message);
+  }
+  
+  isSuccess(): boolean {
+    return this.code === 200;
+  }
+}
 
 // 常量定义
 const TAG = 'SubtitleService';
@@ -39,7 +65,7 @@ export interface SubtitleLanguage {
 export interface SubtitleTrack {
   id: string;        // 轨道ID
   name: string;      // 轨道名称
-  language: string;  // 语言代码
+  language?: string; // 语言代码
   type: SubtitleType; // 字幕类型
   url?: string;      // 字幕文件URL
   localPath?: string; // 本地文件路径
@@ -1362,27 +1388,3 @@ export default class SubtitleService {
   }
 }
 
-// 导出ApiResponse类型（用于兼容性）
-class ApiResponse<T> {
-  code: number;
-  message: string;
-  data?: T;
-  
-  constructor(code: number, message: string, data?: T) {
-    this.code = code;
-    this.message = message;
-    this.data = data;
-  }
-  
-  static success<T>(data: T, message: string = 'Success'): ApiResponse<T> {
-    return new ApiResponse(200, message, data);
-  }
-  
-  static error<T>(code: number, message: string): ApiResponse<T> {
-    return new ApiResponse(code, message);
-  }
-  
-  isSuccess(): boolean {
-    return this.code === 200;
-  }
-}

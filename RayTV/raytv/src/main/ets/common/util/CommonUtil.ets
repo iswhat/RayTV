@@ -22,14 +22,21 @@ export class CommonUtil {
   }
   
   /**
+   * 检查对象是否包含指定属性
+   * 替代Object.prototype.hasOwnProperty.call
+   */
+  private hasOwnProperty<T extends object>(obj: T, key: string): boolean {
+    return Object.getOwnPropertyNames(obj).includes(key);
+  }
+
+  /**
    * 获取对象的所有键
    * 替代Object.keys，兼容ArkTS语法
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
+      if (typeof obj === 'object' && obj !== null && this.hasOwnProperty(obj, key)) {
         keys.push(key);
       }
     }
@@ -75,8 +82,7 @@ export class CommonUtil {
       const keys = this.getObjectKeys(obj);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
+        if (this.hasOwnProperty(obj, key)) {
           clonedObj[key] = this.deepClone(obj[key]);
         }
       }

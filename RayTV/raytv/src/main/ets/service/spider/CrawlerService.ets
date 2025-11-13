@@ -8,6 +8,41 @@ import { StorageUtil } from '../../common/util/StorageUtil';
 import { ConfigParser } from '../config/ConfigParser';
 
 /**
+ * 视频项接口定义
+ */
+interface VideoItem {
+  id: string;
+  title: string;
+  cover?: string;
+  url?: string;
+  rating?: number;
+  type?: string;
+  updateInfo?: string;
+  hot?: number;
+  updateTime?: string;
+}
+
+/**
+ * 视频详情接口定义
+ */
+interface VideoDetail {
+  id: string;
+  title: string;
+  cover?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  rating?: number;
+  year?: string;
+  region?: string;
+  director?: string;
+  actors?: string[];
+  updateTime?: string;
+  playSources?: Array<{ name: string; url: string }>;
+  episodes?: Array<{ id: string; name: string }>;
+}
+
+/**
  * 爬虫服务接口定义
  */
 interface SiteSpider {
@@ -15,25 +50,25 @@ interface SiteSpider {
   getSiteInfo(): Promise<SiteInfo>;
   
   // 获取推荐列表
-  getRecommendList(): Promise<any[]>;
+  getRecommendList(): Promise<VideoItem[]>;
   
   // 获取热门列表
-  getHotList(): Promise<any[]>;
+  getHotList(): Promise<VideoItem[]>;
   
   // 获取最新更新
-  getLatestList(): Promise<any[]>;
+  getLatestList(): Promise<VideoItem[]>;
   
   // 获取分类列表
   getCategories(): Promise<string[]>;
   
   // 获取分类内容
-  getCategoryList(category: string, page: number): Promise<any[]>;
+  getCategoryList(category: string, page: number): Promise<VideoItem[]>;
   
   // 搜索内容
-  search(keyword: string, page?: number): Promise<any[]>;
+  search(keyword: string, page?: number): Promise<VideoItem[]>;
   
   // 获取详情
-  getDetail(id: string): Promise<any>;
+  getDetail(id: string): Promise<VideoDetail>;
   
   // 获取播放链接
   getPlayUrl(id: string, episodeId?: string): Promise<string>;
@@ -49,7 +84,7 @@ interface SiteSpider {
 export class CrawlerService {
   private static instance: CrawlerService;
   private siteSpiders: Map<string, SiteSpider> = new Map();
-  private siteConfigs: Map<string, any> = new Map();
+  private siteConfigs: Map<string, SiteInfo> = new Map();
   private initialized: boolean = false;
   
   private configService: ConfigService;
@@ -366,32 +401,33 @@ export class CrawlerService {
   /**
    * 根据方法名返回模拟数据
    */
-  private getMockDataByMethod<T>(methodName: string, args: unknown[]): T {
+  private getMockDataByMethod(methodName: string, args: Object[]): Object {
     const mockDataGenerator = new MockDataGenerator();
     
     switch (methodName) {
       case 'getRecommendList':
-        return mockDataGenerator.generateRecommendList() as unknown as T;
+        return mockDataGenerator.generateRecommendList() as Object;
       case 'getHotList':
-        return mockDataGenerator.generateHotList() as unknown as T;
+        return mockDataGenerator.generateHotList() as Object;
       case 'getLatestList':
-        return mockDataGenerator.generateLatestList() as unknown as T;
+        return mockDataGenerator.generateLatestList() as Object;
       case 'getCategories':
-        return mockDataGenerator.generateCategories() as unknown as T;
+        return mockDataGenerator.generateCategories() as Object;
       case 'getCategoryList':
-        return mockDataGenerator.generateCategoryList(args[0], args[1]) as unknown as T;
+        return mockDataGenerator.generateCategoryList(args[0], args[1]) as Object;
       case 'search':
-        return mockDataGenerator.generateSearchResults(args[0]) as unknown as T;
+        return mockDataGenerator.generateSearchResults(args[0]) as Object;
       case 'getDetail':
-        return mockDataGenerator.generateDetail(args[0]) as unknown as T;
+        return mockDataGenerator.generateDetail(args[0]) as Object;
       case 'getPlayUrl':
-        return mockDataGenerator.generatePlayUrl(args[0], args[1]) as unknown as T;
+        return mockDataGenerator.generatePlayUrl(args[0], args[1]) as Object;
       case 'getSearchSuggestions':
-        return mockDataGenerator.generateSearchSuggestions(args[0]) as unknown as T;
+        return mockDataGenerator.generateSearchSuggestions(args[0]) as Object;
       case 'getSiteInfo':
-        return mockDataGenerator.generateSiteInfo() as unknown as T;
+        return mockDataGenerator.generateSiteInfo() as Object;
       default:
-        return {} as T;
+        Logger.warn(this.TAG, `Unsupported mock method: ${methodName}`);
+        return {}; // 返回空对象而不是null
     }
   }
 }
@@ -412,15 +448,15 @@ class MockSiteSpider implements SiteSpider {
     return this.siteInfo;
   }
   
-  async getRecommendList(): Promise<Record<string, unknown>[]> {
+  async getRecommendList(): Promise<VideoItem[]> {
     return this.dataGenerator.generateRecommendList();
   }
   
-  async getHotList(): Promise<Record<string, unknown>[]> {
+  async getHotList(): Promise<VideoItem[]> {
     return this.dataGenerator.generateHotList();
   }
   
-  async getLatestList(): Promise<Record<string, unknown>[]> {
+  async getLatestList(): Promise<VideoItem[]> {
     return this.dataGenerator.generateLatestList();
   }
   
@@ -428,15 +464,15 @@ class MockSiteSpider implements SiteSpider {
     return this.dataGenerator.generateCategories();
   }
   
-  async getCategoryList(category: string, page: number = 1): Promise<Record<string, unknown>[]> {
+  async getCategoryList(category: string, page: number = 1): Promise<VideoItem[]> {
     return this.dataGenerator.generateCategoryList(category, page);
   }
   
-  async search(keyword: string, page: number = 1): Promise<Record<string, unknown>[]> {
+  async search(keyword: string, page: number = 1): Promise<VideoItem[]> {
     return this.dataGenerator.generateSearchResults(keyword, page);
   }
   
-  async getDetail(id: string): Promise<Record<string, unknown>> {
+  async getDetail(id: string): Promise<VideoDetail> {
     return this.dataGenerator.generateDetail(id);
   }
   
@@ -459,7 +495,7 @@ class MockDataGenerator {
     this.siteKey = siteKey;
   }
   
-  generateRecommendList(): Record<string, unknown>[] {
+  generateRecommendList(): VideoItem[] {
     return [
       { id: '1', title: '流浪地球2', cover: '', url: '', rating: 9.2, type: 'movie' },
       { id: '2', title: '满江红', cover: '', url: '', rating: 8.7, type: 'movie' },
@@ -469,7 +505,7 @@ class MockDataGenerator {
     ];
   }
   
-  generateHotList(): Record<string, unknown>[] {
+  generateHotList(): VideoItem[] {
     return [
       { id: '101', title: '狂飙', cover: '', url: '', updateInfo: '全39集', type: 'tv', hot: 123456 },
       { id: '102', title: '三体', cover: '', url: '', updateInfo: '全30集', type: 'tv', hot: 98765 },
@@ -484,7 +520,7 @@ class MockDataGenerator {
     ];
   }
   
-  generateLatestList(): Record<string, unknown>[] {
+  generateLatestList(): VideoItem[] {
     return [
       { id: '201', title: '新神榜：杨戬', cover: '', url: '', updateInfo: 'HD国语', type: 'movie', updateTime: new Date().toISOString() },
       { id: '202', title: '阿凡达：水之道', cover: '', url: '', updateInfo: 'HD英语', type: 'movie', updateTime: new Date().toISOString() },
@@ -507,8 +543,8 @@ class MockDataGenerator {
     ];
   }
   
-  generateCategoryList(category: string, page: number = 1): Record<string, unknown>[] {
-    const results: Record<string, unknown>[] = [];
+  generateCategoryList(category: string, page: number = 1): VideoItem[] {
+    const results: VideoItem[] = [];
     const startId = (page - 1) * 20 + 1;
     
     for (let i = 0; i < 20; i++) {
@@ -527,8 +563,8 @@ class MockDataGenerator {
     return results;
   }
   
-  generateSearchResults(keyword: string, page: number = 1): Record<string, unknown>[] {
-    const results: Record<string, unknown>[] = [];
+  generateSearchResults(keyword: string, page: number = 1): VideoItem[] {
+    const results: VideoItem[] = [];
     const startId = (page - 1) * 20 + 1000;
     
     for (let i = 0; i < 20; i++) {
@@ -547,7 +583,7 @@ class MockDataGenerator {
     return results;
   }
   
-  generateDetail(id: string): Record<string, unknown> {
+  generateDetail(id: string): VideoDetail {
     return {
       id,
       title: `模拟视频详情 ${id}`,

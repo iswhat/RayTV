@@ -294,7 +294,7 @@ export class SiteDao {
    * @param jsonString JSON字符串
    * @returns 解析后的对象
    */
-  private parseJsonString(jsonString?: string): any {
+  private parseJsonString(jsonString?: string): Record<string, unknown> {
     if (!jsonString) return {};
     try {
       return JSON.parse(jsonString);
@@ -325,7 +325,7 @@ export class SiteDao {
    * @param obj 要转换的对象
    * @returns JSON字符串
    */
-  private stringifyJson(obj: any): string {
+  private stringifyJson(obj: Record<string, unknown>): string {
     try {
       return JSON.stringify(obj);
     } catch (error) {

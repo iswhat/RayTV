@@ -86,7 +86,7 @@ export class ConfigConstant {
    * 获取默认配置对象
    * @returns 默认配置对象
    */
-  public static getDefaultConfig(): Record<string, any> {
+  public static getDefaultConfig(): Record<string, unknown> {
     return {
       [this.GROUP_PLAYER]: {
         [this.PLAYER_DEFAULT_PLAYER]: this.PLAYER_TYPE_NATIVE,

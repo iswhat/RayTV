@@ -54,7 +54,7 @@ export interface ErrorDetail {
   field?: string;      // 字段名称（用于验证错误）
   message: string;     // 错误消息
   code?: string;       // 错误代码
-  value?: any;     // 错误值
+  value?: unknown;     // 错误值
 }
 
 /**
@@ -72,7 +72,7 @@ export interface ApiResponseParams<T = unknown> {
   trace?: string;
 }
 
-export default class ApiResponse<T = any> {
+export default class ApiResponse<T = unknown> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据
@@ -211,7 +211,7 @@ export default class ApiResponse<T = any> {
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): Record<string, any> {
+  toObject(): Record<string, unknown> {
     return {
       code: this.code,
       message: this.message,
@@ -228,11 +228,11 @@ export default class ApiResponse<T = any> {
    * 从对象创建实例
    * @param obj 对象数据
    */
-  static fromObject<T = any>(obj: Record<string, any>): ApiResponse<T> {
+  static fromObject<T = unknown>(obj: Record<string, unknown>): ApiResponse<T> {
     const params: ApiResponseParams<T> = {
       code: typeof obj.code === 'number' ? obj.code : ResponseCode.SUCCESS,
       message: typeof obj.message === 'string' ? obj.message : 'Unknown response',
-      data: obj.data,
+      data: obj.data as T,
       errors: Array.isArray(obj.errors) ? obj.errors : undefined,
       pagination: typeof obj.pagination === 'object' && obj.pagination !== null ? obj.pagination : undefined,
       requestId: typeof obj.requestId === 'string' ? obj.requestId : undefined,
@@ -246,7 +246,7 @@ export default class ApiResponse<T = any> {
   /**
    * 创建成功响应
    */
-  static success<T = any>(data?: T, message: string = 'Success'): ApiResponse<T> {
+  static success<T = unknown>(data?: T, message: string = 'Success'): ApiResponse<T> {
     return new ApiResponse<T>({
       code: ResponseCode.SUCCESS,
       message,

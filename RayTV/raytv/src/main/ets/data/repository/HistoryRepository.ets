@@ -63,7 +63,7 @@ export class HistoryRepository {
         [HISTORY_TABLE.COLUMNS.EXTRA_DATA]: JSON.stringify(history.extraData || {})
       };
       
-      let result;
+      let result: number | undefined;
       if (existingHistory?.id) {
         // 更新现有历史记录
         const conditions: QueryCondition[] = [{

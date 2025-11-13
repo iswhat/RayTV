@@ -56,7 +56,7 @@ export interface LineResponseResult {
 export interface LineResult {
   success: boolean;
   message?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -72,7 +72,7 @@ export class LineManager {
   private siteDao: SiteDao;
   private lineDao: LineDao;
   private initialized: boolean = false;
-  private context?: any;
+  private context?: Context;
   
   // 默认缓存时间配置
   private defaultCacheHours: number = 24; // 默认24小时
@@ -116,7 +116,7 @@ export class LineManager {
    * 初始化线路管理器
    * @param context 应用上下文
    */
-  public async initialize(context?: any): Promise<void> {
+  public async initialize(context?: Context): Promise<void> {
     if (this.initialized) {
       return;
     }

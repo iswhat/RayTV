@@ -390,7 +390,7 @@ export class CollectionDao {
    * @param jsonString JSON字符串
    * @returns 解析后的对象
    */
-  private parseJsonString(jsonString?: string): any {
+  private parseJsonString(jsonString?: string): Record<string, unknown> {
     if (!jsonString) return {};
     try {
       return JSON.parse(jsonString);
@@ -405,7 +405,7 @@ export class CollectionDao {
    * @param obj 要转换的对象
    * @returns JSON字符串
    */
-  private stringifyJson(obj: any): string {
+  private stringifyJson(obj: Record<string, unknown>): string {
     try {
       return JSON.stringify(obj);
     } catch (error) {
@@ -423,7 +423,7 @@ export class CollectionDao {
    * @param offset 偏移量
    * @returns 查询结果
    */
-  public async query(conditions: string = '', params: any[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0): Promise<Collection[]> {
+  public async query(conditions: string = '', params: unknown[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0): Promise<Collection[]> {
     try {
       const db = await this.databaseManager.getDatabase();
       let sql = `SELECT * FROM ${TableSchema.COLLECTION_TABLE}`;
@@ -453,7 +453,7 @@ export class CollectionDao {
    */
   public async queryOne(options: {
     conditions?: string;
-    params?: any[];
+    params?: unknown[];
     orderBy?: string;
   } = {}): Promise<Collection | null> {
     try {

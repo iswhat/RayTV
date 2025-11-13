@@ -4,6 +4,12 @@
  */
 export default class JsonUtil {
   /**
+   * 检查对象是否包含指定属性
+   */
+  private static hasOwnProperty(obj: Object, key: string): boolean {
+    return Object.getOwnPropertyNames(obj).includes(key);
+  }
+  /**
    * 将对象序列化为JSON字符串
    * @param value - 要序列化的对象
    * @returns JSON字符串
@@ -24,7 +30,11 @@ export default class JsonUtil {
   static parse(jsonStr: string): Record<string, string | number | boolean | null> {
     try {
       const result = JSON.parse(jsonStr);
-      return typeof result === 'object' && result !== null ? result : {};
+      // 确保返回类型安全
+      if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
+        return result as Record<string, string | number | boolean | null>;
+      }
+      return {};
     } catch {
       return {};
     }
@@ -44,10 +54,20 @@ export default class JsonUtil {
    * @param obj - 要克隆的对象
    * @returns 克隆后的新对象
    */
-  static deepClone<T>(obj: T): T {
+  static deepClone<T extends object | null>(obj: T): T {
     try {
+      // 处理null的情况
+      if (obj === null) {
+        return null as T;
+      }
+      // 对于对象类型，使用类型安全的方式克隆
       return JSON.parse(JSON.stringify(obj)) as T;
     } catch {
+      // 克隆失败时返回原始对象的安全副本
+      if (obj === null) {
+        return null as T;
+      }
+      // 返回空对象，保持类型一致性
       return {} as T;
     }
   }
@@ -90,10 +110,12 @@ export default class JsonUtil {
     const result: Record<string, string | number | boolean | null> = {};
     for (let i = 0; i < objects.length; i++) {
       const current = objects[i];
-      const keys = Object.keys(current);
+      const keys = Object.getOwnPropertyNames(current);
       for (let j = 0; j < keys.length; j++) {
         const key = keys[j];
-        result[key] = current[key];
+        if (JsonUtil.hasOwnProperty(current, key)) {
+          result[key] = current[key];
+        }
       }
     }
     return result;
@@ -105,14 +127,17 @@ export default class JsonUtil {
    * @returns 过滤后的对象
    */
   static filterNullUndefined(obj: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
+    // 创建明确类型的结果对象
     const result: Record<string, string | number | boolean | null> = {};
-    const entries = Object.entries(obj);
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      const key = entry[0];
-      const value = entry[1];
-      if (value !== null && value !== undefined) {
-        result[key] = value;
+    const keys = Object.getOwnPropertyNames(obj);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (JsonUtil.hasOwnProperty(obj, key)) {
+        const value = obj[key];
+        // 确保值不为null且不为undefined（ArkTS中undefined需要明确处理）
+        if (value !== null && typeof value !== 'undefined') {
+          result[key] = value;
+        }
       }
     }
     return result;

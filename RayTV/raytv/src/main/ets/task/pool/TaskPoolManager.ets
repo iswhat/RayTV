@@ -456,7 +456,7 @@ export class TaskPoolManager {
    * @param task 任务对象
    * @param result 任务结果
    */
-  private handleTaskComplete(task: Task, result: any): void {
+  private handleTaskComplete<T>(task: Task<T>, result: T): void {
     Logger.debug(TAG, `Task ${task.id} completed successfully`);
     try {
       task.onComplete?.(result);

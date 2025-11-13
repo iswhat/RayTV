@@ -30,7 +30,7 @@ export interface SubscriptionItem {
 export interface SubscriptionResult {
   success: boolean;
   message?: string;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -69,13 +69,13 @@ export class SubscriptionManager {
     Logger.info(TAG, 'SubscriptionManager initialized');
   }
 
-  private context?: any;
+  private context?: unknown;
 
   /**
    * 初始化订阅管理器
    * @param context 应用上下文
    */
-  public async initialize(context?: any): Promise<void> {
+  public async initialize(context?: unknown): Promise<void> {
     if (this.initialized) {
       return;
     }

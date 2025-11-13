@@ -22,7 +22,12 @@ class RealPlayer {
   private volume: number = 1.0;
   private isMuted: boolean = false;
   private speed: number = 1.0;
-  private listeners: Map<string, Function[]> = new Map();
+  // 定义每种事件类型的回调接口
+  private stateChangeListeners: ((state: string, reason: number) => void)[] = [];
+  private errorListeners: ((errorCode: number, errorMsg: string) => void)[] = [];
+  private bufferListeners: ((bufferingRate: number) => void)[] = [];
+  private completeListeners: (() => void)[] = [];
+  private timeUpdateListeners: ((currentTime: number) => void)[] = [];
 
   async createPlayer(): Promise<RealPlayer> {
     try {
@@ -224,16 +229,53 @@ class RealPlayer {
     }
   }
 
-  on(event: string, callback: Function): void {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
+  // 重载on方法，为每种事件类型提供类型安全的接口
+  on(event: 'stateChange', callback: (state: string, reason: number) => void): void;
+  on(event: 'error', callback: (errorCode: number, errorMsg: string) => void): void;
+  on(event: 'bufferingChange', callback: (bufferingRate: number) => void): void;
+  on(event: 'playbackComplete', callback: () => void): void;
+  on(event: 'timeUpdate', callback: (currentTime: number) => void): void;
+  on(event: string, callback: (...args: any[]) => void): void {
+    // 根据事件类型存储对应的回调函数
+    switch (event) {
+      case 'stateChange':
+        this.stateChangeListeners.push(callback as (state: string, reason: number) => void);
+        break;
+      case 'error':
+        this.errorListeners.push(callback as (errorCode: number, errorMsg: string) => void);
+        break;
+      case 'bufferingChange':
+        this.bufferListeners.push(callback as (bufferingRate: number) => void);
+        break;
+      case 'playbackComplete':
+        this.completeListeners.push(callback as () => void);
+        break;
+      case 'timeUpdate':
+        this.timeUpdateListeners.push(callback as (currentTime: number) => void);
+        break;
     }
-    this.listeners.get(event)!.push(callback);
   }
 
+  // 重载emit方法，为每种事件类型提供类型安全的接口
+  private emit(event: 'stateChange', state: string, reason: number): void {
+    this.stateChangeListeners.forEach(callback => callback(state, reason));
+  }
+  private emit(event: 'error', errorCode: number, errorMsg: string): void {
+    this.errorListeners.forEach(callback => callback(errorCode, errorMsg));
+  }
+  private emit(event: 'bufferingChange', bufferingRate: number): void {
+    this.bufferListeners.forEach(callback => callback(bufferingRate));
+  }
+  private emit(event: 'playbackComplete'): void {
+    this.completeListeners.forEach(callback => callback());
+  }
+  private emit(event: 'timeUpdate', currentTime: number): void {
+    this.timeUpdateListeners.forEach(callback => callback(currentTime));
+  }
+  // 通用实现（作为后备）
   private emit(event: string, ...args: any[]): void {
-    const callbacks = this.listeners.get(event) || [];
-    callbacks.forEach(callback => callback(...args));
+    // 这个通用实现实际上不会被调用，因为我们已经为所有事件类型提供了具体实现
+    // 这里仅作为类型系统的兼容层
   }
 
   private setupPlayerCallbacks(): void {
@@ -487,7 +529,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
         throw new Error('Player not initialized');
       }
       
-      await this.avPlayer.seek(timeMs, MockSeekMode.Accurate);
+      await this.avPlayer.seek(timeMs, media.SeekMode.SEEK_PREV_SYNC);
       Logger.info(this.TAG, `Seeked to: ${timeMs}ms`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to seek: ${error}`);

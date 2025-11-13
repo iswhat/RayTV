@@ -195,23 +195,26 @@ export default class History {
    * @returns 序列化后的对象
    */
   public toSerializable(): Record<string, string | number | boolean | object | null> {
-    const result: Record<string, string | number | boolean | object | null> = {};
+    // 使用对象字面量直接初始化，避免空对象字面量
+    const result: Record<string, string | number | boolean | object | null> = {
+      id: this.id,
+      userId: this.userId,
+      contentId: this.contentId,
+      contentTitle: this.contentTitle,
+      contentType: this.contentType,
+      progress: this.progress,
+      totalDuration: this.totalDuration,
+      lastWatchTime: this.lastWatchTime,
+      playCount: this.playCount,
+      isFinished: this.isFinished
+    };
     
-    result.id = this.id;
-    result.userId = this.userId;
-    result.contentId = this.contentId;
-    result.contentTitle = this.contentTitle;
-    result.contentType = this.contentType;
+    // 仅在属性有值时添加可选字段
     if (this.coverUrl !== undefined) result.coverUrl = this.coverUrl;
     if (this.episodeId !== undefined) result.episodeId = this.episodeId;
     if (this.episodeTitle !== undefined) result.episodeTitle = this.episodeTitle;
     if (this.season !== undefined) result.season = this.season;
     if (this.episode !== undefined) result.episode = this.episode;
-    result.progress = this.progress;
-    result.totalDuration = this.totalDuration;
-    result.lastWatchTime = this.lastWatchTime;
-    result.playCount = this.playCount;
-    result.isFinished = this.isFinished;
     if (this.sourceId !== undefined) result.sourceId = this.sourceId;
     if (this.quality !== undefined) result.quality = this.quality;
     if (this.deviceId !== undefined) result.deviceId = this.deviceId;
@@ -225,8 +228,10 @@ export default class History {
    * @returns History实例
    */
   public static fromSerializable(data: Record<string, string | number | boolean | object | null>): History {
+    // 直接创建包含所有有效数据的对象，避免空对象字面量
     const historyData: Partial<History> = {};
     
+    // 添加类型检查并设置属性
     if (typeof data.id === 'string') historyData.id = data.id;
     if (typeof data.userId === 'string') historyData.userId = data.userId;
     if (typeof data.contentId === 'string') historyData.contentId = data.contentId;

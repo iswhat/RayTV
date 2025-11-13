@@ -19,7 +19,7 @@ export interface HistoryItem {
   lastPlayTime: number; // 最后播放时间
   playCount: number;    // 播放次数
   playSource?: PlaySource; // 播放源信息
-  extra?: Record<string, any>; // 其他附加信息
+  extra?: Record<string, unknown>; // 其他附加信息
 }
 
 /**

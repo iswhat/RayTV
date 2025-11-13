@@ -123,8 +123,8 @@ export interface AppError {
   code: string;
   message: string;
   stackTrace?: string;
+  context?: Record<string, unknown>;
   timestamp: number;
-  context?: any;
 }
 
 // 应用事件类型枚举
@@ -145,9 +145,9 @@ export enum AppEventType {
 }
 
 // 应用事件接口
-export interface AppEvent {
+export interface AppEvent<T = any> {
   type: AppEventType;
-  data?: any;
+  data?: T;
   timestamp: number;
 }
 
@@ -236,8 +236,8 @@ export default class AppService {
   private errorHistory: AppError[] = [];
   private eventHistory: AppEvent[] = [];
   
-  // 服务引用
-  private services: Map<string, any> = new Map();
+  // 服务映射
+  private services: Map<string, Object> = new Map();
   
   // 初始化状态
   private initializationPromise: Promise<void> | null = null;
@@ -706,7 +706,7 @@ export default class AppService {
   /**
    * 发布应用事件
    */
-  private publishEvent(type: AppEventType, data?: any): void {
+  private publishEvent<T>(type: AppEventType, data?: T): void {
     const event: AppEvent = {
       type,
       data,
@@ -870,6 +870,7 @@ export default class AppService {
     const service = this.services.get(serviceName);
     if (!service) {
       Logger.warn(TAG, `Service not found: ${serviceName}`);
+      return null;
     }
     return service as T;
   }
@@ -877,7 +878,7 @@ export default class AppService {
   /**
    * 注册自定义服务
    */
-  public registerService(serviceName: string, serviceInstance: any): boolean {
+  public registerService(serviceName: string, serviceInstance: { initialize?: () => Promise<void>; close?: () => Promise<void> }): boolean {
     try {
       this.services.set(serviceName, serviceInstance);
       Logger.info(TAG, `Registered custom service: ${serviceName}`);
@@ -1065,7 +1066,7 @@ export default class AppService {
   /**
    * 加载应用状态
    */
-  private async loadAppState(): Promise<any> {
+  private async loadAppState(): Promise<AppStatistics | null> {
     try {
       const appState = await StorageUtil.getObject(APP_STATE_KEY);
       Logger.debug(TAG, 'Loaded app state');

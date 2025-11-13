@@ -5,7 +5,7 @@ import { FileSystemManager } from '@ohos.file.fs';
  * 缓存项接口
  */
 export interface CacheItem {
-  data: any;
+  data: Record<string, string | number | boolean | null> | string | number | boolean | null;
   timestamp: number;
   expiry: number;
   size: number;
@@ -62,7 +62,13 @@ export class CacheManager {
    */
   private constructor() {
     this.fsManager = FileSystemManager.getFileSystemManager();
-    this.config = { ...CacheManager.DEFAULT_CONFIG };
+    // 避免对象展开操作符，显式赋值确保类型安全
+    this.config = {
+      maxSize: CacheManager.DEFAULT_CONFIG.maxSize,
+      defaultExpiry: CacheManager.DEFAULT_CONFIG.defaultExpiry,
+      cleanupInterval: CacheManager.DEFAULT_CONFIG.cleanupInterval,
+      enabled: CacheManager.DEFAULT_CONFIG.enabled
+    };
     this.initialize();
     Logger.info(this.TAG, 'CacheManager initialized');
   }
@@ -97,7 +103,13 @@ export class CacheManager {
    * @param config 缓存配置
    */
   public setConfig(config: CacheConfig): void {
-    this.config = { ...this.config, ...config };
+    // 避免对象展开操作符，显式合并配置确保类型安全
+    this.config = {
+      maxSize: config.maxSize ?? this.config.maxSize,
+      defaultExpiry: config.defaultExpiry ?? this.config.defaultExpiry,
+      cleanupInterval: config.cleanupInterval ?? this.config.cleanupInterval,
+      enabled: config.enabled ?? this.config.enabled
+    };
     Logger.info(this.TAG, `Updated cache config: ${JSON.stringify(this.config)}`);
     
     // 重新启动清理定时器
@@ -113,9 +125,9 @@ export class CacheManager {
   /**
    * 获取缓存
    * @param key 缓存键
-   * @returns any | null
+   * @returns 缓存数据或null
    */
-  public get(key: string): any | null {
+  public get(key: string): Record<string, string | number | boolean | null> | string | number | boolean | null {
     if (!this.config.enabled) {
       return null;
     }
@@ -168,7 +180,7 @@ export class CacheManager {
    * @param expiry 过期时间（毫秒，可选）
    * @returns boolean
    */
-  public set(key: string, data: any, expiry?: number): boolean {
+  public set(key: string, data: Record<string, string | number | boolean | null> | string | number | boolean | null, expiry?: number): boolean {
     if (!this.config.enabled) {
       return false;
     }
@@ -342,7 +354,7 @@ export class CacheManager {
    * @param params 方法参数
    * @returns string
    */
-  public generateCacheKey(siteKey: string, method: string, params: any): string {
+  public generateCacheKey(siteKey: string, method: string, params: Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null): string {
     // 生成参数的哈希值
     const paramsHash = this.generateParamsHash(params);
     return `${siteKey}:${method}:${paramsHash}`;
@@ -496,7 +508,7 @@ export class CacheManager {
    * @returns string
    * @private
    */
-  private generateParamsHash(params: any): string {
+  private generateParamsHash(params: Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null): string {
     try {
       const sortedParams = this.sortParams(params);
       return this.generateHash(JSON.stringify(sortedParams));
@@ -532,7 +544,7 @@ export class CacheManager {
    * @returns 键数组
    * @private
    */
-  private getObjectKeys(obj: any): string[] {
+  private getObjectKeys(obj: Record<string, unknown>): string[] {
     const keys: string[] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -545,21 +557,48 @@ export class CacheManager {
   /**
    * 排序参数对象，确保相同内容的参数生成相同的哈希值
    * @param params 方法参数
-   * @returns any
+   * @returns 排序后的参数
    * @private
    */
-  private sortParams(params: any): any {
+  private sortParams(params: Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null): Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null {
+    // 处理基本类型和null
     if (typeof params !== 'object' || params === null) {
       return params;
     }
     
+    // 处理数组
     if (Array.isArray(params)) {
-      return params.map(item => this.sortParams(item));
+      // 确保类型安全，避免unknown类型的递归
+      const typedArray = params as (string | number | boolean | null)[];
+      return typedArray.map(item => {
+        // 仅对对象类型进行递归排序
+        if (typeof item === 'object' && item !== null) {
+          if (Array.isArray(item)) {
+            return this.sortParams(item as string[] | number[] | boolean[]);
+          } else {
+            return this.sortParams(item as Record<string, string | number | boolean | null>);
+          }
+        }
+        return item;
+      }) as string[] | number[] | boolean[];
     }
     
-    const sorted: any = {};
-    this.getObjectKeys(params).sort().forEach(key => {
-      sorted[key] = this.sortParams(params[key]);
+    // 处理对象
+    const sorted: Record<string, string | number | boolean | null> = {};
+    const paramObj = params as Record<string, string | number | boolean | null>;
+    
+    this.getObjectKeys(paramObj).sort().forEach(key => {
+      const value = paramObj[key];
+      // 仅对对象类型进行递归排序
+      if (typeof value === 'object' && value !== null) {
+        if (Array.isArray(value)) {
+          sorted[key] = this.sortParams(value as string[] | number[] | boolean[]);
+        } else {
+          sorted[key] = this.sortParams(value as Record<string, string | number | boolean | null>);
+        }
+      } else {
+        sorted[key] = value;
+      }
     });
     
     return sorted;

@@ -22,7 +22,7 @@ export enum StorageType {
 export interface StorageData {
   value: string | number | boolean | Record<string, string | number | boolean> | null;
   timestamp: number;
-  expireTime: number;
+  expireTime: number | null;
 }
 
 /**
@@ -59,14 +59,17 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: string | number | boolean | JsonData | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: string | number | boolean | JsonData | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
     if (!key || typeof key !== 'string') {
       throw new Error('Invalid key');
     }
 
     try {
+      // 处理undefined值，转换为null
+      const normalizedValue = value === undefined ? null : value;
+      
       // 确保value的类型安全
-      const safeValue = StorageUtil.validateValue(value);
+      const safeValue = StorageUtil.validateValue(normalizedValue);
       
       const dataToSave: StorageData = {
         value: safeValue,
@@ -104,7 +107,7 @@ export default class StorageUtil {
    * @param defaultValue 默认值
    * @returns 读取的数据或默认值
    */
-  public static async get(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: string | number | boolean | JsonData | null): Promise<string | number | boolean | JsonData | null> {
+  public static async get<T extends string | number | boolean | JsonData | null>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T | null> {
     if (!key || typeof key !== 'string') {
       return defaultValue !== undefined ? defaultValue : null;
     }
@@ -141,7 +144,7 @@ export default class StorageUtil {
       if (data !== null) {
         // 确保返回值类型安全
         const safeValue = StorageUtil.validateValue(data.value);
-        return safeValue;
+        return safeValue as T;
       }
 
       // 没有数据时返回默认值
@@ -167,11 +170,26 @@ export default class StorageUtil {
    * @param type 存储类型
    */
   public static async remove(key: string, type: StorageType = StorageType.PREFERENCES): Promise<void> {
-    if (!key) {
+    if (!key || typeof key !== 'string') {
+      Logger.error(TAG, 'remove: key is empty or invalid');
       return;
     }
 
     try {
+      // 从内存缓存中删除
+      if (type !== StorageType.MEMORY) {
+        // 创建新对象，不包含要删除的键
+        const newCache: Record<string, MemoryCacheItem> = {};
+        const cacheKeys = Object.keys(StorageUtil.memoryCache);
+        for (let i = 0; i < cacheKeys.length; i++) {
+          const cacheKey = cacheKeys[i];
+          if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
+            newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
+          }
+        }
+        StorageUtil.memoryCache = newCache;
+      }
+
       switch (type) {
         case StorageType.PREFERENCES:
           await StorageUtil.removeFromPreferences(key);
@@ -521,7 +539,7 @@ export default class StorageUtil {
   /**
    * 构建并验证StorageData对象
    */
-  private static buildStorageData(data: JsonData): StorageData {
+  private static buildStorageData(parsedData: JsonData): StorageData {
     const result: StorageData = {
       value: null,
       timestamp: 0,
@@ -582,8 +600,9 @@ export default class StorageUtil {
   /**
    * 验证值的类型安全性
    */
-  private static validateValue(value: string | number | boolean | JsonData | null): string | number | boolean | JsonData | null {
-    if (value === null) {
+  private static validateValue(value: string | number | boolean | JsonData | null | undefined): string | number | boolean | JsonData | null {
+    // 显式处理null和undefined
+    if (value === null || typeof value === 'undefined') {
       return null;
     }
     
@@ -593,25 +612,30 @@ export default class StorageUtil {
       case 'boolean':
         return value;
       case 'object':
-        // 创建新对象确保类型安全
-        const safeObj: JsonData = {};
-        // 获取对象的所有自有属性键
-        const keys = Object.keys(value);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          const propValue = (value as Record<string, string | number | boolean | null>)[key];
-          // 类型安全地处理每个属性值
-          if (typeof propValue === 'string' || typeof propValue === 'number' || 
-              typeof propValue === 'boolean' || propValue === null) {
-            safeObj[key] = propValue;
-          } else if (typeof propValue === 'object' && propValue !== null) {
-            safeObj[key] = {} as JsonData;
+        // 确保是纯对象而非数组
+        if (!Array.isArray(value)) {
+          // 创建新对象确保类型安全
+          const safeObj: JsonData = {};
+          // 获取对象的所有自有属性键
+          const keys = Object.keys(value);
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const propValue = (value as Object)[key];
+            // 类型安全地处理每个属性值
+            if (typeof propValue === 'string' || typeof propValue === 'number' || 
+                typeof propValue === 'boolean' || propValue === null) {
+              safeObj[key] = propValue;
+            } else if (typeof propValue === 'object' && propValue !== null) {
+              safeObj[key] = {};
+            }
           }
+          return safeObj;
         }
-        return safeObj;
+        // 对于数组，返回null，因为存储结构不支持数组
+        return null;
       default:
-        // 对于不支持的类型，转换为字符串
-        return String(value);
+        // 对于不支持的类型，返回null
+        return null;
     }
   }
 

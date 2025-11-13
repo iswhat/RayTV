@@ -61,7 +61,7 @@ export class ParserService {
       // 创建新实例
       ParserService.instance = new ParserService();
     }
-    return ParserService.instance!;
+    return ParserService.instance;
   }
   
   /**
@@ -297,7 +297,7 @@ export class ParserService {
   private async loadCustomParsers(): Promise<void> {
     try {
       // 从配置服务加载自定义解析器
-    const customParsers: CustomParser[] = await configService.getConfig('customParsers', []);
+      const customParsers: CustomParser[] = await configService.getConfig('customParsers', []);
       
       if (Array.isArray(customParsers)) {
         for (let i = 0; i < customParsers.length; i++) {

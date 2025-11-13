@@ -2,6 +2,7 @@ import Logger from '../../../common/util/Logger';
 import { DatabaseManager } from '../DatabaseManager';
 import { SQLiteHelper } from '../SQLiteHelper';
 import { LINE_TABLE } from '../TableSchema';
+import { Context } from '@ohos.ability.featureAbility';
 
 const TAG = 'LineDao';
 
@@ -36,10 +37,10 @@ export class LineDao {
   }
 
   /**
-   * 初始化线路表
+   * 初始化表结构
    * @param context 应用上下文
    */
-  public async initTable(context?: any): Promise<void> {
+  public async initTable(context?: Context): Promise<void> {
     if (this.initialized) {
       return;
     }
@@ -343,7 +344,7 @@ export class LineDao {
    * 将数据库行映射为LineItem对象
    * @param row 数据库行
    */
-  private mapRowToLineItem(row: any): LineItem {
+  private mapRowToLineItem(row: Record<string, unknown>): LineItem {
     return {
       id: row.id,
       name: row.name,

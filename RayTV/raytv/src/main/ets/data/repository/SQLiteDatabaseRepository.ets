@@ -27,7 +27,7 @@ const DATABASE_VERSION = 1;
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, string | number | boolean | null> = new Map(); // 用于缓存配置
+  private configMap: Map<string, string | number | boolean | undefined> = new Map(); // 用于缓存配置
   private context: common.UIAbilityContext | null = null;
 
   /**
@@ -610,54 +610,67 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 安全获取字符串类型字段
    */
-  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string): string | null {
+  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string): string | undefined {
     try {
       const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return null;
-      return resultSet.getString(columnIndex);
+      if (columnIndex === -1) return undefined;
+      const value = resultSet.getString(columnIndex);
+      return value || undefined;
     } catch (error) {
       Logger.warn(TAG, `Failed to get string column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return null;
+      return undefined;
     }
   }
 
   /**
    * 安全获取长整型字段
    */
-  private safeGetLong(resultSet: relationalStore.ResultSet, columnName: string): number | null {
+  private safeGetLong(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
     try {
       const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return null;
-      return resultSet.getLong(columnIndex);
+      if (columnIndex === -1) return undefined;
+      const value = resultSet.getLong(columnIndex);
+      return value !== null ? value : undefined;
     } catch (error) {
       Logger.warn(TAG, `Failed to get long column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return null;
+      return undefined;
     }
   }
 
   /**
    * 安全获取双精度字段
    */
-  private safeGetDouble(resultSet: relationalStore.ResultSet, columnName: string): number | null {
+  private safeGetDouble(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
     try {
       const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return null;
-      return resultSet.getDouble(columnIndex);
+      if (columnIndex === -1) return undefined;
+      const value = resultSet.getDouble(columnIndex);
+      return value !== null ? value : undefined;
     } catch (error) {
       Logger.warn(TAG, `Failed to get double column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return null;
+      return undefined;
     }
   }
 
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): Record<string, unknown> | unknown[] | string | number | boolean | null {
+  private safeParseJson(jsonStr: string): Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | string[] | number[] | boolean[] | string | number | boolean | null {
     try {
-      return JsonUtil.safeParse(jsonStr);
+      const result = JsonUtil.safeParse(jsonStr);
+      // 确保返回类型安全
+      if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
+        return result as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+      } else if (Array.isArray(result)) {
+        return result as string[] | number[] | boolean[];
+      } else if (result === null) {
+        return null;
+      } else {
+        return result as string | number | boolean;
+      }
     } catch (error) {
       Logger.warn(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
-      return {};
+      return {} as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
     }
   }
 
@@ -668,38 +681,112 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   // ========== 占位实现 ==========
   // 为了代码能编译通过，提供基础的占位实现
   async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> { return { success: false, message: 'Not implemented' }; }
-  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, unknown>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, unknown>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async addUser(user: User): Promise<DatabaseResult<string>> { return { success: false, message: 'Not implemented' }; }
-  async updateUser(user: User): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async deleteUser(userId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getUserById(userId: string): Promise<DatabaseResult<User | null>> { return { success: false, message: 'Not implemented' }; }
-  async getAllUsers(): Promise<DatabaseResult<User[]>> { return { success: false, message: 'Not implemented' }; }
-  async getUserByUsername(username: string): Promise<DatabaseResult<User | null>> { return { success: false, message: 'Not implemented' }; }
-  async saveHistory(history: History): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async deleteHistory(historyId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async deleteAllHistoryByUserId(userId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getHistoryById(historyId: string): Promise<DatabaseResult<History | null>> { return { success: false, message: 'Not implemented' }; }
-  async getUserHistory(userId: string, params: PaginationParams): Promise<DatabaseResult<PaginatedResult<History>>> { return { success: false, message: 'Not implemented' }; }
-  async getUserContentHistory(userId: string, contentId: string, contentType: string): Promise<DatabaseResult<History | null>> { return { success: false, message: 'Not implemented' }; }
-  async getRecentHistory(userId: string, limit: number = 20): Promise<DatabaseResult<History[]>> { return { success: false, message: 'Not implemented' }; }
-  async addFavorite(userId: string, movieId: string, collectionName?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async removeFavorite(userId: string, movieId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async isFavorited(userId: string, movieId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getUserFavorites(userId: string, params: PaginationParams, collectionName?: string): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async getUserCollections(userId: string): Promise<DatabaseResult<string[]>> { return { success: false, message: 'Not implemented' }; }
-  async addSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async deleteSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async clearSearchHistory(userId: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getUserSearchHistory(userId: string, limit: number = 50): Promise<DatabaseResult<string[]>> { return { success: false, message: 'Not implemented' }; }
-  async cacheSearchResults(keyword: string, results: SearchResult[], expirationTime?: number): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getCachedSearchResults(keyword: string): Promise<DatabaseResult<SearchResult[] | null>> { return { success: false, message: 'Not implemented' }; }
-  async clearExpiredCache(): Promise<DatabaseResult<number>> { return { success: false, message: 'Not implemented' }; }
-  async getCacheSize(): Promise<DatabaseResult<number>> { return { success: false, message: 'Not implemented' }; }
-  async clearAllCache(): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async saveConfig(key: string, value: ConfigValue, group?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getConfig(key: string, group?: string): Promise<DatabaseResult<ConfigValue | null>> { return { success: false, message: 'Not implemented' }; }
-  async deleteConfig(key: string, group?: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
-  async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, ConfigValue>>> { return { success: false, message: 'Not implemented' }; }
-  async clearConfigGroup(group: string): Promise<DatabaseResult<boolean>> { return { success: false, message: 'Not implemented' }; }
+  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, string | number | boolean | string[] | number[] | boolean[]>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, string | number | boolean | string[] | number[] | boolean[]>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async addUser(user: User): Promise<DatabaseResult<string>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async updateUser(user: User): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async deleteUser(userId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getUserById(userId: string): Promise<DatabaseResult<User | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getAllUsers(): Promise<DatabaseResult<User[]>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: [] }; 
+  }
+  async getUserByUsername(username: string): Promise<DatabaseResult<User | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async saveHistory(history: History): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async deleteHistory(historyId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async deleteAllHistoryByUserId(userId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getHistoryById(historyId: string): Promise<DatabaseResult<History | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getUserHistory(userId: string, params: PaginationParams): Promise<DatabaseResult<PaginatedResult<History>>> { 
+    return { 
+      success: false, 
+      message: 'Not implemented', 
+      error: new Error('Not implemented'),
+      data: { items: [], totalCount: 0, page: params.page, pageSize: params.pageSize } 
+    }; 
+  }
+  async getUserContentHistory(userId: string, contentId: string, contentType: string): Promise<DatabaseResult<History | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getRecentHistory(userId: string, limit: number = 20): Promise<DatabaseResult<History[]>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: [] }; 
+  }
+  async addFavorite(userId: string, movieId: string, collectionName?: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async removeFavorite(userId: string, movieId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async isFavorited(userId: string, movieId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getUserFavorites(userId: string, params: PaginationParams, collectionName?: string): Promise<DatabaseResult<PaginatedResult<Movie>>> { 
+    return { 
+      success: false, 
+      message: 'Not implemented', 
+      error: new Error('Not implemented'),
+      data: { items: [], totalCount: 0, page: params.page, pageSize: params.pageSize } 
+    }; 
+  }
+  async getUserCollections(userId: string): Promise<DatabaseResult<string[]>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: [] }; 
+  }
+  async addSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async deleteSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async clearSearchHistory(userId: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getUserSearchHistory(userId: string, limit: number = 50): Promise<DatabaseResult<string[]>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: [] }; 
+  }
+  async cacheSearchResults(keyword: string, results: SearchResult[], expirationTime?: number): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getCachedSearchResults(keyword: string): Promise<DatabaseResult<SearchResult[] | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async clearExpiredCache(): Promise<DatabaseResult<number>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: 0 }; 
+  }
+  async getCacheSize(): Promise<DatabaseResult<number>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: 0 }; 
+  }
+  async clearAllCache(): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async saveConfig(key: string, value: ConfigValue, group?: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getConfig(key: string, group?: string): Promise<DatabaseResult<ConfigValue | null>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async deleteConfig(key: string, group?: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
+  async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, ConfigValue>>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: {} }; 
+  }
+  async clearConfigGroup(group: string): Promise<DatabaseResult<boolean>> { 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
+  }
 }

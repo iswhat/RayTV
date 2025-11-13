@@ -8,9 +8,19 @@ import Logger from '../../common/util/Logger';
 const TAG = 'SQLiteHelper';
 
 /**
+ * 数据库支持的值类型
+ */
+export type ValueType = string | number | boolean | null;
+
+/**
+ * 数据库记录类型
+ */
+export type DatabaseRecord = Record<string, ValueType>;
+
+/**
  * 获取对象的键数组（ArkTS兼容方法）
  */
-private getObjectKeys<T extends Record<string, any>>(obj: T): string[] {
+private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
   const keys: string[] = [];
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -23,8 +33,8 @@ private getObjectKeys<T extends Record<string, any>>(obj: T): string[] {
 /**
  * 获取对象的值数组（ArkTS兼容方法）
  */
-private getObjectValues<T extends Record<string, any>>(obj: T): any[] {
-  const values: any[] = [];
+private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
+  const values: ValueType[] = [];
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       values.push(obj[key]);
@@ -102,7 +112,9 @@ export class SQLiteHelper {
       
       // 获取最后插入的ID
       const result = await database.querySql(`SELECT last_insert_rowid() as id`);
-      const lastInsertRowId = result.firstItem?.getLong(result.columnNames.indexOf('id')) || -1;
+      // Fix type handling for querySql result
+      const idIndex = result.columnNames.indexOf('id');
+      const lastInsertRowId = result.firstItem ? (result.firstItem.getLong(idIndex) || 0) : -1;
       
       Logger.info(TAG, `Inserted data into ${tableName}, ID: ${lastInsertRowId}`);
       
@@ -295,23 +307,23 @@ export class SQLiteHelper {
   }
   
   /**
-   * 查询数据
-   * @param tableName 表名
-   * @param columns 要查询的列
-   * @param conditions 查询条件
-   * @param sortOptions 排序选项
-   * @param limit 限制数量
-   * @param offset 偏移量
-   * @returns 查询结果列表
-   */
-  public async query<T extends Record<string, any>>(
-    tableName: string,
-    columns: string[] = ['*'],
-    conditions?: Array<QueryCondition>,
-    sortOptions?: Array<SortOption>,
-    limit?: number,
-    offset: number = 0
-  ): Promise<T[]> {
+ * 查询数据
+ * @param tableName 表名
+ * @param columns 要查询的列
+ * @param conditions 查询条件
+ * @param sortOptions 排序选项
+ * @param limit 限制数量
+ * @param offset 偏移量
+ * @returns 查询结果列表
+ */
+public async query<T extends DatabaseRecord>(
+  tableName: string,
+  columns: string[] = ['*'],
+  conditions?: Array<QueryCondition>,
+  sortOptions?: Array<SortOption>,
+  limit?: number,
+  offset: number = 0
+): Promise<T[]> {
     try {
       const database = this.dbManager.getDatabase();
       
@@ -366,7 +378,7 @@ export class SQLiteHelper {
       // 处理结果
       const records: T[] = [];
       while (result.goToNextRow()) {
-        const record: any = {};
+        const record: DatabaseRecord = {};
         result.columnNames.forEach((column, index) => {
           // 根据数据类型获取值
           const value = result.getDouble(index);
@@ -394,17 +406,17 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取单条记录
-   * @param tableName 表名
-   * @param columns 要查询的列
-   * @param conditions 查询条件
-   * @returns 单条记录或null
-   */
-  public async getFirst<T extends Record<string, any>>(
-    tableName: string,
-    columns: string[] = ['*'],
-    conditions?: Array<QueryCondition>
-  ): Promise<T | null> {
+ * 获取单条记录
+ * @param tableName 表名
+ * @param columns 要查询的列
+ * @param conditions 查询条件
+ * @returns 单条记录或null
+ */
+public async getFirst<T extends DatabaseRecord>(
+  tableName: string,
+  columns: string[] = ['*'],
+  conditions?: Array<QueryCondition>
+): Promise<T | null> {
     const results = await this.query<T>(tableName, columns, conditions, undefined, 1);
     return results.length > 0 ? results[0] : null;
   }
@@ -487,7 +499,7 @@ export class SQLiteHelper {
       // 处理结果
       const records: T[] = [];
       while (result.goToNextRow()) {
-        const record: any = {};
+        const record: DatabaseRecord = {};
         result.columnNames.forEach((column, index) => {
           // 根据数据类型获取值
           const value = result.getDouble(index);

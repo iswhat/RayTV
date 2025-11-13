@@ -46,8 +46,8 @@ export class ValidatorUtil {
    * 获取对象的所有值
    * 替代Object.values，兼容ArkTS语法
    */
-  private static getObjectValues<T extends object>(obj: T): any[] {
-    const values: any[] = [];
+  private static getObjectValues<T extends object>(obj: T): T[keyof T][] {
+    const values: T[keyof T][] = [];
     for (const key in obj) {
       // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
   if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {

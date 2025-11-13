@@ -13,7 +13,7 @@ export enum LoaderType {
 /**
  * 爬虫结果通用接口
  */
-export interface CrawlerResult<T = any> {
+export interface CrawlerResult<T> {
   code: number;
   message: string;
   data: T;
@@ -232,7 +232,7 @@ export abstract class BaseLoader {
    * @param params 方法参数
    * @returns Promise<CrawlerResult<T>> 方法执行结果
    */
-  public async invoke<T = any>(method: string, params: any = {}): Promise<CrawlerResult<T>> {
+  public async invoke<T>(method: string, params: Record<string, string | number | boolean | object | null> = {}): Promise<CrawlerResult<T>> {
     try {
       // 检查状态
       if (this.isDestroyed) {
@@ -371,7 +371,7 @@ export abstract class BaseLoader {
   /**
    * 创建成功结果
    */
-  protected createSuccessResult<T = any>(data: T): CrawlerResult<T> {
+  protected createSuccessResult<T>(data: T): CrawlerResult<T> {
     return {
       code: 200,
       message: 'success',
@@ -382,7 +382,7 @@ export abstract class BaseLoader {
   /**
    * 创建错误结果
    */
-  protected createErrorResult<T = any>(message: string, data?: T): CrawlerResult<T> {
+  protected createErrorResult<T>(message: string, data?: T): CrawlerResult<T> {
     return {
       code: 500,
       message,
@@ -404,7 +404,7 @@ export abstract class BaseLoader {
     url: string;
     page?: number;
     pageSize?: number;
-    filters?: Record<string, any>;
+    filters?: Record<string, string | number | boolean>;
   }): Promise<CrawlerResult<CategoryResult>> {
     return this.invoke<CategoryResult>('category', params);
   }
@@ -461,7 +461,7 @@ export abstract class BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected abstract onInvoke<T>(method: string, params: any): Promise<T>;
+  protected abstract onInvoke<T>(method: string, params: Record<string, string | number | boolean | object | null>): Promise<T>;
 
   /**
    * 销毁方法（由子类实现）

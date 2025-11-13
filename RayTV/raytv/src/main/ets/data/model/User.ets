@@ -119,7 +119,17 @@ export default class User {
    * @param updates 要更新的偏好设置
    * @returns 合并后的偏好设置
    */
-  private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences>): UserPreferences {
+  private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences> | null | undefined): UserPreferences {
+    // 安全检查更新对象
+    if (!updates || typeof updates !== 'object') {
+      return { ...base };
+    }
+    
+    // 确保基础偏好设置存在
+    if (!base || typeof base !== 'object') {
+      return this.getDefaultPreferences();
+    }
+    
     // 不使用展开操作符，手动创建并复制属性
     const result: UserPreferences = {
       theme: base.theme,
@@ -354,8 +364,8 @@ export default class User {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
-    const result: Record<string, any> = {
+  public toSerializable(): Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | Record<string, string | number | boolean | object | null> | null> {
+    const result: Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | Record<string, string | number | boolean | object | null> | null> = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -378,12 +388,37 @@ export default class User {
   }
 
   /**
-   * 从序列化对象创建User实例
-   * @param data 序列化的数据
-   * @returns User实例
+   * 从序列化数据创建对象
+   * @param data 序列化数据
+   * @returns User对象
    */
-  public static fromSerializable(data: Record<string, any>): User {
-    return new User(data as Partial<User>);
+  public static fromSerializable(data: Record<string, unknown>): User {
+    // 创建安全的用户数据对象，添加类型检查和默认值
+    const safeUserData: Partial<User> = {};
+    
+    if (typeof data.id === 'string') safeUserData.id = data.id;
+    if (typeof data.username === 'string') safeUserData.username = data.username;
+    if (typeof data.nickname === 'string') safeUserData.nickname = data.nickname;
+    if (typeof data.email === 'string') safeUserData.email = data.email;
+    if (typeof data.avatarUrl === 'string') safeUserData.avatarUrl = data.avatarUrl;
+    if (typeof data.role === 'number') safeUserData.role = data.role;
+    if (data.preferences && typeof data.preferences === 'object') {
+      safeUserData.preferences = data.preferences as UserPreferences;
+    }
+    if (typeof data.lastLoginTime === 'string') safeUserData.lastLoginTime = data.lastLoginTime;
+    if (typeof data.registrationDate === 'string') safeUserData.registrationDate = data.registrationDate;
+    if (Array.isArray(data.activeDevices)) safeUserData.activeDevices = data.activeDevices as DeviceInfo[];
+    if (typeof data.isVerified === 'boolean') safeUserData.isVerified = data.isVerified;
+    if (typeof data.status === 'string') safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
+    if (typeof data.subscriptionEndDate === 'string') safeUserData.subscriptionEndDate = data.subscriptionEndDate;
+    if (typeof data.watchHistoryEnabled === 'boolean') safeUserData.watchHistoryEnabled = data.watchHistoryEnabled;
+    if (typeof data.favoritesEnabled === 'boolean') safeUserData.favoritesEnabled = data.favoritesEnabled;
+    if (typeof data.totalWatchTime === 'number') safeUserData.totalWatchTime = data.totalWatchTime;
+    if (data.settings && typeof data.settings === 'object') {
+      safeUserData.settings = data.settings as Record<string, string | number | boolean | object | null>;
+    }
+    
+    return new User(safeUserData);
   }
 
   /**

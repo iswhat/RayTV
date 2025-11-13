@@ -152,7 +152,7 @@ struct SettingsPage {
   /**
    * 保存设置
    */
-  private saveSetting(key: string, value: any): void {
+  private saveSetting(key: string, value: unknown): void {
     try {
       configService.setConfig(key, value)
         .then(() => {

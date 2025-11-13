@@ -22,7 +22,7 @@ export interface HistoryItem {
   lastPlayed: number;   // 最后播放时间戳
   siteKey?: string;     // 站点标识
   videoId?: string;     // 视频ID
-  metadata?: Record<string, any>; // 额外元数据
+  metadata?: Record<string, unknown>; // 额外元数据
 }
 
 export default class HistoryManager {

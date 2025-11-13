@@ -9,7 +9,7 @@ import TimeoutManager from '../../../common/util/TimeoutManager';
  * JavaScript执行上下文
  */
 interface JsContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -79,7 +79,7 @@ export class ArkJsLoader extends BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected async onInvoke(method: string, params: any): Promise<any> {
+  protected async onInvoke(method: string, params: unknown): Promise<unknown> {
     if (!this.isInitialized) {
       await this.onInit();
     }
@@ -223,7 +223,7 @@ export class ArkJsLoader extends BaseLoader {
         this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
-      post: async (url: string, data?: any, options?: { headers?: Record<string, string>, timeout?: number }) => {
+      post: async (url: string, data?: unknown, options?: { headers?: Record<string, string>, timeout?: number }) => {
         // 验证URL安全性
         this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
@@ -312,7 +312,7 @@ export class ArkJsLoader extends BaseLoader {
           return null;
         }
       },
-      stringifyJson: (obj: any) => {
+      stringifyJson: (obj: unknown) => {
         try {
           return JSON.stringify(obj);
         } catch (error) {
@@ -392,7 +392,7 @@ export class ArkJsLoader extends BaseLoader {
    * @param params 方法参数
    * @private
    */
-  private executeMethod(method: string, params: any): any {
+  private executeMethod(method: string, params: unknown): unknown {
     if (typeof this.jsContext[method] !== 'function') {
       throw new Error(`Method ${method} not found in script`);
     }
@@ -489,7 +489,7 @@ export class ArkJsLoader extends BaseLoader {
    * @param params 方法参数
    * @private
    */
-  private validateParams(params: any): void {
+  private validateParams(params: unknown): void {
     // 检查参数大小，防止过大的参数导致内存问题
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 1024 * 1024) { // 1MB限制
@@ -510,7 +510,7 @@ export class ArkJsLoader extends BaseLoader {
    * 检查对象深度
    * @private
    */
-  private checkObjectDepth(obj: any, currentDepth: number = 0): number {
+  private checkObjectDepth(obj: unknown, currentDepth: number = 0): number {
     if (obj === null || typeof obj !== 'object') {
       return currentDepth;
     }
@@ -546,7 +546,7 @@ export class ArkJsLoader extends BaseLoader {
    * 检查集合大小
    * @private
    */
-  private checkCollectionSize(obj: any): void {
+  private checkCollectionSize(obj: unknown): void {
     const maxArrayLength = 10000;
     
     if (Array.isArray(obj)) {

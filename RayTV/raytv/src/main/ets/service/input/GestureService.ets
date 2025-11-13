@@ -4,6 +4,24 @@ import input from '@ohos.multimodalInput.input';
 import { BusinessError } from '@ohos.base';
 
 /**
+ * 手势原始事件接口
+ */
+export interface GestureRawEvent {
+  type: string;
+  x?: number;
+  y?: number;
+  timestamp?: number;
+  pointers?: Object;
+  deviceId?: number;
+  button?: number;
+  direction?: string;
+  distance?: number;
+  velocity?: number;
+  scale?: number;
+  rotation?: number;
+}
+
+/**
  * 手势类型枚举
  */
 export enum GestureType {
@@ -201,7 +219,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 处理手势事件
    */
-  handleGestureEvent(event: any): void {
+  handleGestureEvent(event: GestureRawEvent): void {
     try {
       // 构建标准化的手势事件
       const gestureEvent: GestureEvent = this.buildGestureEvent(event);
@@ -225,7 +243,7 @@ export class GestureServiceImpl implements GestureService {
   /**
    * 构建标准化的手势事件
    */
-  buildGestureEvent(event: any): GestureEvent | null {
+  buildGestureEvent(event: GestureRawEvent): GestureEvent | null {
     try {
       // 根据事件类型转换为标准手势事件
       switch (event.type) {

@@ -490,7 +490,7 @@ export default class MovieService {
   /**
    * 获取分类列表
    */
-  public async getCategories(type: VideoType = VideoType.ALL): Promise<ApiResponse<any[]>> {
+  public async getCategories(type: VideoType = VideoType.ALL): Promise<ApiResponse<unknown[]>> {
     try {
       Logger.info(TAG, 'Getting categories...', { type });
 
@@ -498,14 +498,14 @@ export default class MovieService {
       const cacheKey = `${CACHE_PREFIX.CATEGORY_LIST}${type}`;
 
       // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<any[]>>(cacheKey, CACHE_DURATION.CATEGORY_LIST);
+      const cachedData = await this.getCachedData<ApiResponse<unknown[]>>(cacheKey, CACHE_DURATION.CATEGORY_LIST);
       if (cachedData) {
         Logger.info(TAG, 'Returning categories from cache');
         return cachedData;
       }
 
       // 调用分类API
-      const response = await this.networkRepo.request<ApiResponse<any[]>>({
+      const response = await this.networkRepo.request<ApiResponse<unknown[]>>({
         url: API_ENDPOINTS.CATEGORIES,
         method: 'GET',
         params: { type }
@@ -519,7 +519,7 @@ export default class MovieService {
       return response;
     } catch (error) {
       Logger.error(TAG, 'Failed to get categories', error);
-      return ApiResponse.networkError<any[]>('获取分类列表失败');
+      return ApiResponse.networkError<unknown[]>('获取分类列表失败');
     }
   }
 

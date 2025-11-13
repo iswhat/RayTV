@@ -22,7 +22,7 @@ export interface DeviceInfo {
  */
 export interface FlowParams {
   flowType: 'video' | 'audio' | 'screen' | 'data'; // 流转类型
-  data?: any;              // 流转数据
+  data?: Record<string, unknown>;              // 流转数据
   sourceDeviceId?: string; // 源设备ID
   targetDeviceId: string;  // 目标设备ID
 }
@@ -90,12 +90,12 @@ class DeviceManager {
     if (!this.dmInstance) return;
     
     try {
-      this.dmInstance.on('deviceStateChange', (device: any) => {
+      this.dmInstance.on('deviceStateChange', (device: Record<string, unknown>) => {
         Logger.info(DeviceManager.TAG, `Device state changed: ${JSON.stringify(device)}`);
         this.handleDeviceStateChange(device);
       });
       
-      this.dmInstance.on('deviceFound', (devices: any[]) => {
+      this.dmInstance.on('deviceFound', (devices: Record<string, unknown>[]) => {
         Logger.info(DeviceManager.TAG, `Devices found: ${devices.length}`);
         this.handleDevicesFound(devices);
       });
@@ -136,10 +136,10 @@ class DeviceManager {
   /**
    * 处理设备状态变化
    */
-  private handleDeviceStateChange(device: any): void {
+  private handleDeviceStateChange(device: Record<string, unknown>): void {
     if (!device || !device.deviceId) return;
     
-    const deviceId = device.deviceId;
+    const deviceId = device.deviceId as string;
     const existingDevice = this.devices.get(deviceId);
     
     if (existingDevice) {
@@ -152,7 +152,7 @@ class DeviceManager {
   /**
    * 处理发现的设备
    */
-  private handleDevicesFound(devices: any[]): void {
+  private handleDevicesFound(devices: Record<string, unknown>[]): void {
     if (!devices || devices.length === 0) return;
     
     Logger.info(DeviceManager.TAG, `Processing ${devices.length} discovered devices`);
@@ -162,14 +162,14 @@ class DeviceManager {
       
       // 转换为标准设备信息格式
       const standardDevice: DeviceInfo = {
-        deviceId: device.deviceId,
-        deviceName: device.deviceName || `Device-${device.deviceId.substring(0, 8)}`,
+        deviceId: device.deviceId as string,
+        deviceName: device.deviceName as string || `Device-${(device.deviceId as string).substring(0, 8)}`,
         deviceType: this.getDeviceType(device),
         status: 'online',
         capabilities: this.getDeviceCapabilities(device)
       };
       
-      this.devices.set(device.deviceId, standardDevice);
+      this.devices.set(device.deviceId as string, standardDevice);
     });
     
     this.notifyDeviceListChanged();
@@ -178,18 +178,19 @@ class DeviceManager {
   /**
    * 获取设备类型
    */
-  private getDeviceType(device: any): string {
+  private getDeviceType(device: Record<string, unknown>): string {
     // 根据设备信息判断类型
-    if (device.deviceTypeId === 2) return 'tv';
-    if (device.deviceTypeId === 3) return 'tablet';
-    if (device.deviceTypeId === 4) return 'phone';
+    const deviceTypeId = device.deviceTypeId as number;
+    if (deviceTypeId === 2) return 'tv';
+    if (deviceTypeId === 3) return 'tablet';
+    if (deviceTypeId === 4) return 'phone';
     return 'unknown';
   }
   
   /**
    * 获取设备能力
    */
-  private getDeviceCapabilities(device: any): string[] {
+  private getDeviceCapabilities(device: Record<string, unknown>): string[] {
     const capabilities: string[] = ['data'];
     
     // 根据设备类型添加默认能力
@@ -405,7 +406,7 @@ export class DeviceFlowManager {
   /**
    * 执行分布式数据传输
    */
-  private async performDistributedTransfer(targetDeviceId: string, data: any): Promise<void> {
+  private async performDistributedTransfer(targetDeviceId: string, data: Record<string, unknown>): Promise<void> {
     try {
       Logger.info(DeviceFlowManager.TAG, `Performing distributed data transfer to ${targetDeviceId}`);
       
@@ -545,17 +546,24 @@ export class DeviceFlowManager {
   /**
    * 从流转参数恢复应用状态
    */
-  public async restoreFromFlowParams(params: any): Promise<void> {
+  public async restoreFromFlowParams(params: Record<string, unknown>): Promise<void> {
     try {
       Logger.info(DeviceFlowManager.TAG, 'Restoring application state from flow params');
       
+      if (!params || !params.data) {
+        Logger.warn(DeviceFlowManager.TAG, 'No valid flow params data found');
+        return;
+      }
+      
+      const flowData = params.data as Record<string, unknown>;
+      
       // 检查是否有视频播放状态需要恢复
-      if (params.currentMedia && params.position !== undefined) {
+      if (flowData.currentMedia && flowData.position !== undefined) {
         // 恢复播放状态
-        await playerManager.loadMedia(params.currentMedia);
-        await playerManager.seekTo(params.position);
+        await playerManager.loadMedia(flowData.currentMedia);
+        await playerManager.seekTo(flowData.position);
         
-        if (params.playState === 'playing') {
+        if (flowData.playState === 'playing') {
           await playerManager.play();
         }
       }

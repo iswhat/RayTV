@@ -29,6 +29,11 @@ export interface DatabaseConfig {
 /**
  * 数据库列定义接口
  */
+/**
+ * 数据库支持的值类型
+ */
+export type DatabaseValueType = string | number | boolean | null;
+
 export interface DatabaseColumn {
   /**
    * 列名
@@ -63,7 +68,7 @@ export interface DatabaseColumn {
   /**
    * 默认值
    */
-  defaultValue?: any;
+  defaultValue?: DatabaseValueType;
   
   /**
    * 注释
@@ -248,11 +253,11 @@ export interface QueryCondition {
   /**
    * 值
    */
-  value?: any;
+  value?: DatabaseValueType | string[] | number[];
   /**
    * 值2（用于BETWEEN等操作符）
    */
-  value2?: any;
+  value2?: DatabaseValueType;
   /**
    * 是否忽略大小写
    */
@@ -391,7 +396,7 @@ export interface Transaction {
    * @param params 参数
    * @returns 执行结果
    */
-  executeSql(sql: string, params?: any[]): Promise<any>;
+  executeSql(sql: string, params?: (DatabaseValueType)[]): Promise<Object>;
   /**
    * 提交事务
    */

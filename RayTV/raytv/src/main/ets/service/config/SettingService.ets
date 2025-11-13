@@ -276,6 +276,20 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
 
 export default class SettingService {
   private static instance: SettingService;
+  
+  /**
+   * 检查对象是否包含指定属性
+   */
+  private hasOwnProperty(obj: object, key: string): boolean {
+    return Object.getOwnPropertyNames(obj).includes(key);
+  }
+  
+  /**
+   * 获取对象的所有自身属性键
+   */
+  private getOwnPropertyKeys(obj: object): string[] {
+    return Object.getOwnPropertyNames(obj);
+  }
   private configService: ConfigService;
   private userService: UserService;
   private databaseManager: DatabaseManager;
@@ -499,13 +513,18 @@ export default class SettingService {
    */
   public async setMultipleSettings(updates: Partial<AppSettings>, userInitiated: boolean = true): Promise<boolean> {
     try {
-      const changedKeys: Array<{ key: string, oldValue: any, newValue: any }> = [];
+      const changedKeys: Array<{ key: string, oldValue: unknown, newValue: unknown }> = [];
       
       // 收集所有要更改的设置
-      for (const [key, newValue] of Object.entries(updates)) {
-        const oldValue = this.getSetting(key as keyof AppSettings);
-        if (oldValue !== newValue) {
-          changedKeys.push({ key, oldValue, newValue });
+      const keys = this.getOwnPropertyKeys(updates);
+      for (const key of keys) {
+        if (this.hasOwnProperty(updates, key)) {
+          // 避免使用any类型，使用更具体的类型断言
+          const newValue = updates[key as keyof AppSettings];
+          const oldValue = this.getSetting(key as keyof AppSettings);
+          if (oldValue !== newValue) {
+            changedKeys.push({ key, oldValue, newValue });
+          }
         }
       }
       

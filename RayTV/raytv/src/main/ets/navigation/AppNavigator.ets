@@ -103,7 +103,7 @@ export class AppNavigator {
    * @param route 页面路由
    * @param params 路由参数
    */
-  private async navigateTo(route: string, params?: any): Promise<void> {
+  private async navigateTo(route: string, params?: Record<string, unknown>): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       const currentUrl = router.getState().path;
@@ -163,7 +163,7 @@ export class AppNavigator {
    * @param route 目标路由
    * @param params 路由参数
    */
-  async replace(route: string, params?: any): Promise<void> {
+  async replace(route: string, params?: Record<string, unknown>): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       await router.replaceUrl({
@@ -248,7 +248,7 @@ export class AppNavigator {
    */
   async loadNavigationHistory(): Promise<void> {
     try {
-      const history = await this.storageUtil.get<any[]>('navigationHistory', []);
+      const history = await this.storageUtil.get<Record<string, unknown>[]>('navigationHistory', []);
       this.navigationHistory = history || [];
     } catch (error) {
       console.error('Failed to load navigation history:', error);
@@ -303,7 +303,7 @@ export class PageRoute {
 export interface NavigationHistoryItem {
   route: string;
   url: string;
-  params?: any;
+  params?: Record<string, unknown>;
   timestamp: number;
 }
 

@@ -568,7 +568,7 @@ export class FormatUtil {
    */
   public formatJSON(json: string | object, indent: number = 2): string {
     try {
-      let obj;
+      let obj: unknown;
       if (typeof json === 'string') {
         obj = JSON.parse(json);
       } else {

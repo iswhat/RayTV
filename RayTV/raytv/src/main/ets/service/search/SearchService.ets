@@ -73,7 +73,7 @@ export interface SearchResultItem {
     title?: string[];       // 标题高亮位置
     description?: string[]; // 描述高亮位置
   };
-  meta?: Record<string, any>; // 额外元数据
+  meta?: { viewCount?: number; [key: string]: any }; // 额外元数据
   siteKey?: string;         // 站点键
   siteName?: string;        // 站点名称
 }
@@ -450,11 +450,11 @@ export class SearchService {
   /**
    * 在多个站点中执行搜索
    */
-  private async searchInSites(keyword: string, sites: any[], limitPerSite: number, timeout: number): Promise<SiteSearchResult[]> {
+  private async searchInSites(keyword: string, sites: Record<string, unknown>[], limitPerSite: number, timeout: number): Promise<SiteSearchResult[]> {
     const promises: Promise<SiteSearchResult>[] = sites.map(async (site) => {
       try {
         const results = await Promise.race([
-          this.siteManager.callSiteMethod<any>(
+          this.siteManager.callSiteMethod<Record<string, unknown>[]>(
             site.key,
             'search',
             [keyword, { limit: limitPerSite }],
@@ -488,14 +488,35 @@ export class SearchService {
   }
 
   /**
+   * 搜索项接口定义
+   */
+  interface SearchItem {
+    id?: string;
+    vodId?: string;
+    title?: string;
+    name?: string;
+    cover?: string;
+    img?: string;
+    pic?: string;
+    rating?: number;
+    score?: number;
+    updateInfo?: string;
+    desc?: string;
+    tags?: string[];
+    category?: string;
+    type?: string;
+    url?: string;
+  }
+
+  /**
    * 转换为统一的视频项格式
    */
-  private convertToVideoItems(results: any, site: any): VideoItem[] {
+  private convertToVideoItems(results: SearchItem[], site: { key: string; name: string }): VideoItem[] {
     if (!results || !Array.isArray(results)) {
       return [];
     }
-
-    return results.map((item: any) => ({
+    
+    return results.map((item: SearchItem) => ({
       id: item.id || item.vodId || `unknown_${Date.now()}_${Math.random()}`,
       title: item.title || item.name || '未知标题',
       cover: item.cover || item.img || item.pic || '',
@@ -661,7 +682,7 @@ export class SearchService {
   /**
    * 获取可搜索的站点
    */
-  private async getSearchableSites(siteKeys: string[]): Promise<any[]> {
+  private async getSearchableSites(siteKeys: string[]): Promise<{ key: string; supportedFeatures?: string[]; }[]> {
     const allSites = await this.siteManager.getActiveSites();
     
     if (siteKeys.length > 0) {

@@ -18,7 +18,7 @@ export interface FavoriteItem {
   score?: number;       // 评分
   tags?: string[];      // 标签
   favoriteTime: number; // 收藏时间
-  extra?: Record<string, any>; // 其他附加信息
+  extra?: Record<string, unknown>; // 其他附加信息
 }
 
 /**

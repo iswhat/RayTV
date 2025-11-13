@@ -164,7 +164,7 @@ class ConfigRepository {
       const configs = await this.databaseRepository.getAll('configs');
       
       for (const config of configs) {
-        let parsedValue = config.value;
+        let parsedValue: unknown = config.value;
         
         // 根据类型解析值
         switch (config.type) {
@@ -229,7 +229,7 @@ class ConfigRepository {
       const dbConfig = await this.databaseRepository.query('configs', [{ field: 'key', operator: '=', value: key }]);
       if (dbConfig.length > 0) {
         const configData = dbConfig[0];
-        let parsedValue = configData.value;
+        let parsedValue: unknown = configData.value;
         
         // 解析值类型
         switch (configData.type) {
@@ -283,7 +283,7 @@ class ConfigRepository {
       });
       
       // 准备存储值
-      let storageValue = value;
+      let storageValue: string | unknown = value;
       if (type === 'object') {
         storageValue = JSON.stringify(value);
       } else if (type === 'boolean') {

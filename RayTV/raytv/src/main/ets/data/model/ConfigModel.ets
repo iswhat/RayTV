@@ -68,7 +68,7 @@ export interface ConfigItem {
   /**
    * 配置值
    */
-  value: any;
+  value: unknown;
   
   /**
    * 配置类型
@@ -83,7 +83,7 @@ export interface ConfigItem {
   /**
    * 默认值
    */
-  defaultValue: any;
+  defaultValue: unknown;
   
   /**
    * 数据类型
@@ -668,7 +668,7 @@ export interface PresetConfig {
   /**
    * 预设配置项
    */
-  config: { [key: string]: any };
+  config: { [key: string]: unknown };
   
   /**
    * 是否为默认预设
@@ -733,12 +733,12 @@ export interface ConfigChangeEvent {
   /**
    * 旧值
    */
-  oldValue: any;
+  oldValue: unknown;
   
   /**
    * 新值
    */
-  newValue: any;
+  newValue: unknown;
   
   /**
    * 变更时间

@@ -41,18 +41,20 @@ export interface PaginatedResult<T> {
 }
 
 /**
+ * 范围筛选接口
+ */
+export interface RangeFilter {
+  min?: number;
+  max?: number;
+}
+
+/**
  * 电影筛选条件接口
  */
 export interface MovieFilter {
   genres?: string[];      // 类型筛选
-  yearRange?: {          // 年份范围
-    min?: number;
-    max?: number;
-  };
-  ratingRange?: {        // 评分范围
-    min?: number;
-    max?: number;
-  };
+  yearRange?: RangeFilter; // 年份范围
+  ratingRange?: RangeFilter; // 评分范围
   country?: string[];     // 国家/地区
   language?: string[];    // 语言
   isVip?: boolean;       // 是否VIP内容

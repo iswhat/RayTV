@@ -9,7 +9,7 @@ import { Router } from '@ohos/router';
  */
 export interface VoiceCommand {
   keyword: string;        // 命令关键词
-  action: (params?: any) => Promise<void>; // 执行的动作
+  action: (params?: unknown) => Promise<void>; // 执行的动作
   description?: string;   // 命令描述
   examples?: string[];    // 示例
 }

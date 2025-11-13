@@ -31,7 +31,7 @@ export class ArkJarLoader extends BaseLoader {
   private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
   private sandboxId: string = '';
-  private sandboxFs: any = null;
+  private sandboxFs: unknown = null;
   private jarLoaded: boolean = false;
   private methodExecutedCount: number = 0;
   private lastMemoryCheckTime: number = 0;
@@ -96,7 +96,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected async onInvoke(method: string, params: any): Promise<any> {
+  protected async onInvoke(method: string, params: unknown): Promise<unknown> {
     try {
       if (!this.jarLoaded) {
         throw new Error('JAR file is not loaded');
@@ -307,7 +307,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 参数
    * @private
    */
-  private async executeJarMethod(method: string, params: any): Promise<any> {
+  private async executeJarMethod(method: string, params: unknown): Promise<unknown> {
     try {
       Logger.info(this.TAG, `Executing JAR method: ${method}`);
       
@@ -436,7 +436,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 方法参数
    * @private
    */
-  private validateParams(params: any): void {
+  private validateParams(params: unknown): void {
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 1024 * 1024) { // 1MB限制
       throw new Error('JAR method parameters too large');
@@ -578,7 +578,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params JavaScript参数
    * @private
    */
-  private convertToJavaParams(params: any): any {
+  private convertToJavaParams(params: unknown): unknown {
     // 转换JavaScript数据结构为Java兼容格式
     // 在实际实现中需要根据ArkNative API的要求进行转换
     return params;
@@ -589,7 +589,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param result Java结果
    * @private
    */
-  private convertFromJavaResult(result: any): any {
+  private convertFromJavaResult(result: unknown): unknown {
     // 转换Java结果为JavaScript格式
     // 在实际实现中需要根据ArkNative API的要求进行转换
     return result;

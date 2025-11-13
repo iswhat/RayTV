@@ -40,6 +40,17 @@ export enum AuthStatus {
   AUTHENTICATION_FAILED = 'authentication_failed'
 }
 
+// 原始设备信息接口（来自系统API）
+interface RawDeviceInfo {
+  deviceId: string;          // 设备唯一标识
+  deviceName: string;        // 设备名称
+  deviceType: number;        // 设备类型编号
+  networkId?: string;        // 网络ID
+  ip?: string;               // IP地址
+  mac?: string;              // MAC地址
+  version?: string;          // 版本信息
+}
+
 // 设备信息接口
 export interface DeviceInfo {
   deviceId: string;          // 设备唯一标识
@@ -57,6 +68,25 @@ export interface DeviceInfo {
   connectedTime?: number;    // 连接时间
   lastActiveTime?: number;   // 最后活跃时间
   deviceLabel?: string;      // 自定义标签
+}
+
+// 同步数据接口
+export interface SyncData<T = Record<string, string | number | boolean | null>> {
+  deviceId: string;          // 目标设备ID
+  dataType: string;          // 数据类型
+  data: T;                   // 要同步的数据
+}
+
+// 播放控制参数接口
+export interface PlaybackControlParams {
+  position?: number;         // 播放位置
+  speed?: number;            // 播放速度
+  volume?: number;           // 音量
+  // 避免使用any类型，定义具体的可能参数
+  paused?: boolean;
+  muted?: boolean;
+  quality?: string;
+  subtitles?: boolean;
 }
 
 // 设备选择条件接口
@@ -543,7 +573,7 @@ export default class DeviceManager {
   /**
    * 获取设备信息
    */
-  private async getDeviceInfo(deviceId: string): Promise<any> {
+  private async getDeviceInfo(deviceId: string): Promise<RawDeviceInfo> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }
@@ -559,7 +589,7 @@ export default class DeviceManager {
   /**
    * 转换为统一的设备信息格式
    */
-  private convertToDeviceInfo(device: any): DeviceInfo {
+  private convertToDeviceInfo(device: RawDeviceInfo): DeviceInfo {
     // 转换设备类型
     let deviceType = DeviceType.OTHER;
     switch (device.deviceType) {
@@ -738,7 +768,7 @@ export default class DeviceManager {
    * @param dataType 数据类型
    * @param data 要同步的数据
    */
-  public async syncDataToDevice(deviceId: string, dataType: string, data: any): Promise<boolean> {
+  public async syncDataToDevice<T = Record<string, any>>(deviceId: string, dataType: string, data: T): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }
@@ -772,7 +802,7 @@ export default class DeviceManager {
    * @param action 播放动作（play/pause/stop/seek等）
    * @param params 动作参数
    */
-  public async controlRemotePlayback(deviceId: string, action: string, params?: any): Promise<boolean> {
+  public async controlRemotePlayback(deviceId: string, action: string, params?: PlaybackControlParams): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }

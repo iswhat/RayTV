@@ -46,8 +46,17 @@ export const DEFAULT_PLAYER_CONFIG: PlayerConfig = {
   startPosition: 0
 };
 
+// 播放器事件数据类型映射
+interface PlayerEventDataMap {
+  [PlayerEvent.STATUS_CHANGED]: PlayerStatus;
+  [PlayerEvent.TIME_UPDATE]: number;
+  [PlayerEvent.BUFFER_UPDATE]: number;
+  [PlayerEvent.ERROR]: {code: number; message: string};
+  [PlayerEvent.COMPLETED]: void;
+}
+
 // 播放器事件监听器类型
-type PlayerEventListener = (event: PlayerEvent, data: unknown) => void;
+type PlayerEventListener = <E extends PlayerEvent>(event: E, data: PlayerEventDataMap[E]) => void;
 
 // 字幕样式接口
 export interface SubtitleStyle {
@@ -279,7 +288,7 @@ export default class PlayerService {
    * 检查是否正在播放
    */
   public isPlaying(): boolean {
-    return this.avPlayerService.getStatus() === 'PLAYING';
+    return this.avPlayerService.getStatus() === PlayerStatus.PLAYING;
   }
 
   /**
@@ -349,7 +358,7 @@ export default class PlayerService {
   /**
    * 触发事件
    */
-  private emitEvent(event: PlayerEvent, data: unknown): void {
+  private emitEvent<E extends PlayerEvent>(event: E, data: PlayerEventDataMap[E]): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(listener => {

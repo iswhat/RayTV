@@ -83,7 +83,7 @@ export class AnalyticsService {
    * @param pageName 页面名称
    * @param params 额外参数
    */
-  public trackPageView(pageName: string, params?: Record<string, any>): void {
+  public trackPageView(pageName: string, params?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
     const event: AnalyticsEvent = {
@@ -130,7 +130,7 @@ export class AnalyticsService {
    * @param duration 播放时长
    * @param params 额外参数
    */
-  public trackVideoComplete(videoId: string, duration: number, params?: Record<string, any>): void {
+  public trackVideoComplete(videoId: string, duration: number, params?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
     const event: AnalyticsEvent = {
@@ -200,7 +200,7 @@ export class AnalyticsService {
    * @param message 错误消息
    * @param context 错误上下文
    */
-  public trackError(errorType: string, message: string, context?: Record<string, any>): void {
+  public trackError(errorType: string, message: string, context?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
     const event: AnalyticsEvent = {
@@ -354,7 +354,7 @@ export interface AnalyticsEvent {
   timestamp: number;
   userId: string;
   sessionId: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }
 
 /**

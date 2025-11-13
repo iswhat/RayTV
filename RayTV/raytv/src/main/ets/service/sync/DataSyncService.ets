@@ -84,6 +84,15 @@ export interface SyncTask {
   retryCount: number;             // 重试次数
 }
 
+// 通用同步实体接口
+export interface SyncEntity {
+  id: string;                     // 实体ID
+  timestamp?: number;             // 时间戳
+  version?: number;               // 版本号
+  checksum?: string;              // 校验和
+  [key: string]: any;             // 其他属性
+}
+
 // 同步记录接口
 export interface SyncRecord {
   id: string;                     // 记录ID
@@ -106,7 +115,7 @@ export interface DataChange {
   entityType: string;             // 实体类型
   operation: 'create' | 'update' | 'delete'; // 操作类型
   timestamp: number;              // 时间戳
-  data?: any;                     // 数据内容
+  data?: Record<string, unknown>; // 数据内容
   version?: number;               // 版本号
   checksum?: string;              // 校验和
 }
@@ -115,8 +124,8 @@ export interface DataChange {
 export interface SyncConflict {
   entityId: string;               // 实体ID
   entityType: string;             // 实体类型
-  localData: any;                 // 本地数据
-  remoteData: any;                // 远程数据
+  localData: Record<string, unknown>;                 // 本地数据
+  remoteData: Record<string, unknown>;                // 远程数据
   resolved: boolean;              // 是否已解决
   resolution?: 'local' | 'remote' | 'merged'; // 解决方式
 }
@@ -127,14 +136,14 @@ type SyncListener = (task: SyncTask) => void;
 // 数据提供者接口（适配器模式）
 export interface DataProvider {
   getDataType(): string;
-  fetchData(params?: any): Promise<any[]>;
-  saveData(data: any[]): Promise<boolean>;
-  updateData(data: any[]): Promise<boolean>;
+  fetchData(params?: Record<string, unknown>): Promise<Record<string, unknown>[]>;
+  saveData(data: Record<string, unknown>[]): Promise<boolean>;
+  updateData(data: Record<string, unknown>[]): Promise<boolean>;
   deleteData(ids: string[]): Promise<boolean>;
   getLastSyncTime(): Promise<number>;
   setLastSyncTime(timestamp: number): Promise<void>;
   getChanges(sinceTime: number): Promise<DataChange[]>;
-  getEntityById(id: string): Promise<any | null>;
+  getEntityById(id: string): Promise<Record<string, unknown> | null>;
   getSyncVersion(): Promise<string>;
 }
 
@@ -151,7 +160,7 @@ export enum SyncEvent {
 }
 
 // 同步事件监听回调类型
-type SyncEventListener = (event: SyncEvent, data: any) => void;
+type SyncEventListener = (event: SyncEvent, data: unknown) => void;
 
 export default class DataSyncService {
   private static instance: DataSyncService;
@@ -183,11 +192,11 @@ export default class DataSyncService {
    * 获取对象的所有值
    * 替代Object.values，兼容ArkTS语法
    */
-  private getObjectValues<T extends object>(obj: T): any[] {
-    const values: any[] = [];
+  private getObjectValues<T extends object>(obj: T): string[] {
+    const values: string[] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        values.push(obj[key]);
+        values.push(obj[key] as string);
       }
     }
     return values;
@@ -333,7 +342,7 @@ export default class DataSyncService {
   /**
    * 处理远程数据变化
    */
-  private async handleRemoteDataChange(dataType: SyncDataType, key: string, data: any, deviceId: string): Promise<void> {
+  private async handleRemoteDataChange(dataType: SyncDataType, key: string, data: Record<string, unknown>, deviceId: string): Promise<void> {
     // 获取对应的本地数据提供者
     const provider = this.dataProviders.get(dataType);
     if (!provider) {
@@ -371,9 +380,9 @@ export default class DataSyncService {
   /**
    * 基于时间戳同步
    */
-  private async syncByTimestamp(provider: DataProvider, remoteData: any, deviceId: string): Promise<void> {
-    const entityId = remoteData.id;
-    const remoteTimestamp = remoteData.timestamp || Date.now();
+  private async syncByTimestamp(provider: DataProvider, remoteData: Record<string, unknown>, deviceId: string): Promise<void> {
+    const entityId = remoteData.id as string;
+    const remoteTimestamp = (remoteData.timestamp as number) || Date.now();
     
     // 获取本地数据
     const localData = await provider.getEntityById(entityId);
@@ -410,9 +419,9 @@ export default class DataSyncService {
   /**
    * 基于版本号同步
    */
-  private async syncByVersion(provider: DataProvider, remoteData: any, deviceId: string): Promise<void> {
-    const entityId = remoteData.id;
-    const remoteVersion = remoteData.version || 0;
+  private async syncByVersion(provider: DataProvider, remoteData: SyncEntity, deviceId: string): Promise<void> {
+    const entityId = remoteData.id as string;
+    const remoteVersion = (remoteData.version as number) || 0;
     
     const localData = await provider.getEntityById(entityId);
     
@@ -444,8 +453,8 @@ export default class DataSyncService {
   /**
    * 基于校验和同步
    */
-  private async syncByChecksum(provider: DataProvider, remoteData: any, deviceId: string): Promise<void> {
-    const entityId = remoteData.id;
+  private async syncByChecksum(provider: DataProvider, remoteData: SyncEntity, deviceId: string): Promise<void> {
+    const entityId = remoteData.id as string;
     
     const localData = await provider.getEntityById(entityId);
     
@@ -465,7 +474,7 @@ export default class DataSyncService {
   /**
    * 检查冲突
    */
-  private checkConflict(localData: any, remoteData: any): boolean {
+  private checkConflict(localData: SyncEntity, remoteData: SyncEntity): boolean {
     // 简单比较：如果数据字符串表示不同，则认为有冲突
     return JSON.stringify(localData) !== JSON.stringify(remoteData);
   }
@@ -473,7 +482,7 @@ export default class DataSyncService {
   /**
    * 处理冲突
    */
-  private async handleConflict(entityId: string, entityType: string, localData: any, remoteData: any): Promise<void> {
+  private async handleConflict(entityId: string, entityType: string, localData: SyncEntity, remoteData: SyncEntity): Promise<void> {
     const conflict: SyncConflict = {
       entityId,
       entityType,
@@ -489,8 +498,8 @@ export default class DataSyncService {
     this.notifyEvent(SyncEvent.CONFLICT_DETECTED, conflict);
     
     // 默认使用时间戳解决冲突
-    const localTimestamp = localData.timestamp || 0;
-    const remoteTimestamp = remoteData.timestamp || 0;
+    const localTimestamp = (localData.timestamp as number) || 0;
+    const remoteTimestamp = (remoteData.timestamp as number) || 0;
     
     if (localTimestamp > remoteTimestamp) {
       conflict.resolution = 'local';
@@ -538,12 +547,14 @@ export default class DataSyncService {
   /**
    * 合并数据
    */
-  private mergeData(localData: any, remoteData: any): any {
+  private mergeData(localData: SyncEntity, remoteData: SyncEntity): SyncEntity {
     // 简单合并：优先保留本地数据，补充远程数据的新字段
     const merged = { ...remoteData, ...localData };
     
     // 保留更新时间戳
-    merged.timestamp = Math.max(localData.timestamp || 0, remoteData.timestamp || 0);
+    const localTimestamp = (localData.timestamp as number) || 0;
+    const remoteTimestamp = (remoteData.timestamp as number) || 0;
+    merged.timestamp = Math.max(localTimestamp, remoteTimestamp);
     
     return merged;
   }
@@ -551,7 +562,7 @@ export default class DataSyncService {
   /**
    * 计算校验和
    */
-  private calculateChecksum(data: any): string {
+  private calculateChecksum(data: SyncEntity): string {
     // 简单实现：使用JSON字符串的长度作为校验和
     // 实际应用中应该使用更安全的哈希算法
     const dataStr = JSON.stringify(data);
@@ -956,7 +967,7 @@ export default class DataSyncService {
   /**
    * 通知事件
    */
-  private notifyEvent(event: SyncEvent, data: any): void {
+  private notifyEvent(event: SyncEvent, data: Record<string, unknown> | null): void {
     if (this.eventListeners.has(event)) {
       const listeners = this.eventListeners.get(event)!;
       for (const listener of listeners) {

@@ -75,8 +75,13 @@ export default class SearchResult {
     this.directors = data.directors || [];
     this.popularity = data.popularity;
     this.matchScore = data.matchScore;
-    // 确保extraInfo是有效的对象类型
-    this.extraInfo = data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo) ? data.extraInfo : {};
+    // 确保extraInfo是有效的对象类型，使用明确的类型初始化
+    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
+      this.extraInfo = data.extraInfo;
+    } else {
+      // 使用空对象字面量，但确保类型安全
+      this.extraInfo = {} as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+    }
     this.link = data.link;
     this.sourceId = data.sourceId;
     this.sourceName = data.sourceName;
@@ -321,8 +326,8 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, any> {
-    const result: Record<string, any> = {};
+  public toSerializable(): Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined> {
+    const result: Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined> = {};
     
     result.id = this.id;
     result.title = this.title;
@@ -356,7 +361,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, any>): SearchResult {
+  public static fromSerializable(data: Record<string, string | number | boolean | string[] | Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | null | undefined>): SearchResult {
     // 将Record类型转换为Partial<SearchResult>类型
     const searchResultData: Partial<SearchResult> = {};
     
@@ -380,7 +385,10 @@ export default class SearchResult {
     if (Array.isArray(data.directors)) searchResultData.directors = data.directors as string[];
     if (typeof data.popularity === 'number') searchResultData.popularity = data.popularity;
     if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
-    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) searchResultData.extraInfo = data.extraInfo as Record<string, any>;
+    // 安全处理extraInfo，确保类型正确
+    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
+      searchResultData.extraInfo = data.extraInfo as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+    }
     if (typeof data.link === 'string') searchResultData.link = data.link;
     if (typeof data.sourceId === 'string') searchResultData.sourceId = data.sourceId;
     if (typeof data.sourceName === 'string') searchResultData.sourceName = data.sourceName;

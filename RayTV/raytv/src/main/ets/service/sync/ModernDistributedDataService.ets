@@ -71,8 +71,15 @@ export interface SyncState {
   syncDataSize?: number;
 }
 
+// 同步数据接口
+export interface SyncData<T = any> {
+  data: T;
+  timestamp: number;
+  deviceId: string;
+}
+
 // 分布式数据监听回调类型
-type DataChangeListener = (key: string, data: any, deviceId: string) => void;
+type DataChangeListener = <T = any>(key: string, data: T, deviceId: string) => void;
 
 export default class ModernDistributedDataService {
   static instance: ModernDistributedDataService;
@@ -137,7 +144,7 @@ export default class ModernDistributedDataService {
 
       // 创建KVManager
       const kvManagerConfig: distributedKVStore.KVManagerConfig = {
-        context: context,
+        context: this.getContext(),
         bundleName: 'com.example.raytv'
       };
 
@@ -302,7 +309,7 @@ export default class ModernDistributedDataService {
    * @param key 数据键
    * @param data 数据内容
    */
-  async saveSyncData(dataType: SyncDataType, key: string, data: any): Promise<void> {
+  async saveSyncData<T = any>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -328,16 +335,16 @@ export default class ModernDistributedDataService {
    * @param dataType 数据类型
    * @param key 数据键
    */
-  async getSyncData(dataType: SyncDataType, key: string): Promise<any | null> {
+  async getSyncData<T = any>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }
 
     try {
       const fullKey = `${dataType}_${key}`;
-      const value = await this.kvStore.get(fullKey);
+      const value = await this.kvStore.get(fullKey) as SyncData<T> | undefined;
 
-      if (value) {
+      if (value && typeof value === 'object' && 'data' in value) {
         Logger.debug(TAG, `Retrieved sync data: ${fullKey}`);
         return value.data;
       }

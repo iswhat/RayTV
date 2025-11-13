@@ -265,7 +265,7 @@ export interface UpdatePreferencesRequest {
   interface?: Partial<InterfacePreferences>; // 界面设置
   parental?: Partial<ParentalControlPreferences>; // 家长控制设置
   recommendations?: Partial<RecommendationPreferences>; // 推荐设置
-  custom?: Record<string, any>;     // 自定义偏好设置
+  custom?: Record<string, unknown>;     // 自定义偏好设置
 }
 
 /**

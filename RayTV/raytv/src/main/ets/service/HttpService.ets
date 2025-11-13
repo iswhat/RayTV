@@ -6,6 +6,17 @@ import { ConfigService } from './config/ConfigService';
 import { AdBlockManager } from './adblock/AdBlockManager';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
+import { HttpResponse, HttpOptions } from '../types/common';
+
+// HTTP请求选项接口
+export interface HttpRequestOptions {
+  method: string;
+  headers?: Record<string, string>;
+  data?: Record<string, string | number | boolean | null> | string | ArrayBuffer;
+  timeout?: number;
+  retryCount?: number;
+  responseType?: 'json' | 'text' | 'arraybuffer';
+}
 
 export class HttpService {
   private static instance: HttpService;
@@ -101,7 +112,7 @@ export class HttpService {
    * @param data 请求数据
    * @param options 请求选项
    */
-  public async post<T>(url: string, data?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
+  public async post<T>(url: string, data?: Record<string, any> | string | ArrayBuffer, options?: HttpOptions): Promise<HttpResponse<T>> {
     const requestOptions: HttpRequestOptions = {
       method: 'POST',
       data: data
@@ -341,7 +352,7 @@ export class HttpService {
       return JSON.parse(data) as T;
     } catch {
       // 如果不是JSON格式，直接返回
-      return data as unknown as T;
+      return data as T;
     }
   }
 

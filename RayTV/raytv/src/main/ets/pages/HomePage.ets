@@ -28,10 +28,14 @@ struct HomePage {
    */
   private handleSearch(): void {
     Logger.info('Search button clicked');
-    // 跳转到搜索页面
-    Router.pushUrl({
-      url: 'pages/SearchPage'
-    });
+    try {
+      // 跳转到搜索页面
+      Router.pushUrl({
+        url: 'pages/SearchPage'
+      });
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to navigate to search page: ${error}`);
+    }
   }
   
   /**

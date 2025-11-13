@@ -20,12 +20,17 @@ export enum ServiceType {
 }
 
 /**
+ * 服务实例类型联合
+ */
+export type ServiceInstance = ConfigService | HistoryService | SiteService | ConfigManager | HistoryManager;
+
+/**
  * 服务工厂类
  * 负责创建和管理各种服务的实例
  */
 export default class ServiceFactory {
   private static instance: ServiceFactory | null = null;
-  private serviceMap: Map<ServiceType, any> = new Map();
+  private serviceMap: Map<ServiceType, ServiceInstance> = new Map();
   private isInitialized: boolean = false;
 
   /**
@@ -160,7 +165,7 @@ export default class ServiceFactory {
    * @param type 服务类型
    * @param service 服务实例
    */
-  public setService(type: ServiceType, service: any): void {
+  public setService(type: ServiceType, service: ServiceInstance): void {
     this.serviceMap.set(type, service);
     Logger.info(TAG, `Custom service set for type: ${type}`);
   }

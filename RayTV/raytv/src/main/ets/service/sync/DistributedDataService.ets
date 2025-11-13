@@ -6,6 +6,7 @@ import distributedKVStore from '@ohos.data.distributedKVStore';
 import { BusinessError } from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
+import { SyncData, DataChangeListener } from '../../types/common';
 
 // 常量定义
 const TAG = 'DistributedDataService';
@@ -70,8 +71,7 @@ export interface SyncState {
   syncDataSize?: number;
 }
 
-// 分布式数据监听回调类型
-type DataChangeListener = (key: string, data: any, deviceId: string) => void;
+// 分布式数据监听回调类型已从common.d.ts导入
 
 export default class DistributedDataService {
   static instance: DistributedDataService;
@@ -262,7 +262,7 @@ export default class DistributedDataService {
   /**
    * 通知相关的监听器
    */
-  private notifyRelevantListeners(key: string, value: any, deviceId: string): void {
+  private notifyRelevantListeners<T>(key: string, value: T, deviceId: string): void {
     for (const [prefix, listeners] of this.dataListeners.entries()) {
       if (key.startsWith(prefix)) {
         for (const listener of listeners) {
@@ -320,7 +320,7 @@ export default class DistributedDataService {
    * @param key 数据键
    * @param data 数据内容
    */
-  async saveSyncData(dataType: SyncDataType, key: string, data: any): Promise<void> {
+  async saveSyncData<T>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -347,7 +347,7 @@ export default class DistributedDataService {
    * @param dataType 数据类型
    * @param key 数据键
    */
-  async getSyncData(dataType: SyncDataType, key: string): Promise<any | null> {
+  async getSyncData<T>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }
@@ -562,7 +562,7 @@ export default class DistributedDataService {
   /**
    * 处理同步冲突
    */
-  private async resolveConflict(localData: any, remoteData: any): Promise<any> {
+  private async resolveConflict<T>(localData: T, remoteData: T): Promise<T> {
     try {
       switch (this.syncConfig.conflictStrategy) {
         case ConflictResolutionStrategy.LOCAL_WIN:
@@ -588,7 +588,7 @@ export default class DistributedDataService {
   /**
    * 合并数据（根据不同数据类型实现智能合并策略）
    */
-  private async mergeData(localData: any, remoteData: any): Promise<any> {
+  private async mergeData<T>(localData: T, remoteData: T): Promise<T> {
     try {
       // 确保输入是对象
       if (typeof localData !== 'object' || localData === null) {

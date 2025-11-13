@@ -16,6 +16,13 @@ import { FlexDirection, ItemAlign, FlexAlign, TextAlign, ImageFit, FontWeight } 
  * 应用主页面
  * 作为应用的入口页面，显示主要功能区域
  */
+interface FeaturedMediaItem {
+  id: string;
+  title: string;
+  cover: string;
+  type: string;
+}
+
 @Entry
 @Component
 struct MainPage {
@@ -23,7 +30,7 @@ struct MainPage {
   private scroller: Scroller = new Scroller();
   
   // 状态管理
-  @State featuredMedia: Array<any> = [];
+  @State featuredMedia: FeaturedMediaItem[] = [];
   @State isLoading: boolean = true;
   
   // 生命周期
@@ -78,7 +85,7 @@ struct MainPage {
   
   // 渲染媒体项
   @Builder
-  renderMediaItem(media: any) {
+  renderMediaItem(media: unknown) {
     ListItem() {
       Column({ padding: 10 }) {
         Image(media.cover)

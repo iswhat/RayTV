@@ -133,7 +133,7 @@ export interface CacheOperationResult {
   success: boolean;
   key?: string;
   error?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // 缓存清理选项接口
@@ -180,7 +180,7 @@ export default class CacheService {
   private static instance: CacheService;
   
   private cacheConfig: CacheConfig = { ...DEFAULT_CACHE_CONFIG };
-  private memoryCache: Map<string, { data: any; expiry: number; timestamp: number }> = new Map();
+  private memoryCache: Map<string, { data: unknown; expiry: number; timestamp: number }> = new Map();
   private cacheIndex: Map<string, CacheMetadata> = new Map();
   private cacheDir: string = '';
   private indexFile: string = '';
@@ -395,10 +395,10 @@ export default class CacheService {
       
       // 计算内存缓存统计
       if (this.cacheConfig.enableMemoryCache) {
-        let totalSize = 0;
-        let itemCount = 0;
-        let largest = 0;
-        let smallest = Number.MAX_SAFE_INTEGER;
+        let totalSize: number = 0;
+        let itemCount: number = 0;
+        let largest: number = 0;
+        let smallest: number = Number.MAX_SAFE_INTEGER;
         
         for (const [key, item] of this.memoryCache.entries()) {
           const itemSize = this.calculateObjectSize(item.data);
@@ -420,8 +420,8 @@ export default class CacheService {
       
       // 计算磁盘缓存统计
       if (this.cacheConfig.enableDiskCache) {
-        let totalSize = 0;
-        let itemCount = 0;
+        let totalSize: number = 0;
+        let itemCount: number = 0;
         
         for (const [key, metadata] of this.cacheIndex.entries()) {
           totalSize += metadata.size;
@@ -459,7 +459,7 @@ export default class CacheService {
   /**
    * 计算对象大小（估算）
    */
-  private calculateObjectSize(obj: any): number {
+  private calculateObjectSize(obj: unknown): number {
     try {
       // 简单估算，实际应用中可以使用更精确的方法
       const str = typeof obj === 'string' ? obj : JsonUtil.stringify(obj);
@@ -911,7 +911,7 @@ export default class CacheService {
     try {
       // 计算当前内存缓存大小
       let currentSize = 0;
-      const cacheItems: Array<[string, { data: any; expiry: number; timestamp: number }]> = [];
+      const cacheItems: Array<[string, { data: unknown; expiry: number; timestamp: number }]> = [];
       
       for (const [key, item] of this.memoryCache.entries()) {
         const itemSize = this.calculateObjectSize(item.data);
@@ -1039,7 +1039,7 @@ export default class CacheService {
       if (this.cacheConfig.enableMemoryCache && 
           (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK)) {
         this.memoryCache.set(fullKey, {
-          data,
+          data: data as unknown,
           expiry: metadata.expiry,
           timestamp: Date.now()
         });
@@ -1315,7 +1315,7 @@ export default class CacheService {
   public async setMultiple(
     items: Array<{
       key: string;
-      data: any;
+      data: unknown;
       options?: {
         expiry?: number;
         priority?: CachePriority;

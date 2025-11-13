@@ -2,6 +2,19 @@
 // 定义应用缓存、数据缓存等相关的数据模型
 
 /**
+ * 缓存值类型别名 - 支持的具体缓存数据类型
+ */
+export type CacheValue =
+  | string              // 字符串
+  | number              // 数字
+  | boolean             // 布尔值
+  | ArrayBuffer         // 二进制数据
+  | Object              // 对象类型 (使用Object替代Record<string, unknown>符合ArkTS规范)
+  | string[]            // 字符串数组
+  | number[]            // 数字数组
+  | boolean[];          // 布尔值数组
+
+/**
  * 缓存类型枚举
  */
 export enum CacheType {
@@ -138,7 +151,7 @@ export interface CacheItem {
   /**
    * 缓存值
    */
-  value: any;
+  value: CacheValue;
   
   /**
    * 缓存类型
@@ -627,6 +640,43 @@ export enum CacheEventType {
 }
 
 /**
+ * 缓存事件数据接口
+ */
+export interface CacheEventData {
+  /**
+   * 清理统计（针对CLEANED事件）
+   */
+  cleanupStats?: {
+    removedCount: number;
+    freedSpace: number;
+  };
+  
+  /**
+   * 命中率数据（针对HIT_RATE_CHANGED事件）
+   */
+  hitRateData?: {
+    hitRate: number;
+    totalRequests: number;
+    hits: number;
+    misses: number;
+  };
+  
+  /**
+   * 大小变化数据（针对SIZE_CHANGED事件）
+   */
+  sizeChangeData?: {
+    previousSize: number;
+    currentSize: number;
+    changeAmount: number;
+  };
+  
+  /**
+   * 自定义数据
+   */
+  customData?: Record<string, string | number | boolean>;
+}
+
+/**
  * 缓存事件接口
  */
 export interface CacheEvent {
@@ -651,9 +701,9 @@ export interface CacheEvent {
   timestamp: number;
   
   /**
-   * 其他数据
+   * 事件数据
    */
-  data?: any;
+  data?: CacheEventData;
 }
 
 /**

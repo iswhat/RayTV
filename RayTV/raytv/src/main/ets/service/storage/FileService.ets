@@ -178,13 +178,18 @@ export interface FileConfig {
   verifyFileIntegrity: boolean;
 }
 
+// 文件元数据接口
+export interface FileMetadata {
+  [key: string]: string | number | boolean | null;
+}
+
 // 文件信息扩展接口
 export interface ExtendedFileInfo extends FileInfo {
   type: FileType;
   format: FileFormat;
   storageLocation: StorageLocation;
   permissions: FilePermission[];
-  metadata?: Record<string, any>;
+  metadata?: FileMetadata;
   thumbnailUrl?: string;
   duration?: number; // 视频/音频时长
   width?: number; // 图像/视频宽度
@@ -224,7 +229,7 @@ export interface FileOperationResult {
   success: boolean;
   path?: string;
   error?: string;
-  details?: any;
+  details?: { source?: string; format?: string; size?: number; duration?: number };
 }
 
 // 文件夹信息接口
@@ -370,8 +375,8 @@ export default class FileService {
    * 获取对象的所有值
    * 替代Object.values，兼容ArkTS语法
    */
-  private getObjectValues<T extends object>(obj: T): any[] {
-    const values: any[] = [];
+  private getObjectValues<T extends object>(obj: T): T[keyof T][] {
+    const values: T[keyof T][] = [];
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         values.push(obj[key]);

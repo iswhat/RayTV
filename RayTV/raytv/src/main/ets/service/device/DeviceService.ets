@@ -13,7 +13,7 @@ const TAG = 'DeviceService';
 // 设备功能检测结果
 interface CapabilityCheckResult {
   supported: boolean;
-  details?: any;
+  details?: unknown;
   error?: string;
 }
 
@@ -631,7 +631,7 @@ export default class DeviceService {
   /**
    * 设置自定义设备属性
    */
-  public async setCustomProperty(key: string, value: any): Promise<void> {
+  public async setCustomProperty(key: string, value: unknown): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }

@@ -234,7 +234,7 @@ export class SearchLiveUseCase {
   /**
    * 缓存搜索结果
    */
-  private async cacheSearchResult(key: string, result: any): Promise<void> {
+  private async cacheSearchResult<T>(key: string, result: T): Promise<void> {
     try {
       await this.cacheRepository.saveObject(key, result, SEARCH_CACHE_EXPIRY);
     } catch (error) {
@@ -245,7 +245,7 @@ export class SearchLiveUseCase {
   /**
    * 获取缓存的搜索结果
    */
-  private async getSearchCache(key: string): Promise<any> {
+  private async getSearchCache(key: string): Promise<LiveChannel[] | null> {
     try {
       return await this.cacheRepository.getObject(key);
     } catch (error) {

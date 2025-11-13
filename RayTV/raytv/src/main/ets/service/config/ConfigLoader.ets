@@ -5,6 +5,16 @@ import fs from '@ohos.file.fs';
 import { Site } from '../../data/bean/Site';
 import { AppConfig } from '../../data/bean/Config';
 
+/**
+ * 配置对象接口，用于规范化处理各种配置格式
+ */
+interface ConfigObject {
+  sites?: Site[];
+  data?: Site[];
+  appConfig?: AppConfig;
+  // 移除了any类型的索引签名，使用更具体的属性定义
+}
+
 const TAG = 'ConfigLoader';
 
 /**
@@ -135,7 +145,7 @@ export class ConfigLoader {
       
       // 尝试解析为纯JSON
       try {
-        const config = JSON.parse(content);
+        const config = JSON.parse(content) as ConfigObject | Site[];
         return this.processConfigObject(config);
       } catch (jsonError) {
         // 如果不是纯JSON，尝试解析为JavaScript格式
@@ -152,24 +162,27 @@ export class ConfigLoader {
    * 处理配置对象
    * @param config 配置对象
    */
-  private processConfigObject(config: any): { sites: Site[]; appConfig?: AppConfig } {
+  private processConfigObject(config: ConfigObject | Site[]): { sites: Site[]; appConfig?: AppConfig } {
     const sites: Site[] = [];
     let appConfig: AppConfig | undefined;
     
-    // 处理站点配置
-    if (config.sites && Array.isArray(config.sites)) {
-      sites.push(...config.sites);
-    } else if (config.data && Array.isArray(config.data)) {
-      // 兼容旧版配置格式
-      sites.push(...config.data);
-    } else if (Array.isArray(config)) {
+    // 检查是否为Site数组
+    if (Array.isArray(config)) {
       // 直接是站点数组
       sites.push(...config);
-    }
-    
-    // 处理应用配置
-    if (config.appConfig) {
-      appConfig = config.appConfig as AppConfig;
+    } else {
+      // 处理站点配置
+      if (config.sites && Array.isArray(config.sites)) {
+        sites.push(...config.sites);
+      } else if (config.data && Array.isArray(config.data)) {
+        // 兼容旧版配置格式
+        sites.push(...config.data);
+      }
+      
+      // 处理应用配置
+      if (config.appConfig) {
+        appConfig = config.appConfig;
+      }
     }
     
     Logger.info(TAG, `Processed ${sites.length} sites`);
@@ -185,14 +198,14 @@ export class ConfigLoader {
       // 尝试提取config变量
       const configMatch = content.match(/var\s+config\s*=\s*([\s\S]*?);/);
       if (configMatch && configMatch[1]) {
-        const configObj = JSON.parse(configMatch[1]);
+        const configObj = JSON.parse(configMatch[1]) as ConfigObject | Site[];
         return this.processConfigObject(configObj);
       }
       
       // 尝试提取data变量
       const dataMatch = content.match(/var\s+data\s*=\s*([\s\S]*?);/);
       if (dataMatch && dataMatch[1]) {
-        const dataObj = JSON.parse(dataMatch[1]);
+        const dataObj = JSON.parse(dataMatch[1]) as ConfigObject | Site[];
         return this.processConfigObject(dataObj);
       }
       

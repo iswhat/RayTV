@@ -9,7 +9,7 @@ import TimeoutManager from '../../../common/util/TimeoutManager';
  * Python执行上下文
  */
 interface PyContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -83,7 +83,7 @@ export class ArkPyLoader extends BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected async onInvoke(method: string, params: any): Promise<any> {
+  protected async onInvoke(method: string, params: unknown): Promise<unknown> {
     if (!this.isInitialized) {
       await this.onInit();
     }
@@ -212,18 +212,18 @@ export class ArkPyLoader extends BaseLoader {
     // 创建Python模块环境
     this.pyContext = {
       // 基本的Python内置函数映射
-      print: (...args: any[]) => {
+      print: (...args: unknown[]) => {
         Logger.info(`${this.TAG}[${this.site.name}]`, args.map(String).join(' '));
       },
-      len: (obj: any) => {
+      len: (obj: unknown) => {
         return Array.isArray(obj) ? obj.length : this.getObjectKeys(obj || {}).length;
       },
-      str: (obj: any) => String(obj),
-      int: (obj: any) => parseInt(obj, 10),
-      float: (obj: any) => parseFloat(obj),
-      bool: (obj: any) => Boolean(obj),
-      list: (obj: any) => Array.isArray(obj) ? [...obj] : [obj],
-      dict: (obj: any) => (typeof obj === 'object' && obj !== null) ? { ...obj } : {},
+      str: (obj: unknown) => String(obj),
+      int: (obj: unknown) => parseInt(obj as string, 10),
+      float: (obj: unknown) => parseFloat(obj as string),
+      bool: (obj: unknown) => Boolean(obj),
+      list: (obj: unknown) => Array.isArray(obj) ? [...obj] : [obj],
+      dict: (obj: unknown) => (typeof obj === 'object' && obj !== null) ? { ...(obj as object) } : {},
       range: (start: number, stop?: number, step: number = 1) => {
         const result = [];
         if (stop === undefined) {
@@ -252,7 +252,7 @@ export class ArkPyLoader extends BaseLoader {
         this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
-      post: async (url: string, data?: any, options?: { headers?: Record<string, string>, timeout?: number }) => {
+      post: async (url: string, data?: unknown, options?: { headers?: Record<string, string>, timeout?: number }) => {
         // 验证URL安全性
         this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
@@ -340,7 +340,7 @@ export class ArkPyLoader extends BaseLoader {
             return null;
           }
         },
-        dumps: (obj: any, indent?: number) => {
+        dumps: (obj: unknown, indent?: number) => {
           try {
             return JSON.stringify(obj, null, indent);
           } catch (error) {
@@ -429,7 +429,7 @@ export class ArkPyLoader extends BaseLoader {
    * @param params 参数
    * @private
    */
-  private executeMethod(method: string, params: any): any {
+  private executeMethod(method: string, params: unknown): unknown {
     // 检查方法是否存在
     if (typeof this.pyContext[method] !== 'function') {
       // 尝试在Python模块中查找
@@ -590,7 +590,7 @@ export class ArkPyLoader extends BaseLoader {
       Logger.info(this.TAG, `Found Python function: ${functionName}`);
       
       // 创建函数代理
-      this.pyContext[functionName] = async (params: any) => {
+      this.pyContext[functionName] = async (params: unknown) => {
         // 模拟函数执行
         return { result: `Function ${functionName} executed with params` };
       };
@@ -608,7 +608,7 @@ export class ArkPyLoader extends BaseLoader {
    * @param params 方法参数
    * @private
    */
-  private validateParams(params: any): void {
+  private validateParams(params: unknown): void {
     // 检查参数大小，防止过大的参数导致内存问题
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 2 * 1024 * 1024) { // Python可能处理更大的数据，设置2MB限制
@@ -629,7 +629,7 @@ export class ArkPyLoader extends BaseLoader {
    * 检查对象深度
    * @private
    */
-  private checkObjectDepth(obj: any, currentDepth: number = 0): number {
+  private checkObjectDepth(obj: unknown, currentDepth: number = 0): number {
     if (obj === null || typeof obj !== 'object') {
       return currentDepth;
     }
@@ -651,7 +651,7 @@ export class ArkPyLoader extends BaseLoader {
    * 检查集合大小
    * @private
    */
-  private checkCollectionSize(obj: any): void {
+  private checkCollectionSize(obj: unknown): void {
     const maxArrayLength = 20000;
 
     if (Array.isArray(obj)) {

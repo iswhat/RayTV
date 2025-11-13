@@ -88,6 +88,38 @@ export const DEFAULT_SUBTITLE_STYLE: SubtitleStyle = {
   position: 'bottom'
 };
 
+// 视频元数据接口
+export interface VideoMetadata {
+  // 基础信息
+  width?: number;           // 视频宽度
+  height?: number;          // 视频高度
+  aspectRatio?: number;     // 宽高比
+  resolution?: string;      // 分辨率描述（如1080p, 4K）
+  
+  // 编码信息
+  videoCodec?: string;      // 视频编码格式
+  audioCodec?: string;      // 音频编码格式
+  bitrate?: number;         // 比特率
+  
+  // 内容信息
+  author?: string;          // 作者/上传者
+  channelName?: string;     // 频道名称
+  publishDate?: string;     // 发布日期
+  description?: string;     // 描述
+  
+  // 分类信息
+  category?: string;        // 分类
+  tags?: string[];          // 标签
+  
+  // 统计信息
+  viewCount?: number;       // 观看次数
+  likeCount?: number;       // 点赞数
+  commentCount?: number;    // 评论数
+  
+  // 其他自定义字段
+  customData?: Record<string, string | number | boolean>; // 其他自定义数据
+}
+
 // 播放项接口
 export interface PlaybackItem {
   id: string;               // 播放项ID
@@ -99,7 +131,7 @@ export interface PlaybackItem {
   position?: number;        // 当前播放位置（毫秒）
   coverUrl?: string;        // 封面图片
   posterUrl?: string;       // 海报图片
-  metadata?: Record<string, any>; // 额外元数据
+  metadata?: VideoMetadata; // 额外元数据
   subtitles?: SubtitleItem[]; // 字幕列表
   currentSubtitleIndex?: number; // 当前字幕索引
 }
