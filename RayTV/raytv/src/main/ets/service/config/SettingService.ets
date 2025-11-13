@@ -6,9 +6,6 @@ import StorageUtil from '../../common/util/StorageUtil';
 import ConfigService from '../../service/config/ConfigService';
 import UserService, { UserPreferences } from '../../service/user/UserService';
 import DatabaseManager from '../../data/db/DatabaseManager';
-import Configuration from '@ohos.app.ability.UIAbility';
-import UIExtensionAbility from '@ohos.app.ability.UIAbility';
-import CommonConstants from '@ohos.app.ability.Constants';
 import { BusinessError } from '@ohos.base';
 import type { ApplicationInfo } from '@ohos.bundle.bundleManager';
 

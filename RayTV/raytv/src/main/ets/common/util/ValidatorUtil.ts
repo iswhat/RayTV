@@ -28,14 +28,22 @@ export class ValidatorUtil {
   }
   
   /**
+   * 检查对象是否包含指定属性
+   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
+   */
+  private static hasOwnProperty<T extends object>(obj: T, key: string): boolean {
+    return Object.getOwnPropertyNames(obj).includes(key);
+  }
+
+  /**
    * 获取对象的所有键
    * 替代Object.keys，兼容ArkTS语法
    */
   private static getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
+      // 安全检查属性是否存在，使用ArkTS兼容的方式
+      if (typeof obj === 'object' && obj !== null && ValidatorUtil.hasOwnProperty(obj, key)) {
         keys.push(key);
       }
     }
@@ -49,8 +57,8 @@ export class ValidatorUtil {
   private static getObjectValues<T extends object>(obj: T): T[keyof T][] {
     const values: T[keyof T][] = [];
     for (const key in obj) {
-      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
+      // 安全检查属性是否存在，使用ArkTS兼容的方式
+      if (typeof obj === 'object' && obj !== null && ValidatorUtil.hasOwnProperty(obj, key)) {
         values.push(obj[key]);
       }
     }

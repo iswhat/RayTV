@@ -427,4 +427,6 @@ export class VoiceAssistantManager {
 }
 
 // 导出单例实例
-export const voiceAssistantManager = VoiceAssistantManager.getInstance();
+export function getVoiceAssistantManager(): VoiceAssistantManager {
+  return VoiceAssistantManager.getInstance();
+}

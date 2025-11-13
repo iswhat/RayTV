@@ -2,11 +2,6 @@
  * LineManagerPage样式定义
  */
 // 使用ArkTS样式系统
-import FlexDirection from '@ohos.components';
-import FlexAlign from '@ohos.components';
-import ItemAlign from '@ohos.components';
-import FontStyle from '@ohos.components';
-import TextAlign from '@ohos.components';
 
 export default {
   container: {
@@ -14,9 +9,9 @@ export default {
     .backgroundColor: '#f5f5f5',
   },
   header: {
-    .flexDirection: FlexDirection.Row,
-    .justifyContent: FlexAlign.SpaceBetween,
-    .alignItems: ItemAlign.Center,
+    .flexDirection: 'row',
+    .justifyContent: 'space-between',
+    .alignItems: 'center',
     .padding: 16,
     .backgroundColor: '#fff',
     .borderBottomWidth: 1,
@@ -35,13 +30,13 @@ export default {
   },
   loading: {
     .flexGrow: 1,
-    .justifyContent: FlexAlign.Center,
-    .alignItems: ItemAlign.Center,
+    .justifyContent: 'center',
+    .alignItems: 'center',
   },
   emptyContainer: {
     .flexGrow: 1,
-    .justifyContent: FlexAlign.Center,
-    .alignItems: ItemAlign.Center,
+    .justifyContent: 'center',
+    .alignItems: 'center',
     .padding: 32,
   },
   emptyText: {
@@ -75,8 +70,8 @@ export default {
     .flexGrow: 1,
   },
   lineHeader: {
-    .flexDirection: FlexDirection.Row,
-    .alignItems: ItemAlign.Center,
+    .flexDirection: 'row',
+    .alignItems: 'center',
     .marginBottom: 8,
   },
   lineName: {
@@ -102,8 +97,8 @@ export default {
     .marginBottom: 8,
   },
   lineInfo: {
-    .flexDirection: FlexDirection.Row,
-    .flexWrap: FlexWrap.Wrap,
+    .flexDirection: 'row',
+    .flexWrap: 'wrap',
     .marginBottom: 8,
   },
   infoText: {
@@ -116,10 +111,10 @@ export default {
     .fontSize: 14,
     .color: '#666',
     .marginBottom: 12,
-    .fontStyle: FontStyle.Italic,
+    .fontStyle: 'italic',
   },
   lineActions: {
-    .flexDirection: FlexDirection.Row,
+    .flexDirection: 'row',
     .marginTop: 8,
   },
   switchButton: {
@@ -170,7 +165,7 @@ export default {
     .paddingHorizontal: 8,
     .paddingVertical: 4,
     .borderRadius: 4,
-    .alignSelf: ItemAlign.Start,
+    .alignSelf: 'flex-start',
     .marginBottom: 8,
   },
   responseTimeText: {
@@ -207,13 +202,13 @@ export default {
   },
   testLoading: {
     .paddingVertical: 32,
-    .justifyContent: FlexAlign.Center,
-    .alignItems: ItemAlign.Center,
+    .justifyContent: 'center',
+    .alignItems: 'center',
   },
   testOptions: {
-    .flexDirection: FlexDirection.Row,
-    .justifyContent: FlexAlign.SpaceBetween,
-    .alignItems: ItemAlign.Center,
+    .flexDirection: 'row',
+    .justifyContent: 'space-between',
+    .alignItems: 'center',
     .marginVertical: 16,
     .paddingVertical: 8,
     .borderBottomWidth: 1,
@@ -230,9 +225,9 @@ export default {
     .borderRadius: 8,
   },
   resultItem: {
-    .flexDirection: FlexDirection.Row,
+    .flexDirection: 'row',
     .marginBottom: 8,
-    .alignItems: ItemAlign.Center,
+    .alignItems: 'center',
   },
   resultLabel: {
     .fontSize: 14,
@@ -276,9 +271,9 @@ export default {
     .borderBottomColor: '#f0f0f0',
   },
   sourceTestItemContent: {
-    .flexDirection: FlexDirection.Row,
-    .justifyContent: FlexAlign.SpaceBetween,
-    .alignItems: ItemAlign.Center,
+    .flexDirection: 'row',
+    .justifyContent: 'space-between',
+    .alignItems: 'center',
   },
   sourceName: {
     .fontSize: 14,
@@ -303,7 +298,7 @@ export default {
   noResultsText: {
     .fontSize: 14,
     .color: '#999',
-    .textAlign: TextAlign.Center,
+    .textAlign: 'center',
     .paddingVertical: 32,
   },
 }

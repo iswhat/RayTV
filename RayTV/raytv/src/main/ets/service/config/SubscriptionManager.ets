@@ -548,4 +548,6 @@ export class SubscriptionManager {
   }
 }
 
-export const subscriptionManager = SubscriptionManager.getInstance();
+export function getSubscriptionManager(): SubscriptionManager {
+  return SubscriptionManager.getInstance();
+}

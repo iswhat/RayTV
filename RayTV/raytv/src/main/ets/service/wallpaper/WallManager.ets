@@ -278,4 +278,6 @@ export class WallManager {
 }
 
 // 导出单例实例
-export const wallManager = WallManager.getInstance();
+export function getWallManager(): WallManager {
+  return WallManager.getInstance();
+}

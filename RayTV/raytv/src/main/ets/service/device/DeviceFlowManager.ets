@@ -575,4 +575,6 @@ export class DeviceFlowManager {
 }
 
 // 导出单例实例
-export const deviceFlowManager = DeviceFlowManager.getInstance();
+export function getDeviceFlowManager(): DeviceFlowManager {
+  return DeviceFlowManager.getInstance();
+}

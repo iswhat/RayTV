@@ -337,4 +337,6 @@ export class AdBlockManager {
 }
 
 // 导出单例实例
-export const adBlockManager = AdBlockManager.getInstance();
+export function getAdBlockManager(): AdBlockManager {
+  return AdBlockManager.getInstance();
+}

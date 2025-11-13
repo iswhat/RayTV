@@ -205,7 +205,7 @@ class Logger {
    * 初始化Logger
    * @param config 日志配置
    */
-  public initialize(config: Partial<LoggerConfig>): void {
+  public initialize(config: LoggerConfig): void {
     // 手动合并对象属性，避免使用Object.assign（ArkTS限制）
     this.config = this.mergeConfig(this.config, config);
     
@@ -427,7 +427,7 @@ class Logger {
    * @param message 日志消息
    */
   public logException(error: Error, message?: string): void {
-    const errorMessage = error.message || 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const finalMessage = message ? `${message}: ${errorMessage}` : errorMessage;
     this.error(finalMessage);
   }
@@ -777,7 +777,7 @@ class Logger {
    * @param target 目标配置
    * @param source 源配置
    */
-  private mergeConfig(target: LoggerConfig, source: Partial<LoggerConfig>): LoggerConfig {
+  private mergeConfig(target: LoggerConfig, source: LoggerConfig): LoggerConfig {
     const result: LoggerConfig = {
       level: source.level !== undefined ? source.level : target.level,
       consoleEnabled: source.consoleEnabled !== undefined ? source.consoleEnabled : target.consoleEnabled,

@@ -566,39 +566,6 @@ export class ConfigParser {
       return false;
     }
   }
-    
-    // 标准化详情页规则格式
-    return {
-      // Fongmi格式详情页规则适配
-      video: detailData.video || {},
-      parse: detailData.parse || [],
-      ...detailData
-    };
-  }
-  
-  /**
-   * 转换播放规则
-   * @param playData 原始播放配置
-   */
-  public convertPlayRules(playData: unknown): Record<string, unknown> {
-    if (!playData) return {};
-    
-    // 标准化播放规则格式
-    const play = {
-      // Fongmi格式播放规则适配
-      parse: playData.parse || [],
-      proxy: playData.proxy !== undefined ? playData.proxy : false,
-      ...playData
-    };
-    
-    // 处理多格式播放规则
-    if (typeof playData !== 'object') {
-      // 处理字符串格式播放规则
-      play.url = playData;
-    }
-    
-    return play;
-  }
 
   /**
    * 解析应用配置
@@ -671,17 +638,4 @@ export class ConfigParser {
     };
   }
 
-  /**
-   * 验证URL格式
-   * @param url URL字符串
-   */
-  private isValidUrl(url: string): boolean {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      // 简单的URL格式检查作为备用
-      return /^https?:\/\/.+/.test(url);
-    }
-  }
 }

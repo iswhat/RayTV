@@ -2,7 +2,7 @@ import Logger from '../../../common/util/Logger';
 import { DatabaseManager } from '../DatabaseManager';
 import { SQLiteHelper } from '../SQLiteHelper';
 import { LINE_TABLE } from '../TableSchema';
-import Context from '@ohos.ability.featureAbility';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'LineDao';
 
@@ -40,7 +40,7 @@ export class LineDao {
    * 初始化表结构
    * @param context 应用上下文
    */
-  public async initTable(context?: Context): Promise<void> {
+  public async initTable(context?: common.UIAbilityContext): Promise<void> {
     if (this.initialized) {
       return;
     }

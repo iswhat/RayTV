@@ -372,13 +372,21 @@ export default class FileService {
   }
   
   /**
+   * 检查对象是否包含指定属性
+   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
+   */
+  private hasOwnProperty<T extends object>(obj: T, key: string): boolean {
+    return Object.getOwnPropertyNames(obj).includes(key);
+  }
+
+  /**
    * 获取对象的所有值
    * 替代Object.values，兼容ArkTS语法
    */
   private getObjectValues<T extends object>(obj: T): T[keyof T][] {
     const values: T[keyof T][] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (this.hasOwnProperty(obj, key)) {
         values.push(obj[key]);
       }
     }

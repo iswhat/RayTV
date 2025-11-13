@@ -17,7 +17,7 @@ import NetworkRepository, {
 import Movie from '../model/Movie';
 import SearchResult, { ResultType } from '../model/SearchResult';
 import { RequestConfig, Response } from '../../common/util/NetworkUtil';
-import { parserService } from '../../service/parser';
+import { getParserService } from '../../service/parser';
 
 const TAG = 'DefaultNetworkRepository';
 const DEFAULT_CACHE_KEY_PREFIX = 'network_cache_';
@@ -604,7 +604,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       Logger.info(TAG, `Getting video sources for contentId: ${contentId}, contentType: ${contentType}`);
       
       // 使用解析器服务获取视频源
-      return await parserService.getVideoSources(contentId, contentType);
+      return await getParserService().getVideoSources(contentId, contentType);
     } catch (error) {
       Logger.error(TAG, `Failed to get video sources: ${error instanceof Error ? error.message : String(error)}`);
       return { 
@@ -620,7 +620,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       Logger.info(TAG, `Parsing video source: ${sourceUrl}, parserId: ${parserId}`);
       
       // 使用解析器服务解析视频源
-      return await parserService.parseVideoSource(sourceUrl, parserId);
+      return await getParserService().parseVideoSource(sourceUrl, parserId);
     } catch (error) {
       Logger.error(TAG, `Failed to parse video source: ${error instanceof Error ? error.message : String(error)}`);
       return { 
@@ -688,7 +688,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       Logger.info(TAG, 'Getting available parsers');
       
       // 使用解析器服务获取所有解析器
-      return await parserService.getParsers();
+      return await getParserService().getParsers();
     } catch (error) {
       Logger.error(TAG, `Failed to get parsers: ${error instanceof Error ? error.message : String(error)}`);
       return { 
@@ -704,7 +704,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       Logger.info(TAG, `Checking parser availability: ${parserId}`);
       
       // 使用解析器服务检查解析器可用性
-      return await parserService.checkParserAvailability(parserId);
+      return await getParserService().checkParserAvailability(parserId);
     } catch (error) {
       Logger.error(TAG, `Failed to check parser availability: ${error instanceof Error ? error.message : String(error)}`);
       return { 

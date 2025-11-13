@@ -127,7 +127,8 @@ export default class StorageUtil {
    * @returns 读取的数据或默认值
    */
   public static async get<T extends string | number | boolean | JsonData | null>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T | null> {
-    if (!key || typeof key !== 'string') {
+    // 严格的null安全检查
+    if (!key || typeof key !== 'string' || key.trim() === '') {
       return defaultValue !== undefined ? defaultValue : null;
     }
 
@@ -148,8 +149,14 @@ export default class StorageUtil {
           throw new Error(`Unsupported storage type: ${type}`);
       }
 
+      // 检查数据是否存在
+      if (data === null) {
+        return defaultValue !== undefined ? defaultValue : null;
+      }
+
       // 检查是否过期
-      if (data !== null && data.expireTime > 0 && Date.now() > data.expireTime) {
+      const now = Date.now();
+      if (data.expireTime !== null && data.expireTime > 0 && now > data.expireTime) {
         Logger.warn(TAG, `Data expired for key: ${key}`);
         await StorageUtil.remove(key, type);
         // 直接返回默认值
@@ -613,8 +620,8 @@ export default class StorageUtil {
         }
       }
     } catch (error) {
-      // 安全处理错误信息，避免使用String()函数
-      const errorMessage = error.message || 'Unknown error';
+      // 安全处理错误信息
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear files: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -760,7 +767,7 @@ export default class StorageUtil {
   /**
    * 安全获取数字值
    */
-  private static safeNumber(value: string | number | boolean, defaultValue: number = 0): number {
+  private static safeNumber(value: string | number | boolean | null | undefined, defaultValue: number = 0): number {
     // 类型安全检查
     if (value === null || value === undefined) {
       return defaultValue;

@@ -786,4 +786,6 @@ export class LineManager {
   }
 }
 
-export const lineManager = LineManager.getInstance();
+export function getLineManager(): LineManager {
+  return LineManager.getInstance();
+}

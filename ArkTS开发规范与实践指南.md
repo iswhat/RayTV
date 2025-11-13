@@ -709,24 +709,188 @@ interface IUserService {
 }
 ```
 
-## 10. 最佳实践总结
+## 10. API兼容性与迁移规范
 
-### 10.1 开发原则
+### 10.1 HarmonyOS API版本兼容性
+
+#### 10.1.1 API版本检查
+```typescript
+// 检查当前API版本
+import system from '@ohos.system';
+
+class ApiVersionChecker {
+    public static async checkApiVersion(): Promise<void> {
+        try {
+            const systemInfo = await system.getSystemInfo();
+            console.log(`当前API版本: ${systemInfo.apiVersion}`);
+            
+            if (parseInt(systemInfo.apiVersion) < 9) {
+                console.warn('当前API版本较低，部分新特性可能不可用');
+            }
+        } catch (error) {
+            console.error('获取系统信息失败:', error);
+        }
+    }
+}
+```
+
+#### 10.1.2 版本兼容性处理
+```typescript
+// 条件编译和版本适配
+class CompatibilityAdapter {
+    private static readonly MIN_SUPPORTED_VERSION = 9;
+    
+    public static isFeatureSupported(feature: string): boolean {
+        // 根据API版本判断特性支持
+        const currentVersion = this.getCurrentApiVersion();
+        return currentVersion >= this.MIN_SUPPORTED_VERSION;
+    }
+    
+    private static getCurrentApiVersion(): number {
+        // 获取当前API版本逻辑
+        return 9; // 示例值
+    }
+}
+```
+
+### 10.2 已弃用API迁移指南
+
+#### 10.2.1 常见已弃用API替换
+```typescript
+// 已弃用API vs 推荐API对比
+class DeprecatedApiMigration {
+    // ❌ 已弃用：@ohos.arkui
+    // import { FlexDirection, FlexAlign } from '@ohos.arkui';
+    
+    // ✅ 推荐：@kit.ArkUI
+    import { FlexDirection, FlexAlign } from '@kit.ArkUI';
+    
+    // ❌ 已弃用：@ohos.components
+    // import { FlexDirection, FlexAlign } from '@ohos.components';
+    
+    // ✅ 推荐：使用ArkTS标准样式属性
+    // 直接使用字符串值：'row', 'column', 'space-between'等
+    
+    // ❌ 已弃用：@ohos.app.ability.Context
+    // import { Context } from '@ohos.app.ability.Context';
+    
+    // ✅ 推荐：@ohos.ability.kits.context
+    import type { Context } from '@ohos.ability.kits.context';
+}
+```
+
+#### 10.2.2 样式属性迁移规范
+```typescript
+// 样式属性枚举值到字符串值的迁移
+class StyleMigrationGuide {
+    // ❌ 已弃用：使用枚举值
+    // flexDirection: FlexDirection.Row,
+    // justifyContent: FlexAlign.SpaceBetween,
+    // alignItems: ItemAlign.Center,
+    
+    // ✅ 推荐：使用字符串值
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    
+    // 其他常见样式属性迁移
+    fontStyle: 'normal',        // 替代 FontStyle.Normal
+    textAlign: 'center',        // 替代 TextAlign.Center
+    objectFit: 'cover',         // 替代 ImageFit.Cover
+}
+```
+
+### 10.3 导入路径统一规范
+
+#### 10.3.1 ArkUI组件导入规范
+```typescript
+// ✅ 统一使用@kit.ArkUI
+import { 
+    Button, Text, Image, List, ListItem, 
+    ScrollView, Stack, Flex, Video, Slider 
+} from '@kit.ArkUI';
+
+// ❌ 避免使用已弃用路径
+// import { Button } from '@ohos.arkui'; // 已弃用
+// import { FlexDirection } from '@ohos.components'; // 已弃用
+```
+
+#### 10.3.2 系统API导入规范
+```typescript
+// ✅ 推荐的系统API导入路径
+import UIAbility from '@ohos.app.ability.UIAbility'; // 当前推荐
+import type { Context } from '@ohos.ability.kits.context'; // 当前推荐
+import Ability from '@ohos.app.ability.Ability'; // 当前推荐
+
+// ❌ 已弃用的系统API导入路径
+// import { Configuration } from '@ohos.app.ability.UIAbility'; // 已弃用
+// import { CommonConstants } from '@ohos.app.ability.Constants'; // 已弃用
+```
+
+### 10.4 迁移工具和检查
+
+#### 10.4.1 代码检查工具配置
+```json
+// code-linter.json5 - 代码检查配置
+{
+    "rules": {
+        "import-paths": {
+            "level": "error",
+            "message": "请使用@kit.ArkUI替代@arkui/native，符合HarmonyOS API 9规范"
+        },
+        "deprecated-apis": {
+            "level": "error",
+            "message": "检测到已弃用API使用，请迁移到推荐API"
+        }
+    }
+}
+```
+
+#### 10.4.2 自动化迁移脚本
+```typescript
+// 自动化API迁移工具示例
+class ApiMigrationTool {
+    private static readonly DEPRECATED_IMPORTS = [
+        '@ohos.arkui',
+        '@ohos.components',
+        '@ohos.app.ability.Context'
+    ];
+    
+    private static readonly REPLACEMENT_MAP = new Map([
+        ['@ohos.arkui', '@kit.ArkUI'],
+        ['@ohos.components', ''], // 删除导入，使用标准样式属性
+        ['@ohos.app.ability.Context', '@ohos.ability.kits.context']
+    ]);
+    
+    public static migrateFile(filePath: string): void {
+        // 读取文件内容
+        // 检测已弃用导入
+        // 执行替换操作
+        // 保存修改后的文件
+    }
+}
+```
+
+## 11. 最佳实践总结
+
+### 11.1 开发原则
 - **类型安全优先**：始终使用明确的类型声明
 - **单一职责**：每个函数/类只负责一个明确的功能
 - **错误处理完备**：对所有可能出错的情况进行处理
 - **性能意识**：在开发过程中始终考虑性能影响
+- **API兼容性**：关注API版本变化，及时迁移已弃用API
 
-### 10.2 代码风格
+### 11.2 代码风格
 - **一致性**：保持团队内的代码风格一致
 - **可读性**：编写易于理解和维护的代码
 - **模块化**：将功能拆分为独立的模块
 - **测试驱动**：优先编写测试用例
 
-### 10.3 持续改进
+### 11.3 持续改进
 - **代码审查**：定期进行代码审查和改进
 - **性能监控**：持续监控应用性能指标
 - **技术债务**：及时处理技术债务
 - **知识分享**：促进团队技术成长和知识传承
+- **API更新跟踪**：持续关注HarmonyOS API变化，及时更新代码
 
-此规范文档为ArkTS开发提供了全面的指导，开发团队应严格遵守这些规范，确保代码质量和项目可维护性。
+此规范文档为ArkTS开发提供了全面的指导，开发团队应严格遵守这些规范，确保代码质量和项目可维护性。基于RayTV项目的实际经验，特别强调了API兼容性和已弃用API迁移的重要性。

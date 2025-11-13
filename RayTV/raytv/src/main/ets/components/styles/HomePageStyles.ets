@@ -1,10 +1,6 @@
 // HomePage样式文件
 // 定义首页UI布局所需的所有样式
 
-import Color from '@ohos.arkui';
-import FlexAlign from '@ohos.arkui';
-import ImageFit from '@ohos.arkui';
-
 // 定义样式对象类型
 export interface HomePageStylesType {
   homePage: {
@@ -169,7 +165,7 @@ export const homePageStyles: HomePageStylesType = {
   // 分类导航栏
   navBar: {
     flexDirection: 'row',
-    justifyContent: FlexAlign.SpaceAround,
+    justifyContent: 'space-around',
     paddingHorizontal: 10,
     marginBottom: 10,
     flexWrap: true
@@ -197,7 +193,7 @@ export const homePageStyles: HomePageStylesType = {
   // 功能按钮区域
   functionButtons: {
     flexDirection: 'row',
-    justifyContent: FlexAlign.End,
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
     marginBottom: 10
   },
@@ -249,14 +245,14 @@ export const homePageStyles: HomePageStylesType = {
     width: '100%',
     aspectRatio: 0.66,
     borderRadius: 4,
-    objectFit: ImageFit.Cover,
+    objectFit: 'cover',
     backgroundColor: '#E0E0E0'
   },
   
   // 媒体信息区域 - 居中显示
   mediaInfo: {
     marginTop: 8,
-    alignItems: FlexAlign.Center
+    alignItems: 'center'
   },
   
   // 媒体标题 - 调整字号和行高
@@ -287,8 +283,8 @@ export const homePageStyles: HomePageStylesType = {
   // 加载容器
   loadingContainer: {
     flex: 1,
-    justifyContent: FlexAlign.Center,
-    alignItems: FlexAlign.Center
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   
   // 加载进度
@@ -308,8 +304,8 @@ export const homePageStyles: HomePageStylesType = {
   // 错误容器
   errorContainer: {
     flex: 1,
-    justifyContent: FlexAlign.Center,
-    alignItems: FlexAlign.Center
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   
   // 错误图标

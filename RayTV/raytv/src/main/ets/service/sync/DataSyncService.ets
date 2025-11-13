@@ -195,7 +195,7 @@ export default class DataSyncService {
   private getObjectValues<T extends object>(obj: T): string[] {
     const values: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.getOwnPropertyNames(obj).includes(key)) {
         values.push(obj[key] as string);
       }
     }

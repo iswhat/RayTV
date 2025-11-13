@@ -7,7 +7,8 @@ export default class JsonUtil {
    * 检查对象是否包含指定属性
    */
   private static hasOwnProperty(obj: Record<string, string | number | boolean | object | null>, key: string): boolean {
-    return Object.prototype.hasOwnProperty.call(obj, key);
+    // 使用ArkTS兼容的方式检查属性存在性
+    return obj.hasOwnProperty(key);
   }
   /**
    * 将对象序列化为JSON字符串
@@ -27,16 +28,20 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象
    */
-  static parse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static parse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     try {
       const result = JSON.parse(jsonStr);
       // 确保返回类型安全
       if (typeof result === 'object' && result !== null) {
         return result as T;
       }
-      return {} as T;
+      // 使用明确的类型创建空对象
+      const emptyObj: Record<string, string | number | boolean | object | null> = {};
+      return emptyObj as T;
     } catch {
-      return {} as T;
+      // 使用明确的类型创建空对象
+      const emptyObj: Record<string, string | number | boolean | object | null> = {};
+      return emptyObj as T;
     }
   }
 
@@ -45,7 +50,7 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象，解析失败返回空对象
    */
-  static safeParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static safeParse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     return JsonUtil.parse<T>(jsonStr);
   }
 
@@ -68,7 +73,8 @@ export default class JsonUtil {
         return null as T;
       }
       // 返回空对象，保持类型一致性
-      return {} as T;
+      const emptyObj: Record<string, string | number | boolean | object | null> = {};
+      return emptyObj as T;
     }
   }
 
@@ -126,7 +132,7 @@ export default class JsonUtil {
    * @param obj - 要过滤的对象
    * @returns 过滤后的对象
    */
-  static filterNullUndefined<T extends Record<string, string | number | boolean | object | null>>(obj: T): Partial<T> {
+  static filterNullUndefined<T extends Record<string, string | number | boolean | object | null>>(obj: T): T {
     // 创建明确类型的结果对象
     const result: Record<string, string | number | boolean | object | null> = {};
     const keys = Object.getOwnPropertyNames(obj);
@@ -140,7 +146,7 @@ export default class JsonUtil {
         }
       }
     }
-    return result as Partial<T>;
+    return result as T;
   }
 }
 
@@ -158,7 +164,7 @@ export function safeStringify<T>(value: T): string {
  * @param jsonStr - JSON字符串
  * @returns 解析后的对象
  */
-export function quickParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+export function quickParse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
   return JsonUtil.parse<T>(jsonStr);
 }
 
@@ -176,21 +182,21 @@ export class JSONUtils {
   /**
    * 解析JSON字符串为对象
    */
-  static parse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static parse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     return JsonUtil.parse<T>(jsonStr);
   }
   
   /**
    * 安全的JSON解析
    */
-  static safeParse<T = Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static safeParse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     return JsonUtil.safeParse<T>(jsonStr);
   }
   
   /**
    * 深度克隆对象
    */
-  static deepClone<T>(obj: T): T {
+  static deepClone<T extends object | null>(obj: T): T {
     return JsonUtil.deepClone<T>(obj);
   }
   
@@ -218,7 +224,7 @@ export class JSONUtils {
   /**
    * 过滤null/undefined值
    */
-  static filterNull<T extends Record<string, string | number | boolean | object | null>>(obj: T): Partial<T> {
+  static filterNull<T extends Record<string, string | number | boolean | object | null>>(obj: T): T {
     return JsonUtil.filterNullUndefined<T>(obj);
   }
 }

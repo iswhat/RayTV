@@ -532,5 +532,7 @@ export class ParserService {
   }
 }
 
-// 导出单例实例
-export const parserService = ParserService.getInstance();
+// 导出单例实例 - 使用函数调用方式
+export function getParserService(): ParserService {
+  return ParserService.getInstance();
+}
