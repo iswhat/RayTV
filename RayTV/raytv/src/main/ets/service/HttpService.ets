@@ -112,7 +112,7 @@ export class HttpService {
    * @param data 请求数据
    * @param options 请求选项
    */
-  public async post<T>(url: string, data?: Record<string, any> | string | ArrayBuffer, options?: HttpOptions): Promise<HttpResponse<T>> {
+  public async post<T>(url: string, data?: Record<string, unknown> | string | ArrayBuffer, options?: HttpOptions): Promise<HttpResponse<T>> {
     const requestOptions: HttpRequestOptions = {
       method: 'POST',
       data: data

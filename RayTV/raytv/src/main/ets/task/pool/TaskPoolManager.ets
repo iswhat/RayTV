@@ -29,7 +29,7 @@ export enum TaskStatus {
 /**
  * 任务接口定义
  */
-export interface Task<T = any> {
+export interface Task<T = unknown> {
   id: string;
   priority: TaskPriority;
   execute: () => Promise<T>;

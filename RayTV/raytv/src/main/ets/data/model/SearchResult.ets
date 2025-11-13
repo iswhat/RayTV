@@ -299,24 +299,25 @@ export default class SearchResult {
    */
   public getDisplayPriority(): number {
     // 定义类型优先级
-    const typePriority: Record<ResultType, number> = {
-      [ResultType.MOVIE]: 10,
-      [ResultType.TV_SERIES]: 9,
-      [ResultType.ANIME]: 8,
-      [ResultType.LIVE]: 7,
-      [ResultType.DOCUMENTARY]: 6,
-      [ResultType.VARIETY]: 5,
-      [ResultType.ACTOR]: 4,
-      [ResultType.DIRECTOR]: 3,
-      [ResultType.COLLECTION]: 2,
-      [ResultType.GENRE]: 1,
-      [ResultType.TAG]: 1,
-      [ResultType.CHANNEL]: 1,
-      [ResultType.OTHER]: 0
+    const typePriority: Record<string, number> = {
+      'movie': 10,
+      'tv_series': 9,
+      'anime': 8,
+      'live': 7,
+      'documentary': 6,
+      'variety': 5,
+      'actor': 4,
+      'director': 3,
+      'collection': 2,
+      'genre': 1,
+      'tag': 1,
+      'channel': 1,
+      'other': 0
     };
 
-    // 基础优先级
-    let priority = typePriority[this.type] || 0;
+    // 基础优先级 - 将枚举值转换为字符串键
+    let typeKey = this.type.toString().toLowerCase();
+    let priority = typePriority[typeKey] || 0;
     
     // 结合匹配分数
     if (this.matchScore) {
@@ -376,7 +377,7 @@ export default class SearchResult {
    * @returns SearchResult实例
    */
   public static fromSerializable(data: Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined>): SearchResult {
-    // 将Record类型转换为Partial<SearchResult>类型
+    // 明确类型的部分对象
     const searchResultData: Partial<SearchResult> = {};
     
     // 手动赋值每个属性，确保类型安全

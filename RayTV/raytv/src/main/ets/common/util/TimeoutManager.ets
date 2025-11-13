@@ -190,41 +190,51 @@ export default class TimeoutManager {
       onRetry?: (attempt: number, error: Error) => void;
     } = {}
   ): Promise<T> {
-    const maxRetries = options.maxRetries ?? 3;
-    const retryDelay = options.retryDelay ?? 1000;
-    const timeout = options.timeout;
-    const onRetry = options.onRetry;
-    let lastError: Error;
+    try {
+      const maxRetries = options.maxRetries ?? 3;
+      const retryDelay = options.retryDelay ?? 1000;
+      const timeout = options.timeout;
+      const onRetry = options.onRetry;
+      let lastError: Error | null = null;
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        // 使用带超时的Promise执行函数
-        return await this.withTimeout(fn(), timeout);
-      } catch (error) {
-        lastError = error as Error;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          // 使用带超时的Promise执行函数
+          return await this.withTimeout(fn(), timeout);
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
 
-        // 如果是最后一次尝试，则抛出错误
-        if (attempt >= maxRetries) {
-          throw lastError;
-        }
-
-        // 调用重试回调
-        if (onRetry) {
-          try {
-            onRetry(attempt + 1, lastError);
-          } catch (callbackError) {
-            Logger.error(TAG, `Error in retry callback: ${callbackError}`);
+          // 如果是最后一次尝试，则抛出错误
+          if (attempt >= maxRetries) {
+            Logger.error(TAG, `All ${maxRetries + 1} attempts failed: ${lastError.message}`);
+            throw lastError;
           }
+
+          // 调用重试回调
+          if (onRetry) {
+            try {
+              onRetry(attempt + 1, lastError);
+            } catch (callbackError) {
+              Logger.error(TAG, `Error in retry callback: ${callbackError instanceof Error ? callbackError.message : String(callbackError)}`);
+            }
+          }
+
+          Logger.warn(TAG, `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}`);
+
+          // 等待重试延迟
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
-
-        Logger.warn(TAG, `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}`);
-
-        // 等待重试延迟
-        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
-    }
 
-    // 这一行理论上不会执行到，但为了类型安全
-    throw lastError || new Error('Retry failed without error');
+      // 这一行理论上不会执行到，但为了类型安全
+      const finalError = lastError || new Error('Retry failed without error');
+      Logger.error(TAG, 'Unexpected end of retry loop: ' + finalError.message);
+      throw finalError;
+    } catch (error) {
+      // 确保抛出的总是Error类型
+      const finalError = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Error in withRetry method: ${finalError.message}`);
+      throw finalError;
+    }
   }
 }

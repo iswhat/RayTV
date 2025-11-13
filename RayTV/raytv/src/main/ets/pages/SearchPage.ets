@@ -53,9 +53,9 @@ struct SearchPage {
     Logger.info(this.TAG, 'SearchPage appeared');
     
     // 获取路由参数中的搜索词
-    const params = Router.getParams();
-    if (params?.['query']) {
-      this.searchQuery = params['query'];
+    const params = this.context.router.getParams();
+    if (params?.query) {
+      this.searchQuery = params.query as string;
       this.performSearch();
     } else {
       // 加载热门搜索词
@@ -226,7 +226,7 @@ struct SearchPage {
       this.showSourceList = false;
       
       // 跳转到MediaDetailPage页面，携带相关参数
-      Router.pushUrl({
+      Router.push({
         url: 'pages/MediaDetailPage',
         params: {
           title: result.title,
@@ -422,7 +422,7 @@ struct SearchPage {
     Logger.info(this.TAG, `Search result clicked: ${media.title}`);
     
     // 跳转到今日详情页
-    Router.pushUrl({
+    Router.push({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,
@@ -451,7 +451,7 @@ struct SearchPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**

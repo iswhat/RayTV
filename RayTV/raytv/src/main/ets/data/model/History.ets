@@ -253,19 +253,20 @@ export default class History {
    * @returns History实例
    */
   public static fromSerializable(data: HistorySerializable): History {
-    // 直接创建包含所有有效数据的对象，避免空对象字面量
-    const historyData: Partial<History> = {
-      id: data.id,
-      userId: data.userId,
-      contentId: data.contentId,
-      contentTitle: data.contentTitle,
-      contentType: data.contentType,
-      progress: data.progress,
-      totalDuration: data.totalDuration,
-      lastWatchTime: data.lastWatchTime,
-      playCount: data.playCount,
-      isFinished: data.isFinished
-    };
+    // 创建类型安全的部分对象
+    const historyData: Partial<History> = {};
+    
+    // 手动检查并赋值每个属性，确保类型安全
+    if (typeof data.id === 'string') historyData.id = data.id;
+    if (typeof data.userId === 'string') historyData.userId = data.userId;
+    if (typeof data.contentId === 'string') historyData.contentId = data.contentId;
+    if (typeof data.contentTitle === 'string') historyData.contentTitle = data.contentTitle;
+    if (typeof data.contentType === 'string') historyData.contentType = data.contentType;
+    if (typeof data.progress === 'number') historyData.progress = data.progress;
+    if (typeof data.totalDuration === 'number') historyData.totalDuration = data.totalDuration;
+    if (typeof data.lastWatchTime === 'string') historyData.lastWatchTime = data.lastWatchTime;
+    if (typeof data.playCount === 'number') historyData.playCount = data.playCount;
+    if (typeof data.isFinished === 'boolean') historyData.isFinished = data.isFinished;
     
     // 添加可选属性
     if (data.coverUrl !== undefined) historyData.coverUrl = data.coverUrl;

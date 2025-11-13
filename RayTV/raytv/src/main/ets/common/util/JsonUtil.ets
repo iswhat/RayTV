@@ -8,7 +8,7 @@ export default class JsonUtil {
    */
   private static hasOwnProperty(obj: Record<string, string | number | boolean | object | null>, key: string): boolean {
     // 使用ArkTS兼容的方式检查属性存在性
-    return obj.hasOwnProperty(key);
+    return Object.keys(obj).includes(key);
   }
   /**
    * 将对象序列化为JSON字符串
@@ -28,15 +28,16 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象
    */
-  static parse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static parse<T extends Record<string, unknown>>(jsonStr: string): T {
     try {
+      // 使用泛型确保类型安全
       const result = JSON.parse(jsonStr);
       // 确保返回类型安全
       if (typeof result === 'object' && result !== null) {
         return result as T;
       }
       // 使用明确的类型创建空对象
-      const emptyObj: Record<string, string | number | boolean | object | null> = {};
+      const emptyObj: Record<string, unknown> = {};
       return emptyObj as T;
     } catch {
       // 使用明确的类型创建空对象
@@ -100,7 +101,8 @@ export default class JsonUtil {
    */
   static prettyPrint(jsonStr: string, indent: number = 2): string {
     try {
-      const obj = JSON.parse(jsonStr);
+      // 使用明确类型进行解析
+      const obj: Record<string, unknown> = JSON.parse(jsonStr);
       return JSON.stringify(obj, null, indent);
     } catch {
       return jsonStr;

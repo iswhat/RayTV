@@ -1424,7 +1424,7 @@ export default class UserService {
   /**
    * 导出用户数据
    */
-  public async exportUserData(): Promise<{ user?: any; exportDate: number; appVersion: string } | null> {
+  public async exportUserData(): Promise<{ user?: User | null; exportDate: number; appVersion: string } | null> {
     if (!this.currentUser) {
       return null;
     }

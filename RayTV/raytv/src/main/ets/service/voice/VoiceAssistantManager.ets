@@ -299,28 +299,28 @@ export class VoiceAssistantManager {
     // 导航命令
     this.registerCommand({
       keyword: '首页',
-      action: async () => Router.pushUrl({ url: 'pages/HomePage' }),
+      action: async () => Router.push({ uri: 'pages/HomePage' }),
       description: '返回首页',
       examples: ['返回首页', '首页']
     });
     
     this.registerCommand({
       keyword: '搜索',
-      action: async () => Router.pushUrl({ url: 'pages/SearchPage' }),
+      action: async () => Router.push({ uri: 'pages/SearchPage' }),
       description: '打开搜索页面',
       examples: ['搜索', '打开搜索']
     });
     
     this.registerCommand({
       keyword: '历史记录',
-      action: async () => Router.pushUrl({ url: 'pages/HistoryPage' }),
+      action: async () => Router.push({ uri: 'pages/HistoryPage' }),
       description: '查看历史记录',
       examples: ['历史记录', '我的历史']
     });
     
     this.registerCommand({
       keyword: '我的收藏',
-      action: async () => Router.pushUrl({ url: 'pages/FavoritePage' }),
+      action: async () => Router.push({ uri: 'pages/FavoritePage' }),
       description: '查看收藏内容',
       examples: ['我的收藏', '收藏']
     });
@@ -346,7 +346,7 @@ export class VoiceAssistantManager {
         Logger.info(VoiceAssistantManager.TAG, `Searching for: ${keyword}`);
         
         // 导航到搜索页面并传递关键词
-        Router.pushUrl({
+        Router.push({
           url: 'pages/SearchPage',
           params: { keyword }
         });

@@ -54,9 +54,9 @@ struct CategoryPage {
     Logger.info(this.TAG, 'CategoryPage appeared');
     
     // 获取路由参数
-    const params = Router.getParams();
-    if (params?.['category']) {
-      this.selectedCategory = params['category'];
+    const params = this.context.router.getParams();
+    if (params?.category) {
+      this.selectedCategory = params.category as string;
     }
     
     // 初始化数据
@@ -220,8 +220,8 @@ struct CategoryPage {
   private handleMediaItemClick(media: MediaItem): void {
     Logger.info(this.TAG, `Media item clicked: ${media.title}`);
     // 跳转到详情页
-    Router.pushUrl({
-      url: 'pages/MediaDetailPage',
+    Router.push({
+      uri: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,
         siteKey: media.siteKey
@@ -251,7 +251,7 @@ struct CategoryPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**

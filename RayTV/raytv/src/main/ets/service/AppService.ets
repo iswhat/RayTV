@@ -523,7 +523,10 @@ export default class AppService {
       Logger.debug(TAG, `Loaded app info: ${this.appInfo.appName} v${this.appInfo.versionName}`);
     } catch (error) {
       Logger.error(TAG, 'Failed to load app info', error);
-      throw error;
+      // 确保抛出的总是Error类型，并添加更有用的错误信息
+      const finalError = error instanceof Error ? error : new Error(String(error));
+      finalError.message = `Failed to load app info: ${finalError.message}`;
+      throw finalError;
     }
   }
 

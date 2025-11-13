@@ -119,16 +119,16 @@ struct MediaDetailPage {
     Logger.info(this.TAG, 'MediaDetailPage mounted');
     
     // 获取路由参数
-    const params = Router.getParams();
-    this.mediaId = params?.['mediaId'] || '';
-    this.siteKey = params?.['siteKey'] || '';
+    const params = this.context.router.getParams();
+    this.mediaId = (params?.mediaId as string) || '';
+    this.siteKey = (params?.siteKey as string) || '';
     
     Logger.info(this.TAG, `Loading media detail for: ${this.siteKey}:${this.mediaId}`);
     
     // 检查是否有预加载的数据（从SearchPage传递过来的）
-    const title = params?.['title'];
-    const coverUrl = params?.['coverUrl'];
-    const description = params?.['description'];
+    const title = params?.title as string;
+    const coverUrl = params?.coverUrl as string;
+    const description = params?.description as string;
     
     // 如果有预加载的数据，先创建一个临时的媒体详情对象
     if (this.mediaId && title && coverUrl) {
@@ -296,7 +296,7 @@ struct MediaDetailPage {
         
         // 如果有播放源且选择了剧集，跳转到播放页面
         if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
-          Router.pushUrl({
+          Router.push({
             url: 'pages/PlaybackPage',
             params: {
               mediaId: this.mediaId,
@@ -477,7 +477,7 @@ struct MediaDetailPage {
     playSource: PlaySource,
     startPosition: number
   ): void {
-    Router.pushUrl({
+    Router.push({
       url: 'pages/PlaybackPage',
       params: {
         mediaId: this.mediaId,
@@ -531,7 +531,7 @@ struct MediaDetailPage {
    */
   private handleRelatedMediaClick(media: MediaItem): void {
     // 跳转到对应媒体详情页
-    Router.pushUrl({
+    Router.push({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: media.id,
@@ -553,7 +553,7 @@ struct MediaDetailPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**

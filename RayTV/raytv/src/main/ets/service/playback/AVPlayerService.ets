@@ -235,7 +235,8 @@ class RealPlayer {
   on(event: 'bufferingChange', callback: (bufferingRate: number) => void): void;
   on(event: 'playbackComplete', callback: () => void): void;
   on(event: 'timeUpdate', callback: (currentTime: number) => void): void;
-  on(event: string, callback: (...args: any[]) => void): void {
+  // 作为类型系统的兼容层，处理可能的未知事件类型
+  on(event: string, callback: (...args: unknown[]) => void): void {
     // 根据事件类型存储对应的回调函数
     switch (event) {
       case 'stateChange':
@@ -273,7 +274,8 @@ class RealPlayer {
     this.timeUpdateListeners.forEach(callback => callback(currentTime));
   }
   // 通用实现（作为后备）
-  private emit(event: string, ...args: any[]): void {
+  // 通用实现作为类型系统的兼容层
+  private emit(event: string, ...args: unknown[]): void {
     // 这个通用实现实际上不会被调用，因为我们已经为所有事件类型提供了具体实现
     // 这里仅作为类型系统的兼容层
   }

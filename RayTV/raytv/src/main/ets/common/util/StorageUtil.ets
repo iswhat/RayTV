@@ -44,17 +44,19 @@ export type JsonData = Record<string, string | number | boolean | JsonData | nul
  * 提供多种存储方式的统一接口，包括偏好设置、文件存储等
  */
 export default class StorageUtil {
-  private static instance: StorageUtil | null = null;
+  // 使用局部变量存储单例实例，避免使用类作为对象
+  private static _instance: StorageUtil | null = null;
 
   /**
    * 获取单例实例
    * @returns StorageUtil实例
    */
   public static getInstance(): StorageUtil {
-    if (!StorageUtil.instance) {
-      StorageUtil.instance = new StorageUtil();
+    if (!StorageUtil._instance) {
+      const instance = new StorageUtil(); // 使用局部变量
+      StorageUtil._instance = instance;
     }
-    return StorageUtil.instance;
+    return StorageUtil._instance;
   }
 
   /**
@@ -272,10 +274,12 @@ export default class StorageUtil {
    * @param key 键名
    * @param type 存储类型
    * @param defaultValue 默认值
-   * @returns 读取的数字或默认值
+   * @returns 读取的数字或默认值（确保返回number类型）
    */
-  public static async getNumber(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: number): Promise<number | null> {
-    return await StorageUtil.get<number>(key, type, defaultValue);
+  public static async getNumber(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue: number = 0): Promise<number> {
+    const value = await StorageUtil.get<number>(key, type, defaultValue);
+    // 确保返回值是数字类型
+    return typeof value === 'number' ? value : defaultValue;
   }
 
   /**
@@ -727,7 +731,7 @@ export default class StorageUtil {
    */
   private static validateValue(value: string | number | boolean | JsonData | null | undefined): string | number | boolean | JsonData | null {
     // 显式处理null和undefined
-    if (value === null || typeof value === 'undefined') {
+    if (value === null || value === undefined) {
       return null;
     }
     
@@ -747,11 +751,14 @@ export default class StorageUtil {
             const key = keys[i];
             const propValue = value[key];
             // 类型安全地处理每个属性值
-            if (typeof propValue === 'string' || typeof propValue === 'number' || 
-                typeof propValue === 'boolean' || propValue === null) {
+            if (typeof propValue === 'string' || 
+                typeof propValue === 'number' || 
+                typeof propValue === 'boolean' || 
+                propValue === null) {
               safeObj[key] = propValue;
             } else if (typeof propValue === 'object' && propValue !== null) {
-              safeObj[key] = {} as JsonData;
+              // 递归验证嵌套对象
+              safeObj[key] = this.validateValue(propValue) as JsonData;
             }
           }
           return safeObj;

@@ -120,7 +120,7 @@ struct HistoryPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**
@@ -236,8 +236,8 @@ struct HistoryPage {
       historyService.updateHistoryTime(history.id)
         .then(() => {
           // 跳转到播放页面，带上上次播放的进度
-          Router.pushUrl({
-            url: 'pages/PlaybackPage',
+          Router.push({
+            uri: 'pages/PlaybackPage',
             params: {
               mediaId: history.mediaId,
               siteKey: history.siteKey,
@@ -251,8 +251,8 @@ struct HistoryPage {
         .catch(error => {
           Logger.error(this.TAG, `Failed to update history time: ${error}`);
           // 即使更新失败，也跳转到播放页面
-          Router.pushUrl({
-            url: 'pages/PlaybackPage',
+          Router.push({
+            uri: 'pages/PlaybackPage',
             params: {
               mediaId: history.mediaId,
               siteKey: history.siteKey,
@@ -266,8 +266,8 @@ struct HistoryPage {
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle history click: ${error}`);
       // 错误处理：跳转到播放页面
-      Router.pushUrl({
-      url: 'pages/PlaybackPage',
+      Router.push({
+      uri: 'pages/PlaybackPage',
       params: {
         mediaId: history.mediaId,
         siteKey: history.siteKey,
@@ -287,8 +287,8 @@ struct HistoryPage {
     Logger.info(this.TAG, `Continue playing: ${history.title} from ${history.playbackPosition}ms`);
     
     // 跳转到播放页面，带上上次播放的进度
-    Router.pushUrl({
-        url: 'pages/PlaybackPage',
+    Router.push({
+        uri: 'pages/PlaybackPage',
         params: {
           mediaId: history.mediaId,
           siteKey: history.siteKey,
@@ -508,7 +508,7 @@ struct HistoryPage {
       Text.create();
       Text.text("暂无播放历史");
       Text.pop();
-      Button.create({ className: "explore-button", onClick: () => Router.pushUrl({ url: 'pages/HomePage' }) });
+      Button.create({ className: "explore-button", onClick: () => Router.push({ uri: 'pages/HomePage' }) });
       Button.text("去探索");
       Button.pop();
       Empty.pop();

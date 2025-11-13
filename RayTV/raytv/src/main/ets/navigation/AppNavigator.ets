@@ -118,7 +118,7 @@ export class AppNavigator {
       this.addToHistory(historyItem);
 
       // 跳转到指定页面
-      await router.pushUrl({
+      await router.push({
         url,
         params
       });
@@ -147,7 +147,7 @@ export class AppNavigator {
   async backToHome(): Promise<void> {
     try {
       await router.clear();
-      await router.pushUrl({
+      await router.push({
         url: this.getPageUrl(PageRoute.HOME)
       });
       this.navigationHistory = [];

@@ -266,7 +266,7 @@ struct SettingsPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**

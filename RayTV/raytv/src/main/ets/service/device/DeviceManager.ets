@@ -768,7 +768,7 @@ export default class DeviceManager {
    * @param dataType 数据类型
    * @param data 要同步的数据
    */
-  public async syncDataToDevice<T = Record<string, any>>(deviceId: string, dataType: string, data: T): Promise<boolean> {
+  public async syncDataToDevice<T = Record<string, unknown>>(deviceId: string, dataType: string, data: T): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }

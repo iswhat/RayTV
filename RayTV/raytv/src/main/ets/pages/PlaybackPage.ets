@@ -64,16 +64,16 @@ struct PlaybackPage {
     Logger.info(this.TAG, 'PlaybackPage appeared');
     
     // 获取路由参数
-    const params = Router.getParams();
-    this.mediaId = params?.['mediaId'] || '';
-    this.siteKey = params?.['siteKey'] || '';
-    this.episodeId = params?.['episodeId'];
-    this.initialPosition = params?.['currentTime'] || params?.['startPosition'] || 0;
-    this.mediaTitle = params?.['mediaTitle'] || '正在播放';
-    this.episodeName = params?.['episodeName'] || '';
-    this.playSource = params?.['playSource'];
-    this.playSourceIndex = params?.['playSourceIndex'] || 0;
-    this.autoSwitchSourceOnError = params?.['autoSwitchSourceOnError'] !== false; // 默认开启
+    const params = this.context.router.getParams();
+    this.mediaId = (params?.mediaId as string) || '';
+    this.siteKey = (params?.siteKey as string) || '';
+    this.episodeId = params?.episodeId;
+    this.initialPosition = (params?.currentTime as number) || (params?.startPosition as number) || 0;
+    this.mediaTitle = (params?.mediaTitle as string) || '正在播放';
+    this.episodeName = (params?.episodeName as string) || '';
+    this.playSource = params?.playSource;
+    this.playSourceIndex = (params?.playSourceIndex as number) || 0;
+    this.autoSwitchSourceOnError = params?.autoSwitchSourceOnError !== false; // 默认开启
     
     Logger.info(this.TAG, `Starting playback for: ${this.siteKey}:${this.mediaId}${this.episodeId ? ` episode: ${this.episodeId}` : ''}, startPosition=${this.initialPosition}`);
     
@@ -565,7 +565,7 @@ struct PlaybackPage {
   private handleBack(): void {
     // 先保存进度
     this.savePlaybackProgress();
-    Router.back();
+    this.context.router.back();
   }
   
   /**

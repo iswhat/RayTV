@@ -63,17 +63,17 @@ struct MainPage {
   
   // 跳转到分类页面
   private navigateToCategory() {
-    Router.pushUrl({ url: 'pages/CategoryPage' });
+    Router.push({ uri: 'pages/CategoryPage' });
   }
   
   // 跳转到搜索页面
   private navigateToSearch() {
-    Router.pushUrl({ url: 'pages/SearchPage' });
+    Router.push({ uri: 'pages/SearchPage' });
   }
   
   // 跳转到设置页面
   private navigateToSettings() {
-    Router.pushUrl({ url: 'pages/SettingsPage' });
+    Router.push({ uri: 'pages/SettingsPage' });
   }
   
   // 渲染媒体项
@@ -92,7 +92,7 @@ struct MainPage {
           .marginTop(8)
       }
     }
-    .onClick(() => Router.pushUrl({ url: `pages/MediaDetailPage?id=${media.id}` }))
+    .onClick(() => Router.push({ uri: `pages/MediaDetailPage?id=${media.id}` }))
   }
   
   build() {

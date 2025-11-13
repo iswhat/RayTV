@@ -165,7 +165,8 @@ export interface LogEntry {
  * 日志工具类
  */
 class Logger {
-  private static instance: Logger;
+  // 使用局部变量存储单例实例，避免使用类作为对象
+  private static _instance: Logger | null = null;
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
@@ -195,10 +196,11 @@ class Logger {
    * 获取Logger单例实例
    */
   public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
+    if (!Logger._instance) {
+      const instance = new Logger(); // 使用局部变量
+      Logger._instance = instance;
     }
-    return Logger.instance;
+    return Logger._instance;
   }
 
   /**

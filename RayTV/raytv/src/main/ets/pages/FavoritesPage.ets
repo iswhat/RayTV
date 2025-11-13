@@ -164,7 +164,7 @@ struct FavoritesPage {
    * 处理返回
    */
   private handleBack(): void {
-    Router.back();
+    this.context.router.back();
   }
   
   /**
@@ -239,7 +239,7 @@ struct FavoritesPage {
     
     Logger.info(this.TAG, `Favorite clicked: ${favorite.title}`);
     // 跳转到详情页
-    Router.pushUrl({
+    Router.push({
       url: 'pages/MediaDetailPage',
       params: {
         mediaId: favorite.id,
@@ -439,7 +439,7 @@ struct FavoritesPage {
       Text.create();
       Text.content("暂无收藏内容");
       Text.pop();
-      Button.create({ className: "explore-button", onClick: () => Router.pushUrl({ url: 'pages/HomePage' }) });
+      Button.create({ className: "explore-button", onClick: () => Router.push({ uri: 'pages/HomePage' }) });
       Button.content("去探索");
       Button.pop();
       Empty.pop();
