@@ -2,7 +2,7 @@ import Logger from '../../common/util/Logger';
 import { configService } from '../config/ConfigService';
 import { mediaService } from '../media/MediaService';
 import { playerManager } from '../media/PlayerManager';
-import { Router } from '@ohos/router';
+import { AppNavigator, PageRoute } from '../../navigation/AppNavigator';
 
 /**
  * 语音命令接口
@@ -299,28 +299,28 @@ export class VoiceAssistantManager {
     // 导航命令
     this.registerCommand({
       keyword: '首页',
-      action: async () => Router.push({ uri: 'pages/HomePage' }),
+      action: async () => AppNavigator.getInstance().navigateToHome(),
       description: '返回首页',
       examples: ['返回首页', '首页']
     });
     
     this.registerCommand({
       keyword: '搜索',
-      action: async () => Router.push({ uri: 'pages/SearchPage' }),
+      action: async () => AppNavigator.getInstance().navigateToSearch(),
       description: '打开搜索页面',
       examples: ['搜索', '打开搜索']
     });
     
     this.registerCommand({
       keyword: '历史记录',
-      action: async () => Router.push({ uri: 'pages/HistoryPage' }),
+      action: async () => AppNavigator.getInstance().navigateToHistory(),
       description: '查看历史记录',
       examples: ['历史记录', '我的历史']
     });
     
     this.registerCommand({
       keyword: '我的收藏',
-      action: async () => Router.push({ uri: 'pages/FavoritePage' }),
+      action: async () => AppNavigator.getInstance().navigateToFavorites(),
       description: '查看收藏内容',
       examples: ['我的收藏', '收藏']
     });
@@ -346,10 +346,7 @@ export class VoiceAssistantManager {
         Logger.info(VoiceAssistantManager.TAG, `Searching for: ${keyword}`);
         
         // 导航到搜索页面并传递关键词
-        Router.push({
-          url: 'pages/SearchPage',
-          params: { keyword }
-        });
+          AppNavigator.getInstance().navigateToSearch(keyword);
       }
     } catch (error: Error) {
       Logger.error(VoiceAssistantManager.TAG, `Failed to handle search command: ${error}`);

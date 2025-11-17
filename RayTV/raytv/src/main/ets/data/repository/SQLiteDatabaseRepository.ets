@@ -784,7 +784,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
   }
   async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, ConfigValue>>> { 
-    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: {} as Record<string, ConfigValue> }; 
+    return { success: false, message: 'Not implemented', error: new Error('Not implemented'), data: {} }; 
   }
   async clearConfigGroup(group: string): Promise<DatabaseResult<boolean>> { 
     return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 

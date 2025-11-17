@@ -1,5 +1,5 @@
 // 简化的HomePage组件
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 
 /**
@@ -30,9 +30,7 @@ struct HomePage {
     Logger.info('Search button clicked');
     try {
       // 跳转到搜索页面
-      Router.push({
-        url: 'pages/SearchPage'
-      });
+      AppNavigator.getInstance().navigateToSearch();
     } catch (error) {
       Logger.error(this.TAG, `Failed to navigate to search page: ${error}`);
     }

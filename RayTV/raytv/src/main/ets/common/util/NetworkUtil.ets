@@ -5,6 +5,7 @@ import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';
 import BusinessError from '@ohos.base';
 import fs from '@ohos.file.fs';
+import fileIO from '@ohos.file.fileIO';
 import { CacheManager } from '../../service/spider/CacheManager';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
@@ -17,8 +18,12 @@ const TAG = 'NetworkUtil';
 export interface RequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  headers?: Record<string, string>;
-  params?: Record<string, string | number | boolean | string[]>;
+  headers?: {
+    [key: string]: string;
+  };
+  params?: {
+    [key: string]: string | number | boolean | string[];
+  };
   data?: string | number | boolean | object;
   timeout?: number;
   responseType?: 'text' | 'json' | 'arraybuffer';
@@ -31,7 +36,9 @@ export interface Response<T = object | string | number | boolean> {
   status: number;
   statusText: string;
   data: T;
-  headers: Record<string, string>;
+  headers: {
+    [key: string]: string;
+  };
 }
 
 /**
@@ -51,11 +58,10 @@ export default class NetworkUtil {
    */
   private static getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
-    for (const key in obj) {
-      // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-  if (typeof obj === 'object' && obj !== null && Object.keys(obj).includes(key)) {
-        keys.push(key);
-      }
+    // 直接使用Object.keys获取键，避免for-in循环中的原型链问题
+    const objectKeys = Object.keys(obj);
+    for (let i = 0; i < objectKeys.length; i++) {
+      keys.push(objectKeys[i]);
     }
     return keys;
   }
@@ -111,6 +117,102 @@ export default class NetworkUtil {
       await NetworkUtil.checkAndRequestNetworkPermission();
       NetworkUtil.isInitialized = true;
     }
+  }
+
+  /**
+   * GET请求便捷方法
+   * @param url 请求URL
+   * @param config 请求配置（可选）
+   * @returns Promise<Response<T>>
+   */
+  public static async get<T = object>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<Response<T>> {
+    const requestConfig: RequestConfig = {
+      url,
+      method: 'GET'
+    };
+    
+    // 手动复制配置属性，避免使用扩展运算符
+    if (config) {
+      if (config.headers) requestConfig.headers = config.headers;
+      if (config.params) requestConfig.params = config.params;
+      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
+      if (config.responseType) requestConfig.responseType = config.responseType;
+    }
+    
+    return NetworkUtil.request<T>(requestConfig);
+  }
+
+  /**
+   * POST请求便捷方法
+   * @param url 请求URL
+   * @param data 请求数据
+   * @param config 请求配置（可选）
+   * @returns Promise<Response<T>>
+   */
+  public static async post<T = object>(url: string, data?: RequestConfig['data'], config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<Response<T>> {
+    const requestConfig: RequestConfig = {
+      url,
+      method: 'POST',
+      data
+    };
+    
+    // 手动复制配置属性，避免使用扩展运算符
+    if (config) {
+      if (config.headers) requestConfig.headers = config.headers;
+      if (config.params) requestConfig.params = config.params;
+      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
+      if (config.responseType) requestConfig.responseType = config.responseType;
+    }
+    
+    return NetworkUtil.request<T>(requestConfig);
+  }
+
+  /**
+   * PUT请求便捷方法
+   * @param url 请求URL
+   * @param data 请求数据
+   * @param config 请求配置（可选）
+   * @returns Promise<Response<T>>
+   */
+  public static async put<T = object>(url: string, data?: RequestConfig['data'], config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<Response<T>> {
+    const requestConfig: RequestConfig = {
+      url,
+      method: 'PUT',
+      data
+    };
+    
+    // 手动复制配置属性，避免使用扩展运算符
+    if (config) {
+      if (config.headers) requestConfig.headers = config.headers;
+      if (config.params) requestConfig.params = config.params;
+      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
+      if (config.responseType) requestConfig.responseType = config.responseType;
+    }
+    
+    return NetworkUtil.request<T>(requestConfig);
+  }
+
+  /**
+   * DELETE请求便捷方法
+   * @param url 请求URL
+   * @param config 请求配置（可选）
+   * @returns Promise<Response<T>>
+   */
+  public static async delete<T = object>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<Response<T>> {
+    const requestConfig: RequestConfig = {
+      url,
+      method: 'DELETE'
+    };
+    
+    // 手动复制配置属性，避免使用扩展运算符
+    if (config) {
+      if (config.headers) requestConfig.headers = config.headers;
+      if (config.params) requestConfig.params = config.params;
+      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
+      if (config.responseType) requestConfig.responseType = config.responseType;
+    }
+    
+    return NetworkUtil.request<T>(requestConfig);
   }
 
   /**
@@ -188,14 +290,14 @@ export default class NetworkUtil {
         }
 
         // 构建响应头
-    const responseHeaders: Record<string, string> = {};
-    if (response.header) {
-      const headerKeys = NetworkUtil.getObjectKeys(response.header);
-      for (let i = 0; i < headerKeys.length; i++) {
-        const key = headerKeys[i];
-        responseHeaders[key] = String(response.header[key]);
-      }
-    }
+        const responseHeaders: Record<string, string> = {};
+        if (response.header) {
+          const headerKeys = NetworkUtil.getObjectKeys(response.header);
+          for (let i = 0; i < headerKeys.length; i++) {
+            const key = headerKeys[i];
+            responseHeaders[key] = String(response.header[key]);
+          }
+        }
 
         // 检查状态码
         if (response.responseCode < 200 || response.responseCode >= 300) {
@@ -299,7 +401,9 @@ export default class NetworkUtil {
    * @returns Promise<void>
    */
   public static async downloadFile(url: string, savePath: string, options?: {
-    headers?: Record<string, string>;
+    headers?: {
+      [key: string]: string;
+    };
     timeout?: number;
     onProgress?: (receivedSize: number, totalSize: number) => void;
   }): Promise<void> {
@@ -450,7 +554,9 @@ export default class NetworkUtil {
    * @returns Promise<string>
    */
   public static async downloadText(url: string, options?: {
-    headers?: Record<string, string>;
+    headers?: {
+      [key: string]: string;
+    };
     timeout?: number;
   }): Promise<string> {
     try {
@@ -478,6 +584,36 @@ export default class NetworkUtil {
       Logger.error(TAG, `Failed to download text: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * 构建查询字符串
+   * @param params 查询参数对象
+   * @returns 构建好的查询字符串
+   */
+  private static buildQueryString(params: {
+    [key: string]: string | number | boolean | string[];
+  }): string {
+    const parts: string[] = [];
+    const keys = NetworkUtil.getObjectKeys(params);
+    
+    for (const key of keys) {
+      const value = params[key];
+      if (Array.isArray(value)) {
+        // 处理数组参数
+        for (const item of value) {
+          const encodedKey = encodeURIComponent(key);
+          const encodedValue = encodeURIComponent(String(item));
+          parts.push(`${encodedKey}=${encodedValue}`);
+        }
+      } else {
+        const encodedKey = encodeURIComponent(key);
+        const encodedValue = encodeURIComponent(String(value));
+        parts.push(`${encodedKey}=${encodedValue}`);
+      }
+    }
+    
+    return parts.join('&');
   }
 
   /**

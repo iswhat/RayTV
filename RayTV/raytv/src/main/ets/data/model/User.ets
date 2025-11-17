@@ -47,6 +47,13 @@ export interface DeviceInfo {
 }
 
 /**
+ * 用户设置类型定义
+ */
+export interface UserSettings {
+  [key: string]: string | number | boolean | null;
+}
+
+/**
  * 用户实体类
  * 定义用户的基本信息和相关操作
  */
@@ -67,29 +74,32 @@ export default class User {
   watchHistoryEnabled?: boolean; // 是否启用观看历史
   favoritesEnabled?: boolean;    // 是否启用收藏
   totalWatchTime?: number;       // 总观看时长（分钟）
-  // 使用更具体的类型替代Record
   settings?: UserSettings; // 其他设置
 
   /**
    * 构造函数
    */
   constructor(data: Partial<User>) {
-    this.id = data.id || `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.username = data.username || `user_${Math.random().toString(36).substr(2, 8)}`;
+    // 创建局部变量存储ID和用户名，避免直接使用User类作为对象
+    const defaultId = `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
+    const defaultUsername = `user_${Math.random().toString(36).substr(2, 8)}`;
+    
+    this.id = data.id || defaultId;
+    this.username = data.username || defaultUsername;
     this.nickname = data.nickname || this.username;
     this.email = data.email;
     this.avatarUrl = data.avatarUrl;
-    this.role = data.role || UserRole.REGULAR;
-    this.preferences = data.preferences || this.getDefaultPreferences();
-    this.lastLoginTime = data.lastLoginTime || DateUtil.format(new Date());
-    this.registrationDate = data.registrationDate || DateUtil.format(new Date());
-    this.activeDevices = data.activeDevices || [];
-    this.isVerified = data.isVerified || false;
-    this.status = data.status || 'active';
+    this.role = data.role ?? UserRole.REGULAR;
+    this.preferences = data.preferences ?? this.getDefaultPreferences();
+    this.lastLoginTime = data.lastLoginTime ?? DateUtil.format(new Date());
+    this.registrationDate = data.registrationDate ?? DateUtil.format(new Date());
+    this.activeDevices = data.activeDevices ?? [];
+    this.isVerified = data.isVerified ?? false;
+    this.status = data.status ?? 'active';
     this.subscriptionEndDate = data.subscriptionEndDate;
     this.watchHistoryEnabled = data.watchHistoryEnabled !== undefined ? data.watchHistoryEnabled : true;
     this.favoritesEnabled = data.favoritesEnabled !== undefined ? data.favoritesEnabled : true;
-    this.totalWatchTime = data.totalWatchTime || 0;
+    this.totalWatchTime = data.totalWatchTime ?? 0;
     this.settings = data.settings ? (data.settings as UserSettings) : {} as UserSettings;
   }
 
@@ -376,18 +386,11 @@ export default class User {
   }
 
   /**
-   * 用户设置类型定义
-   */
-  export interface UserSettings {
-    settings?: Record<string, string | number | boolean | null>;
-  }
-
-  /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null> {
-    const result: Record<string, string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null> = {
+  public toSerializable(): { [key: string]: string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null } {
+    const result: { [key: string]: string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null } = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -414,28 +417,58 @@ export default class User {
    * @param data 序列化数据
    * @returns User对象
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | object | null>): User {
+  public static fromSerializable(data: { [key: string]: string | number | boolean | object | null }): User {
     // 创建安全的用户数据对象，添加类型检查和默认值
     const safeUserData: Partial<User> = {};
     
-    if (typeof data.id === 'string') safeUserData.id = data.id;
-    if (typeof data.username === 'string') safeUserData.username = data.username;
-    if (typeof data.nickname === 'string') safeUserData.nickname = data.nickname;
-    if (typeof data.email === 'string') safeUserData.email = data.email;
-    if (typeof data.avatarUrl === 'string') safeUserData.avatarUrl = data.avatarUrl;
-    if (typeof data.role === 'number') safeUserData.role = data.role;
+    if (typeof data.id === 'string') {
+      safeUserData.id = data.id;
+    }
+    if (typeof data.username === 'string') {
+      safeUserData.username = data.username;
+    }
+    if (typeof data.nickname === 'string') {
+      safeUserData.nickname = data.nickname;
+    }
+    if (typeof data.email === 'string') {
+      safeUserData.email = data.email;
+    }
+    if (typeof data.avatarUrl === 'string') {
+      safeUserData.avatarUrl = data.avatarUrl;
+    }
+    if (typeof data.role === 'number') {
+      safeUserData.role = data.role;
+    }
     if (data.preferences && typeof data.preferences === 'object') {
       safeUserData.preferences = data.preferences as UserPreferences;
     }
-    if (typeof data.lastLoginTime === 'string') safeUserData.lastLoginTime = data.lastLoginTime;
-    if (typeof data.registrationDate === 'string') safeUserData.registrationDate = data.registrationDate;
-    if (Array.isArray(data.activeDevices)) safeUserData.activeDevices = data.activeDevices as DeviceInfo[];
-    if (typeof data.isVerified === 'boolean') safeUserData.isVerified = data.isVerified;
-    if (typeof data.status === 'string') safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
-    if (typeof data.subscriptionEndDate === 'string') safeUserData.subscriptionEndDate = data.subscriptionEndDate;
-    if (typeof data.watchHistoryEnabled === 'boolean') safeUserData.watchHistoryEnabled = data.watchHistoryEnabled;
-    if (typeof data.favoritesEnabled === 'boolean') safeUserData.favoritesEnabled = data.favoritesEnabled;
-    if (typeof data.totalWatchTime === 'number') safeUserData.totalWatchTime = data.totalWatchTime;
+    if (typeof data.lastLoginTime === 'string') {
+      safeUserData.lastLoginTime = data.lastLoginTime;
+    }
+    if (typeof data.registrationDate === 'string') {
+      safeUserData.registrationDate = data.registrationDate;
+    }
+    if (Array.isArray(data.activeDevices)) {
+      safeUserData.activeDevices = data.activeDevices as DeviceInfo[];
+    }
+    if (typeof data.isVerified === 'boolean') {
+      safeUserData.isVerified = data.isVerified;
+    }
+    if (typeof data.status === 'string') {
+      safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
+    }
+    if (typeof data.subscriptionEndDate === 'string') {
+      safeUserData.subscriptionEndDate = data.subscriptionEndDate;
+    }
+    if (typeof data.watchHistoryEnabled === 'boolean') {
+      safeUserData.watchHistoryEnabled = data.watchHistoryEnabled;
+    }
+    if (typeof data.favoritesEnabled === 'boolean') {
+      safeUserData.favoritesEnabled = data.favoritesEnabled;
+    }
+    if (typeof data.totalWatchTime === 'number') {
+      safeUserData.totalWatchTime = data.totalWatchTime;
+    }
     if (data.settings && typeof data.settings === 'object') {
       safeUserData.settings = data.settings as UserSettings;
     }
@@ -452,4 +485,11 @@ export default class User {
     const instance = new User(this.toSerializable());
     return instance;
   }
+}
+
+/**
+ * 用户设置类型定义
+ */
+export interface UserSettings {
+  [key: string]: string | number | boolean | null;
 }

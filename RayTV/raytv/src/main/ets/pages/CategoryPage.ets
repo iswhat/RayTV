@@ -1,23 +1,9 @@
 
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { Stack, Flex, Text, Button, Image, ScrollView, List, LoadingProgress, Blank, Select, Tag, Empty, ListItem } from '@kit.ArkUI';
-
-/**
- * 媒体项接口定义
- */
-interface MediaItem {
-  id: string;
-  title: string;
-  coverUrl?: string;
-  description?: string;
-  year?: string;
-  region?: string;
-  score?: string;
-  actors?: string[];
-  siteKey: string;
-}
+import { MediaItem } from '../data/bean/MediaItem';
 
 /**
  * 分类页面组件
@@ -220,12 +206,10 @@ struct CategoryPage {
   private handleMediaItemClick(media: MediaItem): void {
     Logger.info(this.TAG, `Media item clicked: ${media.title}`);
     // 跳转到详情页
-    Router.push({
-      uri: 'pages/MediaDetailPage',
-      params: {
-        mediaId: media.id,
-        siteKey: media.siteKey
-      }
+    AppNavigator.getInstance().navigateToDetail({
+      id: media.id,
+      siteKey: media.siteKey,
+      type: 'vod'
     });
   }
   
@@ -323,8 +307,9 @@ struct CategoryPage {
   @Builder
   private renderMediaItem(media: MediaItem): void {
     ListItem()
+      .key(media.id)
       .onClick(() => this.handleMediaItemClick(media)) {
-      Flex({ className: "media-item" }) {
+    Flex({ className: "media-item" }) {
         Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
           .className("media-cover")
           .objectFit("cover")

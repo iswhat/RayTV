@@ -1,5 +1,5 @@
 
-import Router from '@ohos.router';
+import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { favoriteService } from '../service/media/FavoriteService';
 import { mediaService } from '../service/media/MediaService';
@@ -239,12 +239,10 @@ struct FavoritesPage {
     
     Logger.info(this.TAG, `Favorite clicked: ${favorite.title}`);
     // 跳转到详情页
-    Router.push({
-      url: 'pages/MediaDetailPage',
-      params: {
-        mediaId: favorite.id,
-        siteKey: favorite.siteKey
-      }
+    AppNavigator.getInstance().navigateToDetail({
+      id: favorite.id,
+      siteKey: favorite.siteKey,
+      type: 'vod'
     });
   }
   
@@ -439,7 +437,7 @@ struct FavoritesPage {
       Text.create();
       Text.content("暂无收藏内容");
       Text.pop();
-      Button.create({ className: "explore-button", onClick: () => Router.push({ uri: 'pages/HomePage' }) });
+      Button.create({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() });
       Button.content("去探索");
       Button.pop();
       Empty.pop();

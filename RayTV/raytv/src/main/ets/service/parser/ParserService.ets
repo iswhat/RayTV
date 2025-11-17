@@ -26,6 +26,15 @@ interface ParserContext {
  * 解析器服务
  * 负责管理和执行视频源解析功能
  */
+/**
+ * 自定义解析器接口
+ */
+interface CustomParser extends ParserInfo {
+  // 可能的额外属性
+  version?: string;
+  priority?: number;
+}
+
 export class ParserService {
   private static readonly TAG: string = 'ParserService';
   // 使用静态私有成员变量存储单例实例
@@ -38,13 +47,9 @@ export class ParserService {
     retryCount: 2
   };
   
-  // 自定义解析器接口
-  interface CustomParser extends ParserInfo {
-    // 可能的额外属性
-    version?: string;
-    priority?: number;
-  }
-  
+  /**
+   * 构造函数
+   */
   private constructor() {
     // 初始化默认解析器
     this.initializeDefaultParsers();
@@ -53,16 +58,13 @@ export class ParserService {
   /**
    * 获取单例实例
    */
-  /**
-   * 获取单例实例
-   */
   public static getInstance(): ParserService {
     if (!ParserService.instance) {
-      // 创建新实例
-      const instance = new ParserService();
-      ParserService.instance = instance;
+      // 创建新实例并存储到静态变量
+      ParserService.instance = new ParserService();
     }
-    return ParserService.instance;
+    // 确保返回实例不为null
+    return ParserService.instance!;
   }
   
   /**
@@ -522,15 +524,16 @@ export class ParserService {
   /**
    * 清理资源
    */
-  public async destroy(): Promise<void> {
+  public destroy(): void {
     try {
       this.parsers.clear();
       Logger.info(ParserService.TAG, 'ParserService destroyed');
+      // 重置单例实例
+      ParserService.instance = null;
     } catch (error) {
-      Logger.error(ParserService.TAG, `Failed to destroy ParserService: ${error}`);
+      Logger.error(ParserService.TAG, `Failed to destroy ParserService: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
-}
 
 // 导出单例实例 - 使用函数调用方式
 export function getParserService(): ParserService {

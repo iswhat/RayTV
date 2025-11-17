@@ -298,26 +298,25 @@ export default class SearchResult {
    * @returns 优先级数值
    */
   public getDisplayPriority(): number {
-    // 定义类型优先级
-    const typePriority: Record<string, number> = {
-      'movie': 10,
-      'tv_series': 9,
-      'anime': 8,
-      'live': 7,
-      'documentary': 6,
-      'variety': 5,
-      'actor': 4,
-      'director': 3,
-      'collection': 2,
-      'genre': 1,
-      'tag': 1,
-      'channel': 1,
-      'other': 0
+    // 定义类型优先级 - 使用ResultType枚举作为键
+    const typePriority: Record<ResultType, number> = {
+      [ResultType.MOVIE]: 10,
+      [ResultType.TV_SERIES]: 9,
+      [ResultType.ANIME]: 8,
+      [ResultType.LIVE]: 7,
+      [ResultType.DOCUMENTARY]: 6,
+      [ResultType.VARIETY]: 5,
+      [ResultType.ACTOR]: 4,
+      [ResultType.DIRECTOR]: 3,
+      [ResultType.COLLECTION]: 2,
+      [ResultType.GENRE]: 1,
+      [ResultType.TAG]: 1,
+      [ResultType.CHANNEL]: 1,
+      [ResultType.OTHER]: 0
     };
 
-    // 基础优先级 - 将枚举值转换为字符串键
-    let typeKey = this.type.toString().toLowerCase();
-    let priority = typePriority[typeKey] || 0;
+    // 基础优先级 - 直接使用枚举值作为键
+    let priority = typePriority[this.type] || 0;
     
     // 结合匹配分数
     if (this.matchScore) {

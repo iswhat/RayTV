@@ -545,13 +545,8 @@ export class CacheManager {
    * @private
    */
   private getObjectKeys(obj: Record<string, unknown>): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    // 直接使用Object.keys获取键，避免for-in循环和原型链操作
+    return Object.keys(obj);
   }
 
   /**

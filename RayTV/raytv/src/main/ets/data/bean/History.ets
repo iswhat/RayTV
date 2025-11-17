@@ -116,9 +116,9 @@ export interface HistoryStats {
   totalWatchTime: number; // 总观看时长（毫秒）
   averageWatchTime: number; // 平均观看时长
   recentDays: number;   // 最近多少天的数据
-  byType: Map<HistoryType, number>; // 按类型统计
-  byContentType: Map<ContentType, number>; // 按内容类型统计
-  bySource: Map<string, number>; // 按数据源统计
+  byType: Record<HistoryType, number>; // 按类型统计
+  byContentType: Record<ContentType, number>; // 按内容类型统计
+  bySource: Record<string, number>; // 按数据源统计
   topContent: {
     contentId: string;
     contentName: string;

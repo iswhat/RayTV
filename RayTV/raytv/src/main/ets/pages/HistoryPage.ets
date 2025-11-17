@@ -1,5 +1,5 @@
 import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch, Stack, ProgressBar, Blank, BarState } from '@kit.ArkUI';
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { historyService, HistoryItem } from '../service/media/HistoryService';
 import { mediaService, MediaItem, MediaType } from '../service/media/MediaService';
@@ -120,8 +120,8 @@ struct HistoryPage {
    * 处理返回
    */
   private handleBack(): void {
-    this.context.router.back();
-  }
+      AppNavigator.getInstance().back();
+    }
   
   /**
    * 处理编辑模式切换
@@ -236,16 +236,13 @@ struct HistoryPage {
       historyService.updateHistoryTime(history.id)
         .then(() => {
           // 跳转到播放页面，带上上次播放的进度
-          Router.push({
-            uri: 'pages/PlaybackPage',
-            params: {
-              mediaId: history.mediaId,
-              siteKey: history.siteKey,
-              episodeId: history.episodeId,
-              playbackPosition: history.progress * 1000,
-              title: history.title,
-              coverUrl: history.cover || ''
-            }
+          AppNavigator.getInstance().navigateToVideoPlay({
+            mediaId: history.mediaId,
+            siteKey: history.siteKey,
+            episodeId: history.episodeId,
+            playbackPosition: history.progress * 1000,
+            title: history.title,
+            coverUrl: history.cover || ''
           });
         })
         .catch(error => {
@@ -266,17 +263,14 @@ struct HistoryPage {
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle history click: ${error}`);
       // 错误处理：跳转到播放页面
-      Router.push({
-      uri: 'pages/PlaybackPage',
-      params: {
+      AppNavigator.getInstance().navigateToVideoPlay({
         mediaId: history.mediaId,
         siteKey: history.siteKey,
         episodeId: history.episodeId,
         playbackPosition: history.progress * 1000,
         title: history.title,
         coverUrl: history.cover || ''
-      }
-    });
+      });
     }
   }
   
@@ -287,16 +281,13 @@ struct HistoryPage {
     Logger.info(this.TAG, `Continue playing: ${history.title} from ${history.playbackPosition}ms`);
     
     // 跳转到播放页面，带上上次播放的进度
-    Router.push({
-        uri: 'pages/PlaybackPage',
-        params: {
-          mediaId: history.mediaId,
-          siteKey: history.siteKey,
-          episodeId: history.episodeId,
-          playbackPosition: history.progress * 1000,
-          title: history.title,
-          coverUrl: history.cover || ''
-        }
+    AppNavigator.getInstance().navigateToVideoPlay({
+        mediaId: history.mediaId,
+        siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
       });
   }
   
@@ -508,7 +499,7 @@ struct HistoryPage {
       Text.create();
       Text.text("暂无播放历史");
       Text.pop();
-      Button.create({ className: "explore-button", onClick: () => Router.push({ uri: 'pages/HomePage' }) });
+      Button.create({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() });
       Button.text("去探索");
       Button.pop();
       Empty.pop();

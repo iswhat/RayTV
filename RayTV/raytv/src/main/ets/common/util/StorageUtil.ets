@@ -20,16 +20,16 @@ export enum StorageType {
  * 存储数据结构
  */
 export interface StorageData {
-  value: string | number | boolean | Record<string, string | number | boolean> | null;
+  value: string | number | boolean | JsonData | null;
   timestamp: number;
-  expireTime: number | null;
+  expireTime: number;
 }
 
 /**
  * 内存缓存项结构
  */
 export interface MemoryCacheItem {
-  value: string | number | boolean | Record<string, string | number | boolean> | null;
+  value: string | number | boolean | JsonData | null;
   expireTime: number;
 }
 
@@ -67,6 +67,8 @@ export default class StorageUtil {
   }
   private static memoryCache: Record<string, MemoryCacheItem> = {};
   private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
+  // 内存缓存清理定时器
+  private static cleanupTimer: number | undefined = undefined;
 
   static {
     // 启动内存缓存自动清理
@@ -80,17 +82,14 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: string | number | boolean | JsonData | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: string | number | boolean | JsonData | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
     if (!key || typeof key !== 'string') {
       throw new Error('Invalid key');
     }
 
     try {
-      // 处理undefined值，转换为null
-      const normalizedValue = value === undefined ? null : value;
-      
       // 确保value的类型安全
-      const safeValue = StorageUtil.validateValue(normalizedValue);
+      const safeValue: string | number | boolean | JsonData | null = StorageUtil.validateValue(value);
       
       const dataToSave: StorageData = {
         value: safeValue,
@@ -158,7 +157,7 @@ export default class StorageUtil {
 
       // 检查是否过期
       const now = Date.now();
-      if (data.expireTime !== null && data.expireTime > 0 && now > data.expireTime) {
+      if (data.expireTime > 0 && now > data.expireTime) {
         Logger.warn(TAG, `Data expired for key: ${key}`);
         await StorageUtil.remove(key, type);
         // 直接返回默认值
@@ -400,6 +399,22 @@ export default class StorageUtil {
       return null;
     }
 
+    // 检查是否过期
+    const now = Date.now();
+    if (cachedItem.expireTime !== 0 && now > cachedItem.expireTime) {
+      // 过期则删除并返回null
+      const newCache: Record<string, MemoryCacheItem> = {};
+      const cacheKeys = Object.keys(StorageUtil.memoryCache);
+      for (let i = 0; i < cacheKeys.length; i++) {
+        const cacheKey = cacheKeys[i];
+        if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
+          newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
+        }
+      }
+      StorageUtil.memoryCache = newCache;
+      return null;
+    }
+
     return {
       value: cachedItem.value,
       timestamp: Date.now(),
@@ -548,7 +563,7 @@ export default class StorageUtil {
   /**
    * 从文件读取
    */
-  private static async getFromFile(key: string): Promise<StorageData | null> {
+  private static async getFromFile(key: string): Promise<StorageData | null | undefined> {
     try {
       const fileName = `${key}.json`;
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
@@ -687,9 +702,8 @@ export default class StorageUtil {
             typeof valueData === 'boolean' || valueData === null) {
           result.value = valueData;
         } else if (typeof valueData === 'object' && valueData !== null) {
-          // 创建新的安全对象
-          const safeObject: JsonData = {};
-          result.value = safeObject;
+          // 递归验证嵌套对象
+          result.value = StorageUtil.validateValue(valueData);
         }
       }
       
@@ -749,7 +763,8 @@ export default class StorageUtil {
           const keys = Object.keys(value);
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-            const propValue = value[key];
+            // 使用类型断言确保兼容性
+            const propValue = value[key] as string | number | boolean | JsonData | null | undefined;
             // 类型安全地处理每个属性值
             if (typeof propValue === 'string' || 
                 typeof propValue === 'number' || 
@@ -758,7 +773,7 @@ export default class StorageUtil {
               safeObj[key] = propValue;
             } else if (typeof propValue === 'object' && propValue !== null) {
               // 递归验证嵌套对象
-              safeObj[key] = this.validateValue(propValue) as JsonData;
+              safeObj[key] = StorageUtil.validateValue(propValue);
             }
           }
           return safeObj;
@@ -801,5 +816,7 @@ export default class StorageUtil {
   }
 }
 
-// 导出单例实例
-export default StorageUtil.getInstance();
+// 导出单例实例函数而不是直接导出实例
+export function getStorageUtil(): StorageUtil {
+  return StorageUtil.getInstance();
+}

@@ -50,9 +50,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
-   * 初始化网络服务
-   */
-  async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
+ * 初始化网络服务
+ * @param config 网络配置对象，包含基础URL、超时时间、重试次数等
+ * @returns 初始化结果，成功或失败信息
+ */
+async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
     try {
       Logger.info(TAG, 'Initializing network repository...');
       
@@ -126,15 +128,21 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
-   * 创建请求配置
-   */
-  private createRequestConfig(
-    url: string,
-    method: string,
-    data?: Record<string, unknown>,
-    params?: Record<string, unknown>,
-    customHeaders?: Record<string, string>
-  ): RequestConfig {
+ * 创建请求配置
+ * @param url 请求URL，可以是相对路径或绝对URL
+ * @param method HTTP方法 (GET, POST, PUT, DELETE等)
+ * @param data 请求体数据
+ * @param params URL查询参数
+ * @param customHeaders 自定义请求头
+ * @returns 构建好的请求配置对象
+ */
+private createRequestConfig(
+  url: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD',
+  data?: Record<string, unknown>,
+  params?: Record<string, string | number | boolean>,
+  customHeaders?: Record<string, string>
+): RequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
     const headers = { ...this.config.headers, ...customHeaders };
     
@@ -194,13 +202,13 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     try {
       const cached = await StorageUtil.get(key);
       if (cached && typeof cached === 'object' && 'data' in cached && 'timestamp' in cached) {
-        const cacheItem = cached as Record<string, unknown>;
+        const cacheItem = cached as { data: T; timestamp: number };
         const now = Date.now();
-        const expiry = (cacheItem.timestamp as number) + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
+        const expiry = cacheItem.timestamp + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
         
         if (now < expiry) {
           Logger.debug(TAG, `Cache hit for key: ${key}`);
-          return cacheItem.data as T;
+          return cacheItem.data;
         } else {
           Logger.debug(TAG, `Cache expired for key: ${key}`);
           await StorageUtil.remove(key);

@@ -28,16 +28,16 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象
    */
-  static parse<T extends Record<string, unknown>>(jsonStr: string): T {
+  static parse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
     try {
       // 使用泛型确保类型安全
-      const result = JSON.parse(jsonStr);
+      const result: object = JSON.parse(jsonStr);
       // 确保返回类型安全
       if (typeof result === 'object' && result !== null) {
         return result as T;
       }
       // 使用明确的类型创建空对象
-      const emptyObj: Record<string, unknown> = {};
+      const emptyObj: Record<string, string | number | boolean | object | null> = {};
       return emptyObj as T;
     } catch {
       // 使用明确的类型创建空对象
@@ -67,7 +67,8 @@ export default class JsonUtil {
         return null as T;
       }
       // 对于对象类型，使用类型安全的方式克隆
-      return JSON.parse(JSON.stringify(obj)) as T;
+      const cloned: Record<string, string | number | boolean | object | null> = JSON.parse(JSON.stringify(obj));
+      return cloned as T;
     } catch {
       // 克隆失败时返回原始对象的安全副本
       if (obj === null) {
@@ -102,7 +103,9 @@ export default class JsonUtil {
   static prettyPrint(jsonStr: string, indent: number = 2): string {
     try {
       // 使用明确类型进行解析
-      const obj: Record<string, unknown> = JSON.parse(jsonStr);
+      const parsed: object = JSON.parse(jsonStr);
+      const obj: Record<string, string | number | boolean | object | null> = 
+        typeof parsed === 'object' && parsed !== null ? parsed as Record<string, string | number | boolean | object | null> : {};
       return JSON.stringify(obj, null, indent);
     } catch {
       return jsonStr;

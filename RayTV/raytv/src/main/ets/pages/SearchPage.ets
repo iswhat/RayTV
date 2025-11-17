@@ -1,5 +1,5 @@
 
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { MediaItem } from '../data/bean/MediaItem';
 import { SearchHistoryItem } from '../../data/repository/SearchHistoryRepository';
@@ -226,9 +226,7 @@ struct SearchPage {
       this.showSourceList = false;
       
       // 跳转到MediaDetailPage页面，携带相关参数
-      Router.push({
-        url: 'pages/MediaDetailPage',
-        params: {
+      AppNavigator.getInstance().navigateToDetail({
           title: result.title,
           sourceId: result.id,
           sourceType: result.sourceType,
@@ -238,8 +236,7 @@ struct SearchPage {
           siteName: result.sourceType,
           // 记录当前使用的线路信息
           currentLine: lineManager.getCurrentLine() ? lineManager.getCurrentLine().name : 'Default'
-        }
-      });
+        });
       
       // 记录搜索历史
       this.saveSearchHistory(this.searchText);
@@ -421,21 +418,11 @@ struct SearchPage {
     
     Logger.info(this.TAG, `Search result clicked: ${media.title}`);
     
-    // 跳转到今日详情页
-    Router.push({
-      url: 'pages/MediaDetailPage',
-      params: {
-        mediaId: media.id,
-        siteKey: media.siteKey || '',
-        title: media.title || '',
-        coverUrl: media.coverUrl || '',
-        description: media.description || '',
-        year: media.year || '',
-        type: media.type || '',
-        score: media.score || '',
-        directors: media.directors || [],
-        actors: media.actors || []
-      }
+    // 跳转到详情页
+    AppNavigator.getInstance().navigateToDetail({
+      id: media.id,
+      siteKey: media.siteKey || '',
+      type: 'vod'
     });
   }
   

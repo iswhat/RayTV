@@ -2,6 +2,7 @@
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import { Logger } from './Logger';
+import UIAbilityContext from '@ohos.app.ability.UIAbilityContext';
 import { safeStringify } from './JsonUtil';
 
 const TAG = 'FileUtil';
@@ -298,9 +299,9 @@ export default class FileUtil {
    */
   public static async getApplicationDataDir(): Promise<string> {
     try {
-      // 在HarmonyOS中，可以使用context来获取应用数据目录
-      // 这里返回一个默认的应用数据目录路径
-      const context = getContext() as common.UIAbilityContext;
+      // 使用新的API方式获取应用上下文
+      // 获取应用程序上下文
+      const context = common.getApplicationContext() as UIAbilityContext;
       return context.filesDir;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

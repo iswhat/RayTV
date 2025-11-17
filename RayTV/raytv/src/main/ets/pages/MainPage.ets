@@ -1,5 +1,5 @@
 import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
@@ -63,17 +63,17 @@ struct MainPage {
   
   // 跳转到分类页面
   private navigateToCategory() {
-    Router.push({ uri: 'pages/CategoryPage' });
+    AppNavigator.getInstance().navigateToCategory();
   }
   
   // 跳转到搜索页面
   private navigateToSearch() {
-    Router.push({ uri: 'pages/SearchPage' });
+    AppNavigator.getInstance().navigateToSearch();
   }
   
   // 跳转到设置页面
   private navigateToSettings() {
-    Router.push({ uri: 'pages/SettingsPage' });
+    AppNavigator.getInstance().navigateToSettings();
   }
   
   // 渲染媒体项
@@ -92,7 +92,7 @@ struct MainPage {
           .marginTop(8)
       }
     }
-    .onClick(() => Router.push({ uri: `pages/MediaDetailPage?id=${media.id}` }))
+    .onClick(() => AppNavigator.getInstance().navigateToDetail({ id: media.id, siteKey: media.siteKey || '', type: 'vod' }))
   }
   
   build() {

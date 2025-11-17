@@ -1,5 +1,5 @@
 import { ScrollView, Image, Text, Button, List, ListItem, Divider, LoadingProgress, Tag, SearchBar, Stack, Flex, Blank, TextInput, Grid, GridItem, Swiper, SwiperItem } from '@kit.ArkUI';
-import Router from '@ohos.router';
+import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
 import { mediaService } from '../service/media/MediaService';
@@ -296,17 +296,11 @@ struct MediaDetailPage {
         
         // 如果有播放源且选择了剧集，跳转到播放页面
         if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
-          Router.push({
-            url: 'pages/PlaybackPage',
-            params: {
-              mediaId: this.mediaId,
-              siteKey: this.siteKey,
-              episodeId: this.episodes[this.selectedEpisodeIndex].id,
-              playSourceIndex: 0,
-              mediaTitle: this.mediaDetail?.title || '',
-              episodeName: this.episodes[this.selectedEpisodeIndex].name
-            }
-          });
+          AppNavigator.getInstance().navigateToVideoPlay({
+          videoId: this.mediaId,
+          siteKey: this.siteKey,
+          episodeName: this.episodes[this.selectedEpisodeIndex].name
+        });
         }
       }).catch((error) => {
         Logger.error(this.TAG, `Failed to load play sources: ${error}`);
@@ -477,19 +471,10 @@ struct MediaDetailPage {
     playSource: PlaySource,
     startPosition: number
   ): void {
-    Router.push({
-      url: 'pages/PlaybackPage',
-      params: {
-        mediaId: this.mediaId,
-        siteKey: this.siteKey,
-        episodeId: episodeId,
-        playSource: playSource,
-        playSources: this.filteredSources,
-        mediaTitle: this.mediaDetail?.title || '',
-        episodeName: episodeName,
-        startPosition: startPosition,
-        autoSwitchSourceOnError: true
-      }
+    AppNavigator.getInstance().navigateToVideoPlay({
+      videoId: this.mediaId,
+      siteKey: this.siteKey,
+      episodeName: episodeName
     });
   }
   
@@ -530,14 +515,12 @@ struct MediaDetailPage {
    * 处理相关媒体点击
    */
   private handleRelatedMediaClick(media: MediaItem): void {
-    // 跳转到对应媒体详情页
-    Router.push({
-      url: 'pages/MediaDetailPage',
-      params: {
-        mediaId: media.id,
-        siteKey: media.siteKey
-      }
-    });
+      // 跳转到对应媒体详情页
+      AppNavigator.getInstance().navigateToDetail({
+        id: media.id,
+        siteKey: media.siteKey,
+        type: 'vod'
+      });
   }
   
   /**
@@ -553,8 +536,8 @@ struct MediaDetailPage {
    * 处理返回
    */
   private handleBack(): void {
-    this.context.router.back();
-  }
+      AppNavigator.getInstance().back();
+    }
   
   /**
    * 渲染加载状态
