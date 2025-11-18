@@ -297,7 +297,7 @@ export default class SettingService {
   
   // 监听器
   private generalListeners: Array<() => void> = [];
-  private specificListeners: Record<string, Array<(event: SettingChangeEvent<unknown>) => void>> = {};
+  private specificListeners: Map<string, Array<(event: SettingChangeEvent<unknown>) => void>> = new Map();
   private themeListeners: Array<(themeMode: ThemeMode, accentColor: string) => void> = [];
   private languageListeners: Array<(language: LanguageCode) => void> = [];
 
@@ -1067,18 +1067,23 @@ export default class SettingService {
     listener: (event: SettingChangeEvent<AppSettings[K]>) => void
   ): () => void {
     const keyStr = key as string;
-    if (!this.specificListeners[keyStr]) {
-      this.specificListeners[keyStr] = [];
+    if (!this.specificListeners.has(keyStr)) {
+      this.specificListeners.set(keyStr, []);
     }
     
-    this.specificListeners[keyStr].push(listener as SettingChangeListener<unknown>);
+    const listeners = this.specificListeners.get(keyStr)!;
+    listeners.push(listener as (event: SettingChangeEvent<unknown>) => void);
     
     // 返回取消监听函数
     return () => {
-      if (this.specificListeners[keyStr]) {
-        const index = this.specificListeners[keyStr].indexOf(listener as SettingChangeListener<unknown>);
+      if (this.specificListeners.has(keyStr)) {
+        const listeners = this.specificListeners.get(keyStr)!;
+        const index = listeners.indexOf(listener as (event: SettingChangeEvent<unknown>) => void);
         if (index > -1) {
-          this.specificListeners[keyStr].splice(index, 1);
+          listeners.splice(index, 1);
+        }
+        if (listeners.length === 0) {
+          this.specificListeners.delete(keyStr);
         }
       }
     };
@@ -1159,8 +1164,9 @@ export default class SettingService {
     };
     
     // 通知特定键的监听器
-    if (this.specificListeners[key]) {
-      for (const listener of this.specificListeners[key]) {
+    if (this.specificListeners.has(key)) {
+      const listeners = this.specificListeners.get(key)!;
+      for (const listener of listeners) {
         try {
           listener(event);
         } catch (error) {

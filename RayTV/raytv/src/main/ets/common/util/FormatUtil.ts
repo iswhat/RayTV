@@ -1,7 +1,7 @@
 // FormatUtil - 格式化工具类
 // 提供数据格式化相关的工具函数，包括时间、数字、字符串等的格式化
 
-import Logger from '../common/util/Logger';
+import Logger from './Logger';
 
 /**
  * 格式化工具类

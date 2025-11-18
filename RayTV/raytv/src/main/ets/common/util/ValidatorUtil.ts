@@ -1,7 +1,7 @@
 // ValidatorUtil - 验证工具类
 // 提供数据验证相关的工具函数，包括邮箱、手机号、URL等验证
 
-import { Logger } from './Logger';
+import Logger from './Logger';
 
 /**
  * 验证工具类

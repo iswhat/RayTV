@@ -374,7 +374,7 @@ export class CommonUtil {
    * @param sources 源对象
    * @returns 合并后的对象
    */
-  public mergeObjects(target: Record<string, unknown>, ...sources: Record<string, unknown>[]): Record<string, unknown> {
+  public mergeObjects<T extends Record<string, unknown>>(target: T, ...sources: Record<string, unknown>[]): T {
     if (!sources.length) return target;
     
     const source = sources.shift();
@@ -384,24 +384,28 @@ export class CommonUtil {
       const keys = this.getObjectKeys(source);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call
-        if (typeof source === 'object' && source !== null && Object.keys(source).includes(key)) {
-          if (source[key] && typeof source[key] === 'object') {
+        // 安全检查属性是否存在
+        if (typeof source === 'object' && source !== null && this.hasOwnProperty(source, key)) {
+          if (source[key] && typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
             if (!target[key]) {
-              // 手动创建新属性，避免使用Object.assign（ArkTS限制）
+              target[key] = {};
+            } else if (typeof target[key] !== 'object' || target[key] === null || Array.isArray(target[key])) {
               target[key] = {};
             }
             this.mergeObjects(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
           } else {
-            // 手动设置属性值，避免使用Object.assign（ArkTS限制）
             target[key] = source[key];
           }
         }
       }
     }
     
-    // 使用apply替代spread操作符
-    return this.mergeObjects.apply(this, [target].concat(sources));
+    // 递归合并后续源对象
+    if (sources.length > 0) {
+      return this.mergeObjects(target, ...sources);
+    }
+    
+    return target;
   }
   
   /**
@@ -500,11 +504,21 @@ export class CommonUtil {
    */
   public parseUrlParams(url: string): Record<string, string> {
     const params: Record<string, string> = {};
-    const searchParams = new URL(url).searchParams;
-    
-    searchParams.forEach((value, key) => {
-      params[key] = value;
-    });
+    try {
+      // 使用自定义URL解析逻辑替代new URL
+      const queryIndex = url.indexOf('?');
+      if (queryIndex !== -1) {
+        const queryString = url.slice(queryIndex + 1);
+        queryString.split('&').forEach(param => {
+          const [key, value] = param.split('=').map(decodeURIComponent);
+          if (key) {
+            params[key] = value || '';
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to parse URL parameters:', error);
+    }
     
     return params;
   }
@@ -703,6 +717,3 @@ export class CommonUtil {
 
 // 导出通用工具单例
 export const commonUtil = CommonUtil.getInstance();
-
-// 导出常用函数类型
-export type { CommonUtil };

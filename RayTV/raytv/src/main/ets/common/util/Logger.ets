@@ -110,10 +110,22 @@ export interface LoggerConfig {
  * 日志额外数据接口
  */
 export interface LoggerExtraData {
-  // 具体属性定义，符合ArkTS规范
+  /**
+   * 额外消息
+   */
   message?: string;
+  /**
+   * 错误代码
+   */
   code?: number;
-  detail?: object;
+  /**
+   * 详细数据
+   */
+  detail?: Record<string, unknown>;
+  /**
+   * 其他任意属性
+   */
+  [key: string]: unknown;
 }
 
 /**
@@ -200,7 +212,7 @@ class Logger {
       const instance = new Logger(); // 使用局部变量
       Logger._instance = instance;
     }
-    return Logger._instance;
+    return Logger._instance!
   }
 
   /**
@@ -292,11 +304,8 @@ class Logger {
    */
   public static exception(tag: string, error: string | Error, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
-    if (error instanceof Error) {
-      instance.logException(error, `[${tag}] ${error.message}`);
-    } else {
-      instance.error(`[${tag}] ${String(error)}`);
-    }
+    const formattedMessage = `[${tag}] ${error instanceof Error ? error.message : error}`;
+    instance.error(formattedMessage, error instanceof Error ? error : undefined, extra);
   }
 
   /**
@@ -392,7 +401,7 @@ class Logger {
       let stackTrace = '';
       if (error && error.stack) {
         stackTrace = error.stack;
-      } else if (this.config.enableStackTrace) {
+      } else {
         stackTrace = this.getStackTrace();
       }
       this.log(LogLevel.ERROR, message, extra, stackTrace);
@@ -566,11 +575,10 @@ class Logger {
     // 添加到文件写入队列
     if (this.config.fileEnabled) {
       this.logQueue.push(entry);
-      if (!this.isWriting) {
-        this.writeLogsToFile().catch((err: Error) => {
-          console.error('Failed to write logs to file:', err);
-        });
-      }
+      // 异步刷新日志到文件
+      this.flushLogs().catch(err => {
+        console.error('Failed to flush logs:', err);
+      });
     }
   }
 
@@ -743,15 +751,16 @@ class Logger {
     }
     
     this.isWriting = true;
-    // 使用slice替代spread操作符
-    const entriesToWrite = this.logQueue.slice();
+    // 使用slice替代spread操作符获取要写入的条目
+    const entriesToWrite = this.logQueue.slice(0);
     this.logQueue = [];
     
     try {
       // 这里需要实现异步文件写入
       for (const entry of entriesToWrite) {
         const formattedLine = this.formatLogEntry(entry) + '\n';
-        // 写入到文件
+        // 写入到文件 - 实际实现需要使用文件系统API
+        console.log('Log would be written:', formattedLine);
       }
       
       // 检查日志文件大小
@@ -816,6 +825,7 @@ class Logger {
   }
 }
 
-// 导出Logger类和默认实例
-export { Logger };
+// 导出默认实例
 export default Logger.getInstance();
+// 导出Logger类，供需要创建自定义实例的场景使用
+export { Logger };

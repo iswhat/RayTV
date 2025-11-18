@@ -18,7 +18,8 @@ export default class JsonUtil {
   static stringify<T>(value: T): string {
     try {
       return JSON.stringify(value);
-    } catch {
+    } catch (error) {
+      console.error('JSON stringify failed:', error);
       return "{}";
     }
   }
@@ -28,30 +29,27 @@ export default class JsonUtil {
    * @param jsonStr - JSON字符串
    * @returns 解析后的对象
    */
-  static parse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static parse<T = unknown>(jsonStr: string): T {
     try {
-      // 使用泛型确保类型安全
-      const result: object = JSON.parse(jsonStr);
-      // 确保返回类型安全
-      if (typeof result === 'object' && result !== null) {
-        return result as T;
+      if (typeof jsonStr !== 'string') {
+        // 确保参数类型正确
+        return {} as T;
       }
-      // 使用明确的类型创建空对象
-      const emptyObj: Record<string, string | number | boolean | object | null> = {};
-      return emptyObj as T;
-    } catch {
-      // 使用明确的类型创建空对象
-      const emptyObj: Record<string, string | number | boolean | object | null> = {};
-      return emptyObj as T;
+      const result = JSON.parse(jsonStr);
+      return result as T;
+    } catch (error) {
+      console.error('JSON parse failed:', error);
+      // 根据泛型类型返回适当的默认值
+      return (typeof ({} as T) === 'object' && ({} as T) !== null) ? {} as T : (undefined as unknown) as T;
     }
   }
 
   /**
    * 安全的JSON解析，不会抛出异常
    * @param jsonStr - JSON字符串
-   * @returns 解析后的对象，解析失败返回空对象
+   * @returns 解析后的对象，解析失败返回适当的默认值
    */
-  static safeParse<T extends Record<string, string | number | boolean | object | null>>(jsonStr: string): T {
+  static safeParse<T = unknown>(jsonStr: string): T {
     return JsonUtil.parse<T>(jsonStr);
   }
 
@@ -60,23 +58,48 @@ export default class JsonUtil {
    * @param obj - 要克隆的对象
    * @returns 克隆后的新对象
    */
-  static deepClone<T extends object | null>(obj: T): T {
+  static deepClone<T>(obj: T): T {
     try {
-      // 处理null的情况
-      if (obj === null) {
-        return null as T;
+      // 处理基本类型和null
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
       }
-      // 对于对象类型，使用类型安全的方式克隆
-      const cloned: Record<string, string | number | boolean | object | null> = JSON.parse(JSON.stringify(obj));
-      return cloned as T;
-    } catch {
-      // 克隆失败时返回原始对象的安全副本
-      if (obj === null) {
-        return null as T;
+      
+      // 特殊处理Date对象
+      if (obj instanceof Date) {
+        return new Date(obj.getTime()) as T;
       }
-      // 返回空对象，保持类型一致性
-      const emptyObj: Record<string, string | number | boolean | object | null> = {};
-      return emptyObj as T;
+      
+      // 特殊处理Array对象
+      if (Array.isArray(obj)) {
+        return obj.map(item => this.deepClone(item)) as T;
+      }
+      
+      // 处理对象字面量
+      if (typeof obj === 'object') {
+        // 创建与原始对象相同类型的新对象
+        const clone = Array.isArray(obj) ? [] : {};
+        
+        // 复制所有可枚举属性
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            clone[key] = this.deepClone(obj[key]);
+          }
+        }
+        
+        return clone as T;
+      }
+      
+      return obj;
+    } catch (error) {
+      console.error('Deep clone failed:', error);
+      // 在克隆失败时，尝试使用JSON序列化作为备选方案
+      try {
+        return JSON.parse(JSON.stringify(obj)) as T;
+      } catch {
+        // 最后回退到返回原始对象
+        return obj;
+      }
     }
   }
 

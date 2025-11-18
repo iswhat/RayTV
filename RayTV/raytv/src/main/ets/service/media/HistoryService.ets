@@ -598,21 +598,22 @@ export class HistoryService {
    */
   private parseHistoryRow(row: Record<string, any>): HistoryItem {
     try {
+      const typedRow = row as Record<keyof HistoryItem, any>;
       return {
-        id: TypeSafetyUtil.asString(row.id, ''),
-        mediaId: TypeSafetyUtil.asString(row.mediaId, ''),
-        siteKey: TypeSafetyUtil.asString(row.siteKey, ''),
-        title: TypeSafetyUtil.asString(row.title, ''),
-        cover: row.cover ? TypeSafetyUtil.asString(row.cover) : undefined,
-        type: TypeSafetyUtil.asString(row.type, 'video') as MediaType,
-        episodeId: row.episodeId ? TypeSafetyUtil.asString(row.episodeId) : undefined,
-        episodeTitle: row.episodeTitle ? TypeSafetyUtil.asString(row.episodeTitle) : undefined,
-        progress: TypeSafetyUtil.asNumber(row.progress, 0),
-        duration: TypeSafetyUtil.asNumber(row.duration, 0),
-        lastPlayTime: TypeSafetyUtil.asNumber(row.lastPlayTime, Date.now()),
-        playCount: TypeSafetyUtil.asNumber(row.playCount, 1),
-        playSource: row.playSource ? this.safeParseJson<PlaySource>(row.playSource) : undefined,
-        extra: row.extra ? this.safeParseJson<HistoryExtraData>(row.extra) : {} as HistoryExtraData
+        id: TypeSafetyUtil.asString(typedRow.id, ''),
+        mediaId: TypeSafetyUtil.asString(typedRow.mediaId, ''),
+        siteKey: TypeSafetyUtil.asString(typedRow.siteKey, ''),
+        title: TypeSafetyUtil.asString(typedRow.title, ''),
+        cover: typedRow.cover ? TypeSafetyUtil.asString(typedRow.cover) : undefined,
+        type: TypeSafetyUtil.asString(typedRow.type, 'video') as MediaType,
+        episodeId: typedRow.episodeId ? TypeSafetyUtil.asString(typedRow.episodeId) : undefined,
+        episodeTitle: typedRow.episodeTitle ? TypeSafetyUtil.asString(typedRow.episodeTitle) : undefined,
+        progress: TypeSafetyUtil.asNumber(typedRow.progress, 0),
+        duration: TypeSafetyUtil.asNumber(typedRow.duration, 0),
+        lastPlayTime: TypeSafetyUtil.asNumber(typedRow.lastPlayTime, Date.now()),
+        playCount: TypeSafetyUtil.asNumber(typedRow.playCount, 1),
+        playSource: typedRow.playSource ? this.safeParseJson<PlaySource>(typedRow.playSource) : undefined,
+        extra: typedRow.extra ? this.safeParseJson<HistoryExtraData>(typedRow.extra) : {} as HistoryExtraData
       };
     } catch (error) {
       Logger.error(this.TAG, `Failed to parse history row: ${error}`);

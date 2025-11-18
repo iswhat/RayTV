@@ -103,7 +103,7 @@ export class AppNavigator {
    * @param route 页面路由
    * @param params 路由参数
    */
-  private async navigateTo(route: string, params?: Record<string, string | number | boolean | null | JsonData>): Promise<void> {
+  private async navigateTo(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       const currentUrl = router.getState().path;
@@ -123,8 +123,10 @@ export class AppNavigator {
         params
       });
     } catch (error) {
-      console.error(`Navigation to ${route} failed:`, error);
-      throw new Error(`Navigation to ${route} failed`);
+      // 安全处理错误信息
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Navigation to ${route} failed:`, errorMessage);
+      throw new Error(`Navigation to ${route} failed: ${errorMessage}`);
     }
   }
 
@@ -163,7 +165,7 @@ export class AppNavigator {
    * @param route 目标路由
    * @param params 路由参数
    */
-  async replace(route: string, params?: Record<string, string | number | boolean | null | JsonData>): Promise<void> {
+  async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       await router.replaceUrl({
@@ -182,20 +184,31 @@ export class AppNavigator {
    * @param route 页面路由
    */
   getPageUrl(route: string): string {
-    const urlMap: Record<string, string> = {
-      [PageRoute.HOME]: 'pages/HomePage',
-      [PageRoute.VIDEO_PLAY]: 'pages/VideoPlayPage',
-      [PageRoute.LINE_MANAGER]: 'pages/LineManagerPage',
-      [PageRoute.SETTINGS]: 'pages/SettingsPage',
-      [PageRoute.SEARCH]: 'pages/SearchPage',
-      [PageRoute.FAVORITES]: 'pages/FavoritesPage',
-      [PageRoute.HISTORY]: 'pages/HistoryPage',
-      [PageRoute.CATEGORY]: 'pages/CategoryPage',
-      [PageRoute.DETAIL]: 'pages/DetailPage',
-      [PageRoute.LIVE]: 'pages/LivePage'
-    };
-
-    return urlMap[route] || 'pages/HomePage';
+    // 使用switch语句替代索引签名，提高类型安全性
+    switch (route) {
+      case PageRoute.HOME:
+        return 'pages/HomePage';
+      case PageRoute.VIDEO_PLAY:
+        return 'pages/VideoPlayPage';
+      case PageRoute.LINE_MANAGER:
+        return 'pages/LineManagerPage';
+      case PageRoute.SETTINGS:
+        return 'pages/SettingsPage';
+      case PageRoute.SEARCH:
+        return 'pages/SearchPage';
+      case PageRoute.FAVORITES:
+        return 'pages/FavoritesPage';
+      case PageRoute.HISTORY:
+        return 'pages/HistoryPage';
+      case PageRoute.CATEGORY:
+        return 'pages/CategoryPage';
+      case PageRoute.DETAIL:
+        return 'pages/DetailPage';
+      case PageRoute.LIVE:
+        return 'pages/LivePage';
+      default:
+        return 'pages/HomePage';
+    }
   }
 
   /**
@@ -256,7 +269,13 @@ export class AppNavigator {
       const history = await this.storageUtil.get('navigationHistory', []);
       // 确保类型安全
       if (Array.isArray(history)) {
-        this.navigationHistory = history as NavigationHistoryItem[];
+        // 避免直接类型断言，进行基本的类型检查
+        this.navigationHistory = history.filter(item => 
+          item && typeof item === 'object' && 
+          typeof item.route === 'string' && 
+          typeof item.url === 'string' && 
+          typeof item.timestamp === 'number'
+        ).map(item => ({ ...item }));
       } else {
         this.navigationHistory = [];
       }
@@ -315,12 +334,19 @@ export class PageRoute {
 }
 
 /**
+   * 导航参数类型
+   */
+export type NavigationParams = {
+  [key: string]: string | number | boolean | null | JsonData;
+};
+
+/**
    * 导航历史项
    */
 export interface NavigationHistoryItem {
   route: string;
   url: string;
-  params?: Record<string, string | number | boolean | null | JsonData>;
+  params?: NavigationParams;
   timestamp: number;
 }
 

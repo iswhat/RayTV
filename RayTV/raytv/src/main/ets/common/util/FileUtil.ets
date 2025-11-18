@@ -1,9 +1,9 @@
 // FileUtil - 文件操作工具类
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
-import { Logger } from './Logger';
+import Logger from './Logger';
 import UIAbilityContext from '@ohos.app.ability.UIAbilityContext';
-import { safeStringify } from './JsonUtil';
+import JsonUtil, { safeStringify } from './JsonUtil';
 
 const TAG = 'FileUtil';
 

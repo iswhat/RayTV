@@ -1,4 +1,4 @@
-import Logger from '@ohos/base/Logger';
+import Logger from '../../common/util/Logger';
 import FileSystemAccess from '@ohos.file.fs';
 import { configService } from '../config/ConfigService';
 

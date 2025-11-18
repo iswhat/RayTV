@@ -1,5 +1,5 @@
 // Movie - 电影/视频实体类
-import { Logger } from '../../common/util/Logger';
+import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 
 const TAG = 'Movie';

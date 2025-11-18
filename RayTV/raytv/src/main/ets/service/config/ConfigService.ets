@@ -1056,7 +1056,7 @@ export default class ConfigService {
 
   // ========== 事件通知机制 ==========
   
-  private configListeners: Map<ConfigKey, Array<(value: ConfigValue) => void>> = new Map();
+  private configListeners: Map<string, Array<(value: ConfigValue) => void>> = new Map();
   private globalListeners: Array<(key: ConfigKey, value: ConfigValue) => void> = [];
   private resetListeners: Array<() => void> = [];
 
@@ -1064,11 +1064,12 @@ export default class ConfigService {
    * 监听配置更改
    */
   public addConfigListener(key: ConfigKey, listener: (value: ConfigValue) => void): () => void {
-    if (!this.configListeners.has(key)) {
-      this.configListeners.set(key, []);
+    const keyStr = key as string;
+    if (!this.configListeners.has(keyStr)) {
+      this.configListeners.set(keyStr, []);
     }
     
-    const listeners = this.configListeners.get(key)!;
+    const listeners = this.configListeners.get(keyStr)!;
     listeners.push(listener);
     
     // 返回取消监听函数
@@ -1115,8 +1116,9 @@ export default class ConfigService {
    */
   private notifyConfigChanged(key: ConfigKey, value: ConfigValue): void {
     // 通知特定配置的监听器
-    if (this.configListeners.has(key)) {
-      const listeners = this.configListeners.get(key)!;
+    const keyStr = key as string;
+    if (this.configListeners.has(keyStr)) {
+      const listeners = this.configListeners.get(keyStr)!;
       for (const listener of listeners) {
         try {
           listener(value);

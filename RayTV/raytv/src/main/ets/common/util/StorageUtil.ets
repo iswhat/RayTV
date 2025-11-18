@@ -804,7 +804,12 @@ export default class StorageUtil {
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
             // 使用类型保护确保类型安全
-            const propValue = value[key];
+            // 使用Object.prototype.hasOwnProperty.call确保属性存在
+          const safeKey = String(key); // 确保key是字符串
+          let propValue: any = null;
+          if (Object.prototype.hasOwnProperty.call(value, safeKey)) {
+            propValue = (value as any)[safeKey];
+          }
             // 类型安全地处理每个属性值
             if (typeof propValue === 'string' || 
                 typeof propValue === 'number' || 

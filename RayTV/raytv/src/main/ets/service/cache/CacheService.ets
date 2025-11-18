@@ -3,6 +3,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil from '../../common/util/FileUtil';
 import JsonUtil from '../../common/util/JsonUtil';
+import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import ConfigService from '../config/ConfigService';
 import FileService, { StorageLocation, FileType, FileConfig } from './FileService';
 
@@ -1039,7 +1040,7 @@ export default class CacheService {
       if (this.cacheConfig.enableMemoryCache && 
           (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK)) {
         this.memoryCache.set(fullKey, {
-          data: data as unknown,
+          data: TypeSafetyHelper.asObject(data) || {},
           expiry: metadata.expiry,
           timestamp: Date.now()
         });
@@ -1168,7 +1169,7 @@ export default class CacheService {
                 data = typeof fileContent === 'string' && 
                       (fileContent.startsWith('{') || fileContent.startsWith('[')) 
                   ? JsonUtil.parse<T>(fileContent)
-                  : (fileContent as unknown as T);
+                  : TypeSafetyHelper.asObject<T>(fileContent) as T;
               } catch (parseError) {
                 throw new Error('Failed to parse cached data');
               }
