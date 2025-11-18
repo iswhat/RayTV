@@ -70,31 +70,31 @@ export default class SearchResult {
    * 构造函数
    */
   constructor(data: Partial<SearchResult>) {
-    this.id = data.id || `result_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.title = data.title || '';
+    this.id = data.id ?? `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    this.title = data.title ?? '';
     this.originalTitle = data.originalTitle;
-    this.type = data.type || ResultType.OTHER;
+    this.type = data.type ?? ResultType.OTHER;
     this.coverUrl = data.coverUrl;
     this.backdropUrl = data.backdropUrl;
     this.description = data.description;
     this.score = data.score;
     this.year = data.year;
     this.releaseDate = data.releaseDate;
-    this.genres = data.genres || [];
-    this.tags = data.tags || [];
+    this.genres = data.genres ?? [];
+    this.tags = data.tags ?? [];
     this.duration = data.duration;
     this.totalEpisodes = data.totalEpisodes;
     this.currentSeason = data.currentSeason;
-    this.actors = data.actors || [];
-    this.directors = data.directors || [];
+    this.actors = data.actors ?? [];
+    this.directors = data.directors ?? [];
     this.popularity = data.popularity;
     this.matchScore = data.matchScore;
     // 确保extraInfo是有效的对象类型，使用明确的类型初始化
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
       this.extraInfo = data.extraInfo as ExtraInfo;
     } else {
-      // 使用空对象字面量，但确保类型安全
-      this.extraInfo = {} as ExtraInfo;
+      // 使用空对象字面量，明确类型
+      this.extraInfo = {};
     }
     this.link = data.link;
     this.sourceId = data.sourceId;
@@ -298,8 +298,8 @@ export default class SearchResult {
    * @returns 优先级数值
    */
   public getDisplayPriority(): number {
-    // 定义类型优先级 - 使用ResultType枚举作为键
-    const typePriority: Record<ResultType, number> = {
+    // 定义类型优先级 - 使用对象字面量，明确键为number类型
+    const typePriority: Record<number, number> = {
       [ResultType.MOVIE]: 10,
       [ResultType.TV_SERIES]: 9,
       [ResultType.ANIME]: 8,
@@ -315,8 +315,8 @@ export default class SearchResult {
       [ResultType.OTHER]: 0
     };
 
-    // 基础优先级 - 直接使用枚举值作为键
-    let priority = typePriority[this.type] || 0;
+    // 基础优先级 - 确保类型安全地访问
+    let priority = typePriority[this.type as number] ?? 0;
     
     // 结合匹配分数
     if (this.matchScore) {
@@ -340,8 +340,8 @@ export default class SearchResult {
    * 序列化对象（用于存储或传输）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined> {
-    const result: Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined> = {};
+  public toSerializable(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
     
     result.id = this.id;
     result.title = this.title;
@@ -375,7 +375,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | string[] | ExtraInfo | null | undefined>): SearchResult {
+  public static fromSerializable(data: Record<string, unknown>): SearchResult {
     // 明确类型的部分对象
     const searchResultData: Partial<SearchResult> = {};
     
@@ -383,20 +383,20 @@ export default class SearchResult {
     if (typeof data.id === 'string') searchResultData.id = data.id;
     if (typeof data.title === 'string') searchResultData.title = data.title;
     if (typeof data.originalTitle === 'string') searchResultData.originalTitle = data.originalTitle;
-    if (typeof data.type === 'number') searchResultData.type = data.type;
+    if (typeof data.type === 'number') searchResultData.type = data.type as ResultType;
     if (typeof data.coverUrl === 'string') searchResultData.coverUrl = data.coverUrl;
     if (typeof data.backdropUrl === 'string') searchResultData.backdropUrl = data.backdropUrl;
     if (typeof data.description === 'string') searchResultData.description = data.description;
     if (typeof data.score === 'number') searchResultData.score = data.score;
     if (typeof data.year === 'number') searchResultData.year = data.year;
     if (typeof data.releaseDate === 'string') searchResultData.releaseDate = data.releaseDate;
-    if (Array.isArray(data.genres)) searchResultData.genres = data.genres as string[];
-    if (Array.isArray(data.tags)) searchResultData.tags = data.tags as string[];
+    if (Array.isArray(data.genres)) searchResultData.genres = data.genres.filter(item => typeof item === 'string') as string[];
+    if (Array.isArray(data.tags)) searchResultData.tags = data.tags.filter(item => typeof item === 'string') as string[];
     if (typeof data.duration === 'number') searchResultData.duration = data.duration;
     if (typeof data.totalEpisodes === 'number') searchResultData.totalEpisodes = data.totalEpisodes;
     if (typeof data.currentSeason === 'number') searchResultData.currentSeason = data.currentSeason;
-    if (Array.isArray(data.actors)) searchResultData.actors = data.actors as string[];
-    if (Array.isArray(data.directors)) searchResultData.directors = data.directors as string[];
+    if (Array.isArray(data.actors)) searchResultData.actors = data.actors.filter(item => typeof item === 'string') as string[];
+    if (Array.isArray(data.directors)) searchResultData.directors = data.directors.filter(item => typeof item === 'string') as string[];
     if (typeof data.popularity === 'number') searchResultData.popularity = data.popularity;
     if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
     // 安全处理extraInfo，确保类型正确

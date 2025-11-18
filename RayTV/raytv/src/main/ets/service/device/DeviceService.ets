@@ -3,6 +3,7 @@ import Logger from '../../common/util/Logger';
 import { DeviceInfo, DeviceType, DeviceCapability } from '../../data/bean/DeviceInfo';
 import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
+import TypeSafetyUtil from '../../common/util/TypeSafetyUtil';
 import deviceInfo from '@ohos.deviceInfo';
 import i18n from '@ohos.i18n';
 import connection from '@ohos.net.connection';
@@ -10,10 +11,20 @@ import display from '@ohos.display';
 
 const TAG = 'DeviceService';
 
+// 设备功能检测详情接口
+export interface CapabilityDetails {
+  capabilityType?: string;
+  version?: string;
+  maxValue?: number;
+  minValue?: number;
+  supportedFormats?: string[];
+  properties?: Record<string, string | number | boolean>;
+}
+
 // 设备功能检测结果
-interface CapabilityCheckResult {
+export interface CapabilityCheckResult {
   supported: boolean;
-  details?: unknown;
+  details?: CapabilityDetails;
   error?: string;
 }
 
@@ -631,13 +642,14 @@ export default class DeviceService {
   /**
    * 设置自定义设备属性
    */
-  public async setCustomProperty(key: string, value: unknown): Promise<void> {
+  public async setCustomProperty<T extends string | number | boolean | object>(key: string, value: T): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
     
     if (this.cachedDeviceInfo) {
-      this.cachedDeviceInfo.customProperties[key] = value;
+      // 使用类型安全的方式存储自定义属性
+      this.cachedDeviceInfo.customProperties[key] = TypeSafetyUtil.safeStringify(value);
       await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
       this.notifyDeviceInfoChanged();
     }

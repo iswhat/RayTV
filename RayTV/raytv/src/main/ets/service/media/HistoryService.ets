@@ -1,6 +1,17 @@
 import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../../data/db/DatabaseManager';
 import { MediaItem, MediaType, PlaySource } from './MediaService';
+import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
+
+/**
+ * 历史记录项接口
+ */
+/**
+ * 历史记录附加信息接口
+ */
+export interface HistoryExtraData {
+  [key: string]: string | number | boolean | object | undefined;
+}
 
 /**
  * 历史记录项接口
@@ -19,7 +30,7 @@ export interface HistoryItem {
   lastPlayTime: number; // 最后播放时间
   playCount: number;    // 播放次数
   playSource?: PlaySource; // 播放源信息
-  extra?: Record<string, unknown>; // 其他附加信息
+  extra?: HistoryExtraData; // 其他附加信息
 }
 
 /**
@@ -135,7 +146,7 @@ export class HistoryService {
         lastPlayTime: now,
         playCount: 1,
         playSource,
-        extra: {}
+        extra: {} as HistoryExtraData
       };
 
       // 检查是否已存在
@@ -261,7 +272,7 @@ export class HistoryService {
 
       // 构建查询条件
       let whereClause = '';
-      const whereParams: unknown[] = [];
+      const whereParams: any[] = [];
       
       if (type) {
         whereClause = 'WHERE type = ?';
@@ -282,7 +293,7 @@ export class HistoryService {
       
       if (result !== null) {
         while (result.goToNextRow()) {
-          const item: Record<string, unknown> = {};
+          const item: Record<string, any> = {};
           for (let i = 0; i < result.rowCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -314,7 +325,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, unknown> = {};
+          const item: Record<string, any> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -349,7 +360,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, unknown> = {};
+          const item: Record<string, any> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -388,7 +399,7 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, unknown> = {};
+          const item: Record<string, any> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
             const value = result.getLong(i) ?? result.getString(i);
@@ -499,7 +510,7 @@ export class HistoryService {
   public async getHistoryCount(type?: MediaType): Promise<number> {
     try {
       let query = `SELECT COUNT(*) as count FROM ${this.historyTable}`;
-      const params: unknown[] = [];
+      const params: any[] = [];
 
       if (type) {
         query += ' WHERE type = ?';
@@ -585,23 +596,45 @@ export class HistoryService {
    * @returns HistoryItem
    * @private
    */
-  private parseHistoryRow(row: Record<string, unknown>): HistoryItem {
-    return {
-      id: row.id,
-      mediaId: row.mediaId,
-      siteKey: row.siteKey,
-      title: row.title,
-      cover: row.cover || undefined,
-      type: row.type,
-      episodeId: row.episodeId || undefined,
-      episodeTitle: row.episodeTitle || undefined,
-      progress: row.progress || 0,
-      duration: row.duration || 0,
-      lastPlayTime: row.lastPlayTime,
-      playCount: row.playCount || 1,
-      playSource: row.playSource ? JSON.parse(row.playSource) : undefined,
-      extra: row.extra ? JSON.parse(row.extra) : {}
-    };
+  private parseHistoryRow(row: Record<string, any>): HistoryItem {
+    try {
+      return {
+        id: TypeSafetyUtil.asString(row.id, ''),
+        mediaId: TypeSafetyUtil.asString(row.mediaId, ''),
+        siteKey: TypeSafetyUtil.asString(row.siteKey, ''),
+        title: TypeSafetyUtil.asString(row.title, ''),
+        cover: row.cover ? TypeSafetyUtil.asString(row.cover) : undefined,
+        type: TypeSafetyUtil.asString(row.type, 'video') as MediaType,
+        episodeId: row.episodeId ? TypeSafetyUtil.asString(row.episodeId) : undefined,
+        episodeTitle: row.episodeTitle ? TypeSafetyUtil.asString(row.episodeTitle) : undefined,
+        progress: TypeSafetyUtil.asNumber(row.progress, 0),
+        duration: TypeSafetyUtil.asNumber(row.duration, 0),
+        lastPlayTime: TypeSafetyUtil.asNumber(row.lastPlayTime, Date.now()),
+        playCount: TypeSafetyUtil.asNumber(row.playCount, 1),
+        playSource: row.playSource ? this.safeParseJson<PlaySource>(row.playSource) : undefined,
+        extra: row.extra ? this.safeParseJson<HistoryExtraData>(row.extra) : {} as HistoryExtraData
+      };
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to parse history row: ${error}`);
+      throw new Error(`Invalid history data format`);
+    }
+  }
+
+  /**
+   * 安全地解析JSON字符串
+   * @param jsonString JSON字符串
+   * @returns 解析后的对象或默认值
+   */
+  private safeParseJson<T>(jsonString: unknown, defaultValue?: T): T {
+    try {
+      if (!jsonString || typeof jsonString !== 'string') {
+        return defaultValue as T;
+      }
+      return JSON.parse(jsonString) as T;
+    } catch (error) {
+      Logger.warn(this.TAG, `Failed to parse JSON: ${error}`);
+      return defaultValue as T;
+    }
   }
 
   /**
@@ -610,7 +643,7 @@ export class HistoryService {
    * @returns HistoryItem[]
    * @private
    */
-  private parseHistoryRows(rows: Record<string, unknown>[]): HistoryItem[] {
+  private parseHistoryRows(rows: Record<string, any>[]): HistoryItem[] {
     return rows.map(row => this.parseHistoryRow(row));
   }
 

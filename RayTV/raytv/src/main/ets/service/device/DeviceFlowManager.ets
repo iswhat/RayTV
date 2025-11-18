@@ -2,6 +2,7 @@ import Logger from '../../common/util/Logger';
 import { DeviceFlowStatus } from '../../data/bean/DeviceInfo';
 import { configService } from '../config/ConfigService';
 import { playerManager } from '../media/PlayerManager';
+import TypeSafetyUtil from '../../common/util/TypeSafetyUtil';
 import deviceManager from '@ohos.distributedHardware.deviceManager';
 import BusinessError from '@ohos.base';
 
@@ -18,13 +19,40 @@ export interface DeviceInfo {
 }
 
 /**
+ * 流转数据接口
+ */
+export interface FlowData {
+  mediaInfo?: {
+    title?: string;
+    url?: string;
+    position?: number;
+    duration?: number;
+    coverUrl?: string;
+  };
+  screenInfo?: {
+    width?: number;
+    height?: number;
+    dpi?: number;
+  };
+  audioInfo?: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    url?: string;
+    position?: number;
+    duration?: number;
+  };
+  appState?: Record<string, string | number | boolean>;
+}
+
+/**
  * 流转参数接口
  */
 export interface FlowParams {
   flowType: 'video' | 'audio' | 'screen' | 'data'; // 流转类型
-  data?: Record<string, unknown>;              // 流转数据
-  sourceDeviceId?: string; // 源设备ID
-  targetDeviceId: string;  // 目标设备ID
+  data?: FlowData;                               // 流转数据
+  sourceDeviceId?: string;                       // 源设备ID
+  targetDeviceId: string;                        // 目标设备ID
 }
 
 /**
@@ -134,12 +162,28 @@ class DeviceManager {
   }
   
   /**
+   * 设备状态变化接口
+   */
+  interface DeviceStateChangeData {
+    deviceId: string;
+    status: number;
+    
+    // 可能的额外字段，但使用具体名称而不是索引签名
+    deviceName?: string;
+    deviceTypeId?: number;
+    networkId?: string;
+    isLocal?: boolean;
+    authType?: number;
+    extraInfo?: Record<string, string | number | boolean>;
+  }
+
+  /**
    * 处理设备状态变化
    */
-  private handleDeviceStateChange(device: Record<string, unknown>): void {
+  private handleDeviceStateChange(device: DeviceStateChangeData): void {
     if (!device || !device.deviceId) return;
     
-    const deviceId = device.deviceId as string;
+    const deviceId = device.deviceId;
     const existingDevice = this.devices.get(deviceId);
     
     if (existingDevice) {
@@ -150,9 +194,25 @@ class DeviceManager {
   }
   
   /**
+   * 设备发现接口
+   */
+  interface DiscoveredDevice {
+    deviceId: string;
+    deviceName?: string;
+    deviceTypeId?: number;
+    
+    // 可能的额外字段，但使用具体名称而不是索引签名
+    networkId?: string;
+    isLocal?: boolean;
+    authType?: number;
+    isTrusted?: boolean;
+    extraInfo?: Record<string, string | number | boolean>;
+  }
+
+  /**
    * 处理发现的设备
    */
-  private handleDevicesFound(devices: Record<string, unknown>[]): void {
+  private handleDevicesFound(devices: DiscoveredDevice[]): void {
     if (!devices || devices.length === 0) return;
     
     Logger.info(DeviceManager.TAG, `Processing ${devices.length} discovered devices`);
@@ -162,14 +222,14 @@ class DeviceManager {
       
       // 转换为标准设备信息格式
       const standardDevice: DeviceInfo = {
-        deviceId: device.deviceId as string,
-        deviceName: device.deviceName as string || `Device-${(device.deviceId as string).substring(0, 8)}`,
+        deviceId: device.deviceId,
+        deviceName: device.deviceName || `Device-${device.deviceId.substring(0, 8)}`,
         deviceType: this.getDeviceType(device),
         status: 'online',
         capabilities: this.getDeviceCapabilities(device)
       };
       
-      this.devices.set(device.deviceId as string, standardDevice);
+      this.devices.set(device.deviceId, standardDevice);
     });
     
     this.notifyDeviceListChanged();
@@ -178,9 +238,9 @@ class DeviceManager {
   /**
    * 获取设备类型
    */
-  private getDeviceType(device: Record<string, unknown>): string {
+  private getDeviceType(device: DiscoveredDevice): string {
     // 根据设备信息判断类型
-    const deviceTypeId = device.deviceTypeId as number;
+    const deviceTypeId = device.deviceTypeId ?? 0;
     if (deviceTypeId === 2) return 'tv';
     if (deviceTypeId === 3) return 'tablet';
     if (deviceTypeId === 4) return 'phone';
@@ -190,7 +250,7 @@ class DeviceManager {
   /**
    * 获取设备能力
    */
-  private getDeviceCapabilities(device: Record<string, unknown>): string[] {
+  private getDeviceCapabilities(device: DiscoveredDevice): string[] {
     const capabilities: string[] = ['data'];
     
     // 根据设备类型添加默认能力

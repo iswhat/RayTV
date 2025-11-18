@@ -70,8 +70,8 @@ export interface DeviceInfo {
   deviceLabel?: string;      // 自定义标签
 }
 
-// 同步数据接口
-export interface SyncData<T = Record<string, string | number | boolean | null>> {
+// 同步数据接口 - 支持具体数据类型
+export interface SyncData<T = any> {
   deviceId: string;          // 目标设备ID
   dataType: string;          // 数据类型
   data: T;                   // 要同步的数据
@@ -768,7 +768,7 @@ export default class DeviceManager {
    * @param dataType 数据类型
    * @param data 要同步的数据
    */
-  public async syncDataToDevice<T = Record<string, unknown>>(deviceId: string, dataType: string, data: T): Promise<boolean> {
+  public async syncDataToDevice<T>(deviceId: string, dataType: string, data: T): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }

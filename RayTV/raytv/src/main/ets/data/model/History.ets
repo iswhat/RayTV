@@ -261,7 +261,8 @@ export default class History {
     if (typeof data.userId === 'string') historyData.userId = data.userId;
     if (typeof data.contentId === 'string') historyData.contentId = data.contentId;
     if (typeof data.contentTitle === 'string') historyData.contentTitle = data.contentTitle;
-    if (typeof data.contentType === 'string') historyData.contentType = data.contentType;
+    // 修复类型不匹配问题，确保从number转换为VideoType
+    if (typeof data.contentType === 'number') historyData.contentType = data.contentType as VideoType;
     if (typeof data.progress === 'number') historyData.progress = data.progress;
     if (typeof data.totalDuration === 'number') historyData.totalDuration = data.totalDuration;
     if (typeof data.lastWatchTime === 'string') historyData.lastWatchTime = data.lastWatchTime;

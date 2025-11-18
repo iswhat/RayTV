@@ -1,32 +1,60 @@
 // ConfigParser - 配置解析器
 // 实现Fongmi配置文件解析和适配功能
 import Logger from '../../common/util/Logger';
+import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 import { Site, SiteType } from '../../data/bean/Site';
 import { AppConfig, HarmonyConfig } from '../../data/bean/Config';
+import type { Record } from '../../types/commonTypes';
 
 const TAG = 'ConfigParser';
 
 // 接口定义
-interface CategoryItem {
+export interface CategoryItem {
   key: string;
   name: string;
 }
 
-interface SearchRules {
+// 搜索规则接口 - 替换any和unknown为具体类型
+export interface SearchRuleItem {
+  name: string;
+  regex?: string;
+  fixed?: string;
+  type?: string;
+  filter?: boolean;
+}
+
+export interface SearchRules {
   page: boolean;
   searchKey: string;
   pageKey: string;
   resultPath: string;
-  list: unknown[];
-  extraFields?: Record<string, unknown>;
+  list: SearchRuleItem[];
 }
 
-interface DetailRules {
-  extraFields?: Record<string, unknown>;
+// 详情规则接口 - 替换unknown为具体类型
+export interface DetailRules {
+  title?: SearchRuleItem;
+  cover?: SearchRuleItem;
+  desc?: SearchRuleItem;
+  director?: SearchRuleItem;
+  actor?: SearchRuleItem;
+  year?: SearchRuleItem;
+  area?: SearchRuleItem;
+  update?: SearchRuleItem;
+  score?: SearchRuleItem;
+  type?: SearchRuleItem;
+  playlist?: SearchRuleItem;
+  tags?: SearchRuleItem;
 }
 
-interface PlayRules {
-  extraFields?: Record<string, unknown>;
+// 播放规则接口 - 替换unknown为具体类型
+export interface PlaySource {
+  name: string;
+  rules: Record<string, SearchRuleItem>;
+}
+
+export interface PlayRules {
+  [key: string]: PlaySource;
 }
 
 /**
@@ -49,16 +77,10 @@ export class ConfigParser {
   
   /**
    * 获取对象的所有键
-   * 替代Object.keys，兼容ArkTS语法
+   * 使用TypeSafetyUtil确保类型安全
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    return TypeSafetyUtil.getObjectKeys(obj);
   }
 
   /**
@@ -67,55 +89,62 @@ export class ConfigParser {
    */
   public validateSite(site: unknown): site is Site {
     try {
+      // 使用TypeSafetyUtil确保安全访问
+      const siteObj = TypeSafetyUtil.asObject(site);
+      
       // 基本字段验证
-      if (!site || typeof site !== 'object') {
-        return false;
-      }
-      
-      const siteObj = site as Record<string, unknown>;
-      
-      if (!siteObj.key || typeof siteObj.key !== 'string') {
+      const key = TypeSafetyUtil.getProperty(siteObj, 'key', '');
+      if (typeof key !== 'string' || key.trim() === '') {
         Logger.warn(TAG, 'Site missing required field: key');
         return false;
       }
       
-      if (!siteObj.name || typeof siteObj.name !== 'string') {
-        Logger.warn(TAG, `Site ${String(siteObj.key)} missing required field: name`);
+      const name = TypeSafetyUtil.getProperty(siteObj, 'name', '');
+      if (typeof name !== 'string' || name.trim() === '') {
+        Logger.warn(TAG, `Site ${key} missing required field: name`);
         return false;
       }
       
-      if (!siteObj.api || typeof siteObj.api !== 'string') {
-        Logger.warn(TAG, `Site ${String(siteObj.name)} missing required field: api`);
+      const api = TypeSafetyUtil.getProperty(siteObj, 'api', '');
+      if (typeof api !== 'string' || api.trim() === '') {
+        Logger.warn(TAG, `Site ${name} missing required field: api`);
         return false;
       }
       
       // 验证API URL格式
-      const api = siteObj.api as string;
-      const name = siteObj.name as string;
       if (!this.isValidUrl(api)) {
         Logger.warn(TAG, `Site ${name} has invalid API URL: ${api}`);
         return false;
       }
       
       // 验证站点类型
-      if (siteObj.type && !this.isValidSiteType(String(siteObj.type))) {
-        Logger.warn(TAG, `Site ${name} has invalid type: ${String(siteObj.type)}`);
-        (site as Record<string, unknown>).type = SiteType.ALL; // 默认值
+      const type = TypeSafetyUtil.getProperty(siteObj, 'type', '') as string;
+      if (type && !this.isValidSiteType(type)) {
+        Logger.warn(TAG, `Site ${name} has invalid type: ${type}`);
+        TypeSafetyUtil.setProperty(siteObj, 'type', SiteType.ALL);
       }
       
       // 验证解析规则
-      if (siteObj.search && typeof siteObj.search !== 'object') {
+      const search = TypeSafetyUtil.getProperty(siteObj, 'search', null);
+      if (search && typeof search !== 'object') {
         Logger.warn(TAG, `Site ${name} has invalid search config`);
-        siteObj.search = {};
+        TypeSafetyUtil.setProperty(siteObj, 'search', { 
+          page: true, 
+          searchKey: 'wd', 
+          pageKey: 'page', 
+          resultPath: '', 
+          list: [] 
+        });
       }
       
-      if (siteObj.detail && typeof siteObj.detail !== 'object') {
+      const detail = TypeSafetyUtil.getProperty(siteObj, 'detail', null);
+      if (detail && typeof detail !== 'object') {
         Logger.warn(TAG, `Site ${name} has invalid detail config`);
-        siteObj.detail = {};
+        TypeSafetyUtil.setProperty(siteObj, 'detail', {});
       }
       
       // 确保必要的默认值
-      this.ensureDefaultValues(site);
+      this.ensureDefaultValues(siteObj);
       
       return true;
     } catch (error) {
@@ -131,26 +160,26 @@ export class ConfigParser {
     const validTypes: SiteType[] = [SiteType.ALL, SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
     return validTypes.includes(type as SiteType);
   }
-  private ensureDefaultValues(site: unknown): void {
-    if (!site || typeof site !== 'object') {
-      return;
-    }
+  private ensureDefaultValues(site: Record<string, any>): void {
+    TypeSafetyUtil.setProperty(site, 'type', TypeSafetyUtil.getProperty(site, 'type', SiteType.ALL));
+    TypeSafetyUtil.setProperty(site, 'searchable', TypeSafetyUtil.getProperty(site, 'searchable', true));
+    TypeSafetyUtil.setProperty(site, 'categories', TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(site, 'categories', [])));
+    TypeSafetyUtil.setProperty(site, 'headers', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'headers', {})));
     
-    const siteObj = site as Record<string, unknown>;
-    siteObj.type = siteObj.type || SiteType.ALL;
-    siteObj.searchable = siteObj.searchable !== false;
-    siteObj.categories = siteObj.categories || [];
-    siteObj.headers = siteObj.headers || {};
-    siteObj.search = siteObj.search || {};
-    siteObj.detail = siteObj.detail || {};
-    siteObj.play = siteObj.play || {};
-    siteObj.filterable = siteObj.filterable || false;
-    siteObj.filters = siteObj.filters || [];
-    siteObj.proxy = siteObj.proxy || false;
-    siteObj.weight = siteObj.weight || 0;
-    siteObj.enabled = siteObj.enabled !== false;
-    siteObj.updateTime = siteObj.updateTime || Date.now();
-    siteObj.lastCheckTime = siteObj.lastCheckTime || 0;
+    const search = TypeSafetyUtil.getProperty(site, 'search', null);
+    TypeSafetyUtil.setProperty(site, 'search', typeof search === 'object' && search !== null 
+      ? search 
+      : { page: true, searchKey: 'wd', pageKey: 'page', resultPath: '', list: [] });
+    
+    TypeSafetyUtil.setProperty(site, 'detail', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'detail', {})));
+    TypeSafetyUtil.setProperty(site, 'play', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'play', {})));
+    TypeSafetyUtil.setProperty(site, 'filterable', TypeSafetyUtil.getProperty(site, 'filterable', false));
+    TypeSafetyUtil.setProperty(site, 'filters', TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(site, 'filters', [])));
+    TypeSafetyUtil.setProperty(site, 'proxy', TypeSafetyUtil.getProperty(site, 'proxy', false));
+    TypeSafetyUtil.setProperty(site, 'weight', TypeSafetyUtil.asNumber(TypeSafetyUtil.getProperty(site, 'weight', 0)));
+    TypeSafetyUtil.setProperty(site, 'enabled', TypeSafetyUtil.getProperty(site, 'enabled', true));
+    TypeSafetyUtil.setProperty(site, 'updateTime', TypeSafetyUtil.asNumber(TypeSafetyUtil.getProperty(site, 'updateTime', Date.now())));
+    TypeSafetyUtil.setProperty(site, 'lastCheckTime', TypeSafetyUtil.asNumber(TypeSafetyUtil.getProperty(site, 'lastCheckTime', 0)));
   }
 
   /**
@@ -201,15 +230,15 @@ export class ConfigParser {
    * 判断是否为Fongmi格式配置
    */
   private isFongmiFormat(config: unknown): boolean {
-    if (typeof config !== 'object' || config === null) return false;
+    if (!TypeSafetyUtil.isValidObject(config)) return false;
     
     // Fongmi格式通常是对象，每个键对应一个站点
+    const configObj = TypeSafetyUtil.asObject(config);
     return !Array.isArray(config) && 
-           this.getObjectKeys(config).length > 0 &&
-           this.getObjectKeys(config).some(key => {
-             const value = (config as Record<string, unknown>)[key];
-             return typeof value === 'object' && 
-                    value !== null && 
+           this.getObjectKeys(configObj).length > 0 &&
+           this.getObjectKeys(configObj).some(key => {
+             const value = TypeSafetyUtil.getProperty(configObj, key, null);
+             return TypeSafetyUtil.isValidObject(value) && 
                     ('api' in value || 'name' in value);
            });
   }
@@ -225,27 +254,27 @@ export class ConfigParser {
       const sites: Site[] = [];
       
       // 遍历配置中的每个站点
-      for (const [key, value] of Object.entries(fongmiConfig)) {
-        if (typeof value === 'object' && value !== null) {
-          const siteData = value as Record<string, unknown>;
+      for (const [key, value] of TypeSafetyUtil.getObjectEntries(fongmiConfig)) {
+        if (TypeSafetyUtil.isValidObject(value)) {
+          const siteData = TypeSafetyUtil.asObject(value);
           
           // 转换为标准站点格式
           const site: Site = {
             key: key,
-            name: typeof siteData.name === 'string' ? siteData.name : key,
+            name: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', key)),
             type: this.detectSiteType(siteData),
-            api: typeof siteData.api === 'string' ? siteData.api : '',
-            searchable: siteData.searchable !== false,
-            categories: this.convertCategories(siteData.categories),
-            headers: this.convertHeaders(siteData.headers || siteData.header),
-            search: this.convertSearchRules(siteData.search),
-            detail: this.convertDetailRules(siteData.detail),
-            play: this.convertPlayRules(siteData.play),
-            filterable: siteData.filterable || false,
-            filters: Array.isArray(siteData.filters) ? siteData.filters : [],
-            proxy: siteData.proxy || false,
-            weight: typeof siteData.weight === 'number' ? siteData.weight : 0,
-            enabled: siteData.enabled !== false,
+            api: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'api', '')),
+            searchable: TypeSafetyUtil.getProperty(siteData, 'searchable', true),
+            categories: this.convertCategories(TypeSafetyUtil.getProperty(siteData, 'categories', [])),
+            headers: this.convertHeaders(TypeSafetyUtil.getProperty(siteData, 'headers', TypeSafetyUtil.getProperty(siteData, 'header', {}))),
+            search: this.convertSearchRules(TypeSafetyUtil.getProperty(siteData, 'search', null)),
+            detail: this.convertDetailRules(TypeSafetyUtil.getProperty(siteData, 'detail', null)),
+            play: this.convertPlayRules(TypeSafetyUtil.getProperty(siteData, 'play', null)),
+            filterable: TypeSafetyUtil.getProperty(siteData, 'filterable', false),
+            filters: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(siteData, 'filters', [])),
+            proxy: TypeSafetyUtil.getProperty(siteData, 'proxy', false),
+            weight: TypeSafetyUtil.asNumber(TypeSafetyUtil.getProperty(siteData, 'weight', 0)),
+            enabled: TypeSafetyUtil.getProperty(siteData, 'enabled', true),
             updateTime: Date.now(),
             lastCheckTime: 0
           };
@@ -271,13 +300,14 @@ export class ConfigParser {
    */
   public detectSiteType(siteData: Record<string, unknown>): SiteType {
     // 根据站点配置特征自动判断类型
-    if (siteData.type && typeof siteData.type === 'string') {
-      return siteData.type as SiteType;
+    const type = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'type', ''));
+    if (type) {
+      return this.convertSiteType(type);
     }
     
     // 通过关键词判断
-    const name = (typeof siteData.name === 'string' ? siteData.name : '').toLowerCase();
-    const api = (typeof siteData.api === 'string' ? siteData.api : '').toLowerCase();
+    const name = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', '')).toLowerCase();
+    const api = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'api', '')).toLowerCase();
     
     if (name.includes('live') || name.includes('直播') || 
         api.includes('live') || api.includes('zhibo')) {
@@ -328,30 +358,32 @@ export class ConfigParser {
    * @param siteData 站点数据
    */
   private parseSiteItem(siteData: Record<string, unknown>): Site {
-    if (!siteData || typeof siteData !== 'object') {
+    if (!TypeSafetyUtil.isValidObject(siteData)) {
       throw new Error('Invalid site data format');
     }
     
-    const key = typeof siteData.key === 'string' ? siteData.key : this.generateSiteKey(typeof siteData.name === 'string' ? siteData.name : 'unknown');
-    const name = typeof siteData.name === 'string' ? siteData.name : 'Unknown Site';
-    const api = typeof siteData.api === 'string' ? siteData.api : typeof siteData.url === 'string' ? siteData.url : '';
+    const key = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'key', '')) || 
+                this.generateSiteKey(TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', 'unknown')));
+    const name = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', 'Unknown Site'));
+    const api = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'api', '')) || 
+                TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'url', ''));
     
     const site: Site = {
       key: key,
       name: name,
-      type: this.convertSiteType(typeof siteData.type === 'string' ? siteData.type : undefined),
+      type: this.convertSiteType(TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'type', ''))),
       api: api,
-      searchable: siteData.searchable !== false,
-      categories: this.convertCategories(siteData.categories),
-      headers: this.convertHeaders(siteData.headers || siteData.header),
-      search: this.convertSearchRules(siteData.search),
-      detail: this.convertDetailRules(siteData.detail),
-      play: this.convertPlayRules(siteData.play),
-      filterable: siteData.filterable || false,
-      filters: Array.isArray(siteData.filters) ? siteData.filters : [],
-      proxy: siteData.proxy || false,
-      weight: typeof siteData.weight === 'number' ? siteData.weight : 0,
-      enabled: siteData.enabled !== false,
+      searchable: TypeSafetyUtil.getProperty(siteData, 'searchable', true),
+      categories: this.convertCategories(TypeSafetyUtil.getProperty(siteData, 'categories', null)),
+      headers: this.convertHeaders(TypeSafetyUtil.getProperty(siteData, 'headers', TypeSafetyUtil.getProperty(siteData, 'header', null))),
+      search: this.convertSearchRules(TypeSafetyUtil.getProperty(siteData, 'search', null)),
+      detail: this.convertDetailRules(TypeSafetyUtil.getProperty(siteData, 'detail', null)),
+      play: this.convertPlayRules(TypeSafetyUtil.getProperty(siteData, 'play', null)),
+      filterable: TypeSafetyUtil.getProperty(siteData, 'filterable', false),
+      filters: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(siteData, 'filters', [])),
+      proxy: TypeSafetyUtil.getProperty(siteData, 'proxy', false),
+      weight: TypeSafetyUtil.asNumber(TypeSafetyUtil.getProperty(siteData, 'weight', 0)),
+      enabled: TypeSafetyUtil.getProperty(siteData, 'enabled', true),
       updateTime: Date.now(),
       lastCheckTime: 0
     };
@@ -396,7 +428,7 @@ export class ConfigParser {
     }
     
     // 处理不同格式的请求头
-    if (typeof headers === 'string') {
+    if (TypeSafetyUtil.isValidString(headers)) {
       // 字符串格式: "User-Agent: xxx; Referer: yyy"
       headers.split(';').forEach((header: string) => {
         const parts = header.split(':');
@@ -406,18 +438,11 @@ export class ConfigParser {
           result[key] = value;
         }
       });
-    } else if (typeof headers === 'object' && headers !== null) {
+    } else if (TypeSafetyUtil.isValidObject(headers)) {
       // 对象格式，手动复制字符串值
-      const headersObj = headers as Record<string, unknown>;
-      for (const key in headersObj) {
-        if (headersObj.hasOwnProperty(key)) {
-          const value = headersObj[key];
-          if (typeof value === 'string') {
-            result[key] = value;
-          } else {
-            result[key] = String(value);
-          }
-        }
+      const headersObj = TypeSafetyUtil.asObject(headers);
+      for (const [key, value] of TypeSafetyUtil.getObjectEntries(headersObj)) {
+        result[key] = TypeSafetyUtil.asString(value, '');
       }
     }
     
@@ -438,18 +463,20 @@ export class ConfigParser {
     // 处理数组格式分类
     if (Array.isArray(categories)) {
       categories.forEach((cat: unknown) => {
-        if (typeof cat === 'string') {
+        if (TypeSafetyUtil.isValidString(cat)) {
             const category: CategoryItem = {
               key: cat,
               name: cat
             };
             result.push(category);
-          } else if (typeof cat === 'object' && cat !== null) {
-            const catObj = cat as Record<string, unknown>;
-            if (catObj.key && typeof catObj.key === 'string' && catObj.name && typeof catObj.name === 'string') {
+          } else if (TypeSafetyUtil.isValidObject(cat)) {
+            const catObj = TypeSafetyUtil.asObject(cat);
+            const key = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(catObj, 'key', ''));
+            const name = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(catObj, 'name', ''));
+            if (key && name) {
               const category: CategoryItem = {
-                key: catObj.key,
-                name: catObj.name
+                key: key,
+                name: name
               };
               result.push(category);
             }
@@ -457,18 +484,15 @@ export class ConfigParser {
       });
     } 
     // 处理Fongmi格式分类（对象格式）
-    else if (typeof categories === 'object' && categories !== null) {
-      const categoriesObj = categories as Record<string, unknown>;
-      for (const key in categoriesObj) {
-        if (categoriesObj.hasOwnProperty(key)) {
-          const value = categoriesObj[key];
-          const name = typeof value === 'string' ? value : String(value || key);
-          const category: CategoryItem = {
-            key: key,
-            name: name
-          };
-          result.push(category);
-        }
+    else if (TypeSafetyUtil.isValidObject(categories)) {
+      const categoriesObj = TypeSafetyUtil.asObject(categories);
+      for (const [key, value] of TypeSafetyUtil.getObjectEntries(categoriesObj)) {
+        const name = TypeSafetyUtil.asString(value, key);
+        const category: CategoryItem = {
+          key: key,
+          name: name
+        };
+        result.push(category);
       }
     }
     
@@ -488,22 +512,36 @@ export class ConfigParser {
    * @param searchData 原始搜索配置
    */
   public convertSearchRules(searchData: unknown): SearchRules {
-    if (!searchData || typeof searchData !== 'object') return {};
+    if (!TypeSafetyUtil.isValidObject(searchData)) {
+      return {
+        page: true,
+        searchKey: 'wd',
+        pageKey: 'page',
+        resultPath: '',
+        list: []
+      };
+    }
     
-    const searchObj = searchData as Record<string, unknown>;
+    const searchObj = TypeSafetyUtil.asObject(searchData);
     // 标准化搜索规则格式
     const result: SearchRules = {
       // Fongmi格式搜索规则适配
-      page: searchObj.page !== undefined ? searchObj.page : true,
-      searchKey: searchObj.key || searchObj.searchKey || 'wd',
-      pageKey: searchObj.pageKey || 'page',
-      resultPath: searchObj.resultPath || '',
-      list: searchObj.list || []
+      page: TypeSafetyUtil.getProperty(searchObj, 'page', true),
+      searchKey: TypeSafetyUtil.asString(
+        TypeSafetyUtil.getProperty(searchObj, 'key', 
+          TypeSafetyUtil.getProperty(searchObj, 'searchKey', 'wd')
+        )
+      ),
+      pageKey: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(searchObj, 'pageKey', 'page')),
+      resultPath: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(searchObj, 'resultPath', '')),
+      list: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(searchObj, 'list', []))
     };
     
-    // 手动合并其他属性
-    for (const key in searchObj) {
-      result[key] = searchObj[key];
+    // 手动合并其他属性（确保类型安全）
+    for (const [key, value] of TypeSafetyUtil.getObjectEntries(searchObj)) {
+      if (!['page', 'searchKey', 'pageKey', 'resultPath', 'list'].includes(key)) {
+        TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
+      }
     }
     
     return result;
@@ -514,16 +552,16 @@ export class ConfigParser {
    * @param detailData 原始详情配置
    */
   public convertDetailRules(detailData: unknown): DetailRules {
-    if (!detailData || typeof detailData !== 'object') return {};
+    if (!TypeSafetyUtil.isValidObject(detailData)) {
+      return {};
+    }
     
-    const detailObj = detailData as Record<string, unknown>;
+    const detailObj = TypeSafetyUtil.asObject(detailData);
     const result: DetailRules = {};
     
     // 手动复制所有属性
-    for (const key in detailObj) {
-      if (detailObj.hasOwnProperty(key)) {
-        result[key] = detailObj[key];
-      }
+    for (const [key, value] of TypeSafetyUtil.getObjectEntries(detailObj)) {
+      TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
     }
     
     return result;
@@ -534,16 +572,16 @@ export class ConfigParser {
    * @param playData 原始播放配置
    */
   public convertPlayRules(playData: unknown): PlayRules {
-    if (!playData || typeof playData !== 'object') return {};
+    if (!TypeSafetyUtil.isValidObject(playData)) {
+      return {};
+    }
     
-    const playObj = playData as Record<string, unknown>;
+    const playObj = TypeSafetyUtil.asObject(playData);
     const result: PlayRules = {};
     
     // 手动复制所有属性
-    for (const key in playObj) {
-      if (playObj.hasOwnProperty(key)) {
-        result[key] = playObj[key];
-      }
+    for (const [key, value] of TypeSafetyUtil.getObjectEntries(playObj)) {
+      TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
     }
     
     return result;
@@ -576,22 +614,23 @@ export class ConfigParser {
       Logger.info(TAG, 'Parsing application configuration');
       
       const config = this.parseJsonContent(configContent);
+      const harmonySection = TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(config, 'harmony', {}));
       
       // 创建HarmonyOS专用配置
       const harmonyConfig: HarmonyConfig = {
-        enableVoiceAssistant: config.harmony?.enableVoiceAssistant || false,
-        enableDeviceFlow: config.harmony?.enableDeviceFlow || false,
-        enableGestureControl: config.harmony?.enableGestureControl || false,
-        enableWidget: config.harmony?.enableWidget || false,
-        enableNotification: config.harmony?.enableNotification || false,
-        enableAutoStart: config.harmony?.enableAutoStart || false,
-        enableBackgroundSync: config.harmony?.enableBackgroundSync || false,
-        enableMultiWindow: config.harmony?.enableMultiWindow || false,
-        enableHiAI: config.harmony?.enableHiAI || false,
-        enableSuperDevice: config.harmony?.enableSuperDevice || false,
-        deviceSharingEnabled: config.harmony?.deviceSharingEnabled || false,
-        notificationChannels: config.harmony?.notificationChannels || [],
-        quickActions: config.harmony?.quickActions || []
+        enableVoiceAssistant: TypeSafetyUtil.getProperty(harmonySection, 'enableVoiceAssistant', false),
+        enableDeviceFlow: TypeSafetyUtil.getProperty(harmonySection, 'enableDeviceFlow', false),
+        enableGestureControl: TypeSafetyUtil.getProperty(harmonySection, 'enableGestureControl', false),
+        enableWidget: TypeSafetyUtil.getProperty(harmonySection, 'enableWidget', false),
+        enableNotification: TypeSafetyUtil.getProperty(harmonySection, 'enableNotification', false),
+        enableAutoStart: TypeSafetyUtil.getProperty(harmonySection, 'enableAutoStart', false),
+        enableBackgroundSync: TypeSafetyUtil.getProperty(harmonySection, 'enableBackgroundSync', false),
+        enableMultiWindow: TypeSafetyUtil.getProperty(harmonySection, 'enableMultiWindow', false),
+        enableHiAI: TypeSafetyUtil.getProperty(harmonySection, 'enableHiAI', false),
+        enableSuperDevice: TypeSafetyUtil.getProperty(harmonySection, 'enableSuperDevice', false),
+        deviceSharingEnabled: TypeSafetyUtil.getProperty(harmonySection, 'deviceSharingEnabled', false),
+        notificationChannels: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(harmonySection, 'notificationChannels', [])),
+        quickActions: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(harmonySection, 'quickActions', []))
       };
       
       return harmonyConfig;

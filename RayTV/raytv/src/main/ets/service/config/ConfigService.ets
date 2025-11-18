@@ -1,6 +1,7 @@
 // ConfigService - 配置服务类
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
+import TypeSafetyUtil from '../../common/util/TypeSafetyUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import DatabaseRepository from '../../data/repository/DatabaseRepository';
 import ConfigParser from './ConfigParser';
@@ -328,7 +329,7 @@ export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
   autoPlay: true,
   autoNextEpisode: true,
   backgroundPlayEnabled: false,
-  videoPlayerSettings: {} as Record<string, unknown>,
+  videoPlayerSettings: {},
   
   // 字幕相关
   subtitleEnabled: true,
@@ -345,8 +346,8 @@ export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
   proxyEnabled: false,
   proxyConfig: null,
   dataSaverEnabled: false,
-  customHeaders: {} as Record<string, string>,
-  customCookies: {} as Record<string, string>,
+  customHeaders: {},
+  customCookies: {},
   
   // 通知相关
   notificationEnabled: true,
@@ -465,7 +466,8 @@ export default class ConfigService {
           ...customConfig[configKey]
         };
       } else if (customConfig[configKey] !== undefined) {
-        merged[configKey] = customConfig[configKey] as unknown as Config[keyof Config];
+        // 使用类型安全的赋值方式，避免unknown类型断言
+        merged[configKey] = customConfig[configKey] as Config[keyof Config];
       }
     });
     

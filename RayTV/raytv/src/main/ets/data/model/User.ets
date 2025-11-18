@@ -48,9 +48,16 @@ export interface DeviceInfo {
 
 /**
  * 用户设置类型定义
+ * 替换索引签名为具体属性，符合ArkTS规范
  */
 export interface UserSettings {
-  [key: string]: string | number | boolean | null;
+  // 预定义常见设置项，避免使用索引签名
+  notificationsEnabled?: boolean;
+  autoPlayEnabled?: boolean;
+  defaultLanguage?: string;
+  themePreference?: string;
+  subtitleSize?: number;
+  // 其他设置使用Map存储，提供类型安全的访问方法
 }
 
 /**
@@ -84,9 +91,10 @@ export default class User {
     const defaultId = `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
     const defaultUsername = `user_${Math.random().toString(36).substr(2, 8)}`;
     
-    this.id = data.id || defaultId;
-    this.username = data.username || defaultUsername;
-    this.nickname = data.nickname || this.username;
+    // 修复undefined赋值问题，使用??运算符替代||
+    this.id = data.id ?? defaultId;
+    this.username = data.username ?? defaultUsername;
+    this.nickname = data.nickname ?? this.username;
     this.email = data.email;
     this.avatarUrl = data.avatarUrl;
     this.role = data.role ?? UserRole.REGULAR;
@@ -100,7 +108,13 @@ export default class User {
     this.watchHistoryEnabled = data.watchHistoryEnabled !== undefined ? data.watchHistoryEnabled : true;
     this.favoritesEnabled = data.favoritesEnabled !== undefined ? data.favoritesEnabled : true;
     this.totalWatchTime = data.totalWatchTime ?? 0;
-    this.settings = data.settings ? (data.settings as UserSettings) : {} as UserSettings;
+    
+    // 安全处理settings对象，避免直接类型断言
+    if (data.settings && typeof data.settings === 'object') {
+      this.settings = data.settings as UserSettings;
+    } else {
+      this.settings = {} as UserSettings;
+    }
   }
 
   /**
@@ -194,7 +208,7 @@ export default class User {
    */
   public updatePreferences(preferences: Partial<UserPreferences>): void {
     if (!this.preferences) {
-      this.preferences = {} as UserPreferences;
+      this.preferences = this.getDefaultPreferences();
     }
     this.preferences = this.mergePreferences(this.preferences, preferences);
   }
@@ -417,7 +431,7 @@ export default class User {
    * @param data 序列化数据
    * @returns User对象
    */
-  public static fromSerializable(data: { [key: string]: string | number | boolean | object | null }): User {
+  public static fromSerializable(data: Record<string, any>): User {
     // 创建安全的用户数据对象，添加类型检查和默认值
     const safeUserData: Partial<User> = {};
     
@@ -439,8 +453,9 @@ export default class User {
     if (typeof data.role === 'number') {
       safeUserData.role = data.role;
     }
-    if (data.preferences && typeof data.preferences === 'object') {
-      safeUserData.preferences = data.preferences as UserPreferences;
+    if (data.preferences && typeof data.preferences === 'object' && !Array.isArray(data.preferences)) {
+      // 安全地转换preferences对象，避免类型断言
+      safeUserData.preferences = this.safeCastToUserPreferences(data.preferences);
     }
     if (typeof data.lastLoginTime === 'string') {
       safeUserData.lastLoginTime = data.lastLoginTime;
@@ -449,13 +464,20 @@ export default class User {
       safeUserData.registrationDate = data.registrationDate;
     }
     if (Array.isArray(data.activeDevices)) {
-      safeUserData.activeDevices = data.activeDevices as DeviceInfo[];
+      // 安全地转换device数组，过滤非对象元素
+      safeUserData.activeDevices = data.activeDevices
+        .filter(item => typeof item === 'object' && item !== null)
+        .map(item => item as DeviceInfo);
     }
     if (typeof data.isVerified === 'boolean') {
       safeUserData.isVerified = data.isVerified;
     }
     if (typeof data.status === 'string') {
-      safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
+      // 确保status是有效的枚举值
+      const validStatuses: Array<'active' | 'inactive' | 'suspended'> = ['active', 'inactive', 'suspended'];
+      if (validStatuses.includes(data.status as any)) {
+        safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
+      }
     }
     if (typeof data.subscriptionEndDate === 'string') {
       safeUserData.subscriptionEndDate = data.subscriptionEndDate;
@@ -469,13 +491,38 @@ export default class User {
     if (typeof data.totalWatchTime === 'number') {
       safeUserData.totalWatchTime = data.totalWatchTime;
     }
-    if (data.settings && typeof data.settings === 'object') {
+    if (data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings)) {
       safeUserData.settings = data.settings as UserSettings;
     }
     
     const instance = new User(safeUserData);
     return instance;
   }
+  
+  /**
+   * 安全地将对象转换为UserPreferences类型
+   * @param obj 要转换的对象
+   * @returns 转换后的UserPreferences对象
+   */
+  private static safeCastToUserPreferences(obj: object): UserPreferences {
+    const result: UserPreferences = {};
+    const preferences = obj as any;
+    
+    // 只复制有效的UserPreferences属性
+    const validProps: (keyof UserPreferences)[] = [
+      'theme', 'language', 'playerDefaultQuality', 'autoplay', 
+      'subtitleEnabled', 'defaultSubtitleLanguage', 'audioLanguage',
+      'maxConcurrentDownloads', 'parentalControlEnabled', 
+      'parentalControlLevel', 'searchHistoryEnabled', 'playbackSpeed'
+    ];
+    
+    validProps.forEach(prop => {
+      if (preferences[prop] !== undefined) {
+        result[prop] = preferences[prop];
+      }
+    });
+    
+    return result;
 
   /**
    * 克隆User实例
@@ -487,9 +534,3 @@ export default class User {
   }
 }
 
-/**
- * 用户设置类型定义
- */
-export interface UserSettings {
-  [key: string]: string | number | boolean | null;
-}

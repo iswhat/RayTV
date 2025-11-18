@@ -234,7 +234,7 @@ export interface MovieDetailData {
   reviews?: Review[];             // 评论列表
   
   // 附加元数据
-  metadata?: Record<string, unknown>; // 额外元数据
+  metadata?: Record<string, string | number | boolean | null>; // 额外元数据
 }
 
 /**

@@ -235,7 +235,7 @@ export class HttpService {
       const result: HttpResponse<T> = {
         status: response.responseCode,
         data: this.parseResponseData<T>(response.result as string),
-        headers: response.header as Record<string, string>,
+        headers: this.sanitizeHeaders(response.header),
         url: response.requestURL
       };
 
@@ -332,7 +332,7 @@ export class HttpService {
       const result: DownloadResult = {
         status: response.responseCode,
         filePath,
-        headers: response.header as Record<string, string>,
+        headers: this.sanitizeHeaders(response.header),
         fileSize: response.fileSize
       };
 
@@ -354,6 +354,26 @@ export class HttpService {
       // 如果不是JSON格式，直接返回
       return data as T;
     }
+  }
+
+  /**
+   * 安全地将header转换为Record<string, string>
+   */
+  private sanitizeHeaders(headers: unknown): Record<string, string> {
+    const result: Record<string, string> = {};
+    
+    if (!headers || typeof headers !== 'object') {
+      return result;
+    }
+    
+    const headersObj = headers as Record<string, unknown>;
+    for (const [key, value] of Object.entries(headersObj)) {
+      if (value !== null && value !== undefined) {
+        result[key] = String(value);
+      }
+    }
+    
+    return result;
   }
 
   /**

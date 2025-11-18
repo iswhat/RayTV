@@ -15,6 +15,7 @@ import { HistoryRepository } from '../../data/repository/HistoryRepository';
 import { CollectionRepository } from '../../data/repository/CollectionRepository';
 import DeviceService from '../../service/device/DeviceService';
 import HttpService from '../HttpService';
+import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 
 // 常量定义
 const TAG = 'MediaService';
@@ -109,7 +110,6 @@ export interface MediaServiceConfig {
   syncPlaybackProgress: boolean;       // 同步播放进度
   autoResumePlayback: boolean;         // 自动恢复播放
   maxPlaybackHistory: number;          // 最大播放历史数量
-  enablePlaybackStatistics: boolean;   // 启用播放统计
   enableRecommendations: boolean;      // 启用推荐
 }
 
@@ -119,7 +119,6 @@ export const DEFAULT_MEDIA_SERVICE_CONFIG: MediaServiceConfig = {
   syncPlaybackProgress: true,
   autoResumePlayback: true,
   maxPlaybackHistory: 100,
-  enablePlaybackStatistics: true,
   enableRecommendations: true
 };
 
@@ -141,7 +140,7 @@ export enum MediaEvent {
 }
 
 // 媒体事件监听回调类型
-type MediaEventListener = (event: MediaEvent, data: unknown) => void;
+type MediaEventListener = (event: MediaEvent, data: MediaMetadata | PlaybackRecord | MediaCollection | PlaybackProgress) => void;
 
 // 播放选项接口（业务层需要）
 export interface PlayOptions {
@@ -159,7 +158,6 @@ export interface PlayOptions {
 // 搜索结果接口（业务层需要）
 export interface SearchResult {
   vodItems: Vod[];
-  liveChannels: LiveChannel[];
   totalCount: number;
   page: number;
   pageSize: number;
@@ -197,7 +195,20 @@ export default class MediaService {
   private playbackRecords: Map<string, PlaybackRecord> = new Map();
   private collections: Map<string, MediaCollection> = new Map();
   private currentPlaybackProgress: PlaybackProgress | null = null;
-  private eventListeners: Record<MediaEvent, MediaEventListener[]> = {} as Record<MediaEvent, MediaEventListener[]>;
+  private eventListeners: Record<MediaEvent, MediaEventListener[]> = {
+    [MediaEvent.PLAYBACK_STARTED]: [],
+    [MediaEvent.PLAYBACK_PAUSED]: [],
+    [MediaEvent.PLAYBACK_RESUMED]: [],
+    [MediaEvent.PLAYBACK_STOPPED]: [],
+    [MediaEvent.PLAYBACK_PROGRESS_CHANGED]: [],
+    [MediaEvent.PLAYBACK_DEVICE_CHANGED]: [],
+    [MediaEvent.MEDIA_ADDED]: [],
+    [MediaEvent.MEDIA_UPDATED]: [],
+    [MediaEvent.MEDIA_DELETED]: [],
+    [MediaEvent.COLLECTION_CREATED]: [],
+    [MediaEvent.COLLECTION_UPDATED]: [],
+    [MediaEvent.COLLECTION_DELETED]: []
+  };
   private progressSyncInterval: number | null = null;
   private isInitialized: boolean = false;
   
@@ -232,21 +243,20 @@ export default class MediaService {
     this.collectionRepository = CollectionRepository.getInstance();
     this.deviceService = DeviceService.getInstance();
     this.httpService = HttpService.getInstance();
+    
+    // 初始化
+    this.initialize();
   }
 
   /**
    * 初始化媒体服务
-   * @param context 应用上下文
    */
-  public async initialize(context: Context): Promise<void> {
+  private async initialize(): Promise<void> {
     if (this.isInitialized) {
-      Logger.info(TAG, 'Media service already initialized');
       return;
     }
-
+    
     try {
-      Logger.info(TAG, 'Initializing media service...');
-
       // 加载配置
       await this.loadConfig();
       
@@ -256,28 +266,20 @@ export default class MediaService {
       // 加载媒体集合
       await this.loadCollections();
       
-      // 注册播放器事件监听
+      // 注册事件监听
       this.registerPlayerEvents();
-      
-      // 注册分布式数据监听
       this.registerDistributedDataListeners();
       
-      // 如果启用了播放进度同步，启动同步定时器
-      if (this.config.syncPlaybackProgress) {
-        this.startProgressSync();
-      }
-      
-      // 初始化业务层相关数据
+      // 初始化业务层
       await this.initializeBusinessLayer();
       
       this.isInitialized = true;
       Logger.info(TAG, 'Media service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize media service: ${JSON.stringify(error)}`);
-      throw error;
+      Logger.error(TAG, `Failed to initialize media service: ${error}`);
     }
   }
-  
+
   /**
    * 初始化业务逻辑层
    */
@@ -345,122 +347,43 @@ export default class MediaService {
       return null;
     }
   }
-  
+
   /**
-   * 播放点播内容
+   * 播放媒体
    */
-  public async playVod(vodId: string, options: PlayOptions = {}): Promise<{ success: boolean; url?: string; error?: string }> {
+  public async playMedia(mediaId: string, type: MediaType, options: PlayOptions = {}): Promise<boolean> {
     try {
-      const vod = await this.getVodDetail(vodId);
-      if (!vod) {
-        return { success: false, error: 'Content not found' };
-      }
-
-      // 确定要播放的集数
-      let episodeToPlay: Episode | undefined;
-      if (options.selectedEpisode) {
-        episodeToPlay = vod.episodes.find(ep => ep.id === options.selectedEpisode);
-      } else if (options.currentEpisode) {
-        episodeToPlay = vod.episodes.find(ep => ep.id === options.currentEpisode);
-      } else {
-        // 获取最后观看的集数或第一集
-        const lastHistory = await this.historyRepository.getLastVodHistory(vodId);
-        if (lastHistory && lastHistory.episodeId) {
-          episodeToPlay = vod.episodes.find(ep => ep.id === lastHistory.episodeId);
-        }
-        if (!episodeToPlay && vod.episodes.length > 0) {
-          episodeToPlay = vod.episodes[0];
-        }
-      }
-
-      if (!episodeToPlay || !episodeToPlay.playUrl) {
-        return { success: false, error: 'No playable episode found' };
-      }
-
-      // 更新播放状态
-      this.currentPlayingMedia = { id: vodId, type: MediaType.VOD };
+      Logger.info(TAG, `Playing media: ${mediaId}, type: ${type}`);
       
-      // 通知播放开始
-      this.notifyPlayStarted({ id: vodId, type: MediaType.VOD });
+      // 更新当前播放的媒体
+      this.currentPlayingMedia = { id: mediaId, type };
       
-      // 更新服务层播放状态
-      if (options.startPosition) {
-        await this.updatePlaybackPosition(vodId, options.startPosition, episodeToPlay.id);
+      // 通知监听器
+      for (const listener of this.playListeners) {
+        listener(this.currentPlayingMedia);
       }
       
-      return { success: true, url: episodeToPlay.playUrl };
+      // 调用播放器服务进行实际播放
+      const success = await this.playerService.play(mediaId, type, options);
+      
+      if (success) {
+        // 记录播放开始事件
+        this.notifyEvent(MediaEvent.PLAYBACK_STARTED, {
+          mediaId,
+          episodeId: options.selectedEpisode,
+          position: options.startPosition || 0,
+          lastPlayTime: Date.now(),
+          playCount: 1
+        } as PlaybackRecord);
+      }
+      
+      return success;
     } catch (error) {
-      Logger.error(TAG, `Failed to play VOD: ${vodId}`, error);
-      return { success: false, error: 'Failed to start playback' };
+      Logger.error(TAG, `Failed to play media ${mediaId}: ${error}`);
+      return false;
     }
   }
-  
-  /**
-   * 播放直播频道
-   */
-  public async playLiveChannel(channelId: string, options: PlayOptions = {}): Promise<{ success: boolean; url?: string; error?: string }> {
-    try {
-      const channel = await this.getLiveChannelDetail(channelId);
-      if (!channel || !channel.playUrl) {
-        return { success: false, error: 'Channel not found or no playback URL' };
-      }
 
-      // 更新播放状态
-      this.currentPlayingMedia = { id: channelId, type: MediaType.LIVE };
-      
-      // 更新直播观看历史
-      await this.historyRepository.saveLiveHistory({
-        channelId: channel.id,
-        channelName: channel.name,
-        channelLogo: channel.logo,
-        playUrl: channel.playUrl,
-        groupId: channel.groupId,
-        groupName: channel.groupName || '',
-        watchTime: Date.now()
-      });
-      
-      // 通知播放开始
-      this.notifyPlayStarted({ id: channelId, type: MediaType.LIVE });
-      
-      return { success: true, url: channel.playUrl };
-    } catch (error) {
-      Logger.error(TAG, `Failed to play live channel: ${channelId}`, error);
-      return { success: false, error: 'Failed to start live playback' };
-    }
-  }
-  
-  /**
-   * 预加载点播相关内容
-   */
-  private async preloadVodRelatedContent(vodId: string): Promise<void> {
-    try {
-      // 异步预加载相关内容，不阻塞主流程
-      const relatedTask = this.vodRepository.getRelatedVods(vodId, 10);
-      relatedTask.catch(error => {
-        Logger.warn(TAG, `Failed to preload related VODs for ${vodId}: ${JSON.stringify(error)}`);
-      });
-    } catch (error) {
-      Logger.warn(TAG, `Failed to schedule preload for VOD ${vodId}: ${JSON.stringify(error)}`);
-    }
-  }
-  
-  /**
-   * 通知播放开始
-   */
-  private notifyPlayStarted(media: { id: string; type: MediaType }): void {
-    this.playListeners.forEach(listener => {
-      try {
-        listener(media);
-      } catch (error) {
-        Logger.error(TAG, `Error in play listener: ${JSON.stringify(error)}`);
-      }
-    });
-    
-    // 同时触发服务层媒体事件
-    const mediaEvent = media.type === MediaType.LIVE ? MediaEvent.PLAYBACK_STARTED : MediaEvent.PLAYBACK_STARTED;
-    this.notifyEvent(mediaEvent, media);
-  }
-  
   /**
    * 添加播放监听器
    */
@@ -498,9 +421,16 @@ export default class MediaService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('mediaServiceConfig', DEFAULT_MEDIA_SERVICE_CONFIG);
-      if (savedConfig) {
-        this.config = { ...DEFAULT_MEDIA_SERVICE_CONFIG, ...savedConfig };
+      const savedConfig = await this.configService.getConfig<unknown>('mediaServiceConfig', DEFAULT_MEDIA_SERVICE_CONFIG);
+      if (savedConfig && TypeSafetyUtil.isObject(savedConfig)) {
+        this.config = {
+          ...DEFAULT_MEDIA_SERVICE_CONFIG,
+          enableCrossDevicePlayback: TypeSafetyUtil.getProperty(savedConfig, 'enableCrossDevicePlayback', true),
+          syncPlaybackProgress: TypeSafetyUtil.getProperty(savedConfig, 'syncPlaybackProgress', true),
+          autoResumePlayback: TypeSafetyUtil.getProperty(savedConfig, 'autoResumePlayback', true),
+          maxPlaybackHistory: TypeSafetyUtil.getProperty(savedConfig, 'maxPlaybackHistory', 100),
+          enableRecommendations: TypeSafetyUtil.getProperty(savedConfig, 'enableRecommendations', true)
+        };
       }
     } catch (error) {
       Logger.error(TAG, `Failed to load media service config: ${error}`);
@@ -528,21 +458,34 @@ export default class MediaService {
   }
 
   /**
-   * 获取配置
-   */
-  public getConfig(): MediaServiceConfig {
-    return { ...this.config };
-  }
-
-  /**
    * 加载播放记录
    */
   private async loadPlaybackRecords(): Promise<void> {
     try {
-      const records = await this.configService.getConfig<Record<string, PlaybackRecord>>('playbackRecords', {});
-      Object.entries(records).forEach(([key, record]) => {
-        this.playbackRecords.set(key, record);
-      });
+      const records = await this.configService.getConfig<Record<string, unknown>>('playbackRecords', {});
+      
+      if (records && TypeSafetyUtil.isObject(records)) {
+        Object.entries(records).forEach(([key, value]) => {
+          if (TypeSafetyUtil.isObject(value)) {
+            const record: PlaybackRecord = {
+              mediaId: TypeSafetyUtil.getProperty(value, 'mediaId', ''),
+              episodeId: TypeSafetyUtil.getProperty(value, 'episodeId', undefined),
+              position: TypeSafetyUtil.getProperty(value, 'position', 0),
+              lastPlayTime: TypeSafetyUtil.getProperty(value, 'lastPlayTime', 0),
+              playCount: TypeSafetyUtil.getProperty(value, 'playCount', 0),
+              deviceId: TypeSafetyUtil.getProperty(value, 'deviceId', undefined),
+              totalDuration: TypeSafetyUtil.getProperty(value, 'totalDuration', undefined),
+              title: TypeSafetyUtil.getProperty(value, 'title', undefined),
+              coverUrl: TypeSafetyUtil.getProperty(value, 'coverUrl', undefined),
+              currentEpisode: TypeSafetyUtil.getProperty(value, 'currentEpisode', undefined),
+              progress: TypeSafetyUtil.getProperty(value, 'progress', undefined),
+              isFinished: TypeSafetyUtil.getProperty(value, 'isFinished', false)
+            };
+            this.playbackRecords.set(key, record);
+          }
+        });
+      }
+      
       Logger.info(TAG, `Loaded ${this.playbackRecords.size} playback records`);
     } catch (error) {
       Logger.error(TAG, `Failed to load playback records: ${error}`);
@@ -569,10 +512,24 @@ export default class MediaService {
    */
   private async loadCollections(): Promise<void> {
     try {
-      const collections = await this.configService.getConfig<Record<string, MediaCollection>>('mediaCollections', {});
-      Object.entries(collections).forEach(([key, collection]) => {
-        this.collections.set(key, collection);
-      });
+      const collections = await this.configService.getConfig<Record<string, unknown>>('mediaCollections', {});
+      
+      if (collections && TypeSafetyUtil.isObject(collections)) {
+        Object.entries(collections).forEach(([key, value]) => {
+          if (TypeSafetyUtil.isObject(value)) {
+            const collection: MediaCollection = {
+              id: TypeSafetyUtil.getProperty(value, 'id', ''),
+              name: TypeSafetyUtil.getProperty(value, 'name', ''),
+              description: TypeSafetyUtil.getProperty(value, 'description', undefined),
+              coverUrl: TypeSafetyUtil.getProperty(value, 'coverUrl', undefined),
+              mediaIds: TypeSafetyUtil.getArray(value, 'mediaIds', []),
+              createTime: TypeSafetyUtil.getProperty(value, 'createTime', 0),
+              updateTime: TypeSafetyUtil.getProperty(value, 'updateTime', 0)
+            };
+            this.collections.set(key, collection);
+          }
+        });
+      }
       Logger.info(TAG, `Loaded ${this.collections.size} media collections`);
     } catch (error) {
       Logger.error(TAG, `Failed to load media collections: ${error}`);
@@ -609,12 +566,12 @@ export default class MediaService {
    */
   private registerDistributedDataListeners(): void {
     // 监听播放进度同步
-    this.distributedDataService.addDataChangeListener(
+    this.distributedDataService.addDataChangeListener<PlaybackProgress>(
       SyncDataType.PLAYBACK_PROGRESS,
       (key, data, deviceId) => {
-        if (data.deviceId !== this.deviceManager.getLocalDeviceId()) {
+        if (data && data.deviceId !== this.deviceManager.getLocalDeviceId()) {
           // 接收到其他设备的播放进度
-          this.handleRemotePlaybackProgress(data as PlaybackProgress);
+          this.handleRemotePlaybackProgress(data);
         }
       }
     );
@@ -623,89 +580,70 @@ export default class MediaService {
   /**
    * 处理远程播放进度
    */
-  private async handleRemotePlaybackProgress(progress: PlaybackProgress): Promise<void> {
-    const localDeviceId = this.deviceManager.getLocalDeviceId();
+  private handleRemotePlaybackProgress(progress: PlaybackProgress): void {
+    // 处理来自其他设备的播放进度同步
+    Logger.debug(TAG, `Received remote playback progress from device ${progress.deviceId}`);
     
-    // 只处理其他设备的播放进度
-    if (progress.deviceId === localDeviceId) {
-      return;
-    }
-
-    Logger.debug(TAG, `Received remote playback progress from ${progress.deviceName}: ${progress.mediaId}`);
+    // 更新当前播放进度
+    this.currentPlaybackProgress = progress;
     
-    // 更新本地缓存的进度
-    const timeDiff = Date.now() - progress.timestamp;
-    
-    // 如果时间差较小，且是同一个媒体，考虑是否需要同步
-    if (timeDiff < 5000) { // 5秒内的进度更新
-      const currentMediaId = this.playerService.getCurrentMediaId();
-      
-      if (currentMediaId === progress.mediaId && !this.playerService.isPlaying()) {
-        // 如果当前播放的是同一个媒体且未在播放，可以提示用户是否同步进度
-        this.notifyEvent(MediaEvent.PLAYBACK_DEVICE_CHANGED, progress);
-      }
-    }
+    // 通知事件监听器
+    this.notifyEvent(MediaEvent.PLAYBACK_PROGRESS_CHANGED, progress);
   }
 
   /**
-   * 开始播放进度同步
+   * 开始进度同步
    */
   private startProgressSync(): void {
-    this.stopProgressSync();
+    if (this.progressSyncInterval) {
+      this.stopProgressSync();
+    }
     
-    // 每5秒同步一次播放进度
-    this.progressSyncInterval = setInterval(() => {
-      this.syncCurrentPlaybackProgress().catch(error => {
-        Logger.error(TAG, `Failed to sync playback progress: ${error}`);
-      });
+    // 每5秒同步一次进度
+    this.progressSyncInterval = setInterval(async () => {
+      await this.syncPlaybackProgress();
     }, 5000);
-    
-    Logger.info(TAG, 'Playback progress sync started');
   }
 
   /**
-   * 停止播放进度同步
+   * 停止进度同步
    */
   private stopProgressSync(): void {
-    if (this.progressSyncInterval !== null) {
+    if (this.progressSyncInterval) {
       clearInterval(this.progressSyncInterval);
       this.progressSyncInterval = null;
-      Logger.info(TAG, 'Playback progress sync stopped');
     }
   }
 
   /**
-   * 同步当前播放进度
+   * 同步播放进度
    */
-  private async syncCurrentPlaybackProgress(): Promise<void> {
-    if (!this.playerService.isPlaying() || !this.config.syncPlaybackProgress) {
+  private async syncPlaybackProgress(): Promise<void> {
+    if (!this.currentPlaybackProgress) {
       return;
     }
-
-    const mediaId = this.playerService.getCurrentMediaId();
-    const position = this.playerService.getCurrentPosition();
     
-    if (mediaId && position >= 0) {
-      const deviceInfo = await this.deviceManager.getDevice(this.deviceManager.getLocalDeviceId());
-      
-      const progress: PlaybackProgress = {
-        mediaId,
-        episodeId: this.playerService.getCurrentEpisodeId(),
-        position,
-        timestamp: Date.now(),
-        deviceId: this.deviceManager.getLocalDeviceId(),
-        deviceName: deviceInfo?.deviceName || '本机',
-        isPlaying: this.playerService.isPlaying()
-      };
-      
-      this.currentPlaybackProgress = progress;
-      
-      // 通过分布式数据服务同步进度
-      await this.distributedDataService.saveSyncData(
+    try {
+      const key = `playback_progress_${this.currentPlaybackProgress.mediaId}`;
+      await this.distributedDataService.syncData(
         SyncDataType.PLAYBACK_PROGRESS,
-        `current_${Date.now()}`,
-        progress
+        key,
+        this.currentPlaybackProgress
       );
+    } catch (error) {
+      Logger.error(TAG, `Failed to sync playback progress: ${error}`);
+    }
+  }
+
+  /**
+   * 预加载相关内容
+   */
+  private async preloadVodRelatedContent(vodId: string): Promise<void> {
+    try {
+      // 预加载相关视频
+      await this.vodRepository.preloadRelatedVods(vodId);
+    } catch (error) {
+      Logger.warn(TAG, `Failed to preload related content for VOD ${vodId}: ${error}`);
     }
   }
 
@@ -720,9 +658,38 @@ export default class MediaService {
       // 缓存中没有，从配置中加载
       try {
         const key = `media_metadata_${mediaId}`;
-        metadata = await this.configService.getConfig<MediaMetadata>(key, null);
+        const configData = await this.configService.getConfig<unknown>(key, null);
         
-        if (metadata) {
+        // 使用TypeSafetyUtil进行类型安全转换
+        if (configData && TypeSafetyUtil.isObject(configData)) {
+          metadata = {
+            id: TypeSafetyUtil.getProperty(configData, 'id', ''),
+            title: TypeSafetyUtil.getProperty(configData, 'title', ''),
+            subtitle: TypeSafetyUtil.getProperty(configData, 'subtitle', ''),
+            description: TypeSafetyUtil.getProperty(configData, 'description', ''),
+            coverUrl: TypeSafetyUtil.getProperty(configData, 'coverUrl', ''),
+            bannerUrl: TypeSafetyUtil.getProperty(configData, 'bannerUrl', ''),
+            type: TypeSafetyUtil.getProperty(configData, 'type', MediaType.OTHER),
+            category: TypeSafetyUtil.getArray(configData, 'category', []),
+            tags: TypeSafetyUtil.getArray(configData, 'tags', []),
+            year: TypeSafetyUtil.getProperty(configData, 'year', 0),
+            duration: TypeSafetyUtil.getProperty(configData, 'duration', 0),
+            episodeCount: TypeSafetyUtil.getProperty(configData, 'episodeCount', 0),
+            director: TypeSafetyUtil.getArray(configData, 'director', []),
+            actors: TypeSafetyUtil.getArray(configData, 'actors', []),
+            rating: TypeSafetyUtil.getProperty(configData, 'rating', 0),
+            region: TypeSafetyUtil.getArray(configData, 'region', []),
+            language: TypeSafetyUtil.getArray(configData, 'language', []),
+            releaseDate: TypeSafetyUtil.getProperty(configData, 'releaseDate', ''),
+            updateStatus: TypeSafetyUtil.getProperty(configData, 'updateStatus', ''),
+            isFavorite: TypeSafetyUtil.getProperty(configData, 'isFavorite', false),
+            isWatchLater: TypeSafetyUtil.getProperty(configData, 'isWatchLater', false),
+            sourceSite: TypeSafetyUtil.getProperty(configData, 'sourceSite', ''),
+            sourceUrl: TypeSafetyUtil.getProperty(configData, 'sourceUrl', ''),
+            createTime: TypeSafetyUtil.getProperty(configData, 'createTime', Date.now()),
+            updateTime: TypeSafetyUtil.getProperty(configData, 'updateTime', Date.now())
+          };
+          
           this.mediaMetadataCache.set(mediaId, metadata);
         }
       } catch (error) {
@@ -808,8 +775,7 @@ export default class MediaService {
           position: 0,
           lastPlayTime: 0,
           playCount: 0,
-          isFinished: false,
-          deviceId: localDeviceId
+          isFinished: false
         };
       }
       
@@ -959,7 +925,7 @@ export default class MediaService {
   /**
    * 通知事件
    */
-  private notifyEvent(event: MediaEvent, data: unknown): void {
+  private notifyEvent(event: MediaEvent, data: MediaMetadata | PlaybackRecord | MediaCollection | PlaybackProgress): void {
     if (this.hasEvent(event)) {
       const listeners = this.getEventListeners(event);
       for (const listener of listeners) {
@@ -1021,42 +987,31 @@ export default class MediaService {
       }
 
       // 构建切换播放命令
-      const command = {
-        action: 'SWITCH_PLAYBACK',
+      const playbackCommand = {
+        action: 'switch_playback',
         mediaId,
         episodeId,
         position,
-        isPlaying,
-        timestamp: Date.now(),
-        sourceDeviceId: this.deviceManager.getLocalDeviceId()
+        isPlaying
       };
 
       // 发送到目标设备
-      const success = await this.deviceManager.sendMessage(deviceId, command);
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand);
       
-      if (success && isPlaying) {
-        // 暂停当前设备的播放
-        await this.playerService.pause();
+      if (success) {
+        // 本地停止播放
+        this.playerService.stop();
+        this.stopPlayback();
+        this.notifyEvent(MediaEvent.PLAYBACK_DEVICE_CHANGED, {
+          deviceId,
+          deviceName: device.name
+        } as PlaybackProgress);
       }
       
       return success;
     } catch (error) {
       Logger.error(TAG, `Failed to switch playback to device ${deviceId}: ${error}`);
       return false;
-    }
-  }
-
-  /**
-   * 清空播放历史
-   */
-  public async clearPlaybackHistory(): Promise<void> {
-    try {
-      this.playbackRecords.clear();
-      await this.savePlaybackRecords();
-      Logger.info(TAG, 'Playback history cleared');
-    } catch (error) {
-      Logger.error(TAG, `Failed to clear playback history: ${error}`);
-      throw error;
     }
   }
 
@@ -1082,4 +1037,4 @@ export default class MediaService {
     this.isInitialized = false;
     Logger.info(TAG, 'Media service closed');
   }
-}
+}

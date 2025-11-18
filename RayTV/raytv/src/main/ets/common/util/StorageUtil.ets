@@ -34,10 +34,65 @@ export interface MemoryCacheItem {
 }
 
 /**
- * JSON数据类型 - 替代any类型
- * 使用Record类型避免索引签名
+ * JSON数据类型 - 替代索引签名，使用类实现
  */
-export type JsonData = Record<string, string | number | boolean | JsonData | null>;
+export class JsonDataClass {
+  private data: Record<string, string | number | boolean | JsonDataClass | null> = {};
+
+  set(key: string, value: string | number | boolean | JsonDataClass | null): void {
+    if (typeof key === 'string') {
+      this.data[key] = value;
+    }
+  }
+
+  get(key: string): string | number | boolean | JsonDataClass | null {
+    return this.data[key] || null;
+  }
+
+  has(key: string): boolean {
+    return key in this.data;
+  }
+
+  keys(): string[] {
+    return Object.keys(this.data);
+  }
+
+  toObject(): Record<string, string | number | boolean | any | null> {
+    const result: Record<string, string | number | boolean | any | null> = {};
+    for (const key of this.keys()) {
+      const value = this.get(key);
+      if (value instanceof JsonDataClass) {
+        result[key] = value.toObject();
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  static fromObject(obj: any): JsonDataClass | null {
+    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+      return null;
+    }
+    const jsonData = new JsonDataClass();
+    for (const key of Object.keys(obj)) {
+      const value = obj[key];
+      if (typeof value === 'string' || typeof value === 'number' || 
+          typeof value === 'boolean' || value === null) {
+        jsonData.set(key, value);
+      } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        const nestedData = JsonDataClass.fromObject(value);
+        if (nestedData) {
+          jsonData.set(key, nestedData);
+        }
+      }
+    }
+    return jsonData;
+  }
+}
+
+// 为了向后兼容，保留JsonData类型别名
+export type JsonData = JsonDataClass;
 
 /**
  * 存储工具类
@@ -82,7 +137,7 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async save(key: string, value: string | number | boolean | JsonData | null, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+  public static async save(key: string, value: string | number | boolean | JsonData | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
     if (!key || typeof key !== 'string') {
       throw new Error('Invalid key');
     }
@@ -108,7 +163,7 @@ export default class StorageUtil {
           StorageUtil.saveToMemory(key, dataToSave);
           break;
         default:
-          throw new Error(`Unsupported storage type: ${type}`);
+          throw new Error(`Unsupported storage type: ${String(type)}`) as never;
       }
 
       Logger.info(TAG, `Saved data for key: ${key}, type: ${type}`);
@@ -147,7 +202,7 @@ export default class StorageUtil {
           data = StorageUtil.getFromMemory(key);
           break;
         default:
-          throw new Error(`Unsupported storage type: ${type}`);
+          throw new Error(`Unsupported storage type: ${String(type)}`) as never;
       }
 
       // 检查数据是否存在
@@ -171,6 +226,7 @@ export default class StorageUtil {
       if (data !== null) {
         // 确保返回值类型安全
         const safeValue = StorageUtil.validateValue(data.value);
+        // 使用更安全的类型转换方式
         return safeValue as T;
       }
 
@@ -563,7 +619,7 @@ export default class StorageUtil {
   /**
    * 从文件读取
    */
-  private static async getFromFile(key: string): Promise<StorageData | null | undefined> {
+  private static async getFromFile(key: string): Promise<StorageData | null> {
     try {
       const fileName = `${key}.json`;
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
@@ -655,24 +711,8 @@ export default class StorageUtil {
     }
     try {
       const parsed = JSON.parse(jsonStr);
-      // 确保解析结果是对象且不是数组
-      if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        const safeData: JsonData = {};
-        // 获取对象的所有自有属性键
-        const keys = Object.keys(parsed);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          const value = parsed[key];
-          // 类型安全地设置值
-          if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
-            safeData[key] = value;
-          } else if (typeof value === 'object' && value !== null) {
-            safeData[key] = {} as JsonData;
-          }
-        }
-        return safeData;
-      }
-      return null;
+      // 使用JsonDataClass.fromObject创建安全的JSON数据对象
+      return JsonDataClass.fromObject(parsed);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to parse JSON string: ${errorMessage}`);
@@ -695,40 +735,37 @@ export default class StorageUtil {
       // 获取对象的所有自有属性键，避免使用in操作符
       const keys = Object.keys(parsedData);
       
-      // 处理value属性
-      if (keys.includes('value')) {
-        const valueData = parsedData['value'];
-        if (typeof valueData === 'string' || typeof valueData === 'number' || 
-            typeof valueData === 'boolean' || valueData === null) {
-          result.value = valueData;
-        } else if (typeof valueData === 'object' && valueData !== null) {
-          // 递归验证嵌套对象
-          result.value = StorageUtil.validateValue(valueData);
-        }
-      }
-      
-      // 处理timestamp属性
-      if (keys.includes('timestamp')) {
-        const tsValue = parsedData['timestamp'];
-        if (typeof tsValue === 'number') {
-          result.timestamp = tsValue;
-        } else if (typeof tsValue === 'string') {
-          const numValue = Number(tsValue);
-          if (!Number.isNaN(numValue)) {
-            result.timestamp = numValue;
+      // 处理value属性 - 避免使用索引访问
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key === 'value') {
+          const valueData = parsedData.get('value');
+          if (typeof valueData === 'string' || typeof valueData === 'number' || 
+              typeof valueData === 'boolean' || valueData === null) {
+            result.value = valueData;
+          } else if (valueData instanceof JsonDataClass) {
+            // 递归验证嵌套对象
+            result.value = StorageUtil.validateValue(valueData);
           }
-        }
-      }
-      
-      // 处理expireTime属性
-      if (keys.includes('expireTime')) {
-        const expValue = parsedData['expireTime'];
-        if (typeof expValue === 'number') {
-          result.expireTime = expValue;
-        } else if (typeof expValue === 'string') {
-          const numValue = Number(expValue);
-          if (!Number.isNaN(numValue)) {
-            result.expireTime = numValue;
+        } else if (key === 'timestamp') {
+          const tsValue = parsedData.get('timestamp');
+          if (typeof tsValue === 'number') {
+            result.timestamp = tsValue;
+          } else if (typeof tsValue === 'string') {
+            const numValue = Number(tsValue);
+            if (!Number.isNaN(numValue)) {
+              result.timestamp = numValue;
+            }
+          }
+        } else if (key === 'expireTime') {
+          const expValue = parsedData.get('expireTime');
+          if (typeof expValue === 'number') {
+            result.expireTime = expValue;
+          } else if (typeof expValue === 'string') {
+            const numValue = Number(expValue);
+            if (!Number.isNaN(numValue)) {
+              result.expireTime = numValue;
+            }
           }
         }
       }
@@ -757,23 +794,30 @@ export default class StorageUtil {
       case 'object':
         // 确保是纯对象而非数组
         if (!Array.isArray(value)) {
+          if (value instanceof JsonDataClass) {
+            return value;
+          }
           // 创建新对象确保类型安全
-          const safeObj: JsonData = {};
+          const safeObj = new JsonDataClass();
           // 获取对象的所有自有属性键
           const keys = Object.keys(value);
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-            // 使用类型断言确保兼容性
-            const propValue = value[key] as string | number | boolean | JsonData | null | undefined;
+            // 使用类型保护确保类型安全
+            const propValue = value[key];
             // 类型安全地处理每个属性值
             if (typeof propValue === 'string' || 
                 typeof propValue === 'number' || 
                 typeof propValue === 'boolean' || 
                 propValue === null) {
-              safeObj[key] = propValue;
-            } else if (typeof propValue === 'object' && propValue !== null) {
-              // 递归验证嵌套对象
-              safeObj[key] = StorageUtil.validateValue(propValue);
+              safeObj.set(key, propValue);
+            } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
+              // 递归验证嵌套对象，确保返回类型兼容
+              const validatedValue = StorageUtil.validateValue(propValue);
+              // 确保只有对象类型才赋值给对象属性
+              if (validatedValue instanceof JsonDataClass) {
+                safeObj.set(key, validatedValue);
+              }
             }
           }
           return safeObj;

@@ -2,12 +2,12 @@
 // 管理页面路由、导航栈和页面跳转
 
 import router from '@ohos.router';
-import { StorageUtil } from '../common/util/StorageUtil';
+import StorageUtil, { JsonData } from '../common/util/StorageUtil';
 
 export class AppNavigator {
-  static instance: AppNavigator;
-  storageUtil: StorageUtil;
-  navigationHistory: NavigationHistoryItem[] = [];
+  private static instance: AppNavigator | null = null;
+  private storageUtil: StorageUtil;
+  private navigationHistory: NavigationHistoryItem[] = [];
 
   constructor() {
     this.storageUtil = StorageUtil.getInstance();
@@ -103,7 +103,7 @@ export class AppNavigator {
    * @param route 页面路由
    * @param params 路由参数
    */
-  private async navigateTo(route: string, params?: Record<string, unknown>): Promise<void> {
+  private async navigateTo(route: string, params?: Record<string, string | number | boolean | null | JsonData>): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       const currentUrl = router.getState().path;
@@ -124,20 +124,20 @@ export class AppNavigator {
       });
     } catch (error) {
       console.error(`Navigation to ${route} failed:`, error);
-      throw error;
+      throw new Error(`Navigation to ${route} failed`);
     }
   }
 
   /**
    * 返回上一页
    */
-  async back(): Promise<void> {
+  async navigateToBack(): Promise<void> {
     try {
       await router.back();
       this.removeLastFromHistory();
     } catch (error) {
       console.error('Navigation back failed:', error);
-      throw error;
+      throw new Error('Navigation back failed');
     }
   }
 
@@ -151,10 +151,10 @@ export class AppNavigator {
         url: this.getPageUrl(PageRoute.HOME)
       });
       this.navigationHistory = [];
-      this.saveNavigationHistory();
+      await this.saveNavigationHistory();
     } catch (error) {
       console.error('Navigation back to home failed:', error);
-      throw error;
+      throw new Error('Navigation back to home failed');
     }
   }
 
@@ -163,7 +163,7 @@ export class AppNavigator {
    * @param route 目标路由
    * @param params 路由参数
    */
-  async replace(route: string, params?: Record<string, unknown>): Promise<void> {
+  async replace(route: string, params?: Record<string, string | number | boolean | null | JsonData>): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       await router.replaceUrl({
@@ -173,7 +173,7 @@ export class AppNavigator {
       this.replaceLastInHistory({ route, url, params, timestamp: Date.now() });
     } catch (error) {
       console.error(`Navigation replace to ${route} failed:`, error);
-      throw error;
+      throw new Error(`Navigation replace to ${route} failed`);
     }
   }
 
@@ -237,7 +237,12 @@ export class AppNavigator {
    */
   async saveNavigationHistory(): Promise<void> {
     try {
-      await this.storageUtil.save('navigationHistory', this.navigationHistory);
+      // 将历史记录转换为可序列化格式
+      const serializableHistory = this.navigationHistory.map(item => ({
+        ...item,
+        params: item.params ? StorageUtil.validateValue(item.params) : null
+      }));
+      await this.storageUtil.save('navigationHistory', serializableHistory);
     } catch (error) {
       console.error('Failed to save navigation history:', error);
     }
@@ -248,8 +253,13 @@ export class AppNavigator {
    */
   async loadNavigationHistory(): Promise<void> {
     try {
-      const history = await this.storageUtil.get<Record<string, unknown>[]>('navigationHistory', []);
-      this.navigationHistory = history || [];
+      const history = await this.storageUtil.get('navigationHistory', []);
+      // 确保类型安全
+      if (Array.isArray(history)) {
+        this.navigationHistory = history as NavigationHistoryItem[];
+      } else {
+        this.navigationHistory = [];
+      }
     } catch (error) {
       console.error('Failed to load navigation history:', error);
       this.navigationHistory = [];
@@ -261,23 +271,30 @@ export class AppNavigator {
    */
   getCurrentRoute(): string {
     const state = router.getState();
-    const url = state.path;
+    const url = state.path || '';
     
-    // 从URL映射回路由
-    const routeMap: Record<string, string> = {
-      'pages/HomePage': PageRoute.HOME,
-      'pages/VideoPlayPage': PageRoute.VIDEO_PLAY,
-      'pages/LineManagerPage': PageRoute.LINE_MANAGER,
-      'pages/SettingsPage': PageRoute.SETTINGS,
-      'pages/SearchPage': PageRoute.SEARCH,
-      'pages/FavoritesPage': PageRoute.FAVORITES,
-      'pages/HistoryPage': PageRoute.HISTORY,
-      'pages/CategoryPage': PageRoute.CATEGORY,
-      'pages/DetailPage': PageRoute.DETAIL,
-      'pages/LivePage': PageRoute.LIVE
-    };
+    // 从URL映射回路由 - 使用数组避免索引签名问题
+    const routeMap = [
+      { url: 'pages/HomePage', route: PageRoute.HOME },
+      { url: 'pages/VideoPlayPage', route: PageRoute.VIDEO_PLAY },
+      { url: 'pages/LineManagerPage', route: PageRoute.LINE_MANAGER },
+      { url: 'pages/SettingsPage', route: PageRoute.SETTINGS },
+      { url: 'pages/SearchPage', route: PageRoute.SEARCH },
+      { url: 'pages/FavoritesPage', route: PageRoute.FAVORITES },
+      { url: 'pages/HistoryPage', route: PageRoute.HISTORY },
+      { url: 'pages/CategoryPage', route: PageRoute.CATEGORY },
+      { url: 'pages/DetailPage', route: PageRoute.DETAIL },
+      { url: 'pages/LivePage', route: PageRoute.LIVE }
+    ];
 
-    return routeMap[url] || PageRoute.HOME;
+    // 查找匹配的URL
+    for (let i = 0; i < routeMap.length; i++) {
+      if (routeMap[i].url === url) {
+        return routeMap[i].route;
+      }
+    }
+    
+    return PageRoute.HOME;
   }
 }
 
@@ -298,12 +315,12 @@ export class PageRoute {
 }
 
 /**
- * 导航历史项
- */
+   * 导航历史项
+   */
 export interface NavigationHistoryItem {
   route: string;
   url: string;
-  params?: Record<string, unknown>;
+  params?: Record<string, string | number | boolean | null | JsonData>;
   timestamp: number;
 }
 

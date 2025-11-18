@@ -26,7 +26,7 @@ export interface CacheItem<T = any> {
   data: T;
   expiry: number;
   timestamp: number;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 // 通用配置项接口
@@ -72,5 +72,5 @@ export interface PaginatedResponse<T = any> {
 export interface ErrorResponse {
   error: string;
   code?: number;
-  details?: Record<string, unknown>;
+  details?: Record<string, any>;
 }
