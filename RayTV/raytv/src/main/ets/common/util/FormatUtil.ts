@@ -197,7 +197,8 @@ export class FormatUtil {
       }
 
       const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+      // 修复：添加明确的类型注解
+      const sizes: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
       // 安全计算索引，避免无效值
       const logValue = Math.log(bytes);
       const logKValue = Math.log(k);

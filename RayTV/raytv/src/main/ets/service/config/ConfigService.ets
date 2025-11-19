@@ -456,22 +456,28 @@ export default class ConfigService {
    * 合并配置
    */
   private mergeConfig(defaultConfig: Config, customConfig: Partial<Config>): Config {
-    const merged = { ...defaultConfig };
+    // 使用ArkTS兼容的对象合并方式
+    if (!customConfig || typeof customConfig !== 'object') {
+      return defaultConfig;
+    }
     
-    this.getObjectKeys(customConfig).forEach(key => {
-      const configKey = key as keyof Config;
-      if (typeof customConfig[configKey] === 'object' && customConfig[configKey] !== null) {
-        merged[configKey] = {
-          ...merged[configKey],
-          ...customConfig[configKey]
-        };
-      } else if (customConfig[configKey] !== undefined) {
-        // 使用类型安全的赋值方式，避免unknown类型断言
-        merged[configKey] = customConfig[configKey] as Config[keyof Config];
+    const result = { ...defaultConfig };
+    
+    for (const key in customConfig) {
+      if (Object.prototype.hasOwnProperty.call(customConfig, key)) {
+        const customValue = customConfig[key];
+        const defaultValue = defaultConfig[key];
+        
+        // 递归合并嵌套对象
+        if (customValue && typeof customValue === 'object' && defaultValue && typeof defaultValue === 'object') {
+          (result as Record<string, any>)[key] = this.mergeConfig(defaultValue as Config, customValue as Partial<Config>);
+        } else if (customValue !== undefined) {
+          (result as Record<string, any>)[key] = customValue;
+        }
       }
-    });
+    }
     
-    return merged;
+    return result;
   }
   
   /**

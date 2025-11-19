@@ -18,30 +18,9 @@ export type ValueType = string | number | boolean | null;
 export type DatabaseRecord = Record<string, ValueType>;
 
 /**
- * 获取对象的键数组（ArkTS兼容方法）
+ * SQLiteHelper类定义开始
  */
-private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
-  const keys: string[] = [];
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      keys.push(key);
-    }
-  }
-  return keys;
-}
 
-/**
- * 获取对象的值数组（ArkTS兼容方法）
- */
-private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
-  const values: ValueType[] = [];
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      values.push(obj[key]);
-    }
-  }
-  return values;
-}
 
 /**
  * SQL查询条件接口
@@ -73,6 +52,32 @@ export interface DatabaseResult {
 export class SQLiteHelper {
   private static instance: SQLiteHelper;
   private dbManager: DatabaseManager;
+  
+  /**
+   * 获取对象的键数组（ArkTS兼容方法）
+   */
+  private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
+    const keys: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+  
+  /**
+   * 获取对象的值数组（ArkTS兼容方法）
+   */
+  private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
+    const values: ValueType[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        values.push(obj[key]);
+      }
+    }
+    return values;
+  }
   
   private constructor() {
     this.dbManager = DatabaseManager.getInstance();

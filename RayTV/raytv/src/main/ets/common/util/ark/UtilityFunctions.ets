@@ -1,0 +1,412 @@
+// UtilityFunctions.ets - ArkTS兼容的TypeScript Utility Types运行时实现
+
+/**
+ * ArkTS兼容的TypeScript Utility Types运行时实现
+ * 提供与TypeScript标准库中类似功能的运行时函数
+ */
+import { SafeAny, SafeObject } from './types/ArkTSBaseTypes';
+import TypeUtils from './TypeUtils';
+import ObjectUtils from './ObjectUtils';
+import ArrayUtils from './ArrayUtils';
+
+/**
+ * Utility Types运行时实现函数集合
+ */
+export const UtilityFunctions = {
+  /**
+   * 创建一个对象，其属性是指定对象的部分属性
+   * 运行时实现Partial<T>的功能
+   */
+  createPartial<T extends Record<string, SafeAny>>(obj: T, keys: string[]): Partial<T> {
+    if (!TypeUtils.isObject(obj)) {
+      return {};
+    }
+    
+    const result: Partial<T> = {};
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key in obj) {
+        result[key] = obj[key];
+      }
+    }
+    
+    return result;
+  },
+
+  /**
+   * 创建一个对象，确保所有指定的键都存在
+   * 运行时实现Required<T>的部分功能
+   */
+  ensureRequired<T extends Record<string, SafeAny>>(obj: T, keys: string[]): T {
+    if (!TypeUtils.isObject(obj)) {
+      throw new Error('Object is required');
+    }
+    
+    const missingKeys: string[] = [];
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (!(key in obj) || obj[key] === undefined) {
+        missingKeys.push(key);
+      }
+    }
+    
+    if (missingKeys.length > 0) {
+      throw new Error(`Missing required properties: ${missingKeys.join(', ')}`);
+    }
+    
+    return obj;
+  },
+
+  /**
+   * 从对象中选取指定的属性
+   * 运行时实现Pick<T, K>的功能
+   */
+  pick<T extends Record<string, SafeAny>, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+    if (!TypeUtils.isObject(obj)) {
+      return {} as Pick<T, K>;
+    }
+    
+    const result: Partial<T> = {};
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key in obj) {
+        result[key] = obj[key];
+      }
+    }
+    
+    return result as Pick<T, K>;
+  },
+
+  /**
+   * 从对象中排除指定的属性
+   * 运行时实现Omit<T, K>的功能
+   */
+  omit<T extends Record<string, SafeAny>, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+    if (!TypeUtils.isObject(obj)) {
+      return {} as Omit<T, K>;
+    }
+    
+    const result: Partial<T> = {};
+    const keySet = new Set<K>(keys);
+    
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key) && !keySet.has(key as K)) {
+        result[key] = obj[key];
+      }
+    }
+    
+    return result as Omit<T, K>;
+  },
+
+  /**
+   * 创建一个记录对象
+   * 运行时实现Record<K, T>的功能
+   */
+  createRecord<K extends string | number | symbol, V>(keys: K[], valueGenerator: (key: K) => V): Record<K, V> {
+    const result: Record<string | number | symbol, V> = {};
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      result[key] = valueGenerator(key);
+    }
+    
+    return result as Record<K, V>;
+  },
+
+  /**
+   * 创建一个只读对象
+   * 运行时近似实现Readonly<T>的功能
+   */
+  makeReadonly<T extends Record<string, SafeAny>>(obj: T): Readonly<T> {
+    if (!TypeUtils.isObject(obj)) {
+      return obj as Readonly<T>;
+    }
+    
+    // 在JavaScript中，Object.freeze只是浅冻结
+    return Object.freeze({ ...obj }) as Readonly<T>;
+  },
+
+  /**
+   * 创建一个深度只读对象
+   * 运行时实现DeepReadonly<T>的功能
+   */
+  makeDeepReadonly<T extends Record<string, SafeAny>>(obj: T): Readonly<T> {
+    if (!TypeUtils.isObject(obj)) {
+      return obj as Readonly<T>;
+    }
+    
+    const result: Record<string, SafeAny> = {};
+    
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const value = obj[key];
+        
+        if (TypeUtils.isObject(value) && !Array.isArray(value)) {
+          // 递归处理嵌套对象
+          result[key] = UtilityFunctions.makeDeepReadonly(value as Record<string, SafeAny>);
+        } else if (Array.isArray(value)) {
+          // 处理数组
+          const frozenArray = value.map((item) => {
+            if (TypeUtils.isObject(item)) {
+              return UtilityFunctions.makeDeepReadonly(item as Record<string, SafeAny>);
+            }
+            return item;
+          });
+          result[key] = Object.freeze(frozenArray);
+        } else {
+          // 原始值
+          result[key] = value;
+        }
+      }
+    }
+    
+    return Object.freeze(result) as Readonly<T>;
+  },
+
+  /**
+   * 深度复制对象
+   * 用于处理DeepPartial等深度类型的辅助函数
+   */
+  deepClone<T>(obj: T): T {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    
+    if (typeof obj !== 'object') {
+      return obj;
+    }
+    
+    if (obj instanceof Date) {
+      return new Date(obj.getTime()) as unknown as T;
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.map(UtilityFunctions.deepClone) as unknown as T;
+    }
+    
+    const result: Record<string, SafeAny> = {};
+    
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result[key] = UtilityFunctions.deepClone(obj[key]);
+      }
+    }
+    
+    return result as T;
+  },
+
+  /**
+   * 创建深度部分对象
+   * 运行时实现DeepPartial<T>的功能
+   */
+  createDeepPartial<T extends Record<string, SafeAny>>(obj: T, paths: string[]): Partial<T> {
+    const result: Partial<T> = {};
+    
+    if (!TypeUtils.isObject(obj)) {
+      return result;
+    }
+    
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      const pathParts = path.split('.');
+      let currentObj: Record<string, SafeAny> = result;
+      let sourceObj: Record<string, SafeAny> = obj;
+      
+      for (let j = 0; j < pathParts.length - 1; j++) {
+        const part = pathParts[j];
+        
+        if (!(part in currentObj)) {
+          currentObj[part] = {};
+        }
+        
+        if (!(part in sourceObj) || !TypeUtils.isObject(sourceObj[part])) {
+          break;
+        }
+        
+        currentObj = currentObj[part] as Record<string, SafeAny>;
+        sourceObj = sourceObj[part] as Record<string, SafeAny>;
+      }
+      
+      const lastPart = pathParts[pathParts.length - 1];
+      if (lastPart in sourceObj) {
+        currentObj[lastPart] = sourceObj[lastPart];
+      }
+    }
+    
+    return result;
+  },
+
+  /**
+   * 合并两个对象
+   * 运行时实现Merge<T, U>的功能
+   */
+  merge<T extends Record<string, SafeAny>, U extends Record<string, SafeAny>>(target: T, source: U): T & U {
+    if (!TypeUtils.isObject(target)) {
+      return source as T & U;
+    }
+    
+    if (!TypeUtils.isObject(source)) {
+      return target as T & U;
+    }
+    
+    const result = { ...target };
+    
+    for (const key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        (result as Record<string, SafeAny>)[key] = source[key];
+      }
+    }
+    
+    return result as T & U;
+  },
+
+  /**
+   * 深度合并两个对象
+   * 运行时实现深度Merge<T, U>的功能
+   */
+  deepMerge<T extends Record<string, SafeAny>, U extends Record<string, SafeAny>>(target: T, source: U): T & U {
+    if (!TypeUtils.isObject(target)) {
+      return source as T & U;
+    }
+    
+    if (!TypeUtils.isObject(source)) {
+      return target as T & U;
+    }
+    
+    const result = { ...target };
+    
+    for (const key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        const targetValue = target[key];
+        const sourceValue = source[key];
+        
+        if (TypeUtils.isObject(targetValue) && TypeUtils.isObject(sourceValue) && !Array.isArray(targetValue) && !Array.isArray(sourceValue)) {
+          // 递归合并嵌套对象
+          (result as Record<string, SafeAny>)[key] = UtilityFunctions.deepMerge(targetValue as Record<string, SafeAny>, sourceValue as Record<string, SafeAny>);
+        } else if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
+          // 合并数组
+          (result as Record<string, SafeAny>)[key] = [...targetValue, ...sourceValue];
+        } else {
+          // 使用source的值覆盖target的值
+          (result as Record<string, SafeAny>)[key] = sourceValue;
+        }
+      }
+    }
+    
+    return result as T & U;
+  },
+
+  /**
+   * 检查值是否为指定类型
+   * 运行时实现类型守卫功能
+   */
+  isType<T>(value: unknown, typeGuard: (value: unknown) => boolean): value is T {
+    return typeGuard(value);
+  },
+
+  /**
+   * 安全地转换类型
+   * 运行时实现类型转换功能
+   */
+  safeCast<T>(value: unknown, typeGuard: (value: unknown) => boolean, defaultValue: T): T {
+    return typeGuard(value) ? (value as T) : defaultValue;
+  },
+
+  /**
+   * 获取函数的返回类型（运行时检查）
+   */
+  getReturnType<T>(fn: (...args: any[]) => T, ...args: any[]): T | null {
+    try {
+      if (typeof fn === 'function') {
+        return fn(...args);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * 创建类型保护函数
+   */
+  createTypeGuard<T>(validator: (value: unknown) => boolean): (value: unknown) => value is T {
+    return validator as (value: unknown) => value is T;
+  },
+
+  /**
+   * 从联合类型中提取特定类型的元素
+   * 运行时实现Extract<T, U>的功能
+   */
+  extract<T>(array: T[], typeGuard: (value: T) => boolean): T[] {
+    if (!Array.isArray(array)) {
+      return [];
+    }
+    
+    return array.filter(typeGuard);
+  },
+
+  /**
+   * 从联合类型中排除特定类型的元素
+   * 运行时实现Exclude<T, U>的功能
+   */
+  exclude<T>(array: T[], typeGuard: (value: T) => boolean): T[] {
+    if (!Array.isArray(array)) {
+      return [];
+    }
+    
+    return array.filter((value) => !typeGuard(value));
+  },
+
+  /**
+   * 确保值不为null或undefined
+   * 运行时实现NonNullable<T>的功能
+   */
+  ensureNotNull<T>(value: T | null | undefined, errorMessage: string = 'Value cannot be null or undefined'): T {
+    if (value === null || value === undefined) {
+      throw new Error(errorMessage);
+    }
+    
+    return value;
+  },
+
+  /**
+   * 异步等待Promise解析
+   * 运行时实现Awaited<T>的功能
+   */
+  async awaitPromise<T>(promise: Promise<T>): Promise<T> {
+    if (!(promise instanceof Promise)) {
+      throw new Error('Value is not a Promise');
+    }
+    
+    return promise;
+  },
+
+  /**
+   * 检查对象是否完全匹配指定的类型定义
+   * 运行时实现Exact<T, U>的部分功能
+   */
+  isExactMatch<T extends Record<string, SafeAny>>(obj: Record<string, SafeAny>, expectedKeys: string[]): boolean {
+    if (!TypeUtils.isObject(obj)) {
+      return false;
+    }
+    
+    const actualKeys = Object.keys(obj);
+    
+    if (actualKeys.length !== expectedKeys.length) {
+      return false;
+    }
+    
+    for (let i = 0; i < expectedKeys.length; i++) {
+      if (!actualKeys.includes(expectedKeys[i])) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+};
+
+export default UtilityFunctions;

@@ -29,7 +29,7 @@ export default class TypeSafeUtil {
    * @param value 要转换的值
    * @returns 转换后的数组，失败时返回空数组
    */
-  public static asArray<T = unknown>(value: unknown): T[] {
+  public static asArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) {
       return value as T[];
     }
@@ -91,7 +91,7 @@ export default class TypeSafeUtil {
    * @param defaultValue 默认值
    * @returns 属性值或默认值
    */
-  public static safeGet<T = unknown>(
+  public static safeGet<T>(
     obj: unknown,
     key: string | number,
     defaultValue: T
@@ -165,7 +165,7 @@ export default class TypeSafeUtil {
    * @param obj 对象
    * @returns 值数组
    */
-  public static getObjectValues<T = unknown>(obj: unknown): T[] {
+  public static getObjectValues<T>(obj: unknown): T[] {
     if (obj === null || obj === undefined || typeof obj !== 'object') {
       return [];
     }
@@ -177,7 +177,7 @@ export default class TypeSafeUtil {
    * @param obj 对象
    * @returns 键值对数组
    */
-  public static getObjectEntries<T = unknown>(
+  public static getObjectEntries<T>(
     obj: unknown
   ): [string, T][] {
     if (obj === null || obj === undefined || typeof obj !== 'object') {

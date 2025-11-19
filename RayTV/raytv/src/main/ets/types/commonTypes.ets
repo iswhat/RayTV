@@ -4,7 +4,7 @@
 /**
  * 基础响应对象类型
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
   code: number;
   message: string;
   data?: T;
@@ -33,7 +33,17 @@ export interface MediaItem {
   duration?: number;
   releaseDate?: string;
   rating?: number;
-  [key: string]: string | number | boolean | null | undefined;
+  // 引入ArkTS兼容的工具类型
+import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
+import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
+
+// 重命名以避免与标准库冲突
+export type Partial<T> = ArkTSPartial<T>;
+export type Required<T> = ArkTSRequired<T>;
+export type Pick<T, K extends keyof T> = ArkTSPick<T, K>;
+export type Omit<T, K extends keyof T> = ArkTSOmit<T, K>;
+export type Record<K extends string | number | symbol, T> = ArkTSRecord<K, T>;
+export type Readonly<T> = ArkTSReadonly<T>;
 }
 
 /**
@@ -107,7 +117,7 @@ export interface ConfigItem {
 /**
  * 缓存选项类型
  */
-export interface CacheOptions<T = any> {
+export interface CacheOptions<T> {
   key: string;
   value: T;
   ttl?: number; // 过期时间（毫秒）
@@ -183,7 +193,7 @@ export interface HttpRequestOptions {
 /**
  * HTTP响应类型
  */
-export interface HttpResponse<T = any> {
+export interface HttpResponse<T> {
   status: number;
   statusText: string;
   data: T;
@@ -212,7 +222,7 @@ export interface EventListenerOptions {
 /**
  * 事件处理函数类型
  */
-export type EventHandler<T = any> = (event: T) => void | Promise<void>;
+export type EventHandler<T> = (event: T) => void | Promise<void>;
 
 /**
  * 通用回调函数类型
@@ -239,6 +249,17 @@ export type ID = string | number;
 export type Empty = null | undefined | void;
 
 /**
+ * 可序列化的对象接口
+ */
+export interface SerializableObject {
+  // ArkTS兼容：不使用索引签名，使用明确的接口定义
+  getSerializable(key: string): Serializable;
+  setSerializable(key: string, value: Serializable): void;
+  hasSerializable(key: string): boolean;
+  toPlainObject(): Record<string, unknown>;
+}
+
+/**
  * 可序列化的值类型
  */
 export type Serializable = 
@@ -248,46 +269,68 @@ export type Serializable =
   | null
   | undefined
   | Serializable[]
-  | { [key: string]: Serializable };
+  | SerializableObject;
 
 /**
  * 深只读类型
  */
-export type DeepReadonly<T> = 
-  T extends Function ? T :
-  T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepReadonly<U>> :
-  T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> } :
-  T;
+// ArkTS兼容的深只读实现 - 简化版本
+export interface DeepReadonlyObject {
+  // ArkTS兼容：不使用索引签名
+  getReadonly(key: string): DeepReadonlyValue;
+  hasReadonly(key: string): boolean;
+}
+
+// 简化版：直接返回对象类型，不使用条件类型
+export type DeepReadonlyValue = 
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | ReadonlyArray<DeepReadonlyValue>
+  | DeepReadonlyObject;
 
 /**
  * 可选键类型
  */
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+// ArkTS兼容的可选属性实现
+export interface OptionalBase<T> {
+  // ArkTS兼容：不使用索引签名
+  getOptional(key: string): unknown;
+  hasOptional(key: string): boolean;
+}
 
 /**
  * 必需键类型
  */
-export type Required<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+// ArkTS兼容的必需属性实现
+export interface RequiredBase<T> {
+  // ArkTS兼容：不使用索引签名
+  getRequired(key: string): unknown;
+  hasRequired(key: string): boolean;
+}
 
 /**
  * 空对象类型（非null且非undefined的对象）
  */
-export type NonEmptyObject<T extends object> = T & { [P in keyof T]: T[P] };
+export type NonEmptyObject<T extends object> = T;
 
 /**
  * 排除null和undefined的类型
  */
-export type NonNullable<T> = T extends null | undefined ? never : T;
+// ArkTS兼容的非空类型实现
+export type NonNullableValue<T> = T;
 
 /**
  * 函数类型
  */
-export type AnyFunction = (...args: any[]) => any;
+export type AnyFunction = (...args: unknown[]) => unknown;
 
 /**
  * 异步函数类型
  */
-export type AsyncFunction<T = any> = (...args: any[]) => Promise<T>;
+export type AsyncFunction<T> = (...args: unknown[]) => Promise<T>;
 
 /**
  * 延迟执行的返回类型

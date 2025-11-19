@@ -2147,8 +2147,8 @@ export class CategoryRepository {
       activeCategories: 0,
       featuredCategories: 0,
       followedCategories: 0,
-      byType: new Map(),
-      byVisibility: new Map(),
+      byType: new Map<CategoryType, number>(),
+      byVisibility: new Map<CategoryVisibility, number>(),
       totalContentCount: 0,
       lastUpdated: Date.now()
     };

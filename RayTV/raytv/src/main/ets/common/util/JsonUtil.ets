@@ -1,4 +1,54 @@
 /**
+ * JSON数据类，用于安全地处理JSON对象
+ */
+export class JsonData {
+  private data: Record<string, string | number | boolean | null> = {};
+
+  /**
+   * 设置属性值
+   * @param key - 属性名
+   * @param value - 属性值
+   */
+  set(key: string, value: string | number | boolean | null): void {
+    this.data[key] = value;
+  }
+
+  /**
+   * 获取属性值
+   * @param key - 属性名
+   * @returns 属性值
+   */
+  get(key: string): string | number | boolean | null | undefined {
+    return this.data[key];
+  }
+
+  /**
+   * 检查属性是否存在
+   * @param key - 属性名
+   * @returns 是否存在
+   */
+  has(key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.data, key);
+  }
+
+  /**
+   * 获取所有属性名
+   * @returns 属性名数组
+   */
+  keys(): string[] {
+    return Object.keys(this.data);
+  }
+
+  /**
+   * 转换为普通对象
+   * @returns 转换后的对象
+   */
+  toObject(): Record<string, string | number | boolean | null> {
+    return { ...this.data };
+  }
+}
+
+/**
  * JSON工具类 - 全功能版本
  * 提供安全的JSON序列化和反序列化功能
  */
@@ -8,8 +58,8 @@ export default class JsonUtil {
    * 使用标准的Object.prototype.hasOwnProperty.call方式确保类型安全
    */
   private static hasOwnProperty<T extends object>(obj: T, key: string | number): boolean {
-    // 使用Object.prototype.hasOwnProperty.call替代in操作符
-    return typeof obj === 'object' && obj !== null && Object.prototype.hasOwnProperty.call(obj, key);
+    // 使用Object.prototype.hasOwnProperty.call确保类型安全
+    return typeof obj === 'object' && obj !== null && Object.prototype.hasOwnProperty.call(obj, String(key));
   }
   /**
    * 将对象序列化为JSON字符串
@@ -20,40 +70,50 @@ export default class JsonUtil {
     try {
       return JSON.stringify(value);
     } catch (error) {
-      console.error('JSON stringify failed:', error);
+      console.error('JSON stringify failed:', error instanceof Error ? error.message : String(error));
       return "{}";
     }
   }
 
   /**
    * 将JSON字符串解析为对象
-   * @param jsonStr - JSON字符串
+   * @param jsonStr JSON字符串
    * @returns 解析后的对象
    */
-  static parse<T = unknown>(jsonStr: string): T {
+  static parse<T>(jsonStr: string): T {
     try {
       if (typeof jsonStr !== 'string') {
         // 参数类型不匹配时抛出明确的类型错误
         throw new TypeError('Expected string as input to parse method');
       }
-      const result = JSON.parse(jsonStr);
-      return result as T;
+      // 使用明确的类型断言以兼容ArkTS
+      return JSON.parse(jsonStr) as T;
     } catch (error) {
-      console.error('JSON parse failed:', error);
-      // 移除条件类型，使用简单的默认返回值
-      // ArkTS不支持条件类型，直接返回空对象并进行适当的类型断言
+      // 使用更明确的错误类型处理以兼容ArkTS
+      console.error('JSON parse failed:', error instanceof Error ? error.message : String(error));
+      // 返回空对象并进行适当的类型断言
       return {} as T;
     }
   }
 
   /**
-   * 安全的JSON解析，不会抛出异常
-   * @param jsonStr - JSON字符串
-   * @returns 解析后的对象，解析失败返回适当的默认值
+   * 安全地解析JSON字符串，出错时返回默认值
+   * @param jsonStr JSON字符串
+   * @param defaultValue 默认值
+   * @returns 解析后的对象或默认值
    */
-  // 移除类型参数的默认值unknown，ArkTS可能不支持这种语法
-  static safeParse<T>(jsonStr: string): T {
-    return JsonUtil.parse<T>(jsonStr);
+  static safeParse<T>(jsonStr: string, defaultValue?: T): T | null {
+    try {
+      if (!jsonStr || typeof jsonStr !== 'string') {
+        return defaultValue || null;
+      }
+      // 使用明确的类型断言以兼容ArkTS
+      return JSON.parse(jsonStr) as T;
+    } catch (error) {
+      // 使用明确的错误类型处理以兼容ArkTS
+      console.error('JSON parse failed:', error instanceof Error ? error.message : String(error));
+      return defaultValue || null;
+    }
   }
 
   /**
@@ -75,27 +135,34 @@ export default class JsonUtil {
       
       // 特殊处理Array对象
       if (Array.isArray(obj)) {
-        return obj.map(item => JsonUtil.deepClone(item)) as T;
+        // 使用泛型数组类型替代any[]
+        const clonedArray: unknown[] = [];
+        for (let i = 0; i < obj.length; i++) {
+          // 确保索引有效，安全访问数组元素
+          if (i >= 0 && i < obj.length) {
+            const arrayItem = obj[i];
+            clonedArray[i] = JsonUtil.deepClone(arrayItem);
+          }
+        }
+        return clonedArray as T;
       }
       
       // 处理对象字面量
-      if (typeof obj === 'object') {
-        // 创建与原始对象相同类型的新对象
-        const clone = Array.isArray(obj) ? [] : {};
-        
-        // 复制所有可枚举属性
-        for (const key in obj) {
-          if (JsonUtil.hasOwnProperty(obj, key)) {
-            clone[key] = JsonUtil.deepClone(obj[key]);
-          }
-        }
-        
-        return clone as T;
+      const clone: Record<string, unknown> = {};
+      
+      // 使用Object.getOwnPropertyNames获取属性名
+      const keys = Object.getOwnPropertyNames(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const safeKey = String(key);
+        // 直接使用属性名访问值
+        const propertyValue = (obj as Record<string, unknown>)[safeKey];
+        clone[safeKey] = JsonUtil.deepClone(propertyValue);
       }
       
-      return obj;
+      return clone as T;
     } catch (error) {
-      console.error('Deep clone failed:', error);
+      console.error('Deep clone failed:', error instanceof Error ? error.message : String(error));
       // 在克隆失败时，尝试使用JSON序列化作为备选方案
       try {
         return JSON.parse(JSON.stringify(obj)) as T;
@@ -147,23 +214,28 @@ export default class JsonUtil {
    * @param objects - 要合并的对象数组
    * @returns 合并后的对象
    */
-  static merge<T extends Record<string, unknown>>(...objects: T[]): T {
-    const result: Record<string, unknown> = {};
+  static merge<T extends Record<string, string | number | boolean | null>>(...objects: T[]): T {
+    // 使用JsonData类替代对象字面量
+    const jsonData = new JsonData();
     
-    for (const current of objects) {
+    // 替换外层for..of循环
+    for (let i = 0; i < objects.length; i++) {
+      const current = objects[i];
       if (!current || typeof current !== 'object') {
         continue;
       }
       
       const keys = Object.getOwnPropertyNames(current);
-      for (const key of keys) {
+      // 替换内层for..of循环
+      for (let j = 0; j < keys.length; j++) {
+        const key = keys[j];
         if (JsonUtil.hasOwnProperty(current, key)) {
-          result[key] = current[key];
+          jsonData.set(key, current[key] as string | number | boolean | null);
         }
       }
     }
     
-    return result as T;
+    return jsonData.toObject() as T;
   }
 
   /**
@@ -171,27 +243,32 @@ export default class JsonUtil {
    * @param obj - 要过滤的对象
    * @returns 过滤后的对象
    */
-  static filterNullUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  static filterNullUndefined<T extends Record<string, string | number | boolean | null>>(
+    obj: T
+  ): Record<string, string | number | boolean | null> {
     // 类型安全检查
     if (!obj || typeof obj !== 'object') {
-      return {} as Partial<T>;
+      return {} as Record<string, string | number | boolean | null>;
     }
     
-    // 创建明确类型的结果对象
-    const result: Record<string, unknown> = {};
+    // 使用JsonData类替代对象字面量
+    const jsonData = new JsonData();
     const keys = Object.getOwnPropertyNames(obj);
     
-    for (const key of keys) {
+    // 替换for..of循环为标准for循环
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       if (JsonUtil.hasOwnProperty(obj, key)) {
         const value = obj[key];
         // 确保值不为null且不为undefined
         if (value !== null && value !== undefined) {
-          result[key] = value;
+          jsonData.set(key, value as string | number | boolean | null);
         }
       }
     }
     
-    return result as Partial<T>;
+    // 直接返回明确的类型
+    return jsonData.toObject();
   }
 }
 
@@ -201,7 +278,7 @@ export default class JsonUtil {
  * @returns JSON字符串
  */
 export function safeStringify<T>(value: T): string {
-  return JsonUtil.stringify<T>(value);
+  return JsonUtil.stringify(value);
 }
 
 /**
@@ -209,8 +286,8 @@ export function safeStringify<T>(value: T): string {
  * @param jsonStr - JSON字符串
  * @returns 解析后的对象
  */
-export function quickParse<T extends Record<string, unknown>>(jsonStr: string): T {
-  return JsonUtil.parse<T>(jsonStr);
+export function quickParse<T extends Record<string, string | number | boolean | null>>(jsonStr: string): T {
+  return JsonUtil.parse(jsonStr);
 }
 
 /**

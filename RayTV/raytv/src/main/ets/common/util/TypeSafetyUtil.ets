@@ -26,25 +26,52 @@ export class TypeSafetyUtil {
   }
 
   /**
-   * 安全地访问对象属性
-   * @param obj 要访问的对象
-   * @param key 属性名
+   * 安全地访问嵌套属性
+   * @param obj 目标对象
+   * @param path 属性路径，可以是字符串或字符串数组
    * @param defaultValue 默认值
-   * @returns 属性值或默认值
+   * @returns 访问结果或默认值
    */
-  public static safeAccess<T extends object, K extends keyof T, D>(
-    obj: T | null | undefined,
-    key: K | string | number,
-    defaultValue: D
-  ): T[K] | D {
-    if (obj === null || obj === undefined) {
+  public static safeAccess<T = string | number | boolean | null>(obj: object, path: string | string[], defaultValue?: T): T | undefined {
+    if (!obj || typeof obj !== 'object') {
       return defaultValue;
     }
-    
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      return obj[key as keyof T];
+
+    const keys: string[] = Array.isArray(path) ? path : path.split('.');
+    let current: object = obj;
+
+    for (const key of keys) {
+      // 跳过无效键
+      if (!key || typeof key !== 'string') {
+        return defaultValue;
+      }
+      
+      // 安全地进行索引访问
+      const objRef = current as Record<string, string | number | boolean | object | null>;
+      // 使用Object.keys检查属性存在性
+      if (Object.keys(objRef).includes(key)) {
+        const nextValue = objRef[key];
+        // 检查nextValue是否是有效对象
+        if (nextValue !== null && typeof nextValue === 'object') {
+          current = nextValue;
+        } else if (nextValue === null || 
+                   typeof nextValue === 'string' || 
+                   typeof nextValue === 'number' || 
+                   typeof nextValue === 'boolean') {
+          // 对于基本类型，检查是否是最后一个键
+          if (keys.indexOf(key) === keys.length - 1) {
+            return nextValue as T ?? defaultValue;
+          }
+          return defaultValue; // 非对象类型不能继续访问嵌套属性
+        } else {
+          return defaultValue;
+        }
+      } else {
+        return defaultValue;
+      }
     }
     
+    // 如果循环结束且current仍是对象，返回默认值
     return defaultValue;
   }
 
@@ -65,7 +92,9 @@ export class TypeSafetyUtil {
     }
     
     try {
-      (obj as Record<string, unknown>)[key] = value;
+      // 修复：使用更精确的类型断言
+      const safeObj = obj as Record<string | number, unknown>;
+      safeObj[key] = value;
       return true;
     } catch {
       return false;
@@ -100,10 +129,14 @@ export class TypeSafetyUtil {
    * @param obj 原始对象
    * @returns 带有安全属性名的新对象
    */
-  public static createSafeObject(obj: Record<string, unknown>): Record<string, unknown> {
-    const safeObj: Record<string, unknown> = {};
+  public static createSafeObject(obj: Record<string, unknown>): SafeObject {
+    // 修复：使用明确的类型注解，避免未类型化对象字面量
+    const safeObj: SafeObject = {};
     
-    for (const [key, value] of Object.entries(obj)) {
+    const entries = Object.entries(obj);
+    for (let i = 0; i < entries.length; i++) {
+      const key = entries[i][0];
+      const value = entries[i][1];
       const safeKey = TypeSafetyUtil.safePropertyName(key);
       safeObj[safeKey] = value;
     }
@@ -117,7 +150,8 @@ export class TypeSafetyUtil {
    * @returns 包装后的对象，保留原始类型信息
    */
   public static withType<T>(value: T): { value: T } {
-    return { value };
+    // 使用完整的对象属性赋值语法并添加明确类型
+    return { value: value } as { value: T };
   }
   
   /**
@@ -126,8 +160,19 @@ export class TypeSafetyUtil {
    * @param guard 类型守卫函数
    * @returns 经过类型守卫后的值
    */
-  public static narrowType<T extends U, U = unknown>(value: U, guard: (v: U) => v is T): T | null {
-    return guard(value) ? value : null;
+  public static narrowType<T extends string | number | boolean | null, U = unknown>(value: U, guard: (v: U) => boolean): T | null {
+    // 在ArkTS中，使用返回布尔值的函数替代类型守卫
+    if (guard(value)) {
+      // 额外的运行时检查确保类型安全
+      const result = value as T;
+      if (result === null || 
+          typeof result === 'string' || 
+          typeof result === 'number' || 
+          typeof result === 'boolean') {
+        return result;
+      }
+    }
+    return null;
   }
   
   /**
@@ -160,7 +205,8 @@ export class TypeSafetyUtil {
    * @param args 工厂函数参数
    * @returns 工厂函数创建的对象
    */
-  public static createWithType<T>(factory: (...args: unknown[]) => T, ...args: unknown[]): T | null {
+  public static createWithType<T, A extends unknown[]>(factory: (...args: A) => T, ...args: A): T | null {
+    // 修复：使用泛型参数A来捕获准确的参数类型，而不是使用unknown[]
     try {
       return factory(...args);
     } catch {
@@ -169,20 +215,49 @@ export class TypeSafetyUtil {
   }
   
   /**
+   * 安全地执行函数
+   * @param fn 要执行的函数
+   * @param defaultValue 默认值
+   * @param args 函数参数
+   * @returns 执行结果或默认值
+   */
+  public static safeExecute<T>(
+    fn: (...args: unknown[]) => T,
+    defaultValue: T,
+    ...args: unknown[]
+  ): T {
+    try {
+      return typeof fn === 'function' ? fn(...args) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  /**
    * 安全地进行类型断言
    * 用于解决泛型函数调用类型推断受限的问题
    * @param value 要断言的值
-   * @param typeGuard 可选的类型守卫函数
+   * @param typeGuard 可选的类型检查函数
    * @returns 断言后的类型
    */
-  public static asType<T>(value: unknown, typeGuard?: (value: unknown) => value is T): T {
-    // 如果提供了类型守卫函数，使用它来验证类型
+  public static asType<T extends string | number | boolean | null>(value: unknown, typeGuard?: (value: unknown) => boolean): T {
+    // 在ArkTS中，使用返回布尔值的函数替代类型守卫
     if (typeGuard && !typeGuard(value)) {
       console.warn('Type assertion failed: value does not match the expected type');
+      // 返回默认值而不是直接断言
+      return null as T;
     }
     
-    // 执行类型断言
-    return value as T;
+    // 确保返回值符合基本类型约束
+    if (value === null || 
+        typeof value === 'string' || 
+        typeof value === 'number' || 
+        typeof value === 'boolean') {
+      return value as T;
+    }
+    
+    // 对于不匹配的类型，返回null
+    return null as T;
   }
   
   /**
@@ -190,25 +265,72 @@ export class TypeSafetyUtil {
    * @param fn 原始函数
    * @returns 包装后的函数，具有更好的类型推断
    */
-  public static createEnhancedGenericFunction<T extends (...args: unknown[]) => unknown>(fn: T): T {
-    return function(this: object, ...args: unknown[]): ReturnType<T> {
-      // 避免使用Function.apply，直接调用函数
-      return fn.call(this, ...args) as ReturnType<T>;
-    } as T;
+  // 修复：使用更具体的泛型类型定义，避免any[]
+  public static createEnhancedGenericFunction<T, A extends unknown[]>(fn: (...args: A) => T): (...args: A) => T {
+    // 在ArkTS中使用更简单的方式实现，使用箭头函数替代普通函数表达式
+    return (...args: A): T => {
+      // 使用标准函数调用
+      try {
+        if (typeof fn === 'function') {
+          return fn(...args);
+        }
+        // 确保抛出的是Error类型的错误
+        const error = new Error('fn is not a function');
+        throw error;
+      } catch (e) {
+        console.error('Function execution failed:', e);
+        // 确保抛出的是Error类型的错误
+        const error: Error = e instanceof Error ? e : new Error(String(e));
+        throw error;
+      }
+    };
   }
+  /**
+   * 定义安全对象类型，避免使用object literals as types
+   */
+  export interface SafeObject {
+    [key: string]: string | number | boolean | object | null;
+  }
+
   /**
    * 安全地将值转换为对象
    * @param value 要转换的值
    * @returns 如果是对象则返回对象，否则返回空对象
    */
-  public static asObject(value: unknown): Record<string, unknown> {
+  public static asObject(value: unknown): SafeObject {
     if (value === null || value === undefined) {
-      return {};
+      return {} as SafeObject;
     }
     if (typeof value === 'object' && !Array.isArray(value)) {
-      return value as Record<string, unknown>;
+      // 转换对象，只保留基本类型值和嵌套对象
+      const result: SafeObject = {};
+      const obj = value as Record<string, unknown>;
+      
+      for (const key in obj) {
+        if (key !== undefined && Object.prototype.hasOwnProperty.call(obj, key)) {
+          const propValue = obj[key];
+          if (typeof propValue === 'string' || 
+              typeof propValue === 'number' || 
+              typeof propValue === 'boolean' || 
+              propValue === null ||
+              (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue))) {
+            result[key] = propValue as string | number | boolean | object | null;
+          }
+        }
+      }
+      
+      return result;
     }
-    return {};
+    try {
+      // 对于非对象类型，尝试JSON序列化/反序列化来创建安全对象
+      const serialized = JSON.stringify(value);
+      const parsed = JSON.parse(serialized);
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+          ? parsed as SafeObject
+          : {} as SafeObject;
+    } catch {
+      return {} as SafeObject;
+    }
   }
 
   /**
@@ -217,12 +339,12 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 转换后的数组或默认值
    */
-  public static asArray<T = unknown>(value: unknown, defaultValue: T[] = []): T[] {
+  // 修复：移除类型参数默认值，使用defaultValue参数
+  public static asArray<T>(value: unknown, defaultValue: T[] = []): T[] {
     if (Array.isArray(value)) {
-      // 避免类型断言，返回类型安全的数组
-      return [...value] as T[];
+      return value as T[];
     }
-    return [];
+    return defaultValue;
   }
 
   /**
@@ -278,26 +400,27 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 属性值或默认值
    */
-  public static getProperty<T>(
+  public static getProperty<T extends string | number | boolean | null>(
     obj: unknown,
     key: string,
     defaultValue: T
   ): T {
-    const safeObj = TypeSafetyUtil.asObject(obj);
+    const safeObj: SafeObject = TypeSafetyUtil.asObject(obj);
     
-    // 使用hasOwnProperty确保属性安全访问
-    if (!Object.prototype.hasOwnProperty.call(safeObj, key)) {
-      return defaultValue;
+    // 使用Object.keys和includes检查属性存在性，避免使用in操作符
+    if (key !== undefined && Object.keys(safeObj).includes(key)) {
+      const value = safeObj[key];
+      // 确保返回值是基本类型且符合预期类型
+      if ((value === null || 
+           typeof value === 'string' || 
+           typeof value === 'number' || 
+           typeof value === 'boolean') && 
+          value !== undefined) {
+        return value as T;
+      }
     }
     
-    const value = safeObj[key];
-    
-    // 检查值是否为null或undefined
-    if (value === null || value === undefined) {
-      return defaultValue;
-    }
-    
-    return value as T ?? defaultValue;
+    return defaultValue;
   }
 
   /**
@@ -308,37 +431,49 @@ export class TypeSafetyUtil {
    * @returns 属性值或默认值
    */
   public static getNestedProperty<T>(
-    obj: unknown,
+    obj: object,
     path: string,
     defaultValue: T
   ): T {
-    if (!path || typeof path !== 'string') {
+    if (!obj || typeof obj !== 'object' || !path || typeof path !== 'string') {
       return defaultValue;
     }
     
     const keys = path.split('.');
-    let current: unknown = obj;
+    let current: object = obj;
     
     for (const key of keys) {
-      if (current === null || current === undefined) {
+      // 跳过无效键
+      if (!key || typeof key !== 'string') {
         return defaultValue;
       }
       
-      const safeObj = TypeSafetyUtil.asObject(current);
-      
-      // 安全检查属性存在性，避免使用原型方法
-      if (key in safeObj && typeof safeObj === 'object' && safeObj !== null) {
-        current = safeObj[key];
+      // 安全地进行类型转换
+      const safeObj = current as SafeObject;
+      // 使用Object.keys检查属性存在性
+      if (Object.keys(safeObj).includes(key)) {
+        const nextValue = safeObj[key];
+        // 检查nextValue是否是有效对象
+        if (nextValue !== null && typeof nextValue === 'object') {
+          current = nextValue;
+        } else if (nextValue === null || 
+                   typeof nextValue === 'string' || 
+                   typeof nextValue === 'number' || 
+                   typeof nextValue === 'boolean') {
+          // 对于基本类型，检查是否是最后一个键
+          if (keys.indexOf(key) === keys.length - 1) {
+            return nextValue as T;
+          }
+          return defaultValue; // 非对象类型不能继续访问嵌套属性
+        } else {
+          return defaultValue;
+        }
       } else {
         return defaultValue;
       }
     }
     
-    // 尝试类型转换
-    if (current === null || current === undefined) {
-      return defaultValue;
-    }
-    
+    // 如果循环结束且current仍是对象，尝试进行类型转换
     return current as T;
   }
 
@@ -349,13 +484,13 @@ export class TypeSafetyUtil {
    * @param value 值
    * @returns 是否设置成功
    */
-  public static setProperty<T>(
+  public static setProperty<T extends string | number | boolean | null>(
     obj: Record<string, unknown>,
     key: string,
     value: T
   ): boolean {
     if (obj && typeof obj === 'object' && key && !Array.isArray(obj)) {
-      obj[key] = value as unknown;
+      obj[key] = value;
       return true;
     }
     return false;
@@ -398,16 +533,24 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 属性值或默认值
    */
-  public static getPropertyWithSpecialChars<T>(obj: unknown, propertyName: string, defaultValue: T): T {
+  public static getPropertyWithSpecialChars<T extends string | number | boolean | null>(obj: unknown, propertyName: string, defaultValue: T): T {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
       return defaultValue;
     }
     
     try {
-      // 使用索引访问器安全地访问属性
-      const objRecord = obj as Record<string, unknown>;
-      if (Object.prototype.hasOwnProperty.call(objRecord, propertyName)) {
-        return objRecord[propertyName] as T;
+      // 安全地进行索引访问
+      const safeObj = obj as Record<string, unknown>;
+      if (propertyName !== undefined && Object.keys(safeObj).includes(propertyName)) {
+        const value = safeObj[propertyName];
+        // 确保返回值是基本类型且符合预期类型
+        if ((value === null || 
+             typeof value === 'string' || 
+             typeof value === 'number' || 
+             typeof value === 'boolean') && 
+            value !== undefined) {
+          return value as T;
+        }
       }
       return defaultValue;
     } catch (error) {
@@ -423,14 +566,19 @@ export class TypeSafetyUtil {
    * @param value 属性值
    * @returns 是否设置成功
    */
-  public static setPropertyWithSpecialChars(obj: unknown, propertyName: string, value: unknown): boolean {
+  public static setPropertyWithSpecialChars<T extends string | number | boolean | null>(
+    obj: unknown,
+    propertyName: string,
+    value: T
+  ): boolean {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
       return false;
     }
     
     try {
       // 使用索引访问器安全地设置属性
-      (obj as Record<string, unknown>)[propertyName] = value;
+      const safeObj = obj as Record<string, unknown>;
+      safeObj[propertyName] = value;
       return true;
     } catch (error) {
       // 移除Logger引用，因为原代码中没有使用Logger
@@ -443,17 +591,26 @@ export class TypeSafetyUtil {
    * @param data 原始数据对象
    * @returns 安全的数据库记录对象
    */
-  public static createSafeDatabaseRecord(data: unknown): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
+  public static createSafeDatabaseRecord(data: unknown): Record<string, string | number | boolean | null> {
+    const result: Record<string, string | number | boolean | null> = {};
     
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
       return result;
     }
     
     // 安全地复制所有属性，包括那些包含特殊字符的属性
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        result[key] = data[key];
+    const safeData = data as Record<string, unknown>;
+    for (const key in safeData) {
+      // 安全地检查属性是否属于对象自身
+      if (key !== undefined && Object.prototype.hasOwnProperty.call(safeData, key)) {
+        // 只保留基本类型值
+        const value = safeData[key];
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+          result[key] = value;
+        } else {
+          // 对于复杂类型，转换为字符串或忽略
+          result[key] = value === undefined ? null : String(value);
+        }
       }
     }
     
@@ -475,9 +632,16 @@ export class TypeSafetyUtil {
    * @param obj 对象
    * @returns 值列表
    */
-  public static getObjectValues<T = unknown>(obj: unknown): T[] {
+  public static getObjectValues<T extends string | number | boolean | null>(obj: unknown): T[] {
     const safeObj = TypeSafetyUtil.asObject(obj);
-    return Object.values(safeObj) as T[];
+    const values = Object.values(safeObj);
+    // 过滤并转换值，确保返回的是指定类型
+    return values.filter(value => 
+      typeof value === 'string' || 
+      typeof value === 'number' || 
+      typeof value === 'boolean' || 
+      value === null
+    ) as T[];
   }
 
   /**
@@ -485,9 +649,16 @@ export class TypeSafetyUtil {
    * @param obj 对象
    * @returns 键值对列表
    */
-  public static getObjectEntries<T = unknown>(obj: unknown): [string, T][] {
+  public static getObjectEntries<T extends string | number | boolean | null>(obj: unknown): [string, T][] {
     const safeObj = TypeSafetyUtil.asObject(obj);
-    return Object.entries(safeObj) as [string, T][];
+    const entries = Object.entries(safeObj);
+    // 过滤并转换键值对，确保返回的是指定类型
+    return entries.filter(([_, value]) => 
+      typeof value === 'string' || 
+      typeof value === 'number' || 
+      typeof value === 'boolean' || 
+      value === null
+    ) as [string, T][];
   }
 
   /**
@@ -497,9 +668,9 @@ export class TypeSafetyUtil {
    * @returns 合并后的对象
    */
   public static mergeObjects(
-    target: Record<string, unknown>,
-    ...sources: Record<string, unknown>[]
-  ): Record<string, unknown> {
+    target: Record<string, string | number | boolean | null>,
+    ...sources: Record<string, string | number | boolean | null>[]
+  ): Record<string, string | number | boolean | null> {
     const safeTarget = TypeSafetyUtil.asObject(target);
     
     for (const source of sources) {
@@ -514,14 +685,16 @@ export class TypeSafetyUtil {
           const targetValue = safeTarget[key];
           if (TypeSafetyUtil.isValidObject(targetValue)) {
             safeTarget[key] = TypeSafetyUtil.mergeObjects(
-              targetValue as Record<string, unknown>, 
-              value as Record<string, unknown>
+              targetValue as Record<string, string | number | boolean | object | null>, 
+              value as Record<string, string | number | boolean | object | null>
             );
           } else {
-            safeTarget[key] = { ...value };
+            // 避免使用对象展开操作，改用明确的对象创建
+            safeTarget[key] = TypeSafetyUtil.asObject(value);
           }
         } else if (TypeSafetyUtil.isValidArray(value)) {
-          safeTarget[key] = [...value];
+          // 避免使用数组展开操作，改用Array.from创建新数组
+          safeTarget[key] = Array.from(value as unknown[]);
         } else {
           safeTarget[key] = value;
         }
@@ -532,24 +705,24 @@ export class TypeSafetyUtil {
   }
 
   /**
-   * 创建类型守卫函数，用于验证对象是否符合特定接口
+   * 创建类型检查函数
    * @param schema 属性验证函数的映射
-   * @returns 类型守卫函数
+   * @returns 类型检查函数，返回布尔值
    */
-  public static createTypeGuard<T>(
-    schema: Record<keyof T, (value: unknown) => boolean>
-  ): (obj: unknown) => obj is T {
-    return (obj: unknown): obj is T => {
+  public static createTypeGuard<T extends Record<string, unknown>>(
+    schema: Record<string | number, (value: unknown) => boolean>
+  ): (obj: unknown) => boolean {
+    return (obj: unknown): boolean => {
       if (!TypeSafetyUtil.isValidObject(obj)) {
         return false;
       }
       
-      const safeObj = obj as Record<keyof T, unknown>;
+      const safeObj = obj as Record<string | number, unknown>;
       
       // 验证所有必需的属性都存在且符合类型
       for (const [key, validator] of TypeSafetyUtil.getObjectEntries<(value: unknown) => boolean>(schema)) {
         // 安全地获取对象属性并验证
-        const value = TypeSafetyUtil.safeAccess(safeObj, key, undefined);
+        const value = TypeSafetyUtil.safeAccess(safeObj, key.toString(), undefined);
         if (!validator(value)) {
           return false;
         }
@@ -567,8 +740,11 @@ export class TypeSafetyUtil {
    */
   public static safeJsonParse<T>(jsonStr: unknown, defaultValue: T): T {
     try {
-      const str = TypeSafetyUtil.asString(jsonStr);
-      const parsed = JSON.parse(str);
+      // 确保jsonStr是字符串类型
+      if (typeof jsonStr !== 'string') {
+        return defaultValue;
+      }
+      const parsed = JSON.parse(jsonStr);
       return parsed !== null ? (parsed as T) : defaultValue;
     } catch (error) {
       return defaultValue;

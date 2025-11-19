@@ -32,7 +32,7 @@ export interface RequestConfig {
 /**
  * 网络响应接口
  */
-export interface Response<T = object | string | number | boolean> {
+export interface Response<T> {
   status: number;
   statusText: string;
   data: T;
@@ -125,7 +125,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async get<T = object>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<Response<T>> {
+  public static async get<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'GET'
@@ -149,7 +149,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async post<T = object>(url: string, data?: RequestConfig['data'], config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<Response<T>> {
+  public static async post<T>(url: string, data?: RequestConfig['data'], config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'POST',
@@ -174,7 +174,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async put<T = object>(url: string, data?: RequestConfig['data'], config?: Omit<RequestConfig, 'url' | 'method' | 'data'>): Promise<Response<T>> {
+  public static async put<T>(url: string, data?: RequestConfig['data'], config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'PUT',
@@ -198,7 +198,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async delete<T = object>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<Response<T>> {
+  public static async delete<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'DELETE'
@@ -221,7 +221,7 @@ export default class NetworkUtil {
    * @param retryCount 当前重试次数
    * @returns Promise<Response>
    */
-  public static async request<T = object>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
+  public static async request<T>(config: RequestConfig, retryCount: number = 0): Promise<Response<T>> {
     const url = config.url;
     const method = config.method || 'GET';
     const headers = config.headers || {};

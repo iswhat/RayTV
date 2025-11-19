@@ -262,8 +262,7 @@ struct CategoryPage {
     ScrollView({ className: "category-scroll", scrollBar: "auto" }) {
       Flex({ className: "category-list", wrap: "nowrap" }) {
         ForEach(this.categories, (category: string) => {
-          Button(category)
-            .key(`category-${category}`)
+          Button(category, { key: `category-${category}` })
             .className(`category-button ${this.selectedCategory === category ? 'selected' : ''}`)
             .onClick(() => this.handleCategorySelect(category))
         }, (category: string) => category)
@@ -306,10 +305,8 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    ListItem()
-      .key(media.id)
+    Flex({ className: "media-item", key: media.id })
       .onClick(() => this.handleMediaItemClick(media)) {
-    Flex({ className: "media-item" }) {
         Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
           .className("media-cover")
           .objectFit("cover")
@@ -327,7 +324,6 @@ struct CategoryPage {
           }
         }
       }
-    }
   }
   
   /**
@@ -359,8 +355,9 @@ struct CategoryPage {
     }
     
     if (this.mediaList.length === 0) {
-      Empty({ className: "empty-container" }) {
+      Stack({ className: "empty-container" }) {
         Text("暂无相关内容")
+          .className("empty-text")
       }
       return;
     }

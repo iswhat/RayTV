@@ -387,7 +387,8 @@ export class CrawlerService {
     try {
       const method = (spider as Record<string, unknown>)[methodName];
       if (typeof method === 'function') {
-        return await method.apply(spider, args) as T;
+        // ArkTS兼容：使用直接调用替代apply
+        return await (spider as Record<string, Function>)[methodName](...args) as T;
       } else {
         throw new Error(`Method ${methodName} not found in spider`);
       }

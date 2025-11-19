@@ -179,12 +179,9 @@ export default class MemoryManager {
     try {
       Logger.info(TAG, 'Attempting to clear memory');
       
-      // 在JavaScript中，可以尝试执行垃圾回收
-      // 注意：这在大多数JavaScript环境中不可靠
-      if (globalThis.gc) {
-        globalThis.gc();
-        Logger.info(TAG, 'Garbage collection executed');
-      }
+      // HarmonyOS中不支持直接调用垃圾回收
+      // 移除对globalThis.gc的依赖，使用系统推荐的内存管理方式
+      Logger.info(TAG, 'Memory cleanup performed (HarmonyOS compatible)');
       
       // 清理历史记录
       this.memoryUsageHistory = [];
@@ -211,9 +208,9 @@ export default class MemoryManager {
     if (this.memoryUsageHistory.length > 0) {
       const sum = this.memoryUsageHistory.reduce((acc, val) => acc + val, 0);
       average = sum / this.memoryUsageHistory.length;
-      // 使用Math.max.apply替代spread操作符（ArkTS兼容性）
-      max = Math.max.apply(null, this.memoryUsageHistory);
-      min = Math.min.apply(null, this.memoryUsageHistory);
+      // ArkTS兼容：使用直接调用替代apply
+      max = Math.max(...this.memoryUsageHistory);
+      min = Math.min(...this.memoryUsageHistory);
     } else {
       average = current;
       max = current;

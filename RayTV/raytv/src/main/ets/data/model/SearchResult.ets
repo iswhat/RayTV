@@ -298,8 +298,8 @@ export default class SearchResult {
    * @returns 优先级数值
    */
   public getDisplayPriority(): number {
-    // 定义类型优先级 - 使用对象字面量，明确键为number类型
-    const typePriority: Record<number, number> = {
+    // 定义类型优先级 - 使用明确的ResultType作为键类型
+    const typePriority: Record<ResultType, number> = {
       [ResultType.MOVIE]: 10,
       [ResultType.TV_SERIES]: 9,
       [ResultType.ANIME]: 8,
@@ -313,7 +313,7 @@ export default class SearchResult {
       [ResultType.TAG]: 1,
       [ResultType.CHANNEL]: 1,
       [ResultType.OTHER]: 0
-    };
+    } as const;
 
     // 基础优先级 - 确保类型安全地访问
     let priority = typePriority[this.type as number] ?? 0;

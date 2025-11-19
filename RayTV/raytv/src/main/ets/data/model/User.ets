@@ -400,11 +400,30 @@ export default class User {
   }
 
   /**
+   * User序列化数据接口
+   */
+  interface UserSerializable {
+    id: string;
+    username: string;
+    nickname: string | null;
+    email: string | null;
+    avatarUrl: string | null;
+    role: string;
+    preferences: UserPreferences;
+    lastLoginTime: string;
+    registrationDate: string;
+    activeDevices: DeviceInfo[];
+    isVerified: boolean;
+    status: string;
+    subscriptionEndDate: string | null;
+  }
+
+  /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): { [key: string]: string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null } {
-    const result: { [key: string]: string | number | boolean | UserPreferences | DeviceInfo[] | UserSettings | null } = {
+  public toSerializable(): UserSerializable {
+    const result: UserSerializable = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,

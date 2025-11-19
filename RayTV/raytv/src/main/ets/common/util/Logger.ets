@@ -110,8 +110,8 @@ export interface LoggerConfig {
  * 日志详细数据接口
  */
 export interface LogDetailData {
-  // 使用Record替代索引签名
-  data?: Record<string, string | number | boolean | any>;
+  // 使用Record替代索引签名，避免使用any类型
+  data?: Record<string, string | number | boolean | null>;
 }
 
 /**

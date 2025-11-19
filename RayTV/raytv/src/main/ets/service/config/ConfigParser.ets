@@ -54,7 +54,12 @@ export interface PlaySource {
 }
 
 export interface PlayRules {
-  [key: string]: PlaySource;
+  // ArkTS兼容：不使用索引签名，使用明确的方法定义
+  getPlaySource(key: string): PlaySource | undefined;
+  setPlaySource(key: string, value: PlaySource): void;
+  hasPlaySource(key: string): boolean;
+  getAllKeys(): string[];
+  toRecord(): Record<string, PlaySource>;
 }
 
 /**

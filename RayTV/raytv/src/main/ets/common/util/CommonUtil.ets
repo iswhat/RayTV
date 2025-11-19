@@ -103,7 +103,10 @@ export class CommonUtil {
     
     return (...args: Parameters<T>) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(null, args), delay);
+      timeoutId = setTimeout(() => {
+        // ArkTS兼容：使用直接调用替代apply
+        func(...args);
+      }, delay);
     };
   }
   
@@ -118,7 +121,8 @@ export class CommonUtil {
     
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
-        func.apply(null, args);
+        // ArkTS兼容：使用直接调用替代apply
+        func(...args);
         inThrottle = true;
         setTimeout(() => inThrottle = false, limit);
       }
@@ -158,7 +162,7 @@ export class CommonUtil {
   public formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
     
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const sizes: string[] = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;

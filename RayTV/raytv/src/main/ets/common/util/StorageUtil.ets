@@ -20,6 +20,7 @@ export enum StorageType {
  * 存储数据结构
  */
 export interface StorageData {
+  // 替换any类型为具体的支持类型
   value: string | number | boolean | JsonData | null;
   timestamp: number;
   expireTime: number;
@@ -29,6 +30,7 @@ export interface StorageData {
  * 内存缓存项结构
  */
 export interface MemoryCacheItem {
+  // 替换any类型为具体的支持类型
   value: string | number | boolean | JsonData | null;
   expireTime: number;
 }
@@ -50,8 +52,8 @@ export class JsonDataClass {
   }
 
   has(key: string): boolean {
-    // 替换in操作符，使用hasOwnProperty方法更安全
-    return this.data.hasOwnProperty(key);
+    // 使用Object.keys获取属性列表并检查，避免使用hasOwnProperty
+    return Object.keys(this.data).includes(key);
   }
 
   keys(): string[] {
@@ -166,7 +168,7 @@ export default class StorageUtil {
           StorageUtil.saveToMemory(key, dataToSave);
           break;
         default:
-          throw new Error(`Unsupported storage type: ${String(type)}`) as never;
+          throw new Error(`Unsupported storage type: ${String(type)}`);
       }
 
       Logger.info(TAG, `Saved data for key: ${key}, type: ${type}`);
@@ -205,7 +207,7 @@ export default class StorageUtil {
           data = StorageUtil.getFromMemory(key);
           break;
         default:
-          throw new Error(`Unsupported storage type: ${String(type)}`) as never;
+          throw new Error(`Unsupported storage type: ${String(type)}`);
       }
 
       // 检查数据是否存在
@@ -398,7 +400,7 @@ export default class StorageUtil {
           StorageUtil.memoryCache = newCache;
           break;
         default:
-          throw new Error(`Unsupported storage type: ${type}`);
+          throw new Error(`Unsupported storage type: ${String(type)}`);
       }
 
       Logger.info(TAG, `Removed data for key: ${key}, type: ${type}`);
@@ -427,7 +429,7 @@ export default class StorageUtil {
           StorageUtil.memoryCache = {};
           break;
         default:
-          throw new Error(`Unsupported storage type: ${type}`);
+          throw new Error(`Unsupported storage type: ${String(type)}`);
       }
 
       Logger.info(TAG, `Cleared all data for type: ${type}`);
@@ -443,8 +445,10 @@ export default class StorageUtil {
    * 保存到内存缓存
    */
   private static saveToMemory(key: string, data: StorageData): void {
+    // 确保存储的是经过验证的类型
+    const safeValue: string | number | boolean | JsonData | null = StorageUtil.validateValue(data.value);
     StorageUtil.memoryCache[key] = {
-      value: data.value,
+      value: safeValue,
       expireTime: data.expireTime
     };
   }
@@ -474,8 +478,10 @@ export default class StorageUtil {
       return null;
     }
 
+    // 确保返回的是类型安全的值
+    const safeValue: string | number | boolean | JsonData | null = StorageUtil.validateValue(cachedItem.value);
     return {
-      value: cachedItem.value,
+      value: safeValue,
       timestamp: Date.now(),
       expireTime: cachedItem.expireTime
     };
@@ -714,8 +720,20 @@ export default class StorageUtil {
     }
     try {
       const parsed = JSON.parse(jsonStr);
-      // 使用JsonDataClass.fromObject创建安全的JSON数据对象
-      return JsonDataClass.fromObject(parsed);
+      // 创建JsonData实例并设置属性
+      const jsonData = new JsonData();
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        const keys = Object.keys(parsed);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = parsed[key];
+          if (typeof value === 'string' || typeof value === 'number' || 
+              typeof value === 'boolean' || value === null) {
+            jsonData.set(key, value);
+          }
+        }
+      }
+      return jsonData;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to parse JSON string: ${errorMessage}`);
@@ -756,19 +774,22 @@ export default class StorageUtil {
             result.timestamp = tsValue;
           } else if (typeof tsValue === 'string') {
             const numValue = Number(tsValue);
-            if (!Number.isNaN(numValue)) {
+            // 使用更基础的NaN检查方式，避免使用Number.isNaN
+            if (typeof numValue === 'number' && numValue === numValue) {
               result.timestamp = numValue;
             }
           }
         } else if (key === 'expireTime') {
           const expValue = parsedData.get('expireTime');
           if (typeof expValue === 'number') {
-            if (!Number.isNaN(expValue)) {
+            // 使用更基础的NaN检查方式，避免使用Number.isNaN
+            if (expValue === expValue) {
               result.expireTime = expValue;
             }
           } else if (typeof expValue === 'string') {
             const numValue = Number(expValue);
-            if (!Number.isNaN(numValue)) {
+            // 使用更基础的NaN检查方式，避免使用Number.isNaN
+            if (typeof numValue === 'number' && numValue === numValue) {
               result.expireTime = numValue;
             }
           }
@@ -806,25 +827,36 @@ export default class StorageUtil {
           const safeObj = new JsonDataClass();
           // 获取对象的所有自有属性键
           const keys = Object.keys(value);
+          // 由于使用Object.keys获取的都是自有属性，不需要额外的hasOwnProperty检查
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-            // 使用类型保护确保类型安全
-            if (Object.prototype.hasOwnProperty.call(value, key)) {
+            if (key !== undefined) {
               const safeKey = String(key); // 确保key是字符串
-              const propValue = (value as any)[safeKey];
-              
-              // 类型安全地处理每个属性值
-              if (typeof propValue === 'string' || 
-                  typeof propValue === 'number' || 
-                  typeof propValue === 'boolean' || 
-                  propValue === null) {
-                safeObj.set(key, propValue);
-              } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
-                // 递归验证嵌套对象
-                const validatedValue = StorageUtil.validateValue(propValue);
-                // 确保只有对象类型才赋值给对象属性
-                if (validatedValue instanceof JsonDataClass) {
-                  safeObj.set(key, validatedValue);
+              // 检查属性是否存在并访问
+              if (Object.prototype.hasOwnProperty.call(value, safeKey)) {
+                const propValue = value[safeKey];
+                
+                // 类型安全地处理每个属性值
+                if (typeof propValue === 'string' || 
+                    typeof propValue === 'number' || 
+                    typeof propValue === 'boolean' || 
+                    propValue === null) {
+                  safeObj.set(safeKey, propValue);
+                } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
+                  // 处理嵌套对象
+                  const validatedObj = new JsonData();
+                  const nestedKeys = Object.keys(propValue);
+                  for (let j = 0; j < nestedKeys.length; j++) {
+                    const nestedKey = nestedKeys[j];
+                    const nestedValue = propValue[nestedKey];
+                    if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
+                        typeof nestedValue === 'boolean' || nestedValue === null) {
+                      validatedObj.set(nestedKey, nestedValue);
+                    }
+                  }
+                  // 转换为普通对象后再设置
+                  const objValue = validatedObj.toObject();
+                  safeObj.set(safeKey, JSON.stringify(objValue) as any);
                 }
               }
             }
@@ -842,13 +874,15 @@ export default class StorageUtil {
   /**
    * 安全的数字转换，避免NaN
    */
-  private static safeNumber(value: any): number {
+  // 移除any类型，使用更具体的类型定义
+  private static safeNumber(value: string | number | boolean | null | undefined): number {
     if (value === null || value === undefined) {
       return 0;
     }
     const num = Number(value);
-    // 添加NaN检查，确保返回有效数字
-    return isNaN(num) ? 0 : num;
+    // 使用更基础的NaN检查方式，避免使用isNaN函数
+    // NaN是唯一不等于自身的值
+    return typeof num === 'number' && num === num ? num : 0;
   }
 }
 

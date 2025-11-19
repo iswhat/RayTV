@@ -58,7 +58,7 @@ declare module '@ohos.app.ability.UIAbilityContext' {
 // Logger模块声明
 declare module '../common/util/Logger' {
   export interface LoggerExtraData {
-    [key: string]: any;
+    [key: string]: unknown;
   }
   export default class Logger {
     static d(tag: string, message: string, extra?: LoggerExtraData): void;
