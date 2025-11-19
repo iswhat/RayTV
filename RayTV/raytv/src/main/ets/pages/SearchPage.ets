@@ -16,6 +16,62 @@ interface QuickSearchResult {
   sourceType: string;
 }
 
+// 样式相关接口定义
+interface ButtonStyle {
+  backgroundColor?: string;
+  borderRadius?: number;
+  paddingHorizontal?: number;
+  paddingVertical?: number;
+  marginRight?: number;
+}
+
+interface TextStyle {
+  fontSize?: number;
+  color?: string;
+  fontWeight?: number;
+}
+
+interface GridStyle {
+  paddingHorizontal?: number;
+  gap?: number;
+  columnsTemplate?: string;
+  rowsTemplate?: string;
+}
+
+interface GridItemStyle {
+  gridColumnStart?: number;
+  gridColumnEnd?: number;
+  padding?: number;
+  alignItems?: string;
+  justifyContent?: string;
+}
+
+interface StackStyle {
+  backgroundColor?: string;
+  borderRadius?: number;
+  padding?: number;
+  marginHorizontal?: number;
+  marginVertical?: number;
+  position?: string;
+  top?: number;
+  left?: number;
+  right?: number;
+  zIndex?: number;
+}
+
+interface FlexStyle {
+  flexDirection?: string;
+  justifyContent?: string;
+  alignItems?: string;
+  marginBottom?: number;
+  flex?: number;
+}
+
+interface ListStyle {
+  width?: string;
+  height?: number;
+}
+
 /**
  * 搜索页面组件
  * 实现媒体搜索功能，包括搜索输入、结果展示、历史搜索等

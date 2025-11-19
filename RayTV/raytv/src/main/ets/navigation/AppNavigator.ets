@@ -118,7 +118,7 @@ export class AppNavigator {
       this.addToHistory(historyItem);
 
       // 跳转到指定页面
-      await router.push({
+      await router.pushUrl({
         url,
         params
       });
@@ -135,11 +135,14 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
+      // 使用router.back而非router.backTo，保持简单的返回逻辑
       await router.back();
       this.removeLastFromHistory();
     } catch (error) {
       console.error('Navigation back failed:', error);
-      throw new Error('Navigation back failed');
+      // 优化错误处理，提供更详细的错误信息
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Navigation back failed: ${errorMsg}`);
     }
   }
 
@@ -148,15 +151,19 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      await router.clear();
-      await router.push({
-        url: this.getPageUrl(PageRoute.HOME)
+      // 直接使用pushUrl替换clear+push的组合
+      await router.pushUrl({
+        url: this.getPageUrl(PageRoute.HOME),
+        params: {},
+        mode: router.RouterMode.SingleTop // 使用SingleTop模式避免重复创建
       });
       this.navigationHistory = [];
       await this.saveNavigationHistory();
     } catch (error) {
       console.error('Navigation back to home failed:', error);
-      throw new Error('Navigation back to home failed');
+      // 优化错误处理
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Navigation back to home failed: ${errorMsg}`);
     }
   }
 

@@ -50,15 +50,18 @@ export class JsonDataClass {
   }
 
   has(key: string): boolean {
-    return key in this.data;
+    // 替换in操作符，使用hasOwnProperty方法更安全
+    return this.data.hasOwnProperty(key);
   }
 
   keys(): string[] {
     return Object.keys(this.data);
   }
 
-  toObject(): Record<string, string | number | boolean | any | null> {
-    const result: Record<string, string | number | boolean | any | null> = {};
+  // 移除any类型，使用更具体的类型定义
+  toObject(): Record<string, string | number | boolean | JsonDataClass | null> {
+    const result: Record<string, string | number | boolean | JsonDataClass | null> = {};
+    
     for (const key of this.keys()) {
       const value = this.get(key);
       if (value instanceof JsonDataClass) {
@@ -70,7 +73,8 @@ export class JsonDataClass {
     return result;
   }
 
-  static fromObject(obj: any): JsonDataClass | null {
+  // 使用更具体的类型替代any
+  static fromObject(obj: Record<string, string | number | boolean | object | null>): JsonDataClass | null {
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
       return null;
     }
@@ -108,8 +112,7 @@ export default class StorageUtil {
    */
   public static getInstance(): StorageUtil {
     if (!StorageUtil._instance) {
-      const instance = new StorageUtil(); // 使用局部变量
-      StorageUtil._instance = instance;
+      StorageUtil._instance = new StorageUtil();
     }
     return StorageUtil._instance;
   }
@@ -760,7 +763,9 @@ export default class StorageUtil {
         } else if (key === 'expireTime') {
           const expValue = parsedData.get('expireTime');
           if (typeof expValue === 'number') {
-            result.expireTime = expValue;
+            if (!Number.isNaN(expValue)) {
+              result.expireTime = expValue;
+            }
           } else if (typeof expValue === 'string') {
             const numValue = Number(expValue);
             if (!Number.isNaN(numValue)) {
@@ -804,24 +809,23 @@ export default class StorageUtil {
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
             // 使用类型保护确保类型安全
-            // 使用Object.prototype.hasOwnProperty.call确保属性存在
-          const safeKey = String(key); // 确保key是字符串
-          let propValue: any = null;
-          if (Object.prototype.hasOwnProperty.call(value, safeKey)) {
-            propValue = (value as any)[safeKey];
-          }
-            // 类型安全地处理每个属性值
-            if (typeof propValue === 'string' || 
-                typeof propValue === 'number' || 
-                typeof propValue === 'boolean' || 
-                propValue === null) {
-              safeObj.set(key, propValue);
-            } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
-              // 递归验证嵌套对象，确保返回类型兼容
-              const validatedValue = StorageUtil.validateValue(propValue);
-              // 确保只有对象类型才赋值给对象属性
-              if (validatedValue instanceof JsonDataClass) {
-                safeObj.set(key, validatedValue);
+            if (Object.prototype.hasOwnProperty.call(value, key)) {
+              const safeKey = String(key); // 确保key是字符串
+              const propValue = (value as any)[safeKey];
+              
+              // 类型安全地处理每个属性值
+              if (typeof propValue === 'string' || 
+                  typeof propValue === 'number' || 
+                  typeof propValue === 'boolean' || 
+                  propValue === null) {
+                safeObj.set(key, propValue);
+              } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
+                // 递归验证嵌套对象
+                const validatedValue = StorageUtil.validateValue(propValue);
+                // 确保只有对象类型才赋值给对象属性
+                if (validatedValue instanceof JsonDataClass) {
+                  safeObj.set(key, validatedValue);
+                }
               }
             }
           }
@@ -836,32 +840,15 @@ export default class StorageUtil {
   }
 
   /**
-   * 安全获取数字值
+   * 安全的数字转换，避免NaN
    */
-  private static safeNumber(value: string | number | boolean | null | undefined, defaultValue: number = 0): number {
-    // 类型安全检查
+  private static safeNumber(value: any): number {
     if (value === null || value === undefined) {
-      return defaultValue;
+      return 0;
     }
-    
-    // 直接处理不同类型
-    if (typeof value === 'number') {
-      // 检查是否为有效数字
-      if (!Number.isNaN(value)) {
-        return value;
-      }
-    } else if (typeof value === 'string') {
-      // 对于字符串，安全转换为数字
-      const num = Number(value);
-      if (!Number.isNaN(num)) {
-        return num;
-      }
-    } else if (typeof value === 'boolean') {
-      // 对于布尔值，转换为数字
-      return value ? 1 : 0;
-    }
-    
-    return defaultValue;
+    const num = Number(value);
+    // 添加NaN检查，确保返回有效数字
+    return isNaN(num) ? 0 : num;
   }
 }
 

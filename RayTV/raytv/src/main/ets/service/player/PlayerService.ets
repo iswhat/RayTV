@@ -339,7 +339,10 @@ export default class PlayerService {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
-    this.eventListeners.get(event)?.push(listener);
+    const listeners = this.eventListeners.get(event);
+    if (listeners !== null && listeners !== undefined) {
+      listeners.push(listener);
+    }
   }
 
   /**

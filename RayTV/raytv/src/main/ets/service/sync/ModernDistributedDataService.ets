@@ -247,20 +247,22 @@ export default class ModernDistributedDataService {
             const deviceId = entry.deviceId || 'local';
             
             // 获取数据并通知监听器
-            this.kvStore?.get(key).then((value) => {
-              if (this.dataListeners.has(key)) {
-                const listeners = this.dataListeners.get(key)!;
-                for (const listener of listeners) {
-                  try {
-                    listener(key, value, deviceId);
-                  } catch (error) {
-                  Logger.error(TAG, `Error in data listener: ${error}`);
+            if (this.kvStore !== null && this.kvStore !== undefined) {
+              this.kvStore.get(key).then((value) => {
+                if (this.dataListeners.has(key)) {
+                  const listeners = this.dataListeners.get(key)!;
+                  for (const listener of listeners) {
+                    try {
+                      listener(key, value, deviceId);
+                    } catch (error) {
+                      Logger.error(TAG, `Error in data listener: ${error}`);
+                    }
+                  }
                 }
-                }
-              }
-            }).catch((error) => {
-              Logger.error(TAG, `Failed to get changed data: ${error}`);
-            });
+              }).catch((error) => {
+                Logger.error(TAG, `Failed to get changed data: ${error}`);
+              });
+            }
           });
         }
       });

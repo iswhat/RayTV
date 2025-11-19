@@ -24,7 +24,7 @@ const PINYIN_MAP: Record<string, string> = {
   '仕': 's', '他': 't', '仗': 'z', '付': 'f', '仙': 'x', '们': 'm', '代': 'd', '令': 'l', '以': 'y', '仪': 'y',
   '仲': 'z', '任': 'r', '伊': 'y', '伍': 'w', '伏': 'f', '伐': 'f', '休': 'x', '会': 'h', '伟': 'w', '传': 'c',
   '伞': 's', '伤': 's', '何': 'h', '估': 'g', '佑': 'y', '余': 'y', '佩': 'p', '侯': 'h', '侵': 'q', '便': 'b',
-  '促': 'c', '俄': 'e', '俅': 'q', '俊': 'j', '俏': 'q', '俐': 'l', '侯': 'h', '侵': 'q', '便': 'b', '促': 'c',
+  '促': 'c', '俄': 'e', '俅': 'q', '俊': 'j', '俏': 'q', '俐': 'l',
   // 数字
   '0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
   // 字母
@@ -109,57 +109,17 @@ export class PinyinUtil {
   }
   
   /**
-   * 获取映射表的键数组
-   * 兼容ArkTS语法的安全实现
+   * 获取映射表的所有键（兼容ArkTS）
+   * @param map 映射表
+   * @returns 键数组
    */
   private getMapKeys(map: Record<string, string>): string[] {
     const keys: string[] = [];
-    
     try {
-      // 使用JSON序列化方法获取键
-      const jsonStr = JSON.stringify(map);
-      let inKey = false;
-      let currentKey = '';
-      let isEscaped = false;
-      
-      // 跳过JSON对象的开始大括号
-      for (let i = 1; i < jsonStr.length - 1; i++) {
-        const char = jsonStr[i];
-        
-        if (isEscaped) {
-          if (inKey) {
-            currentKey += char;
-          }
-          isEscaped = false;
-        } else if (char === '\\') {
-          isEscaped = true;
-        } else if (char === '"' && !inKey) {
-          inKey = true;
-          currentKey = '';
-        } else if (char === '"' && inKey) {
-          inKey = false;
-          if (currentKey.length > 0) {
-            keys.push(currentKey);
-            currentKey = '';
-          }
-          // 跳过值部分直到下一个键开始或结束
-          let j = i + 1;
-          let depth = 0;
-          while (j < jsonStr.length - 1) {
-            const nextChar = jsonStr[j];
-            if (nextChar === '{' || nextChar === '[') {
-              depth++;
-            } else if ((nextChar === '}' || nextChar === ']') && depth > 0) {
-              depth--;
-            } else if (nextChar === ',' && depth === 0) {
-              i = j;
-              break;
-            }
-            j++;
-          }
-        } else if (inKey) {
-          currentKey += char;
-        }
+      // 使用Object.keys获取对象的键，这在HarmonyOS环境中是支持的
+      const objKeys = Object.keys(map);
+      for (let i = 0; i < objKeys.length; i++) {
+        keys.push(objKeys[i]);
       }
     } catch (error) {
       Logger.error(TAG, `Failed to get map keys: ${error instanceof Error ? error.message : String(error)}`);
@@ -208,6 +168,23 @@ export class PinyinUtil {
     
     // 实现字符串开头匹配检查（不使用内置的startsWith方法）
     return this.stringStartsWith(firstLetters, lowerPinyin);
+  }
+  
+  /**
+   * 检查字符串是否以指定子字符串开头
+   * 兼容ArkTS语法的实现
+   */
+  private stringStartsWith(str: string, prefix: string): boolean {
+    if (!str || !prefix || prefix.length > str.length) {
+      return false;
+    }
+    
+    for (let i = 0; i < prefix.length; i++) {
+      if (str.charAt(i) !== prefix.charAt(i)) {
+        return false;
+      }
+    }
+    return true;
   }
   
   /**

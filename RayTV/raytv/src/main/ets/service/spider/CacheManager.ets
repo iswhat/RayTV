@@ -105,10 +105,10 @@ export class CacheManager {
   public setConfig(config: CacheConfig): void {
     // 避免对象展开操作符，显式合并配置确保类型安全
     this.config = {
-      maxSize: config.maxSize ?? this.config.maxSize,
-      defaultExpiry: config.defaultExpiry ?? this.config.defaultExpiry,
-      cleanupInterval: config.cleanupInterval ?? this.config.cleanupInterval,
-      enabled: config.enabled ?? this.config.enabled
+      maxSize: config.maxSize !== null && config.maxSize !== undefined ? config.maxSize : this.config.maxSize,
+      defaultExpiry: config.defaultExpiry !== null && config.defaultExpiry !== undefined ? config.defaultExpiry : this.config.defaultExpiry,
+      cleanupInterval: config.cleanupInterval !== null && config.cleanupInterval !== undefined ? config.cleanupInterval : this.config.cleanupInterval,
+      enabled: config.enabled !== null && config.enabled !== undefined ? config.enabled : this.config.enabled
     };
     Logger.info(this.TAG, `Updated cache config: ${JSON.stringify(this.config)}`);
     

@@ -119,13 +119,30 @@ export class FormatUtil {
         return '0';
       }
 
-      let formatted = number.toFixed(decimals);
+      // 确保小数位数是有效的非负数
+      const safeDecimals = Math.max(0, Math.floor(decimals));
+      let formatted = number.toFixed(safeDecimals);
 
       if (useCommas) {
         // 分离整数和小数部分
         const parts = formatted.split('.');
-        // 为整数部分添加千位分隔符
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        // 为整数部分添加千位分隔符 - 使用字符串操作替代正则表达式以提高兼容性
+        let integerPart = parts[0];
+        const isNegative = integerPart.startsWith('-');
+        if (isNegative) {
+          integerPart = integerPart.substring(1);
+        }
+        
+        let result = '';
+        const length = integerPart.length;
+        for (let i = 0; i < length; i++) {
+          if (i > 0 && (length - i) % 3 === 0) {
+            result += ',';
+          }
+          result += integerPart[i];
+        }
+        
+        parts[0] = isNegative ? '-' + result : result;
         // 重新组合
         formatted = parts.join('.');
       }
@@ -181,9 +198,15 @@ export class FormatUtil {
 
       const k = 1024;
       const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      // 安全计算索引，避免无效值
+      const logValue = Math.log(bytes);
+      const logKValue = Math.log(k);
+      const i = Math.min(
+        Math.max(0, Math.floor(logValue / logKValue)), 
+        sizes.length - 1
+      );
 
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+      return this.formatNumber(bytes / Math.pow(k, i), decimals) + ' ' + sizes[i];
     } catch (error) {
       this.logger.error('Failed to format file size', error as Error);
       return '0 Bytes';

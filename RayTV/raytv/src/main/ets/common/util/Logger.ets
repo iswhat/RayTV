@@ -107,6 +107,14 @@ export interface LoggerConfig {
 }
 
 /**
+ * 日志详细数据接口
+ */
+export interface LogDetailData {
+  // 使用Record替代索引签名
+  data?: Record<string, string | number | boolean | any>;
+}
+
+/**
  * 日志额外数据接口
  */
 export interface LoggerExtraData {
@@ -121,11 +129,15 @@ export interface LoggerExtraData {
   /**
    * 详细数据
    */
-  detail?: Record<string, unknown>;
+  detail?: LogDetailData;
   /**
-   * 其他任意属性
+   * 标签
    */
-  [key: string]: unknown;
+  tag?: string;
+  /**
+   * 错误
+   */
+  error?: Error;
 }
 
 /**
@@ -182,7 +194,7 @@ class Logger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
-  private logFileHandle?: object; // 使用object类型替代any，在使用时会添加类型断言
+  private logFileHandle?: File; // 使用具体的File类型替代object
   private logQueue: LogEntry[] = [];
   private isWriting: boolean = false;
 

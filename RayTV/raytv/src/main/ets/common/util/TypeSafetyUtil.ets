@@ -190,9 +190,10 @@ export class TypeSafetyUtil {
    * @param fn 原始函数
    * @returns 包装后的函数，具有更好的类型推断
    */
-  public static createEnhancedGenericFunction<T extends (...args: any[]) => any>(fn: T): T {
-    return function(this: any, ...args: any[]): ReturnType<T> {
-      return fn.apply(this, args);
+  public static createEnhancedGenericFunction<T extends (...args: unknown[]) => unknown>(fn: T): T {
+    return function(this: object, ...args: unknown[]): ReturnType<T> {
+      // 避免使用Function.apply，直接调用函数
+      return fn.call(this, ...args) as ReturnType<T>;
     } as T;
   }
   /**
@@ -325,12 +326,12 @@ export class TypeSafetyUtil {
       
       const safeObj = TypeSafetyUtil.asObject(current);
       
-      // 使用hasOwnProperty确保属性安全访问
-      if (!Object.prototype.hasOwnProperty.call(safeObj, key)) {
+      // 安全检查属性存在性，避免使用原型方法
+      if (key in safeObj && typeof safeObj === 'object' && safeObj !== null) {
+        current = safeObj[key];
+      } else {
         return defaultValue;
       }
-      
-      current = (safeObj as Record<string, unknown>)[key];
     }
     
     // 尝试类型转换
@@ -509,14 +510,17 @@ export class TypeSafetyUtil {
           continue;
         }
         
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        if (TypeSafetyUtil.isValidObject(value)) {
           const targetValue = safeTarget[key];
-          if (targetValue !== null && typeof targetValue === 'object' && !Array.isArray(targetValue)) {
-            safeTarget[key] = TypeSafetyUtil.mergeObjects(targetValue as Record<string, unknown>, value as Record<string, unknown>);
+          if (TypeSafetyUtil.isValidObject(targetValue)) {
+            safeTarget[key] = TypeSafetyUtil.mergeObjects(
+              targetValue as Record<string, unknown>, 
+              value as Record<string, unknown>
+            );
           } else {
             safeTarget[key] = { ...value };
           }
-        } else if (Array.isArray(value)) {
+        } else if (TypeSafetyUtil.isValidArray(value)) {
           safeTarget[key] = [...value];
         } else {
           safeTarget[key] = value;
@@ -536,15 +540,17 @@ export class TypeSafetyUtil {
     schema: Record<keyof T, (value: unknown) => boolean>
   ): (obj: unknown) => obj is T {
     return (obj: unknown): obj is T => {
-      if (!obj || typeof obj !== 'object') {
+      if (!TypeSafetyUtil.isValidObject(obj)) {
         return false;
       }
       
       const safeObj = obj as Record<keyof T, unknown>;
       
       // 验证所有必需的属性都存在且符合类型
-      for (const [key, validator] of TypeSafetyUtil.getObjectEntries(schema)) {
-        if (!validator(safeObj[key])) {
+      for (const [key, validator] of TypeSafetyUtil.getObjectEntries<(value: unknown) => boolean>(schema)) {
+        // 安全地获取对象属性并验证
+        const value = TypeSafetyUtil.safeAccess(safeObj, key, undefined);
+        if (!validator(value)) {
           return false;
         }
       }

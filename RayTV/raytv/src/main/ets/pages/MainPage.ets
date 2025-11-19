@@ -14,6 +14,7 @@ interface FeaturedMediaItem {
   title: string;
   cover: string;
   type: string;
+  siteKey?: string;
 }
 
 @Entry

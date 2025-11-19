@@ -238,7 +238,10 @@ export default class DistributedDataService {
               
               try {
                 // 获取数据并通知监听器
-                const value = await this.kvStore?.get(key);
+                let value;
+                if (this.kvStore !== null && this.kvStore !== undefined) {
+                  value = await this.kvStore.get(key);
+                }
                 if (value && this.dataListeners.size > 0) {
                   // 查找所有匹配的监听器
                   this.notifyRelevantListeners(key, value, deviceId);
