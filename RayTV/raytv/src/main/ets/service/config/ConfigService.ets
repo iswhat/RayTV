@@ -435,7 +435,7 @@ export default class ConfigService {
   private getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         keys.push(key);
       }
     }
@@ -464,7 +464,7 @@ export default class ConfigService {
     const result = { ...defaultConfig };
     
     for (const key in customConfig) {
-      if (Object.prototype.hasOwnProperty.call(customConfig, key)) {
+      if (Object.keys(customConfig).includes(key)) {
         const customValue = customConfig[key];
         const defaultValue = defaultConfig[key];
         

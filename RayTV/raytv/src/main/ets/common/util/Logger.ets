@@ -588,7 +588,7 @@ class Logger {
     if (this.config.fileEnabled) {
       this.logQueue.push(entry);
       // 异步刷新日志到文件
-      this.flushLogs().catch(err => {
+      this.flushLogs().catch((err: Error) => {
         console.error('Failed to flush logs:', err);
       });
     }

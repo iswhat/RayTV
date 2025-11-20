@@ -59,7 +59,7 @@ export class SQLiteHelper {
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         keys.push(key);
       }
     }
@@ -72,7 +72,7 @@ export class SQLiteHelper {
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
     const values: ValueType[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         values.push(obj[key]);
       }
     }

@@ -1,0 +1,23 @@
+# 混淆规则文件
+# 保留不混淆的类和方法
+
+# 保留User类
+-keep class raytv.data.model.User { *; }
+
+# 保留UserService类
+-keep class raytv.service.user.UserService { *; }
+
+# 保留StorageUtil类
+-keep class raytv.utils.StorageUtil { *; }
+
+# 保留AppNavigator类
+-keep class raytv.navigation.AppNavigator { *; }
+
+# 保留TypeSafetyUtil类
+-keep class raytv.utils.TypeSafetyUtil { *; }
+
+# 保留所有接口
+-keep interface * { *; }
+
+# 保留所有枚举
+-keep enum * { *; }

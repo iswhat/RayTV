@@ -288,9 +288,7 @@ export class TypeSafetyUtil {
   /**
    * 定义安全对象类型，避免使用object literals as types
    */
-  export interface SafeObject {
-    [key: string]: string | number | boolean | object | null;
-  }
+  export type SafeObject = Record<string, string | number | boolean | object | null>;
 
   /**
    * 安全地将值转换为对象
@@ -307,7 +305,7 @@ export class TypeSafetyUtil {
       const obj = value as Record<string, unknown>;
       
       for (const key in obj) {
-        if (key !== undefined && Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (key !== undefined && Object.keys(obj).includes(key)) {
           const propValue = obj[key];
           if (typeof propValue === 'string' || 
               typeof propValue === 'number' || 
@@ -602,7 +600,7 @@ export class TypeSafetyUtil {
     const safeData = data as Record<string, unknown>;
     for (const key in safeData) {
       // 安全地检查属性是否属于对象自身
-      if (key !== undefined && Object.prototype.hasOwnProperty.call(safeData, key)) {
+      if (key !== undefined && Object.keys(safeData).includes(key)) {
         // 只保留基本类型值
         const value = safeData[key];
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {

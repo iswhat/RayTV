@@ -494,7 +494,7 @@ class ConfigRepository {
   private getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         keys.push(key);
       }
     }
@@ -508,7 +508,7 @@ class ConfigRepository {
   private getObjectEntries<T extends object>(obj: T): [string, string | number | boolean | null][] {
     const entries: [string, string | number | boolean | null][] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         entries.push([key, obj[key]]);
       }
     }

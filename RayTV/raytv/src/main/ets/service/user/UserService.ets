@@ -567,8 +567,27 @@ export default class UserService {
           const { user, token } = apiResponse.data;
           
           if (user && token) {
-            // 转换为内部用户模型
-            const internalUser: User = this.convertToInternalUser(user);
+            // 直接使用API返回的用户数据，确保符合内部User接口
+            const internalUser: User = {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              phone: user.phone,
+              nickname: user.nickname,
+              avatar: user.avatar,
+              gender: user.gender,
+              birthday: user.birthday,
+              location: user.location,
+              bio: user.bio,
+              role: user.role,
+              status: user.status,
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt,
+              lastLoginAt: user.lastLoginAt,
+              loginCount: user.loginCount,
+              preferences: user.preferences,
+              statistics: user.statistics
+            };
             
             // 登录成功
             this.currentUser = internalUser;

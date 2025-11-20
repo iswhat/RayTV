@@ -109,11 +109,13 @@ export default class User {
     this.favoritesEnabled = data.favoritesEnabled !== undefined ? data.favoritesEnabled : true;
     this.totalWatchTime = data.totalWatchTime ?? 0;
     
-    // 安全处理settings对象，避免直接类型断言
-    if (data.settings && typeof data.settings === 'object') {
-      this.settings = data.settings as UserSettings;
+    // 安全处理settings对象，避免类作为对象使用和直接类型断言
+    if (data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings)) {
+      // 创建一个新的符合UserSettings接口的对象
+      this.settings = this.createSafeUserSettings(data.settings);
     } else {
-      this.settings = {} as UserSettings;
+      // 使用明确的空对象，不进行类型断言
+      this.settings = {};
     }
   }
 
@@ -542,6 +544,37 @@ export default class User {
     });
     
     return result;
+  }
+  
+  /**
+   * 安全地创建符合UserSettings接口的对象
+   * 避免类作为对象使用的警告
+   * @param settingsObj 输入的settings对象
+   * @returns 安全的UserSettings对象
+   */
+  private createSafeUserSettings(settingsObj: object): UserSettings {
+    const result: UserSettings = {};
+    const settings = settingsObj as any;
+    
+    // 只复制UserSettings接口中定义的有效属性
+    if (typeof settings.notificationsEnabled === 'boolean') {
+      result.notificationsEnabled = settings.notificationsEnabled;
+    }
+    if (typeof settings.autoPlayEnabled === 'boolean') {
+      result.autoPlayEnabled = settings.autoPlayEnabled;
+    }
+    if (typeof settings.defaultLanguage === 'string') {
+      result.defaultLanguage = settings.defaultLanguage;
+    }
+    if (typeof settings.themePreference === 'string') {
+      result.themePreference = settings.themePreference;
+    }
+    if (typeof settings.subtitleSize === 'number') {
+      result.subtitleSize = settings.subtitleSize;
+    }
+    
+    return result;
+  }
 
   /**
    * 克隆User实例

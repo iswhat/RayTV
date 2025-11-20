@@ -833,7 +833,8 @@ export default class StorageUtil {
             if (key !== undefined) {
               const safeKey = String(key); // 确保key是字符串
               // 检查属性是否存在并访问
-              if (Object.prototype.hasOwnProperty.call(value, safeKey)) {
+              // 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
+              if (Object.keys(value).includes(safeKey)) {
                 const propValue = value[safeKey];
                 
                 // 类型安全地处理每个属性值
@@ -848,7 +849,8 @@ export default class StorageUtil {
                   const nestedKeys = Object.keys(propValue);
                   for (let j = 0; j < nestedKeys.length; j++) {
                     const nestedKey = nestedKeys[j];
-                    const nestedValue = propValue[nestedKey];
+                    // 使用get方法替代索引访问
+                const nestedValue = validatedObj.get(nestedKey);
                     if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
                         typeof nestedValue === 'boolean' || nestedValue === null) {
                       validatedObj.set(nestedKey, nestedValue);
@@ -856,7 +858,7 @@ export default class StorageUtil {
                   }
                   // 转换为普通对象后再设置
                   const objValue = validatedObj.toObject();
-                  safeObj.set(safeKey, JSON.stringify(objValue) as any);
+                  safeObj.set(safeKey, JSON.stringify(objValue) as string | number | boolean | null);
                 }
               }
             }

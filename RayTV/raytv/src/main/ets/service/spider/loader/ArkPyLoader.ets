@@ -493,7 +493,7 @@ export class ArkPyLoader extends BaseLoader {
   private getObjectKeys<T extends object>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         keys.push(key);
       }
     }
@@ -636,7 +636,7 @@ export class ArkPyLoader extends BaseLoader {
 
     const maxDepth = currentDepth;
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         const depth = this.checkObjectDepth(obj[key], currentDepth + 1);
         if (depth > maxDepth) {
           return depth;

@@ -28,7 +28,8 @@ export class JsonData {
    * @returns 是否存在
    */
   has(key: string): boolean {
-    return Object.prototype.hasOwnProperty.call(this.data, key);
+    // 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
+    return Object.keys(this.data).includes(key);
   }
 
   /**
@@ -44,7 +45,14 @@ export class JsonData {
    * @returns 转换后的对象
    */
   toObject(): Record<string, string | number | boolean | null> {
-    return { ...this.data };
+    // 直接返回this.data的副本，避免递归调用
+    const result: Record<string, string | number | boolean | null> = {};
+    const keys = Object.keys(this.data);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      result[key] = this.data[key];
+    }
+    return result;
   }
 }
 
@@ -55,11 +63,15 @@ export class JsonData {
 export default class JsonUtil {
   /**
    * 检查对象是否包含指定属性
-   * 使用标准的Object.prototype.hasOwnProperty.call方式确保类型安全
+   * 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
    */
   private static hasOwnProperty<T extends object>(obj: T, key: string | number): boolean {
-    // 使用Object.prototype.hasOwnProperty.call确保类型安全
-    return typeof obj === 'object' && obj !== null && Object.prototype.hasOwnProperty.call(obj, String(key));
+    // 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const keys = Object.keys(obj);
+    return keys.includes(String(key));
   }
   /**
    * 将对象序列化为JSON字符串
@@ -92,7 +104,8 @@ export default class JsonUtil {
       // 使用更明确的错误类型处理以兼容ArkTS
       console.error('JSON parse failed:', error instanceof Error ? error.message : String(error));
       // 返回空对象并进行适当的类型断言
-      return {} as T;
+      const emptyResult: Record<string, string | number | boolean | null> = {};
+      return emptyResult as T;
     }
   }
 
@@ -121,6 +134,11 @@ export default class JsonUtil {
    * @param obj - 要克隆的对象
    * @returns 克隆后的新对象
    */
+  /**
+   * 深度克隆对象
+   * @param obj - 要克隆的对象
+   * @returns 克隆后的新对象
+   */
   static deepClone<T>(obj: T): T {
     try {
       // 处理基本类型和null
@@ -136,7 +154,7 @@ export default class JsonUtil {
       // 特殊处理Array对象
       if (Array.isArray(obj)) {
         // 使用泛型数组类型替代any[]
-        const clonedArray: unknown[] = [];
+        const clonedArray: T[] = [];
         for (let i = 0; i < obj.length; i++) {
           // 确保索引有效，安全访问数组元素
           if (i >= 0 && i < obj.length) {
@@ -196,7 +214,7 @@ export default class JsonUtil {
   static prettyPrint(jsonStr: string, indent: number = 2): string {
     try {
       // 使用明确的序列化值类型进行解析
-      const parsed = JSON.parse(jsonStr);
+      const parsed: Record<string, unknown> = JSON.parse(jsonStr);
       
       // 检查是否为有效的对象或数组
       if (parsed === null || (typeof parsed !== 'object')) {
@@ -248,7 +266,8 @@ export default class JsonUtil {
   ): Record<string, string | number | boolean | null> {
     // 类型安全检查
     if (!obj || typeof obj !== 'object') {
-      return {} as Record<string, string | number | boolean | null>;
+      const emptyResult: Record<string, string | number | boolean | null> = {};
+      return emptyResult;
     }
     
     // 使用JsonData类替代对象字面量

@@ -556,8 +556,10 @@ export class NavigationParamsImpl implements NavigationParams {
   // 实现clone方法，避免结构类型转换问题
   clone(): NavigationParams {
     const clone = new NavigationParamsImpl();
-    // 深拷贝数据
-    for (const key in this._data) {
+    // 深拷贝数据 - 使用Object.keys代替for..in循环，避免ArkTS严格模式警告
+    const keys = Object.keys(this._data);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       const value = this._data[key];
       if (typeof value === 'object' && value !== null) {
         // 对对象类型进行深拷贝
@@ -668,7 +670,10 @@ export class NavigationParamsImpl implements NavigationParams {
   // 转换为普通对象以便在router中使用
   toObject(): Record<string, string | number | boolean | null> {
     const result: Record<string, string | number | boolean | null> = {};
-    for (const key in this._data) {
+    // 使用Object.keys代替for..in循环，避免ArkTS严格模式警告
+    const keys = Object.keys(this._data);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       const value = this._data[key];
       // 只序列化基本类型
       if (value !== undefined) {

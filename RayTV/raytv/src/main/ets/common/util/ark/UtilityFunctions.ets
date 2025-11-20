@@ -93,7 +93,7 @@ export const UtilityFunctions = {
     const keySet = new Set<K>(keys);
     
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key) && !keySet.has(key as K)) {
+      if (Object.keys(obj).includes(key) && !keySet.has(key as K)) {
         result[key] = obj[key];
       }
     }
@@ -141,7 +141,7 @@ export const UtilityFunctions = {
     const result: Record<string, SafeAny> = {};
     
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         const value = obj[key];
         
         if (TypeUtils.isObject(value) && !Array.isArray(value)) {
@@ -190,7 +190,7 @@ export const UtilityFunctions = {
     const result: Record<string, SafeAny> = {};
     
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.keys(obj).includes(key)) {
         result[key] = UtilityFunctions.deepClone(obj[key]);
       }
     }
@@ -255,7 +255,7 @@ export const UtilityFunctions = {
     const result = { ...target };
     
     for (const key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
+      if (Object.keys(source).includes(key)) {
         (result as Record<string, SafeAny>)[key] = source[key];
       }
     }
@@ -279,7 +279,7 @@ export const UtilityFunctions = {
     const result = { ...target };
     
     for (const key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
+      if (Object.keys(source).includes(key)) {
         const targetValue = target[key];
         const sourceValue = source[key];
         
