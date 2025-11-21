@@ -160,16 +160,16 @@ export const ObjectUtils = {
     
     // 处理日期
     if (value instanceof Date) {
-      return new Date(value.getTime()) as unknown as T;
+      return new Date(value.getTime()) as T;
     }
     
     // 处理数组
     if (Array.isArray(value)) {
-      const clonedArray: unknown[] = [];
+      const clonedArray: T extends (infer U)[] ? U[] : unknown[] = [];
       for (let i = 0; i < value.length; i++) {
         clonedArray.push(ObjectUtils.deepClone(value[i]));
       }
-      return clonedArray as unknown as T;
+      return clonedArray as T;
     }
     
     // 处理普通对象
@@ -252,3 +252,4 @@ export const ObjectUtils = {
 };
 
 export default ObjectUtils;
+

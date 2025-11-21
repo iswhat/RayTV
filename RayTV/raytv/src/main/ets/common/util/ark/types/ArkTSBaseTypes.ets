@@ -44,7 +44,7 @@ export type SerializableData =
   | boolean
   | null
   | SerializableData[]
-  | { [key: string]: SerializableData };
+  | Record<string, SerializableData>;
 
 /**
  * 结果类型，包含成功和失败两种状态

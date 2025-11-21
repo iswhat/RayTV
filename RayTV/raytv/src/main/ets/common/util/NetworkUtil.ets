@@ -18,12 +18,8 @@ const TAG = 'NetworkUtil';
 export interface RequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  headers?: {
-    [key: string]: string;
-  };
-  params?: {
-    [key: string]: string | number | boolean | string[];
-  };
+  headers?: Record<string, string>;
+  params?: Record<string, string | number | boolean | string[]>;
   data?: string | number | boolean | object;
   timeout?: number;
   responseType?: 'text' | 'json' | 'arraybuffer';
@@ -36,9 +32,7 @@ export interface Response<T> {
   status: number;
   statusText: string;
   data: T;
-  headers: {
-    [key: string]: string;
-  };
+  headers: Record<string, string>;
 }
 
 /**
@@ -582,7 +576,7 @@ export default class NetworkUtil {
       return response.result as string;
     } catch (error) {
       Logger.error(TAG, `Failed to download text: ${error}`);
-      throw error;
+      throw new Error(String(error));
     }
   }
 
@@ -591,9 +585,7 @@ export default class NetworkUtil {
    * @param params 查询参数对象
    * @returns 构建好的查询字符串
    */
-  private static buildQueryString(params: {
-    [key: string]: string | number | boolean | string[];
-  }): string {
+  private static buildQueryString(params: Record<string, string | number | boolean | string[]>): string {
     const parts: string[] = [];
     const keys = NetworkUtil.getObjectKeys(params);
     
@@ -679,9 +671,9 @@ export default class NetworkUtil {
    * 创建带缓存的请求
    * @param url 请求URL
    * @param cacheTime 缓存时间（毫秒）
-   * @returns Promise<any>
+   * @returns Promise<T>
    */
-  public static async cachedRequest<T = unknown>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
+  public static async cachedRequest<T>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
       const cacheKey = `network_cache_${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
       
@@ -700,7 +692,8 @@ export default class NetworkUtil {
             // 检查缓存是否有效
             if (now - timestamp < cacheTime) {
               Logger.info(TAG, `Using cached data for ${url}`);
-              return cacheData as T;
+              // 明确指定返回类型
+            return cacheData as T;
             }
           }
         } catch (cacheError) {
@@ -720,6 +713,7 @@ export default class NetworkUtil {
               Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
               const parsedData = JSON.parse(oldCachedData);
               const cacheData = parsedData.data;
+              // 明确指定返回类型
               return cacheData as T;
             }
           } catch (offlineCacheError) {
@@ -752,7 +746,12 @@ export default class NetworkUtil {
       return response.data;
     } catch (error) {
       Logger.error(TAG, `Cached request failed: ${error}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      // 确保错误是Error类型
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(String(error));
+      }
     }
   }
 }

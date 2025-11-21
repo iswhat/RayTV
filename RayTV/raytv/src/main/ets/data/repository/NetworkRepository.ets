@@ -74,7 +74,7 @@ export interface VideoSourceInfo {
   isDefault?: boolean;    // 是否默认
   headers?: Record<string, string>; // 请求头
   cookies?: string;       // Cookies
-  extra?: Record<string, unknown>; // 额外信息
+  extra?: Record<string, Record<string, unknown>>; // 额外信息
 }
 
 /**
@@ -108,7 +108,7 @@ export interface LiveChannelInfo {
   nextPlaying?: string;   // 下一个节目
   isFavorite?: boolean;   // 是否收藏
   sortOrder?: number;     // 排序顺序
-  extra?: Record<string, unknown>; // 额外信息
+  extra?: Record<string, Record<string, unknown>>; // 额外信息
 }
 
 /**
@@ -121,7 +121,7 @@ export interface ParserInfo {
   supports?: string[];    // 支持的网站/协议
   version?: string;       // 版本
   isEnabled?: boolean;    // 是否启用
-  config?: Record<string, string | number | boolean | string[]>; // 解析器配置
+  config?: Record<string, Record<string, unknown>>; // 解析器配置
 }
 
 /**

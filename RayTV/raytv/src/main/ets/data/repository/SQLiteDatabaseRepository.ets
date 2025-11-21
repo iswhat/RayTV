@@ -27,7 +27,7 @@ const DATABASE_VERSION = 1;
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, string | number | boolean | undefined> = new Map(); // 用于缓存配置
+  private configMap: Map<string, Record<string, unknown>> = new Map(); // 用于缓存配置
   private context: common.UIAbilityContext | null = null;
 
   /**
@@ -260,7 +260,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       `);
 
       // 创建配置表
-      rdb.executeSql(`
+      await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS config (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           key TEXT NOT NULL,
@@ -272,22 +272,10 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建索引以提高查询性能
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_user ON history(userId);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_content ON history(contentId, contentType);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_history_time ON history(lastWatchTime);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(userId);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_favorites_collection ON favorites(userId, collectionName);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_search_history ON search_history(userId, searchTime);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_type ON movies(type);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_movies_score ON movies(score);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_cache_key ON cache(key);');
-      await rdb.executeSql('CREATE INDEX IF NOT EXISTS idx_config_group ON config(config_group);');
-
       Logger.info(TAG, 'Database tables created successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(`Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 
@@ -316,7 +304,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       Logger.info(TAG, 'Database upgrade completed successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to upgrade database: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(`Database upgrade failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 
@@ -325,25 +313,29 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
    */
   private async loadConfigCache(): Promise<void> {
     try {
-      if (!this.rdbStore) return;
+      if (!this.rdbStore) {
+        return;
+      }
 
-      const resultSet = await this.rdbStore.querySql('SELECT key, value, config_group FROM config');
-      if (resultSet) {
-        while (resultSet.goToNextRow()) {
+      const predicates = new relationalStore.RdbPredicates('config');
+      const resultSet = await this.rdbStore.query(predicates);
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        do {
           const key = resultSet.getString(resultSet.getColumnIndex('key'));
           const value = resultSet.getString(resultSet.getColumnIndex('value'));
           const config_group = resultSet.getString(resultSet.getColumnIndex('config_group')) || 'default';
           
           if (key) {
             try {
-              const parsedValue = JsonUtil.safeParse(value || '');
+              const parsedValue = JsonUtil.safeParse<Record<string, unknown>>(value || '');
               this.configMap.set(`${config_group}:${key}`, parsedValue);
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
               this.configMap.set(`${config_group}:${key}`, value);
             }
           }
-        }
+        } while (resultSet.goToNextRow());
         resultSet.close();
       }
     } catch (error) {
@@ -547,19 +539,17 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         };
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get movie by id: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get movie by ID: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
-        message: 'Failed to get movie'
+        message: 'Failed to get movie by ID'
       };
     }
   }
 
-  // 其他方法的实现会继续添加...
-
   /**
-   * 从结果集中解析电影数据
+   * 从结果集中解析Movie对象
    */
   private parseMovieFromResultSet(resultSet: relationalStore.ResultSet): Movie | null {
     try {
@@ -655,22 +645,13 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null> | string[] | number[] | boolean[] | string | number | boolean | null {
+  private safeParseJson(jsonStr: string): Record<string, unknown> {
     try {
-      const result = JsonUtil.safeParse(jsonStr);
-      // 确保返回类型安全
-      if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
-        return result as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
-      } else if (Array.isArray(result)) {
-        return result as string[] | number[] | boolean[];
-      } else if (result === null) {
-        return null;
-      } else {
-        return result as string | number | boolean;
-      }
+      const result = JsonUtil.safeParse<Record<string, unknown>>(jsonStr);
+      return result || {};
     } catch (error) {
       Logger.warn(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
-      return {} as Record<string, string | number | boolean | Record<string, string | number | boolean | null> | null>;
+      return {};
     }
   }
 
@@ -681,8 +662,8 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   // ========== 占位实现 ==========
   // 为了代码能编译通过，提供基础的占位实现
   async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> { return { success: false, message: 'Not implemented' }; }
-  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, string | number | boolean | string[] | number[] | boolean[]>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, string | number | boolean | string[] | number[] | boolean[]>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, Record<string, unknown>>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, Record<string, unknown>>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
   async addUser(user: User): Promise<DatabaseResult<string>> { 
     return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
   }

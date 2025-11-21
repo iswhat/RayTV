@@ -172,7 +172,7 @@ export interface FileConfig {
   subtitleDir: string;
   enableFileWatcher: boolean;
   fileWatcherInterval: number; // 毫秒
-  supportedFormats: { [key in FileType]?: FileFormat[] };
+  supportedFormats: Partial<Record<FileType, FileFormat[]>>;
   chunkSize: number; // 分块上传/下载的块大小
   maxConcurrentOperations: number;
   verifyFileIntegrity: boolean;

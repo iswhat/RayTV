@@ -496,7 +496,7 @@ export default class User {
     if (typeof data.status === 'string') {
       // 确保status是有效的枚举值
       const validStatuses: Array<'active' | 'inactive' | 'suspended'> = ['active', 'inactive', 'suspended'];
-      if (validStatuses.includes(data.status as any)) {
+      if (validStatuses.includes(data.status as 'active' | 'inactive' | 'suspended')) {
         safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
       }
     }
@@ -527,7 +527,7 @@ export default class User {
    */
   private static safeCastToUserPreferences(obj: object): UserPreferences {
     const result: UserPreferences = {};
-    const preferences = obj as any;
+    const preferences = obj as Record<string, unknown>;
     
     // 只复制有效的UserPreferences属性
     const validProps: (keyof UserPreferences)[] = [
@@ -554,7 +554,7 @@ export default class User {
    */
   private createSafeUserSettings(settingsObj: object): UserSettings {
     const result: UserSettings = {};
-    const settings = settingsObj as any;
+    const settings = settingsObj as Record<string, unknown>;
     
     // 只复制UserSettings接口中定义的有效属性
     if (typeof settings.notificationsEnabled === 'boolean') {

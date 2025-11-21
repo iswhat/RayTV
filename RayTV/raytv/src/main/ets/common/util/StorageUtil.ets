@@ -556,9 +556,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error) {
+    } catch (error: Error) {
       // 安全处理错误信息
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to get from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -600,9 +600,9 @@ export default class StorageUtil {
       }
       
       await pref.flush();
-    } catch (error) {
+    } catch (error: Error) {
       // 安全处理错误信息
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to clear preferences: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -617,9 +617,9 @@ export default class StorageUtil {
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
-    } catch (error) {
+    } catch (error: Error) {
       // 安全处理错误信息
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to save to file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -703,9 +703,9 @@ export default class StorageUtil {
           }
         }
       }
-    } catch (error) {
+    } catch (error: Error) {
       // 安全处理错误信息
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to clear files: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -734,8 +734,8 @@ export default class StorageUtil {
         }
       }
       return jsonData;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (error: Error) {
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to parse JSON string: ${errorMessage}`);
       return null;
     }
@@ -795,8 +795,8 @@ export default class StorageUtil {
           }
         }
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (error: Error) {
+      const errorMessage = error.message;
       Logger.error(TAG, `Failed to build StorageData: ${errorMessage}`);
     }
     
@@ -835,7 +835,7 @@ export default class StorageUtil {
               // 检查属性是否存在并访问
               // 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
               if (Object.keys(value).includes(safeKey)) {
-                const propValue = value[safeKey];
+                const propValue = (value as Record<string, any>)[safeKey];
                 
                 // 类型安全地处理每个属性值
                 if (typeof propValue === 'string' || 

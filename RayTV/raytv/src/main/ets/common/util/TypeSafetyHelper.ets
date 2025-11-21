@@ -127,7 +127,8 @@ export default class TypeSafeUtil {
   public static safeError(message: string, cause?: unknown): Error {
     const error = new Error(message);
     if (cause) {
-      (error as any).cause = cause;
+      // 使用对象展开操作符安全地设置cause属性，避免使用any类型
+      Object.assign(error, { cause });
     }
     return error;
   }
@@ -321,3 +322,4 @@ export default class TypeSafeUtil {
     }
   }
 }
+

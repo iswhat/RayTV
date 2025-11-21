@@ -166,15 +166,15 @@ export default class JsonUtil {
       }
       
       // 处理对象字面量
-      const clone: Record<string, unknown> = {};
+      const clone: Record<string, string | number | boolean | null> = {};
       
       // 使用Object.getOwnPropertyNames获取属性名
       const keys = Object.getOwnPropertyNames(obj);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const safeKey = String(key);
-        // 直接使用属性名访问值
-        const propertyValue = (obj as Record<string, unknown>)[safeKey];
+        // 直接使用属性名访问值，使用明确的类型
+        const propertyValue = (obj as Record<string, string | number | boolean | null>)[safeKey];
         clone[safeKey] = JsonUtil.deepClone(propertyValue);
       }
       
@@ -214,7 +214,7 @@ export default class JsonUtil {
   static prettyPrint(jsonStr: string, indent: number = 2): string {
     try {
       // 使用明确的序列化值类型进行解析
-      const parsed: Record<string, unknown> = JSON.parse(jsonStr);
+      const parsed: Record<string, string | number | boolean | null> = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
       
       // 检查是否为有效的对象或数组
       if (parsed === null || (typeof parsed !== 'object')) {
@@ -305,7 +305,7 @@ export function safeStringify<T>(value: T): string {
  * @param jsonStr - JSON字符串
  * @returns 解析后的对象
  */
-export function quickParse<T extends Record<string, string | number | boolean | null>>(jsonStr: string): T {
+export function quickParse<T>(jsonStr: string): T {
   return JsonUtil.parse(jsonStr);
 }
 

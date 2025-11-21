@@ -544,7 +544,7 @@ export class CacheManager {
    * @returns 键数组
    * @private
    */
-  private getObjectKeys(obj: Record<string, unknown>): string[] {
+  private getObjectKeys(obj: Record<string, Record<string, unknown>>): string[] {
     // 直接使用Object.keys获取键，避免for-in循环和原型链操作
     return Object.keys(obj);
   }

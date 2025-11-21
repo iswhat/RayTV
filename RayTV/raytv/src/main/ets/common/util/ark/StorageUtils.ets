@@ -61,7 +61,8 @@ export const StorageUtils = {
       try {
         return JSON.parse(value) as T;
       } catch {
-        return value as unknown as T;
+        // 当JSON解析失败时，返回null而不是进行不安全的类型转换
+        return null as unknown as T;
       }
     } catch (e) {
       console.error('StorageUtils.getItem error:', e);

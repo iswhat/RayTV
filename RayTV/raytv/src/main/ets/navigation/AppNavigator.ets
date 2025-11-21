@@ -134,9 +134,9 @@ export class AppNavigator {
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
       await router.push(routerOptions);
-    } catch (error) {
+    } catch (error: Error) {
         // 优化错误处理 - 明确类型标注
-        const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
+        const errorMsg: string = error.message;
         console.error(`Navigation to ${route} failed:`, errorMsg);
         throw new Error(`Navigation to ${route} failed: ${errorMsg}`);
     }
@@ -150,10 +150,10 @@ export class AppNavigator {
       // 使用标准的返回方法
       await router.back();
       this.removeLastFromHistory();
-    } catch (error) {
+    } catch (error: Error) {
       console.error('Navigation back failed:', error);
       // 优化错误处理，提供更详细的错误信息 - 明确类型标注
-      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
+      const errorMsg: string = error.message;
       throw new Error(`Navigation back failed: ${errorMsg}`);
     }
   }
@@ -171,10 +171,10 @@ export class AppNavigator {
       await router.push(routerOptions);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
-    } catch (error) {
+    } catch (error: Error) {
       console.error('Navigation back to home failed:', error);
       // 优化错误处理 - 明确类型标注
-      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
+      const errorMsg: string = error.message;
       throw new Error(`Navigation back to home failed: ${errorMsg}`);
     }
   }
@@ -203,7 +203,7 @@ export class AppNavigator {
       historyItem.params = params;
       historyItem.timestamp = Date.now();
       this.replaceLastInHistory(historyItem);
-    } catch (error) {
+    } catch (error: Error) {
       console.error(`Navigation replace to ${route} failed:`, error);
       throw new Error(`Navigation replace to ${route} failed`);
     }
@@ -287,10 +287,9 @@ export class AppNavigator {
         const serializableItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
         serializableItem.route = item.route;
         serializableItem.url = item.url;
-        // 明确类型处理，避免any/unknown
         if (item.params) {
-          const validatedParams = new NavigationParamsImpl();
-          // 手动复制已知属性，避免使用any类型
+          const validatedParams: NavigationParams = new NavigationParamsImpl();
+          // 复制基本属性
           if (item.params.id) validatedParams.id = item.params.id;
           if (item.params.name) validatedParams.name = item.params.name;
           if (item.params.title) validatedParams.title = item.params.title;
@@ -298,19 +297,22 @@ export class AppNavigator {
           if (item.params.page !== undefined) validatedParams.page = item.params.page;
           if (item.params.keyword) validatedParams.keyword = item.params.keyword;
           if (item.params.isFavorite !== undefined) validatedParams.isFavorite = item.params.isFavorite;
-          // 处理其他可能的参数
-          if ('type' in item.params) {
-            validatedParams.setParam('type', item.params.getParam('type') as string);
+          // 处理其他可能的参数 - 使用hasOwnProperty替代in操作符
+          if (Object.prototype.hasOwnProperty.call(item.params, 'type')) {
+            const typeValue = item.params.getParam('type');
+            if (typeValue !== undefined) {
+              validatedParams.setParam('type', typeValue as string);
+            }
           }
           serializableItem.params = validatedParams;
         } else {
-          serializableItem.params = null;
+          serializableItem.params = undefined; // 使用undefined而不是null
         }
         serializableItem.timestamp = item.timestamp;
         serializableHistory.push(serializableItem);
       }
       await this.storageUtil.save('navigationHistory', serializableHistory);
-    } catch (error) {
+    } catch (error: Error) {
       console.error('Failed to save navigation history:', error);
     }
   }
@@ -341,7 +343,7 @@ export class AppNavigator {
       } else {
         this.navigationHistory = [];
       }
-    } catch (error) {
+    } catch (error: Error) {
       console.error('Failed to load navigation history:', error);
       this.navigationHistory = [];
     }
@@ -350,6 +352,36 @@ export class AppNavigator {
   /**
    * 获取当前页面路由
    */
+  getCurrentRoute(): string {
+    // 获取当前路由状态
+    const state = router.getState();
+    const url = state.path || '';
+    
+    // 从URL映射回路由 - 使用数组避免索引签名问题，使用构造函数避免structural typing
+    const routeMap = new Array<RouteMapping>();
+    
+    routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));
+    routeMap.push(new RouteMappingImpl('pages/VideoPlayPage', PageRoute.VIDEO_PLAY));
+    routeMap.push(new RouteMappingImpl('pages/LineManagerPage', PageRoute.LINE_MANAGER));
+    routeMap.push(new RouteMappingImpl('pages/SettingsPage', PageRoute.SETTINGS));
+    routeMap.push(new RouteMappingImpl('pages/SearchPage', PageRoute.SEARCH));
+    routeMap.push(new RouteMappingImpl('pages/FavoritesPage', PageRoute.FAVORITES));
+    routeMap.push(new RouteMappingImpl('pages/HistoryPage', PageRoute.HISTORY));
+    routeMap.push(new RouteMappingImpl('pages/CategoryPage', PageRoute.CATEGORY));
+    routeMap.push(new RouteMappingImpl('pages/DetailPage', PageRoute.DETAIL));
+    routeMap.push(new RouteMappingImpl('pages/LivePage', PageRoute.LIVE));
+
+    // 查找匹配的URL
+    for (let i = 0; i < routeMap.length; i++) {
+      if (routeMap[i].url === url) {
+        return routeMap[i].route;
+      }
+    }
+    
+    return PageRoute.HOME;
+  }
+}
+
 // 定义路由映射接口 - 避免structural typing问题
 export interface RouteMapping {
   url: string;
@@ -457,37 +489,6 @@ export class NavigationHistoryItemImpl implements NavigationHistoryItem {
   }
 }
 
-// 在AppNavigator类中继续...
-  getCurrentRoute(): string {
-    // 获取当前路由状态
-    const state = router.getState();
-    const url = state.path || '';
-    
-    // 从URL映射回路由 - 使用数组避免索引签名问题，使用构造函数避免structural typing
-    const routeMap = new Array<RouteMapping>();
-    
-    routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));
-    routeMap.push(new RouteMappingImpl('pages/VideoPlayPage', PageRoute.VIDEO_PLAY));
-    routeMap.push(new RouteMappingImpl('pages/LineManagerPage', PageRoute.LINE_MANAGER));
-    routeMap.push(new RouteMappingImpl('pages/SettingsPage', PageRoute.SETTINGS));
-    routeMap.push(new RouteMappingImpl('pages/SearchPage', PageRoute.SEARCH));
-    routeMap.push(new RouteMappingImpl('pages/FavoritesPage', PageRoute.FAVORITES));
-    routeMap.push(new RouteMappingImpl('pages/HistoryPage', PageRoute.HISTORY));
-    routeMap.push(new RouteMappingImpl('pages/CategoryPage', PageRoute.CATEGORY));
-    routeMap.push(new RouteMappingImpl('pages/DetailPage', PageRoute.DETAIL));
-    routeMap.push(new RouteMappingImpl('pages/LivePage', PageRoute.LIVE));
-
-    // 查找匹配的URL
-    for (let i = 0; i < routeMap.length; i++) {
-      if (routeMap[i].url === url) {
-        return routeMap[i].route;
-      }
-    }
-    
-    return PageRoute.HOME;
-  }
-}
-
 /**
  * 页面路由常量
  */
@@ -507,22 +508,7 @@ export class PageRoute {
 /**
    * 导航参数类型
    */
-// 替换索引签名为更具体的类型定义
-export interface NavigationParams {
-  // 定义常用的参数键值对
-  id?: string;
-  name?: string;
-  title?: string;
-  category?: string;
-  page?: number;
-  keyword?: string;
-  isFavorite?: boolean;
-  // 如果需要处理更多动态参数，可以使用以下方法
-  getParam(key: string): string | number | boolean | null | JsonData | undefined;
-  setParam(key: string, value: string | number | boolean | null | JsonData): void;
-}
-
-// 扩展NavigationParams接口，添加clone方法
+// 统一NavigationParams接口定义，避免声明合并问题
 export interface NavigationParams {
   // 定义常用的参数键值对
   id?: string;

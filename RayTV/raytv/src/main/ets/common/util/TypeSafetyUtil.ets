@@ -125,6 +125,11 @@ export class TypeSafetyUtil {
   }
   
   /**
+   * 定义安全对象类型，避免使用object literals as types
+   */
+  export type SafeObject = Record<string, string | number | boolean | object | null>;
+  
+  /**
    * 创建带有安全属性名的对象
    * @param obj 原始对象
    * @returns 带有安全属性名的新对象
@@ -149,9 +154,10 @@ export class TypeSafetyUtil {
    * @param value 要包装的值
    * @returns 包装后的对象，保留原始类型信息
    */
-  public static withType<T>(value: T): { value: T } {
+  public static withType<T>(value: T): TypeWrapper<T> {
     // 使用完整的对象属性赋值语法并添加明确类型
-    return { value: value } as { value: T };
+    const wrapper: TypeWrapper<T> = { value: value };
+    return wrapper;
   }
   
   /**
@@ -160,7 +166,7 @@ export class TypeSafetyUtil {
    * @param guard 类型守卫函数
    * @returns 经过类型守卫后的值
    */
-  public static narrowType<T extends string | number | boolean | null, U = unknown>(value: U, guard: (v: U) => boolean): T | null {
+  public static narrowType<T extends string | number | boolean | null>(value: unknown, guard: (v: unknown) => boolean): T | null {
     // 在ArkTS中，使用返回布尔值的函数替代类型守卫
     if (guard(value)) {
       // 额外的运行时检查确保类型安全
@@ -185,7 +191,7 @@ export class TypeSafetyUtil {
   public static safeCast<T, U>(
     value: T,
     transformer: (v: T) => U,
-    guard?: (v: U) => boolean,
+    guard?: (v: unknown) => boolean,
     defaultValue?: U
   ): U | null {
     try {
@@ -240,12 +246,12 @@ export class TypeSafetyUtil {
    * @param typeGuard 可选的类型检查函数
    * @returns 断言后的类型
    */
-  public static asType<T extends string | number | boolean | null>(value: unknown, typeGuard?: (value: unknown) => boolean): T {
+  public static asType<T extends string | number | boolean | null>(value: unknown, typeGuard?: (value: unknown) => boolean): T | null {
     // 在ArkTS中，使用返回布尔值的函数替代类型守卫
     if (typeGuard && !typeGuard(value)) {
       console.warn('Type assertion failed: value does not match the expected type');
       // 返回默认值而不是直接断言
-      return null as T;
+      return null;
     }
     
     // 确保返回值符合基本类型约束
@@ -257,7 +263,7 @@ export class TypeSafetyUtil {
     }
     
     // 对于不匹配的类型，返回null
-    return null as T;
+    return null;
   }
   
   /**
@@ -266,9 +272,9 @@ export class TypeSafetyUtil {
    * @returns 包装后的函数，具有更好的类型推断
    */
   // 修复：使用更具体的泛型类型定义，避免any[]
-  public static createEnhancedGenericFunction<T, A extends unknown[]>(fn: (...args: A) => T): (...args: A) => T {
+  public static createEnhancedGenericFunction<T, A extends unknown[]>(fn: (...args: A) => T): EnhancedFunction<T, A> {
     // 在ArkTS中使用更简单的方式实现，使用箭头函数替代普通函数表达式
-    return (...args: A): T => {
+    const enhancedFn: EnhancedFunction<T, A> = (...args: A): T => {
       // 使用标准函数调用
       try {
         if (typeof fn === 'function') {
@@ -277,18 +283,15 @@ export class TypeSafetyUtil {
         // 确保抛出的是Error类型的错误
         const error = new Error('fn is not a function');
         throw error;
-      } catch (e) {
+      } catch (e: Error) {
         console.error('Function execution failed:', e);
         // 确保抛出的是Error类型的错误
         const error: Error = e instanceof Error ? e : new Error(String(e));
         throw error;
       }
     };
+    return enhancedFn;
   }
-  /**
-   * 定义安全对象类型，避免使用object literals as types
-   */
-  export type SafeObject = Record<string, string | number | boolean | object | null>;
 
   /**
    * 安全地将值转换为对象
@@ -304,8 +307,11 @@ export class TypeSafetyUtil {
       const result: SafeObject = {};
       const obj = value as Record<string, unknown>;
       
-      for (const key in obj) {
-        if (key !== undefined && Object.keys(obj).includes(key)) {
+      // 使用Object.keys和forEach替代for..in循环
+      const keys = Object.keys(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key !== undefined) {
           const propValue = obj[key];
           if (typeof propValue === 'string' || 
               typeof propValue === 'number' || 
@@ -338,7 +344,7 @@ export class TypeSafetyUtil {
    * @returns 转换后的数组或默认值
    */
   // 修复：移除类型参数默认值，使用defaultValue参数
-  public static asArray<T>(value: unknown, defaultValue: T[] = []): T[] {
+  public static asArray<T>(value: unknown, defaultValue: T[]): T[] {
     if (Array.isArray(value)) {
       return value as T[];
     }
@@ -351,7 +357,7 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 转换后的字符串
    */
-  public static asString(value: unknown, defaultValue: string = ''): string {
+  public static asString(value: unknown, defaultValue: string): string {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -364,7 +370,7 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 转换后的数字
    */
-  public static asNumber(value: unknown, defaultValue: number = 0): number {
+  public static asNumber(value: unknown, defaultValue: number): number {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -384,7 +390,7 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 转换后的布尔值
    */
-  public static asBoolean(value: unknown, defaultValue: boolean = false): boolean {
+  public static asBoolean(value: unknown, defaultValue: boolean): boolean {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -551,7 +557,7 @@ export class TypeSafetyUtil {
         }
       }
       return defaultValue;
-    } catch (error) {
+    } catch (error: Error) {
       // 移除Logger引用，因为原代码中没有使用Logger
       return defaultValue;
     }
@@ -578,7 +584,7 @@ export class TypeSafetyUtil {
       const safeObj = obj as Record<string, unknown>;
       safeObj[propertyName] = value;
       return true;
-    } catch (error) {
+    } catch (error: Error) {
       // 移除Logger引用，因为原代码中没有使用Logger
       return false;
     }
@@ -674,7 +680,9 @@ export class TypeSafetyUtil {
     for (const source of sources) {
       const safeSource = TypeSafetyUtil.asObject(source);
       
-      for (const [key, value] of TypeSafetyUtil.getObjectEntries<unknown>(safeSource)) {
+      const entries = TypeSafetyUtil.getObjectEntries<unknown>(safeSource);
+      for (let i = 0; i < entries.length; i++) {
+        const [key, value] = entries[i];
         if (value === null || value === undefined) {
           continue;
         }
@@ -744,7 +752,7 @@ export class TypeSafetyUtil {
       }
       const parsed = JSON.parse(jsonStr);
       return parsed !== null ? (parsed as T) : defaultValue;
-    } catch (error) {
+    } catch (error: Error) {
       return defaultValue;
     }
   }
@@ -755,10 +763,10 @@ export class TypeSafetyUtil {
    * @param defaultValue 默认值
    * @returns 序列化后的字符串或默认值
    */
-  public static safeJsonStringify(obj: unknown, defaultValue: string = ''): string {
+  public static safeJsonStringify(obj: unknown, defaultValue: string): string {
     try {
       return JSON.stringify(obj);
-    } catch (error) {
+    } catch (error: Error) {
       return defaultValue;
     }
   }
@@ -807,4 +815,87 @@ export class TypeSafetyUtil {
   public static isValidArray(value: unknown): boolean {
     return Array.isArray(value);
   }
+
+  /**
+   * 创建类型安全的映射对象
+   * @param entries 键值对数组
+   * @returns 类型安全的映射对象
+   */
+  public static createSafeMap<K extends string, V extends string | number | boolean | null>(
+    entries: [K, V][]
+  ): Record<K, V> {
+    const result = {} as Record<K, V>;
+    
+    for (let i = 0; i < entries.length; i++) {
+      const [key, value] = entries[i];
+      if (key !== undefined && value !== undefined) {
+        result[key] = value;
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * 从对象中选择指定的属性
+   * @param obj 源对象
+   * @param keys 要选择的属性名数组
+   * @returns 包含选定属性的新对象
+   */
+  public static pickProperties<T extends Record<string, unknown>, K extends keyof T>(
+    obj: T,
+    keys: K[]
+  ): Pick<T, K> {
+    const result = {} as Pick<T, K>;
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key !== undefined && obj[key] !== undefined) {
+        result[key] = obj[key];
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * 从对象中排除指定的属性
+   * @param obj 源对象
+   * @param keys 要排除的属性名数组
+   * @returns 排除指定属性后的新对象
+   */
+  public static omitProperties<T extends Record<string, unknown>, K extends keyof T>(
+    obj: T,
+    keys: K[]
+  ): Omit<T, K> {
+    const result = {} as Omit<T, K>;
+    const objKeys = Object.keys(obj) as (keyof T)[];
+    
+    for (let i = 0; i < objKeys.length; i++) {
+      const key = objKeys[i];
+      // 检查key是否在要排除的键列表中
+      let shouldExclude = false;
+      for (let j = 0; j < keys.length; j++) {
+        if (key === keys[j]) {
+          shouldExclude = true;
+          break;
+        }
+      }
+      
+      if (!shouldExclude && key !== undefined) {
+        result[key] = obj[key];
+      }
+    }
+    
+    return result;
+  }
+}
+
+// 类型定义，避免使用对象字面量作为类型
+export interface TypeWrapper<T> {
+  value: T;
+}
+
+export interface EnhancedFunction<T, A extends unknown[]> {
+  (...args: A): T;
 }
