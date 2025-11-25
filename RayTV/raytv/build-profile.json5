@@ -32,6 +32,20 @@
       }
     }
   ],
+  "modules": [
+    {
+      "name": "raytv",
+      "srcPath": "./src",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ],
   "targets": [
     {
       "name": "default"

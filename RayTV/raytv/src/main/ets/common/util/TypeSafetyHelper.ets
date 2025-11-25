@@ -146,7 +146,7 @@ export default class TypeSafeUtil {
     if (typeof obj !== 'object') {
       return false;
     }
-    return key in obj;
+    return Object.hasOwnProperty.call(obj, key);
   }
 
   /**
@@ -311,9 +311,9 @@ export default class TypeSafeUtil {
    * @returns 函数执行结果或默认值
    */
   public static safeExecute<T>(
-    fn: (...args: any[]) => T,
+    fn: (...args: Array<string | number | boolean | object | null>) => T,
     defaultValue: T,
-    ...args: any[]
+    ...args: Array<string | number | boolean | object | null>
   ): T {
     try {
       return TypeSafeUtil.isFunction(fn) ? fn(...args) : defaultValue;

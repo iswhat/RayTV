@@ -22,6 +22,18 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// 引入ArkTS兼容的工具类型
+import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
+import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
+
+// 重命名以避免与标准库冲突
+export type Partial<T> = ArkTSPartial<T>;
+export type Required<T> = ArkTSRequired<T>;
+export type Pick<T, K extends keyof T> = ArkTSPick<T, K>;
+export type Omit<T, K extends keyof T> = ArkTSOmit<T, K>;
+export type Record<K extends string | number | symbol, T> = ArkTSRecord<K, T>;
+export type Readonly<T> = ArkTSReadonly<T>;
+
 /**
  * 媒体项基础类型
  */
@@ -33,17 +45,6 @@ export interface MediaItem {
   duration?: number;
   releaseDate?: string;
   rating?: number;
-  // 引入ArkTS兼容的工具类型
-import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
-import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
-
-// 重命名以避免与标准库冲突
-export type Partial<T> = ArkTSPartial<T>;
-export type Required<T> = ArkTSRequired<T>;
-export type Pick<T, K extends keyof T> = ArkTSPick<T, K>;
-export type Omit<T, K extends keyof T> = ArkTSOmit<T, K>;
-export type Record<K extends string | number | symbol, T> = ArkTSRecord<K, T>;
-export type Readonly<T> = ArkTSReadonly<T>;
 }
 
 /**
@@ -108,10 +109,10 @@ export interface AuthInfo {
  */
 export interface ConfigItem {
   key: string;
-  value: string | number | boolean | Record<string, string | number | boolean | null>;
-  type: 'string' | 'number' | 'boolean' | 'object';
+  value: string | number | boolean;
+  type: 'string' | 'number' | 'boolean';
   description?: string;
-  defaultValue?: string | number | boolean | Record<string, string | number | boolean | null>;
+  defaultValue?: string | number | boolean;
 }
 
 /**
@@ -147,7 +148,7 @@ export interface HistoryItem {
   progress: number;
   lastPlayed: string;
   totalDuration?: number;
-  extra?: Record<string, string | number | boolean | null>;
+  extra?: Record<string, Serializable>;
 }
 
 /**
@@ -160,7 +161,7 @@ export interface FavoriteItem {
   mediaType: 'video' | 'audio' | 'image' | 'playlist';
   addedAt: string;
   note?: string;
-  extra?: Record<string, string | number | boolean | null>;
+  extra?: Record<string, Serializable>;
 }
 
 /**
@@ -184,9 +185,9 @@ export interface HttpRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean>;
-  data?: Record<string, string | number | boolean | null> | FormData | string | Blob;
+  data?: Record<string, string | number | boolean | null> | string;
   timeout?: number;
-  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer';
+  responseType?: 'json' | 'text';
   withCredentials?: boolean;
 }
 
@@ -207,7 +208,7 @@ export interface HttpResponse<T> {
 export interface ErrorInfo {
   code: string;
   message: string;
-  details?: Record<string, string | number | boolean | null>;
+  details?: Record<string, Serializable>;
   timestamp?: number;
 }
 
@@ -256,7 +257,7 @@ export interface SerializableObject {
   getSerializable(key: string): Serializable;
   setSerializable(key: string, value: Serializable): void;
   hasSerializable(key: string): boolean;
-  toPlainObject(): Record<string, unknown>;
+  toPlainObject(): Record<string, Serializable>;
 }
 
 /**
@@ -297,7 +298,7 @@ export type DeepReadonlyValue =
 // ArkTS兼容的可选属性实现
 export interface OptionalBase<T> {
   // ArkTS兼容：不使用索引签名
-  getOptional(key: string): unknown;
+  getOptional(key: string): T;
   hasOptional(key: string): boolean;
 }
 
@@ -307,7 +308,7 @@ export interface OptionalBase<T> {
 // ArkTS兼容的必需属性实现
 export interface RequiredBase<T> {
   // ArkTS兼容：不使用索引签名
-  getRequired(key: string): unknown;
+  getRequired(key: string): T;
   hasRequired(key: string): boolean;
 }
 
@@ -323,14 +324,18 @@ export type NonEmptyObject<T extends object> = T;
 export type NonNullableValue<T> = T;
 
 /**
- * 函数类型
+ * 通用函数类型 - 接受任意参数，返回任意值
  */
-export type AnyFunction = (...args: unknown[]) => unknown;
+export interface AnyFunction {
+  (...args: never[]): never;
+}
 
 /**
- * 异步函数类型
+ * 异步函数类型 - 接受任意参数，返回Promise
  */
-export type AsyncFunction<T> = (...args: unknown[]) => Promise<T>;
+export interface AsyncFunction<T> {
+  (...args: never[]): Promise<T>;
+}
 
 /**
  * 延迟执行的返回类型

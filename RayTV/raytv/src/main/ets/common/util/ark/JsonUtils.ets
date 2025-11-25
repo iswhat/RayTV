@@ -114,7 +114,9 @@ export const JsonUtils = {
     
     for (const key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
-        (result as Record<string, SafeAny>)[key] = source[key];
+        // 使用类型安全的属性访问方式
+        const propertyValue = JsonUtils.getPropertyValue(source, key);
+        (result as Record<string, SafeAny>)[key] = propertyValue;
       }
     }
     
@@ -133,8 +135,9 @@ export const JsonUtils = {
     
     for (const key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
-        const targetValue = target[key];
-        const sourceValue = source[key];
+        // 使用类型安全的属性访问方式
+        const targetValue = JsonUtils.getPropertyValue(target, key);
+        const sourceValue = JsonUtils.getPropertyValue(source, key);
         
         if (TypeUtils.isObject(targetValue) && TypeUtils.isObject(sourceValue) && !Array.isArray(targetValue) && !Array.isArray(sourceValue)) {
           // 递归合并嵌套对象
@@ -256,6 +259,25 @@ export const JsonUtils = {
     }
     
     return false;
+  },
+
+  /**
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  getPropertyValue(obj: Record<string, SafeAny>, key: string): unknown {
+    if (!TypeUtils.isObject(obj)) {
+      return undefined;
+    }
+    
+    if (!(key in obj)) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    return obj[key];
   },
 
   /**

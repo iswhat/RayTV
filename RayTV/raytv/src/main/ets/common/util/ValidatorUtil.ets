@@ -124,7 +124,7 @@ export class ValidatorUtil {
       }
 
       // 简单的URL验证
-      const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+      const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
       return urlRegex.test(url);
     } catch (error) {
       this.logger.error('Failed to validate URL', error as Error);
@@ -286,14 +286,6 @@ export class ValidatorUtil {
         return false;
       }
 
-      // 构建正则表达式
-      let pattern = '^[a-zA-Z0-9';
-      if (allowUnderscore) pattern += '_';
-      // 不使用正则表达式，改用字符串方法实现用户名验证
-      if (!username || username.length === 0) {
-        return false;
-      }
-      
       // 检查第一个字符是否是字母或数字
       const firstChar = username[0];
       const isFirstCharValid = (firstChar >= 'a' && firstChar <= 'z') || 

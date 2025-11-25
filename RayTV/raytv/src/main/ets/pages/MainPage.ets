@@ -1,9 +1,8 @@
-import { Button, Text, Image, List, ListItem, Row, Column, Flex } from '@kit.ArkUI';
+import { Button, Image, List } from '@kit.ArkUI';
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
-import { FlexDirection, ItemAlign, FlexAlign, TextAlign, ImageFit, FontWeight } from '@kit.ArkUI';
 
 /**
  * 应用主页面
@@ -109,7 +108,7 @@ struct MainPage {
       }) {
         Text("RayTV")
           .fontSize(24)
-          .fontWeight(FontWeight.Bold)
+          .fontWeight(700)
         Row() {
           Button("搜索")
             .onClick(() => this.navigateToSearch())
@@ -132,7 +131,7 @@ struct MainPage {
       // 推荐内容
       Text("推荐内容")
         .fontSize(20)
-        .fontWeight(FontWeight.Bold)
+        .fontWeight(700)
         .marginBottom(15)
       
       if (this.isLoading) {
@@ -140,9 +139,7 @@ struct MainPage {
       } else {
         List() {
           ForEach(this.featuredMedia, (item: FeaturedMediaItem) => {
-            ListItem() {
-              this.renderMediaItem(item)
-            }
+            this.renderMediaItem(item)
           }, (item: FeaturedMediaItem) => item.id)
         }
         .scroller(this.scroller)

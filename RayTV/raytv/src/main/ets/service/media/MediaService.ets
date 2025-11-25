@@ -251,7 +251,7 @@ export default class MediaService {
   /**
    * 初始化媒体服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }

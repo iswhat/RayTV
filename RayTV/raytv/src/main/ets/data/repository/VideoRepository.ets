@@ -1,79 +1,113 @@
-// VideoRepository - 视频数据仓库类
-// 负责管理视频相关数据，包括视频列表、详情、收藏、观看历史等
-
-import Logger from '../../common/util/Logger';
-import StorageUtil from '../../common/util/StorageUtil';
-import NetworkUtil from '../../common/util/NetworkUtil';
-import EventBusUtil from '../../common/util/EventBusUtil';
-import CacheService from '../../service/cache/CacheService';
-import FileUtil from '../../common/util/FileUtil';
-import {
-  VideoType,
-  VideoQuality,
-  VideoSource,
-  VideoInfo,
-  VideoMetadata,
-  VideoStatistics,
-  VideoChapter,
-  VideoComment,
-  RelatedVideo,
-  PlaybackProgress,
-  VideoRating,
-  VideoCategory,
-  VideoTag
-} from '../dto/VideoDto';
-import { LocalStorageType } from '../model/LocalModel';
-import { CacheType } from '../model/CacheModel';
-import { UserRepository } from './UserRepository';
-
-/**
- * 视频事件类型
+/*
+ * Copyright (c) 2024 RayTV. All rights reserved.
+ * 视频仓库类 - 负责视频相关数据的获取和管理
  */
-export const VideoEventType: Record<string, string> = {
-  VIDEO_LOADED: 'video:loaded',
-  VIDEO_LIST_LOADED: 'video:listLoaded',
-  VIDEO_UPDATED: 'video:updated',
-  VIDEO_FAVORITED: 'video:favorited',
-  VIDEO_UNFAVORITED: 'video:unfavorited',
-  VIDEO_PROGRESS_UPDATED: 'video:progressUpdated',
-  VIDEO_WATCHED: 'video:watched',
-  VIDEO_RATED: 'video:rated',
-  VIDEO_COMMENT_ADDED: 'video:commentAdded',
-  VIDEO_ERROR: 'video:error',
-  VIDEO_CACHE_UPDATED: 'video:cacheUpdated'
-} as const;
 
-/**
- * 视频事件数据
- */
+import Logger from '@ohos:common@ohos/common/src/main/ets/utils/Logger';
+import StorageUtil from '@ohos:common@ohos/common/src/main/ets/utils/StorageUtil';
+import NetworkUtil from '@ohos:common@ohos/common/src/main/ets/utils/NetworkUtil';
+import CacheService from '@ohos:common@ohos/common/src/main/ets/services/CacheService';
+import UserRepository from './UserRepository';
+import { LocalStorageType } from '@ohos:common@ohos/common/src/main/ets/utils/StorageUtil';
+import { CacheType } from '@ohos:common@ohos/common/src/main/ets/services/CacheService';
+
+// 视频类型枚举
+export enum VideoType {
+  MOVIE = 'movie',
+  TV_SERIES = 'tv_series',
+  SHORT_VIDEO = 'short_video',
+  LIVE = 'live',
+  ANIMATION = 'animation',
+  DOCUMENTARY = 'documentary'
+}
+
+// 视频质量枚举
+export enum VideoQuality {
+  SD = 'sd',
+  HD = 'hd',
+  FHD = 'fhd',
+  UHD = 'uhd'
+}
+
+// 视频事件类型常量
+export class VideoEventType {
+  static readonly VIDEO_LOADED = 'video:loaded';
+  static readonly VIDEO_LIST_LOADED = 'video:list:loaded';
+  static readonly VIDEO_ERROR = 'video:error';
+  static readonly VIDEO_FAVORITED = 'video:favorited';
+  static readonly VIDEO_UNFAVORITED = 'video:unfavorited';
+  static readonly VIDEO_RATED = 'video:rated';
+  static readonly VIDEO_COMMENT_ADDED = 'video:comment:added';
+  static readonly VIDEO_PROGRESS_UPDATED = 'video:progress:updated';
+  static readonly VIDEO_WATCHED = 'video:watched';
+  static readonly VIDEO_CACHE_UPDATED = 'video:cache:updated';
+}
+
+// 视频事件接口
 export interface VideoEvent {
-  videoId: string;
   type: string;
   timestamp: number;
-  data?: unknown;
+  videoId?: string;
+  data?: any;
   error?: Error;
 }
 
-/**
- * 视频列表请求参数
- */
+// 收藏状态变更事件接口
+export interface FavoriteChangeEvent extends VideoEvent {
+  favorited: boolean;
+  userId: string;
+}
+
+// 进度更新事件接口
+export interface ProgressUpdateEvent extends VideoEvent {
+  progress: PlaybackProgress;
+}
+
+// 视频信息接口
+export interface VideoInfo {
+  id: string;
+  title: string;
+  description: string;
+  coverUrl: string;
+  duration: number;
+  type: VideoType;
+  quality: VideoQuality;
+  releaseDate: string;
+  director: string;
+  actors: string[];
+  genres: string[];
+  rating: number;
+  viewCount: number;
+  isFavorite?: boolean;
+  playUrl: string;
+  subtitles?: Array<{
+    language: string;
+    url: string;
+  }>;
+}
+
+// 视频列表请求接口
 export interface VideoListRequest {
   type?: VideoType;
   category?: string;
   tag?: string;
   page?: number;
   pageSize?: number;
-  sortBy?: 'latest' | 'popular' | 'rating' | 'viewCount';
+  sortBy?: string;
   filters?: {
     quality?: VideoQuality;
-    duration?: { min?: number; max?: number };
-    dateRange?: { start?: number; end?: number };
+    duration?: {
+      min?: number;
+      max?: number;
+    };
+    dateRange?: {
+      start?: string;
+      end?: string;
+    };
   };
 }
 
-/**
- * 视频列表响应
- */
+// 视频列表响应接口
 export interface VideoListResponse {
   videos: VideoInfo[];
   total: number;
@@ -82,86 +116,136 @@ export interface VideoListResponse {
   hasMore: boolean;
 }
 
-/**
- * 收藏状态变更事件数据
- */
-export interface FavoriteChangeEvent extends VideoEvent {
-  favorited: boolean;
+// 视频分类接口
+export interface VideoCategory {
+  id: string;
+  name: string;
+  description: string;
+  iconUrl: string;
+  videoCount: number;
+}
+
+// 视频标签接口
+export interface VideoTag {
+  id: string;
+  name: string;
+  count: number;
+}
+
+// 视频统计信息接口
+export interface VideoStatistics {
+  viewCount: number;
+  likeCount: number;
+  dislikeCount: number;
+  favoriteCount: number;
+  commentCount: number;
+  averageRating: number;
+}
+
+// 相关视频接口
+export interface RelatedVideo {
+  id: string;
+  title: string;
+  coverUrl: string;
+  duration: number;
+  similarity: number;
+}
+
+// 视频评论接口
+export interface VideoComment {
+  id: string;
   userId: string;
+  userName: string;
+  userAvatar: string;
+  content: string;
+  rating?: number;
+  createdAt: string;
+  likes: number;
+  replies: VideoComment[];
+}
+
+// 视频评分接口
+export interface VideoRating {
+  videoId: string;
+  userId: string;
+  rating: number;
+  ratedAt: string;
+}
+
+// 播放进度接口
+export interface PlaybackProgress {
+  videoId: string;
+  currentTime: number;
+  duration: number;
+  lastUpdated: number;
+  isCompleted: boolean;
 }
 
 /**
- * 播放进度更新事件数据
- */
-export interface ProgressUpdateEvent extends VideoEvent {
-  progress: PlaybackProgress;
-}
-
-/**
- * 视频数据仓库类
+ * 视频仓库类
  */
 export class VideoRepository {
   private static instance: VideoRepository;
-  private logger = Logger.getInstance();
-  private storageUtil = StorageUtil.getInstance();
-  private networkUtil = NetworkUtil.getInstance();
-  private eventBus = EventBusUtil.getInstance();
-  private cacheService = CacheService.getInstance();
-  private fileUtil = FileUtil.getInstance();
-  private userRepository = UserRepository.getInstance();
+  private logger: Logger;
+  private storageUtil: StorageUtil;
+  private networkUtil: NetworkUtil;
+  private cacheService: CacheService;
+  private userRepository: UserRepository;
+  private eventBus: any; // EventBus实例
   
   // API端点配置
   private apiEndpoints = {
-    baseUrl: 'https://api.raytv.example.com',
+    baseUrl: 'https://api.raytv.com/v1',
     videos: '/videos',
     videoDetail: '/videos/:id',
     videoCategories: '/categories',
     videoTags: '/tags',
     videoStatistics: '/videos/:id/statistics',
+    relatedVideos: '/videos/:id/related',
     videoComments: '/videos/:id/comments',
     videoFavorites: '/videos/:id/favorite',
     videoRating: '/videos/:id/rating',
-    relatedVideos: '/videos/:id/related',
-    videoSearch: '/search/videos',
-    watchHistory: '/user/history'
+    watchHistory: '/user/watch-history'
   };
   
-  // 存储和缓存键配置
+  // 存储键配置
   private storageKeys = {
-    videoCache: 'video:cache:',
+    videoCache: 'video:detail:',
     videoListCache: 'video:list:',
-    favorites: 'video:favorites',
-    watchHistory: 'video:watchHistory',
-    playbackProgress: 'video:progress:',
     categories: 'video:categories',
-    tags: 'video:tags',
-    lastWatched: 'video:lastWatched'
+    tags: 'video:tags:',
+    favorites: 'user:favorites',
+    playbackProgress: 'video:progress:',
+    watchHistory: 'video:watch:history',
+    lastWatched: 'video:last:watched'
   };
   
   // 视频配置
   private videoConfig = {
-    videoDetailCacheDuration: 3600, // 视频详情缓存时间（秒）
-    videoListCacheDuration: 1800, // 视频列表缓存时间（秒）
-    maxWatchHistoryItems: 100, // 最大观看历史记录数
-    progressSaveInterval: 10, // 播放进度保存间隔（秒）
-    maxFavorites: 1000, // 最大收藏数
-    thumbnailCacheDuration: 86400 // 缩略图缓存时间（秒）
+    maxFavorites: 1000,
+    maxWatchHistoryItems: 100,
+    videoDetailCacheDuration: 3600, // 1小时
+    videoListCacheDuration: 1800,   // 30分钟
+    progressSyncInterval: 300000    // 5分钟
   };
   
-  // 本地播放进度缓存
+  // 播放进度内存缓存
   private progressCache: Map<string, PlaybackProgress> = new Map();
-
+  
   /**
    * 私有构造函数
    */
   private constructor() {
-    this.logger.info('VideoRepository initialized');
-    this.setupEventListeners();
-    this.initialize();
+    this.logger = Logger.getInstance();
+    this.storageUtil = StorageUtil.getInstance();
+    this.networkUtil = NetworkUtil.getInstance();
+    this.cacheService = CacheService.getInstance();
+    this.userRepository = UserRepository.getInstance();
+    // this.eventBus = EventBus.getInstance(); // 需要导入EventBus
   }
-
+  
   /**
-   * 获取VideoRepository单例实例
+   * 获取单例实例
    */
   public static getInstance(): VideoRepository {
     if (!VideoRepository.instance) {
@@ -169,56 +253,58 @@ export class VideoRepository {
     }
     return VideoRepository.instance;
   }
-
+  
   /**
    * 初始化视频仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
-      // 加载本地播放进度缓存
+      // 加载播放进度缓存
       await this.loadProgressCache();
       
-      // 预加载视频分类（异步）
-      this.loadCategories().catch(err => {
-        this.logger.warn('Failed to preload video categories', err);
-      });
+      // 预加载分类
+      await this.loadCategories();
       
-      this.logger.info('VideoRepository initialization completed');
+      // 设置事件监听
+      this.setupEventListeners();
+      
+      this.logger.info('VideoRepository initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize VideoRepository', error as Error);
+      throw error;
     }
   }
-
+  
   /**
-   * 设置事件监听器
+   * 设置事件监听
    */
   private setupEventListeners(): void {
-    // 监听应用退出事件，保存所有进度
-    this.eventBus.on('app:exit', async () => {
-      await this.saveAllProgress();
-    });
+    // 监听应用退出事件
+    // this.eventBus.on('app:exit', async () => {
+    //   await this.saveAllProgress();
+    // });
     
     // 监听网络状态变化
-    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
-      if (status.isOnline) {
-        // 在线时同步播放进度
-        await this.syncPlaybackProgress();
-      }
-    });
+    // this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    //   if (status.isOnline) {
+    //     // 在线时同步播放进度
+    //     await this.syncPlaybackProgress();
+    //   }
+    // });
     
     // 监听用户登录/登出事件
-    this.eventBus.on('user:login', async () => {
-      // 登录后同步播放进度和收藏
-      await this.syncPlaybackProgress();
-      await this.syncFavorites();
-    });
+    // this.eventBus.on('user:login', async () => {
+    //   // 登录后同步播放进度和收藏
+    //   await this.syncPlaybackProgress();
+    //   await this.syncFavorites();
+    // });
     
-    this.eventBus.on('user:logout', async () => {
-      // 登出前保存所有进度
-      await this.saveAllProgress();
-    });
+    // this.eventBus.on('user:logout', async () => {
+    //   // 登出前保存所有进度
+    //   await this.saveAllProgress();
+    // });
   }
-
+  
   /**
    * 获取视频详情
    * @param videoId 视频ID
@@ -235,12 +321,12 @@ export class VideoRepository {
           this.logger.debug(`Video detail loaded from cache: ${videoId}`);
           
           // 发布视频加载事件
-          this.eventBus.emit(VideoEventType.VIDEO_LOADED, {
-            videoId,
-            type: VideoEventType.VIDEO_LOADED,
-            timestamp: Date.now(),
-            data: cachedVideo
-          } as VideoEvent);
+          // this.eventBus.emit(VideoEventType.VIDEO_LOADED, {
+          //   videoId,
+          //   type: VideoEventType.VIDEO_LOADED,
+          //   timestamp: Date.now(),
+          //   data: cachedVideo
+          // } as VideoEvent);
           
           return cachedVideo;
         }
@@ -279,12 +365,12 @@ export class VideoRepository {
       );
       
       // 发布视频加载事件
-      this.eventBus.emit(VideoEventType.VIDEO_LOADED, {
-        videoId,
-        type: VideoEventType.VIDEO_LOADED,
-        timestamp: Date.now(),
-        data: videoInfo
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_LOADED, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_LOADED,
+      //   timestamp: Date.now(),
+      //   data: videoInfo
+      // } as VideoEvent);
       
       this.logger.info(`Video detail loaded: ${videoInfo.title} (${videoId})`);
       
@@ -293,17 +379,17 @@ export class VideoRepository {
       this.logger.error(`Failed to get video detail for ${videoId}`, error as Error);
       
       // 发布视频错误事件
-      this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
-        videoId,
-        type: VideoEventType.VIDEO_ERROR,
-        timestamp: Date.now(),
-        error: error as Error
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now(),
+      //   error: error as Error
+      // } as VideoEvent);
       
       throw error;
     }
   }
-
+  
   /**
    * 获取视频列表
    * @param request 视频列表请求参数
@@ -322,11 +408,11 @@ export class VideoRepository {
         this.logger.debug(`Video list loaded from cache`);
         
         // 发布视频列表加载事件
-        this.eventBus.emit(VideoEventType.VIDEO_LIST_LOADED, {
-          type: VideoEventType.VIDEO_LIST_LOADED,
-          timestamp: Date.now(),
-          data: cachedList
-        } as VideoEvent);
+        // this.eventBus.emit(VideoEventType.VIDEO_LIST_LOADED, {
+        //   type: VideoEventType.VIDEO_LIST_LOADED,
+        //   timestamp: Date.now(),
+        //   data: cachedList
+        // } as VideoEvent);
         
         return cachedList;
       }
@@ -366,11 +452,11 @@ export class VideoRepository {
       );
       
       // 发布视频列表加载事件
-      this.eventBus.emit(VideoEventType.VIDEO_LIST_LOADED, {
-        type: VideoEventType.VIDEO_LIST_LOADED,
-        timestamp: Date.now(),
-        data: videoList
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_LIST_LOADED, {
+      //   type: VideoEventType.VIDEO_LIST_LOADED,
+      //   timestamp: Date.now(),
+      //   data: videoList
+      // } as VideoEvent);
       
       this.logger.info(`Video list loaded: ${videoList.videos.length} videos, page ${videoList.page}`);
       
@@ -379,16 +465,16 @@ export class VideoRepository {
       this.logger.error('Failed to get video list', error as Error);
       
       // 发布视频错误事件
-      this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
-        type: VideoEventType.VIDEO_ERROR,
-        timestamp: Date.now(),
-        error: error as Error
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now(),
+      //   error: error as Error
+      // } as VideoEvent);
       
       throw error;
     }
   }
-
+  
   /**
    * 获取视频分类
    */
@@ -423,7 +509,7 @@ export class VideoRepository {
       return [];
     }
   }
-
+  
   /**
    * 获取热门标签
    */
@@ -464,7 +550,7 @@ export class VideoRepository {
       return [];
     }
   }
-
+  
   /**
    * 获取视频统计信息
    * @param videoId 视频ID
@@ -494,7 +580,7 @@ export class VideoRepository {
       };
     }
   }
-
+  
   /**
    * 获取相关视频
    * @param videoId 视频ID
@@ -540,7 +626,7 @@ export class VideoRepository {
       return [];
     }
   }
-
+  
   /**
    * 获取视频评论
    * @param videoId 视频ID
@@ -583,7 +669,7 @@ export class VideoRepository {
       };
     }
   }
-
+  
   /**
    * 添加视频评论
    * @param videoId 视频ID
@@ -618,12 +704,12 @@ export class VideoRepository {
       const comment = response.data;
       
       // 发布评论添加事件
-      this.eventBus.emit(VideoEventType.VIDEO_COMMENT_ADDED, {
-        videoId,
-        type: VideoEventType.VIDEO_COMMENT_ADDED,
-        timestamp: Date.now(),
-        data: comment
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_COMMENT_ADDED, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_COMMENT_ADDED,
+      //   timestamp: Date.now(),
+      //   data: comment
+      // } as VideoEvent);
       
       return comment;
     } catch (error) {
@@ -631,7 +717,7 @@ export class VideoRepository {
       throw error;
     }
   }
-
+  
   /**
    * 收藏/取消收藏视频
    * @param videoId 视频ID
@@ -692,13 +778,13 @@ export class VideoRepository {
       await this.storageUtil.setObject(this.storageKeys.favorites, favorites, LocalStorageType.DEFAULT);
       
       // 发布收藏状态变更事件
-      this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
-        videoId,
-        type: favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED,
-        timestamp: Date.now(),
-        favorited,
-        userId
-      } as FavoriteChangeEvent);
+      // this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
+      //   videoId,
+      //   type: favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED,
+      //   timestamp: Date.now(),
+      //   favorited,
+      //   userId
+      // } as FavoriteChangeEvent);
       
       // 更新视频缓存中的收藏状态
       await this.updateVideoFavoriteStatus(videoId, favorited);
@@ -709,7 +795,7 @@ export class VideoRepository {
       throw error;
     }
   }
-
+  
   /**
    * 获取收藏视频列表
    */
@@ -721,7 +807,7 @@ export class VideoRepository {
       return [];
     }
   }
-
+  
   /**
    * 检查视频是否已收藏
    * @param videoId 视频ID
@@ -735,7 +821,7 @@ export class VideoRepository {
       return false;
     }
   }
-
+  
   /**
    * 对视频进行评分
    * @param videoId 视频ID
@@ -770,12 +856,12 @@ export class VideoRepository {
       const videoRating = response.data;
       
       // 发布评分事件
-      this.eventBus.emit(VideoEventType.VIDEO_RATED, {
-        videoId,
-        type: VideoEventType.VIDEO_RATED,
-        timestamp: Date.now(),
-        data: videoRating
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_RATED, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_RATED,
+      //   timestamp: Date.now(),
+      //   data: videoRating
+      // } as VideoEvent);
       
       return videoRating;
     } catch (error) {
@@ -783,7 +869,7 @@ export class VideoRepository {
       throw error;
     }
   }
-
+  
   /**
    * 更新播放进度
    * @param videoId 视频ID
@@ -809,12 +895,12 @@ export class VideoRepository {
       await this.updateLastWatched(videoId, progress.currentTime);
       
       // 发布进度更新事件
-      this.eventBus.emit(VideoEventType.VIDEO_PROGRESS_UPDATED, {
-        videoId,
-        type: VideoEventType.VIDEO_PROGRESS_UPDATED,
-        timestamp: Date.now(),
-        progress
-      } as ProgressUpdateEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_PROGRESS_UPDATED, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_PROGRESS_UPDATED,
+      //   timestamp: Date.now(),
+      //   progress
+      // } as ProgressUpdateEvent);
       
       // 如果视频接近完成，记录为已观看
       if (progress.duration > 0 && progress.currentTime / progress.duration > 0.9) {
@@ -824,7 +910,7 @@ export class VideoRepository {
       this.logger.warn(`Failed to update playback progress for video ${videoId}`, error as Error);
     }
   }
-
+  
   /**
    * 获取播放进度
    * @param videoId 视频ID
@@ -845,7 +931,7 @@ export class VideoRepository {
       return null;
     }
   }
-
+  
   /**
    * 添加到观看历史
    * @param videoId 视频ID
@@ -895,7 +981,7 @@ export class VideoRepository {
       this.logger.warn(`Failed to add video ${videoId} to watch history`, error as Error);
     }
   }
-
+  
   /**
    * 获取观看历史
    * @param limit 限制数量
@@ -948,11 +1034,11 @@ export class VideoRepository {
   private async markAsWatched(videoId: string): Promise<void> {
     try {
       // 发布视频已观看事件
-      this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
-        videoId,
-        type: VideoEventType.VIDEO_WATCHED,
-        timestamp: Date.now()
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now()
+      // } as VideoEvent);
       
       // 异步发送观看记录到服务器
       if (this.userRepository.isLoggedIn()) {
@@ -1260,11 +1346,11 @@ export class VideoRepository {
       }
       
       // 发布缓存更新事件
-      this.eventBus.emit(VideoEventType.VIDEO_CACHE_UPDATED, {
-        type: VideoEventType.VIDEO_CACHE_UPDATED,
-        timestamp: Date.now(),
-        data: { videoId }
-      } as VideoEvent);
+      // this.eventBus.emit(VideoEventType.VIDEO_CACHE_UPDATED, {
+      //   type: VideoEventType.VIDEO_CACHE_UPDATED,
+      //   timestamp: Date.now(),
+      //   data: { videoId }
+      // } as VideoEvent);
       
       this.logger.info(`${videoId ? `Cache cleared for video ${videoId}` : 'All video caches cleared'}`);
     } catch (error) {

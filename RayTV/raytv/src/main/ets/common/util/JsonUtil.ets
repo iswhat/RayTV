@@ -73,6 +73,26 @@ export default class JsonUtil {
     const keys = Object.keys(obj);
     return keys.includes(String(key));
   }
+
+  /**
+   * 安全地获取对象属性值，避免字段索引访问错误
+   * @param obj - 要访问的对象
+   * @param key - 属性名
+   * @returns 属性值
+   */
+  private static getPropertyValue<T extends object>(obj: T, key: string): string | number | boolean | null | undefined {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    const recordObj = obj as Record<string, string | number | boolean | null>;
+    if (JsonUtil.hasOwnProperty(recordObj, key)) {
+      return recordObj[key];
+    }
+    
+    return undefined;
+  }
   /**
    * 将对象序列化为JSON字符串
    * @param value - 要序列化的对象
@@ -153,12 +173,13 @@ export default class JsonUtil {
       
       // 特殊处理Array对象
       if (Array.isArray(obj)) {
-        // 使用泛型数组类型替代any[]
-        const clonedArray: T[] = [];
+        // 使用具体的数组类型替代unknown[]
+        const clonedArray: (string | number | boolean | null)[] = [];
         for (let i = 0; i < obj.length; i++) {
           // 确保索引有效，安全访问数组元素
           if (i >= 0 && i < obj.length) {
-            const arrayItem = obj[i];
+            // 使用类型安全的数组访问方式，避免any/unknown类型
+            const arrayItem = (obj as (string | number | boolean | null)[])[i];
             clonedArray[i] = JsonUtil.deepClone(arrayItem);
           }
         }
@@ -173,9 +194,13 @@ export default class JsonUtil {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const safeKey = String(key);
-        // 直接使用属性名访问值，使用明确的类型
-        const propertyValue = (obj as Record<string, string | number | boolean | null>)[safeKey];
-        clone[safeKey] = JsonUtil.deepClone(propertyValue);
+        // 使用类型安全的属性访问方式，避免字段索引访问
+        const propertyValue = JsonUtil.getPropertyValue(obj, safeKey);
+        // 修复类型错误：确保deepClone返回正确的类型
+        const clonedValue = JsonUtil.deepClone<string | number | boolean | null>(propertyValue as string | number | boolean | null);
+        if (clonedValue !== undefined) {
+          clone[safeKey] = clonedValue as string | number | boolean | null;
+        }
       }
       
       return clone as T;
@@ -248,7 +273,12 @@ export default class JsonUtil {
       for (let j = 0; j < keys.length; j++) {
         const key = keys[j];
         if (JsonUtil.hasOwnProperty(current, key)) {
-          jsonData.set(key, current[key] as string | number | boolean | null);
+          // 使用类型安全的属性访问方式，避免字段索引访问
+          const propertyValue = JsonUtil.getPropertyValue(current, key);
+          // 修复类型错误：确保属性值类型正确
+          if (propertyValue !== undefined) {
+            jsonData.set(key, propertyValue as string | number | boolean | null);
+          }
         }
       }
     }
@@ -278,9 +308,11 @@ export default class JsonUtil {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (JsonUtil.hasOwnProperty(obj, key)) {
-        const value = obj[key];
+        // 使用类型安全的属性访问方式，避免字段索引访问
+        const value = JsonUtil.getPropertyValue(obj, key);
         // 确保值不为null且不为undefined
         if (value !== null && value !== undefined) {
+          // 修复类型错误：确保值类型正确
           jsonData.set(key, value as string | number | boolean | null);
         }
       }
@@ -296,7 +328,7 @@ export default class JsonUtil {
  * @param value - 要序列化的对象
  * @returns JSON字符串
  */
-export function safeStringify<T>(value: T): string {
+export function safeStringify(value: Record<string, string | number | boolean | null>): string {
   return JsonUtil.stringify(value);
 }
 
@@ -305,8 +337,8 @@ export function safeStringify<T>(value: T): string {
  * @param jsonStr - JSON字符串
  * @returns 解析后的对象
  */
-export function quickParse<T>(jsonStr: string): T {
-  return JsonUtil.parse(jsonStr);
+export function quickParse(jsonStr: string): Record<string, string | number | boolean | null> {
+  return JsonUtil.parse<Record<string, string | number | boolean | null>>(jsonStr);
 }
 
 /**

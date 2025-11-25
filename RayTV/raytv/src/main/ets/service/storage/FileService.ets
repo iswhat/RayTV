@@ -396,7 +396,7 @@ export default class FileService {
   /**
    * 初始化文件服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing file service...');
       

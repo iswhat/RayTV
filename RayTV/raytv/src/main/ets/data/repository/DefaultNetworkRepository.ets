@@ -140,7 +140,7 @@ private createRequestConfig(
   url: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD',
   data?: Record<string, unknown>,
-  params?: Record<string, string | number | boolean>,
+  params?: Record<string, unknown>,
   customHeaders?: Record<string, string>
 ): RequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
@@ -186,7 +186,7 @@ private createRequestConfig(
   /**
    * 生成缓存键
    */
-  private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
+  private generateCacheKey(url: string, method: string, params?: Record<string, unknown>): string {
     const paramsStr = params ? JsonUtil.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
   }
@@ -418,7 +418,7 @@ private createRequestConfig(
 
   // ========== 通用网络方法实现 ==========
 
-  async get<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async get<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       const requestConfig = this.createRequestConfig(url, 'GET', undefined, params, headers);
       const response = await NetworkUtil.request(url, requestConfig);
@@ -433,7 +433,7 @@ private createRequestConfig(
     }
   }
 
-  async post<T>(url: string, data?: Record<string, string | number | boolean | object>, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async post<T>(url: string, data?: Record<string, unknown>, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       const requestConfig = this.createRequestConfig(url, 'POST', data, params, headers);
       const response = await NetworkUtil.request(url, requestConfig);
@@ -448,7 +448,7 @@ private createRequestConfig(
     }
   }
 
-  async put<T>(url: string, data?: Record<string, string | number | boolean | object>, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async put<T>(url: string, data?: Record<string, unknown>, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       const requestConfig = this.createRequestConfig(url, 'PUT', data, params, headers);
       const response = await NetworkUtil.request(url, requestConfig);
@@ -463,7 +463,7 @@ private createRequestConfig(
     }
   }
 
-  async delete<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async delete<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       const requestConfig = this.createRequestConfig(url, 'DELETE', undefined, params, headers);
       const response = await NetworkUtil.request(url, requestConfig);
@@ -478,7 +478,7 @@ private createRequestConfig(
     }
   }
 
-  async upload<T>(url: string, file: File, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async upload<T>(url: string, file: File, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       // 上传文件时需要特殊处理Content-Type
       const uploadHeaders: Record<string, string> = {};
@@ -603,7 +603,7 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
+  async getMovieRating(movieId: string): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -643,7 +643,7 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, string | number | boolean>[]>> { 
+  async getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, unknown>[]>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -683,7 +683,7 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>> { 
+  async getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -727,11 +727,11 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
+  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getAppConfig(): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>> { 
+  async getAppConfig(): Promise<NetworkResult<Record<string, unknown>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   

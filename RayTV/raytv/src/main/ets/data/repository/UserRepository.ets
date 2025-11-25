@@ -134,7 +134,7 @@ export class UserRepository {
   /**
    * 初始化用户仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 从存储中恢复用户会话
       await this.restoreUserSession();

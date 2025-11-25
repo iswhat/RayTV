@@ -27,7 +27,7 @@ export type DatabaseRecord = Record<string, ValueType>;
  */
 export interface QueryCondition {
   column: string;
-  value: ValueType;
+  value: ValueType | ValueType[];
   operator?: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'IN' | 'NOT IN';
 }
 

@@ -58,7 +58,7 @@ export class FavoriteService {
    * 初始化收藏服务
    * @private
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 使用DatabaseManager创建表（表结构已在DatabaseManager中定义）
       // 这里只记录初始化日志

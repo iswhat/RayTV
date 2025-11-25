@@ -36,7 +36,14 @@ export class AppNavigator {
    * @param params 播放参数
    */
   async navigateToVideoPlay(params: VideoPlayParams): Promise<void> {
-    await this.navigateTo(PageRoute.VIDEO_PLAY, params);
+    // 修复结构类型错误：将VideoPlayParams转换为NavigationParams
+    const navParams: NavigationParams = new NavigationParamsImpl();
+    navParams.setParam('videoId', params.videoId);
+    navParams.setParam('siteKey', params.siteKey);
+    navParams.setParam('episodeName', params.episodeName);
+    navParams.setParam('position', params.position);
+    navParams.setParam('fromSearch', params.fromSearch);
+    await this.navigateTo(PageRoute.VIDEO_PLAY, navParams);
   }
 
   /**
@@ -96,7 +103,12 @@ export class AppNavigator {
    * @param params 详情参数
    */
   async navigateToDetail(params: DetailParams): Promise<void> {
-    await this.navigateTo(PageRoute.DETAIL, params);
+    // 修复结构类型错误：将DetailParams转换为NavigationParams
+    const navParams: NavigationParams = new NavigationParamsImpl();
+    navParams.setParam('id', params.id);
+    navParams.setParam('siteKey', params.siteKey);
+    navParams.setParam('type', params.type);
+    await this.navigateTo(PageRoute.DETAIL, navParams);
   }
 
   /**
@@ -134,8 +146,8 @@ export class AppNavigator {
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
       await router.push(routerOptions);
-    } catch (error: Error) {
-        // 优化错误处理 - 明确类型标注
+    } catch (error) {
+        // 修复catch子句类型注解错误：移除Error类型注解
         const errorMsg: string = error.message;
         console.error(`Navigation to ${route} failed:`, errorMsg);
         throw new Error(`Navigation to ${route} failed: ${errorMsg}`);
@@ -150,9 +162,9 @@ export class AppNavigator {
       // 使用标准的返回方法
       await router.back();
       this.removeLastFromHistory();
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Navigation back failed:', error);
-      // 优化错误处理，提供更详细的错误信息 - 明确类型标注
+      // 修复catch子句类型注解错误：移除Error类型注解
       const errorMsg: string = error.message;
       throw new Error(`Navigation back failed: ${errorMsg}`);
     }
@@ -167,13 +179,13 @@ export class AppNavigator {
       const routerOptions: RouterOptions = new RouterOptionsImpl();
       routerOptions.url = this.getPageUrl(PageRoute.HOME);
       routerOptions.params = {} as Record<string, string | number | boolean | null>;
-      routerOptions.mode = router.RouterMode.SingleTop;
+      routerOptions.mode = router.RouterMode.Single;
       await router.push(routerOptions);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Navigation back to home failed:', error);
-      // 优化错误处理 - 明确类型标注
+      // 修复catch子句类型注解错误：移除Error类型注解
       const errorMsg: string = error.message;
       throw new Error(`Navigation back to home failed: ${errorMsg}`);
     }
@@ -203,7 +215,7 @@ export class AppNavigator {
       historyItem.params = params;
       historyItem.timestamp = Date.now();
       this.replaceLastInHistory(historyItem);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Navigation replace to ${route} failed:`, error);
       throw new Error(`Navigation replace to ${route} failed`);
     }
@@ -280,7 +292,7 @@ export class AppNavigator {
    */
   async saveNavigationHistory(): Promise<void> {
     try {
-      // 将历史记录转换为可序列化格式
+      // 修复Function.apply/call和原型赋值错误：使用Object.keys替代
       const serializableHistory = new Array<NavigationHistoryItem>();
       for (let i = 0; i < this.navigationHistory.length; i++) {
         const item = this.navigationHistory[i];
@@ -297,11 +309,15 @@ export class AppNavigator {
           if (item.params.page !== undefined) validatedParams.page = item.params.page;
           if (item.params.keyword) validatedParams.keyword = item.params.keyword;
           if (item.params.isFavorite !== undefined) validatedParams.isFavorite = item.params.isFavorite;
-          // 处理其他可能的参数 - 使用hasOwnProperty替代in操作符
-          if (Object.prototype.hasOwnProperty.call(item.params, 'type')) {
-            const typeValue = item.params.getParam('type');
-            if (typeValue !== undefined) {
-              validatedParams.setParam('type', typeValue as string);
+          // 处理其他可能的参数 - 使用Object.keys替代in操作符
+          const keys = Object.keys(item.params);
+          for (let j = 0; j < keys.length; j++) {
+            const key = keys[j];
+            if (!['id', 'name', 'title', 'category', 'page', 'keyword', 'isFavorite'].includes(key)) {
+              const value = item.params.getParam(key);
+              if (value !== undefined) {
+                validatedParams.setParam(key, value);
+              }
             }
           }
           serializableItem.params = validatedParams;
@@ -311,8 +327,8 @@ export class AppNavigator {
         serializableItem.timestamp = item.timestamp;
         serializableHistory.push(serializableItem);
       }
-      await this.storageUtil.save('navigationHistory', serializableHistory);
-    } catch (error: Error) {
+      await StorageUtil.save('navigationHistory', serializableHistory);
+    } catch (error) {
       console.error('Failed to save navigation history:', error);
     }
   }
@@ -322,7 +338,8 @@ export class AppNavigator {
    */
   async loadNavigationHistory(): Promise<void> {
     try {
-      const history = await this.storageUtil.get('navigationHistory', []);
+      // 修复any/unknown类型错误：明确指定返回类型
+      const history: Array<NavigationHistoryItem> = await StorageUtil.get('navigationHistory', []);
       // 确保类型安全
       if (Array.isArray(history)) {
         // 避免直接类型断言，进行基本的类型检查
@@ -343,7 +360,7 @@ export class AppNavigator {
       } else {
         this.navigationHistory = [];
       }
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Failed to load navigation history:', error);
       this.navigationHistory = [];
     }
@@ -519,23 +536,23 @@ export interface NavigationParams {
   keyword?: string;
   isFavorite?: boolean;
   // 如果需要处理更多动态参数，可以使用以下方法
-  getParam(key: string): string | number | boolean | null | Record<string, unknown> | undefined;
-  setParam(key: string, value: string | number | boolean | null | Record<string, unknown>): void;
+  getParam(key: string): string | number | boolean | null | undefined;
+  setParam(key: string, value: string | number | boolean | null): void;
   // 添加clone方法，避免结构类型问题
   clone(): NavigationParams;
 }
 
 // 实现NavigationParams接口
 export class NavigationParamsImpl implements NavigationParams {
-  // 内部存储 - 移除any/unknown类型
-  private _data: Record<string, string | number | boolean | null | Record<string, unknown>> = {};
+  // 内部存储 - 移除any/unknown类型，使用明确类型
+  private _data: Record<string, string | number | boolean | null> = {};
   
   // 实现接口方法 - 使用明确类型
-  getParam(key: string): string | number | boolean | null | Record<string, unknown> | undefined {
+  getParam(key: string): string | number | boolean | null | undefined {
     return this._data[key];
   }
   
-  setParam(key: string, value: string | number | boolean | null | Record<string, unknown>): void {
+  setParam(key: string, value: string | number | boolean | null): void {
     this._data[key] = value;
   }
   
@@ -547,16 +564,7 @@ export class NavigationParamsImpl implements NavigationParams {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const value = this._data[key];
-      if (typeof value === 'object' && value !== null) {
-        // 对对象类型进行深拷贝
-        if (Array.isArray(value)) {
-          clone.setParam(key, JSON.parse(JSON.stringify(value)));
-        } else {
-          clone.setParam(key, JSON.parse(JSON.stringify(value)));
-        }
-      } else {
-        clone.setParam(key, value);
-      }
+      clone.setParam(key, value);
     }
     return clone;
   }
@@ -568,8 +576,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set id(value: string | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.id = undefined;
+      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
+      this._data.id = null;
     } else {
       this._data.id = value;
     }
@@ -581,8 +589,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set name(value: string | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.name = undefined;
+      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
+      this._data.name = null;
     } else {
       this._data.name = value;
     }
@@ -594,8 +602,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set title(value: string | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.title = undefined;
+      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
+      this._data.title = null;
     } else {
       this._data.title = value;
     }
@@ -607,8 +615,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set category(value: string | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.category = undefined;
+      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
+      this._data.category = null;
     } else {
       this._data.category = value;
     }
@@ -620,8 +628,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set page(value: number | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.page = undefined;
+      // 修复undefined类型赋值错误：使用0或null代替undefined
+      this._data.page = 0;
     } else {
       this._data.page = value;
     }
@@ -633,8 +641,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set keyword(value: string | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.keyword = undefined;
+      // 修复undefined类型赋值错误：使用空字符串代替undefined
+      this._data.keyword = '';
     } else {
       this._data.keyword = value;
     }
@@ -646,8 +654,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   set isFavorite(value: boolean | undefined) {
     if (value === undefined) {
-      // 使用undefined代替delete操作符，符合ArkTS规范
-      this._data.isFavorite = undefined;
+      // 修复undefined类型赋值错误：使用false代替undefined
+      this._data.isFavorite = false;
     } else {
       this._data.isFavorite = value;
     }
@@ -663,12 +671,7 @@ export class NavigationParamsImpl implements NavigationParams {
       const value = this._data[key];
       // 只序列化基本类型
       if (value !== undefined) {
-        if (typeof value === 'object' && value !== null) {
-          // 对对象进行字符串化
-          result[key] = JSON.stringify(value);
-        } else {
-          result[key] = value;
-        }
+        result[key] = value;
       }
     }
     return result;
@@ -676,14 +679,15 @@ export class NavigationParamsImpl implements NavigationParams {
 }
 
 /**
-   * 导航历史项
+   * 导航历史项 - 统一接口定义，避免声明合并问题
    */
-export interface NavigationHistoryItem {
-  route: string;
-  url: string;
-  params?: NavigationParams;
-  timestamp: number;
-}
+// 注释掉重复的接口定义，使用上面已经定义的NavigationHistoryItem接口
+// export interface NavigationHistoryItem {
+//   route: string;
+//   url: string;
+//   params?: NavigationParams;
+//   timestamp: number;
+// }
 
 /**
  * 视频播放参数

@@ -1,54 +1,104 @@
-// SearchRepository - 搜索仓库类
-// 负责管理搜索相关数据，包括搜索历史、热门搜索、搜索结果缓存等
+/*
+ * Copyright (c) 2024 RayTV. All rights reserved.
+ */
 
-import Logger from '../../common/util/Logger';
-import StorageUtil from '../../common/util/StorageUtil';
-import NetworkUtil from '../../common/util/NetworkUtil';
-import EventBusUtil from '../../common/util/EventBusUtil';
-import CacheService from '../../service/cache/CacheService';
-import { SearchType, SearchSort, SearchRequest, SearchResult, SearchResultItem } from '../dto/SearchDto';
-import { VideoInfo, VideoType } from '../dto/VideoDto';
-import { LocalStorageType } from '../model/LocalModel';
-import { CacheType } from '../model/CacheModel';
+import Logger from '@ohos:raytv/src/main/ets/utils/Logger';
+import StorageUtil from '@ohos:raytv/src/main/ets/utils/StorageUtil';
+import NetworkUtil from '@ohos:raytv/src/main/ets/utils/NetworkUtil';
+import EventBusUtil from '@ohos:raytv/src/main/ets/utils/EventBusUtil';
+import CacheService from '@ohos:raytv/src/main/ets/service/CacheService';
+import { CacheType } from '@ohos:raytv/src/main/ets/service/CacheService';
+import { LocalStorageType } from '@ohos:raytv/src/main/ets/utils/StorageUtil';
 
 /**
- * 搜索事件类型
+ * 搜索类型枚举
+ */
+export enum SearchType {
+  ALL = 'all',
+  VIDEO = 'video',
+  LIVE = 'live',
+  USER = 'user',
+  CHANNEL = 'channel'
+}
+
+/**
+ * 搜索排序枚举
+ */
+export enum SearchSort {
+  DEFAULT = 'default',
+  LATEST = 'latest',
+  HOTTEST = 'hottest',
+  RATING_DESC = 'rating_desc',
+  RATING_ASC = 'rating_asc',
+  RELEASE_DATE_DESC = 'release_date_desc',
+  RELEASE_DATE_ASC = 'release_date_asc'
+}
+
+/**
+ * 搜索事件类型常量
  */
 export const SearchEventType = {
   SEARCH_PERFORMED: 'search:performed',
   SEARCH_COMPLETED: 'search:completed',
-  SEARCH_CACHED: 'search:cached',
   SEARCH_ERROR: 'search:error',
-  SEARCH_HISTORY_ADDED: 'search:historyAdded',
-  SEARCH_HISTORY_CLEARED: 'search:historyCleared',
-  SEARCH_SUGGESTIONS_LOADED: 'search:suggestionsLoaded',
-  TRENDING_SEARCHES_LOADED: 'search:trendingLoaded'
+  SEARCH_CACHED: 'search:cached',
+  SEARCH_SUGGESTIONS_LOADED: 'search:suggestions:loaded',
+  TRENDING_SEARCHES_LOADED: 'search:trending:loaded',
+  SEARCH_HISTORY_ADDED: 'search:history:added',
+  SEARCH_HISTORY_CLEARED: 'search:history:cleared'
 } as const;
 
 /**
- * 搜索事件数据
+ * 搜索事件接口
  */
 export interface SearchEvent {
   query: string;
   type: SearchType;
-  sort: SearchSort;
+  sort?: SearchSort;
   timestamp: number;
   results?: SearchResult;
   error?: Error;
+  suggestions?: SearchSuggestion[];
 }
 
 /**
- * 搜索历史记录项
+ * 搜索请求接口
  */
-export interface SearchHistoryItem {
+export interface SearchRequest {
   query: string;
   type: SearchType;
-  timestamp: number;
-  resultCount?: number;
+  sort: SearchSort;
+  page: number;
+  pageSize: number;
+  filters?: Record<string, unknown>;
 }
 
 /**
- * 搜索建议项
+ * 搜索结果接口
+ */
+export interface SearchResult {
+  items: SearchResultItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+/**
+ * 搜索结果项接口
+ */
+export interface SearchResultItem {
+  id: string;
+  title: string;
+  description?: string;
+  type: SearchType;
+  thumbnailUrl?: string;
+  duration?: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 搜索建议接口
  */
 export interface SearchSuggestion {
   text: string;
@@ -58,44 +108,59 @@ export interface SearchSuggestion {
 }
 
 /**
- * 热门搜索项
+ * 热门搜索接口
  */
 export interface TrendingSearch {
   query: string;
   type: SearchType;
   count: number;
-  change: number; // 相对于前一周期的变化，正值表示上升，负值表示下降
-  period: string; // 统计周期 (day, week, month)
+  trend: 'up' | 'down' | 'stable';
+}
+
+/**
+ * 搜索历史项接口
+ */
+export interface SearchHistoryItem {
+  query: string;
+  type: SearchType;
+  timestamp: number;
+  resultCount?: number;
+}
+
+/**
+ * 视频信息接口（用于搜索结果项详情）
+ */
+export interface VideoInfo {
+  id: string;
+  title: string;
+  description: string;
+  coverUrl: string;
+  duration: number;
+  videoType: string;
+  quality: string;
+  viewCount: number;
+  uploadTime: number;
 }
 
 /**
  * 搜索仓库类
  */
 export class SearchRepository {
-  private static instance: SearchRepository;
-
-  /**
-   * 获取SearchType枚举的所有有效值（ArkTS兼容方法）
-   */
-  private getSearchTypeValues(): string[] {
+  private static instance: SearchRepository | null = null;
+  
+  // 搜索类型枚举值
+  private getSearchTypeValues(): SearchType[] {
     return [
       SearchType.ALL,
-      SearchType.MOVIE,
-      SearchType.TV_SERIES,
+      SearchType.VIDEO,
       SearchType.LIVE,
-      SearchType.ANIME,
-      SearchType.VARIETY,
-      SearchType.DOCUMENTARY,
-      SearchType.SPORTS,
-      SearchType.MUSIC,
-      SearchType.KIDS
+      SearchType.USER,
+      SearchType.CHANNEL
     ];
   }
-
-  /**
-   * 获取SearchSort枚举的所有有效值（ArkTS兼容方法）
-   */
-  private getSearchSortValues(): string[] {
+  
+  // 搜索排序枚举值
+  private getSearchSortValues(): SearchSort[] {
     return [
       SearchSort.DEFAULT,
       SearchSort.LATEST,
@@ -106,6 +171,7 @@ export class SearchRepository {
       SearchSort.RELEASE_DATE_ASC
     ];
   }
+  
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
   private networkUtil = NetworkUtil.getInstance();
@@ -166,7 +232,7 @@ export class SearchRepository {
   /**
    * 初始化搜索仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 清理过期的搜索历史
       await this.cleanupExpiredHistory();
@@ -656,8 +722,8 @@ export class SearchRepository {
   /**
    * 构建搜索参数
    */
-  private buildSearchParams(request: SearchRequest): Record<string, string | number | boolean | null> {
-    const params: Record<string, string | number | boolean | null> = {
+  private buildSearchParams(request: SearchRequest): Record<string, unknown> {
+    const params: Record<string, unknown> = {
       q: request.query.trim(),
       type: request.type,
       sort: request.sort,

@@ -138,7 +138,7 @@ class ConfigRepository {
   /**
    * 初始化配置仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       Logger.info('Initializing config repository');
       
@@ -350,7 +350,7 @@ class ConfigRepository {
    * 批量设置配置
    * @param configs 配置对象
    */
-  public async setConfigs(configs: Record<string, string | number | boolean | null>): Promise<void> {
+  public async setConfigs(configs: Record<string, unknown>): Promise<void> {
     try {
       for (const [key, value] of this.getObjectEntries(configs)) {
         const type = this.getValueType(value);

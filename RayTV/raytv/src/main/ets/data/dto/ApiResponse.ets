@@ -54,7 +54,7 @@ export interface ErrorDetail {
   field?: string;      // 字段名称（用于验证错误）
   message: string;     // 错误消息
   code?: string;       // 错误代码
-  value?: unknown;     // 错误值
+  value?: string | number | boolean | null;     // 错误值
 }
 
 /**
@@ -62,7 +62,7 @@ export interface ErrorDetail {
  * 用于标准化API响应结构
  */
 // API响应参数接口
-export interface ApiResponseParams<T = unknown> {
+export interface ApiResponseParams<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
   code: ResponseCode;
   message: string;
   data?: T;
@@ -72,7 +72,7 @@ export interface ApiResponseParams<T = unknown> {
   trace?: string;
 }
 
-export default class ApiResponse<T = unknown> {
+export default class ApiResponse<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据

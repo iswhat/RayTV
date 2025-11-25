@@ -125,6 +125,27 @@ export default class StorageUtil {
   private constructor() {
     // 初始化操作
   }
+
+  /**
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  private static getPropertyValue(obj: Record<string, MemoryCacheItem>, key: string): MemoryCacheItem | undefined {
+    if (!obj || typeof obj !== 'object') {
+      return undefined;
+    }
+    
+    // 使用Object.hasOwnProperty替代in操作符
+    if (!Object.hasOwnProperty.call(obj, key)) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    return obj[key];
+  }
+
   private static memoryCache: Record<string, MemoryCacheItem> = {};
   private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
   // 内存缓存清理定时器
@@ -372,8 +393,10 @@ export default class StorageUtil {
         const cacheKeys = Object.keys(StorageUtil.memoryCache);
         for (let i = 0; i < cacheKeys.length; i++) {
           const cacheKey = cacheKeys[i];
-          if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
-            newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
+          // 使用类型安全的属性访问方式
+          const cacheItem = StorageUtil.getPropertyValue(StorageUtil.memoryCache, cacheKey);
+          if (cacheKey !== key && cacheItem !== undefined) {
+            newCache[cacheKey] = cacheItem;
           }
         }
         StorageUtil.memoryCache = newCache;
@@ -392,9 +415,10 @@ export default class StorageUtil {
           const cacheKeys = Object.keys(StorageUtil.memoryCache);
           for (let i = 0; i < cacheKeys.length; i++) {
             const cacheKey = cacheKeys[i];
-            // 使用简单的检查方式
-            if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
-              newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
+            // 使用类型安全的属性访问方式
+            const cacheItem = StorageUtil.getPropertyValue(StorageUtil.memoryCache, cacheKey);
+            if (cacheKey !== key && cacheItem !== undefined) {
+              newCache[cacheKey] = cacheItem as MemoryCacheItem;
             }
           }
           StorageUtil.memoryCache = newCache;
@@ -470,8 +494,10 @@ export default class StorageUtil {
       const cacheKeys = Object.keys(StorageUtil.memoryCache);
       for (let i = 0; i < cacheKeys.length; i++) {
         const cacheKey = cacheKeys[i];
-        if (cacheKey !== key && StorageUtil.memoryCache[cacheKey] !== undefined) {
-          newCache[cacheKey] = StorageUtil.memoryCache[cacheKey];
+        // 使用类型安全的属性访问方式
+        const cacheItem = StorageUtil.getPropertyValue(StorageUtil.memoryCache, cacheKey);
+        if (cacheKey !== key && cacheItem !== undefined) {
+          newCache[cacheKey] = cacheItem;
         }
       }
       StorageUtil.memoryCache = newCache;
@@ -501,8 +527,8 @@ export default class StorageUtil {
         const cacheKeys = Object.keys(StorageUtil.memoryCache);
         for (let i = 0; i < cacheKeys.length; i++) {
           const key = cacheKeys[i];
-          // 使用简单的检查方式
-          const item = StorageUtil.memoryCache[key];
+          // 使用类型安全的属性访问方式
+          const item = StorageUtil.getPropertyValue(StorageUtil.memoryCache, key);
           if (item !== undefined && (item.expireTime === 0 || now < item.expireTime)) {
             newCache[key] = item;
           } else {
@@ -556,9 +582,9 @@ export default class StorageUtil {
       
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
-    } catch (error: Error) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = error.message;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get from preferences for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -600,9 +626,9 @@ export default class StorageUtil {
       }
       
       await pref.flush();
-    } catch (error: Error) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = error.message;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear preferences: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -617,9 +643,9 @@ export default class StorageUtil {
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
-    } catch (error: Error) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = error.message;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save to file for key ${key}: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -703,9 +729,9 @@ export default class StorageUtil {
           }
         }
       }
-    } catch (error: Error) {
+    } catch (error) {
       // 安全处理错误信息
-      const errorMessage = error.message;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear files: ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -734,8 +760,8 @@ export default class StorageUtil {
         }
       }
       return jsonData;
-    } catch (error: Error) {
-      const errorMessage = error.message;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to parse JSON string: ${errorMessage}`);
       return null;
     }
@@ -754,7 +780,7 @@ export default class StorageUtil {
     // 安全地处理所有属性，避免使用索引访问和任何原型方法
     try {
       // 获取对象的所有自有属性键，避免使用in操作符
-      const keys = Object.keys(parsedData);
+      const keys = parsedData.keys();
       
       // 处理value属性 - 避免使用索引访问
       for (let i = 0; i < keys.length; i++) {
@@ -795,8 +821,9 @@ export default class StorageUtil {
           }
         }
       }
-    } catch (error: Error) {
-      const errorMessage = error.message;
+    } catch (error) {
+      // 安全处理错误信息
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to build StorageData: ${errorMessage}`);
     }
     
@@ -850,7 +877,7 @@ export default class StorageUtil {
                   for (let j = 0; j < nestedKeys.length; j++) {
                     const nestedKey = nestedKeys[j];
                     // 使用get方法替代索引访问
-                const nestedValue = validatedObj.get(nestedKey);
+                    const nestedValue = validatedObj.get(nestedKey);
                     if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
                         typeof nestedValue === 'boolean' || nestedValue === null) {
                       validatedObj.set(nestedKey, nestedValue);

@@ -1,4 +1,4 @@
-import { ScrollView, Text, Button, List, ListItem, Image, LoadingProgress, Empty, Flex, Tag, Checkbox, Switch, Stack, ProgressBar, Blank, BarState } from '@kit.ArkUI';
+import { ScrollView, Button, List, ListItem, Image, LoadingProgress, Empty, Tag, Checkbox, Switch, Stack, ProgressBar, Blank, BarState } from '@kit.ArkUI';
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { historyService, HistoryItem } from '../service/media/HistoryService';
@@ -330,17 +330,16 @@ struct HistoryPage {
    */
   @Builder
   private renderHeader() {
-    Stack.create({ className: "header" });
-    Button.create({ className: "back-button", onClick: this.handleBack });
-    Button.text("←");
-    Button.pop();
-    Text.create({ className: "page-title" });
-    Text.text("播放历史");
-    Text.pop();
-    Button.create({ className: "action-button", onClick: this.toggleEditMode });
-    Button.text(this.isEditMode ? '取消' : '编辑');
-    Button.pop();
-    Stack.pop();
+    Stack({ className: "header" }) {
+      Button({ className: "back-button", onClick: this.handleBack }) {
+        Text("←")
+      }
+      Text("播放历史")
+        .className("page-title")
+      Button({ className: "action-button", onClick: this.toggleEditMode }) {
+        Text(this.isEditMode ? '取消' : '编辑')
+      }
+    }
   }
 
   /**
@@ -350,30 +349,27 @@ struct HistoryPage {
   private renderEditToolbar() {
     if (!this.isEditMode || this.histories.length === 0) return;
     
-    Flex.create({ className: "edit-toolbar" });
-    Flex.create({ className: "select-all" });
-    Checkbox.create();
-    Checkbox.checked(this.selectedItems.size === this.histories.length && this.histories.length > 0);
-    Checkbox.onCheckChange(this.handleSelectAll);
-    Checkbox.pop();
-    Text.create();
-    Text.text("全选");
-    Text.pop();
-    Flex.pop();
-    Text.create({ className: "selected-count" });
-    Text.text(`已选择 ${this.selectedItems.size} 项`);
-    Text.pop();
-    Button.create({ 
-      className: "delete-button", 
-      onClick: this.handleDeleteSelected,
-      disabled: this.selectedItems.size === 0 
-    });
-    Button.text("删除");
-    Button.pop();
-    Button.create({ className: "clear-all-button", onClick: this.handleClearAll });
-    Button.text("清空");
-    Button.pop();
-    Flex.pop();
+    Flex({ className: "edit-toolbar" }) {
+      Flex({ className: "select-all" }) {
+        Checkbox({
+          checked: this.selectedItems.size === this.histories.length && this.histories.length > 0,
+          onCheckChange: this.handleSelectAll
+        })
+        Text("全选")
+      }
+      Text(`已选择 ${this.selectedItems.size} 项`)
+        .className("selected-count")
+      Button({ 
+        className: "delete-button", 
+        onClick: this.handleDeleteSelected,
+        disabled: this.selectedItems.size === 0 
+      }) {
+        Text("删除")
+      }
+      Button({ className: "clear-all-button", onClick: this.handleClearAll }) {
+        Text("清空")
+      }
+    }
   }
 
   /**
@@ -383,19 +379,18 @@ struct HistoryPage {
   private renderSettings() {
     if (this.isEditMode || this.histories.length === 0) return;
     
-    Flex.create({ className: "settings-container" });
-    Text.create({ className: "setting-label" });
-    Text.text("自动续播上次内容");
-    Text.pop();
-    Switch.create();
-    Switch.checked(this.autoPlayLast);
-    Switch.onValueChange((value) => {
-      this.autoPlayLast = value;
-      // 这里可以保存设置到配置服务
-      Logger.info(this.TAG, `Auto play last content: ${value}`);
-    });
-    Switch.pop();
-    Flex.pop();
+    Flex({ className: "settings-container" }) {
+      Text("自动续播上次内容")
+        .className("setting-label")
+      Switch({
+        checked: this.autoPlayLast,
+        onValueChange: (value) => {
+          this.autoPlayLast = value;
+          // 这里可以保存设置到配置服务
+          Logger.info(this.TAG, `Auto play last content: ${value}`);
+        }
+      })
+    }
   }
 
   /**
@@ -407,57 +402,53 @@ struct HistoryPage {
     const progressText = this.formatPlaybackProgress(history.progress * 1000, (history.duration || 0) * 1000);
     const progressPercentage = this.getProgressPercentage(history.progress * 1000, (history.duration || 0) * 1000);
     
-    ListItem.create({ onClick: () => this.handleHistoryClick(history) });
-    Flex.create({ className: "history-item" });
-    
-    if (this.isEditMode) {
-      Checkbox.create();
-      Checkbox.checked(this.selectedItems.has(history.id));
-      Checkbox.onCheckChange(() => this.handleItemSelect(history.id));
-      Checkbox.pop();
+    ListItem({ onClick: () => this.handleHistoryClick(history) }) {
+      Flex({ className: "history-item" }) {
+        if (this.isEditMode) {
+          Checkbox({
+            checked: this.selectedItems.has(history.id),
+            onCheckChange: () => this.handleItemSelect(history.id)
+          })
+        }
+        
+        Image({ 
+          src: media?.coverUrl || history.cover || "https://via.placeholder.com/120x160?text=No+Image",
+          className: "media-cover",
+          objectFit: ImageFit.Cover
+        })
+        
+        Flex({ className: "media-info", direction: FlexDirection.Column }) {
+          Text(media?.title || history.title)
+            .className("media-title")
+            .numberOfLines(2)
+          
+          if (history.episodeTitle) {
+            Text(history.episodeTitle)
+              .className("episode-title")
+              .numberOfLines(1)
+          }
+          
+          Text(`播放时间: ${new Date(history.lastPlayTime).toLocaleString()}`)
+            .className("play-time")
+          
+          Stack({ className: "progress-container" }) {
+            ProgressBar({
+              percent: progressPercentage,
+              strokeWidth: 4,
+              color: "#FF4500"
+            })
+            Text(progressText)
+              .className("progress-text")
+          }
+          
+          if (!this.isEditMode) {
+            Button({ className: "continue-button", onClick: () => this.handleContinuePlay(history) }) {
+              Text("继续观看")
+            }
+          }
+        }
+      }
     }
-    
-    Image.create({ 
-      src: media?.coverUrl || history.cover || "https://via.placeholder.com/120x160?text=No+Image",
-      className: "media-cover",
-      objectFit: ImageFit.Cover
-    });
-    Image.pop();
-    
-    Flex.create({ className: "media-info", direction: FlexDirection.Column });
-    Text.create({ className: "media-title", numberOfLines: 2 });
-    Text.text(media?.title || history.title);
-    Text.pop();
-    
-    if (history.episodeTitle) {
-      Text.create({ className: "episode-title", numberOfLines: 1 });
-      Text.text(history.episodeTitle);
-      Text.pop();
-    }
-    
-    Text.create({ className: "play-time" });
-    Text.text(`播放时间: ${new Date(history.lastPlayTime).toLocaleString()}`);
-    Text.pop();
-    
-    Stack.create({ className: "progress-container" });
-    ProgressBar.create();
-    ProgressBar.percent(progressPercentage);
-    ProgressBar.strokeWidth(4);
-    ProgressBar.color("#FF4500");
-    ProgressBar.pop();
-    Text.create({ className: "progress-text" });
-    Text.text(progressText);
-    Text.pop();
-    Stack.pop();
-    
-    if (!this.isEditMode) {
-      Button.create({ className: "continue-button", onClick: () => this.handleContinuePlay(history) });
-      Button.text("继续观看");
-      Button.pop();
-    }
-    
-    Flex.pop();
-    ListItem.pop();
   }
 
   /**
@@ -466,79 +457,67 @@ struct HistoryPage {
   @Builder
   private renderHistoryList() {
     if (this.isLoading && !this.isRefreshing) {
-      Stack.create({ className: "loading-container" });
-      LoadingProgress.create({ className: "loading-progress", color: "#FF4500" });
-      LoadingProgress.pop();
-      Text.create();
-      Text.text("加载中...");
-      Text.pop();
-      Stack.pop();
+      Stack({ className: "loading-container" }) {
+        LoadingProgress({ className: "loading-progress", color: "#FF4500" })
+        Text("加载中...")
+      }
       return;
     }
     
     if (this.errorMessage) {
-      Stack.create({ className: "error-container" });
-      Text.create({ className: "error-icon" });
-      Text.text("⚠️");
-      Text.pop();
-      Text.create({ className: "error-message" });
-      Text.text(this.errorMessage);
-      Text.pop();
-      Button.create({ className: "retry-button", onClick: this.loadHistories });
-      Button.text("重试");
-      Button.pop();
-      Stack.pop();
+      Stack({ className: "error-container" }) {
+        Text("⚠️")
+          .className("error-icon")
+        Text(this.errorMessage)
+          .className("error-message")
+        Button({ className: "retry-button", onClick: this.loadHistories }) {
+          Text("重试")
+        }
+      }
       return;
     }
     
     if (this.histories.length === 0) {
-      Empty.create({ className: "empty-container" });
-      Text.create({ className: "empty-icon" });
-      Text.text("📺");
-      Text.pop();
-      Text.create();
-      Text.text("暂无播放历史");
-      Text.pop();
-      Button.create({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() });
-      Button.text("去探索");
-      Button.pop();
-      Empty.pop();
+      Empty({ className: "empty-container" }) {
+        Text("📺")
+          .className("empty-icon")
+        Text("暂无播放历史")
+        Button({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() }) {
+          Text("去探索")
+        }
+      }
       return;
     }
     
-    List.create({ 
+    List({ 
       className: "history-list",
       itemTemplate: this.renderHistoryItem,
       data: this.histories,
       onRefresh: () => this.handleRefresh(),
       refreshing: this.isRefreshing
-    });
-    List.pop();
+    })
   }
 
   /**
    * 组件渲染
    */
   build() {
-    Stack.create({ className: "history-page" });
-    
-    // 页面头部
-    this.renderHeader();
-    
-    // 编辑工具栏
-    this.renderEditToolbar();
-    
-    // 设置选项
-    this.renderSettings();
-    
-    // 历史记录列表
-    ScrollView.create({ className: "content-scroll", scrollBar: BarState.Auto });
-    this.renderHistoryList();
-    Blank.create({ className: "bottom-space" });
-    Blank.pop();
-    ScrollView.pop();
-    
-    Stack.pop();
+    Stack({ className: "history-page" }) {
+      // 页面头部
+      this.renderHeader()
+      
+      // 编辑工具栏
+      this.renderEditToolbar()
+      
+      // 设置选项
+      this.renderSettings()
+      
+      // 历史记录列表
+      ScrollView({ className: "content-scroll", scrollBar: BarState.Auto }) {
+        this.renderHistoryList()
+        Blank({ className: "bottom-space" })
+      }
+    }
   }
 }
 

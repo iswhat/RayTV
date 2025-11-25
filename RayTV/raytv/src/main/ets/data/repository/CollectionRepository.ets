@@ -26,7 +26,7 @@ export interface CollectionItem {
   visibility?: CollectionVisibility;
   createTime?: number;
   updateTime?: number;
-  extraData?: Record<string, string | number | boolean | null>;
+  extraData?: Record<string, unknown>;
 }
 
 export interface CollectionFolder {
@@ -746,7 +746,7 @@ export class CollectionRepository {
   /**
    * 将数据库记录转换为CollectionItem对象
    */
-  private convertToCollectionObject(record: Record<string, string | number | boolean | null>): CollectionItem {
+  private convertToCollectionObject(record: Record<string, unknown>): CollectionItem {
     return {
       id: record[COLLECTION_TABLE.COLUMNS.ID]?.toString(),
       title: record[COLLECTION_TABLE.COLUMNS.TITLE],
@@ -769,7 +769,7 @@ export class CollectionRepository {
   /**
    * 将数据库记录列表转换为CollectionItem对象列表
    */
-  private convertToCollectionObjects(records: Record<string, string | number | boolean | null>[]): CollectionItem[] {
+  private convertToCollectionObjects(records: Record<string, unknown>[]): CollectionItem[] {
     return records.map(record => this.convertToCollectionObject(record));
   }
 }

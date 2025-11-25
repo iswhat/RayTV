@@ -418,6 +418,10 @@ export default class User {
     isVerified: boolean;
     status: string;
     subscriptionEndDate: string | null;
+    watchHistoryEnabled: boolean;
+    favoritesEnabled: boolean;
+    totalWatchTime: number;
+    settings: UserSettings;
   }
 
   /**

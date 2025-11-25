@@ -51,7 +51,9 @@ export const ObjectUtils = {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      values.push((obj as Record<string, T>)[key]);
+      // 使用类型安全的属性访问方式
+      const propertyValue = ObjectUtils.getPropertyValue(obj, key);
+      values.push(propertyValue as T);
     }
     
     return values;
@@ -71,7 +73,9 @@ export const ObjectUtils = {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      entries.push([key, (obj as Record<string, T>)[key]]);
+      // 使用类型安全的属性访问方式
+      const propertyValue = ObjectUtils.getPropertyValue(obj, key);
+      entries.push([key, propertyValue as T]);
     }
     
     return entries;
@@ -86,7 +90,9 @@ export const ObjectUtils = {
     }
     
     const keyStr = String(key);
-    return (obj as Record<string, T>)[keyStr];
+    // 使用类型安全的属性访问方式
+    const propertyValue = ObjectUtils.getPropertyValue(obj, keyStr);
+    return propertyValue as T;
   },
 
   /**
@@ -121,6 +127,27 @@ export const ObjectUtils = {
     } catch {
       return false;
     }
+  },
+
+  /**
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  getPropertyValue(obj: SafeAny, key: string | number): unknown {
+    if (!TypeUtils.isObject(obj)) {
+      return undefined;
+    }
+    
+    const keyStr = String(key);
+    if (!ObjectUtils.hasProperty(obj, keyStr)) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    const safeObj = obj as Record<string, unknown>;
+    return safeObj[keyStr];
   },
 
   /**
@@ -165,7 +192,7 @@ export const ObjectUtils = {
     
     // 处理数组
     if (Array.isArray(value)) {
-      const clonedArray: T extends (infer U)[] ? U[] : unknown[] = [];
+      const clonedArray: unknown[] = [];
       for (let i = 0; i < value.length; i++) {
         clonedArray.push(ObjectUtils.deepClone(value[i]));
       }

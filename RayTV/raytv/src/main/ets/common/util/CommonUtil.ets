@@ -42,6 +42,26 @@ export class CommonUtil {
     }
     return keys;
   }
+
+  /**
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  private getPropertyValue<T extends object>(obj: T, key: string): unknown {
+    if (!obj || typeof obj !== 'object') {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    if (this.hasOwnProperty(obj, key)) {
+      const safeObj = obj as Record<string, unknown>;
+      return safeObj[key];
+    }
+    
+    return undefined;
+  }
   
   /**
    * 生成唯一ID
@@ -83,7 +103,9 @@ export class CommonUtil {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (this.hasOwnProperty(obj, key)) {
-          clonedObj[key] = this.deepClone(obj[key]);
+          // 使用类型安全的属性访问方式，避免字段索引访问
+          const propertyValue = this.getPropertyValue(obj, key);
+          clonedObj[key] = this.deepClone(propertyValue);
         }
       }
       return clonedObj as T;
@@ -98,7 +120,7 @@ export class CommonUtil {
    * @param delay 延迟时间（毫秒）
    * @returns 防抖后的函数
    */
-  public debounce<T extends (...args: unknown[]) => unknown>(func: T, delay: number): (...args: Parameters<T>) => void {
+  public debounce<T extends (...args: Array<string | number | boolean | object | null>) => string | number | boolean | object | null>(func: T, delay: number): (...args: Parameters<T>) => void {
     let timeoutId: number | undefined;
     
     return (...args: Parameters<T>) => {
@@ -116,7 +138,7 @@ export class CommonUtil {
    * @param limit 时间限制（毫秒）
    * @returns 节流后的函数
    */
-  public throttle<T extends (...args: unknown[]) => unknown>(func: T, limit: number): (...args: Parameters<T>) => void {
+  public throttle<T extends (...args: Array<string | number | boolean | object | null>) => string | number | boolean | object | null>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean = false;
     
     return (...args: Parameters<T>) => {

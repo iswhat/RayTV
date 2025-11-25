@@ -55,6 +55,15 @@ export default class CollectionService {
   }
 
   /**
+   * 初始化服务
+   * 用于兼容AppService的初始化流程
+   */
+  public async initialize(): Promise<void> {
+    Logger.info(TAG, 'CollectionService initialized');
+    // 空实现，用于兼容AppService初始化流程
+  }
+
+  /**
    * 添加收藏
    */
   public async addToCollection(collectionData: Partial<CollectionItem>): Promise<ApiResponse<CollectionItem>> {

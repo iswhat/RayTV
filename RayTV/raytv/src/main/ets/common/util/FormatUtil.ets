@@ -448,7 +448,7 @@ export class FormatUtil {
    */
   public formatExtension(extension: string): string {
     try {
-      return extension ? extension.toUpperCase().replace(/^\./, '') : '';
+      return extension ? extension.toUpperCase().replace(/^./, '') : '';
     } catch (error) {
       this.logger.error('Failed to format extension', error as Error);
       return '';
@@ -696,6 +696,3 @@ export class FormatUtil {
     }
   }
 }
-
-// 导出默认实例
-export default FormatUtil.getInstance();

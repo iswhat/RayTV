@@ -33,7 +33,7 @@ export class AnalyticsService {
   /**
    * 初始化分析服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     // 加载配置
     const config = await this.storageUtil.get<{ enabled: boolean }>('analyticsConfig', { enabled: true });
     this.isEnabled = config.enabled;

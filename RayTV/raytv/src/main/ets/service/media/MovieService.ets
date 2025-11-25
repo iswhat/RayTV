@@ -92,6 +92,15 @@ export default class MovieService {
   }
 
   /**
+   * 初始化服务
+   * 用于兼容AppService的初始化流程
+   */
+  public async initialize(): Promise<void> {
+    Logger.info(TAG, 'MovieService initialized');
+    // 空实现，用于兼容AppService初始化流程
+  }
+
+  /**
    * 搜索电影/视频
    */
   public async search(request: SearchRequest): Promise<ApiResponse<SearchResponseData>> {

@@ -44,7 +44,7 @@ export interface SearchParams {
   region?: string;        // 地区筛选
   sortBy?: string;        // 排序字段
   sortOrder?: 'asc' | 'desc'; // 排序顺序
-  filters?: Record<string, string | number | boolean>; // 额外筛选条件
+  filters?: Record<string, unknown>; // 额外筛选条件
 }
 
 /**
@@ -57,7 +57,7 @@ export interface PaginatedResponse<T> {
   pageSize: number;       // 每页数量
   totalPages: number;     // 总页数
   hasMore: boolean;       // 是否有更多
-  extra?: Record<string, string | number | boolean | string[] | null>; // 额外信息
+  extra?: Record<string, unknown>; // 额外信息
 }
 
 /**
@@ -209,7 +209,7 @@ export default interface NetworkRepository {
    * @param movieId 电影ID
    * @returns 评分信息
    */
-  getMovieRating(movieId: string): Promise<NetworkResult<Record<string, string | number | boolean>>>;
+  getMovieRating(movieId: string): Promise<NetworkResult<Record<string, unknown>>>;
 
   // ========== 视频播放相关接口 ==========
   
@@ -244,7 +244,7 @@ export default interface NetworkRepository {
    * @param endTime 结束时间
    * @returns 弹幕列表
    */
-  getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, string | number | boolean>[]>>;
+  getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, unknown>[]>>;
 
   /**
    * 提交视频弹幕
@@ -319,7 +319,7 @@ export default interface NetworkRepository {
    * @param channelId 频道ID
    * @returns EPG数据
    */
-  getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>>;
+  getLiveEpg(channelId: string): Promise<NetworkResult<Record<string, unknown>>>;
 
   /**
    * 搜索直播频道
@@ -358,13 +358,13 @@ export default interface NetworkRepository {
    * @param currentVersion 当前版本
    * @returns 更新信息
    */
-  checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, string | number | boolean>>>;
+  checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, unknown>>>;
 
   /**
    * 获取应用配置
    * @returns 应用配置
    */
-  getAppConfig(): Promise<NetworkResult<Record<string, string | number | boolean | string[]>>>;
+  getAppConfig(): Promise<NetworkResult<Record<string, unknown>>>;
 
   /**
    * 获取公告信息
@@ -381,7 +381,7 @@ export default interface NetworkRepository {
    * @param headers 请求头
    * @returns 请求结果
    */
-  get<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
+  get<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
 
   /**
    * 发送POST请求
@@ -390,7 +390,7 @@ export default interface NetworkRepository {
    * @param headers 请求头
    * @returns 请求结果
    */
-  post<T>(url: string, data?: Record<string, string | number | boolean | object>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
+  post<T>(url: string, data?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
 
   /**
    * 发送PUT请求
@@ -399,7 +399,7 @@ export default interface NetworkRepository {
    * @param headers 请求头
    * @returns 请求结果
    */
-  put<T>(url: string, data?: Record<string, string | number | boolean | object>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
+  put<T>(url: string, data?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
 
   /**
    * 发送DELETE请求
@@ -408,7 +408,7 @@ export default interface NetworkRepository {
    * @param headers 请求头
    * @returns 请求结果
    */
-  delete<T>(url: string, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
+  delete<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
 
   /**
    * 上传文件
@@ -418,7 +418,7 @@ export default interface NetworkRepository {
    * @param headers 请求头
    * @returns 上传结果
    */
-  upload<T>(url: string, file: File, params?: Record<string, string | number | boolean>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
+  upload<T>(url: string, file: File, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>>;
 
   /**
    * 下载文件

@@ -124,7 +124,7 @@ export class SearchHistoryRepository {
   /**
    * 初始化搜索历史仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 加载配置
       await this.loadConfig();
@@ -1027,22 +1027,22 @@ export class SearchHistoryRepository {
           finalFavorites,
           LocalStorageType.DEFAULT
         );
+      }
+      
+      // 更新历史记录中的收藏状态
+      if (data.favorites) {
+        const history = await this.getHistory();
+        const updatedHistory = history.map(item => ({
+          ...item,
+          isFavorite: finalFavorites?.some(fav => fav.id === item.id) || false
+        }));
         
-        // 更新历史记录中的收藏状态
-        if (this.cachedHistory) {
-          const updatedHistory = this.cachedHistory.map(item => ({
-            ...item,
-            isFavorite: finalFavorites.some(fav => fav.id === item.id || 
-              (fav.query === item.query && fav.type === item.type))
-          }));
-          
-          this.cachedHistory = updatedHistory;
-          await this.storageUtil.setObject(
-            this.storageKeys.searchHistory,
-            updatedHistory,
-            LocalStorageType.DEFAULT
-          );
-        }
+        this.cachedHistory = updatedHistory;
+        await this.storageUtil.setObject(
+          this.storageKeys.searchHistory,
+          updatedHistory,
+          LocalStorageType.DEFAULT
+        );
       }
       
       this.logger.info('Search history data imported successfully');
@@ -1055,27 +1055,29 @@ export class SearchHistoryRepository {
   /**
    * 验证历史记录项
    */
-  private isValidHistoryItem(item: unknown): boolean {
-    return item && 
-           typeof (item as SearchHistoryItem).query === 'string' && 
-           (item as SearchHistoryItem).query.trim().length > 0 &&
-           typeof (item as SearchHistoryItem).type === 'string' &&
-           typeof (item as SearchHistoryItem).timestamp === 'number';
+  private isValidHistoryItem(item: SearchHistoryItem): boolean {
+    return !!item && 
+           typeof item.id === 'string' && 
+           typeof item.query === 'string' && 
+           typeof item.timestamp === 'number' &&
+           item.timestamp > 0 &&
+           typeof item.type === 'string' &&
+           Object.values(SearchType).includes(item.type as SearchType);
   }
 
   /**
    * 规范化历史记录项
    */
-  private normalizeHistoryItem(item: unknown): SearchHistoryItem {
-    const historyItem = item as SearchHistoryItem;
+  private normalizeHistoryItem(item: SearchHistoryItem): SearchHistoryItem {
     return {
-      id: historyItem.id || this.generateId(),
-      query: historyItem.query.trim().toLowerCase(),
-      type: historyItem.type as SearchType,
-      timestamp: historyItem.timestamp || Date.now(),
-      resultCount: historyItem.resultCount,
-      category: historyItem.category,
-      isFavorite: !!historyItem.isFavorite
+      id: item.id || this.generateId(),
+      query: item.query.trim(),
+      timestamp: item.timestamp || Date.now(),
+      type: Object.values(SearchType).includes(item.type as SearchType) ? item.type : SearchType.ALL,
+      resultCount: item.resultCount || 0,
+      selected: !!item.selected,
+      isFavorite: !!item.isFavorite,
+      category: item.category || undefined
     };
   }
 
@@ -1083,88 +1085,48 @@ export class SearchHistoryRepository {
    * 获取搜索统计信息
    */
   public async getSearchStatistics(): Promise<{
-    totalHistoryItems: number;
-    totalFavoriteItems: number;
-    historyByType: Record<SearchType, number>;
-    mostSearchedQuery: string | null;
-    mostSearchedType: SearchType;
-    lastSearchTime: number | null;
+    totalSearches: number;
+    favoriteSearches: number;
+    todaySearches: number;
+    weekSearches: number;
+    monthSearches: number;
+    mostFrequent: Array<{query: string, count: number}>;
   }> {
     try {
       const history = await this.getHistory();
-      const favorites = await this.getFavorites();
-      
-      // 按类型统计
-      const historyByType: Record<SearchType, number> = {
-        [SearchType.VIDEO]: 0,
-        [SearchType.LIVE]: 0,
-        [SearchType.USER]: 0,
-        [SearchType.CATEGORY]: 0,
-        [SearchType.TAG]: 0,
-        [SearchType.ALL]: 0
-      };
-      
-      // 统计查询频率
-      const queryFrequency = new Map<string, number>();
-      let mostSearchedQuery = '';
-      let highestFrequency = 0;
-      let mostSearchedType = SearchType.ALL;
-      let typeCounts = new Map<SearchType, number>();
-      let lastSearchTime: number | null = null;
-      
+      const now = Date.now();
+      const today = new Date().setHours(0, 0, 0, 0);
+      const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+      const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+      // 计算最频繁的搜索
+      const frequencyMap = new Map<string, number>();
       history.forEach(item => {
-        // 类型统计
-        historyByType[item.type]++;
-        
-        // 查询频率
-        const frequency = (queryFrequency.get(item.query) || 0) + 1;
-        queryFrequency.set(item.query, frequency);
-        
-        if (frequency > highestFrequency) {
-          highestFrequency = frequency;
-          mostSearchedQuery = item.query;
-        }
-        
-        // 类型统计
-        const typeCount = (typeCounts.get(item.type) || 0) + 1;
-        typeCounts.set(item.type, typeCount);
-        
-        if (typeCount > typeCounts.get(mostSearchedType)!) {
-          mostSearchedType = item.type;
-        }
-        
-        // 最后搜索时间
-        if (!lastSearchTime || item.timestamp > lastSearchTime) {
-          lastSearchTime = item.timestamp;
-        }
+        frequencyMap.set(item.query, (frequencyMap.get(item.query) || 0) + 1);
       });
-      
+
+      const mostFrequent = Array.from(frequencyMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([query, count]) => ({ query, count }));
+
       return {
-        totalHistoryItems: history.length,
-        totalFavoriteItems: favorites.length,
-        historyByType,
-        mostSearchedQuery: mostSearchedQuery || null,
-        mostSearchedType,
-        lastSearchTime
+        totalSearches: history.length,
+        favoriteSearches: (await this.getFavorites()).length,
+        todaySearches: history.filter(item => item.timestamp >= today).length,
+        weekSearches: history.filter(item => item.timestamp >= weekAgo).length,
+        monthSearches: history.filter(item => item.timestamp >= monthAgo).length,
+        mostFrequent
       };
     } catch (error) {
       this.logger.error('Failed to get search statistics', error as Error);
-      
-      // 返回默认统计信息
       return {
-        totalHistoryItems: 0,
-        totalFavoriteItems: 0,
-        historyByType: {
-          [SearchType.VIDEO]: 0,
-          [SearchType.LIVE]: 0,
-          [SearchType.USER]: 0,
-          [SearchType.CATEGORY]: 0,
-          [SearchType.TAG]: 0,
-          [SearchType.ALL]: 0
-        },
-        mostSearchedQuery: null,
-        mostSearchedType: SearchType.ALL,
-        lastSearchTime: null
+        totalSearches: 0,
+        favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
       };
     }
   }
@@ -1172,3 +1134,4 @@ export class SearchHistoryRepository {
 
 // 导出默认实例
 export default SearchHistoryRepository.getInstance();
+        

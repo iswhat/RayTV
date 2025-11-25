@@ -427,6 +427,29 @@ export default class ConfigService {
     }
     return ConfigService.instance;
   }
+
+  /**
+   * 初始化配置服务
+   */
+  public async initialize(): Promise<void> {
+    try {
+      Logger.info(TAG, 'Initializing ConfigService...');
+      
+      // 如果已经初始化，直接返回
+      if (this.isInitialized) {
+        Logger.info(TAG, 'ConfigService already initialized');
+        return;
+      }
+      
+      // 调用私有初始化方法
+      await this.initializeConfig();
+      
+      Logger.info(TAG, 'ConfigService initialized successfully');
+    } catch (error) {
+      Logger.error(TAG, 'Failed to initialize ConfigService', error);
+      throw error;
+    }
+  }
   
   /**
    * 获取对象的所有键

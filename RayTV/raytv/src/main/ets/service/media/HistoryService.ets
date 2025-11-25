@@ -10,7 +10,7 @@ import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
  * 历史记录附加信息接口
  */
 export interface HistoryExtraData {
-  [key: string]: string | number | boolean | object | undefined;
+  [key: string]: string | number | boolean | undefined;
 }
 
 /**
@@ -66,9 +66,8 @@ export class HistoryService {
 
   /**
    * 初始化历史记录服务
-   * @private
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 创建历史记录表
       await this.dbManager.executeSql(`

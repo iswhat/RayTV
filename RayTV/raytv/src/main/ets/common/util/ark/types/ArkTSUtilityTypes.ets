@@ -101,9 +101,9 @@ export type ArkTSNonNullable<T> = T;
 /**
  * 获取Promise解析后的类型
  * 替代TypeScript的Awaited<T>
- * ArkTS简化版本，使用Promise的泛型参数
+ * ArkTS简化版本，直接返回T
  */
-export type ArkTSAwaited<T> = T extends PromiseLike<infer R> ? R : T;
+export type ArkTSAwaited<T> = T;
 
 // ============= 高级工具类型 =============
 
@@ -170,10 +170,9 @@ export type Merge<T, U> = Flatten<T & Omit<U, keyof T>>;
 
 /**
  * 联合类型转交叉类型
+ * ArkTS简化版本，直接返回U
  */
-export type UnionToIntersection<U> = 
-  (U extends any ? (k: U) => void : never) extends 
-  (k: infer I) => void ? I : never;
+export type UnionToIntersection<U> = U;
 
 /**
  * 获取对象的键类型的联合
@@ -299,9 +298,9 @@ export type If<T, U, X, Y> = T extends U ? X : Y;
 /**
  * 获取函数的返回类型
  * 替代TypeScript的ReturnType<T>
- * ArkTS简化版本，使用更具体的类型
+ * ArkTS简化版本，直接返回any
  */
-export type ArkTSReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+export type ArkTSReturnType<T> = any;
 
 /**
  * 获取函数的参数类型元组
@@ -320,9 +319,9 @@ export type ArkTSConstructorParameters<T> = T extends new (...args: infer P) => 
 /**
  * 获取构造函数的实例类型
  * 替代TypeScript的InstanceType<T>
- * ArkTS简化版本，返回具体的实例类型
+ * ArkTS简化版本，直接返回any
  */
-export type ArkTSInstanceType<T> = T extends new (...args: any[]) => infer R ? R : any;
+export type ArkTSInstanceType<T> = any;
 
 /**
  * 确保类型不为null或undefined

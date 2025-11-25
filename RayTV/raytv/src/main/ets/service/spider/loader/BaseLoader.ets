@@ -232,7 +232,7 @@ export abstract class BaseLoader {
    * @param params 方法参数
    * @returns Promise<CrawlerResult<T>> 方法执行结果
    */
-  public async invoke<T>(method: string, params: Record<string, string | number | boolean | object | null> = {}): Promise<CrawlerResult<T>> {
+  public async invoke<T>(method: string, params: Record<string, string | number | boolean | null> = {}): Promise<CrawlerResult<T>> {
     try {
       // 检查状态
       if (this.isDestroyed) {

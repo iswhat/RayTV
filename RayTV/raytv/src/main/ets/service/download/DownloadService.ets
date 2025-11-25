@@ -150,7 +150,7 @@ export default class DownloadService {
   /**
    * 初始化下载服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing download service...');
       

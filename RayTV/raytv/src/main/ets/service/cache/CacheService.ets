@@ -253,7 +253,7 @@ export default class CacheService {
   /**
    * 初始化缓存服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing cache service...');
       

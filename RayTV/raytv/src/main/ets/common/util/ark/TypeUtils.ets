@@ -191,6 +191,26 @@ export const TypeUtils = {
   },
 
   /**
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  getPropertyValue(obj: SafeAny, key: string): SafeAny {
+    if (!TypeUtils.isObject(obj)) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    const safeObj = obj as Record<string, SafeAny>;
+    if (Object.prototype.hasOwnProperty.call(safeObj, key)) {
+      return safeObj[key];
+    }
+    
+    return undefined;
+  },
+
+  /**
    * 创建类型守卫函数
    */
   createTypeGuard<T extends SafeObject>(
@@ -203,7 +223,8 @@ export const TypeUtils = {
       
       // 验证所有必需的属性都存在且符合类型
       for (const [key, validator] of Object.entries(schema)) {
-        const value = (obj as Record<string, SafeAny>)[key];
+        // 使用类型安全的属性访问方式，避免字段索引访问
+        const value = TypeUtils.getPropertyValue(obj, key);
         if (!validator(value)) {
           return false;
         }

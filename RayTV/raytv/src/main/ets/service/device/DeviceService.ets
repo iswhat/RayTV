@@ -53,7 +53,7 @@ export default class DeviceService {
   /**
    * 初始化设备服务
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 加载设备信息
       this.cachedDeviceInfo = await this.deviceInfoRepository.getDeviceInfo();

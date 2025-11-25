@@ -659,7 +659,7 @@ export class LiveRepository {
    * @param limit 限制数量
    * @returns 播放历史列表
    */
-  public async getPlayHistory(limit: number = 50): Promise<Record<string, string | number | boolean | null>[]> {
+  public async getPlayHistory(limit: number = 50): Promise<Record<string, unknown>[]> {
     try {
       const sortOptions: SortOption[] = [{
         column: LIVE_PLAY_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,

@@ -9,13 +9,9 @@ import common from '@ohos.app.ability.common';
 import { HttpResponse, HttpOptions } from '../types/common';
 
 // HTTP请求选项接口
-export interface HttpRequestOptions {
-  method: string;
-  headers?: Record<string, string>;
-  data?: Record<string, string | number | boolean | null> | string | ArrayBuffer;
-  timeout?: number;
-  retryCount?: number;
-  responseType?: 'json' | 'text' | 'arraybuffer';
+export interface HttpRequestOptions extends HttpOptions {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  data?: Record<string, string | number | boolean | null> | string;
 }
 
 export class HttpService {
@@ -70,6 +66,14 @@ export class HttpService {
     }
     return HttpService.instance;
   }
+
+  /**
+   * 初始化HTTP服务（空实现，用于兼容AppService的初始化流程）
+   */
+  public async initialize(): Promise<void> {
+    // HTTP服务在构造函数中已经初始化完成
+    // 这里提供一个空实现以兼容AppService的初始化流程
+  }
   
   /**
    * 获取对象的所有键
@@ -112,7 +116,7 @@ export class HttpService {
    * @param data 请求数据
    * @param options 请求选项
    */
-  public async post<T>(url: string, data?: Record<string, unknown> | string | ArrayBuffer, options?: HttpOptions): Promise<HttpResponse<T>> {
+  public async post<T>(url: string, data?: Record<string, string | number | boolean | null> | string, options?: HttpOptions): Promise<HttpResponse<T>> {
     const requestOptions: HttpRequestOptions = {
       method: 'POST',
       data: data
@@ -393,14 +397,6 @@ export interface HttpOptions {
   timeout?: number;
   retryCount?: number;
   responseType?: 'json' | 'text' | 'arraybuffer';
-}
-
-/**
-   * HTTP请求配置
-   */
-export interface HttpRequestOptions extends HttpOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  data?: string | Record<string, string | number | boolean>;
 }
 
 /**

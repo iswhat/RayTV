@@ -36,7 +36,7 @@ class LocalRepository {
   /**
    * 初始化本地仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       Logger.info('Initializing local repository');
       

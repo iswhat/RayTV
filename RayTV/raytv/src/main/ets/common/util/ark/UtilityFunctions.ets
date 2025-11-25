@@ -14,7 +14,7 @@ import ArrayUtils from './ArrayUtils';
  */
 export const UtilityFunctions = {
   /**
-   * 创建一个对象，其属性是指定对象的部分属性
+   * 创建一个部分对象
    * 运行时实现Partial<T>的功能
    */
   createPartial<T extends Record<string, SafeAny>>(obj: T, keys: string[]): Partial<T> {
@@ -27,7 +27,9 @@ export const UtilityFunctions = {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (key in obj) {
-        result[key] = obj[key];
+        // 使用类型安全的属性访问方式
+        const propertyValue = UtilityFunctions.getPropertyValue(obj, key);
+        result[key] = propertyValue as T[Extract<keyof T, string>];
       }
     }
     
@@ -47,7 +49,9 @@ export const UtilityFunctions = {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      if (!(key in obj) || obj[key] === undefined) {
+      // 使用类型安全的属性访问方式
+      const propertyValue = UtilityFunctions.getPropertyValue(obj, key);
+      if (!(key in obj) || propertyValue === undefined) {
         missingKeys.push(key);
       }
     }
@@ -73,7 +77,9 @@ export const UtilityFunctions = {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (key in obj) {
-        result[key] = obj[key];
+        // 使用类型安全的属性访问方式
+        const propertyValue = UtilityFunctions.getPropertyValue(obj, key as string);
+        result[key] = propertyValue as T[K];
       }
     }
     
@@ -90,11 +96,14 @@ export const UtilityFunctions = {
     }
     
     const result: Partial<T> = {};
-    const keySet = new Set<K>(keys);
+    const objKeys = Object.keys(obj);
     
-    for (const key in obj) {
-      if (Object.keys(obj).includes(key) && !keySet.has(key as K)) {
-        result[key] = obj[key];
+    for (let i = 0; i < objKeys.length; i++) {
+      const key = objKeys[i];
+      if (!keys.includes(key as K)) {
+        // 使用类型安全的属性访问方式
+        const propertyValue = UtilityFunctions.getPropertyValue(obj, key);
+        result[key] = propertyValue as T[Extract<keyof T, string>];
       }
     }
     
@@ -199,7 +208,26 @@ export const UtilityFunctions = {
   },
 
   /**
-   * 创建深度部分对象
+   * 安全地获取对象属性值
+   * @param obj - 要获取属性的对象
+   * @param key - 属性键名
+   * @returns 属性值，如果属性不存在则返回undefined
+   */
+  getPropertyValue(obj: Record<string, SafeAny>, key: string): unknown {
+    if (!TypeUtils.isObject(obj)) {
+      return undefined;
+    }
+    
+    if (!(key in obj)) {
+      return undefined;
+    }
+    
+    // 使用类型安全的属性访问方式
+    return obj[key];
+  },
+
+  /**
+   * 创建一个深度部分对象
    * 运行时实现DeepPartial<T>的功能
    */
   createDeepPartial<T extends Record<string, SafeAny>>(obj: T, paths: string[]): Partial<T> {

@@ -162,19 +162,6 @@ export interface PermissionCheckRequest {
 export class AuthRepository {
   private static instance: AuthRepository;
 
-  /**
-   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法）
-   */
-  private getAuthStatusValues(): string[] {
-    return [
-      AuthStatus.UNAUTHENTICATED,
-      AuthStatus.AUTHENTICATING,
-      AuthStatus.AUTHENTICATED,
-      AuthStatus.TOKEN_EXPIRED,
-      AuthStatus.REFRESHING,
-      AuthStatus.ERROR
-    ];
-  }
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
   private networkUtil = NetworkUtil.getInstance();
@@ -269,19 +256,13 @@ export class AuthRepository {
   /**
    * 初始化认证仓库
    */
-  private async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // 加载配置
       await this.loadConfig();
       
       // 恢复认证状态
       await this.restoreAuthState();
-      
-      // 设置令牌过期检查
-      this.setupTokenExpiryCheck();
-      
-      // 设置会话超时
-      this.setupSessionTimeout();
       
       this.logger.info('AuthRepository initialization completed');
     } catch (error) {
@@ -320,18 +301,6 @@ export class AuthRepository {
           });
         }
       }
-    });
-    
-    // 监听权限相关事件
-    this.eventBus.on('auth:permissionDenied', (event: AuthEvent) => {
-      this.logger.warn(`Permission denied: ${event.data?.permissionId}`, event.error);
-      // 这里可以记录权限拒绝事件，用于后续分析
-    });
-    
-    // 监听配置变更事件
-    this.eventBus.on('auth:configChanged', (event: AuthEvent) => {
-      // 配置变更时，更新相关设置
-      this.applyConfigChanges(event.data as AuthConfig);
     });
   }
 
@@ -384,9 +353,6 @@ export class AuthRepository {
         updatedConfig,
         LocalStorageType.DEFAULT
       );
-      
-      // 应用配置变更
-      this.applyConfigChanges(updatedConfig);
       
       // 发布配置变更事件
       this.eventBus.emit(AuthEventType.AUTH_CONFIG_CHANGED, {
@@ -449,43 +415,6 @@ export class AuthRepository {
   }
 
   /**
-   * 应用配置变更
-   */
-  private applyConfigChanges(config: AuthConfig): void {
-    // 根据配置调整行为
-    if (config.sessionTimeout > 0) {
-      // 重新设置会话超时
-      this.setupSessionTimeout();
-    }
-    
-    // 如果启用了生物认证，验证设备支持
-    if (config.enableBiometricAuth) {
-      this.checkBiometricSupport().catch(err => {
-        this.logger.warn('Biometric authentication not supported', err);
-        // 禁用生物认证
-        this.setConfig({ enableBiometricAuth: false }).catch(setConfigErr => {
-          this.logger.error('Failed to disable biometric auth', setConfigErr);
-        });
-      });
-    }
-  }
-
-  /**
-   * 检查生物认证支持
-   */
-  private async checkBiometricSupport(): Promise<boolean> {
-    try {
-      // 在实际应用中，这里应该调用设备的生物认证API
-      // 由于是示例实现，返回false
-      this.logger.debug('Checking biometric support');
-      return false;
-    } catch (error) {
-      this.logger.warn('Error checking biometric support', error as Error);
-      return false;
-    }
-  }
-
-  /**
    * 恢复认证状态
    */
   private async restoreAuthState(): Promise<void> {
@@ -519,9 +448,6 @@ export class AuthRepository {
             this.cachedUser = savedUser;
             this.currentStatus = AuthStatus.AUTHENTICATED;
             
-            // 加载用户权限
-            await this.loadUserPermissions(savedUser.id);
-            
             this.logger.info('Auth state restored successfully');
             
             // 发布认证状态变更事件
@@ -548,6 +474,20 @@ export class AuthRepository {
       this.logger.error('Failed to restore auth state', error as Error);
       await this.resetAuthState();
     }
+  }
+
+  /**
+   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法）
+   */
+  private getAuthStatusValues(): string[] {
+    return [
+      AuthStatus.UNAUTHENTICATED,
+      AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
   }
 
   /**
@@ -688,14 +628,6 @@ export class AuthRepository {
         );
       }
       
-      // 如果选择记住我，保存凭证（加密）
-      if (rememberMe && this.cachedConfig?.enableAutoLogin) {
-        await this.saveRememberMeCredentials(credentials);
-      }
-      
-      // 加载用户权限
-      await this.loadUserPermissions(authResponse.user.id);
-      
       // 重置登录尝试计数
       this.loginAttempts = 0;
       
@@ -762,32 +694,6 @@ export class AuthRepository {
   }
 
   /**
-   * 保存记住我凭证
-   */
-  private async saveRememberMeCredentials(credentials: UserCredentials): Promise<void> {
-    try {
-      // 在实际应用中，这里应该对凭证进行加密存储
-      // 为了安全，密码不应该直接存储，而是存储一个令牌或标识符
-      const rememberMeData = {
-        username: credentials.username,
-        // 注意：实际应用中不应该存储密码，这里仅作示例
-        // 应该使用一个特殊的令牌或标识符
-        savedAt: Date.now()
-      };
-      
-      await this.storageUtil.setObject(
-        this.storageKeys.rememberMeCredentials,
-        rememberMeData,
-        LocalStorageType.SECURE
-      );
-      
-      this.logger.debug('Remember me credentials saved');
-    } catch (error) {
-      this.logger.warn('Failed to save remember me credentials', error as Error);
-    }
-  }
-
-  /**
    * 用户登出
    */
   public async logout(): Promise<void> {
@@ -798,30 +704,24 @@ export class AuthRepository {
         timestamp: Date.now()
       } as AuthEvent);
       
-      // 如果有活跃的令牌，调用登出API（异步，不阻塞）
+      // 如果有令牌，调用登出API
       if (this.cachedToken) {
-        this.networkUtil.post(
-          `${this.apiEndpoints.baseUrl}${this.apiEndpoints.logout}`,
-          null,
-          {
-            headers: {
-              'Authorization': `${this.cachedToken.tokenType} ${this.cachedToken.accessToken}`
-            }
-          }
-        ).catch(err => {
-          // 记录错误但不中断登出流程
-          this.logger.warn('Failed to call logout API', err);
-        });
+        try {
+          await this.networkUtil.post(
+            `${this.apiEndpoints.baseUrl}${this.apiEndpoints.logout}`,
+            { token: this.cachedToken.accessToken }
+          );
+        } catch (error) {
+          // 登出API调用失败不影响本地登出
+          this.logger.warn('Logout API call failed, proceeding with local logout', error);
+        }
       }
       
-      // 清除认证状态
+      // 重置认证状态
       await this.resetAuthState();
       
-      // 清除记住我凭证
-      await this.clearRememberMeCredentials();
-      
-      // 更新认证状态变更事件
-      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
+      // 更新状态为未认证
+      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
       
       // 发布登出成功事件
       this.eventBus.emit(AuthEventType.LOGOUT_SUCCESS, {
@@ -829,76 +729,109 @@ export class AuthRepository {
         timestamp: Date.now()
       } as AuthEvent);
       
+      // 更新认证状态变更事件
+      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
+      
       this.logger.info('User logged out successfully');
     } catch (error) {
       this.logger.error('Logout failed', error as Error);
-      
-      // 构建认证错误
-      const authError: AuthError = {
-        code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
-        message: error instanceof Error ? error.message : 'Logout failed',
-        timestamp: Date.now()
-      };
       
       // 发布登出失败事件
       this.eventBus.emit(AuthEventType.LOGOUT_FAILURE, {
         type: AuthEventType.LOGOUT_FAILURE,
         timestamp: Date.now(),
-        error: authError
+        error: {
+          code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+          message: error instanceof Error ? error.message : 'Logout failed',
+          timestamp: Date.now()
+        }
       } as AuthEvent);
       
-      // 即使出错，也要尝试重置认证状态
-      await this.resetAuthState().catch(resetErr => {
-        this.logger.error('Failed to reset auth state during logout failure', resetErr);
-      });
+      throw error;
     }
   }
 
   /**
-   * 清除记住我凭证
+   * 获取当前认证状态
    */
-  private async clearRememberMeCredentials(): Promise<void> {
-    try {
-      await this.storageUtil.remove(
-        this.storageKeys.rememberMeCredentials,
-        LocalStorageType.SECURE
-      );
-      
-      this.logger.debug('Remember me credentials cleared');
-    } catch (error) {
-      this.logger.warn('Failed to clear remember me credentials', error as Error);
-    }
+  public getAuthStatus(): AuthStatus {
+    return this.currentStatus;
   }
 
   /**
-   * 刷新认证令牌
+   * 获取当前用户信息
+   */
+  public getCurrentUser(): UserInfo | null {
+    return this.cachedUser;
+  }
+
+  /**
+   * 获取当前令牌
+   */
+  public getCurrentToken(): AuthToken | null {
+    return this.cachedToken;
+  }
+
+  /**
+   * 检查是否已认证
+   */
+  public isAuthenticated(): boolean {
+    return this.currentStatus === AuthStatus.AUTHENTICATED && 
+           this.cachedToken !== null && 
+           this.cachedUser !== null;
+  }
+
+  /**
+   * 检查令牌是否过期
+   */
+  public isTokenExpired(): boolean {
+    if (!this.cachedToken) {
+      return true;
+    }
+    
+    const now = Date.now();
+    const expiryTime = this.cachedToken.issuedAt + (this.cachedToken.expiresIn * 1000);
+    return now >= expiryTime;
+  }
+
+  /**
+   * 检查令牌是否即将过期
+   */
+  public isTokenExpiredSoon(): boolean {
+    if (!this.cachedToken) {
+      return true;
+    }
+    
+    const now = Date.now();
+    const expiryTime = this.cachedToken.issuedAt + (this.cachedToken.expiresIn * 1000);
+    const threshold = this.cachedConfig?.tokenRefreshThreshold || 300;
+    
+    return (expiryTime - now) <= (threshold * 1000);
+  }
+
+  /**
+   * 刷新令牌
    */
   public async refreshToken(): Promise<RefreshTokenResponse> {
+    if (this.isRefreshingToken) {
+      throw new Error('Token refresh already in progress');
+    }
+    
+    if (!this.cachedToken?.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+    
+    this.isRefreshingToken = true;
+    
     try {
-      // 检查是否正在刷新令牌，避免重复请求
-      if (this.isRefreshingToken) {
-        this.logger.warn('Token refresh already in progress');
-        // 等待当前刷新完成（这里简化处理，实际应使用Promise队列）
-        throw new Error('Token refresh already in progress');
-      }
-      
-      // 检查是否有刷新令牌
-      if (!this.cachedToken || !this.cachedToken.refreshToken) {
-        this.logger.warn('No refresh token available');
-        throw new Error('No refresh token available');
-      }
-      
-      // 设置刷新标志
-      this.isRefreshingToken = true;
-      
-      // 更新状态为刷新中
-      this.updateAuthStatus(AuthStatus.REFRESHING);
-      
       // 发布令牌刷新开始事件
       this.eventBus.emit(AuthEventType.TOKEN_REFRESH_START, {
         type: AuthEventType.TOKEN_REFRESH_START,
         timestamp: Date.now()
       } as AuthEvent);
+      
+      // 更新状态为刷新中
+      this.updateAuthStatus(AuthStatus.REFRESHING);
       
       // 调用刷新令牌API
       const response = await this.networkUtil.post<RefreshTokenResponse>(
@@ -911,7 +844,7 @@ export class AuthRepository {
       // 更新令牌
       this.cachedToken = refreshResponse.token;
       
-      // 保存新令牌
+      // 保存新的令牌
       await this.storageUtil.setObject(
         this.storageKeys.authToken,
         refreshResponse.token,
@@ -937,30 +870,37 @@ export class AuthRepository {
       // 更新状态为令牌过期
       this.updateAuthStatus(AuthStatus.TOKEN_EXPIRED);
       
-      // 构建认证错误
-      const authError: AuthError = {
-        code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
-        message: error instanceof Error ? error.message : 'Token refresh failed',
-        timestamp: Date.now()
-      };
-      
       // 发布令牌刷新失败事件
       this.eventBus.emit(AuthEventType.TOKEN_REFRESH_FAILURE, {
         type: AuthEventType.TOKEN_REFRESH_FAILURE,
         timestamp: Date.now(),
-        error: authError
+        error: {
+          code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+          message: error instanceof Error ? error.message : 'Token refresh failed',
+          timestamp: Date.now()
+        }
       } as AuthEvent);
       
-      // 刷新失败，清除认证状态
-      await this.resetAuthState().catch(resetErr => {
-        this.logger.error('Failed to reset auth state after token refresh failure', resetErr);
-      });
-      
-      throw authError;
+      throw error;
     } finally {
-      // 重置刷新标志
       this.isRefreshingToken = false;
     }
+  }
+
+  /**
+   * 如果需要，刷新令牌
+   */
+  public async refreshTokenIfNeeded(): Promise<boolean> {
+    if (this.isTokenExpiredSoon() && !this.isTokenExpired()) {
+      try {
+        await this.refreshToken();
+        return true;
+      } catch (error) {
+        this.logger.warn('Token refresh not needed or failed', error);
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
@@ -971,265 +911,22 @@ export class AuthRepository {
       // 尝试刷新令牌
       await this.refreshToken();
     } catch (error) {
-      this.logger.error('Failed to handle token expiry', error as Error);
-      
-      // 刷新失败，清除认证状态
-      await this.resetAuthState();
-      
-      // 发布会话过期事件
+      // 刷新失败，发布会话过期事件
       this.eventBus.emit(AuthEventType.SESSION_EXPIRED, {
         type: AuthEventType.SESSION_EXPIRED,
         timestamp: Date.now(),
-        error: error as Error
-      } as AuthEvent);
-    }
-  }
-
-  /**
-   * 检查是否需要刷新令牌
-   */
-  public async refreshTokenIfNeeded(): Promise<boolean> {
-    if (!this.cachedToken) {
-      return false;
-    }
-    
-    // 检查令牌是否即将过期
-    if (this.isTokenExpiredSoon() && !this.isRefreshingToken) {
-      try {
-        await this.refreshToken();
-        return true;
-      } catch (error) {
-        this.logger.error('Failed to refresh token when needed', error as Error);
-        return false;
-      }
-    }
-    
-    return false;
-  }
-
-  /**
-   * 检查令牌是否过期
-   */
-  public isTokenExpired(): boolean {
-    if (!this.cachedToken) {
-      return true;
-    }
-    
-    const now = Date.now() / 1000; // 转换为秒
-    const expiresAt = this.cachedToken.issuedAt + this.cachedToken.expiresIn;
-    
-    return now >= expiresAt;
-  }
-
-  /**
-   * 检查令牌是否即将过期
-   */
-  public isTokenExpiredSoon(): boolean {
-    if (!this.cachedToken || !this.cachedConfig) {
-      return false;
-    }
-    
-    const now = Date.now() / 1000; // 转换为秒
-    const expiresAt = this.cachedToken.issuedAt + this.cachedToken.expiresIn;
-    const threshold = this.cachedConfig.tokenRefreshThreshold;
-    
-    return now >= (expiresAt - threshold);
-  }
-
-  /**
-   * 设置令牌过期检查
-   */
-  private setupTokenExpiryCheck(): void {
-    // 每30秒检查一次令牌是否需要刷新
-    setInterval(() => {
-      if (this.cachedToken && this.isTokenExpiredSoon() && !this.isRefreshingToken) {
-        this.refreshTokenIfNeeded().catch(err => {
-          this.logger.warn('Failed to refresh token during periodic check', err);
-        });
-      }
-    }, 30000);
-  }
-
-  /**
-   * 设置会话超时
-   */
-  private setupSessionTimeout(): void {
-    if (!this.cachedConfig || this.cachedConfig.sessionTimeout <= 0) {
-      return;
-    }
-    
-    // 会话超时定时器
-    let sessionTimeoutTimer: number | null = null;
-    
-    // 重置超时计时器的函数
-    const resetTimeout = () => {
-      if (sessionTimeoutTimer) {
-        clearTimeout(sessionTimeoutTimer);
-      }
-      
-      sessionTimeoutTimer = setTimeout(() => {
-        // 会话超时，自动登出
-        this.logout().catch(err => {
-          this.logger.warn('Failed to logout on session timeout', err);
-        });
-      }, this.cachedConfig!.sessionTimeout * 1000);
-    };
-    
-    // 初始设置超时
-    resetTimeout();
-    
-    // 监听用户活动，重置超时计时器
-    this.eventBus.on('user:activity', resetTimeout);
-  }
-
-  /**
-   * 用户注册
-   */
-  public async register(userInfo: UserRegisterInfo): Promise<{ user: UserInfo; requiresVerification: boolean }> {
-    try {
-      // 调用注册API
-      const response = await this.networkUtil.post<{
-        user: UserInfo;
-        requiresVerification: boolean;
-      }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.register}`,
-        userInfo
-      );
-      
-      const registerResponse = response.data;
-      
-      // 发布注册成功事件
-      this.eventBus.emit(AuthEventType.REGISTRATION_SUCCESS, {
-        type: AuthEventType.REGISTRATION_SUCCESS,
-        timestamp: Date.now(),
-        data: registerResponse
+        error: {
+          code: 'SESSION_EXPIRED',
+          message: 'Session has expired, please login again',
+          timestamp: Date.now()
+        }
       } as AuthEvent);
       
-      this.logger.info(`User ${registerResponse.user.username} registered successfully`);
+      // 重置认证状态
+      await this.resetAuthState();
       
-      return registerResponse;
-    } catch (error) {
-      this.logger.error('Registration failed', error as Error);
-      
-      // 构建认证错误
-      const authError: AuthError = {
-        code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
-        message: error instanceof Error ? error.message : 'Registration failed',
-        timestamp: Date.now()
-      };
-      
-      throw authError;
+      this.logger.warn('Session expired, user needs to login again');
     }
-  }
-
-  /**
-   * 发送密码重置请求
-   */
-  public async sendPasswordResetRequest(email: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // 调用忘记密码API
-      const response = await this.networkUtil.post<{ success: boolean; message: string }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.forgotPassword}`,
-        { email }
-      );
-      
-      // 发布密码重置请求事件
-      this.eventBus.emit(AuthEventType.PASSWORD_RESET_REQUEST, {
-        type: AuthEventType.PASSWORD_RESET_REQUEST,
-        timestamp: Date.now(),
-        data: { email, success: response.data.success }
-      } as AuthEvent);
-      
-      this.logger.info(`Password reset request sent for email: ${email}`);
-      
-      return response.data;
-    } catch (error) {
-      this.logger.error('Failed to send password reset request', error as Error);
-      throw error;
-    }
-  }
-
-  /**
-   * 重置密码
-   */
-  public async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // 调用重置密码API
-      const response = await this.networkUtil.post<{ success: boolean; message: string }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resetPassword}`,
-        { token, newPassword }
-      );
-      
-      // 发布密码重置成功事件
-      this.eventBus.emit(AuthEventType.PASSWORD_RESET_SUCCESS, {
-        type: AuthEventType.PASSWORD_RESET_SUCCESS,
-        timestamp: Date.now(),
-        data: response.data
-      } as AuthEvent);
-      
-      this.logger.info('Password reset successful');
-      
-      return response.data;
-    } catch (error) {
-      this.logger.error('Password reset failed', error as Error);
-      throw error;
-    }
-  }
-
-  /**
-   * 验证邮箱
-   */
-  public async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // 调用邮箱验证API
-      const response = await this.networkUtil.post<{ success: boolean; message: string }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.verifyEmail}`,
-        { token }
-      );
-      
-      this.logger.info('Email verification successful');
-      
-      return response.data;
-    } catch (error) {
-      this.logger.error('Email verification failed', error as Error);
-      throw error;
-    }
-  }
-
-  /**
-   * 重新发送验证邮件
-   */
-  public async resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // 调用重新发送验证邮件API
-      const response = await this.networkUtil.post<{ success: boolean; message: string }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resendVerification}`,
-        { email }
-      );
-      
-      this.logger.info(`Verification email resent to: ${email}`);
-      
-      return response.data;
-    } catch (error) {
-      this.logger.error('Failed to resend verification email', error as Error);
-      throw error;
-    }
-  }
-
-  /**
-   * 检查用户是否已认证
-   */
-  public isAuthenticated(): boolean {
-    return this.currentStatus === AuthStatus.AUTHENTICATED && 
-           !!this.cachedToken && 
-           !this.isTokenExpired();
-  }
-
-  /**
-   * 获取当前认证状态
-   */
-  public getAuthStatus(): AuthStatus {
-    return this.currentStatus;
   }
 
   /**
@@ -1239,7 +936,7 @@ export class AuthRepository {
     if (this.currentStatus !== status) {
       this.currentStatus = status;
       
-      // 保存状态
+      // 保存状态到存储
       this.storageUtil.setString(
         this.storageKeys.authStatus,
         status,
@@ -1247,6 +944,8 @@ export class AuthRepository {
       ).catch(err => {
         this.logger.warn('Failed to save auth status', err);
       });
+      
+      this.emitAuthStatusChange(status);
     }
   }
 
@@ -1257,55 +956,175 @@ export class AuthRepository {
     this.eventBus.emit(AuthEventType.AUTH_STATUS_CHANGED, {
       type: AuthEventType.AUTH_STATUS_CHANGED,
       timestamp: Date.now(),
-      data: {
-        status,
-        user: this.cachedUser,
-        isAuthenticated: status === AuthStatus.AUTHENTICATED
-      }
+      data: { status }
     } as AuthEvent);
   }
 
   /**
-   * 获取当前用户
+   * 用户注册
    */
-  public getCurrentUser(): UserInfo | null {
-    // 确保用户已认证且令牌未过期
-    if (!this.isAuthenticated()) {
-      return null;
+  public async register(userInfo: UserRegisterInfo): Promise<AuthResponse> {
+    try {
+      // 调用注册API
+      const response = await this.networkUtil.post<AuthResponse>(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.register}`,
+        userInfo
+      );
+      
+      const authResponse = response.data;
+      
+      // 保存认证状态
+      await this.saveAuthState(authResponse.token, authResponse.user);
+      
+      // 发布注册成功事件
+      this.eventBus.emit(AuthEventType.REGISTRATION_SUCCESS, {
+        type: AuthEventType.REGISTRATION_SUCCESS,
+        timestamp: Date.now(),
+        data: authResponse
+      } as AuthEvent);
+      
+      this.logger.info(`User ${authResponse.user.username} registered successfully`);
+      
+      return authResponse;
+    } catch (error) {
+      this.logger.error('Registration failed', error as Error);
+      throw error;
     }
-    
-    return this.cachedUser;
   }
 
   /**
-   * 获取认证令牌
+   * 忘记密码
    */
-  public getAuthToken(): string | null {
-    // 确保令牌有效
-    if (!this.cachedToken || this.isTokenExpired()) {
-      return null;
+  public async forgotPassword(email: string): Promise<void> {
+    try {
+      // 调用忘记密码API
+      await this.networkUtil.post(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.forgotPassword}`,
+        { email }
+      );
+      
+      // 发布忘记密码请求事件
+      this.eventBus.emit(AuthEventType.PASSWORD_RESET_REQUEST, {
+        type: AuthEventType.PASSWORD_RESET_REQUEST,
+        timestamp: Date.now(),
+        data: { email }
+      } as AuthEvent);
+      
+      this.logger.info(`Password reset request sent for ${email}`);
+    } catch (error) {
+      this.logger.error('Forgot password request failed', error as Error);
+      throw error;
     }
-    
-    return `${this.cachedToken.tokenType} ${this.cachedToken.accessToken}`;
   }
 
   /**
-   * 获取原始访问令牌
+   * 重置密码
    */
-  public getAccessToken(): string | null {
-    // 确保令牌有效
-    if (!this.cachedToken || this.isTokenExpired()) {
-      return null;
+  public async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      // 调用重置密码API
+      await this.networkUtil.post(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resetPassword}`,
+        { token, newPassword }
+      );
+      
+      // 发布密码重置成功事件
+      this.eventBus.emit(AuthEventType.PASSWORD_RESET_SUCCESS, {
+        type: AuthEventType.PASSWORD_RESET_SUCCESS,
+        timestamp: Date.now(),
+        data: { token }
+      } as AuthEvent);
+      
+      this.logger.info('Password reset successfully');
+    } catch (error) {
+      this.logger.error('Password reset failed', error as Error);
+      throw error;
     }
-    
-    return this.cachedToken.accessToken;
   }
 
   /**
-   * 获取刷新令牌
+   * 验证邮箱
    */
-  public getRefreshToken(): string | null {
-    return this.cachedToken?.refreshToken || null;
+  public async verifyEmail(token: string): Promise<void> {
+    try {
+      // 调用验证邮箱API
+      await this.networkUtil.post(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.verifyEmail}`,
+        { token }
+      );
+      
+      this.logger.info('Email verified successfully');
+    } catch (error) {
+      this.logger.error('Email verification failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * 重新发送验证邮件
+   */
+  public async resendVerification(email: string): Promise<void> {
+    try {
+      // 调用重新发送验证邮件API
+      await this.networkUtil.post(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resendVerification}`,
+        { email }
+      );
+      
+      this.logger.info(`Verification email resent to ${email}`);
+    } catch (error) {
+      this.logger.error('Failed to resend verification email', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * 检查权限
+   */
+  public async checkPermission(request: PermissionCheckRequest): Promise<boolean> {
+    try {
+      // 调用权限检查API
+      const response = await this.networkUtil.post<{ hasPermission: boolean }>(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.checkPermission}`,
+        request
+      );
+      
+      return response.data.hasPermission;
+    } catch (error) {
+      this.logger.error('Permission check failed', error as Error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取用户权限
+   */
+  public async getUserPermissions(userId: string): Promise<UserPermissions | null> {
+    try {
+      // 如果缓存中有权限信息，直接返回
+      if (this.cachedUserPermissions && this.cachedUserPermissions.userId === userId) {
+        return this.cachedUserPermissions;
+      }
+      
+      // 调用获取用户权限API
+      const response = await this.networkUtil.get<UserPermissions>(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userPermissions}/${userId}`
+      );
+      
+      this.cachedUserPermissions = response.data;
+      
+      // 保存到存储
+      await this.storageUtil.setObject(
+        this.storageKeys.userPermissions,
+        this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+      );
+      
+      return this.cachedUserPermissions;
+    } catch (error) {
+      this.logger.error('Failed to get user permissions', error as Error);
+      return null;
+    }
   }
 
   /**
@@ -1313,264 +1132,54 @@ export class AuthRepository {
    */
   private async loadUserPermissions(userId: string): Promise<void> {
     try {
-      // 尝试从缓存获取
-      const cachedPermissions = await this.cacheService.getCache<UserPermissions>(`user_permissions:${userId}`);
-      
-      if (cachedPermissions) {
-        this.cachedUserPermissions = cachedPermissions;
-        return;
-      }
-      
-      // 调用API获取用户权限
-      const response = await this.networkUtil.get<UserPermissions>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userPermissions}/${userId}`,
-        {
-          headers: {
-            'Authorization': this.getAuthToken() || ''
-          }
-        }
-      );
-      
-      const userPermissions = response.data;
-      
-      // 保存到缓存
-      await this.cacheService.setCache(
-        `user_permissions:${userId}`,
-        userPermissions,
-        {
-          type: CacheType.MEMORY,
-          expiry: 3600000 // 1小时
-        }
-      );
-      
-      // 保存到本地存储
-      await this.storageUtil.setObject(
-        this.storageKeys.userPermissions,
-        userPermissions,
-        LocalStorageType.DEFAULT
-      );
-      
-      this.cachedUserPermissions = userPermissions;
-      
-      this.logger.debug(`User permissions loaded for ${userId}`);
-    } catch (error) {
-      this.logger.warn(`Failed to load user permissions for ${userId}, using local data`, error as Error);
-      
-      // 尝试从本地存储加载
-      const localPermissions = await this.storageUtil.getObject<UserPermissions>(
+      // 从存储加载权限信息
+      const savedPermissions = await this.storageUtil.getObject<UserPermissions>(
         this.storageKeys.userPermissions,
         LocalStorageType.DEFAULT
       );
       
-      if (localPermissions) {
-        this.cachedUserPermissions = localPermissions;
+      if (savedPermissions && savedPermissions.userId === userId) {
+        this.cachedUserPermissions = savedPermissions;
+      } else {
+        // 从API获取权限信息
+        await this.getUserPermissions(userId);
       }
+    } catch (error) {
+      this.logger.warn('Failed to load user permissions', error as Error);
     }
   }
 
   /**
-   * 检查用户权限
+   * 获取所有角色
    */
-  public async checkPermission(permissionId: string, context?: string | number | boolean | null): Promise<boolean> {
+  public async getRoles(): Promise<Role[]> {
     try {
-      // 确保用户已认证
-      if (!this.isAuthenticated() || !this.cachedUser) {
-        return false;
-      }
+      // 调用获取角色API
+      const response = await this.networkUtil.get<Role[]>(
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.roles}`
+      );
       
-      // 确保已加载用户权限
-      if (!this.cachedUserPermissions) {
-        await this.loadUserPermissions(this.cachedUser.id);
-      }
-      
-      // 检查用户是否直接被授予权限
-      if (this.cachedUserPermissions?.grantedPermissions.includes(permissionId)) {
-        return true;
-      }
-      
-      // 检查用户是否被拒绝权限
-      if (this.cachedUserPermissions?.deniedPermissions.includes(permissionId)) {
-        return false;
-      }
-      
-      // 检查用户角色权限
-      for (const role of this.cachedUserPermissions?.roles || []) {
-        if (role.permissions.includes(permissionId) && role.isEnabled) {
-          return true;
-        }
-      }
-      
-      // 检查用户拥有的权限列表
-      const permission = this.cachedUserPermissions?.permissions.find(p => p.id === permissionId);
-      if (permission && permission.isEnabled) {
-        return true;
-      }
-      
-      // 如果本地检查失败，尝试从服务器检查
-      try {
-        const response = await this.networkUtil.post<{ hasPermission: boolean }>(
-          `${this.apiEndpoints.baseUrl}${this.apiEndpoints.checkPermission}`,
-          { permissionId, userId: this.cachedUser.id, context },
-          {
-            headers: {
-              'Authorization': this.getAuthToken() || ''
-            }
-          }
-        );
-        
-        return response.data.hasPermission;
-      } catch (serverError) {
-        this.logger.warn(`Failed to check permission from server for ${permissionId}`, serverError as Error);
-        // 服务器检查失败，返回本地检查结果（false）
-        return false;
-      }
+      return response.data;
     } catch (error) {
-      this.logger.error(`Failed to check permission for ${permissionId}`, error as Error);
-      
-      // 发布权限拒绝事件
-      this.eventBus.emit(AuthEventType.PERMISSION_DENIED, {
-        type: AuthEventType.PERMISSION_DENIED,
-        timestamp: Date.now(),
-        error: error as Error,
-        data: { permissionId, context }
-      } as AuthEvent);
-      
-      return false;
-    }
-  }
-
-  /**
-   * 获取用户所有权限
-   */
-  public async getUserPermissions(): Promise<string[]> {
-    try {
-      // 确保用户已认证
-      if (!this.isAuthenticated() || !this.cachedUser) {
-        return [];
-      }
-      
-      // 确保已加载用户权限
-      if (!this.cachedUserPermissions) {
-        await this.loadUserPermissions(this.cachedUser.id);
-      }
-      
-      // 构建权限集合
-      const permissions = new Set<string>();
-      
-      // 添加直接授予的权限
-      this.cachedUserPermissions?.grantedPermissions.forEach(perm => permissions.add(perm));
-      
-      // 添加角色权限（排除被拒绝的权限）
-      this.cachedUserPermissions?.roles.forEach(role => {
-        if (role.isEnabled) {
-          role.permissions.forEach(perm => {
-            if (!this.cachedUserPermissions?.deniedPermissions.includes(perm)) {
-              permissions.add(perm);
-            }
-          });
-        }
-      });
-      
-      // 添加拥有的权限（排除被拒绝的权限）
-      this.cachedUserPermissions?.permissions.forEach(perm => {
-        if (perm.isEnabled && !this.cachedUserPermissions?.deniedPermissions.includes(perm.id)) {
-          permissions.add(perm.id);
-        }
-      });
-      
-      return Array.from(permissions);
-    } catch (error) {
-      this.logger.error('Failed to get user permissions', error as Error);
+      this.logger.error('Failed to get roles', error as Error);
       return [];
     }
   }
 
   /**
-   * 获取用户角色
+   * 生物认证
    */
-  public async getUserRoles(): Promise<Role[]> {
+  public async authenticateWithBiometric(): Promise<AuthResponse> {
     try {
-      // 确保用户已认证
-      if (!this.isAuthenticated() || !this.cachedUser) {
-        return [];
-      }
-      
-      // 确保已加载用户权限
-      if (!this.cachedUserPermissions) {
-        await this.loadUserPermissions(this.cachedUser.id);
-      }
-      
-      return [...(this.cachedUserPermissions?.roles || [])];
-    } catch (error) {
-      this.logger.error('Failed to get user roles', error as Error);
-      return [];
-    }
-  }
-
-  /**
-   * 生物认证登录
-   */
-  public async biometricLogin(): Promise<boolean> {
-    try {
-      // 检查是否启用了生物认证
+      // 检查是否启用生物认证
       const config = await this.getConfig();
       if (!config.enableBiometricAuth) {
         throw new Error('Biometric authentication is not enabled');
       }
       
-      // 检查设备是否支持生物认证
-      const isSupported = await this.checkBiometricSupport();
-      if (!isSupported) {
-        throw new Error('Biometric authentication is not supported on this device');
-      }
-      
-      // 获取保存的生物认证数据
-      const biometricData = await this.storageUtil.getObject<{
-        username: string;
-        biometricToken: string;
-      }>(
-        this.storageKeys.biometricData,
-        LocalStorageType.SECURE
-      );
-      
-      if (!biometricData) {
-        throw new Error('No biometric authentication data found');
-      }
-      
-      // 在实际应用中，这里应该调用设备的生物认证API进行验证
-      // 由于是示例实现，假设验证成功
-      const isAuthenticated = true; // 模拟生物认证成功
-      
-      if (!isAuthenticated) {
-        throw new Error('Biometric authentication failed');
-      }
-      
-      // 调用服务器验证生物认证令牌
-      const response = await this.networkUtil.post<AuthResponse>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.biometricAuth}`,
-        {
-          username: biometricData.username,
-          biometricToken: biometricData.biometricToken
-        }
-      );
-      
-      // 保存认证状态
-      await this.saveAuthState(response.data.token, response.data.user);
-      
-      // 发布生物认证成功事件
-      this.eventBus.emit(AuthEventType.BIOMETRIC_AUTH_SUCCESS, {
-        type: AuthEventType.BIOMETRIC_AUTH_SUCCESS,
-        timestamp: Date.now(),
-        data: { user: response.data.user }
-      } as AuthEvent);
-      
-      // 更新认证状态
-      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
-      this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
-      
-      this.logger.info(`User ${response.data.user.username} logged in via biometric authentication`);
-      
-      return true;
+      // 在实际应用中，这里应该调用设备的生物认证API
+      // 由于是示例实现，返回错误
+      throw new Error('Biometric authentication not implemented');
     } catch (error) {
       this.logger.error('Biometric authentication failed', error as Error);
       
@@ -1578,132 +1187,32 @@ export class AuthRepository {
       this.eventBus.emit(AuthEventType.BIOMETRIC_AUTH_FAILURE, {
         type: AuthEventType.BIOMETRIC_AUTH_FAILURE,
         timestamp: Date.now(),
-        error: error as Error
+        error: {
+          code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+          message: error instanceof Error ? error.message : 'Biometric authentication failed',
+          timestamp: Date.now()
+        }
       } as AuthEvent);
       
-      return false;
-    }
-  }
-
-  /**
-   * 设置生物认证
-   */
-  public async setupBiometricAuth(enabled: boolean): Promise<boolean> {
-    try {
-      // 确保用户已认证
-      if (!this.isAuthenticated() || !this.cachedUser) {
-        throw new Error('User must be authenticated to setup biometric authentication');
-      }
-      
-      if (enabled) {
-        // 检查设备是否支持生物认证
-        const isSupported = await this.checkBiometricSupport();
-        if (!isSupported) {
-          throw new Error('Biometric authentication is not supported on this device');
-        }
-        
-        // 在实际应用中，这里应该调用设备的生物认证API进行验证
-        // 由于是示例实现，假设验证成功
-        const isAuthenticated = true; // 模拟生物认证成功
-        
-        if (!isAuthenticated) {
-          throw new Error('Biometric authentication failed');
-        }
-        
-        // 调用服务器注册生物认证
-        const response = await this.networkUtil.post<{ biometricToken: string }>(
-          `${this.apiEndpoints.baseUrl}${this.apiEndpoints.biometricAuth}/register`,
-          { username: this.cachedUser.username },
-          {
-            headers: {
-              'Authorization': this.getAuthToken() || ''
-            }
-          }
-        );
-        
-        // 保存生物认证数据
-        await this.storageUtil.setObject(
-          this.storageKeys.biometricData,
-          {
-            username: this.cachedUser.username,
-            biometricToken: response.data.biometricToken
-          },
-          LocalStorageType.SECURE
-        );
-        
-        // 更新配置
-        await this.setConfig({ enableBiometricAuth: true });
-        
-        this.logger.info(`Biometric authentication enabled for user ${this.cachedUser.username}`);
-      } else {
-        // 禁用生物认证，清除数据
-        await this.storageUtil.remove(
-          this.storageKeys.biometricData,
-          LocalStorageType.SECURE
-        );
-        
-        // 更新配置
-        await this.setConfig({ enableBiometricAuth: false });
-        
-        this.logger.info(`Biometric authentication disabled for user ${this.cachedUser.username}`);
-      }
-      
-      return true;
-    } catch (error) {
-      this.logger.error('Failed to setup biometric authentication', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 导出认证数据（用于调试或分析）
-   */
-  public async exportAuthData(): Promise<{
-    status: AuthStatus;
-    user: UserInfo | null;
-    token: Partial<AuthToken> | null;
-    permissions: UserPermissions | null;
-    config: AuthConfig;
-    loginAttempts: number;
-    lastLogin: number | null;
-    exportTime: number;
-  }> {
-    try {
-      // 获取最后登录时间
-      const lastLogin = await this.storageUtil.getNumber(
-        this.storageKeys.lastLoginTimestamp,
-        LocalStorageType.DEFAULT
-      );
-      
-      // 注意：在导出时，不应包含敏感信息如完整令牌
-      const tokenInfo = this.cachedToken ? {
-        tokenType: this.cachedToken.tokenType,
-        issuedAt: this.cachedToken.issuedAt,
-        expiresIn: this.cachedToken.expiresIn,
-        scope: this.cachedToken.scope
-        // 不包含accessToken和refreshToken
-      } : null;
-      
-      const data = {
-        status: this.currentStatus,
-        user: this.cachedUser,
-        token: tokenInfo,
-        permissions: this.cachedUserPermissions,
-        config: await this.getConfig(),
-        loginAttempts: this.loginAttempts,
-        lastLogin,
-        exportTime: Date.now()
-      };
-      
-      this.logger.info('Auth data exported (sensitive information removed)');
-      
-      return data;
-    } catch (error) {
-      this.logger.error('Failed to export auth data', error as Error);
       throw error;
     }
   }
-}
 
-// 导出默认实例
-export default AuthRepository.getInstance();
+  /**
+   * 清理资源
+   */
+  public async cleanup(): Promise<void> {
+    try {
+      // 移除事件监听器
+      this.eventBus.removeAllListeners('network:statusChanged');
+      this.eventBus.removeAllListeners('app:stateChanged');
+      
+      // 重置实例
+      AuthRepository.instance = null as any;
+      
+      this.logger.info('AuthRepository cleanup completed');
+    } catch (error) {
+      this.logger.error('Failed to cleanup AuthRepository', error as Error);
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { hapTasks } from '@ohos/hvigor-ohos-plugin';
 
-// Hvigor configuration - using any type to avoid TypeScript import issues
+// Module-level Hvigor configuration
 const config: any = {
   system: [
     {
@@ -8,7 +8,7 @@ const config: any = {
       apply: hapTasks
     }
   ],
-  plugins: []       /* Custom plugin to extend the functionality of Hvigor. */
+  plugins: []
 };
 
 export default config;

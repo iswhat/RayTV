@@ -1,896 +1,1218 @@
-# ArkTS开发规范与实践指南
+# ArkTS开发规范与实践指南（华为官方标准版）
+
+> 基于华为HarmonyOS官方文档、社区最佳实践和实际项目经验修订
+
+## 前言：ArkTS开发核心原则
+
+### 1.1 华为官方开发理念
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **类型安全优先**：充分利用ArkTS的静态类型检查，避免运行时错误
+- **性能优化导向**：基于AOT编译特性，编写高性能代码
+- **状态驱动UI**：遵循"状态驱动UI更新"的现代前端开发范式
+- **组件化开发**：采用组件化架构，提高代码复用性和可维护性
+
+**禁止使用的方案：**
+- 忽略类型检查，依赖运行时错误处理
+- 编写性能敏感的热路径代码
+- 使用命令式UI更新模式
+- 大而全的单体组件设计
+
+### 1.2 社区最佳实践总结
+
+**建议使用的方案：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- **分布式架构思维**：为多设备协同设计应用架构
+- **渐进式错误处理**：分层处理不同类型的错误
+- **内存友好设计**：避免内存泄漏和过度内存占用
+- **用户体验优先**：确保应用流畅性和响应性
+
+**可以使用方案：**
+- 使用华为云分布式日志追踪系统
+- 采用模块化错误处理策略
+- 实现智能内存管理机制
+- 优化首屏加载和交互响应
+
+## 1. 语言基础规范（华为官方标准）
 
 ## 1. 语言基础规范
 
-### 1.1 类型系统规范
+### 1.1 类型系统规范（华为官方标准）
 
-#### 1.1.1 基础类型使用
+#### 1.1.1 基础类型使用策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
 - **boolean类型**：用于逻辑判断，必须明确初始化为true或false
 - **number类型**：用于数值计算，支持整数和浮点数
 - **string类型**：用于文本处理，支持模板字符串
 - **null/undefined**：明确区分空值和未定义值
+- **void类型**：用于函数无返回值声明
+- **字面量类型**：使用字符串字面量类型定义有限状态
+
+**禁止使用的方案：**
+- **any类型**：严格禁止使用，会导致类型安全检查失效<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- **unknown类型**：严格禁止使用，除非在极特殊的安全边界场景
+- **隐式类型转换**：避免依赖隐式类型转换
+
+**替代方案：**
+- 使用具体类型或联合类型替代any/unknown
+- 使用类型保护机制进行运行时类型检查
+- 使用类型断言进行安全的类型转换
+
+**华为官方推荐实践：**<mcreference link="https://www.cnblogs.com/lxjshuju/p/19101556" index="3">3</mcreference>
+- 充分利用ArkTS的静态类型检查特性
+- 为API接口定义明确的输入输出类型
+- 使用类型别名提高代码可读性
 
 #### 1.1.2 类型声明规范
-```typescript
-// 正确示例：明确类型声明
-let isActive: boolean = true;
-let count: number = 0;
-let message: string = "Hello";
 
-// 错误示例：避免使用any和unknown
-let data: any; // 禁止使用
-let unknownData: unknown; // 禁止使用
-```
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- 明确类型声明：`let isActive: boolean = true;`
+- 充分利用类型推断：`const userName = "John";`（自动推断为string）
+- 复杂类型显式声明：使用interface或type定义
+- 接口优先原则：优先使用interface定义对象结构
+- 类型别名：使用type定义复杂类型别名
 
-#### 1.1.3 联合类型使用
-```typescript
-// 正确使用联合类型
-let status: 'active' | 'inactive' | 'pending' = 'active';
-let value: number | string = 42;
+**禁止使用的方案：**
+- 隐式any类型：`let data;`（未声明类型）
+- 显式any/unknown：`let data: any;` 或 `let data: unknown;`
+- 过度类型推断：避免过度依赖类型推断导致代码可读性降低
 
-// 类型保护
-if (typeof value === 'string') {
-    console.log(value.length);
-}
-```
+**替代方案：**
+- 联合类型：`let data: string | number = "initial";`
+- 可选类型：`let userData: User | null = null;`
+- 类型保护：使用typeof、instanceof进行运行时检查
+- 类型守卫：自定义类型守卫函数进行复杂类型检查
 
-### 1.2 变量声明规范
+**华为官方推荐实践：**<mcreference link="https://m.imooc.com/article/375096" index="4">4</mcreference>
+- 为所有变量和函数参数提供明确的类型注解
+- 使用接口定义API契约，确保类型安全
+- 优先使用字面量类型替代枚举类型
+- 充分利用类型推断简化简单变量的声明
 
-#### 1.2.1 变量作用域
-- **局部变量**：使用`let`声明，限制在最小作用域内
-- **常量**：使用`const`声明，确保不可变性
-- **类属性**：明确访问修饰符（private/protected/public）
+#### 1.1.3 联合类型使用规范
 
-#### 1.2.2 命名规范
-```typescript
-// 变量命名：camelCase
-let userName: string = "John";
-let itemCount: number = 10;
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- 有限状态管理：`type Status = 'pending' | 'success' | 'error';`
+- API响应类型：`type ApiResponse = SuccessResponse | ErrorResponse;`
+- 可空类型：`let data: string | null = null;`
+- 字面量联合：使用字符串字面量定义有限选项集合
+- 类型区分：使用可辨识联合（discriminated unions）进行类型区分
 
-// 常量命名：UPPER_CASE
-const MAX_COUNT: number = 100;
-const DEFAULT_TIMEOUT: number = 5000;
+**禁止使用的方案：**
+- 过度复杂的联合类型：避免超过5个类型的联合
+- 联合类型与any混用：`let data: any | string;`
+- 无意义的联合：避免将不相关的类型进行联合
 
-// 类命名：PascalCase
-class UserService {
-    // 类属性命名：camelCase
-    private userData: User;
-    
-    // 方法命名：camelCase
-    public getUserInfo(): User {
-        return this.userData;
-    }
-}
-```
+**替代方案：**
+- 使用枚举类型替代字符串联合类型
+- 使用类型别名简化复杂联合类型
+- 使用类型保护进行运行时类型区分
+- 使用类型守卫函数进行复杂的类型检查
 
-## 2. 类与对象规范
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 优先使用字面量联合类型替代枚举类型
+- 为联合类型提供明确的类型守卫函数
+- 使用可辨识联合模式处理复杂状态管理
+- 避免在公共API中使用过于复杂的联合类型
+
+### 1.2 变量声明规范（华为官方标准）
+
+#### 1.2.1 变量声明策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **const声明**：用于不会重新赋值的变量
+- **let声明**：用于需要重新赋值的变量
+- **块级作用域**：充分利用块级作用域限制变量作用范围
+- **立即初始化**：变量声明时立即进行初始化
+- **作用域最小化**：将变量声明在最小作用域内
+
+**禁止使用的方案：**
+- **var声明**：严格禁止使用，存在变量提升问题
+- **全局变量**：避免使用全局变量，容易造成命名冲突
+- **重复声明**：避免在同一作用域内重复声明变量
+
+**替代方案：**
+- 使用模块作用域替代全局变量
+- 使用立即执行函数表达式（IIFE）创建私有作用域
+- 使用类或命名空间组织相关变量
+- 使用解构赋值简化变量声明
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 优先使用const声明，除非变量需要重新赋值
+- 为所有变量提供明确的类型注解
+- 避免在循环体内重复声明变量
+- 使用解构赋值简化对象和数组的处理
+
+#### 1.2.2 命名规范策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **驼峰命名法**：变量、函数、方法使用camelCase
+- **帕斯卡命名法**：类、接口、类型使用PascalCase
+- **常量命名**：使用全大写加下划线：`MAX_SIZE`
+- **布尔变量**：使用is、has、can等前缀：`isActive`
+- **接口命名**：使用I前缀或描述性名称：`IUser` 或 `UserInterface`
+- **类型别名**：使用描述性名称：`UserList` 而非 `Users`
+
+**禁止使用的方案：**
+- **拼音命名**：禁止使用拼音或拼音缩写
+- **单字母命名**：避免使用单字母变量名（除循环计数器）
+- **保留字命名**：禁止使用语言保留字作为标识符
+- **模糊命名**：避免使用data、info、temp等模糊名称
+
+**替代方案：**
+- 使用英文单词或常见缩写
+- 使用描述性名称替代单字母命名
+- 使用下划线或不同拼写避免保留字冲突
+- 使用领域特定术语提高代码可读性
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 使用有意义的英文单词命名，避免拼音和缩写
+- 为布尔变量使用is、has、can等明确的前缀
+- 为接口和类型提供描述性名称
+- 遵循一致的命名约定，提高团队协作效率
+
+## 2. 类与对象规范（华为官方标准）
 
 ### 2.1 类定义规范
 
-#### 2.1.1 类结构
-```typescript
-// 正确类定义
-class User {
-    // 属性声明
-    private id: number;
-    private name: string;
-    
-    // 构造函数
-    constructor(id: number, name: string) {
-        this.id = id;
-        this.name = name;
-    }
-    
-    // 方法定义
-    public getName(): string {
-        return this.name;
-    }
-    
-    // 静态方法
-    public static createDefault(): User {
-        return new User(0, "Default User");
-    }
-}
-```
+#### 2.1.1 类声明策略
 
-#### 2.1.2 类实例化规范
-```typescript
-// 正确实例化：使用局部变量
-const user = new User(1, "Alice");
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **明确访问修饰符**：使用public、private、protected明确访问权限
+- **构造函数简化**：使用参数属性简化构造函数
+- **单一职责原则**：每个类只负责一个功能领域
+- **依赖倒置**：依赖抽象而非具体实现
+- **开闭原则**：对扩展开放，对修改关闭
 
-// 错误实例化：避免类名直接作为对象
-// User.instance = new User(); // 禁止使用
+**禁止使用的方案：**
+- **空类**：避免定义没有任何成员的类
+- **过度复杂类**：避免类过于庞大，超过500行
+- **上帝类**：避免一个类承担过多职责
+- **紧耦合**：避免类之间过度依赖
 
-// 正确单例模式实现
-class ParserService {
-    private static _instance: ParserService;
-    
-    public static getInstance(): ParserService {
-        if (!ParserService._instance) {
-            const instance = new ParserService(); // 使用局部变量
-            ParserService._instance = instance;
-        }
-        return ParserService._instance;
-    }
-}
-```
+**替代方案：**
+- 使用接口定义行为契约
+- 使用组合替代继承
+- 使用依赖注入管理类依赖关系
+- 使用工厂模式创建复杂对象
 
-### 2.2 接口与抽象类
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 遵循SOLID原则设计类结构
+- 优先使用组合而非继承
+- 为类提供明确的职责描述
+- 使用依赖注入提高可测试性
 
-#### 2.2.1 接口定义
-```typescript
-// 接口定义
-interface IUserService {
-    getUser(id: number): User;
-    saveUser(user: User): boolean;
-}
+#### 2.1.2 类实例化策略
 
-// 接口实现
-class UserService implements IUserService {
-    public getUser(id: number): User {
-        // 实现逻辑
-        return new User(id, "User Name");
-    }
-    
-    public saveUser(user: User): boolean {
-        // 实现逻辑
-        return true;
-    }
-}
-```
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **构造函数实例化**：使用new关键字创建实例
+- **工厂方法**：使用静态工厂方法创建复杂对象
+- **单例模式**：使用私有构造函数实现单例
+- **依赖注入**：使用依赖注入管理对象创建
+- **建造者模式**：使用建造者模式创建复杂对象
 
-#### 2.2.2 抽象类使用
-```typescript
-// 抽象类定义
-abstract class BaseService {
-    protected abstract initialize(): void;
-    
-    public start(): void {
-        this.initialize();
-        console.log("Service started");
-    }
-}
+**禁止使用的方案：**
+- **直接修改原型**：避免直接修改类的prototype
+- **动态添加方法**：避免在运行时动态添加类方法
+- **不安全的实例化**：避免不进行参数验证的实例化
+- **全局实例**：避免使用全局变量存储实例
 
-// 具体实现
-class UserService extends BaseService {
-    protected initialize(): void {
-        console.log("User service initialized");
-    }
-}
-```
+**替代方案：**
+- 使用依赖注入容器管理实例生命周期
+- 使用对象池模式管理频繁创建的对象
+- 使用建造者模式创建复杂对象
+- 使用抽象工厂创建相关对象族
 
-## 3. 函数与方法规范
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 优先使用工厂方法替代直接构造函数调用
+- 为复杂对象提供建造者模式
+- 使用依赖注入提高代码可测试性
+- 避免在构造函数中执行复杂逻辑
+
+### 2.2 接口与抽象类（华为官方标准）
+
+#### 2.2.1 接口定义策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **行为契约**：使用接口定义对象的行为契约
+- **最小接口**：接口应该尽可能小且专注
+- **接口隔离**：避免定义过于庞大的接口
+- **可扩展性**：为接口提供扩展点
+- **语义明确**：接口名称应明确表达其用途
+
+**禁止使用的方案：**
+- **空接口**：避免定义没有任何成员的接口
+- **过度抽象**：避免过度抽象导致接口难以理解
+- **接口污染**：避免在接口中定义不相关的方法
+- **上帝接口**：避免一个接口承担过多职责
+
+**替代方案：**
+- 使用类型别名定义复杂类型
+- 使用抽象类提供部分实现
+- 使用混合类型组合多个接口
+- 使用泛型接口提高复用性
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 优先使用接口而非抽象类
+- 为接口提供明确的文档注释
+- 使用接口定义API契约
+- 遵循接口隔离原则设计接口
+
+#### 2.2.2 抽象类使用策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **模板方法**：使用抽象类实现模板方法模式
+- **部分实现**：抽象类可以提供部分实现
+- **强制约束**：使用抽象方法强制子类实现特定行为
+- **代码复用**：在相关类之间共享通用逻辑
+- **框架设计**：为框架提供基础实现
+
+**禁止使用的方案：**
+- **过度抽象**：避免过度抽象导致代码难以理解
+- **抽象类污染**：避免在抽象类中定义不相关的方法
+- **深度继承**：避免过深的继承层次
+- **紧耦合**：避免抽象类与具体实现过度耦合
+
+**替代方案：**
+- 使用接口定义行为契约
+- 使用组合替代继承
+- 使用策略模式实现可变行为
+- 使用装饰器模式动态扩展功能
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 优先使用接口，仅在需要共享实现时使用抽象类
+- 为抽象类提供明确的文档说明
+- 避免过深的继承层次，建议不超过3层
+- 使用组合模式替代复杂的继承关系
+
+## 3. 函数与方法规范（华为官方标准）
 
 ### 3.1 函数定义规范
 
-#### 3.1.1 参数类型声明
-```typescript
-// 明确参数类型
-function calculateTotal(price: number, quantity: number): number {
-    return price * quantity;
-}
+#### 3.1.1 函数声明策略
 
-// 可选参数
-function createUser(name: string, age?: number): User {
-    return new User(0, name, age || 0);
-}
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **明确参数类型**：为所有参数提供明确的类型注解
+- **明确返回值类型**：为函数提供明确的返回值类型
+- **单一职责**：每个函数只负责一个明确的功能
+- **函数长度**：函数体长度不应超过50行
+- **参数数量**：函数参数数量不应超过5个
+- **默认参数**：使用默认参数简化函数调用
 
-// 默认参数
-function createMessage(text: string, type: string = "info"): string {
-    return `[${type}] ${text}`;
-}
-```
+**禁止使用的方案：**
+- **隐式any参数**：避免参数类型为any
+- **过长函数**：避免函数体过长，超过100行
+- **副作用函数**：避免函数产生不可预测的副作用
+- **过度参数化**：避免函数参数过多，超过7个
 
-#### 3.1.2 箭头函数使用
-```typescript
-// 箭头函数
-const multiply = (a: number, b: number): number => a * b;
+**替代方案：**
+- 使用纯函数替代有副作用的函数
+- 使用高阶函数实现函数组合
+- 使用柯里化技术简化参数传递
+- 使用参数对象封装多个参数
 
-// 回调函数
-const numbers = [1, 2, 3, 4, 5];
-const doubled = numbers.map((num: number): number => num * 2);
-```
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 为所有函数提供明确的类型注解
+- 遵循单一职责原则设计函数
+- 使用默认参数和可选参数提高灵活性
+- 避免函数产生不可预测的副作用
+
+#### 3.1.2 箭头函数使用策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **this绑定**：使用箭头函数保持this上下文
+- **简洁语法**：使用箭头函数简化函数表达式
+- **回调函数**：在回调函数中使用箭头函数
+- **函数式编程**：在函数式编程场景中使用箭头函数
+- **立即执行函数**：使用箭头函数创建立即执行函数表达式
+
+**禁止使用的方案：**
+- **构造函数**：箭头函数不能用作构造函数
+- **方法定义**：避免在类方法中使用箭头函数
+- **原型方法**：避免在原型方法中使用箭头函数
+- **事件处理器**：避免在需要动态绑定的事件处理器中使用箭头函数
+
+**替代方案：**
+- 使用普通函数定义构造函数
+- 使用类方法定义对象方法
+- 使用bind方法绑定this上下文
+- 使用普通函数定义需要动态绑定的方法
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 在回调函数和异步操作中使用箭头函数
+- 避免在类方法中使用箭头函数定义
+- 使用箭头函数简化函数表达式
+- 理解箭头函数与普通函数的this绑定差异
 
 ### 3.2 方法设计规范
 
-#### 3.2.1 方法职责单一
-```typescript
-class UserManager {
-    // 单一职责方法
-    public validateUser(user: User): boolean {
-        return user.name.length > 0 && user.age >= 0;
-    }
-    
-    // 明确返回值类型
-    public formatUserName(user: User): string {
-        return `${user.name} (${user.age})`;
-    }
-}
-```
+#### 3.2.1 方法命名策略
 
-#### 3.2.2 错误处理规范
-```typescript
-class DataService {
-    public async fetchData(url: string): Promise<any> {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Fetch data error:", error);
-            throw error;
-        }
-    }
-}
-```
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **动词开头**：方法名应以动词开头，如`getUserInfo()`
+- **描述性命名**：方法名应准确描述其功能
+- **一致性**：遵循统一的命名约定
+- **语义明确**：方法名应明确表达其操作意图
+- **长度适中**：方法名长度应在3-5个单词之间
+
+**禁止使用的方案：**
+- **模糊命名**：避免使用模糊的方法名，如`process()`
+- **拼音命名**：禁止使用拼音命名方法
+- **保留字命名**：避免使用语言保留字作为方法名
+- **过度缩写**：避免使用难以理解的缩写
+
+**替代方案：**
+- 使用领域特定术语命名方法
+- 遵循团队统一的命名规范
+- 使用描述性名称替代缩写
+- 使用动词+名词的组合命名方法
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 为方法提供明确的动词前缀（get、set、create、update等）
+- 使用描述性名称表达方法功能
+- 遵循一致的命名约定
+- 避免使用模糊或过于通用的方法名
+
+#### 3.2.2 错误处理规范策略
+
+**建议使用的方案：**<mcreference link="https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-coding-style-guide-0000002213458625" index="1">1</mcreference>
+- **异常处理**：使用try-catch处理可能抛出异常的代码
+- **错误类型**：定义明确的错误类型和错误码
+- **错误传播**：合理使用throw和rethrow传播错误
+- **错误边界**：使用错误边界隔离错误影响
+- **错误恢复**：提供错误恢复机制和重试逻辑
+
+**禁止使用的方案：**
+- **静默失败**：避免静默忽略错误
+- **过度捕获**：避免捕获所有异常而不处理
+- **错误隐藏**：避免隐藏真实的错误信息
+- **全局错误处理**：避免使用全局错误处理器处理所有错误
+
+**替代方案：**
+- 使用Result模式替代异常处理
+- 使用Option类型处理可选值
+- 使用错误边界隔离错误影响
+- 使用错误监控和日志记录系统
+
+**华为官方推荐实践：**<mcreference link="https://juejin.cn/post/7471136285035839497" index="2">2</mcreference>
+- 为所有可能失败的操作提供明确的错误处理
+- 使用自定义错误类型提供详细的错误信息
+- 避免在异步操作中丢失错误信息
+- 提供用户友好的错误提示和恢复选项
 
 ## 4. 装饰器使用规范
 
-### 4.1 状态管理装饰器
+### 4.1 状态管理装饰器策略
 
-#### 4.1.1 @State装饰器
-```typescript
-@Component
-struct UserComponent {
-    // 正确使用@State装饰器
-    @State private userName: string = "";
-    @State private isActive: boolean = false;
-    @State private userCount: number = 0;
-    
-    // 错误使用：未初始化或类型不匹配
-    // @State private user: User; // 禁止使用
-    
-    build() {
-        Column() {
-            Text(this.userName)
-            Toggle({ isOn: $isActive })
-            Text(`Count: ${this.userCount}`)
-        }
-    }
-}
-```
+#### 4.1.1 装饰器核心思想
 
-#### 4.1.2 @Prop和@Link装饰器
-```typescript
-// 父组件
-@Component
-struct ParentComponent {
-    @State private message: string = "Hello";
-    
-    build() {
-        Column() {
-            ChildComponent({ content: this.message })
-            Button('Change Message')
-                .onClick(() => {
-                    this.message = "Updated Message";
-                })
-        }
-    }
-}
+**建议使用的方案：**
+- **@State装饰器**：组件内部状态管理，状态变化触发UI更新
+- **@Prop装饰器**：父组件向子组件传递数据，单向数据流
+- **@Link装饰器**：父子组件双向数据绑定
+- **@Local装饰器**：局部状态管理，不参与跨组件传递
+- **@ObservedV2 + @Trace**：响应式状态管理组合，用于复杂对象状态管理
 
-// 子组件
-@Component
-struct ChildComponent {
-    @Prop content: string; // 单向数据流
-    
-    build() {
-        Text(this.content)
-    }
-}
-```
+**禁止使用的方案：**
+- 过度使用@State：避免在组件中定义过多@State变量
+- 滥用@Link：只在确实需要双向绑定的场景使用
+- 混合使用：避免在同一属性上使用多个装饰器
 
-### 4.2 生命周期装饰器
+**可以使用方案：**
+- @Provide和@Consume：用于跨组件层级的状态共享
+- @StorageLink和@StorageProp：用于持久化状态管理
+- @Watch：用于监听状态变化并执行副作用
 
-#### 4.2.1 @Entry和@Component
-```typescript
-// 入口组件
-@Entry
-@Component
-struct MainPage {
-    build() {
-        Column() {
-            Text('Main Page')
-                .fontSize(30)
-        }
-    }
-}
-```
+#### 4.1.2 @State装饰器使用策略
 
-#### 4.2.2 自定义装饰器
-```typescript
-// 日志装饰器
-function logMethod(target: any, propertyName: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
-    
-    descriptor.value = function(...args: any[]) {
-        console.log(`Calling ${propertyName} with args:`, args);
-        const result = originalMethod.apply(this, args);
-        console.log(`Method ${propertyName} returned:`, result);
-        return result;
-    };
-    
-    return descriptor;
-}
+**建议使用的方案：**
+- 简单类型状态：`@State private userName: string = "";`
+- 布尔类型状态：`@State private isActive: boolean = false;`
+- 数值类型状态：`@State private userCount: number = 0;`
+- 使用@ObservedV2装饰的类：对于复杂对象状态管理
 
-class Calculator {
-    @logMethod
-    public add(a: number, b: number): number {
-        return a + b;
-    }
-}
-```
+**禁止使用的方案：**
+- 复杂对象直接作为@State：`@State private user: User;`（可能导致性能问题）
+- 在build方法中修改@State状态
+- 在异步回调中直接修改@State状态
+
+**替代方案：**
+- 使用简单类型替代复杂对象
+- 使用@ObservedV2 + @Trace装饰器管理复杂对象
+- 使用状态管理库（如Redux模式）管理全局状态
+
+#### 4.1.3 @Prop和@Link装饰器策略
+
+**建议使用的方案：**
+- **@Prop装饰器**：用于父组件向子组件传递只读数据
+- **@Link装饰器**：用于父子组件间的双向数据绑定
+- 明确数据流向：使用@Prop实现单向数据流
+- 谨慎使用@Link：只在需要双向数据同步的场景使用
+
+**禁止使用的方案：**
+- 在子组件中修改@Prop装饰的属性
+- 过度使用@Link导致数据流向不清晰
+- 在深层嵌套组件中使用@Link
+
+**替代方案：**
+- 使用事件回调替代@Link实现数据更新
+- 使用状态提升（Lifting State Up）模式管理共享状态
+- 使用Context API或状态管理库管理跨组件状态
+
+### 4.2 生命周期装饰器策略
+
+#### 4.2.1 @Entry和@Component装饰器策略
+
+**建议使用的方案：**
+- **@Entry装饰器**：用于标记应用入口组件
+- **@Component装饰器**：用于定义所有可复用的UI组件
+- 在@Entry组件中管理页面级状态和生命周期
+- 在@Component组件中实现具体的UI逻辑和交互
+
+**禁止使用的方案：**
+- 在非入口组件上使用@Entry装饰器
+- 在同一个组件上同时使用@Entry和@Component装饰器
+- 在生命周期方法中执行耗时操作
+
+**可以使用方案：**
+- 使用@Preview装饰器进行组件预览
+- 使用@CustomDialog装饰器创建自定义对话框
+- 使用@Extend装饰器扩展组件样式
+
+**替代方案：**
+- 使用函数式组件替代类组件（如果支持）
+- 使用组合式API管理组件逻辑
+- 使用Hooks模式管理组件状态和副作用
+
+### 4.3 自定义装饰器策略
+
+#### 4.3.1 自定义装饰器使用策略
+
+**建议使用的方案：**
+- 日志装饰器：用于方法调用跟踪和调试
+- 权限装饰器：用于方法级别的权限控制
+- 缓存装饰器：用于方法结果的缓存优化
+- 验证装饰器：用于参数验证和类型检查
+
+**禁止使用的方案：**
+- 过度使用装饰器导致代码可读性降低
+- 在性能敏感的场景使用复杂的装饰器
+- 装饰器副作用影响业务逻辑
+
+**可以使用方案：**
+- 参数装饰器：用于参数验证和转换
+- 属性装饰器：用于属性级别的元数据标记
+- 类装饰器：用于类级别的功能增强
+
+**替代方案：**
+- 使用高阶函数替代装饰器功能
+- 使用中间件模式实现横切关注点
+- 使用AOP（面向切面编程）框架
 
 ## 5. 模块与导入规范
 
-### 5.1 模块组织规范
+### 5.1 模块组织策略
 
-#### 5.1.1 文件结构
-```
-src/
-├── components/          # 组件模块
-│   ├── common/         # 通用组件
-│   ├── business/       # 业务组件
-│   └── layout/         # 布局组件
-├── services/           # 服务模块
-│   ├── api/            # API服务
-│   ├── storage/        # 存储服务
-│   └── utils/          # 工具服务
-├── models/             # 数据模型
-├── pages/              # 页面模块
-└── app.ets             # 应用入口
-```
+#### 5.1.1 文件结构策略
 
-#### 5.1.2 导入导出规范
-```typescript
-// services/UserService.ets
-export class UserService {
-    public getUser(id: number): User {
-        // 实现逻辑
-    }
-}
+**建议使用的方案：**
+- 分层架构：components/（组件层）、services/（服务层）、models/（模型层）、pages/（页面层）
+- 功能模块化：按业务功能划分模块目录
+- 单一职责：每个文件只负责一个明确的职责
 
-// 在其他文件中导入
-import { UserService } from '../services/UserService';
+**禁止使用的方案：**
+- 扁平化文件结构：避免将所有文件放在同一目录下
+- 混合职责：避免在一个文件中实现多个不相关的功能
+- 深度嵌套：避免超过3层的目录嵌套
 
-// 默认导出
-export default class ConfigService {
-    // 类实现
-}
+**可以使用方案：**
+- 功能分组：按功能模块组织相关文件
+- 类型分组：按文件类型（组件、服务、模型）组织
+- 混合组织：结合功能和类型进行组织
 
-// 导入默认导出
-import ConfigService from '../services/ConfigService';
-```
+**替代方案：**
+- 领域驱动设计（DDD）架构
+- 功能特性分组（Feature-based grouping）
+- 微前端架构模式
 
-### 5.2 依赖管理规范
+#### 5.1.2 导入导出策略
 
-#### 5.2.1 循环依赖避免
-```typescript
-// 错误示例：循环依赖
-// ServiceA.ts
-import { ServiceB } from './ServiceB';
+**建议使用的方案：**
+- 命名导出：`export class UserService { ... }`
+- 明确导入路径：`import { UserService } from '../services/UserService';`
+- 相对路径导入：使用相对路径而非绝对路径
 
-// ServiceB.ts  
-import { ServiceA } from './ServiceA'; // 循环依赖
+**禁止使用的方案：**
+- 循环依赖：避免模块间的相互引用
+- 深层相对路径：避免使用`../../../`等深层路径
+- 通配符导入：避免使用`import * as`通配符导入
 
-// 正确解决方案：使用接口或依赖注入
-interface IServiceB {
-    doSomething(): void;
-}
+**可以使用方案：**
+- 默认导出：`export default class ConfigService { ... }`
+- 别名导入：使用路径别名简化导入路径
+- 批量导出：使用`export { A, B, C } from './module';`
 
-class ServiceA {
-    constructor(private serviceB: IServiceB) {}
-}
-```
+**替代方案：**
+- 使用模块联邦（Module Federation）
+- 使用动态导入（Dynamic Import）
+- 使用依赖注入容器
 
-#### 5.2.2 模块边界清晰
-```typescript
-// 明确模块职责边界
-// services/ 模块：数据处理和业务逻辑
-// components/ 模块：UI展示和用户交互
-// models/ 模块：数据结构和类型定义
-```
+### 5.2 依赖管理策略
+
+#### 5.2.1 循环依赖避免策略
+
+**建议使用的方案：**
+- 依赖注入：通过构造函数注入依赖
+- 接口隔离：使用接口定义依赖关系
+- 依赖倒置：高层模块不依赖低层模块，都依赖抽象
+
+**禁止使用的方案：**
+- 直接导入：避免模块间的直接相互引用
+- 全局状态：避免使用全局变量作为模块间通信
+- 隐式依赖：避免通过副作用建立依赖关系
+
+**可以使用方案：**
+- 事件驱动：通过事件进行模块间通信
+- 消息队列：使用消息队列解耦模块
+- 服务定位器：通过服务定位器获取依赖
+
+**替代方案：**
+- 使用微服务架构
+- 使用事件溯源模式
+- 使用CQRS（命令查询职责分离）模式
+
+#### 5.2.2 模块边界清晰策略
+
+**建议使用的方案：**
+- 明确职责：services/模块负责数据处理和业务逻辑
+- UI分离：components/模块负责UI展示和用户交互
+- 数据建模：models/模块负责数据结构和类型定义
+- 页面组织：pages/模块负责页面级组件组织
+
+**禁止使用的方案：**
+- 职责混淆：避免在组件中直接处理业务逻辑
+- 数据操作：避免在UI组件中直接操作数据
+- 跨层调用：避免高层模块直接调用低层模块实现
+
+**可以使用方案：**
+- 中间层：使用中间层处理跨模块通信
+- 适配器模式：使用适配器转换不同模块间的接口
+- 门面模式：使用门面模式简化复杂模块的调用
+
+**替代方案：**
+- 六边形架构（Hexagonal Architecture）
+- 洋葱架构（Onion Architecture）
+- 清洁架构（Clean Architecture）
 
 ## 6. 异步编程规范
 
-### 6.1 Promise使用规范
+### 6.1 Promise使用策略
 
-#### 6.1.1 Promise链式调用
-```typescript
-class ApiService {
-    public async fetchUserData(userId: number): Promise<User> {
-        return fetch(`/api/users/${userId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => new User(data))
-            .catch(error => {
-                console.error('Error fetching user data:', error);
-                throw error;
-            });
-    }
-}
-```
+#### 6.1.1 Promise链式调用策略
 
-#### 6.1.2 async/await使用
-```typescript
-class DataProcessor {
-    public async processUserData(userId: number): Promise<ProcessResult> {
-        try {
-            const user = await this.apiService.fetchUserData(userId);
-            const processedData = await this.processData(user);
-            return this.formatResult(processedData);
-        } catch (error) {
-            console.error('Data processing failed:', error);
-            throw new Error('Data processing failed');
-        }
-    }
-}
-```
+**建议使用的方案：**
+- 错误处理：在Promise链末尾添加catch处理错误
+- 状态检查：检查HTTP响应状态码
+- 数据转换：使用then进行数据格式转换
 
-### 6.2 错误处理规范
+**禁止使用的方案：**
+- 忽略错误：避免不处理Promise拒绝
+- 嵌套Promise：避免Promise的深度嵌套
+- 混合风格：避免在同一函数中混合使用then和async/await
 
-#### 6.2.1 统一错误处理
-```typescript
-// 自定义错误类
-class AppError extends Error {
-    constructor(
-        message: string,
-        public code: string,
-        public details?: any
-    ) {
-        super(message);
-        this.name = 'AppError';
-    }
-}
+**可以使用方案：**
+- Promise.all：用于并行执行多个异步操作
+- Promise.race：用于竞速执行多个异步操作
+- Promise.allSettled：用于等待所有Promise完成（无论成功或失败）
 
-// 错误处理中间件
-class ErrorHandler {
-    public static handleError(error: Error): void {
-        if (error instanceof AppError) {
-            console.error(`AppError [${error.code}]: ${error.message}`);
-        } else {
-            console.error('Unexpected error:', error);
-        }
-    }
-}
-```
+**替代方案：**
+- 使用Observable模式（如RxJS）
+- 使用Generator函数
+- 使用回调函数（仅限兼容性场景）
+
+#### 6.1.2 async/await使用策略
+
+**建议使用的方案：**
+- try-catch包装：使用try-catch处理异步错误
+- 顺序执行：使用await按顺序执行异步操作
+- 明确返回：明确返回Promise类型
+
+**禁止使用的方案：**
+- 忽略await：避免在async函数中忘记使用await
+- 过度使用：避免在不必要的场景使用async/await
+- 阻塞操作：避免在UI线程中使用await执行耗时操作
+
+**可以使用方案：**
+- 并行执行：结合Promise.all实现并行执行
+- 错误边界：使用错误边界组件处理异步错误
+- 加载状态：使用加载状态指示器
+
+**替代方案：**
+- 使用Promise链式调用
+- 使用回调地狱（不推荐）
+- 使用事件驱动模式
+
+### 6.2 错误处理策略
+
+#### 6.2.1 统一错误处理策略
+
+**建议使用的方案：**
+- 自定义错误类：创建继承自Error的自定义错误类
+- 错误分类：根据错误类型创建不同的错误类（如AppError、NetworkError等）
+- 统一处理：使用错误处理中间件统一处理错误
+
+**禁止使用的方案：**
+- 抛出原始错误：避免直接抛出原始Error对象
+- 忽略错误：避免不处理或静默忽略错误
+- 过度包装：避免过度包装错误信息导致调试困难
+
+**可以使用方案：**
+- 错误码机制：使用错误码标识不同类型的错误
+- 错误详情：在错误对象中包含详细的错误信息
+- 错误恢复：实现错误恢复机制
+
+**替代方案：**
+- 使用Result模式（Success/Failure）
+- 使用Either模式（Left/Right）
+- 使用Monad模式处理错误
 
 ## 7. 性能优化规范
 
-### 7.1 内存管理规范
+### 7.1 内存管理策略
 
-#### 7.1.1 对象生命周期管理
-```typescript
-class ResourceManager {
-    private resources: Map<string, any> = new Map();
-    
-    public setResource(key: string, resource: any): void {
-        this.resources.set(key, resource);
-    }
-    
-    public getResource(key: string): any {
-        return this.resources.get(key);
-    }
-    
-    public clearResource(key: string): void {
-        const resource = this.resources.get(key);
-        if (resource && typeof resource.dispose === 'function') {
-            resource.dispose();
-        }
-        this.resources.delete(key);
-    }
-    
-    public dispose(): void {
-        this.resources.forEach((resource, key) => {
-            this.clearResource(key);
-        });
-        this.resources.clear();
-    }
-}
-```
+#### 7.1.1 对象生命周期管理策略
 
-#### 7.1.2 避免内存泄漏
-```typescript
-// 正确的事件监听管理
-class EventManager {
-    private listeners: Map<string, Function[]> = new Map();
-    
-    public addListener(event: string, callback: Function): void {
-        if (!this.listeners.has(event)) {
-            this.listeners.set(event, []);
-        }
-        this.listeners.get(event)!.push(callback);
-    }
-    
-    public removeListener(event: string, callback: Function): void {
-        const callbacks = this.listeners.get(event);
-        if (callbacks) {
-            const index = callbacks.indexOf(callback);
-            if (index > -1) {
-                callbacks.splice(index, 1);
-            }
-        }
-    }
-    
-    public clearListeners(event?: string): void {
-        if (event) {
-            this.listeners.delete(event);
-        } else {
-            this.listeners.clear();
-        }
-    }
-}
-```
+**建议使用的方案：**
+- 资源管理：使用ResourceManager类管理资源生命周期
+- 显式释放：实现dispose方法显式释放资源
+- 引用计数：对共享资源使用引用计数机制
 
-### 7.2 渲染性能优化
+**禁止使用的方案：**
+- 内存泄漏：避免不释放不再使用的资源
+- 循环引用：避免对象间的循环引用
+- 全局缓存：避免无限制的全局缓存
 
-#### 7.2.1 组件优化
-```typescript
-@Component
-struct OptimizedList {
-    @State private items: string[] = [];
-    
-    build() {
-        List() {
-            ForEach(this.items, (item: string) => {
-                ListItem() {
-                    Text(item)
-                        .fontSize(16)
-                }
-            }, (item: string) => item)
-        }
-        .cachedCount(5) // 缓存列表项提升性能
-    }
-}
-```
+**可以使用方案：**
+- 弱引用：使用弱引用管理临时对象
+- 对象池：对频繁创建销毁的对象使用对象池
+- 延迟加载：对大型资源使用延迟加载
 
-#### 7.2.2 状态更新优化
-```typescript
-@Component
-struct OptimizedComponent {
-    @State private data: LargeData;
-    
-    // 避免不必要的状态更新
-    private shouldUpdate(newData: LargeData): boolean {
-        return JSON.stringify(this.data) !== JSON.stringify(newData);
-    }
-    
-    public updateData(newData: LargeData): void {
-        if (this.shouldUpdate(newData)) {
-            this.data = newData;
-        }
-    }
-}
-```
+**替代方案：**
+- 使用垃圾回收器友好的数据结构
+- 使用内存分析工具监控内存使用
+- 使用自动内存管理框架
+
+#### 7.1.2 避免内存泄漏策略
+
+**建议使用的方案：**
+- 事件监听管理：使用EventManager类管理事件监听器
+- 显式移除：在组件销毁时显式移除事件监听器
+- 弱事件模式：使用弱事件模式避免内存泄漏
+
+**禁止使用的方案：**
+- 匿名函数：避免使用匿名函数作为事件监听器
+- 全局事件：避免在全局作用域注册事件监听器
+- 不清理：避免不清理不再需要的事件监听器
+
+**可以使用方案：**
+- 自动清理：使用自动清理机制管理事件监听器
+- 作用域绑定：将事件监听器绑定到特定作用域
+- 一次性事件：对一次性事件使用一次性监听器
+
+**替代方案：**
+- 使用响应式编程模式
+- 使用函数式编程避免副作用
+- 使用不可变数据结构
+
+### 7.2 渲染性能优化策略
+
+#### 7.2.1 组件优化策略
+
+**建议使用的方案：**
+- 列表优化：使用ForEach渲染列表，提供唯一键值
+- 缓存机制：使用cachedCount缓存列表项提升性能
+- 明确方向：明确设置列表方向（Axis.Vertical或Axis.Horizontal）
+
+**禁止使用的方案：**
+- 在build方法中创建新对象：避免每次渲染都创建新对象
+- 匿名函数：避免在渲染方法中使用匿名函数
+- 复杂计算：避免在build方法中执行复杂计算
+
+**可以使用方案：**
+- 状态管理：使用状态管理避免重复创建对象
+- 方法调用：将复杂逻辑封装到方法中调用
+- 条件渲染：使用条件渲染避免不必要的组件渲染
+
+**替代方案：**
+- 使用虚拟滚动处理大型列表
+- 使用分页加载减少一次性渲染数量
+- 使用懒加载延迟渲染不可见内容
+
+#### 7.2.2 状态更新优化策略
+
+**建议使用的方案：**
+- 深度比较：使用深度比较替代JSON.stringify判断数据变化
+- 选择性更新：实现shouldUpdate方法避免不必要的状态更新
+- 响应式状态：使用@ObservedV2 + @Trace优化复杂对象状态管理
+
+**禁止使用的方案：**
+- 频繁更新：避免频繁触发状态更新
+- 深层复制：避免使用深层复制进行状态比较
+- 同步阻塞：避免在状态更新中执行同步阻塞操作
+
+**可以使用方案：**
+- 批量更新：对多个状态更新使用批量更新机制
+- 防抖节流：对频繁的状态更新使用防抖或节流
+- 异步更新：使用异步更新避免阻塞UI线程
+
+**替代方案：**
+- 使用不可变数据结构
+- 使用状态管理库（如Redux、MobX）
+- 使用函数式响应式编程
 
 ## 8. 测试规范
 
-### 8.1 单元测试规范
+### 8.1 单元测试策略
 
-#### 8.1.1 测试用例结构
-```typescript
-// 测试工具类
-class Calculator {
-    public add(a: number, b: number): number {
-        return a + b;
-    }
-    
-    public multiply(a: number, b: number): number {
-        return a * b;
-    }
-}
+#### 8.1.1 测试用例结构策略
 
-// 测试用例
-describe('Calculator', () => {
-    let calculator: Calculator;
-    
-    beforeEach(() => {
-        calculator = new Calculator();
-    });
-    
-    it('should add two numbers correctly', () => {
-        const result = calculator.add(2, 3);
-        expect(result).toBe(5);
-    });
-    
-    it('should multiply two numbers correctly', () => {
-        const result = calculator.multiply(4, 5);
-        expect(result).toBe(20);
-    });
-});
-```
+**建议使用的方案：**
+- 测试框架：使用标准的测试框架（如Jest、Mocha）
+- 测试结构：使用describe/it组织测试用例
+- 测试准备：使用beforeEach进行测试前的准备工作
+- 断言明确：使用明确的断言表达式
 
-#### 8.1.2 异步测试
-```typescript
-describe('ApiService', () => {
-    it('should fetch user data successfully', async () => {
-        const apiService = new ApiService();
-        const user = await apiService.fetchUserData(1);
-        
-        expect(user).toBeDefined();
-        expect(user.id).toBe(1);
-        expect(user.name).toBe('Test User');
-    });
-    
-    it('should handle fetch errors', async () => {
-        const apiService = new ApiService();
-        
-        await expect(apiService.fetchUserData(-1))
-            .rejects.toThrow('User not found');
-    });
-});
-```
+**禁止使用的方案：**
+- 测试耦合：避免测试用例间的相互依赖
+- 硬编码：避免在测试中使用硬编码值
+- 副作用：避免测试产生副作用影响其他测试
 
-### 8.2 集成测试规范
+**可以使用方案：**
+- 测试工厂：使用工厂函数创建测试数据
+- 模拟对象：使用模拟对象替代真实依赖
+- 测试钩子：使用beforeAll/afterAll进行全局设置
 
-#### 8.2.1 组件测试
-```typescript
-describe('UserComponent', () => {
-    it('should display user information correctly', () => {
-        const user = new User(1, 'John Doe', 30);
-        
-        const component = new UserComponent();
-        component.user = user;
-        
-        // 模拟组件渲染和断言
-        expect(component.getDisplayText()).toBe('John Doe (30)');
-    });
-});
-```
+**替代方案：**
+- 使用行为驱动开发（BDD）风格
+- 使用属性测试（Property Testing）
+- 使用快照测试（Snapshot Testing）
 
-## 9. 代码质量规范
+#### 8.1.2 异步测试策略
 
-### 9.1 代码审查规范
+**建议使用的方案：**
+- async/await：使用async/await处理异步测试
+- 错误处理：测试异步操作的错误处理逻辑
+- 超时控制：设置合理的测试超时时间
 
-#### 9.1.1 审查要点
-- **类型安全**：确保没有使用any和unknown类型
-- **性能考虑**：检查潜在的性能问题
-- **错误处理**：验证错误处理逻辑的完整性
-- **代码复用**：评估代码的可复用性
+**禁止使用的方案：**
+- 回调地狱：避免使用嵌套的回调函数
+- 忽略错误：避免不处理异步操作的错误
+- 无限等待：避免测试无限期等待
 
-#### 9.1.2 审查清单
-```typescript
-// 代码审查清单示例
-class CodeReviewChecklist {
-    public static checkTypeSafety(code: string): boolean {
-        return !code.includes(': any') && !code.includes(': unknown');
-    }
-    
-    public static checkErrorHandling(code: string): boolean {
-        return code.includes('try') && code.includes('catch');
-    }
-    
-    public static checkPerformance(code: string): boolean {
-        return !code.includes('JSON.stringify') || 
-               code.includes('cachedCount');
-    }
-}
-```
+**可以使用方案：**
+- Promise测试：使用Promise的resolve/reject进行测试
+- 模拟异步：使用模拟的异步操作进行测试
+- 并发测试：测试并发场景下的异步操作
 
-### 9.2 文档规范
+**替代方案：**
+- 使用回调函数风格的异步测试
+- 使用生成器函数处理异步流程
+- 使用事件驱动测试
 
-#### 9.2.1 代码注释
-```typescript
-/**
- * 用户服务类
- * 提供用户相关的业务逻辑处理
- */
-class UserService {
-    /**
-     * 根据用户ID获取用户信息
-     * @param userId - 用户ID
-     * @returns 用户对象
-     * @throws 当用户不存在时抛出错误
-     */
-    public getUser(userId: number): User {
-        // 实现逻辑
-    }
-}
-```
+### 8.2 集成测试策略
 
-#### 9.2.2 API文档
-```typescript
-/**
- * @interface IUserService
- * 用户服务接口定义
- */
-interface IUserService {
-    /**
-     * 创建新用户
-     * @param userData - 用户数据
-     * @returns 创建的用户ID
-     */
-    createUser(userData: UserData): number;
-}
-```
+#### 8.2.1 组件测试策略
 
-## 10. API兼容性与迁移规范
+**建议使用的方案：**
+- 组件渲染测试：测试组件是否正确渲染
+- 用户交互测试：测试用户交互行为
+- 状态变化测试：测试组件状态变化
 
-### 10.1 HarmonyOS API版本兼容性
+**禁止使用的方案：**
+- 过度测试：避免测试框架内部实现细节
+- 硬编码断言：避免使用硬编码的断言值
+- 测试耦合：避免测试间的相互依赖
 
-#### 10.1.1 API版本检查
-```typescript
-// 检查当前API版本
-import system from '@ohos.system';
+**可以使用方案：**
+- 快照测试：使用快照测试验证组件输出
+- 模拟用户：使用模拟用户行为进行测试
+- 视觉测试：使用视觉回归测试验证UI
 
-class ApiVersionChecker {
-    public static async checkApiVersion(): Promise<void> {
-        try {
-            const systemInfo = await system.getSystemInfo();
-            console.log(`当前API版本: ${systemInfo.apiVersion}`);
-            
-            if (parseInt(systemInfo.apiVersion) < 9) {
-                console.warn('当前API版本较低，部分新特性可能不可用');
-            }
-        } catch (error) {
-            console.error('获取系统信息失败:', error);
-        }
-    }
-}
-```
+**替代方案：**
+- 使用端到端测试（E2E Testing）
+- 使用手动测试验证复杂交互
+- 使用用户验收测试（UAT）
 
-#### 10.1.2 版本兼容性处理
-```typescript
-// 条件编译和版本适配
-class CompatibilityAdapter {
-    private static readonly MIN_SUPPORTED_VERSION = 9;
-    
-    public static isFeatureSupported(feature: string): boolean {
-        // 根据API版本判断特性支持
-        const currentVersion = this.getCurrentApiVersion();
-        return currentVersion >= this.MIN_SUPPORTED_VERSION;
-    }
-    
-    private static getCurrentApiVersion(): number {
-        // 获取当前API版本逻辑
-        return 9; // 示例值
-    }
-}
-```
+## 9. 代码质量策略
 
-### 10.2 已弃用API迁移指南
+### 9.1 代码审查策略
 
-#### 10.2.1 常见已弃用API替换
-```typescript
-// 已弃用API vs 推荐API对比
-class DeprecatedApiMigration {
-    // ❌ 已弃用：@ohos.arkui
-    // import { FlexDirection, FlexAlign } from '@ohos.arkui';
-    
-    // ✅ 推荐：@kit.ArkUI
-    import { FlexDirection, FlexAlign } from '@kit.ArkUI';
-    
-    // ❌ 已弃用：@ohos.components
-    // import { FlexDirection, FlexAlign } from '@ohos.components';
-    
-    // ✅ 推荐：使用ArkTS标准样式属性
-    // 直接使用字符串值：'row', 'column', 'space-between'等
-    
-    // ❌ 已弃用：@ohos.app.ability.Context
-    // import { Context } from '@ohos.app.ability.Context';
-    
-    // ✅ 推荐：@ohos.ability.kits.context
-    import type { Context } from '@ohos.ability.kits.context';
-}
-```
+#### 9.1.1 审查标准策略
 
-#### 10.2.2 样式属性迁移规范
-```typescript
-// 样式属性枚举值到字符串值的迁移
-class StyleMigrationGuide {
-    // ❌ 已弃用：使用枚举值
-    // flexDirection: FlexDirection.Row,
-    // justifyContent: FlexAlign.SpaceBetween,
-    // alignItems: ItemAlign.Center,
-    
-    // ✅ 推荐：使用字符串值
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    
-    // 其他常见样式属性迁移
-    fontStyle: 'normal',        // 替代 FontStyle.Normal
-    textAlign: 'center',        // 替代 TextAlign.Center
-    objectFit: 'cover',         // 替代 ImageFit.Cover
-}
-```
+**建议使用的方案：**
+- 可读性审查：评估代码清晰度和易理解性
+- 可维护性审查：评估代码修改和扩展难度
+- 性能审查：评估代码执行效率
+- 安全性审查：评估代码安全风险
+- 复用性审查：评估代码可复用性
 
-### 10.3 导入路径统一规范
+**禁止使用的方案：**
+- 主观评价：避免基于个人偏好的审查
+- 过度审查：避免对简单代码进行过度审查
+- 形式主义：避免只关注格式而忽略逻辑
 
-#### 10.3.1 ArkUI组件导入规范
-```typescript
-// ✅ 统一使用@kit.ArkUI
-import { 
-    Button, Text, Image, List, ListItem, 
-    ScrollView, Stack, Flex, Video, Slider 
-} from '@kit.ArkUI';
+**可以使用方案：**
+- 自动化工具：使用代码检查工具辅助审查
+- 同行评审：进行同行间的代码审查
+- 标准检查清单：使用标准化的检查清单
 
-// ❌ 避免使用已弃用路径
-// import { Button } from '@ohos.arkui'; // 已弃用
-// import { FlexDirection } from '@ohos.components'; // 已弃用
-```
+**替代方案：**
+- 使用代码质量度量指标
+- 采用持续集成中的代码质量检查
+- 实施代码质量门禁机制
 
-#### 10.3.2 系统API导入规范
-```typescript
-// ✅ 推荐的系统API导入路径
-import UIAbility from '@ohos.app.ability.UIAbility'; // 当前推荐
-import type { Context } from '@ohos.ability.kits.context'; // 当前推荐
-import Ability from '@ohos.app.ability.Ability'; // 当前推荐
+#### 9.1.2 审查清单策略
 
-// ❌ 已弃用的系统API导入路径
-// import { Configuration } from '@ohos.app.ability.UIAbility'; // 已弃用
-// import { CommonConstants } from '@ohos.app.ability.Constants'; // 已弃用
-```
+**建议使用的方案：**
+- 类型安全检查：确保没有使用any和unknown类型
+- 错误处理检查：验证异常处理机制
+- 性能检查：识别性能瓶颈代码
 
-### 10.4 迁移工具和检查
+**禁止使用的方案：**
+- 硬编码检查：避免使用硬编码的检查规则
+- 过度严格：避免过于严格的检查标准
+- 忽略上下文：避免脱离代码上下文的检查
 
-#### 10.4.1 代码检查工具配置
-```json
-// code-linter.json5 - 代码检查配置
-{
-    "rules": {
-        "import-paths": {
-            "level": "error",
-            "message": "请使用@kit.ArkUI替代@arkui/native，符合HarmonyOS API 9规范"
-        },
-        "deprecated-apis": {
-            "level": "error",
-            "message": "检测到已弃用API使用，请迁移到推荐API"
-        }
-    }
-}
-```
+**可以使用方案：**
+- 自定义检查规则：根据项目需求定制检查规则
+- 渐进式检查：逐步引入更严格的检查标准
+- 例外处理：为特殊情况提供例外机制
 
-#### 10.4.2 自动化迁移脚本
-```typescript
-// 自动化API迁移工具示例
-class ApiMigrationTool {
-    private static readonly DEPRECATED_IMPORTS = [
-        '@ohos.arkui',
-        '@ohos.components',
-        '@ohos.app.ability.Context'
-    ];
-    
-    private static readonly REPLACEMENT_MAP = new Map([
-        ['@ohos.arkui', '@kit.ArkUI'],
-        ['@ohos.components', ''], // 删除导入，使用标准样式属性
-        ['@ohos.app.ability.Context', '@ohos.ability.kits.context']
-    ]);
-    
-    public static migrateFile(filePath: string): void {
-        // 读取文件内容
-        // 检测已弃用导入
-        // 执行替换操作
-        // 保存修改后的文件
-    }
-}
-```
+**替代方案：**
+- 使用静态代码分析工具
+- 采用代码质量评分系统
+- 实施代码质量监控
 
-## 11. 最佳实践总结
+### 9.2 文档策略
 
-### 11.1 开发原则
-- **类型安全优先**：始终使用明确的类型声明
-- **单一职责**：每个函数/类只负责一个明确的功能
-- **错误处理完备**：对所有可能出错的情况进行处理
-- **性能意识**：在开发过程中始终考虑性能影响
-- **API兼容性**：关注API版本变化，及时迁移已弃用API
+#### 9.2.1 代码注释策略
 
-### 11.2 代码风格
-- **一致性**：保持团队内的代码风格一致
-- **可读性**：编写易于理解和维护的代码
-- **模块化**：将功能拆分为独立的模块
-- **测试驱动**：优先编写测试用例
+**建议使用的方案：**
+- JSDoc格式：使用标准JSDoc格式编写注释
+- 参数说明：明确说明参数类型和用途
+- 返回值说明：描述方法返回值和可能异常
+- 类级别注释：为类和方法提供完整说明
 
-### 11.3 持续改进
-- **代码审查**：定期进行代码审查和改进
-- **性能监控**：持续监控应用性能指标
-- **技术债务**：及时处理技术债务
-- **知识分享**：促进团队技术成长和知识传承
-- **API更新跟踪**：持续关注HarmonyOS API变化，及时更新代码
+**禁止使用的方案：**
+- 无意义注释：避免编写显而易见的注释
+- 过时注释：避免保留已过时的注释内容
+- 错误注释：避免注释与实际代码不符
 
-此规范文档为ArkTS开发提供了全面的指导，开发团队应严格遵守这些规范，确保代码质量和项目可维护性。基于RayTV项目的实际经验，特别强调了API兼容性和已弃用API迁移的重要性。
+**可以使用方案：**
+- 内联注释：为复杂逻辑提供内联说明
+- TODO注释：标记需要后续处理的部分
+- 示例注释：提供使用示例和场景说明
+
+**替代方案：**
+- 使用自文档化代码
+- 采用文档生成工具
+- 实施代码审查中的文档检查
+
+#### 9.2.2 API文档策略
+
+**建议使用的方案：**
+- 接口文档：为公开接口提供完整文档
+- 类型定义：为复杂类型提供详细说明
+- 使用示例：提供典型使用场景示例
+- 变更记录：记录API变更历史
+
+**禁止使用的方案：**
+- 不完整文档：避免提供不完整的API文档
+- 误导性文档：避免文档与实际行为不符
+- 私有API文档：避免为私有API编写详细文档
+
+**可以使用方案：**
+- 自动生成文档：使用工具自动生成API文档
+- 版本化文档：为不同版本维护相应文档
+- 交互式文档：提供可交互的API文档
+
+**替代方案：**
+- 使用TypeScript类型定义作为文档
+- 采用契约测试验证API行为
+- 实施API设计评审机制
+
+## 10. API兼容性与迁移策略
+
+### 10.1 HarmonyOS API版本兼容性策略
+
+#### 10.1.1 API版本检查策略
+
+**建议使用的方案：**
+- 系统信息检查：使用@ohos.system获取API版本信息
+- 版本比较：检查当前API版本是否支持所需特性
+- 错误处理：妥善处理版本检查过程中的异常
+
+**禁止使用的方案：**
+- 硬编码版本：避免在代码中硬编码API版本号
+- 忽略兼容性：避免忽略API版本兼容性问题
+- 静默失败：避免在版本检查失败时静默处理
+
+**可以使用方案：**
+- 条件编译：根据API版本进行条件编译
+- 特性检测：运行时检测特定API特性支持
+- 降级处理：为不支持的特性提供降级方案
+
+**替代方案：**
+- 使用多版本构建配置
+- 采用特性标志管理
+- 实施渐进式增强策略
+
+#### 10.1.2 版本兼容性处理策略
+
+**建议使用的方案：**
+- 最小版本检查：设置最小支持的API版本
+- 特性支持判断：根据版本判断特性可用性
+- 适配器模式：使用适配器处理版本差异
+
+**禁止使用的方案：**
+- 直接版本判断：避免直接判断具体版本号
+- 忽略警告：避免忽略版本兼容性警告
+- 强制升级：避免强制用户升级系统版本
+
+**可以使用方案：**
+- 运行时检测：在运行时检测API可用性
+- 回退机制：为不支持的功能提供回退方案
+- 用户提示：向用户提示版本兼容性问题
+
+**替代方案：**
+- 使用特性检测库
+- 采用多目标构建
+- 实施版本隔离架构
+
+### 10.2 已弃用API迁移策略
+
+#### 10.2.1 常见已弃用API替换策略
+
+**建议使用的方案：**
+- @kit.ArkUI：使用@kit.ArkUI替代@ohos.arkui
+- 标准样式属性：使用字符串值替代枚举值
+- 新路径导入：使用@ohos.ability.kits.context替代旧路径
+
+**禁止使用的方案：**
+- @ohos.arkui：严格禁止使用已弃用的@ohos.arkui
+- @ohos.components：禁止使用已弃用的组件库
+- 旧版Context：禁止使用@ohos.app.ability.Context
+
+**可以使用方案：**
+- 渐进式迁移：逐步替换已弃用API
+- 条件编译：为不同版本提供兼容性支持
+- 适配器层：创建适配器处理API差异
+
+**替代方案：**
+- 使用第三方UI库
+- 自定义组件封装
+- 抽象层设计
+
+#### 10.2.2 样式属性迁移策略
+
+**建议使用的方案：**
+- 字符串值：使用字符串值替代枚举值
+- 标准属性：使用ArkTS标准样式属性
+- 统一格式：保持样式属性格式一致
+
+**禁止使用的方案：**
+- 枚举值：禁止使用FlexDirection.Row等枚举值
+- 混合使用：禁止混合使用枚举值和字符串值
+- 非标准属性：禁止使用非标准样式属性
+
+**可以使用方案：**
+- 类型定义：为样式属性定义类型
+- 工具函数：使用工具函数处理样式转换
+- 配置管理：通过配置管理样式属性
+
+**替代方案：**
+- 使用CSS-in-JS方案
+- 采用主题系统
+- 实施设计系统
+
+### 10.3 导入路径统一策略
+
+#### 10.3.1 ArkUI组件导入策略
+
+**建议使用的方案：**
+- @kit.ArkUI：统一使用@kit.ArkUI导入组件
+- 组件列表：明确导入所需的具体组件
+- 类型导入：使用type关键字导入类型定义
+
+**禁止使用的方案：**
+- @ohos.arkui：严格禁止使用已弃用的@ohos.arkui
+- @ohos.components：禁止使用已弃用的组件库
+- 通配符导入：避免使用通配符导入所有组件
+
+**可以使用方案：**
+- 别名导入：为长路径使用别名
+- 分组导入：按功能分组导入相关组件
+- 延迟导入：对大型组件使用延迟导入
+
+**替代方案：**
+- 使用模块打包器优化导入
+- 采用树摇优化减少包大小
+- 实施代码分割策略
+
+#### 10.3.2 系统API导入策略
+
+**建议使用的方案：**
+- 标准路径：使用当前推荐的系统API导入路径
+- 类型导入：对类型定义使用type关键字
+- 最小导入：只导入实际使用的API
+
+**禁止使用的方案：**
+- 已弃用路径：禁止使用已弃用的系统API路径
+- 非标准导入：避免使用非标准导入方式
+- 冗余导入：避免导入未使用的API
+
+**可以使用方案：**
+- 版本适配：为不同版本提供适配导入
+- 条件导入：根据环境条件选择导入路径
+- 抽象导入：通过抽象层管理导入路径
+
+**替代方案：**
+- 使用依赖注入容器
+- 采用服务定位器模式
+- 实施模块联邦架构
+
+### 10.4 迁移工具和检查策略
+
+#### 10.4.1 代码检查工具配置策略
+
+**建议使用的方案：**
+- 错误级别检查：对已弃用API使用error级别检查
+- 明确消息：提供清晰的迁移指导消息
+- 路径检查：严格检查导入路径规范性
+
+**禁止使用的方案：**
+- 宽松检查：避免使用warning级别检查已弃用API
+- 模糊消息：避免提供模糊的检查消息
+- 忽略检查：禁止忽略导入路径检查
+
+**可以使用方案：**
+- 自定义规则：根据项目需求定制检查规则
+- 渐进式检查：逐步引入更严格的检查标准
+- 例外配置：为特殊情况配置例外规则
+
+**替代方案：**
+- 使用IDE插件进行实时检查
+- 采用CI/CD流水线集成检查
+- 实施代码质量门禁机制
+
+#### 10.4.2 自动化迁移策略
+
+**建议使用的方案：**
+- 映射替换：建立已弃用API到新API的映射关系
+- 批量处理：支持批量文件迁移处理
+- 备份机制：提供迁移前的备份功能
+
+**禁止使用的方案：**
+- 强制迁移：避免无确认的强制迁移
+- 丢失数据：禁止迁移过程中丢失代码
+- 破坏性修改：避免破坏现有功能
+
+**可以使用方案：**
+- 交互式迁移：提供交互式迁移确认
+- 增量迁移：支持增量式迁移处理
+- 回滚机制：提供迁移失败的回滚功能
+
+**替代方案：**
+- 使用官方迁移工具
+- 采用手动迁移验证
+- 实施迁移测试套件
+
+## 11. 最佳实践策略
+
+### 11.1 开发原则策略
+
+**建议使用的方案：**
+- 类型安全优先：始终使用明确的类型声明
+- 单一职责原则：每个函数/类只负责一个明确功能
+- 错误处理完备：对所有可能出错的情况进行处理
+- 性能意识：在开发过程中始终考虑性能影响
+- API兼容性：关注API版本变化，及时迁移已弃用API
+
+**禁止使用的方案：**
+- 类型模糊：避免使用any和unknown类型
+- 职责混淆：禁止函数/类承担过多职责
+- 忽略错误：避免忽略潜在的错误情况
+- 性能忽视：禁止忽视性能影响
+- API滞后：避免使用已弃用的API
+
+**可以使用方案：**
+- 渐进式类型：逐步引入更严格的类型检查
+- 职责分解：将复杂职责分解为多个小职责
+- 错误分类：对不同类型的错误进行分类处理
+- 性能优化：在必要时进行性能优化
+- 版本适配：为不同API版本提供适配方案
+
+**替代方案：**
+- 使用函数式编程范式
+- 采用领域驱动设计（DDD）
+- 实施测试驱动开发（TDD）
+- 使用性能分析工具
+- 采用微服务架构
+
+### 11.2 代码风格策略
+
+**建议使用的方案：**
+- 一致性：保持团队内的代码风格一致
+- 可读性：编写易于理解和维护的代码
+- 模块化：将功能拆分为独立的模块
+- 测试驱动：优先编写测试用例
+
+**禁止使用的方案：**
+- 风格混乱：避免代码风格不一致
+- 复杂难懂：禁止编写难以理解的代码
+- 巨型模块：避免创建过于庞大的模块
+- 测试滞后：禁止在功能完成后才编写测试
+
+**可以使用方案：**
+- 代码格式化：使用自动化代码格式化工具
+- 代码审查：通过代码审查确保代码质量
+- 模块拆分：将大模块拆分为更小的功能单元
+- 测试覆盖：确保测试覆盖关键业务逻辑
+
+**替代方案：**
+- 使用代码质量度量工具
+- 采用结对编程实践
+- 实施持续集成流程
+- 使用行为驱动开发（BDD）
+
+### 11.3 持续改进策略
+
+**建议使用的方案：**
+- 代码审查：定期进行代码审查和改进
+- 性能监控：持续监控应用性能指标
+- 技术债务：及时处理技术债务
+- 知识分享：促进团队技术成长和知识传承
+- API更新跟踪：持续关注HarmonyOS API变化
+
+**禁止使用的方案：**
+- 审查缺失：避免缺少代码审查环节
+- 性能忽视：禁止忽视性能监控
+- 债务积累：避免技术债务的持续积累
+- 知识封闭：禁止知识分享的封闭态度
+- API滞后：避免对API更新的忽视
+
+**可以使用方案：**
+- 自动化审查：使用自动化代码审查工具
+- 性能基准：建立性能基准和监控体系
+- 债务管理：建立技术债务管理机制
+- 技术分享：定期组织技术分享会议
+- 更新计划：制定API更新迁移计划
+
+**替代方案：**
+- 使用DevOps实践
+- 采用敏捷开发方法
+- 实施持续交付流程
+- 使用学习型组织模式
+- 采用云原生架构
+
+此规范文档为ArkTS开发提供了全面的策略指导，开发团队应严格遵守这些策略，确保代码质量和项目可维护性。基于RayTV项目的实际经验，特别强调了API兼容性和已弃用API迁移的重要性。

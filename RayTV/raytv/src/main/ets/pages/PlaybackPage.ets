@@ -1,4 +1,4 @@
-import { Stack, Video, Image, Text, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction } from '@kit.ArkUI';
+import { Stack, Video, Image, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction } from '@kit.ArkUI';
 import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { playbackService } from '../service/media/PlaybackService';
@@ -648,23 +648,13 @@ struct PlaybackPage {
    */
   @Builder
   private renderLoading(): void {
-    Stack.create();
-    Stack.className("loading-overlay");
-    LoadingProgress.create();
-    LoadingProgress.className("loading-progress");
-    LoadingProgress.color("#FF4500");
-    LoadingProgress.pop();
-    Text.create();
-    Text.className("loading-text");
-    Text.content("正在加载...");
-    Text.pop();
-    if (this.bufferPercentage > 0) {
-      Text.create();
-      Text.className("buffer-text");
-      Text.content(`已缓冲 ${this.bufferPercentage}%`);
-      Text.pop();
+    Stack({ className: "loading-overlay" }) {
+      LoadingProgress({ className: "loading-progress", color: "#FF4500" })
+      Text("正在加载...").className("loading-text")
+      if (this.bufferPercentage > 0) {
+        Text(`已缓冲 ${this.bufferPercentage}%`).className("buffer-text")
+      }
     }
-    Stack.pop();
   }
   
   /**
@@ -672,24 +662,13 @@ struct PlaybackPage {
    */
   @Builder
   private renderError(): void {
-    Stack.create();
-    Stack.className("error-overlay");
-    Text.create();
-    Text.className("error-icon");
-    Text.content("⚠️");
-    Text.pop();
-    Text.create();
-    Text.className("error-message");
-    Text.content(this.errorMessage);
-    Text.pop();
-    Button.create();
-    Button.className("retry-button");
-    Button.onClick(() => this.initializePlayback());
-    Text.create();
-    Text.content("重试");
-    Text.pop();
-    Button.pop();
-    Stack.pop();
+    Stack({ className: "error-overlay" }) {
+      Text("⚠️").className("error-icon")
+      Text(this.errorMessage).className("error-message")
+      Button({ className: "retry-button", onClick: () => this.initializePlayback() }) {
+        Text("重试")
+      }
+    }
   }
   
   /**
@@ -697,38 +676,20 @@ struct PlaybackPage {
    */
   @Builder
   private renderTopControls(): void {
-    Stack.create();
-    Stack.className("top-controls");
-    Button.create();
-    Button.className("back-button");
-    Button.onClick(this.handleBack);
-    Text.create();
-    Text.content("← 返回");
-    Text.pop();
-    Button.pop();
-    Stack.create();
-    Stack.className("title-container");
-    Text.create();
-    Text.className("media-title");
-    Text.numberOfLines(1);
-    Text.content(this.mediaTitle);
-    Text.pop();
-    if (this.episodeName) {
-      Text.create();
-      Text.className("episode-name");
-      Text.numberOfLines(1);
-      Text.content(this.episodeName);
-      Text.pop();
+    Stack({ className: "top-controls" }) {
+      Button({ className: "back-button", onClick: this.handleBack }) {
+        Text("← 返回")
+      }
+      Stack({ className: "title-container" }) {
+        Text(this.mediaTitle).className("media-title").numberOfLines(1)
+        if (this.episodeName) {
+          Text(this.episodeName).className("episode-name").numberOfLines(1)
+        }
+      }
+      Button({ className: "settings-button", onClick: () => this.showSpeedMenu = !this.showSpeedMenu }) {
+        Text(`${this.playbackSpeed}x`)
+      }
     }
-    Stack.pop();
-    Button.create();
-    Button.className("settings-button");
-    Button.onClick(() => this.showSpeedMenu = !this.showSpeedMenu);
-    Text.create();
-    Text.content(`${this.playbackSpeed}x`);
-    Text.pop();
-    Button.pop();
-    Stack.pop();
   }
   
   /**
@@ -736,73 +697,47 @@ struct PlaybackPage {
    */
   @Builder
   private renderBottomControls(): void {
-    Stack.create();
-    Stack.className("bottom-controls");
-    Button.create();
-    Button.className("play-pause-button");
-    Button.onClick(this.togglePlayPause);
-    Text.create();
-    Text.content(this.isPlaying ? '⏸' : '▶');
-    Text.pop();
-    Button.pop();
-    
-    Stack.create();
-    Stack.className("progress-container");
-    Slider.create();
-    Slider.className("progress-slider");
-    Slider.value((this.currentTime / this.duration) * 100 || 0);
-    Slider.min(0);
-    Slider.max(100);
-    Slider.onChange(this.handleProgressChange);
-    Slider.pop();
-    Flex.create();
-    Flex.className("time-display");
-    Text.create();
-    Text.className("current-time");
-    Text.content(this.formatTime(this.currentTime));
-    Text.pop();
-    Text.create();
-    Text.className("duration");
-    Text.content(this.formatTime(this.duration));
-    Text.pop();
-    Flex.pop();
-    Stack.pop();
-    
-    Button.create();
-    Button.className("mute-button");
-    Button.onClick(this.toggleMute);
-    Text.create();
-    Text.content(this.isMuted ? '🔇' : '🔊');
-    Text.pop();
-    Button.pop();
-    
-    Stack.create();
-    Stack.className("volume-container");
-    Slider.create();
-    Slider.className("volume-slider");
-    Slider.value(this.volume * 100);
-    Slider.min(0);
-    Slider.max(100);
-    Slider.onChange(this.handleVolumeChange);
-    Slider.pop();
-    Stack.pop();
-    
-    Button.create();
-    Button.className("source-button");
-    Button.onClick(() => this.showSourceMenu = !this.showSourceMenu);
-    Text.create();
-    Text.content("源");
-    Text.pop();
-    Button.pop();
-    
-    Button.create();
-    Button.className("fullscreen-button");
-    Button.onClick(this.toggleFullscreen);
-    Text.create();
-    Text.content(this.isFullscreen ? '⤢' : '⤡');
-    Text.pop();
-    Button.pop();
-    Stack.pop();
+    Stack({ className: "bottom-controls" }) {
+      Button({ className: "play-pause-button", onClick: this.togglePlayPause }) {
+        Text(this.isPlaying ? '⏸' : '▶')
+      }
+      
+      Stack({ className: "progress-container" }) {
+        Slider({ 
+          className: "progress-slider",
+          value: (this.currentTime / this.duration) * 100 || 0,
+          min: 0,
+          max: 100,
+          onChange: this.handleProgressChange 
+        })
+        Flex({ className: "time-display" }) {
+          Text(this.formatTime(this.currentTime)).className("current-time")
+          Text(this.formatTime(this.duration)).className("duration")
+        }
+      }
+      
+      Button({ className: "mute-button", onClick: this.toggleMute }) {
+        Text(this.isMuted ? '🔇' : '🔊')
+      }
+      
+      Stack({ className: "volume-container" }) {
+        Slider({ 
+          className: "volume-slider",
+          value: this.volume * 100,
+          min: 0,
+          max: 100,
+          onChange: this.handleVolumeChange 
+        })
+      }
+      
+      Button({ className: "source-button", onClick: () => this.showSourceMenu = !this.showSourceMenu }) {
+        Text("源")
+      }
+      
+      Button({ className: "fullscreen-button", onClick: this.toggleFullscreen }) {
+        Text(this.isFullscreen ? '⤢' : '⤡')
+      }
+    }
   }
   
   /**
@@ -812,19 +747,17 @@ struct PlaybackPage {
   private renderSpeedMenu(): void {
     if (!this.showSpeedMenu) return;
     
-    Stack.create();
-    Stack.className("speed-menu");
-    playbackService.getSupportedPlaybackSpeeds().forEach((speed) => {
-      Button.create();
-      Button.key(speed.toString());
-      Button.className(`speed-option ${this.playbackSpeed === speed ? 'selected' : ''}`);
-      Button.onClick(() => this.setPlaybackSpeed(speed));
-      Text.create();
-      Text.content(playbackService.getPlaybackSpeedText(speed));
-      Text.pop();
-      Button.pop();
-    });
-    Stack.pop();
+    Stack({ className: "speed-menu" }) {
+      playbackService.getSupportedPlaybackSpeeds().forEach((speed) => {
+        Button({ 
+          key: speed.toString(),
+          className: `speed-option ${this.playbackSpeed === speed ? 'selected' : ''}`,
+          onClick: () => this.setPlaybackSpeed(speed) 
+        }) {
+          Text(playbackService.getPlaybackSpeedText(speed))
+        }
+      })
+    }
   }
   
   /**
@@ -834,238 +767,210 @@ struct PlaybackPage {
   private renderSourceMenu(): void {
     if (!this.showSourceMenu) return;
     
-    Stack.create();
-    Stack.style({
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: '#4CAF50',
-      height: '80%',
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 20,
-      zIndex: 1000
-    });
-    
-    // 菜单标题
-    Flex.create();
-    Flex.style({
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 20
-    });
-    Text.create();
-    Text.style({
-      fontSize: 28,
-      color: '#FFFFFF',
-      fontWeight: 700
-    });
-    Text.content('切换片源');
-    Text.pop();
-    Button.create();
-    Button.style({
-      backgroundColor: 'transparent'
-    });
-    Button.onClick(() => this.showSourceMenu = false);
-    Text.create();
-    Text.style({
-      fontSize: 24,
-      color: '#FFFFFF'
-    });
-    Text.content('✕');
-    Text.pop();
-    Button.pop();
-    Flex.pop();
-    
-    // 搜索框
-    Stack.create();
-    Stack.style({
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#FFFFFF',
-      borderRadius: 25,
-      paddingHorizontal: 20,
-      marginBottom: 20,
-      height: 50
-    });
-    Text.create();
-    Text.style({
-      fontSize: 24,
-      color: '#999999',
-      marginRight: 10
-    });
-    Text.content('🔍');
-    Text.pop();
-    TextInput.create();
-    TextInput.style({
-      flex: 1,
-      fontSize: 24,
-      color: '#333333'
-    });
-    TextInput.value(this.searchText);
-    TextInput.onChange((text) => this.handleSearchChange(text));
-    TextInput.onFocusChange((focused) => this.handleSearchFocusChange(focused));
-    TextInput.placeholder('搜索片源...');
-    TextInput.placeholderColor('#999999');
-    TextInput.pop();
-    if (this.searchText.length > 0) {
-      Button.create();
-      Button.style({
-        backgroundColor: 'transparent'
-      });
-      Button.onClick(() => this.clearSearchText());
-      Text.create();
-      Text.style({
-        fontSize: 24,
-        color: '#999999'
-      });
-      Text.content('✕');
-      Text.pop();
-      Button.pop();
-    }
-    Stack.pop();
-    
-    // 搜索结果数量提示
-    Text.create();
-    Text.style({
-      fontSize: 24,
-      color: '#FFFFFF',
-      fontWeight: 600,
-      marginBottom: 10
-    });
-    Text.content(`共找到 ${this.filteredSources.length} 个片源`);
-    Text.pop();
-    
-    // 片源列表
-    if (this.filteredSources.length === 0) {
-      Stack.create();
-      Stack.style({
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-      });
-      Text.create();
-      Text.style({
-        fontSize: 24,
-        color: '#FFFFFF'
-      });
-      Text.content('暂无匹配的片源');
-      Text.pop();
-      Stack.pop();
-    } else {
-      List.create();
-      List.style({
-        flex: 1
-      });
-      this.filteredSources.forEach((source, index) => {
-        ListItem.create();
-        ListItem.key(index.toString());
-        ListItem.style({
-          paddingVertical: 15
-        });
-        Button.create();
-        Button.style({
-          backgroundColor: '#66BB6A',
-          padding: 20,
-          borderRadius: 10,
-          width: '100%'
-        });
-        Button.onClick(() => {
-          this.switchPlaySource(source);
-          this.showSourceMenu = false;
-        });
-        Flex.create();
-        Flex.style({
+    Stack({
+      style: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#4CAF50',
+        height: '80%',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        zIndex: 1000
+      }
+    }) {
+      // 菜单标题
+      Flex({
+        style: {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          width: '100%'
-        });
-        Text.create();
-        Text.style({
-          fontSize: 26,
-          color: '#FFFFFF',
-          fontWeight: 600
-        });
-        Text.content(source.name || `播放源${index + 1}`);
-        Text.pop();
-        if (source.quality) {
-          Flex.create();
-          Flex.style({
-            backgroundColor: '#FFEB3B',
-            paddingHorizontal: 12,
-            paddingVertical: 4,
-            borderRadius: 12
-          });
-          Text.create();
-          Text.style({
-            fontSize: 20,
-            color: '#000000',
-            fontWeight: 700
-          });
-          Text.content(source.quality);
-          Text.pop();
-          Flex.pop();
+          marginBottom: 20
         }
-        Flex.pop();
-        Button.pop();
-        ListItem.pop();
-      });
-      List.pop();
-    }
+      }) {
+        Text('切换片源')
+          .fontSize(28)
+          .fontColor('#FFFFFF')
+          .fontWeight(700)
+        Button({
+          style: {
+            backgroundColor: 'transparent'
+          },
+          onClick: () => this.showSourceMenu = false
+        }) {
+          Text('✕')
+            .fontSize(24)
+            .fontColor('#FFFFFF')
+        }
+      }
     
-    Stack.pop();
+      // 搜索框
+      Stack({
+        style: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          borderRadius: 25,
+          paddingHorizontal: 20,
+          marginBottom: 20,
+          height: 50
+        }
+      }) {
+        Text('🔍')
+          .fontSize(24)
+          .fontColor('#999999')
+          .margin({ right: 10 })
+        TextInput({
+          style: {
+            flex: 1,
+            fontSize: 24,
+            color: '#333333'
+          },
+          value: this.searchText,
+          onChange: (text) => this.handleSearchChange(text),
+          onFocusChange: (focused) => this.handleSearchFocusChange(focused),
+          placeholder: '搜索片源...',
+          placeholderColor: '#999999'
+        })
+        if (this.searchText.length > 0) {
+          Button({
+            style: {
+              backgroundColor: 'transparent'
+            },
+            onClick: () => this.clearSearchText()
+          }) {
+            Text('✕')
+          .fontSize(24)
+          .fontColor('#999999')
+          }
+        }
+      }
+      
+      // 搜索结果数量提示
+      Text(`共找到 ${this.filteredSources.length} 个片源`)
+        .fontSize(24)
+        .fontColor('#FFFFFF')
+        .fontWeight(600)
+        .margin({ bottom: 10 })
+    
+      // 片源列表
+      List({
+        style: {
+          flex: 1,
+          backgroundColor: 'transparent'
+        },
+        divider: {
+          strokeWidth: 1,
+          color: '#FFFFFF',
+          startMargin: 0,
+          endMargin: 0
+        }
+      }) {
+        this.filteredSources.forEach((source, index) => {
+          ListItem({
+            key: source.id,
+            style: {
+              backgroundColor: this.playSource?.id === source.id ? '#FFFFFF' : 'transparent',
+              borderRadius: 10,
+              marginBottom: 10,
+              padding: 15
+            },
+            onClick: () => this.switchPlaySource(source)
+          }) {
+            Flex({
+              style: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }
+            }) {
+              // 片源信息
+              Flex({
+                style: {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  flex: 1
+                }
+              }) {
+                Text(source.name || `播放源${index + 1}`)
+                  .fontSize(26)
+                  .fontColor(this.playSource?.id === source.id ? '#4CAF50' : '#FFFFFF')
+                  .fontWeight(600)
+                  .margin({ bottom: 5 })
+                Text(source.url)
+                  .fontSize(22)
+                  .fontColor(this.playSource?.id === source.id ? '#666666' : '#CCCCCC')
+              }
+              
+              // 质量标签
+              if (source.quality) {
+                Flex({
+                  style: {
+                    backgroundColor: '#FFEB3B',
+                    paddingHorizontal: 12,
+                    paddingVertical: 4,
+                    borderRadius: 12
+                  }
+                }) {
+                  Text(source.quality)
+                    .fontSize(20)
+                    .fontColor('#000000')
+                    .fontWeight(700)
+                }
+              }
+              
+              // 选中标记
+              if (this.playSource?.id === source.id) {
+                Text('✓')
+                  .fontSize(24)
+                  .fontColor('#4CAF50')
+              }
+            }
+          }
+        }
+    }
   }
   
   /**
    * 组件渲染
    */
   build() {
-    Stack.create();
-    Stack.className(`playback-page ${this.isFullscreen ? 'fullscreen' : ''}`);
-    Stack.onClick(this.handleScreenTap);
-    
-    // 视频播放区域
-    Stack.create();
-    Stack.className("video-container");
-    
-    // 这里应该使用实际的视频播放器组件
-    // 由于HarmonyOS的Video组件具体API可能不同，这里用占位符表示
-    Image.create();
-    Image.src("https://via.placeholder.com/1920x1080?text=Video+Player");
-    Image.className("video-placeholder");
-    Image.objectFit("cover");
-    Image.pop();
-    
-    // 加载状态
-    if (this.isLoading) {
-      this.renderLoading();
+    Stack({ className: `playback-page ${this.isFullscreen ? 'fullscreen' : ''}`, onClick: this.handleScreenTap }) {
+      // 视频播放区域
+      Stack({ className: "video-container" }) {
+        // 这里应该使用实际的视频播放器组件
+        // 由于HarmonyOS的Video组件具体API可能不同，这里用占位符表示
+        Image("https://via.placeholder.com/1920x1080?text=Video+Player")
+          .className("video-placeholder")
+          .objectFit("cover")
+        
+        // 加载状态
+        if (this.isLoading) {
+          this.renderLoading();
+        }
+        
+        // 错误状态
+        if (this.errorMessage) {
+          this.renderError();
+        }
+        
+        // 播放控制界面
+        if (this.showControls) {
+          Stack({ className: "controls-overlay" }) {
+            this.renderTopControls();
+            this.renderBottomControls();
+          }
+        }
+        
+        // 播放速度菜单
+        this.renderSpeedMenu();
+        
+        // 播放源菜单
+        this.renderSourceMenu();
+      }
     }
-    
-    // 错误状态
-    if (this.errorMessage) {
-      this.renderError();
-    }
-    
-    // 播放控制界面
-    if (this.showControls) {
-      Stack.create();
-      Stack.className("controls-overlay");
-      this.renderTopControls();
-      this.renderBottomControls();
-      Stack.pop();
-    }
-    
-    // 播放速度菜单
-    this.renderSpeedMenu();
-    
-    // 播放源菜单
-    this.renderSourceMenu();
-    
-    Stack.pop();
-    Stack.pop();
   }
 }
 
