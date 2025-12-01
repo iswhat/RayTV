@@ -1,11 +1,9 @@
-import { hapTasks } from '@ohos/hvigor-ohos-plugin';
-
 // Module-level Hvigor configuration
-const config: any = {
+const config = {
   system: [
     {
       name: 'hap',
-      apply: hapTasks
+      apply: require('@ohos/hvigor-ohos-plugin').hapTasks
     }
   ],
   plugins: []

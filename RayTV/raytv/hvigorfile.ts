@@ -1,14 +1,9 @@
+// raytv模块hvigor配置
 import { hapTasks } from '@ohos/hvigor-ohos-plugin';
 
-// Hvigor configuration - using any type to avoid TypeScript import issues
-const config: any = {
-  system: [
-    {
-      name: 'hap',
-      apply: hapTasks
-    }
-  ],
-  plugins: []       /* Custom plugin to extend the functionality of Hvigor. */
+const config: { system: any, plugins: any[] } = {
+  system: hapTasks,
+  plugins: []
 };
 
 export default config;

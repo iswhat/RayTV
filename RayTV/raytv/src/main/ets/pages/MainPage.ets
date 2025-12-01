@@ -3,6 +3,7 @@ import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
 import { configService } from '../service/config/ConfigService';
+import { RecommendationRepository, RecommendationType, RecommendationItem } from '../data/repository/RecommendationRepository';
 
 /**
  * 应用主页面
@@ -28,47 +29,108 @@ struct MainPage {
   
   // 生命周期
   aboutToAppear() {
-    this.loadFeaturedContent();
+    Logger.info(`${this.TAG}: MainPage about to appear`);
+    
+    // 初始化并检查配置
+    this.initializeConfig();
   }
   
-  // 加载推荐内容
-  private loadFeaturedContent() {
-    Logger.info(`${this.TAG}: Loading featured content`);
-    
-    // 模拟加载推荐内容
-    setTimeout(() => {
-      this.featuredMedia = [
-        {
-          id: '1',
-          title: '热门电影推荐',
-          cover: 'https://example.com/cover1.jpg',
-          type: 'movie'
-        },
-        {
-          id: '2',
-          title: '最新剧集更新',
-          cover: 'https://example.com/cover2.jpg',
-          type: 'series'
-        },
-        {
-          id: '3',
-          title: '精选纪录片',
-          cover: 'https://example.com/cover3.jpg',
-          type: 'documentary'
+  /**
+   * 初始化配置并加载数据
+   */
+  private async initializeConfig() {
+    try {
+      // 确保配置服务已初始化
+      if (!configService.isInitialized) {
+        await configService.initializeConfig();
+        Logger.info(`${this.TAG}: ConfigService initialized successfully`);
+      }
+      
+      // 检查是否应该显示推荐内容
+      const showRecommendations = configService.getConfig('showRecommendedContent') as boolean;
+      
+      if (showRecommendations) {
+        // 加载推荐内容
+        this.loadFeaturedMedia();
+      } else {
+        Logger.info(`${this.TAG}: Recommended content is disabled in config`);
+        this.isLoading = false;
+      }
+    } catch (error) {
+      Logger.error(`${this.TAG}: Failed to initialize config: ${error}`);
+      // 发生错误时仍尝试加载内容
+      this.loadFeaturedMedia();
+    }
+  }
+  
+  /**
+   * 加载推荐内容
+   */
+  private async loadFeaturedMedia() {
+    try {
+      this.isLoading = true;
+      const recommendationRepo = RecommendationRepository.getInstance();
+      
+      // 获取精选推荐内容
+      const response = await recommendationRepo.getRecommendations({
+        type: RecommendationType.FEATURED,
+        limit: 10,
+        contentTypes: ['video']
+      });
+      
+      // 转换推荐项目为页面所需格式
+      this.featuredMedia = response.items.map((item: RecommendationItem) => {
+        // 提取数据中的必要信息
+        const data = item.data || {};
+        return {
+          id: item.id,
+          title: data.title as string || '未命名内容',
+          cover: data.coverUrl as string || data.imageUrl as string || '/resources/images/default_cover.jpg',
+          type: data.type as string || item.type,
+          siteKey: data.siteKey as string
+        };
+      });
+      
+      Logger.info(`${this.TAG}: Loaded ${this.featuredMedia.length} featured media items`);
+    } catch (error) {
+      Logger.error(`${this.TAG}: Failed to load featured media: ${error}`);
+      
+      // 尝试从MediaService获取数据作为后备
+      try {
+        Logger.info(`${this.TAG}: Trying to load data from MediaService as fallback`);
+        const fallbackData = await mediaService.getPopularContent();
+        
+        if (fallbackData && fallbackData.length > 0) {
+          this.featuredMedia = fallbackData.map((item: any) => ({
+            id: item.id || String(Math.random()),
+            title: item.title || '未命名内容',
+            cover: item.coverUrl || item.imageUrl || '/resources/images/default_cover.jpg',
+            type: item.type || 'video',
+            siteKey: item.siteKey
+          }));
+          Logger.info(`${this.TAG}: Successfully loaded ${this.featuredMedia.length} items from MediaService`);
+        } else {
+          // 如果所有数据来源都失败，使用空数组
+          this.featuredMedia = [];
+          Logger.warn(`${this.TAG}: No fallback content available`);
         }
-      ];
+      } catch (fallbackError) {
+        Logger.error(`${this.TAG}: Failed to load fallback data: ${fallbackError}`);
+        this.featuredMedia = [];
+      }
+    } finally {
       this.isLoading = false;
-    }, 1000);
+    }
   }
   
   // 跳转到分类页面
   private navigateToCategory() {
-    AppNavigator.getInstance().navigateToCategory();
+    AppNavigator.getInstance().navigateToCategory({ id: "", name: "", type: "" });
   }
   
   // 跳转到搜索页面
   private navigateToSearch() {
-    AppNavigator.getInstance().navigateToSearch();
+    AppNavigator.getInstance().navigateToSearch("");
   }
   
   // 跳转到设置页面

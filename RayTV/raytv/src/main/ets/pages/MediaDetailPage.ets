@@ -356,24 +356,38 @@ struct MediaDetailPage {
   /**
    * 处理收藏/取消收藏
    */
-  private handleToggleFavorite(): void {
+  private async handleToggleFavorite(): Promise<void> {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
     try {
-      // 切换收藏状态（即使没有favoriteService也能提供视觉反馈）
+      // 先记录当前状态，以便在操作失败时恢复
+      const originalState = this.isFavorite;
+      
+      // 立即更新UI状态，提供即时反馈
       this.isFavorite = !this.isFavorite;
       
-      // 尝试调用favoriteService（但不依赖它）
-      try {
-        // 模拟收藏/取消收藏操作
-        Logger.info(this.TAG, this.isFavorite ? 'Added to favorites' : 'Removed from favorites');
-      } catch (e) {
-        // 忽略favoriteService相关的错误
-        Logger.error(this.TAG, `Favorite service error: ${e}`);
+      // 创建收藏项对象
+      const favoriteItem: FavoriteItem = {
+        id: `${this.siteKey}_${this.mediaId}`,
+        mediaId: this.mediaId,
+        siteKey: this.siteKey,
+        title: this.mediaDetail.title,
+        coverUrl: this.mediaDetail.coverUrl,
+        type: this.mediaDetail.type,
+        favoriteTime: Date.now()
+      };
+      
+      // 执行真实的收藏/取消收藏操作
+      if (this.isFavorite) {
+        await favoriteService.addToFavorites(favoriteItem);
+        Logger.info(this.TAG, 'Added to favorites successfully');
+      } else {
+        await favoriteService.removeFromFavorites(this.mediaId, this.siteKey);
+        Logger.info(this.TAG, 'Removed from favorites successfully');
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to toggle favorite: ${error}`);
-      // 恢复之前的状态
+      // 操作失败，恢复之前的状态
       this.isFavorite = !this.isFavorite;
     }
   }
@@ -411,7 +425,7 @@ struct MediaDetailPage {
   /**
    * 处理播放源点击
    */
-  private handlePlaySourceClick(source: PlaySource): void {
+  private async handlePlaySourceClick(source: PlaySource): Promise<void> {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
     try {
@@ -428,34 +442,25 @@ struct MediaDetailPage {
         // 尝试获取上次观看进度
         if (episodeId) {
           try {
-            // 使用try-catch避免依赖问题
-            const historyService = { getWatchHistory: () => Promise.resolve(null) };
-            historyService.getWatchHistory(
+            // 使用真实的historyService获取观看历史
+            const watchHistory = await historyService.getWatchHistory(
               this.mediaId,
               this.siteKey,
               episodeId
-            ).then(watchHistory => {
-              if (watchHistory && watchHistory.position > 0) {
-                currentPlayPosition = watchHistory.position;
-              }
-              
-              // 跳转到播放页面
-              this.navigateToPlayback(episodeId, episodeName, source, currentPlayPosition);
-            }).catch(() => {
-              // 即使获取历史记录失败，仍继续跳转到播放页面
-              this.navigateToPlayback(episodeId, episodeName, source, 0);
-            });
+            );
+            
+            if (watchHistory && watchHistory.position > 0) {
+              currentPlayPosition = watchHistory.position;
+            }
           } catch (e) {
-            // 即使historyService不可用，仍继续跳转到播放页面
-            this.navigateToPlayback(episodeId, episodeName, source, 0);
+            // 获取历史记录失败，使用默认进度
+            Logger.error(this.TAG, `Failed to get watch history: ${e}`);
           }
-        } else {
-          this.navigateToPlayback(episodeId, episodeName, source, 0);
         }
-      } else {
-        // 没有剧集时也尝试播放
-        this.navigateToPlayback(episodeId, episodeName, source, 0);
       }
+      
+      // 跳转到播放页面
+      this.navigateToPlayback(episodeId, episodeName, source, currentPlayPosition);
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle play source click: ${error}`);
       this.errorMessage = '播放失败';

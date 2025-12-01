@@ -11,8 +11,7 @@
     "version": "hvigorw --version"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@ohos/hvigor-ohos-plugin": "4.0.5"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "json5": "^2.2.3"

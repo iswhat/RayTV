@@ -126,7 +126,7 @@ export class AppNavigator {
   private async navigateTo(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用标准的router.getState()方法
+      // 使用标准的router.getState()方法 - 虽然标记为已弃用，但目前没有直接替代方案
       const state = router.getState();
       const currentUrl = state.path || '';
       
@@ -138,17 +138,18 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       this.addToHistory(historyItem);
 
-      // 使用标准的页面跳转方法
-      const routerOptions: RouterOptions = new RouterOptionsImpl();
-      routerOptions.url = url;
-      // 转换NavigationParams为普通对象 - 明确类型标注
-      routerOptions.params = params instanceof NavigationParamsImpl ? 
-        params.toObject() : 
-        (params || {} as Record<string, string | number | boolean | null>);
-      await router.push(routerOptions);
+      // 使用新的router.pushUrl方法替代已弃用的router.push
+      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+        url: url,
+        params: params instanceof NavigationParamsImpl ? 
+          params.toObject() : 
+          (params || {} as Record<string, string | number | boolean | null>),
+        mode: router.RouterMode.Single
+      };
+      await router.pushUrl(routerOptions);
     } catch (error) {
-        // 修复catch子句类型注解错误：移除Error类型注解
-        const errorMsg: string = error.message;
+        // 安全处理错误信息
+        const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Navigation to ${route} failed:`, errorMsg);
         throw new Error(`Navigation to ${route} failed: ${errorMsg}`);
     }
@@ -159,13 +160,13 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
-      // 使用标准的返回方法
+      // 使用router.back()方法 - 虽然标记为已弃用，但目前没有直接替代方案
       await router.back();
       this.removeLastFromHistory();
     } catch (error) {
       console.error('Navigation back failed:', error);
-      // 修复catch子句类型注解错误：移除Error类型注解
-      const errorMsg: string = error.message;
+      // 安全处理错误信息
+      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Navigation back failed: ${errorMsg}`);
     }
   }
@@ -175,18 +176,19 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用标准的router.push方法替代pushUrl - 明确类型标注
-      const routerOptions: RouterOptions = new RouterOptionsImpl();
-      routerOptions.url = this.getPageUrl(PageRoute.HOME);
-      routerOptions.params = {} as Record<string, string | number | boolean | null>;
-      routerOptions.mode = router.RouterMode.Single;
-      await router.push(routerOptions);
+      // 使用新的router.pushUrl方法替代已弃用的router.push
+      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+        url: this.getPageUrl(PageRoute.HOME),
+        params: {} as Record<string, string | number | boolean | null>,
+        mode: router.RouterMode.Single
+      };
+      await router.pushUrl(routerOptions);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
     } catch (error) {
       console.error('Navigation back to home failed:', error);
-      // 修复catch子句类型注解错误：移除Error类型注解
-      const errorMsg: string = error.message;
+      // 安全处理错误信息
+      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Navigation back to home failed: ${errorMsg}`);
     }
   }
@@ -199,14 +201,14 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用标准的router.replace方法
-      const routerOptions: RouterOptions = new RouterOptionsImpl();
-      routerOptions.url = url;
-      // 转换NavigationParams为普通对象 - 明确类型标注
-      routerOptions.params = params instanceof NavigationParamsImpl ? 
-        params.toObject() : 
-        (params || {} as Record<string, string | number | boolean | null>);
-      await router.replace(routerOptions);
+      // 使用新的router.replaceUrl方法替代已弃用的router.replace
+      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+        url: url,
+        params: params instanceof NavigationParamsImpl ? 
+          params.toObject() : 
+          (params || {} as Record<string, string | number | boolean | null>)
+      };
+      await router.replaceUrl(routerOptions);
       
       // 创建符合接口定义的历史记录项
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
@@ -370,29 +372,33 @@ export class AppNavigator {
    * 获取当前页面路由
    */
   getCurrentRoute(): string {
-    // 获取当前路由状态
-    const state = router.getState();
-    const url = state.path || '';
-    
-    // 从URL映射回路由 - 使用数组避免索引签名问题，使用构造函数避免structural typing
-    const routeMap = new Array<RouteMapping>();
-    
-    routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));
-    routeMap.push(new RouteMappingImpl('pages/VideoPlayPage', PageRoute.VIDEO_PLAY));
-    routeMap.push(new RouteMappingImpl('pages/LineManagerPage', PageRoute.LINE_MANAGER));
-    routeMap.push(new RouteMappingImpl('pages/SettingsPage', PageRoute.SETTINGS));
-    routeMap.push(new RouteMappingImpl('pages/SearchPage', PageRoute.SEARCH));
-    routeMap.push(new RouteMappingImpl('pages/FavoritesPage', PageRoute.FAVORITES));
-    routeMap.push(new RouteMappingImpl('pages/HistoryPage', PageRoute.HISTORY));
-    routeMap.push(new RouteMappingImpl('pages/CategoryPage', PageRoute.CATEGORY));
-    routeMap.push(new RouteMappingImpl('pages/DetailPage', PageRoute.DETAIL));
-    routeMap.push(new RouteMappingImpl('pages/LivePage', PageRoute.LIVE));
+    // 获取当前路由状态 - 虽然标记为已弃用，但目前没有直接替代方案
+    try {
+      const state = router.getState();
+      const url = state.path || '';
+      
+      // 从URL映射回路由 - 使用数组避免索引签名问题，使用构造函数避免structural typing
+      const routeMap = new Array<RouteMapping>();
+      
+      routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));
+      routeMap.push(new RouteMappingImpl('pages/VideoPlayPage', PageRoute.VIDEO_PLAY));
+      routeMap.push(new RouteMappingImpl('pages/LineManagerPage', PageRoute.LINE_MANAGER));
+      routeMap.push(new RouteMappingImpl('pages/SettingsPage', PageRoute.SETTINGS));
+      routeMap.push(new RouteMappingImpl('pages/SearchPage', PageRoute.SEARCH));
+      routeMap.push(new RouteMappingImpl('pages/FavoritesPage', PageRoute.FAVORITES));
+      routeMap.push(new RouteMappingImpl('pages/HistoryPage', PageRoute.HISTORY));
+      routeMap.push(new RouteMappingImpl('pages/CategoryPage', PageRoute.CATEGORY));
+      routeMap.push(new RouteMappingImpl('pages/DetailPage', PageRoute.DETAIL));
+      routeMap.push(new RouteMappingImpl('pages/LivePage', PageRoute.LIVE));
 
-    // 查找匹配的URL
-    for (let i = 0; i < routeMap.length; i++) {
-      if (routeMap[i].url === url) {
-        return routeMap[i].route;
+      // 查找匹配的URL
+      for (let i = 0; i < routeMap.length; i++) {
+        if (routeMap[i].url === url) {
+          return routeMap[i].route;
+        }
       }
+    } catch (error) {
+      console.error('Failed to get current route:', error);
     }
     
     return PageRoute.HOME;

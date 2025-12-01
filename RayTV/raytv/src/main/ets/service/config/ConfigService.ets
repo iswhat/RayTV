@@ -406,7 +406,6 @@ export default class ConfigService {
   private configCache: Map<ConfigKey, ConfigItem> = new Map();
   private configParser: ConfigParser;
   private fullConfig: Config = { ...DEFAULT_FULL_CONFIG };
-  private configListeners: Array<(config: Config) => void> = [];
   private isInitialized: boolean = false;
 
   /**

@@ -298,25 +298,49 @@ export default class SearchResult {
    * @returns 优先级数值
    */
   public getDisplayPriority(): number {
-    // 定义类型优先级 - 使用明确的ResultType作为键类型
-    const typePriority: Record<number, number> = {
-      [ResultType.MOVIE]: 10,
-      [ResultType.TV_SERIES]: 9,
-      [ResultType.ANIME]: 8,
-      [ResultType.LIVE]: 7,
-      [ResultType.DOCUMENTARY]: 6,
-      [ResultType.VARIETY]: 5,
-      [ResultType.ACTOR]: 4,
-      [ResultType.DIRECTOR]: 3,
-      [ResultType.COLLECTION]: 2,
-      [ResultType.GENRE]: 1,
-      [ResultType.TAG]: 1,
-      [ResultType.CHANNEL]: 1,
-      [ResultType.OTHER]: 0
-    };
+    // 定义类型优先级 - 使用switch语句替代对象字面量，避免非标识符属性名
+    let basePriority = 0;
+    switch (this.type) {
+      case ResultType.MOVIE:
+        basePriority = 10;
+        break;
+      case ResultType.TV_SERIES:
+        basePriority = 9;
+        break;
+      case ResultType.ANIME:
+        basePriority = 8;
+        break;
+      case ResultType.LIVE:
+        basePriority = 7;
+        break;
+      case ResultType.DOCUMENTARY:
+        basePriority = 6;
+        break;
+      case ResultType.VARIETY:
+        basePriority = 5;
+        break;
+      case ResultType.ACTOR:
+        basePriority = 4;
+        break;
+      case ResultType.DIRECTOR:
+        basePriority = 3;
+        break;
+      case ResultType.COLLECTION:
+        basePriority = 2;
+        break;
+      case ResultType.GENRE:
+      case ResultType.TAG:
+      case ResultType.CHANNEL:
+        basePriority = 1;
+        break;
+      case ResultType.OTHER:
+      default:
+        basePriority = 0;
+        break;
+    }
 
-    // 基础优先级 - 确保类型安全地访问
-    let priority = typePriority[this.type] ?? 0;
+    // 基础优先级
+    let priority = basePriority;
     
     // 结合匹配分数
     if (this.matchScore) {
@@ -337,11 +361,11 @@ export default class SearchResult {
   }
 
   /**
-   * 序列化对象（用于存储或传输）
+   * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, Record<string, unknown>> {
-    const result: Record<string, Record<string, unknown>> = {};
+  public toSerializable(): Record<string, string | number | boolean | null | string[]> {
+    const result: Record<string, string | number | boolean | null | string[]> = {};
     
     result.id = this.id;
     result.title = this.title;
@@ -375,7 +399,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, Record<string, unknown>>): SearchResult {
+  public static fromSerializable(data: Record<string, string | number | boolean | null | string[]>): SearchResult {
     // 明确类型的部分对象
     const searchResultData: Partial<SearchResult> = {};
     
@@ -403,18 +427,18 @@ export default class SearchResult {
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
       // 创建一个明确的ExtraInfo对象
       const extraInfoObj: ExtraInfo = {};
-      const extraInfoData = data.extraInfo as Record<string, Record<string, unknown>>;
+      const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
       
       // 检查extraData属性
       if (extraInfoData.extraData && typeof extraInfoData.extraData === 'object' && !Array.isArray(extraInfoData.extraData)) {
         const extraDataRecord: Record<string, string | number | boolean | null | NestedExtraInfo> = {};
-        const extraDataObj = extraInfoData.extraData as Record<string, Record<string, unknown>>;
+        const extraDataObj = extraInfoData.extraData as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
         
         // 处理extraData的每个属性
         const extraDataKeys = Object.keys(extraDataObj);
         for (let i = 0; i < extraDataKeys.length; i++) {
           const key = extraDataKeys[i];
-          const value = extraDataObj[key] as Record<string, unknown>;
+          const value = extraDataObj[key];
           
           if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
             extraDataRecord[key] = value;
@@ -422,7 +446,7 @@ export default class SearchResult {
             // 处理嵌套对象
             const nestedInfo: NestedExtraInfo = {};
             const nestedDataRecord: Record<string, string | number | boolean | null> = {};
-            const nestedObj = value as Record<string, Record<string, unknown>>;
+            const nestedObj = value as Record<string, string | number | boolean | null>;
             
             const nestedKeys = Object.keys(nestedObj);
             for (let j = 0; j < nestedKeys.length; j++) {
@@ -457,7 +481,33 @@ export default class SearchResult {
    * @returns 克隆后的实例
    */
   public clone(): SearchResult {
-    return new SearchResult(this.toSerializable());
+    // 手动创建克隆，避免类作为对象使用
+    const cloneData: Partial<SearchResult> = {
+      id: this.id,
+      title: this.title,
+      originalTitle: this.originalTitle,
+      type: this.type,
+      coverUrl: this.coverUrl,
+      backdropUrl: this.backdropUrl,
+      description: this.description,
+      score: this.score,
+      year: this.year,
+      releaseDate: this.releaseDate,
+      genres: this.genres ? [...this.genres] : undefined,
+      tags: this.tags ? [...this.tags] : undefined,
+      duration: this.duration,
+      totalEpisodes: this.totalEpisodes,
+      currentSeason: this.currentSeason,
+      actors: this.actors ? [...this.actors] : undefined,
+      directors: this.directors ? [...this.directors] : undefined,
+      popularity: this.popularity,
+      matchScore: this.matchScore,
+      extraInfo: this.extraInfo ? {...this.extraInfo} : undefined,
+      link: this.link,
+      sourceId: this.sourceId,
+      sourceName: this.sourceName
+    };
+    return new SearchResult(cloneData);
   }
 
   /**

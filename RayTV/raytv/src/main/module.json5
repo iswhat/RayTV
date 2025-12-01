@@ -16,7 +16,7 @@
     "abilities": [
       {
         "name": "MainAbility",
-        "srcEntry": "./ets/MainAbility.ts",
+        "srcEntry": "./ets/MainAbility.ets",
         "description": "$string:RaytvAbility_desc",
         "icon": "$media:layered_image",
         "label": "$string:app_name",

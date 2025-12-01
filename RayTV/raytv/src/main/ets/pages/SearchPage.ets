@@ -106,21 +106,21 @@ struct SearchPage {
   /**
    * 页面加载时调用
    */
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     Logger.info(this.TAG, 'SearchPage appeared');
     
     // 获取路由参数中的搜索词
     const params = this.context.router.getParams();
     if (params?.query) {
       this.searchQuery = params.query as string;
-      this.performSearch();
+      await this.performSearch();
     } else {
       // 加载热门搜索词
       this.loadHotKeywords();
     }
     
-    // 加载搜索历史
-    this.loadSearchHistory();
+    // 加载搜索历史（异步）
+    await this.loadSearchHistory();
   }
   
   /**
@@ -154,13 +154,20 @@ struct SearchPage {
   /**
    * 加载搜索历史
    */
-  private loadSearchHistory(): void {
+  private async loadSearchHistory(): Promise<void> {
     try {
-      // 这里应该从本地存储中读取搜索历史
-      // 暂时使用模拟数据
-      const history = ['复仇者联盟', '海贼王', '星际穿越'];
-      this.searchHistory = history;
-      Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items`);
+      // 使用SearchHistoryRepository从本地存储中读取搜索历史
+      const searchHistoryRepo = new SearchHistoryRepository();
+      const history = await searchHistoryRepo.getHistory();
+      
+      // 确保history是数组类型
+      if (Array.isArray(history)) {
+        this.searchHistory = history;
+        Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
+      } else {
+        Logger.warn(this.TAG, `Invalid history data format, using empty array`);
+        this.searchHistory = [];
+      }
     } catch (error) {
       Logger.error(this.TAG, `Failed to load search history: ${error}`);
       this.searchHistory = [];
@@ -170,7 +177,7 @@ struct SearchPage {
   /**
    * 保存搜索历史
    */
-  private saveSearchHistory(keyword: string): void {
+  private async saveSearchHistory(keyword: string): Promise<void> {
     try {
       // 去重并限制数量
       let history = this.searchHistory.filter(item => item !== keyword);
@@ -179,7 +186,10 @@ struct SearchPage {
       
       this.searchHistory = history;
       
-      // 这里应该保存到本地存储
+      // 使用SearchHistoryRepository保存到本地存储
+      const searchHistoryRepo = new SearchHistoryRepository();
+      await searchHistoryRepo.saveHistory(history);
+      
       Logger.info(this.TAG, `Search history saved: ${keyword}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to save search history: ${error}`);
@@ -288,7 +298,7 @@ struct SearchPage {
   /**
    * 处理快速搜索结果点击事件
    */
-  private handleQuickSearchResultClick(result: QuickSearchResult): void {
+  private async handleQuickSearchResultClick(result: QuickSearchResult): Promise<void> {
     try {
       Logger.info(this.TAG, `Quick search result clicked: ${JSON.stringify(result)}`);
       
@@ -301,7 +311,7 @@ struct SearchPage {
           sourceId: result.id,
           sourceType: result.sourceType,
           mediaType: 'video',
-          keyword: this.searchText,
+          keyword: this.searchQuery,
           // 传递站点信息，以便在详情页能够使用正确的搜索源
           siteName: result.sourceType,
           // 记录当前使用的线路信息
@@ -309,7 +319,7 @@ struct SearchPage {
         });
       
       // 记录搜索历史
-      this.saveSearchHistory(this.searchText);
+      await this.saveSearchHistory(this.searchQuery);
     } catch (error) {
       Logger.error(this.TAG, `Error handling quick search result click: ${error}`);
     }
@@ -318,10 +328,13 @@ struct SearchPage {
   /**
    * 清除搜索历史
    */
-  private clearSearchHistory(): void {
+  private async clearSearchHistory(): Promise<void> {
     try {
       this.searchHistory = [];
-      // 这里应该清除本地存储中的搜索历史
+      // 使用SearchHistoryRepository清除本地存储中的搜索历史
+      const searchHistoryRepo = new SearchHistoryRepository();
+      await searchHistoryRepo.clearHistory();
+      
       Logger.info(this.TAG, 'Search history cleared');
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear search history: ${error}`);
@@ -352,8 +365,8 @@ struct SearchPage {
       this.quickSearch(value.trim());
       
       // 输入停止300ms后执行常规搜索
-      this.searchDebounceTimer = setTimeout(() => {
-        this.performSearch();
+      this.searchDebounceTimer = setTimeout(async () => {
+        await this.performSearch();
       }, 300);
     }
   }
@@ -361,7 +374,7 @@ struct SearchPage {
   /**
    * 执行搜索
    */
-  private performSearch(): void {
+  private async performSearch(): Promise<void> {
     const query = this.searchQuery.trim();
     if (!query) return;
     
@@ -375,8 +388,8 @@ struct SearchPage {
     this.currentPage = 1;
     
     try {
-      // 保存搜索历史
-      this.saveSearchHistory(query);
+      // 保存搜索历史（异步）
+      await this.saveSearchHistory(query);
       
       // 执行搜索，传递筛选条件
       Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
@@ -390,27 +403,20 @@ struct SearchPage {
         ...this.filters // 合并筛选条件
       };
       
-      mediaService.searchMedia(searchParams).then((result) => {
-        // 处理搜索结果
-        this.searchResults = result.items || [];
-        this.hasMoreResults = result.hasMore || false;
-        
-        Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
-        this.isLoading = false;
-        this.isSearching = false;
-      }).catch((error) => {
-        Logger.error(this.TAG, `Search failed: ${error}`);
-        this.errorMessage = '搜索失败，请稍后重试';
-        this.searchResults = [];
-        this.hasMoreResults = false;
-        this.isLoading = false;
-        this.isSearching = false;
-      });
+      // 使用await处理Promise
+      const result = await mediaService.searchMedia(searchParams);
+      
+      // 处理搜索结果
+      this.searchResults = result.items || [];
+      this.hasMoreResults = result.hasMore || false;
+      
+      Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
     } catch (error) {
       Logger.error(this.TAG, `Search failed: ${error}`);
       this.errorMessage = '搜索失败，请稍后重试';
       this.searchResults = [];
       this.hasMoreResults = false;
+    } finally {
       this.isLoading = false;
       this.isSearching = false;
     }
@@ -472,9 +478,9 @@ struct SearchPage {
   /**
    * 处理关键词点击
    */
-  private handleKeywordClick(keyword: string): void {
+  private async handleKeywordClick(keyword: string): Promise<void> {
     this.searchQuery = keyword;
-    this.performSearch();
+    await this.performSearch();
   }
   
   /**
@@ -1113,52 +1119,35 @@ struct SearchPage {
   @Builder
   private renderQuickSearchResults(): void {
     if (this.showSourceList && this.quickSearchResults.length > 0) {
-      Stack({
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        borderRadius: 15,
-        padding: 20,
-        marginHorizontal: 20,
-        marginVertical: 10,
-        position: 'absolute',
-        top: 120,
-        left: 0,
-        right: 0,
-        zIndex: 100
-      }) {
+      Stack() {
         // 标题栏
-        Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center, marginBottom: 15 }) {
+        Flex() {
           Text(`为您找到相关片源: ${this.quickSearchResults.length}个`)
             .fontSize(28)
             .fontColor('#FFFFFF')
             .fontWeight(700)
-          Button({
-            backgroundColor: 'transparent',
-            onClick: () => {
-              this.showSourceList = false;
-            }
-          }) {
+          Button() {
             Text('✕')
               .fontSize(28)
               .fontColor('#FFFFFF')
           }
+          .backgroundColor('transparent')
+          .onClick(() => {
+            this.showSourceList = false;
+          })
         }
+        .direction(FlexDirection.Row)
+        .justifyContent(FlexAlign.SpaceBetween)
+        .alignItems(ItemAlign.Center)
+        .margin({ bottom: 15 })
         
         // 片源列表
-        List({ width: '100%', height: 500 }) {
+        List() {
           ForEach(this.quickSearchResults, (item, index) => {
-            ListItem({
-              key: `${item.id || index}`,
-              backgroundColor: '#66BB6A',
-              marginBottom: 10,
-              padding: 15,
-              borderRadius: 10,
-              onClick: () => {
-                this.handleQuickSearchResultClick(item);
-              }
-            }) {
-              Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+            ListItem() {
+              Flex() {
                 // 标题和来源
-                Flex({ flex: 1, direction: FlexDirection.Column }) {
+                Flex() {
                   Text(item.title)
                     .fontSize(26)
                     .fontColor('#FFFFFF')
@@ -1168,26 +1157,46 @@ struct SearchPage {
                     .fontSize(20)
                     .fontColor('#E0E0E0')
                 }
+                .flex(1)
+                .direction(FlexDirection.Column)
                 
                 // 质量标签
                 if (item.quality) {
-                  Flex({
-                    backgroundColor: '#FFEB3B',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 12
-                  }) {
+                  Flex() {
                     Text(item.quality)
                       .fontSize(22)
                       .fontColor('#000000')
                       .fontWeight(700)
                   }
+                  .backgroundColor('#FFEB3B')
+                  .padding({ horizontal: 12, vertical: 6 })
+                  .borderRadius(12)
                 }
               }
+              .direction(FlexDirection.Row)
+              .justifyContent(FlexAlign.SpaceBetween)
+              .alignItems(ItemAlign.Center)
             }
+            .key(`${item.id || index}`)
+            .backgroundColor('#66BB6A')
+            .margin({ bottom: 10 })
+            .padding(15)
+            .borderRadius(10)
+            .onClick(() => {
+              this.handleQuickSearchResultClick(item);
+            })
           })
         }
+        .width('100%')
+        .height(500)
       }
+      .backgroundColor('rgba(0, 0, 0, 0.85)')
+      .borderRadius(15)
+      .padding(20)
+      .margin({ left: 20, right: 20, top: 10, bottom: 10 })
+      .position({ x: 0, y: 120 })
+      .width('100%')
+      .zIndex(100)
     }
   }
 

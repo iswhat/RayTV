@@ -3,6 +3,15 @@ import { AdBlockConfig } from '../../data/bean/Config';
 import { configService } from '../config/ConfigService';
 
 /**
+ * 规则统计信息接口
+ */
+export interface AdBlockStats {
+  ruleCount: number;
+  lastUpdate?: number;
+  enabled: boolean;
+}
+
+/**
  * 广告规则模型
  */
 export class AdRule {
@@ -36,9 +45,13 @@ export class AdRule {
 
   private matchesDomain(url: string): boolean {
     try {
-      const domain = new URL(url).hostname;
+      const urlObj = new URL(url);
+      const domain = urlObj.hostname;
+      if (!domain) {
+        return false;
+      }
       return domain === this.pattern || domain.endsWith(`.${this.pattern}`);
-    } catch {
+    } catch (error: Error) {
       return false;
     }
   }
@@ -156,7 +169,7 @@ export class AdBlockManager {
       Logger.info(AdBlockManager.TAG, `AdBlockManager initialized with ${this.urlFilter.getRuleCount()} rules`);
     } catch (error) {
       Logger.error(AdBlockManager.TAG, `Failed to initialize AdBlockManager: ${error}`);
-      throw error;
+      throw new Error(`Failed to initialize AdBlockManager: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -176,9 +189,11 @@ export class AdBlockManager {
       new AdRule('adspot', 'keyword', 'Ad spot'),
       new AdRule('advertisement', 'keyword', 'Advertisement'),
       
-      // 视频广告正则表达式
-      new AdRule(/ad\.(mp4|m3u8|ts)/i, 'regex', 'Video ads'),
-      new AdRule(/advertisement\d*\./i, 'regex', 'Advertisement domains'),
+      // 视频广告关键词
+      new AdRule('ad.mp4', 'keyword', 'Video ads'),
+      new AdRule('ad.m3u8', 'keyword', 'Video ads'),
+      new AdRule('ad.ts', 'keyword', 'Video ads'),
+      new AdRule('advertisement', 'keyword', 'Advertisement domains'),
     ];
     
     // 如果有自定义规则，加载它们
@@ -239,7 +254,7 @@ export class AdBlockManager {
       Logger.info(AdBlockManager.TAG, `Rules updated. Now have ${this.urlFilter.getRuleCount()} rules.`);
     } catch (error) {
       Logger.error(AdBlockManager.TAG, `Failed to update rules: ${error}`);
-      throw error;
+      throw new Error(`Failed to update rules: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -284,7 +299,7 @@ export class AdBlockManager {
   /**
    * 获取规则统计信息
    */
-  public getStats(): { ruleCount: number; lastUpdate?: number; enabled: boolean } {
+  public getStats(): AdBlockStats {
     return {
       ruleCount: this.urlFilter.getRuleCount(),
       lastUpdate: this.config?.lastUpdateTime,
@@ -301,18 +316,21 @@ export class AdBlockManager {
         this.config = await configService.getAdBlockConfig();
       }
       
-      if (!this.config.customFilters) {
-        this.config.customFilters = [];
-      }
-      
-      if (!this.config.customFilters.includes(filter)) {
-        this.config.customFilters.push(filter);
-        await configService.saveAdBlockConfig(this.config);
-        await this.updateRules();
+      // 确保config不为null
+      if (this.config) {
+        if (!this.config.customFilters) {
+          this.config.customFilters = [];
+        }
+        
+        if (!this.config.customFilters.includes(filter)) {
+          this.config.customFilters.push(filter);
+          await configService.saveAdBlockConfig(this.config);
+          await this.updateRules();
+        }
       }
     } catch (error) {
       Logger.error(AdBlockManager.TAG, `Failed to add custom filter: ${error}`);
-      throw error;
+      throw new Error(`Failed to add custom filter: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -325,13 +343,16 @@ export class AdBlockManager {
         this.config = await configService.getAdBlockConfig();
       }
       
-      this.config.enabled = enabled;
-      await configService.saveAdBlockConfig(this.config);
-      
-      Logger.info(AdBlockManager.TAG, `Ad blocking ${enabled ? 'enabled' : 'disabled'}`);
+      // 确保config不为null
+      if (this.config) {
+        this.config.enabled = enabled;
+        await configService.saveAdBlockConfig(this.config);
+        
+        Logger.info(AdBlockManager.TAG, `Ad blocking ${enabled ? 'enabled' : 'disabled'}`);
+      }
     } catch (error) {
       Logger.error(AdBlockManager.TAG, `Failed to set ad block enabled state: ${error}`);
-      throw error;
+      throw new Error(`Failed to set ad block enabled state: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

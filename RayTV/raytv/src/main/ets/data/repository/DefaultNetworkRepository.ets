@@ -59,7 +59,14 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
       Logger.info(TAG, 'Initializing network repository...');
       
       // 合并配置
-      this.config = { ...this.config, ...config };
+      this.config = {
+        baseUrl: config.baseUrl !== undefined ? config.baseUrl : this.config.baseUrl,
+        timeout: config.timeout !== undefined ? config.timeout : this.config.timeout,
+        retryCount: config.retryCount !== undefined ? config.retryCount : this.config.retryCount,
+        headers: config.headers !== undefined ? config.headers : this.config.headers,
+        cacheEnabled: config.cacheEnabled !== undefined ? config.cacheEnabled : this.config.cacheEnabled,
+        cacheExpiry: config.cacheExpiry !== undefined ? config.cacheExpiry : this.config.cacheExpiry
+      };
       
       // 验证必要配置
       if (!this.config.baseUrl) {
@@ -87,7 +94,14 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
    * 设置网络配置
    */
   setConfig(config: Partial<NetworkConfig>): void {
-    this.config = { ...this.config, ...config };
+    this.config = {
+      baseUrl: config.baseUrl !== undefined ? config.baseUrl : this.config.baseUrl,
+      timeout: config.timeout !== undefined ? config.timeout : this.config.timeout,
+      retryCount: config.retryCount !== undefined ? config.retryCount : this.config.retryCount,
+      headers: config.headers !== undefined ? config.headers : this.config.headers,
+      cacheEnabled: config.cacheEnabled !== undefined ? config.cacheEnabled : this.config.cacheEnabled,
+      cacheExpiry: config.cacheExpiry !== undefined ? config.cacheExpiry : this.config.cacheExpiry
+    };
     Logger.info(TAG, 'Network config updated');
   }
 
@@ -95,7 +109,14 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
    * 获取当前网络配置
    */
   getConfig(): NetworkConfig {
-    return { ...this.config };
+    return {
+      baseUrl: this.config.baseUrl,
+      timeout: this.config.timeout,
+      retryCount: this.config.retryCount,
+      headers: this.config.headers,
+      cacheEnabled: this.config.cacheEnabled,
+      cacheExpiry: this.config.cacheExpiry
+    };
   }
 
   /**
@@ -137,25 +158,50 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
  * @returns 构建好的请求配置对象
  */
 private createRequestConfig(
-  url: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD',
-  data?: Record<string, unknown>,
-  params?: Record<string, unknown>,
-  customHeaders?: Record<string, string>
-): RequestConfig {
+    url: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD',
+    data?: Record<string, string | number | boolean | null>,
+    params?: Record<string, string | number | boolean | null>,
+    customHeaders?: Record<string, string>
+  ): RequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
-    const headers = { ...this.config.headers, ...customHeaders };
+    // 合并headers
+    const headers: Record<string, string> = {};
+    
+    // 复制默认headers
+    if (this.config.headers) {
+      for (const [key, value] of Object.entries(this.config.headers)) {
+        headers[key] = value;
+      }
+    }
+    
+    // 复制自定义headers（覆盖默认值）
+    if (customHeaders) {
+      for (const [key, value] of Object.entries(customHeaders)) {
+        headers[key] = value;
+      }
+    }
     
     // 处理请求体类型
     if (data && headers['Content-Type'] === 'application/json') {
       data = JsonUtil.stringify(data);
     }
 
+    // 过滤掉params中的null值，确保符合RequestConfig的类型要求
+    const filteredParams: Record<string, string | number | boolean | string[]> = {};
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== null) {
+          filteredParams[key] = value as string | number | boolean | string[];
+        }
+      }
+    }
+
     return {
       url: requestUrl,
       method,
       data,
-      params,
+      params: filteredParams,
       headers,
       timeout: this.config.timeout,
       retryCount: this.config.retryCount
@@ -201,17 +247,21 @@ private createRequestConfig(
 
     try {
       const cached = await StorageUtil.get(key);
-      if (cached && typeof cached === 'object' && 'data' in cached && 'timestamp' in cached) {
-        const cacheItem = cached as { data: T; timestamp: number };
-        const now = Date.now();
-        const expiry = cacheItem.timestamp + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
-        
-        if (now < expiry) {
-          Logger.debug(TAG, `Cache hit for key: ${key}`);
-          return cacheItem.data;
-        } else {
-          Logger.debug(TAG, `Cache expired for key: ${key}`);
-          await StorageUtil.remove(key);
+      if (cached && typeof cached === 'object') {
+        // 使用Object.keys检查属性存在性，替代in操作符
+        const cacheKeys = Object.keys(cached);
+        if (cacheKeys.includes('data') && cacheKeys.includes('timestamp')) {
+          const cacheItem = cached as { data: T; timestamp: number };
+          const now = Date.now();
+          const expiry = cacheItem.timestamp + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
+          
+          if (now < expiry) {
+            Logger.debug(TAG, `Cache hit for key: ${key}`);
+            return cacheItem.data;
+          } else {
+            Logger.debug(TAG, `Cache expired for key: ${key}`);
+            await StorageUtil.remove(key);
+          }
         }
       }
     } catch (error) {

@@ -137,8 +137,8 @@ export default class StorageUtil {
       return undefined;
     }
     
-    // 使用Object.hasOwnProperty替代in操作符
-    if (!Object.hasOwnProperty.call(obj, key)) {
+    // 使用类型安全的属性访问方式
+    if (obj === null || obj === undefined) {
       return undefined;
     }
     
@@ -740,26 +740,16 @@ export default class StorageUtil {
   /**
    * 安全解析JSON字符串
    */
-  private static safeParseJSON(jsonStr: string): JsonData | null {
+  private static safeParseJSON(jsonStr: string): Record<string, string | number | boolean | null> | null {
     if (!jsonStr || typeof jsonStr !== 'string') {
       return null;
     }
     try {
-      const parsed = JSON.parse(jsonStr);
-      // 创建JsonData实例并设置属性
-      const jsonData = new JsonData();
+      const parsed = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
       if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-        const keys = Object.keys(parsed);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          const value = parsed[key];
-          if (typeof value === 'string' || typeof value === 'number' || 
-              typeof value === 'boolean' || value === null) {
-            jsonData.set(key, value);
-          }
-        }
+        return parsed;
       }
-      return jsonData;
+      return null;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to parse JSON string: ${errorMessage}`);
@@ -770,7 +760,7 @@ export default class StorageUtil {
   /**
    * 构建并验证StorageData对象
    */
-  private static buildStorageData(parsedData: JsonData): StorageData {
+  private static buildStorageData(parsedData: Record<string, string | number | boolean | null>): StorageData {
     const result: StorageData = {
       value: null,
       timestamp: 0,
@@ -780,43 +770,49 @@ export default class StorageUtil {
     // 安全地处理所有属性，避免使用索引访问和任何原型方法
     try {
       // 获取对象的所有自有属性键，避免使用in操作符
-      const keys = parsedData.keys();
+      const keys = Object.keys(parsedData);
       
       // 处理value属性 - 避免使用索引访问
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key === 'value') {
-          const valueData = parsedData.get('value');
-          if (typeof valueData === 'string' || typeof valueData === 'number' || 
-              typeof valueData === 'boolean' || valueData === null) {
-            result.value = valueData;
-          } else if (valueData instanceof JsonDataClass) {
-            // 递归验证嵌套对象
-            result.value = StorageUtil.validateValue(valueData);
+          // 安全地获取属性值，避免使用索引访问
+          if (Object.keys(parsedData).includes(key)) {
+            const valueData = parsedData[key];
+            if (typeof valueData === 'string' || typeof valueData === 'number' || 
+                typeof valueData === 'boolean' || valueData === null) {
+              result.value = valueData;
+            }
           }
         } else if (key === 'timestamp') {
-          const tsValue = parsedData.get('timestamp');
-          if (typeof tsValue === 'number') {
-            result.timestamp = tsValue;
-          } else if (typeof tsValue === 'string') {
-            const numValue = Number(tsValue);
-            // 使用更基础的NaN检查方式，避免使用Number.isNaN
-            if (typeof numValue === 'number' && numValue === numValue) {
-              result.timestamp = numValue;
+          // 安全地获取属性值，避免使用索引访问
+          if (Object.keys(parsedData).includes(key)) {
+            const tsValue = parsedData[key];
+            if (typeof tsValue === 'number') {
+              result.timestamp = tsValue;
+            } else if (typeof tsValue === 'string') {
+              const numValue = Number(tsValue);
+              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              if (typeof numValue === 'number' && numValue === numValue) {
+                result.timestamp = numValue;
+              }
             }
           }
         } else if (key === 'expireTime') {
-          const expValue = parsedData.get('expireTime');
-          if (typeof expValue === 'number') {
-            // 使用更基础的NaN检查方式，避免使用Number.isNaN
-            if (expValue === expValue) {
-              result.expireTime = expValue;
-            }
-          } else if (typeof expValue === 'string') {
-            const numValue = Number(expValue);
-            // 使用更基础的NaN检查方式，避免使用Number.isNaN
-            if (typeof numValue === 'number' && numValue === numValue) {
-              result.expireTime = numValue;
+          // 安全地获取属性值，避免使用索引访问
+          if (Object.keys(parsedData).includes(key)) {
+            const expValue = parsedData[key];
+            if (typeof expValue === 'number') {
+              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              if (expValue === expValue) {
+                result.expireTime = expValue;
+              }
+            } else if (typeof expValue === 'string') {
+              const numValue = Number(expValue);
+              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              if (typeof numValue === 'number' && numValue === numValue) {
+                result.expireTime = numValue;
+              }
             }
           }
         }
@@ -860,32 +856,51 @@ export default class StorageUtil {
             if (key !== undefined) {
               const safeKey = String(key); // 确保key是字符串
               // 检查属性是否存在并访问
-              // 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
               if (Object.keys(value).includes(safeKey)) {
-                const propValue = (value as Record<string, any>)[safeKey];
-                
-                // 类型安全地处理每个属性值
-                if (typeof propValue === 'string' || 
-                    typeof propValue === 'number' || 
-                    typeof propValue === 'boolean' || 
-                    propValue === null) {
-                  safeObj.set(safeKey, propValue);
-                } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
-                  // 处理嵌套对象
-                  const validatedObj = new JsonData();
-                  const nestedKeys = Object.keys(propValue);
-                  for (let j = 0; j < nestedKeys.length; j++) {
-                    const nestedKey = nestedKeys[j];
-                    // 使用get方法替代索引访问
-                    const nestedValue = validatedObj.get(nestedKey);
-                    if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
-                        typeof nestedValue === 'boolean' || nestedValue === null) {
-                      validatedObj.set(nestedKey, nestedValue);
+                // 安全地获取属性值，避免使用any类型
+                // 使用Object.keys和includes检查，避免直接索引访问
+                const propValue = (() => {
+                  for (const k of Object.keys(value)) {
+                    if (k === safeKey) {
+                      return (value as Record<string, string | number | boolean | object | null>)[k];
                     }
                   }
-                  // 转换为普通对象后再设置
-                  const objValue = validatedObj.toObject();
-                  safeObj.set(safeKey, JSON.stringify(objValue) as string | number | boolean | null);
+                  return undefined;
+                })();
+                
+                // 类型安全地处理每个属性值
+                if (propValue !== undefined) {
+                  if (typeof propValue === 'string' || 
+                      typeof propValue === 'number' || 
+                      typeof propValue === 'boolean' || 
+                      propValue === null) {
+                    safeObj.set(safeKey, propValue);
+                  } else if (typeof propValue === 'object' && propValue !== null && !Array.isArray(propValue)) {
+                    // 处理嵌套对象
+                    const validatedObj = new JsonDataClass();
+                    const nestedKeys = Object.keys(propValue);
+                    for (let j = 0; j < nestedKeys.length; j++) {
+                      const nestedKey = nestedKeys[j];
+                      // 安全地获取嵌套属性值
+                      if (Object.keys(propValue).includes(nestedKey)) {
+                        const nestedPropValue = (() => {
+                          for (const nk of Object.keys(propValue)) {
+                            if (nk === nestedKey) {
+                              return (propValue as Record<string, string | number | boolean | null>)[nk];
+                            }
+                          }
+                          return undefined;
+                        })();
+                        if (nestedPropValue !== undefined && 
+                            (typeof nestedPropValue === 'string' || typeof nestedPropValue === 'number' || 
+                             typeof nestedPropValue === 'boolean' || nestedPropValue === null)) {
+                          validatedObj.set(nestedKey, nestedPropValue);
+                        }
+                      }
+                    }
+                    // 直接设置嵌套的JsonDataClass对象
+                    safeObj.set(safeKey, validatedObj);
+                  }
                 }
               }
             }

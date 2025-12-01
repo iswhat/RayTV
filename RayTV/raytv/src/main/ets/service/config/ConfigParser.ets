@@ -54,12 +54,8 @@ export interface PlaySource {
 }
 
 export interface PlayRules {
-  // ArkTS兼容：不使用索引签名，使用明确的方法定义
-  getPlaySource(key: string): PlaySource | undefined;
-  setPlaySource(key: string, value: PlaySource): void;
-  hasPlaySource(key: string): boolean;
-  getAllKeys(): string[];
-  toRecord(): Record<string, PlaySource>;
+  // ArkTS兼容：使用Record类型替代方法定义
+  [key: string]: PlaySource;
 }
 
 /**
@@ -165,16 +161,18 @@ export class ConfigParser {
     const validTypes: SiteType[] = [SiteType.ALL, SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
     return validTypes.includes(type as SiteType);
   }
-  private ensureDefaultValues(site: Record<string, any>): void {
+  private ensureDefaultValues(site: Record<string, string | number | boolean | object | null>): void {
     TypeSafetyUtil.setProperty(site, 'type', TypeSafetyUtil.getProperty(site, 'type', SiteType.ALL));
     TypeSafetyUtil.setProperty(site, 'searchable', TypeSafetyUtil.getProperty(site, 'searchable', true));
     TypeSafetyUtil.setProperty(site, 'categories', TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(site, 'categories', [])));
     TypeSafetyUtil.setProperty(site, 'headers', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'headers', {})));
     
     const search = TypeSafetyUtil.getProperty(site, 'search', null);
-    TypeSafetyUtil.setProperty(site, 'search', typeof search === 'object' && search !== null 
-      ? search 
-      : { page: true, searchKey: 'wd', pageKey: 'page', resultPath: '', list: [] });
+    if (search !== null && typeof search === 'object') {
+      site.search = search as Record<string, string | number | boolean | object | null>;
+    } else {
+      site.search = { page: true, searchKey: 'wd', pageKey: 'page', resultPath: '', list: [] };
+    }
     
     TypeSafetyUtil.setProperty(site, 'detail', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'detail', {})));
     TypeSafetyUtil.setProperty(site, 'play', TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(site, 'play', {})));
@@ -242,9 +240,13 @@ export class ConfigParser {
     return !Array.isArray(config) && 
            this.getObjectKeys(configObj).length > 0 &&
            this.getObjectKeys(configObj).some(key => {
-             const value = TypeSafetyUtil.getProperty(configObj, key, null);
+             // 先将configObj转换为更宽泛的类型，支持对象值
+             const broadConfigObj = configObj as Record<string, string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null);
              return TypeSafetyUtil.isValidObject(value) && 
-                    ('api' in value || 'name' in value);
+                    (TypeSafetyUtil.getNestedProperty(value as Record<string, string | number | boolean | object | null>, 'api', null) !== null || 
+                     TypeSafetyUtil.getNestedProperty(value as Record<string, string | number | boolean | object | null>, 'name', null) !== null);
            });
   }
   
@@ -586,7 +588,13 @@ export class ConfigParser {
     
     // 手动复制所有属性
     for (const [key, value] of TypeSafetyUtil.getObjectEntries(playObj)) {
-      TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
+      if (TypeSafetyUtil.isValidObject(value)) {
+        const playSource: PlaySource = {
+          name: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(value, 'name', key)),
+          rules: TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(value, 'rules', {}))
+        };
+        result[key] = playSource;
+      }
     }
     
     return result;

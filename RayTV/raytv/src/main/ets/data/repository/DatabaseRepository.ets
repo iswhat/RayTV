@@ -66,7 +66,7 @@ export interface MovieFilter {
 /**
  * 配置值类型
  */
-export type ConfigValue = string | number | boolean | Record<string, unknown> | string[] | number[] | boolean[];
+export type ConfigValue = string | number | boolean | Record<string, string | number | boolean | string[] | number[] | boolean[]> | string[] | number[] | boolean[];
 
 /**
  * 数据库操作状态枚举

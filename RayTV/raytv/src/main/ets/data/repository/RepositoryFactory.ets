@@ -20,7 +20,7 @@ export enum RepositoryType {
  * 负责创建和管理各种Repository的实例
  */
 export default class RepositoryFactory {
-  private static instance: RepositoryFactory;
+  private static instance: RepositoryFactory | null;
   private repositoryMap: Map<RepositoryType, DatabaseRepository | NetworkRepository> = new Map();
   private isInitialized: boolean = false;
 

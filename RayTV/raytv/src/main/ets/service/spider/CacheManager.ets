@@ -150,8 +150,8 @@ export class CacheManager {
       // 从文件系统获取
       const filePath = this.getCacheFilePath(key);
       if (this.fsManager.existsSync(filePath)) {
-        const fileContent = this.fsManager.readTextSync(filePath);
-        const fileCacheItem: CacheItem = JSON.parse(fileContent);
+        const fileContent = this.fsManager.readTextSync(filePath) as string;
+        const fileCacheItem: CacheItem = JSON.parse(fileContent) as CacheItem;
         
         // 检查是否过期
         if (!this.isExpired(fileCacheItem)) {
@@ -264,12 +264,17 @@ export class CacheManager {
       
       // 清空文件系统缓存
       if (this.fsManager.existsSync(this.cacheDir)) {
-        const files = this.fsManager.listSync(this.cacheDir);
+        const files = this.fsManager.listSync(this.cacheDir) as string[];
         if (files) {
-          for (const file of files) {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
             const filePath = `${this.cacheDir}/${file}`;
-            if (this.fsManager.statSync(filePath).isFile()) {
+            try {
+              // 直接删除文件，不检查文件类型
               this.fsManager.unlinkSync(filePath);
+            } catch (error) {
+              // 如果删除失败，忽略并继续
+              Logger.warn(this.TAG, `Failed to delete cache file: ${filePath}, error: ${error}`);
             }
           }
         }
@@ -305,7 +310,7 @@ export class CacheManager {
       }
       
       // 移除文件系统中的缓存
-      const files = this.fsManager.listSync(this.cacheDir);
+      const files = this.fsManager.listSync(this.cacheDir) as string[];
       if (files) {
         for (const file of files) {
           if (file.startsWith(`${this.getCacheKeyHash(`${siteKey}:`)}_`)) {
@@ -544,7 +549,7 @@ export class CacheManager {
    * @returns 键数组
    * @private
    */
-  private getObjectKeys(obj: Record<string, Record<string, unknown>>): string[] {
+  private getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
     // 直接使用Object.keys获取键，避免for-in循环和原型链操作
     return Object.keys(obj);
   }

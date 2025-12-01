@@ -27,7 +27,7 @@ const DATABASE_VERSION = 1;
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, Record<string, unknown>> = new Map(); // 用于缓存配置
+  private configMap: Map<string, Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置
   private context: common.UIAbilityContext | null = null;
 
   /**
@@ -328,11 +328,13 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
           
           if (key) {
             try {
-              const parsedValue = JsonUtil.safeParse<Record<string, unknown>>(value || '');
-              this.configMap.set(`${config_group}:${key}`, parsedValue);
+              const parsedValue = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(value || '');
+              if (parsedValue) {
+                this.configMap.set(`${config_group}:${key}`, parsedValue);
+              }
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
-              this.configMap.set(`${config_group}:${key}`, value);
+              this.configMap.set(`${config_group}:${key}`, { value: value });
             }
           }
         } while (resultSet.goToNextRow());
@@ -645,9 +647,9 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): Record<string, unknown> {
+  private safeParseJson(jsonStr: string): Record<string, string | number | boolean | Record<string, string | number | boolean>> {
     try {
-      const result = JsonUtil.safeParse<Record<string, unknown>>(jsonStr);
+      const result = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(jsonStr);
       return result || {};
     } catch (error) {
       Logger.warn(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
@@ -662,8 +664,8 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   // ========== 占位实现 ==========
   // 为了代码能编译通过，提供基础的占位实现
   async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> { return { success: false, message: 'Not implemented' }; }
-  async getMoviesPaginated(params: PaginationParams, filters?: Record<string, Record<string, unknown>>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
-  async searchMovies(keyword: string, params: PaginationParams, filters?: Record<string, Record<string, unknown>>): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async getMoviesPaginated(params: PaginationParams, filters?: import('./DatabaseRepository').MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
+  async searchMovies(keyword: string, params: PaginationParams, filters?: import('./DatabaseRepository').MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
   async addUser(user: User): Promise<DatabaseResult<string>> { 
     return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
   }

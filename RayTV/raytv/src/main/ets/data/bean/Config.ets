@@ -77,6 +77,15 @@ export interface NetworkConfig {
 }
 
 /**
+ * 内容限制配置接口
+ */
+export interface ContentRestrictions {
+  enabled: boolean;
+  rating?: string;
+  password?: string;
+}
+
+/**
  * 安全配置接口
  */
 export interface SecurityConfig {
@@ -91,11 +100,7 @@ export interface SecurityConfig {
   hideSensitiveInfo: boolean;        // 隐藏敏感信息
   enableAntiCheat: boolean;          // 启用反作弊
   safeBrowsingEnabled: boolean;      // 安全浏览
-  contentRestrictions?: {
-    enabled: boolean;
-    rating?: string;
-    password?: string;
-  };
+  contentRestrictions?: ContentRestrictions;
 }
 
 /**
@@ -162,6 +167,16 @@ export interface DownloadConfig {
 }
 
 /**
+ * 云账户配置接口
+ */
+export interface CloudAccount {
+  type: string;
+  username?: string;
+  token?: string;
+  lastSyncTime?: number;
+}
+
+/**
  * 同步配置接口
  */
 export interface SyncConfig {
@@ -173,12 +188,7 @@ export interface SyncConfig {
   syncSettings: boolean;             // 同步设置
   autoBackup: boolean;               // 自动备份
   backupInterval?: number;           // 备份间隔（天）
-  cloudAccount?: {
-    type: string;
-    username?: string;
-    token?: string;
-    lastSyncTime?: number;
-  };
+  cloudAccount?: CloudAccount;
 }
 
 /**
@@ -279,6 +289,15 @@ export interface SiteValidationResult {
 }
 
 /**
+ * 测试结果接口
+ */
+export interface TestResult {
+  success: boolean;          // 测试是否成功
+  message?: string;          // 测试消息
+  timestamp: number;         // 测试时间
+}
+
+/**
  * 站点信息接口
  */
 export interface SiteInfo {
@@ -303,11 +322,7 @@ export interface SiteInfo {
   homepage?: string;           // 首页URL
   supportedFeatures?: string[]; // 支持的特性
   updatedAt: number;           // 更新时间
-  lastTestResult?: {
-    success: boolean;          // 测试是否成功
-    message?: string;          // 测试消息
-    timestamp: number;         // 测试时间
-  };
+  lastTestResult?: TestResult;
   errorCount: number;          // 错误计数
   isFavorite: boolean;         // 是否收藏
 }
@@ -374,21 +389,36 @@ export interface PlayRule {
 }
 
 /**
+ * 配置错误信息接口
+ */
+export interface ConfigError {
+  field: string;
+  message: string;
+}
+
+/**
+ * 配置警告信息接口
+ */
+export interface ConfigWarning {
+  field: string;
+  message: string;
+}
+
+/**
+ * 配置建议信息接口
+ */
+export interface ConfigSuggestion {
+  field: string;
+  value: string | number | boolean | null;
+  reason: string;
+}
+
+/**
  * 配置验证结果接口
  */
 export interface ConfigValidationResult {
   valid: boolean;                    // 是否有效
-  errors?: {
-    field: string;
-    message: string;
-  }[];
-  warnings?: {
-    field: string;
-    message: string;
-  }[];
-  suggestions?: {
-    field: string;
-    value: string | number | boolean | null;
-    reason: string;
-  }[];
+  errors?: ConfigError[];
+  warnings?: ConfigWarning[];
+  suggestions?: ConfigSuggestion[];
 }

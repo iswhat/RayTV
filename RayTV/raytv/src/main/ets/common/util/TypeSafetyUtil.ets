@@ -11,9 +11,8 @@ export interface BasicValue {
   value: string | number | boolean | null;
 }
 
-export interface EnhancedFunction<T, A extends BasicValue[]> {
-  (...args: A): T;
-}
+// 移除函数调用签名接口，使用普通函数类型替代
+export type EnhancedFunction<T, A> = (...args: A) => T;
 
 /**
  * 类型安全工具类
@@ -100,8 +99,8 @@ export class TypeSafetyUtil {
       return undefined;
     }
     
-    // 使用Object.hasOwnProperty替代in操作符
-    if (!Object.hasOwnProperty.call(obj, key)) {
+    // 使用Object.keys检查属性存在性，避免使用Object.hasOwnProperty.call
+    if (!Object.keys(obj).includes(key)) {
       return undefined;
     }
     
@@ -160,11 +159,8 @@ export class TypeSafetyUtil {
   }
   
   /**
-   * 定义安全对象类型，避免使用object literals as types
+   * 移除索引签名接口，使用Record类型替代
    */
-  export interface SafeObject {
-    [key: string]: string | number | boolean | object | null | undefined;
-  }
   
   /**
    * 创建带有安全属性名的对象
@@ -320,9 +316,9 @@ export class TypeSafetyUtil {
     try {
       // 对于非对象类型，尝试JSON序列化/反序列化来创建安全对象
       const serialized = JSON.stringify(value);
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized) as Record<string, string | number | boolean | null>;
       return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
-          ? parsed as Record<string, string | number | boolean | null>
+          ? parsed
           : {};
     } catch {
       return {};
@@ -513,7 +509,8 @@ export class TypeSafetyUtil {
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
       if (!current[key] || typeof current[key] !== 'object' || Array.isArray(current[key])) {
-        current[key] = {};
+        // 使用明确的类型声明，避免使用空对象字面量
+        current[key] = {} as Record<string, string | number | boolean | object | null>;
       }
       current = current[key] as Record<string, string | number | boolean | object | null>;
     }
@@ -659,12 +656,24 @@ export class TypeSafetyUtil {
     target: Record<string, string | number | boolean | null>,
     ...sources: Record<string, string | number | boolean | null>[]
   ): Record<string, string | number | boolean | null> {
-    const result = { ...target };
+    // 创建目标对象的副本，避免直接修改原对象
+    const result: Record<string, string | number | boolean | null> = {};
+    
+    // 复制目标对象的属性
+    const targetEntries = TypeSafetyUtil.getObjectEntries<string | number | boolean | null>(target);
+    for (let i = 0; i < targetEntries.length; i++) {
+      const entry = targetEntries[i];
+      const key = entry[0];
+      const value = entry[1];
+      result[key] = value;
+    }
     
     for (const source of sources) {
       const entries = TypeSafetyUtil.getObjectEntries<string | number | boolean | null>(source);
       for (let i = 0; i < entries.length; i++) {
-        const [key, value] = entries[i];
+        const entry = entries[i];
+        const key = entry[0];
+        const value = entry[1];
         if (value === null || value === undefined) {
           continue;
         }
@@ -706,9 +715,13 @@ export class TypeSafetyUtil {
       }
       
       // 验证所有必需的属性都存在且符合类型
-      for (const [key, validator] of TypeSafetyUtil.getObjectEntries<(value: string | number | boolean | object | null) => boolean>(schema)) {
+      const entries = TypeSafetyUtil.getObjectEntries<(value: string | number | boolean | object | null) => boolean>(schema);
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        const key = entry[0];
+        const validator = entry[1];
         // 安全地获取对象属性并验证
-        const value = TypeSafetyUtil.safeAccess(obj, key.toString(), undefined);
+        const value = TypeSafetyUtil.safeAccess(obj, key.toString(), null);
         if (!validator(value)) {
           return false;
         }
@@ -730,8 +743,8 @@ export class TypeSafetyUtil {
       if (typeof jsonStr !== 'string') {
         return defaultValue;
       }
-      const parsed = JSON.parse(jsonStr);
-      return parsed !== null ? (parsed as T) : defaultValue;
+      const parsed = JSON.parse(jsonStr) as T;
+      return parsed !== null ? parsed : defaultValue;
     } catch {
       return defaultValue;
     }
@@ -807,7 +820,9 @@ export class TypeSafetyUtil {
     const result = {} as Record<K, V>;
     
     for (let i = 0; i < entries.length; i++) {
-      const [key, value] = entries[i];
+      const entry = entries[i];
+      const key = entry[0];
+      const value = entry[1];
       if (key !== undefined && value !== undefined) {
         // 使用类型安全的属性访问方法
         const propertyValue = TypeSafetyUtil.getPropertyValue(result, key);
@@ -884,10 +899,4 @@ export class TypeSafetyUtil {
 }
 
 // 类型定义，避免使用对象字面量作为类型
-export interface TypeWrapper<T> {
-  value: T;
-}
-
-export interface EnhancedFunction<T, A extends Array<string | number | boolean | null>> {
-  (...args: A): T;
-}
+// 接口已在文件顶部定义，此处不再重复

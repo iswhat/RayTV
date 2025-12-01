@@ -402,34 +402,11 @@ export default class User {
   }
 
   /**
-   * User序列化数据接口
-   */
-  interface UserSerializable {
-    id: string;
-    username: string;
-    nickname: string | null;
-    email: string | null;
-    avatarUrl: string | null;
-    role: string;
-    preferences: UserPreferences;
-    lastLoginTime: string;
-    registrationDate: string;
-    activeDevices: DeviceInfo[];
-    isVerified: boolean;
-    status: string;
-    subscriptionEndDate: string | null;
-    watchHistoryEnabled: boolean;
-    favoritesEnabled: boolean;
-    totalWatchTime: number;
-    settings: UserSettings;
-  }
-
-  /**
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): UserSerializable {
-    const result: UserSerializable = {
+  public toSerializable(): Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> {
+    const result: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
       id: this.id,
       username: this.username,
       nickname: this.nickname,
@@ -456,68 +433,85 @@ export default class User {
    * @param data 序列化数据
    * @returns User对象
    */
-  public static fromSerializable(data: Record<string, any>): User {
+  public static fromSerializable(data: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>): User {
     // 创建安全的用户数据对象，添加类型检查和默认值
-    const safeUserData: Partial<User> = {};
+    const safeUserData: Partial<User> = {
+      id: typeof data.id === 'string' ? data.id : `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      username: typeof data.username === 'string' ? data.username : `user_${Math.random().toString(36).substr(2, 8)}`,
+      nickname: typeof data.nickname === 'string' ? data.nickname : undefined,
+      email: typeof data.email === 'string' ? data.email : undefined,
+      avatarUrl: typeof data.avatarUrl === 'string' ? data.avatarUrl : undefined,
+      role: typeof data.role === 'number' ? data.role : UserRole.REGULAR,
+      lastLoginTime: typeof data.lastLoginTime === 'string' ? data.lastLoginTime : DateUtil.format(new Date()),
+      registrationDate: typeof data.registrationDate === 'string' ? data.registrationDate : DateUtil.format(new Date()),
+      isVerified: typeof data.isVerified === 'boolean' ? data.isVerified : false,
+      status: typeof data.status === 'string' ? 
+        (['active', 'inactive', 'suspended'].includes(data.status) ? data.status as 'active' | 'inactive' | 'suspended' : 'active') : 
+        'active',
+      subscriptionEndDate: typeof data.subscriptionEndDate === 'string' ? data.subscriptionEndDate : undefined,
+      watchHistoryEnabled: typeof data.watchHistoryEnabled === 'boolean' ? data.watchHistoryEnabled : true,
+      favoritesEnabled: typeof data.favoritesEnabled === 'boolean' ? data.favoritesEnabled : true,
+      totalWatchTime: typeof data.totalWatchTime === 'number' ? data.totalWatchTime : 0
+    };
     
-    if (typeof data.id === 'string') {
-      safeUserData.id = data.id;
-    }
-    if (typeof data.username === 'string') {
-      safeUserData.username = data.username;
-    }
-    if (typeof data.nickname === 'string') {
-      safeUserData.nickname = data.nickname;
-    }
-    if (typeof data.email === 'string') {
-      safeUserData.email = data.email;
-    }
-    if (typeof data.avatarUrl === 'string') {
-      safeUserData.avatarUrl = data.avatarUrl;
-    }
-    if (typeof data.role === 'number') {
-      safeUserData.role = data.role;
-    }
+    // 处理preferences
     if (data.preferences && typeof data.preferences === 'object' && !Array.isArray(data.preferences)) {
-      // 安全地转换preferences对象，避免类型断言
-      safeUserData.preferences = this.safeCastToUserPreferences(data.preferences);
+      safeUserData.preferences = this.safeCastToUserPreferences(data.preferences as Record<string, string | number | boolean | null>);
+    } else {
+      safeUserData.preferences = {
+        theme: 'system',
+        language: 'zh-CN',
+        playerDefaultQuality: 'HD',
+        autoplay: true,
+        subtitleEnabled: false,
+        defaultSubtitleLanguage: 'zh-CN',
+        audioLanguage: 'zh-CN',
+        maxConcurrentDownloads: 3,
+        parentalControlEnabled: false,
+        parentalControlLevel: 0,
+        searchHistoryEnabled: true,
+        playbackSpeed: 1.0
+      };
     }
-    if (typeof data.lastLoginTime === 'string') {
-      safeUserData.lastLoginTime = data.lastLoginTime;
-    }
-    if (typeof data.registrationDate === 'string') {
-      safeUserData.registrationDate = data.registrationDate;
-    }
+    
+    // 处理activeDevices
     if (Array.isArray(data.activeDevices)) {
-      // 安全地转换device数组，过滤非对象元素
       safeUserData.activeDevices = data.activeDevices
         .filter(item => typeof item === 'object' && item !== null)
-        .map(item => item as DeviceInfo);
+        .map(item => {
+          const deviceItem = item as Record<string, string | number | boolean | null>;
+          return {
+            deviceId: typeof deviceItem.deviceId === 'string' ? deviceItem.deviceId : '',
+            deviceName: typeof deviceItem.deviceName === 'string' ? deviceItem.deviceName : '',
+            deviceType: typeof deviceItem.deviceType === 'string' ? deviceItem.deviceType : '',
+            lastActiveTime: typeof deviceItem.lastActiveTime === 'string' ? deviceItem.lastActiveTime : '',
+            osVersion: typeof deviceItem.osVersion === 'string' ? deviceItem.osVersion : '',
+            appVersion: typeof deviceItem.appVersion === 'string' ? deviceItem.appVersion : '',
+            ipAddress: typeof deviceItem.ipAddress === 'string' ? deviceItem.ipAddress : ''
+          };
+        });
+    } else {
+      safeUserData.activeDevices = [];
     }
-    if (typeof data.isVerified === 'boolean') {
-      safeUserData.isVerified = data.isVerified;
-    }
-    if (typeof data.status === 'string') {
-      // 确保status是有效的枚举值
-      const validStatuses: Array<'active' | 'inactive' | 'suspended'> = ['active', 'inactive', 'suspended'];
-      if (validStatuses.includes(data.status as 'active' | 'inactive' | 'suspended')) {
-        safeUserData.status = data.status as 'active' | 'inactive' | 'suspended';
-      }
-    }
-    if (typeof data.subscriptionEndDate === 'string') {
-      safeUserData.subscriptionEndDate = data.subscriptionEndDate;
-    }
-    if (typeof data.watchHistoryEnabled === 'boolean') {
-      safeUserData.watchHistoryEnabled = data.watchHistoryEnabled;
-    }
-    if (typeof data.favoritesEnabled === 'boolean') {
-      safeUserData.favoritesEnabled = data.favoritesEnabled;
-    }
-    if (typeof data.totalWatchTime === 'number') {
-      safeUserData.totalWatchTime = data.totalWatchTime;
-    }
+    
+    // 处理settings
     if (data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings)) {
-      safeUserData.settings = data.settings as UserSettings;
+      const settingsItem = data.settings as Record<string, string | number | boolean | null>;
+      safeUserData.settings = {
+        notificationsEnabled: typeof settingsItem.notificationsEnabled === 'boolean' ? settingsItem.notificationsEnabled : undefined,
+        autoPlayEnabled: typeof settingsItem.autoPlayEnabled === 'boolean' ? settingsItem.autoPlayEnabled : undefined,
+        defaultLanguage: typeof settingsItem.defaultLanguage === 'string' ? settingsItem.defaultLanguage : undefined,
+        themePreference: typeof settingsItem.themePreference === 'string' ? settingsItem.themePreference : undefined,
+        subtitleSize: typeof settingsItem.subtitleSize === 'number' ? settingsItem.subtitleSize : undefined
+      };
+    } else {
+      safeUserData.settings = {
+        notificationsEnabled: undefined,
+        autoPlayEnabled: undefined,
+        defaultLanguage: undefined,
+        themePreference: undefined,
+        subtitleSize: undefined
+      };
     }
     
     const instance = new User(safeUserData);
@@ -529,25 +523,22 @@ export default class User {
    * @param obj 要转换的对象
    * @returns 转换后的UserPreferences对象
    */
-  private static safeCastToUserPreferences(obj: object): UserPreferences {
-    const result: UserPreferences = {};
-    const preferences = obj as Record<string, unknown>;
-    
-    // 只复制有效的UserPreferences属性
-    const validProps: (keyof UserPreferences)[] = [
-      'theme', 'language', 'playerDefaultQuality', 'autoplay', 
-      'subtitleEnabled', 'defaultSubtitleLanguage', 'audioLanguage',
-      'maxConcurrentDownloads', 'parentalControlEnabled', 
-      'parentalControlLevel', 'searchHistoryEnabled', 'playbackSpeed'
-    ];
-    
-    validProps.forEach(prop => {
-      if (preferences[prop] !== undefined) {
-        result[prop] = preferences[prop];
-      }
-    });
-    
-    return result;
+  private static safeCastToUserPreferences(obj: Record<string, string | number | boolean | null>): UserPreferences {
+    // 避免使用对象字面量，直接创建具体属性
+    return {
+      theme: typeof obj.theme === 'string' && ['light', 'dark', 'system'].includes(obj.theme) ? obj.theme as 'light' | 'dark' | 'system' : undefined,
+      language: typeof obj.language === 'string' ? obj.language : undefined,
+      playerDefaultQuality: typeof obj.playerDefaultQuality === 'string' ? obj.playerDefaultQuality : undefined,
+      autoplay: typeof obj.autoplay === 'boolean' ? obj.autoplay : undefined,
+      subtitleEnabled: typeof obj.subtitleEnabled === 'boolean' ? obj.subtitleEnabled : undefined,
+      defaultSubtitleLanguage: typeof obj.defaultSubtitleLanguage === 'string' ? obj.defaultSubtitleLanguage : undefined,
+      audioLanguage: typeof obj.audioLanguage === 'string' ? obj.audioLanguage : undefined,
+      maxConcurrentDownloads: typeof obj.maxConcurrentDownloads === 'number' ? obj.maxConcurrentDownloads : undefined,
+      parentalControlEnabled: typeof obj.parentalControlEnabled === 'boolean' ? obj.parentalControlEnabled : undefined,
+      parentalControlLevel: typeof obj.parentalControlLevel === 'number' ? obj.parentalControlLevel : undefined,
+      searchHistoryEnabled: typeof obj.searchHistoryEnabled === 'boolean' ? obj.searchHistoryEnabled : undefined,
+      playbackSpeed: typeof obj.playbackSpeed === 'number' ? obj.playbackSpeed : undefined
+    };
   }
   
   /**
@@ -556,25 +547,30 @@ export default class User {
    * @param settingsObj 输入的settings对象
    * @returns 安全的UserSettings对象
    */
-  private createSafeUserSettings(settingsObj: object): UserSettings {
-    const result: UserSettings = {};
-    const settings = settingsObj as Record<string, unknown>;
+  private createSafeUserSettings(settingsObj: Record<string, string | number | boolean | null>): UserSettings {
+    const result: UserSettings = {
+      notificationsEnabled: undefined,
+      autoPlayEnabled: undefined,
+      defaultLanguage: undefined,
+      themePreference: undefined,
+      subtitleSize: undefined
+    };
     
     // 只复制UserSettings接口中定义的有效属性
-    if (typeof settings.notificationsEnabled === 'boolean') {
-      result.notificationsEnabled = settings.notificationsEnabled;
+    if (typeof settingsObj.notificationsEnabled === 'boolean') {
+      result.notificationsEnabled = settingsObj.notificationsEnabled;
     }
-    if (typeof settings.autoPlayEnabled === 'boolean') {
-      result.autoPlayEnabled = settings.autoPlayEnabled;
+    if (typeof settingsObj.autoPlayEnabled === 'boolean') {
+      result.autoPlayEnabled = settingsObj.autoPlayEnabled;
     }
-    if (typeof settings.defaultLanguage === 'string') {
-      result.defaultLanguage = settings.defaultLanguage;
+    if (typeof settingsObj.defaultLanguage === 'string') {
+      result.defaultLanguage = settingsObj.defaultLanguage;
     }
-    if (typeof settings.themePreference === 'string') {
-      result.themePreference = settings.themePreference;
+    if (typeof settingsObj.themePreference === 'string') {
+      result.themePreference = settingsObj.themePreference;
     }
-    if (typeof settings.subtitleSize === 'number') {
-      result.subtitleSize = settings.subtitleSize;
+    if (typeof settingsObj.subtitleSize === 'number') {
+      result.subtitleSize = settingsObj.subtitleSize;
     }
     
     return result;
@@ -585,7 +581,27 @@ export default class User {
    * @returns 克隆后的实例
    */
   public clone(): User {
-    const instance = new User(this.toSerializable());
+    // 手动创建克隆，避免类作为对象使用
+    const cloneData: Partial<User> = {
+      id: this.id,
+      username: this.username,
+      nickname: this.nickname,
+      email: this.email,
+      avatarUrl: this.avatarUrl,
+      role: this.role,
+      preferences: this.preferences ? {...this.preferences} : undefined,
+      lastLoginTime: this.lastLoginTime,
+      registrationDate: this.registrationDate,
+      activeDevices: this.activeDevices ? [...this.activeDevices] : undefined,
+      isVerified: this.isVerified,
+      status: this.status,
+      subscriptionEndDate: this.subscriptionEndDate,
+      watchHistoryEnabled: this.watchHistoryEnabled,
+      favoritesEnabled: this.favoritesEnabled,
+      totalWatchTime: this.totalWatchTime,
+      settings: this.settings ? {...this.settings} : undefined
+    };
+    const instance = new User(cloneData);
     return instance;
   }
 }

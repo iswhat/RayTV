@@ -1,6 +1,10 @@
 // 通用类型定义文件
 // 为项目中常见的数据结构提供明确的类型定义，减少对any类型的依赖
 
+// 引入ArkTS兼容的工具类型
+import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
+import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
+
 /**
  * 基础响应对象类型
  */
@@ -21,10 +25,6 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
-
-// 引入ArkTS兼容的工具类型
-import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
-import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
 
 // 重命名以避免与标准库冲突
 export type Partial<T> = ArkTSPartial<T>;

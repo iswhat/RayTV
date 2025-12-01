@@ -20,7 +20,7 @@ export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean | string[]>;
-  data?: string | number | boolean | object;
+  data?: string | number | boolean | Record<string, string | number | boolean | null>;
   timeout?: number;
   responseType?: 'text' | 'json' | 'arraybuffer';
 }
@@ -33,6 +33,23 @@ export interface Response<T> {
   statusText: string;
   data: T;
   headers: Record<string, string>;
+}
+
+/**
+ * 文件下载选项接口
+ */
+export interface DownloadOptions {
+  headers?: Record<string, string>;
+  timeout?: number;
+  onProgress?: (receivedSize: number, totalSize: number) => void;
+}
+
+/**
+ * 文本下载选项接口
+ */
+export interface DownloadTextOptions {
+  headers?: Record<string, string>;
+  timeout?: number;
 }
 
 /**
@@ -143,7 +160,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async post<T>(url: string, data?: RequestConfig['data'], config?: Partial<RequestConfig>): Promise<Response<T>> {
+  public static async post<T>(url: string, data?: string | number | boolean | object, config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'POST',
@@ -168,7 +185,7 @@ export default class NetworkUtil {
    * @param config 请求配置（可选）
    * @returns Promise<Response<T>>
    */
-  public static async put<T>(url: string, data?: RequestConfig['data'], config?: Partial<RequestConfig>): Promise<Response<T>> {
+  public static async put<T>(url: string, data?: string | number | boolean | object, config?: Partial<RequestConfig>): Promise<Response<T>> {
     const requestConfig: RequestConfig = {
       url,
       method: 'PUT',
@@ -257,7 +274,11 @@ export default class NetworkUtil {
         const headerKeys = NetworkUtil.getObjectKeys(headers);
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
-          httpOptions.header[key] = headers[key];
+          if (httpOptions.header) {
+            httpOptions.header[key] = headers[key];
+          } else {
+            httpOptions.header = { [key]: headers[key] };
+          }
         }
       }
 
@@ -286,7 +307,7 @@ export default class NetworkUtil {
         // 构建响应头
         const responseHeaders: Record<string, string> = {};
         if (response.header) {
-          const headerKeys = NetworkUtil.getObjectKeys(response.header);
+          const headerKeys = Object.keys(response.header);
           for (let i = 0; i < headerKeys.length; i++) {
             const key = headerKeys[i];
             responseHeaders[key] = String(response.header[key]);
@@ -394,19 +415,17 @@ export default class NetworkUtil {
    * @param options 下载选项
    * @returns Promise<void>
    */
-  public static async downloadFile(url: string, savePath: string, options?: {
-    headers?: {
-      [key: string]: string;
-    };
-    timeout?: number;
-    onProgress?: (receivedSize: number, totalSize: number) => void;
-  }): Promise<void> {
+  public static async downloadFile(url: string, savePath: string, options?: DownloadOptions): Promise<void> {
     try {
       // 创建HTTP请求
       const httpRequest = http.createHttp();
+      
+      // 初始化header对象
+      const headers = options?.headers || {};
+      
       const downloadOptions: http.HttpRequestOptions = {
         method: 'GET',
-        header: options?.headers || {},
+        header: headers,
         responseType: http.HttpResponseType.ARRAY_BUFFER,
         connectTimeout: options?.timeout || 60000,
         readTimeout: options?.timeout || 60000
@@ -547,18 +566,17 @@ export default class NetworkUtil {
    * @param options 下载选项
    * @returns Promise<string>
    */
-  public static async downloadText(url: string, options?: {
-    headers?: {
-      [key: string]: string;
-    };
-    timeout?: number;
-  }): Promise<string> {
+  public static async downloadText(url: string, options?: DownloadTextOptions): Promise<string> {
     try {
       // 创建HTTP请求
       const httpRequest = http.createHttp();
+      
+      // 初始化header对象
+      const headers = options?.headers || {};
+      
       const downloadOptions: http.HttpRequestOptions = {
         method: 'GET',
-        header: options?.headers || {},
+        header: headers,
         connectTimeout: options?.timeout || 30000,
         readTimeout: options?.timeout || 30000
       };
@@ -682,8 +700,8 @@ export default class NetworkUtil {
       
       if (cacheManager) {
         try {
-          const cachedData = await cacheManager.get(cacheKey);
-          if (cachedData) {
+          const cachedData = cacheManager.get(cacheKey);
+          if (cachedData && typeof cachedData === 'string') {
             const parsedData = JSON.parse(cachedData);
             const cacheData = parsedData.data;
             const timestamp = parsedData.timestamp;
@@ -693,7 +711,7 @@ export default class NetworkUtil {
             if (now - timestamp < cacheTime) {
               Logger.info(TAG, `Using cached data for ${url}`);
               // 明确指定返回类型
-            return cacheData as T;
+              return cacheData as T;
             }
           }
         } catch (cacheError) {
@@ -708,8 +726,8 @@ export default class NetworkUtil {
         // 离线模式，尝试返回旧缓存（即使过期）
         if (cacheManager) {
           try {
-            const oldCachedData = await cacheManager.get(cacheKey);
-            if (oldCachedData) {
+            const oldCachedData = cacheManager.get(cacheKey);
+            if (oldCachedData && typeof oldCachedData === 'string') {
               Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
               const parsedData = JSON.parse(oldCachedData);
               const cacheData = parsedData.data;
@@ -735,7 +753,7 @@ export default class NetworkUtil {
       // 尝试保存到缓存
       if (cacheManager) {
         try {
-          await cacheManager.set(cacheKey, JSON.stringify(cacheData));
+          cacheManager.set(cacheKey, JSON.stringify(cacheData));
           Logger.info(TAG, `Cached response for ${url}`);
         } catch (cacheWriteError) {
           Logger.warn(TAG, `Cache write error: ${cacheWriteError}`);
@@ -773,8 +791,15 @@ export interface NetworkCacheItem {
 // 修复throw语句不能接受任意类型的问题
 export function createNetworkError(message: string, code?: number): Error {
   const error = new Error(message);
+  // 避免使用Object.assign，直接设置属性
   if (code) {
-    Object.assign(error, { code });
+    // 使用类型断言为Error添加code属性
+    Object.defineProperty(error, 'code', {
+      value: code,
+      writable: false,
+      enumerable: true,
+      configurable: true
+    });
   }
   return error;
 }

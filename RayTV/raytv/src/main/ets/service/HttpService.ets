@@ -22,7 +22,13 @@ export class HttpService {
 
   private constructor() {
     // 初始化默认配置
-    const defaultConfig = {
+    interface HttpConfig {
+      timeout: number;
+      retryCount: number;
+      userAgent?: string;
+    }
+    
+    const defaultConfig: HttpConfig = {
       timeout: 30,
       retryCount: 3
     };
@@ -80,13 +86,8 @@ export class HttpService {
    * 替代Object.keys，兼容ArkTS语法
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.keys(obj).includes(key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    // 直接使用Object.keys获取键，避免for-in循环
+    return Object.keys(obj);
   }
 
   /**
@@ -194,13 +195,16 @@ export class HttpService {
         const headerKeys = this.getObjectKeys(headers);
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
-          requestConfig.header[key] = headers[key];
+          if (requestConfig.header) {
+            requestConfig.header[key] = headers[key];
+          }
         }
       }
 
       // 添加请求数据
       if (requestData !== null && requestData !== undefined) {
-        if (requestConfig.header['Content-Type']?.includes('json')) {
+        const contentType = requestConfig.header?.['Content-Type'] || 'application/json';
+        if (contentType.includes('json')) {
           requestConfig.extraData = JSON.stringify(requestData);
         } else {
           requestConfig.extraData = requestData;
@@ -240,7 +244,7 @@ export class HttpService {
         status: response.responseCode,
         data: this.parseResponseData<T>(response.result as string),
         headers: this.sanitizeHeaders(response.header),
-        url: response.requestURL
+        url: response.requestURL || ''
       };
 
       // 关闭请求对象
@@ -363,14 +367,14 @@ export class HttpService {
   /**
    * 安全地将header转换为Record<string, string>
    */
-  private sanitizeHeaders(headers: unknown): Record<string, string> {
+  private sanitizeHeaders(headers: Record<string, string | number | boolean> | null | undefined): Record<string, string> {
     const result: Record<string, string> = {};
     
     if (!headers || typeof headers !== 'object') {
       return result;
     }
     
-    const headersObj = headers as Record<string, unknown>;
+    const headersObj = headers as Record<string, string | number | boolean>;
     for (const [key, value] of Object.entries(headersObj)) {
       if (value !== null && value !== undefined) {
         result[key] = String(value);

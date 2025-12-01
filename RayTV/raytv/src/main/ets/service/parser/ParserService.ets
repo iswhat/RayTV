@@ -239,27 +239,37 @@ export class ParserService {
       {
         id: 'direct',
         name: '直链解析',
-        description: '直接使用原始URL，适用于HTTP/HTTPS视频流'
+        description: '直接使用原始URL，适用于HTTP/HTTPS视频流',
+        type: 'direct',
+        enabled: true
       },
       {
         id: 'hls',
         name: 'HLS解析',
-        description: '解析HLS流(m3u8格式)'
+        description: '解析HLS流(m3u8格式)',
+        type: 'hls',
+        enabled: true
       },
       {
         id: 'dash',
         name: 'DASH解析',
-        description: '解析DASH流(mpd格式)'
+        description: '解析DASH流(mpd格式)',
+        type: 'dash',
+        enabled: true
       },
       {
         id: 'mp4',
         name: 'MP4解析',
-        description: 'MP4文件直接播放解析'
+        description: 'MP4文件直接播放解析',
+        type: 'mp4',
+        enabled: true
       },
       {
         id: 'flv',
         name: 'FLV解析',
-        description: 'FLV文件直接播放解析'
+        description: 'FLV文件直接播放解析',
+        type: 'flv',
+        enabled: true
       }
     ];
     
@@ -275,7 +285,7 @@ export class ParserService {
   private async loadParserConfig(): Promise<void> {
     try {
       // 从配置服务加载解析器配置
-      const parserConfig = await configService.getConfig('parserConfig', {});
+      const parserConfig = await configService.getConfig<Record<string, boolean | number>>('parserConfig', {});
       
       if (parserConfig && typeof parserConfig === 'object') {
         // 手动合并默认配置，避免对象展开操作
@@ -300,7 +310,7 @@ export class ParserService {
   private async loadCustomParsers(): Promise<void> {
     try {
       // 从配置服务加载自定义解析器
-      const customParsers: CustomParser[] = await configService.getConfig('customParsers', []);
+      const customParsers: CustomParser[] = await configService.getConfig<CustomParser[]>('customParsers', []);
       
       if (Array.isArray(customParsers)) {
         for (let i = 0; i < customParsers.length; i++) {
