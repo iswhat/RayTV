@@ -126,14 +126,15 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
     try {
       // 发送一个简单的GET请求来测试连接
       const testUrl = `${this.config.baseUrl}/api/test`;
-      const response = await NetworkUtil.request(testUrl, {
+      const response = await NetworkUtil.request<Record<string, string | number | boolean | null>>({ 
+        url: testUrl,
         method: 'GET',
-        timeout: this.config.timeout,
-        retryCount: 1
+        timeout: this.config.timeout
       });
       
-      if (!response.success) {
-        throw new Error(`Connection test failed: ${response.error?.message || 'Unknown error'}`);
+      // 检查响应状态码
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`Connection test failed: HTTP ${response.status}`);
       }
     } catch (error) {
       Logger.warn(TAG, `Connection test failed, continuing anyway: ${error instanceof Error ? error.message : String(error)}`);
@@ -211,28 +212,19 @@ private createRequestConfig(
   /**
    * 处理网络响应
    */
-  private processNetworkResponse<T>(response: Response<unknown>): NetworkResult<T> {
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data as T,
-        headers: response.headers,
-        statusCode: response.status
-      };
-    } else {
-      return {
-        success: false,
-        error: response.error,
-        message: response.error?.message || 'Request failed',
-        statusCode: response.status
-      };
-    }
+  private processNetworkResponse<T>(response: Response<T>): NetworkResult<T> {
+    return {
+      success: true,
+      data: response.data,
+      headers: response.headers,
+      statusCode: response.status
+    };
   }
 
   /**
    * 生成缓存键
    */
-  private generateCacheKey(url: string, method: string, params?: Record<string, unknown>): string {
+  private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
     const paramsStr = params ? JsonUtil.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
   }
@@ -274,7 +266,7 @@ private createRequestConfig(
   /**
    * 设置缓存数据
    */
-  private async setCachedData(key: string, data: unknown): Promise<void> {
+  private async setCachedData<T>(key: string, data: T): Promise<void> {
     if (!this.config.cacheEnabled) {
       return;
     }

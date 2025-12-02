@@ -60,7 +60,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       await rdbStore.setVersion(DATABASE_VERSION);
       
       // 检查是否需要创建或升级数据库
-      const currentVersion = await rdbStore.getVersion();
+      const currentVersion: number = await rdbStore.getVersion();
       if (currentVersion === 0) {
         await this.onCreateDatabase(rdbStore);
       } else if (currentVersion < DATABASE_VERSION) {
@@ -275,7 +275,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       Logger.info(TAG, 'Database tables created successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -304,7 +304,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       Logger.info(TAG, 'Database upgrade completed successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to upgrade database: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

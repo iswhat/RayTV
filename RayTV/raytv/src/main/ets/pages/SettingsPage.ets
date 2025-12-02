@@ -1,4 +1,4 @@
-import { ScrollView, Button, Switch, List, ListItem, Image } from '@kit.ArkUI';
+import { Column, Row, Text, Image, Button, Switch, List, ListItem, Scroller, Blank, Flex, FlexDirection, FlexAlign, ItemAlign, TextAlign, ImageFit } from '@ohos.arkui';
 import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
@@ -153,7 +153,7 @@ struct SettingsPage {
   /**
    * 保存设置
    */
-  private saveSetting(key: string, value: unknown): void {
+  private saveSetting(key: string, value: string | number | boolean | null | Record<string, string | number | boolean | null>): void {
     try {
       configService.setConfig(key, value)
         .then(() => {

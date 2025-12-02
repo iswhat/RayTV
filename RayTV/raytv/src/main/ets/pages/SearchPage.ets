@@ -7,7 +7,7 @@ import { mediaService } from '../service/media/MediaService';
 import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
 import { siteManager } from '../service/spider/SiteManager';
 import { lineManager } from '../service/config/LineManager';
-import { Button } from '@kit.ArkUI';
+import { Column, Row, Text, Image, Flex, Stack, Button, List, ForEach, Scroller, Blank, ImageFit, BarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign } from '@ohos/arkui';
 
 // 快速搜索结果接口
 interface QuickSearchResult {
@@ -578,45 +578,49 @@ struct SearchPage {
    */
   @Builder
   private renderSearchHistory(): void {
-    if (this.searchHistory.length === 0) return;
-    
-    Stack({
-      backgroundColor: '#FFFFFF',
-      borderRadius: 10,
-      padding: 15,
-      margin: { bottom: 15 }
-    }) {
-      Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center, marginBottom: 10 }) {
-        Text("搜索历史")
-          .fontSize(20)
-          .fontColor('#333333')
-          .fontWeight(600)
-        Button({
-          backgroundColor: 'transparent',
-          onClick: this.clearSearchHistory
-        }) {
-          Text("清除")
-            .fontSize(16)
-            .fontColor('#666666')
-        }
-      }
-      Flex({ direction: FlexDirection.Row, flexWrap: FlexWrap.Wrap, gap: 10 }) {
-        ForEach(this.searchHistory, (keyword, index) => {
-          Button({
-            key: `history-${index}`,
-            backgroundColor: '#E0E0E0',
-            borderRadius: 15,
-            paddingHorizontal: 15,
-            paddingVertical: 8,
-            onClick: () => this.handleKeywordClick(keyword)
-          }) {
-            Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center, gap: 5 }) {
-              Text("🕐")
-                .fontSize(16)
-              Text(keyword)
-                .fontSize(16)
-            }
+    if (this.searchHistory.length > 0) {
+      Stack()
+      .backgroundColor('#FFFFFF')
+      .borderRadius(10)
+      .padding(15)
+      .margin({ bottom: 15 }) {
+        Flex()
+        .direction(FlexDirection.Row)
+        .justifyContent(FlexAlign.SpaceBetween)
+        .alignItems(ItemAlign.Center)
+        .margin({ bottom: 10 }) {
+          Text("搜索历史")
+            .fontSize(20)
+            .fontColor('#333333')
+            .fontWeight(600)
+          Button()
+          .backgroundColor('transparent')
+          .onClick(this.clearSearchHistory) {
+            Text("清除")
+              .fontSize(16)
+              .fontColor('#666666')
           }
+        Flex()
+        .direction(FlexDirection.Row)
+        .flexWrap(FlexWrap.Wrap)
+        .gap(10) {
+          ForEach(this.searchHistory, (keyword, index) => {
+            Button()
+            .key(`history-${index}`)
+            .backgroundColor('#E0E0E0')
+            .borderRadius(15)
+            .padding({ horizontal: 15, vertical: 8 })
+            .onClick(() => this.handleKeywordClick(keyword)) {
+              Flex()
+              .direction(FlexDirection.Row)
+              .alignItems(ItemAlign.Center)
+              .gap(5) {
+                Text("🕐")
+                  .fontSize(16)
+                Text(keyword)
+                  .fontSize(16)
+              }
+            }
         }, (keyword, index) => `history-${index}`)
       }
     }
@@ -627,103 +631,92 @@ struct SearchPage {
    */
   @Builder
   private renderSearchResultItem(media: MediaItem): void {
-    ListItem({ onClick: () => this.handleSearchResultClick(media) }) {
-      Flex({
-        direction: FlexDirection.Row,
-        alignItems: ItemAlign.Center,
-        padding: 15,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 10,
-        marginBottom: 10
-      }) {
-        // 媒体封面 - 使用占位符替代Image组件
-        Column({
-          width: 100,
-          height: 150,
-          backgroundColor: '#E0E0E0',
-          borderRadius: 8,
-          justifyContent: FlexAlign.Center,
-          alignItems: HorizontalAlign.Center,
-          marginRight: 15
-        }) {
-          Text("封面")
-            .fontSize(14)
-            .fontColor('#666666')
+    Flex()
+    .direction(FlexDirection.Row)
+    .alignItems(ItemAlign.Center)
+    .padding(15)
+    .backgroundColor('#FFFFFF')
+    .borderRadius(10)
+    .margin({ bottom: 10 })
+    .onClick(() => this.handleSearchResultClick(media)) {
+      // 媒体封面 - 使用占位符替代Image组件
+      Column()
+      .width(100)
+      .height(150)
+      .backgroundColor('#E0E0E0')
+      .borderRadius(8)
+      .justifyContent(FlexAlign.Center)
+      .alignItems(HorizontalAlign.Center)
+      .margin({ right: 15 }) {
+        Text("封面")
+          .fontSize(14)
+          .fontColor('#666666')
+      }
+      Flex()
+      .direction(FlexDirection.Column)
+      .flex(1) {
+        Text(media.title)
+          .fontSize(20)
+          .fontColor('#333333')
+          .fontWeight(600)
+          .numberOfLines(2)
+        Flex()
+        .direction(FlexDirection.Row)
+        .flexWrap(FlexWrap.Wrap)
+        .gap(8)
+        .margin({ top: 8 }) {
+          if (media.year) {
+            Button()
+            .backgroundColor('#E0E0E0')
+            .borderRadius(10)
+            .padding({ horizontal: 10, vertical: 4 }) {
+              Text(media.year)
+                .fontSize(14)
+                .fontColor('#666666')
+            }
+          }
+          if (media.type) {
+            Button()
+            .backgroundColor('#E0E0E0')
+            .borderRadius(10)
+            .padding({ horizontal: 10, vertical: 4 }) {
+              Text(media.type)
+                .fontSize(14)
+                .fontColor('#666666')
+            }
+          }
+          if (media.score) {
+            Button()
+            .backgroundColor('#FFEB3B')
+            .borderRadius(10)
+            .padding({ horizontal: 10, vertical: 4 }) {
+              Text(media.score)
+                .fontSize(14)
+                .fontColor('#000000')
+                .fontWeight(600)
+            }
+          }
         }
-        Flex({
-          direction: FlexDirection.Column,
-          flex: 1
-        }) {
-          Text(media.title)
-            .fontSize(20)
-            .fontColor('#333333')
-            .fontWeight(600)
+        if (media.description) {
+          Text(media.description)
+            .fontSize(16)
+            .fontColor('#666666')
             .numberOfLines(2)
-          Flex({
-            direction: FlexDirection.Row,
-            flexWrap: FlexWrap.Wrap,
-            gap: 8,
-            marginTop: 8
-          }) {
-            if (media.year) {
-              Button({
-                backgroundColor: '#E0E0E0',
-                borderRadius: 10,
-                paddingHorizontal: 10,
-                paddingVertical: 4
-              }) {
-                Text(media.year)
-                  .fontSize(14)
-                  .fontColor('#666666')
-              }
-            }
-            if (media.type) {
-              Button({
-                backgroundColor: '#E0E0E0',
-                borderRadius: 10,
-                paddingHorizontal: 10,
-                paddingVertical: 4
-              }) {
-                Text(media.type)
-                  .fontSize(14)
-                  .fontColor('#666666')
-              }
-            }
-            if (media.score) {
-              Button({
-                backgroundColor: '#FFEB3B',
-                borderRadius: 10,
-                paddingHorizontal: 10,
-                paddingVertical: 4
-              }) {
-                Text(media.score)
-                  .fontSize(14)
-                  .fontColor('#000000')
-                  .fontWeight(600)
-              }
-            }
-          }
-          if (media.description) {
-            Text(media.description)
-              .fontSize(16)
-              .fontColor('#666666')
-              .numberOfLines(2)
-              .margin({ top: 8 })
-          }
-          if (media.directors && media.directors.length > 0) {
-            Text(`导演: ${media.directors.slice(0, 3).join(', ')}`)
-              .fontSize(14)
-              .fontColor('#999999')
-              .numberOfLines(1)
-              .margin({ top: 5 })
-          }
-          if (media.actors && media.actors.length > 0) {
-            Text(`主演: ${media.actors.slice(0, 3).join(', ')}`)
-              .fontSize(14)
-              .fontColor('#999999')
-              .numberOfLines(1)
-              .margin({ top: 2 })
-          }
+            .margin({ top: 8 })
+        }
+        if (media.directors && media.directors.length > 0) {
+          Text(`导演: ${media.directors.slice(0, 3).join(', ')}`)
+            .fontSize(14)
+            .fontColor('#999999')
+            .numberOfLines(1)
+            .margin({ top: 5 })
+        }
+        if (media.actors && media.actors.length > 0) {
+          Text(`主演: ${media.actors.slice(0, 3).join(', ')}`)
+            .fontSize(14)
+            .fontColor('#999999')
+            .numberOfLines(1)
+            .margin({ top: 2 })
         }
       }
     }
@@ -734,13 +727,11 @@ struct SearchPage {
    */
   @Builder
   private renderDisplayModeToggle(): void {
-    Button({
-      backgroundColor: '#4CAF50',
-      borderRadius: 20,
-      paddingHorizontal: 15,
-      paddingVertical: 8,
-      onClick: this.toggleDisplayMode
-    }) {
+    Button()
+    .backgroundColor('#4CAF50')
+    .borderRadius(20)
+    .padding({ horizontal: 15, vertical: 8 })
+    .onClick(this.toggleDisplayMode) {
       Text(this.displayMode === 'list' ? '网格' : '列表')
         .fontSize(16)
         .fontColor('#FFFFFF')
@@ -753,13 +744,11 @@ struct SearchPage {
    */
   @Builder
   private renderFilterButton(): void {
-    Button({
-      backgroundColor: '#4CAF50',
-      borderRadius: 20,
-      paddingHorizontal: 15,
-      paddingVertical: 8,
-      onClick: this.toggleFilterPanel
-    }) {
+    Button()
+    .backgroundColor('#4CAF50')
+    .borderRadius(20)
+    .padding({ horizontal: 15, vertical: 8 })
+    .onClick(this.toggleFilterPanel) {
       Text("筛选")
         .fontSize(16)
         .fontColor('#FFFFFF')
@@ -772,44 +761,41 @@ struct SearchPage {
    */
   @Builder
   private renderFilterPanel(): void {
-    if (!this.showFilterPanel) return;
-    
-    Stack({
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 100
-    }) {
-      Stack({
-          backgroundColor: '#4CAF50',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: 20,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20
-        }) {
-        // 标题栏
-        Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center, marginBottom: 20 }) {
-          Text('筛选条件')
-            .fontSize(28)
-            .fontColor('#FFFFFF')
-            .fontWeight(700)
-          Button({
-            backgroundColor: 'transparent',
-            onClick: () => {
-              this.showFilterPanel = false;
-            }
-          }) {
-            Text('✕')
+    if (this.showFilterPanel) {
+      Stack()
+      .backgroundColor('rgba(0, 0, 0, 0.85)')
+      .position({ x: 0, y: 0 })
+      .width('100%')
+      .height('100%')
+      .zIndex(100) {
+        Stack()
+        .backgroundColor('#4CAF50')
+        .position({ x: 0, y: 0 })
+        .width('100%')
+        .height('auto')
+        .padding(20)
+        .borderTopLeftRadius(20)
+        .borderTopRightRadius(20) {
+          // 标题栏
+          Flex()
+          .direction(FlexDirection.Row)
+          .justifyContent(FlexAlign.SpaceBetween)
+          .alignItems(ItemAlign.Center)
+          .margin({ bottom: 20 }) {
+            Text('筛选条件')
               .fontSize(28)
               .fontColor('#FFFFFF')
+              .fontWeight(700)
+            Button()
+            .backgroundColor('transparent')
+            .onClick(() => {
+              this.showFilterPanel = false;
+            }) {
+              Text('✕')
+                .fontSize(28)
+                .fontColor('#FFFFFF')
+            }
           }
-        }
         
         // 媒体类型筛选
         Text('媒体类型:')
@@ -936,14 +922,12 @@ struct SearchPage {
    */
   @Builder
   private renderGridItem(item: MediaItem): void {
-    if (!item) return;
-    
-    // 使用Column替代GridItem
-    Column({
-      width: '100%',
-      margin: { bottom: 15 }
-    })
-    .onClick(() => this.handleSearchResultClick(item)) {
+    if (item) {
+      // 使用Column替代GridItem
+      Column()
+      .width('100%')
+      .margin({ bottom: 15 })
+      .onClick(() => this.handleSearchResultClick(item)) {
       Stack({
           width: '100%'
         }) {
@@ -1009,24 +993,20 @@ struct SearchPage {
   @Builder
   private renderSearchResults(): void {
     // 渲染分类筛选按钮
-    ScrollView({
-      whiteSpace: 'nowrap',
-      margin: { bottom: 20 }
-    }) {
-      Flex({
-        paddingHorizontal: 15,
-        alignItems: FlexAlign.Center,
-        gap: 10
-      }) {
+    Scroller()
+    .scrollable(ScrollDirection.Horizontal)
+    .margin({ bottom: 20 }) {
+      Flex()
+      .padding({ horizontal: 15 })
+      .alignItems(FlexAlign.Center)
+      .gap(10) {
         // 全部显示按钮
-        Button({
-          backgroundColor: '#4CAF50',
-          borderRadius: 20,
-          paddingHorizontal: 20,
-          paddingVertical: 8,
-          marginRight: 10,
-          onClick: () => {}
-        }) {
+        Button()
+        .backgroundColor('#4CAF50')
+        .borderRadius(20)
+        .padding({ horizontal: 20, vertical: 8 })
+        .margin({ right: 10 })
+        .onClick(() => {}) {
           Text("全部显示")
             .fontSize(22)
             .fontColor('#FFFFFF')
@@ -1035,14 +1015,12 @@ struct SearchPage {
         
         // 分类按钮
         ForEach(["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"], (category) => {
-          Button({
-            backgroundColor: '#FFFFFF',
-            borderRadius: 20,
-            paddingHorizontal: 20,
-            paddingVertical: 8,
-            marginRight: 10,
-            onClick: () => {}
-          }) {
+          Button()
+          .backgroundColor('#FFFFFF')
+          .borderRadius(20)
+          .padding({ horizontal: 20, vertical: 8 })
+          .margin({ right: 10 })
+          .onClick(() => {}) {
             Text(category)
               .fontSize(22)
               .fontColor('#4CAF50')

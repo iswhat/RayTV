@@ -1,4 +1,4 @@
-import { Button, Divider, SearchBar, Swiper, SwiperItem } from '@kit.ArkUI';
+import { Button, Column, Row, Text, Image, ForEach, Scroller, Blank, ImageFit, BarState, TextOverflow } from '@ohos/arkui';
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
@@ -1121,36 +1121,31 @@ struct MediaDetailPage {
           this.renderTabBar()
           
           // 内容区域
-          Column({
-            padding: 20
-          }) {
+          Column() {
             if (this.activeTab === 'episodes') {
               this.renderEpisodes()
             } else {
               this.renderPlaySources()
             }
           }
+          .padding(20)
           
           // 相关推荐
           if (this.relatedMedia.length > 0) {
-            Column({
-              padding: 20
-            }) {
+            Column() {
               Text("相关推荐")
                 .fontSize(22)
                 .fontColor('#FFFFFF')
                 .fontWeight(600)
                 .margin({ bottom: 15 })
               
-              ScrollView() {
-                Row({
-                  gap: 15
-                }) {
+              Scroller() {
+                Row() {
                   ForEach(this.relatedMedia, (media: MediaItem) => {
-                    Column({
-                      width: 150
-                    })
+                    Column()
                     .key(`${media.siteKey}-${media.id}`)
+                    .width(150)
+                    .margin({ right: 15 })
                     .onClick(() => this.handleRelatedMediaClick(media)) {
                       Image(media.coverUrl || "https://via.placeholder.com/150x200?text=No+Image")
                         .width(150)
@@ -1163,7 +1158,7 @@ struct MediaDetailPage {
                         .fontColor('#FFFFFF')
                         .margin({ top: 10 })
                         .maxLines(2)
-                        .textOverflow({ overflow: 'ellipsis' })
+                        .textOverflow(TextOverflow.Ellipsis)
                     }
                   })
                 }

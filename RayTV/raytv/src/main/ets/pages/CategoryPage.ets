@@ -2,7 +2,7 @@
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
-import { Button } from '@kit.ArkUI';
+import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, HorizontalAlign, FlexAlign, ItemAlign, FlexDirection, ImageFit, TextAlign } from '@ohos/arkui';
 import { MediaItem } from '../data/bean/MediaItem';
 
 /**
@@ -243,7 +243,9 @@ struct CategoryPage {
    */
   @Builder
   private renderHeader(): void {
-    Flex({ alignItems: FlexAlign.Center, justifyContent: FlexAlign.SpaceBetween }) {
+    Flex()
+    .alignItems(FlexAlign.Center)
+    .justifyContent(FlexAlign.SpaceBetween) {
       Button("←")
         .onClick(() => this.handleBack())
       Text("分类浏览")
@@ -257,12 +259,16 @@ struct CategoryPage {
    */
   @Builder
   private renderCategorySelector(): void {
-    ScrollView({ className: "category-scroll", scrollBar: "auto" }) {
-      Flex({ className: "category-list", wrap: "nowrap" }) {
+    Scroller()
+    .scrollable(ScrollDirection.Horizontal) {
+      Flex()
+      .className("category-list")
+      .wrap(FlexWrap.NoWrap) {
         ForEach(this.categories, (category: string) => {
-          Button(category, { key: `category-${category}` })
-            .className(`category-button ${this.selectedCategory === category ? 'selected' : ''}`)
-            .onClick(() => this.handleCategorySelect(category))
+          Button(category)
+          .key(`category-${category}`)
+          .className(`category-button ${this.selectedCategory === category ? 'selected' : ''}`)
+          .onClick(() => this.handleCategorySelect(category))
         }, (category: string) => category)
       }
     }
@@ -273,48 +279,59 @@ struct CategoryPage {
    */
   @Builder
   private renderFilters(): void {
-    Flex({ alignItems: FlexAlign.Center, gap: 10 }) {
+    Flex()
+    .alignItems(FlexAlign.Center)
+    .gap(10) {
       // 地区筛选 - 使用按钮组替代Select组件
-      Flex({ alignItems: FlexAlign.Center }) {
+      Flex()
+      .alignItems(FlexAlign.Center) {
         Text("地区:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex({ alignItems: FlexAlign.Center, gap: 5 }) {
+        Flex()
+        .alignItems(FlexAlign.Center)
+        .gap(5) {
           ForEach(this.regions.slice(0, 5), (region: string) => {
             Button(region)
-              .backgroundColor(this.selectedRegion === region ? '#4CAF50' : '#E0E0E0')
-              .fontColor(this.selectedRegion === region ? '#FFFFFF' : '#333333')
-              .onClick(() => this.handleRegionSelect(region))
+            .backgroundColor(this.selectedRegion === region ? '#4CAF50' : '#E0E0E0')
+            .fontColor(this.selectedRegion === region ? '#FFFFFF' : '#333333')
+            .onClick(() => this.handleRegionSelect(region))
           })
         }
       }
       
       // 年份筛选 - 使用按钮组替代Select组件
-      Flex({ alignItems: FlexAlign.Center }) {
+      Flex()
+      .alignItems(FlexAlign.Center) {
         Text("年份:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex({ alignItems: FlexAlign.Center, gap: 5 }) {
+        Flex()
+        .alignItems(FlexAlign.Center)
+        .gap(5) {
           ForEach(this.years.slice(0, 5), (year: string) => {
             Button(year)
-              .backgroundColor(this.selectedYear === year ? '#4CAF50' : '#E0E0E0')
-              .fontColor(this.selectedYear === year ? '#FFFFFF' : '#333333')
-              .onClick(() => this.handleYearSelect(year))
+            .backgroundColor(this.selectedYear === year ? '#4CAF50' : '#E0E0E0')
+            .fontColor(this.selectedYear === year ? '#FFFFFF' : '#333333')
+            .onClick(() => this.handleYearSelect(year))
           })
         }
       }
       
       // 排序筛选 - 使用按钮组替代Select组件
-      Flex({ alignItems: FlexAlign.Center }) {
+      Flex()
+      .alignItems(FlexAlign.Center) {
         Text("排序:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex({ alignItems: FlexAlign.Center, gap: 5 }) {
+        Flex()
+        .alignItems(FlexAlign.Center)
+        .gap(5) {
           ForEach(this.sortOptions.slice(0, 3), (sort: string) => {
             Button(sort)
-              .backgroundColor(this.selectedSort === sort ? '#4CAF50' : '#E0E0E0')
-              .fontColor(this.selectedSort === sort ? '#FFFFFF' : '#333333')
-              .onClick(() => this.handleSortSelect(sort))
+            .backgroundColor(this.selectedSort === sort ? '#4CAF50' : '#E0E0E0')
+            .fontColor(this.selectedSort === sort ? '#FFFFFF' : '#333333')
+            .onClick(() => this.handleSortSelect(sort))
           })
         }
       }
@@ -326,30 +343,40 @@ struct CategoryPage {
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    Flex({ alignItems: FlexAlign.Start, gap: 10, padding: 10, backgroundColor: '#F5F5F5', borderRadius: 8, marginBottom: 10 })
-      .onClick(() => this.handleMediaItemClick(media)) {
-        Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
-          .width(80)
-          .height(120)
-          .objectFit("cover")
-          .borderRadius(4)
-        Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.SpaceBetween, alignItems: FlexAlign.Start, height: 120 }) {
-          Text(media.title)
-            .fontSize(16)
-            .fontColor('#333333')
-            .maxLines(2)
-          if (media.year) {
-            Text(media.year)
-              .fontSize(12)
-              .fontColor('#666666')
-          }
-          if (media.score) {
-            Text("评分: " + media.score)
-              .fontSize(12)
-              .fontColor('#FF6B35')
-          }
+    Flex()
+    .alignItems(FlexAlign.Start)
+    .gap(10)
+    .padding(10)
+    .backgroundColor('#F5F5F5')
+    .borderRadius(8)
+    .margin({ bottom: 10 })
+    .onClick(() => this.handleMediaItemClick(media)) {
+      Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
+        .width(80)
+        .height(120)
+        .objectFit(ImageFit.Cover)
+        .borderRadius(4)
+      Flex()
+      .direction(FlexDirection.Column)
+      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(FlexAlign.Start)
+      .height(120) {
+        Text(media.title)
+          .fontSize(16)
+          .fontColor('#333333')
+          .maxLines(2)
+        if (media.year) {
+          Text(media.year)
+            .fontSize(12)
+            .fontColor('#666666')
+        }
+        if (media.score) {
+          Text("评分: " + media.score)
+            .fontSize(12)
+            .fontColor('#FF6B35')
         }
       }
+    }
   }
   
   /**
@@ -358,51 +385,53 @@ struct CategoryPage {
   @Builder
   private renderMediaList(): void {
     if (this.isLoading && this.currentPage === 1) {
-      Stack({ alignItems: HorizontalAlign.Center, justifyContent: FlexAlign.Center, padding: 20 }) {
+      Stack()
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20) {
         LoadingProgress()
           .color("#FF4500")
         Text("加载中...")
           .fontSize(16)
           .fontColor('#333333')
-          .marginTop(10)
+          .margin({ top: 10 })
       }
-      return;
-    }
-    
-    if (this.errorMessage) {
-      Stack({ alignItems: HorizontalAlign.Center, justifyContent: FlexAlign.Center, padding: 20 }) {
+    } else if (this.errorMessage) {
+      Stack()
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20) {
         Text("⚠️")
           .fontSize(24)
         Text(this.errorMessage)
           .fontSize(16)
           .fontColor('#333333')
-          .marginTop(10)
+          .margin({ top: 10 })
         Button("重试")
           .backgroundColor('#4CAF50')
           .fontColor('#FFFFFF')
-          .marginTop(15)
+          .margin({ top: 15 })
           .onClick(() => this.loadMediaList(true))
       }
-      return;
-    }
-    
-    if (this.mediaList.length === 0) {
-      Stack({ alignItems: HorizontalAlign.Center, justifyContent: FlexAlign.Center, padding: 20 }) {
+    } else if (this.mediaList.length === 0) {
+      Stack()
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20) {
         Text("暂无相关内容")
           .fontSize(16)
           .fontColor('#666666')
       }
-      return;
+    } else {
+      List() {
+        ForEach(this.mediaList, (item: MediaItem) => {
+          this.renderMediaItem(item)
+        }, (item: MediaItem) => item.id)
+      }
+      .onScrollBottom(() => this.handleLoadMore())
+      .onRefresh(() => this.handleRefresh())
+      .refreshing(this.isRefreshing)
     }
-    
-    List({ className: "media-list" }) {
-      ForEach(this.mediaList, (item: MediaItem) => {
-        this.renderMediaItem(item)
-      }, (item: MediaItem) => item.id)
-    }
-    .onScrollBottom(() => this.handleLoadMore())
-    .onRefresh(() => this.handleRefresh())
-    .refreshing(this.isRefreshing)
   }
   
   /**
@@ -411,13 +440,16 @@ struct CategoryPage {
   @Builder
   private renderLoadMore(): void {
     if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
-      Stack({ alignItems: HorizontalAlign.Center, justifyContent: FlexAlign.Center, padding: 20 }) {
+      Stack()
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20) {
         LoadingProgress()
           .color("#FF4500")
         Text("加载更多...")
           .fontSize(16)
           .fontColor('#333333')
-          .marginTop(10)
+          .margin({ top: 10 })
       }
     } else if (!this.hasMoreResults && this.mediaList.length > 0) {
       Text("没有更多内容了")

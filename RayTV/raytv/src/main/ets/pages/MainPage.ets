@@ -1,4 +1,4 @@
-import { Button, Image, List } from '@kit.ArkUI';
+import { Button, Image, List } from '@ohos/arkui';
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
@@ -101,7 +101,7 @@ struct MainPage {
         const fallbackData = await mediaService.getPopularContent();
         
         if (fallbackData && fallbackData.length > 0) {
-          this.featuredMedia = fallbackData.map((item: any) => ({
+          this.featuredMedia = fallbackData.map((item: { id?: string; title?: string; coverUrl?: string; imageUrl?: string; type?: string; siteKey?: string }) => ({
             id: item.id || String(Math.random()),
             title: item.title || '未命名内容',
             cover: item.coverUrl || item.imageUrl || '/resources/images/default_cover.jpg',

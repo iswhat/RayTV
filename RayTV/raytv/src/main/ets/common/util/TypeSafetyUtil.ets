@@ -638,12 +638,13 @@ export class TypeSafetyUtil {
   public static getObjectEntries<T extends string | number | boolean | null>(obj: Record<string, string | number | boolean | null>): [string, T][] {
     const entries = Object.entries(obj);
     // 过滤并转换键值对，确保返回的是指定类型
-    return entries.filter(([_, value]) => 
-      typeof value === 'string' || 
-      typeof value === 'number' || 
-      typeof value === 'boolean' || 
-      value === null
-    ) as [string, T][];
+    return entries.filter((entry) => {
+      const value = entry[1];
+      return typeof value === 'string' || 
+             typeof value === 'number' || 
+             typeof value === 'boolean' || 
+             value === null;
+    }) as [string, T][];
   }
 
   /**
@@ -721,7 +722,11 @@ export class TypeSafetyUtil {
         const key = entry[0];
         const validator = entry[1];
         // 安全地获取对象属性并验证
-        const value = TypeSafetyUtil.safeAccess(obj, key.toString(), null);
+        let value = TypeSafetyUtil.safeAccess(obj, key.toString(), null);
+        // 确保value不是undefined，使用null作为默认值
+        if (value === undefined) {
+          value = null;
+        }
         if (!validator(value)) {
           return false;
         }

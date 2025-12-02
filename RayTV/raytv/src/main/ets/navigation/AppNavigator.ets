@@ -4,6 +4,13 @@
 import router from '@ohos.router';
 import StorageUtil from '../common/util/StorageUtil';
 
+// 定义router.pushUrl和router.replaceUrl方法的参数类型接口
+export interface RouterOptions {
+  url: string;
+  params?: Record<string, string | number | boolean | null>;
+  mode?: router.RouterMode;
+}
+
 export class AppNavigator {
   private static instance: AppNavigator | null = null;
   private storageUtil: StorageUtil;
@@ -139,7 +146,8 @@ export class AppNavigator {
       this.addToHistory(historyItem);
 
       // 使用新的router.pushUrl方法替代已弃用的router.push
-      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+      // 创建符合router.pushUrl要求的对象
+      const routerOptions: RouterOptions = {
         url: url,
         params: params instanceof NavigationParamsImpl ? 
           params.toObject() : 
@@ -177,7 +185,8 @@ export class AppNavigator {
   async backToHome(): Promise<void> {
     try {
       // 使用新的router.pushUrl方法替代已弃用的router.push
-      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+      // 创建符合router.pushUrl要求的对象
+      const routerOptions: RouterOptions = {
         url: this.getPageUrl(PageRoute.HOME),
         params: {} as Record<string, string | number | boolean | null>,
         mode: router.RouterMode.Single
@@ -202,7 +211,8 @@ export class AppNavigator {
     try {
       const url = this.getPageUrl(route);
       // 使用新的router.replaceUrl方法替代已弃用的router.replace
-      const routerOptions: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>> = {
+      // 创建符合router.replaceUrl要求的对象
+      const routerOptions: RouterOptions = {
         url: url,
         params: params instanceof NavigationParamsImpl ? 
           params.toObject() : 

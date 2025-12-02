@@ -2,11 +2,44 @@
 
 // @ohos模块声明
 declare module '@ohos.net.http' {
-  export const createHttp: () => any;
+  export interface HttpRequest {
+    request(url: string, options?: RequestOptions): Promise<HttpResponse>;
+    destroy(): void;
+  }
+  
+  export interface RequestOptions {
+    method?: string;
+    header?: Record<string, string>;
+    extraData?: string | Record<string, string | number | boolean>;
+    connectTimeout?: number;
+    readTimeout?: number;
+    responseType?: string;
+    signal?: AbortSignal;
+  }
+  
+  export interface HttpResponse {
+    responseCode: number;
+    result: string | ArrayBuffer | Record<string, any>;
+    header: Record<string, string>;
+  }
+  
+  export const createHttp: () => HttpRequest;
 }
 
 declare module '@ohos.net.connection' {
-  export const getNetCapabilities: (callback: Function) => any;
+  export interface NetCapabilities {
+    isInternetAvailable: boolean;
+    networkType: string;
+  }
+  
+  export const getNetCapabilities: (callback: (capabilities: NetCapabilities) => void) => void;
+  export const getStatus: () => Promise<NetStatus>;
+  export const on: (event: string, callback: (data: NetStatus | null) => void) => Promise<void>;
+  
+  export interface NetStatus {
+    isInternetAvailable: boolean;
+    networkType: string;
+  }
 }
 
 declare module '@ohos.base' {
@@ -38,9 +71,19 @@ declare module '@ohos.abilityAccessCtrl' {
 }
 
 declare module '@ohos.app.ability.common' {
+  export interface ResourceManager {
+    getMediaBasePath(type: string): Promise<string>;
+    getRawFileContent(fileName: string): Promise<ArrayBuffer>;
+  }
+  
+  export interface ApplicationContext {
+    getBundleName(): string;
+    getProcessName(): string;
+  }
+  
   export class Context {
-    resourceManager: any;
-    applicationContext: any;
+    resourceManager: ResourceManager;
+    applicationContext: ApplicationContext;
   }
 }
 
@@ -70,9 +113,15 @@ declare module '../common/util/Logger' {
 
 // Hvigor模块声明
 declare module '@ohos/hvigor-ohos-plugin' {
-  export class HvigorOhosPlugin {
-    constructor(options?: any);
+  export interface HvigorOhosPluginOptions {
+    [key: string]: any;
   }
+  
+  export class HvigorOhosPlugin {
+    constructor(options?: HvigorOhosPluginOptions);
+  }
+  
+  export const hapTasks: any;
 }
 
 // 其他基础类型声明

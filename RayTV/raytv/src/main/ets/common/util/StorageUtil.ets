@@ -568,7 +568,7 @@ export default class StorageUtil {
   private static async getFromPreferences(key: string): Promise<StorageData | null> {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const jsonData = await pref.getString(key, '');
+      const jsonData: string = await pref.getString(key, '');
       
       if (jsonData === '') {
         return null;
@@ -612,12 +612,12 @@ export default class StorageUtil {
   private static async clearPreferences(): Promise<void> {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const keys = await pref.getAllKeys();
+      const keys: string[] = await pref.getAllKeys() as string[];
       
       // 检查keys是否为数组
       if (Array.isArray(keys)) {
         for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
+          const key: string = keys[i];
           // 确保key是字符串类型
           if (typeof key === 'string') {
             await pref.delete(key);

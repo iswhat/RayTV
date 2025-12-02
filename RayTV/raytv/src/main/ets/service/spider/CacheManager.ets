@@ -388,12 +388,17 @@ export class CacheManager {
       const keysToRemove: string[] = [];
       const currentTime = Date.now();
       
-      // 清理内存缓存
-      for (const [key, item] of this.memoryCache.entries()) {
+      // 清理内存缓存 - 使用普通变量声明替代解构
+      const entries = this.memoryCache.entries();
+      let entry = entries.next();
+      while (!entry.done) {
+        const key = entry.value[0];
+        const item = entry.value[1];
         if (currentTime > item.timestamp + item.expiry) {
           keysToRemove.push(key);
           this.totalSize -= item.size;
         }
+        entry = entries.next();
       }
       
       for (const key of keysToRemove) {
@@ -409,7 +414,7 @@ export class CacheManager {
         Logger.info(this.TAG, `Cleaned ${keysToRemove.length} expired cache items`);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to cleanup expired cache: ${error}`);
+      Logger.error(this.TAG, `Failed to cleanup expired cache: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -420,15 +425,22 @@ export class CacheManager {
   private cleanupExcessCache(): void {
     if (this.totalSize > this.config.maxSize!) {
       try {
-        // 按时间排序缓存项
+        // 按时间排序缓存项 - 使用普通函数替代解构
         const sortedItems = Array.from(this.memoryCache.entries())
-          .sort(([,a], [,b]) => a.timestamp - b.timestamp);
+          .sort((entryA, entryB) => {
+            const a = entryA[1];
+            const b = entryB[1];
+            return a.timestamp - b.timestamp;
+          });
         
         // 移除最旧的缓存项，直到总大小在限制内
         let removedSize = 0;
         let removedCount = 0;
         
-        for (const [key, item] of sortedItems) {
+        // 使用普通变量声明替代解构
+        for (const entry of sortedItems) {
+          const key = entry[0];
+          const item = entry[1];
           if (this.totalSize - removedSize <= this.config.maxSize! * 0.8) { // 保留20%的空间
             break;
           }

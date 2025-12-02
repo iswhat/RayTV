@@ -401,7 +401,31 @@ export default class SearchResult {
    */
   public static fromSerializable(data: Record<string, string | number | boolean | null | string[]>): SearchResult {
     // 明确类型的部分对象
-    const searchResultData: Partial<SearchResult> = {};
+    const searchResultData: Partial<SearchResult> = {
+      id: undefined,
+      title: undefined,
+      originalTitle: undefined,
+      type: undefined,
+      coverUrl: undefined,
+      backdropUrl: undefined,
+      description: undefined,
+      score: undefined,
+      year: undefined,
+      releaseDate: undefined,
+      genres: undefined,
+      tags: undefined,
+      duration: undefined,
+      totalEpisodes: undefined,
+      currentSeason: undefined,
+      actors: undefined,
+      directors: undefined,
+      popularity: undefined,
+      matchScore: undefined,
+      extraInfo: undefined,
+      link: undefined,
+      sourceId: undefined,
+      sourceName: undefined
+    };
     
     // 手动赋值每个属性，确保类型安全
     if (typeof data.id === 'string') searchResultData.id = data.id;
@@ -426,7 +450,7 @@ export default class SearchResult {
     // 安全处理extraInfo，确保类型正确
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
       // 创建一个明确的ExtraInfo对象
-      const extraInfoObj: ExtraInfo = {};
+      const extraInfoObj: ExtraInfo = { extraData: undefined };
       const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
       
       // 检查extraData属性
@@ -444,7 +468,7 @@ export default class SearchResult {
             extraDataRecord[key] = value;
           } else if (value && typeof value === 'object' && !Array.isArray(value)) {
             // 处理嵌套对象
-            const nestedInfo: NestedExtraInfo = {};
+            const nestedInfo: NestedExtraInfo = { nestedData: undefined };
             const nestedDataRecord: Record<string, string | number | boolean | null> = {};
             const nestedObj = value as Record<string, string | number | boolean | null>;
             
@@ -493,21 +517,64 @@ export default class SearchResult {
       score: this.score,
       year: this.year,
       releaseDate: this.releaseDate,
-      genres: this.genres ? [...this.genres] : undefined,
-      tags: this.tags ? [...this.tags] : undefined,
+      genres: this.genres ? Array.from(this.genres) : undefined,
+      tags: this.tags ? Array.from(this.tags) : undefined,
       duration: this.duration,
       totalEpisodes: this.totalEpisodes,
       currentSeason: this.currentSeason,
-      actors: this.actors ? [...this.actors] : undefined,
-      directors: this.directors ? [...this.directors] : undefined,
+      actors: this.actors ? Array.from(this.actors) : undefined,
+      directors: this.directors ? Array.from(this.directors) : undefined,
       popularity: this.popularity,
       matchScore: this.matchScore,
-      extraInfo: this.extraInfo ? {...this.extraInfo} : undefined,
+      extraInfo: this.extraInfo ? this.cloneExtraInfo(this.extraInfo) : undefined,
       link: this.link,
       sourceId: this.sourceId,
       sourceName: this.sourceName
     };
     return new SearchResult(cloneData);
+  }
+
+  /**
+   * 克隆ExtraInfo对象
+   * @param extraInfo 要克隆的ExtraInfo对象
+   * @returns 克隆后的ExtraInfo对象
+   */
+  private cloneExtraInfo(extraInfo: ExtraInfo): ExtraInfo {
+    const cloned: ExtraInfo = {};
+    
+    if (extraInfo.extraData) {
+      cloned.extraData = {};
+      // 手动复制extraData中的每个属性
+      const keys = Object.keys(extraInfo.extraData);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = extraInfo.extraData[key];
+        
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          // 检查是否为NestedExtraInfo类型，通过检查是否有nestedData属性且该属性是对象
+          const potentialNested = value as NestedExtraInfo;
+          if (potentialNested.nestedData && typeof potentialNested.nestedData === 'object' && !Array.isArray(potentialNested.nestedData)) {
+            // 克隆NestedExtraInfo对象
+            const nestedCloned: NestedExtraInfo = {};
+            nestedCloned.nestedData = {};
+            const nestedKeys = Object.keys(potentialNested.nestedData);
+            for (let j = 0; j < nestedKeys.length; j++) {
+              const nestedKey = nestedKeys[j];
+              nestedCloned.nestedData![nestedKey] = potentialNested.nestedData![nestedKey];
+            }
+            cloned.extraData![key] = nestedCloned;
+          } else {
+            // 直接复制基本类型值或非NestedExtraInfo对象
+            cloned.extraData![key] = value as string | number | boolean | null;
+          }
+        } else {
+          // 直接复制基本类型值
+          cloned.extraData![key] = value;
+        }
+      }
+    }
+    
+    return cloned;
   }
 
   /**

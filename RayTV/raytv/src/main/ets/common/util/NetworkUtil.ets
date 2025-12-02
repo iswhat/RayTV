@@ -106,7 +106,7 @@ export default class NetworkUtil {
       const context = NetworkUtil.getContext();
       
       // 先检查权限状态，避免重复申请
-      const permissionResult = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
+      const permissionResult: abilityAccessCtrl.GrantStatus = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
       
       // 只有当权限未授权时才请求
       if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
@@ -272,13 +272,12 @@ export default class NetworkUtil {
       // 手动合并headers，避免数组展开操作
       if (headers) {
         const headerKeys = NetworkUtil.getObjectKeys(headers);
+        if (!httpOptions.header) {
+          httpOptions.header = {};
+        }
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
-          if (httpOptions.header) {
-            httpOptions.header[key] = headers[key];
-          } else {
-            httpOptions.header = { [key]: headers[key] };
-          }
+          httpOptions.header[key] = headers[key];
         }
       }
 
@@ -387,7 +386,7 @@ export default class NetworkUtil {
   public static async checkNetworkStatus(): Promise<boolean> {
     try {
       // 使用HarmonyOS原生API检查网络状态
-      const netStatus = await connection.getStatus();
+      const netStatus: connection.NetworkStatus = await connection.getStatus();
       return netStatus.isInternetAvailable;
     } catch (error) {
       Logger.warn(TAG, 'Network check failed:', error);
@@ -448,11 +447,11 @@ export default class NetworkUtil {
       const totalSize = response.result.byteLength;
       
       // 写入文件
-      const file = await fileIO.open(savePath, fileIO.OpenMode.READ_WRITE | fileIO.OpenMode.CREATE);
+      const file: fileIO.File = await fileIO.open(savePath, fileIO.OpenMode.READ_WRITE | fileIO.OpenMode.CREATE);
       
       try {
         // 将ArrayBuffer写入文件
-        const writeResult = await fileIO.write(file.fd, response.result);
+        const writeResult: fileIO.WriteResult = await fileIO.write(file.fd, response.result);
         
         // 通知进度完成
         if (options?.onProgress) {
@@ -479,7 +478,7 @@ export default class NetworkUtil {
     
     try {
       // 订阅网络状态变化
-      await connection.on('netStatusChange', async (data) => {
+      await connection.on('netStatusChange', async (data: connection.NetworkStatus | null) => {
         const isOnline = data !== null && data.isInternetAvailable !== false;
         const networkType = isOnline ? await NetworkUtil.getNetworkType() : 'NONE';
         
@@ -490,11 +489,11 @@ export default class NetworkUtil {
       });
       
       // 获取初始网络状态
-      const status = await connection.getStatus();
-      const isOnline = status !== null && status.isInternetAvailable !== false;
-      const initialNetworkType = isOnline ? await NetworkUtil.getNetworkType() : 'NONE';
+      const status: connection.NetworkStatus = await connection.getStatus();
+      const isOnline = status.isInternetAvailable !== false;
+      const networkType = isOnline ? await NetworkUtil.getNetworkType() : 'NONE';
       
-      Logger.info(TAG, `Initial network status: online=${isOnline}, type=${initialNetworkType}`);
+      Logger.info(TAG, `Initial network status: online=${isOnline}, type=${networkType}`);
       
       NetworkUtil.isInitialized = true;
     } catch (error) {
