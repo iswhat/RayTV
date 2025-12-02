@@ -346,12 +346,10 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     }
   }
 
-  /**
-   * 配置值类型接口
-   */
-  export interface ConfigValueObject {
-    value: string;
-  }
+  // 配置值类型接口
+export interface ConfigValueObject {
+  value: string;
+}
 
   // ========== 电影相关实现 ==========
 

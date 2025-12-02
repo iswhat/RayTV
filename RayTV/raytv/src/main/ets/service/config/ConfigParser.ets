@@ -54,8 +54,11 @@ export interface PlaySource {
 }
 
 export interface PlayRules {
-  // ArkTS兼容：使用Record类型替代方法定义
-  [key: string]: PlaySource;
+  // ArkTS兼容：使用数组替代索引签名
+  sources: Array<{
+    key: string;
+    source: PlaySource;
+  }>;
 }
 
 /**
@@ -580,20 +583,20 @@ export class ConfigParser {
    */
   public convertPlayRules(playData: unknown): PlayRules {
     if (!TypeSafetyUtil.isValidObject(playData)) {
-      return {};
+      return { sources: [] };
     }
     
     const playObj = TypeSafetyUtil.asObject(playData);
-    const result: PlayRules = {};
+    const result: PlayRules = { sources: [] };
     
-    // 手动复制所有属性
+    // 手动复制所有属性到sources数组
     for (const [key, value] of TypeSafetyUtil.getObjectEntries(playObj)) {
       if (TypeSafetyUtil.isValidObject(value)) {
         const playSource: PlaySource = {
           name: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(value, 'name', key)),
           rules: TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(value, 'rules', {}))
         };
-        result[key] = playSource;
+        result.sources.push({ key, source: playSource });
       }
     }
     

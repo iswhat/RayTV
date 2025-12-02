@@ -305,10 +305,10 @@ private createRequestConfig(
       this.requestMap.set(requestId, controller);
 
       // 发送请求
-      const response = await NetworkUtil.request(requestUrl, {
-        ...this.createRequestConfig(requestUrl, 'GET', undefined, params),
-        signal: controller.signal
-      });
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
+      // 手动添加signal属性，不使用展开运算符
+      (requestConfig as any).signal = controller.signal;
+      const response = await NetworkUtil.request(requestUrl, requestConfig);
 
       // 从请求映射中移除
       this.requestMap.delete(requestId);

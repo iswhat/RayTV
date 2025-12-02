@@ -392,32 +392,58 @@ export interface SearchResultSerializable {
 }
 
   public toSerializable(): SearchResultSerializable {
-    // 使用明确的类型赋值，避免对象字面量错误
-    const result: SearchResultSerializable = {
-      id: this.id,
-      title: this.title,
-      originalTitle: this.originalTitle,
-      type: this.type,
-      coverUrl: this.coverUrl,
-      backdropUrl: this.backdropUrl,
-      description: this.description,
-      score: this.score,
-      year: this.year,
-      releaseDate: this.releaseDate,
-      genres: this.genres,
-      tags: this.tags,
-      duration: this.duration,
-      totalEpisodes: this.totalEpisodes,
-      currentSeason: this.currentSeason,
-      actors: this.actors,
-      directors: this.directors,
-      popularity: this.popularity,
-      matchScore: this.matchScore,
-      extraInfo: this.extraInfo,
-      link: this.link,
-      sourceId: this.sourceId,
-      sourceName: this.sourceName
-    };
+    // 使用构造函数和逐个属性赋值，避免对象字面量错误
+    // 由于SearchResultSerializable是接口，我们创建一个实现该接口的类实例
+    class SearchResultSerializableImpl implements SearchResultSerializable {
+      id: string = '';
+      title: string = '';
+      originalTitle?: string;
+      type: ResultType = ResultType.OTHER;
+      coverUrl?: string;
+      backdropUrl?: string;
+      description?: string;
+      score?: number;
+      year?: number;
+      releaseDate?: string;
+      genres?: string[];
+      tags?: string[];
+      duration?: number;
+      totalEpisodes?: number;
+      currentSeason?: number;
+      actors?: string[];
+      directors?: string[];
+      popularity?: number;
+      matchScore?: number;
+      extraInfo?: ExtraInfo;
+      link?: string;
+      sourceId?: string;
+      sourceName?: string;
+    }
+    
+    const result = new SearchResultSerializableImpl();
+    result.id = this.id;
+    result.title = this.title;
+    result.originalTitle = this.originalTitle;
+    result.type = this.type;
+    result.coverUrl = this.coverUrl;
+    result.backdropUrl = this.backdropUrl;
+    result.description = this.description;
+    result.score = this.score;
+    result.year = this.year;
+    result.releaseDate = this.releaseDate;
+    result.genres = this.genres;
+    result.tags = this.tags;
+    result.duration = this.duration;
+    result.totalEpisodes = this.totalEpisodes;
+    result.currentSeason = this.currentSeason;
+    result.actors = this.actors;
+    result.directors = this.directors;
+    result.popularity = this.popularity;
+    result.matchScore = this.matchScore;
+    result.extraInfo = this.extraInfo;
+    result.link = this.link;
+    result.sourceId = this.sourceId;
+    result.sourceName = this.sourceName;
     
     return result;
   }
@@ -428,62 +454,38 @@ export interface SearchResultSerializable {
    * @returns SearchResult实例
    */
   public static fromSerializable(data: SearchResultSerializable): SearchResult {
-    // 明确类型的部分对象
-    const searchResultData: Partial<SearchResult> = {
-      id: undefined,
-      title: undefined,
-      originalTitle: undefined,
-      type: undefined,
-      coverUrl: undefined,
-      backdropUrl: undefined,
-      description: undefined,
-      score: undefined,
-      year: undefined,
-      releaseDate: undefined,
-      genres: undefined,
-      tags: undefined,
-      duration: undefined,
-      totalEpisodes: undefined,
-      currentSeason: undefined,
-      actors: undefined,
-      directors: undefined,
-      popularity: undefined,
-      matchScore: undefined,
-      extraInfo: undefined,
-      link: undefined,
-      sourceId: undefined,
-      sourceName: undefined
-    };
+    // 直接创建SearchResult实例，手动赋值所有属性
+    const instance = new SearchResult({});
     
     // 手动赋值每个属性，确保类型安全
-    if (typeof data.id === 'string') searchResultData.id = data.id;
-    if (typeof data.title === 'string') searchResultData.title = data.title;
-    if (typeof data.originalTitle === 'string') searchResultData.originalTitle = data.originalTitle;
-    if (typeof data.type === 'number') searchResultData.type = data.type as ResultType;
-    if (typeof data.coverUrl === 'string') searchResultData.coverUrl = data.coverUrl;
-    if (typeof data.backdropUrl === 'string') searchResultData.backdropUrl = data.backdropUrl;
-    if (typeof data.description === 'string') searchResultData.description = data.description;
-    if (typeof data.score === 'number') searchResultData.score = data.score;
-    if (typeof data.year === 'number') searchResultData.year = data.year;
-    if (typeof data.releaseDate === 'string') searchResultData.releaseDate = data.releaseDate;
-    if (Array.isArray(data.genres)) searchResultData.genres = data.genres.filter(item => typeof item === 'string') as string[];
-    if (Array.isArray(data.tags)) searchResultData.tags = data.tags.filter(item => typeof item === 'string') as string[];
-    if (typeof data.duration === 'number') searchResultData.duration = data.duration;
-    if (typeof data.totalEpisodes === 'number') searchResultData.totalEpisodes = data.totalEpisodes;
-    if (typeof data.currentSeason === 'number') searchResultData.currentSeason = data.currentSeason;
-    if (Array.isArray(data.actors)) searchResultData.actors = data.actors.filter(item => typeof item === 'string') as string[];
-    if (Array.isArray(data.directors)) searchResultData.directors = data.directors.filter(item => typeof item === 'string') as string[];
-    if (typeof data.popularity === 'number') searchResultData.popularity = data.popularity;
-    if (typeof data.matchScore === 'number') searchResultData.matchScore = data.matchScore;
+    if (typeof data.id === 'string') instance.id = data.id;
+    if (typeof data.title === 'string') instance.title = data.title;
+    if (typeof data.originalTitle === 'string') instance.originalTitle = data.originalTitle;
+    if (typeof data.type === 'number') instance.type = data.type as ResultType;
+    if (typeof data.coverUrl === 'string') instance.coverUrl = data.coverUrl;
+    if (typeof data.backdropUrl === 'string') instance.backdropUrl = data.backdropUrl;
+    if (typeof data.description === 'string') instance.description = data.description;
+    if (typeof data.score === 'number') instance.score = data.score;
+    if (typeof data.year === 'number') instance.year = data.year;
+    if (typeof data.releaseDate === 'string') instance.releaseDate = data.releaseDate;
+    if (Array.isArray(data.genres)) instance.genres = data.genres.filter(item => typeof item === 'string') as string[];
+    if (Array.isArray(data.tags)) instance.tags = data.tags.filter(item => typeof item === 'string') as string[];
+    if (typeof data.duration === 'number') instance.duration = data.duration;
+    if (typeof data.totalEpisodes === 'number') instance.totalEpisodes = data.totalEpisodes;
+    if (typeof data.currentSeason === 'number') instance.currentSeason = data.currentSeason;
+    if (Array.isArray(data.actors)) instance.actors = data.actors.filter(item => typeof item === 'string') as string[];
+    if (Array.isArray(data.directors)) instance.directors = data.directors.filter(item => typeof item === 'string') as string[];
+    if (typeof data.popularity === 'number') instance.popularity = data.popularity;
+    if (typeof data.matchScore === 'number') instance.matchScore = data.matchScore;
     // 安全处理extraInfo，确保类型正确
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
       // 创建一个明确的ExtraInfo对象
-      const extraInfoObj: ExtraInfo = { extraData: undefined };
-      const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
+      instance.extraInfo = {};
       
       // 检查extraData属性
+      const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
       if (extraInfoData.extraData && typeof extraInfoData.extraData === 'object' && !Array.isArray(extraInfoData.extraData)) {
-        const extraDataRecord: Record<string, string | number | boolean | null | NestedExtraInfo> = {};
+        instance.extraInfo.extraData = {};
         const extraDataObj = extraInfoData.extraData as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
         
         // 处理extraData的每个属性
@@ -493,11 +495,10 @@ export interface SearchResultSerializable {
           const value = extraDataObj[key];
           
           if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
-            extraDataRecord[key] = value;
+            instance.extraInfo.extraData![key] = value;
           } else if (value && typeof value === 'object' && !Array.isArray(value)) {
             // 处理嵌套对象
-            const nestedInfo: NestedExtraInfo = { nestedData: undefined };
-            const nestedDataRecord: Record<string, string | number | boolean | null> = {};
+            const nestedInfo: NestedExtraInfo = { nestedData: {} };
             const nestedObj = value as Record<string, string | number | boolean | null>;
             
             const nestedKeys = Object.keys(nestedObj);
@@ -507,25 +508,20 @@ export interface SearchResultSerializable {
               
               if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
                   typeof nestedValue === 'boolean' || nestedValue === null) {
-                nestedDataRecord[nestedKey] = nestedValue;
+                nestedInfo.nestedData![nestedKey] = nestedValue;
               }
             }
             
-            nestedInfo.nestedData = nestedDataRecord;
-            extraDataRecord[key] = nestedInfo;
+            instance.extraInfo.extraData![key] = nestedInfo;
           }
         }
-        
-        extraInfoObj.extraData = extraDataRecord;
       }
-      
-      searchResultData.extraInfo = extraInfoObj;
     }
-    if (typeof data.link === 'string') searchResultData.link = data.link;
-    if (typeof data.sourceId === 'string') searchResultData.sourceId = data.sourceId;
-    if (typeof data.sourceName === 'string') searchResultData.sourceName = data.sourceName;
+    if (typeof data.link === 'string') instance.link = data.link;
+    if (typeof data.sourceId === 'string') instance.sourceId = data.sourceId;
+    if (typeof data.sourceName === 'string') instance.sourceName = data.sourceName;
     
-    return new SearchResult(searchResultData);
+    return instance;
   }
 
   /**

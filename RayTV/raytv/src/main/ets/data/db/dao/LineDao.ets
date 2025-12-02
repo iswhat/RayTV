@@ -346,18 +346,18 @@ export class LineDao {
    */
   private mapRowToLineItem(row: Record<string, unknown>): LineItem {
     return {
-      id: row.id,
-      name: row.name,
-      url: row.url,
-      description: row.description,
-      type: row.type as 'all' | 'vod' | 'live',
-      updateTime: row.updateTime,
-      createTime: row.createTime,
-      sourceCount: row.sourceCount,
-      enabled: row.enabled === 1,
-      current: row.current === 1,
-      cacheTime: row.cacheTime,
-      responseTime: row.responseTime
+      id: String(row.id),
+      name: String(row.name),
+      url: String(row.url),
+      description: row.description ? String(row.description) : '',
+      type: (row.type as string) || 'all',
+      updateTime: Number(row.updateTime),
+      createTime: Number(row.createTime),
+      sourceCount: Number(row.sourceCount),
+      enabled: Number(row.enabled) === 1,
+      current: Number(row.current) === 1,
+      cacheTime: Number(row.cacheTime),
+      responseTime: Number(row.responseTime)
     };
   }
 }

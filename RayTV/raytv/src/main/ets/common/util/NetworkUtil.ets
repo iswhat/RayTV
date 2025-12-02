@@ -114,7 +114,7 @@ export default class NetworkUtil {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to check or request INTERNET permission: ${errorMessage}`);
+      Logger.error(TAG, 'Failed to check or request INTERNET permission', error instanceof Error ? error : new Error(errorMessage));
       // 不抛出错误，允许应用继续尝试网络操作
     }
   }
@@ -299,7 +299,7 @@ export default class NetworkUtil {
             responseData = JSON.parse(responseData);
           } catch (parseError) {
             const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-            Logger.error(TAG, `Failed to parse JSON response: ${errorMessage}`);
+            Logger.error(TAG, 'Failed to parse JSON response', parseError as Error);
           }
         }
 
@@ -335,7 +335,7 @@ export default class NetworkUtil {
           return NetworkUtil.request(config, retryCount + 1);
         }
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error(TAG, `Request error: ${errorMessage}`);
+        Logger.error(TAG, 'Request error', error as Error);
         throw error instanceof Error ? error : new Error(errorMessage);
       } finally {
         // 销毁HTTP请求
@@ -343,7 +343,7 @@ export default class NetworkUtil {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Request failed with error: ${errorMessage}`);
+      Logger.error(TAG, 'Request failed with error', error as Error);
       throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
@@ -465,7 +465,7 @@ export default class NetworkUtil {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to download file: ${errorMessage}`);
+      Logger.error(TAG, 'Failed to download file', error as Error);
       throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
@@ -498,7 +498,7 @@ export default class NetworkUtil {
       NetworkUtil.isInitialized = true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to initialize network listener: ${errorMessage}`);
+      Logger.error(TAG, 'Failed to initialize network listener', error as Error);
     }
   }
 
@@ -513,7 +513,7 @@ export default class NetworkUtil {
         listener(isOnline, networkType);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error(TAG, `Error in network status listener: ${errorMessage}`);
+        Logger.error(TAG, 'Error in network status listener', error as Error);
       }
     });
   }
@@ -528,7 +528,7 @@ export default class NetworkUtil {
     
     // 自动初始化监听
     NetworkUtil.initializeNetworkListener().catch((error) => {
-      Logger.error(TAG, `Failed to initialize network listener after adding: ${error}`);
+      Logger.error(TAG, 'Failed to initialize network listener after adding', error as Error);
     });
     
     // 返回取消监听的函数
@@ -592,7 +592,7 @@ export default class NetworkUtil {
       // 返回文本内容
       return response.result as string;
     } catch (error) {
-      Logger.error(TAG, `Failed to download text: ${error}`);
+      Logger.error(TAG, 'Failed to download text', error as Error);
       throw new Error(String(error));
     }
   }
@@ -690,13 +690,11 @@ export default class NetworkUtil {
    * @param cacheTime 缓存时间（毫秒）
    * @returns Promise<T>
    */
-  /**
-   * 缓存响应数据结构
-   */
-  export interface CachedResponse<T> {
-    data: T;
-    timestamp: number;
-  }
+// 缓存响应数据结构
+export interface CachedResponse<T> {
+  data: T;
+  timestamp: number;
+}
 
   public static async cachedRequest<T>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
@@ -742,7 +740,7 @@ export default class NetworkUtil {
             }
           } catch (offlineCacheError) {
             const errorMessage = offlineCacheError instanceof Error ? offlineCacheError.message : String(offlineCacheError);
-            Logger.error(TAG, `Offline cache error: ${errorMessage}`);
+            Logger.error(TAG, 'Offline cache error', offlineCacheError as Error);
           }
         }
         throw new Error('Network unavailable and no cached data available');
@@ -772,7 +770,7 @@ export default class NetworkUtil {
       return response.data;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Cached request failed: ${errorMessage}`);
+      Logger.error(TAG, 'Cached request failed', error as Error);
       // 确保错误是Error类型
       throw error instanceof Error ? error : new Error(errorMessage);
     }

@@ -22,23 +22,15 @@ export class HttpService {
 
   private constructor() {
     // 初始化默认配置
-    interface HttpConfig {
-      timeout: number;
-      retryCount: number;
-      userAgent?: string;
-    }
-    
-    const defaultConfig: HttpConfig = {
-      timeout: 30,
-      retryCount: 3
-    };
+    const defaultTimeout = 30;
+    const defaultRetryCount = 3;
     const networkConfig = ConfigService.getInstance().getConfig('network');
     
-    // 手动合并配置，避免使用对象字面量作为类型
+    // 手动初始化配置，避免使用对象字面量
     this.httpConfig = {
-      timeout: networkConfig?.timeout !== undefined ? networkConfig.timeout as number : defaultConfig.timeout,
-      retryCount: networkConfig?.retryCount !== undefined ? networkConfig.retryCount as number : defaultConfig.retryCount,
-      userAgent: networkConfig?.userAgent as string
+      timeout: networkConfig?.timeout !== undefined ? networkConfig.timeout as number : defaultTimeout,
+      retryCount: networkConfig?.retryCount !== undefined ? networkConfig.retryCount as number : defaultRetryCount,
+      userAgent: networkConfig?.userAgent as string || ''
     };
     
     this.adBlockManager = AdBlockManager.getInstance();
@@ -192,12 +184,14 @@ export class HttpService {
       
       // 手动合并headers
       if (headers) {
+        // 确保header对象存在
+        if (!requestConfig.header) {
+          requestConfig.header = {};
+        }
         const headerKeys = this.getObjectKeys(headers);
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
-          if (requestConfig.header) {
-            requestConfig.header[key] = headers[key];
-          }
+          requestConfig.header![key] = headers[key];
         }
       }
 
@@ -324,10 +318,10 @@ export class HttpService {
       // 发送请求
       const downloadConfig: DownloadConfig = {
         filePath: filePath,
-        method: requestConfig.method,
-        connectTimeout: requestConfig.connectTimeout,
-        readTimeout: requestConfig.readTimeout,
-        header: requestConfig.header,
+        method: requestConfig.method || 'GET',
+        connectTimeout: requestConfig.connectTimeout || 30000,
+        readTimeout: requestConfig.readTimeout || 30000,
+        header: requestConfig.header || {},
         extraData: requestConfig.extraData,
         expectDataType: requestConfig.expectDataType
       };

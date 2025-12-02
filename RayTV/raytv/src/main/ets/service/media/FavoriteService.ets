@@ -1,9 +1,8 @@
 import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../../data/db/DatabaseManager';
-import { MediaItem, MediaType } from './MediaService';
-import ValuesBucket from '@ohos.data.relationalStore';
-import RelationalPredicates from '@ohos.data.relationalStore';
-import ResultSet from '@ohos.data.relationalStore';
+import { MediaType } from './MediaService';
+import { MediaItem } from '../../data/bean/MediaItem';
+import { ValuesBucket, RdbPredicates as RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
 
 /**
  * 收藏项接口

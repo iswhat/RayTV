@@ -221,12 +221,14 @@ export class ParserService {
         id: parser.id,
         name: parser.name,
         description: config.description !== undefined ? config.description : parser.description,
-        url: config.url !== undefined ? config.url : parser.url,
-        isEnabled: config.isEnabled !== undefined ? config.isEnabled : parser.isEnabled
+        supports: config.supports !== undefined ? config.supports : parser.supports,
+        version: config.version !== undefined ? config.version : parser.version,
+        isEnabled: config.isEnabled !== undefined ? config.isEnabled : parser.isEnabled,
+        config: config.config !== undefined ? config.config : parser.config
       };
       
       this.parsers.set(parserId, updatedParser);
-      Logger.info(ParserService.TAG, `Updated parser config: ${parserId}`);
+      Logger.info(ParserService.TAG, 'Updated parser config', updatedParser as Error);
     }
   }
   
@@ -240,36 +242,41 @@ export class ParserService {
         id: 'direct',
         name: '直链解析',
         description: '直接使用原始URL，适用于HTTP/HTTPS视频流',
-        type: 'direct',
-        enabled: true
+        supports: ['http', 'https'],
+        version: '1.0',
+        isEnabled: true
       },
       {
         id: 'hls',
         name: 'HLS解析',
         description: '解析HLS流(m3u8格式)',
-        type: 'hls',
-        enabled: true
+        supports: ['m3u8', 'hls'],
+        version: '1.0',
+        isEnabled: true
       },
       {
         id: 'dash',
         name: 'DASH解析',
         description: '解析DASH流(mpd格式)',
-        type: 'dash',
-        enabled: true
+        supports: ['mpd', 'dash'],
+        version: '1.0',
+        isEnabled: true
       },
       {
         id: 'mp4',
         name: 'MP4解析',
         description: 'MP4文件直接播放解析',
-        type: 'mp4',
-        enabled: true
+        supports: ['mp4'],
+        version: '1.0',
+        isEnabled: true
       },
       {
         id: 'flv',
         name: 'FLV解析',
         description: 'FLV文件直接播放解析',
-        type: 'flv',
-        enabled: true
+        supports: ['flv'],
+        version: '1.0',
+        isEnabled: true
       }
     ];
     
@@ -425,6 +432,8 @@ export class ParserService {
     }
     
     return {
+      id: `source_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: `Direct Source (${format})`,
       url,
       format,
       mimeType,
@@ -458,6 +467,8 @@ export class ParserService {
       }
       
       return {
+        id: `source_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: `HLS Source`,
         url: m3u8Url,
         format: 'hls',
         mimeType: 'application/x-mpegURL',
@@ -496,6 +507,8 @@ export class ParserService {
       }
       
       return {
+        id: `source_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: `DASH Source`,
         url: mpdUrl,
         format: 'dash',
         mimeType: 'application/dash+xml',

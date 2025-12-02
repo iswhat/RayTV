@@ -9,8 +9,6 @@ export interface RouterOptions {
   url: string;
   params?: Record<string, string | number | boolean | null>;
   mode?: router.RouterMode;
-  // 添加明确的类型检查方法
-  isValid(): boolean;
 }
 
 export class AppNavigator {
@@ -463,10 +461,7 @@ export class RouterOptionsImpl implements RouterOptions {
     }
   }
   
-  // 实现isValid方法
-  isValid(): boolean {
-    return this.url !== undefined && this.url !== '';
-  }
+  
 }
 
 // 导航历史项接口
@@ -687,16 +682,7 @@ export class NavigationParamsImpl implements NavigationParams {
   }
 }
 
-/**
-   * 导航历史项 - 统一接口定义，避免声明合并问题
-   */
-// 注释掉重复的接口定义，使用上面已经定义的NavigationHistoryItem接口
-// export interface NavigationHistoryItem {
-//   route: string;
-//   url: string;
-//   params?: NavigationParams;
-//   timestamp: number;
-// }
+
 
 /**
  * 视频播放参数

@@ -1,6 +1,7 @@
 import Logger from '../../common/util/Logger';
 import { DatabaseManager } from '../../data/db/DatabaseManager';
-import { MediaItem, MediaType, PlaySource } from './MediaService';
+import { MediaType } from './MediaService';
+import { MediaItem } from '../../data/bean/MediaItem';
 import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 
 /**

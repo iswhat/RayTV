@@ -57,7 +57,7 @@ struct MainPage {
         this.isLoading = false;
       }
     } catch (error) {
-      Logger.error(`${this.TAG}: Failed to initialize config: ${error}`);
+      Logger.error(this.TAG, 'Failed to initialize config', error instanceof Error ? error : undefined);
       // 发生错误时仍尝试加载内容
       this.loadFeaturedMedia();
     }

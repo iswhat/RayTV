@@ -144,11 +144,11 @@ struct SettingsPage {
         })
         .catch(error => {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          Logger.error(this.TAG, new Error(`Failed to load settings: ${errorMessage}`));
+          Logger.error(this.TAG, `Failed to load settings: ${errorMessage}`);
         });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, new Error(`Failed to load settings: ${errorMessage}`));
+      Logger.error(this.TAG, `Failed to load settings: ${errorMessage}`);
     }
   }
   
