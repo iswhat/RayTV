@@ -334,7 +334,8 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
               }
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
-              this.configMap.set(`${config_group}:${key}`, { value: value });
+              const configValue: ConfigValueObject = { value: value };
+              this.configMap.set(`${config_group}:${key}`, configValue);
             }
           }
         } while (resultSet.goToNextRow());
@@ -343,6 +344,13 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     } catch (error) {
       Logger.error(TAG, `Failed to load config cache: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  /**
+   * 配置值类型接口
+   */
+  export interface ConfigValueObject {
+    value: string;
   }
 
   // ========== 电影相关实现 ==========

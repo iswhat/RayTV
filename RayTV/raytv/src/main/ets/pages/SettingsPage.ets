@@ -1,4 +1,4 @@
-import { Column, Row, Text, Image, Button, Switch, List, ListItem, Scroller, Blank, Flex, FlexDirection, FlexAlign, ItemAlign, TextAlign, ImageFit } from '@ohos.arkui';
+import { Column, Row, Text, Image, Button, Switch, List, ListItem, Scroller, ScrollView, Blank, Flex, FlexDirection, FlexAlign, ItemAlign, TextAlign, ImageFit, Divider, Toggle, FontWeight, Dialog, DialogAlignment, ButtonType, ScrollBarState } from '@ohos.arkui';
 import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
@@ -143,10 +143,12 @@ struct SettingsPage {
           Logger.info(this.TAG, 'Settings loaded successfully');
         })
         .catch(error => {
-          Logger.error(this.TAG, `Failed to load settings: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.error(this.TAG, new Error(`Failed to load settings: ${errorMessage}`));
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load settings: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to load settings: ${errorMessage}`));
     }
   }
   
@@ -160,11 +162,13 @@ struct SettingsPage {
           Logger.info(this.TAG, `Setting saved: ${key} = ${value}`);
         })
         .catch(error => {
-          Logger.error(this.TAG, `Failed to save setting ${key}: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.error(this.TAG, new Error(`Failed to save setting ${key}: ${errorMessage}`));
           // 保存设置失败提示
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save setting ${key}: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to save setting ${key}: ${errorMessage}`));
       // 保存设置失败提示
     }
   }
@@ -179,7 +183,8 @@ struct SettingsPage {
       this.currentCacheSize = 235; // MB
       Logger.info(this.TAG, `Cache size calculated: ${this.currentCacheSize} MB`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to calculate cache size: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to calculate cache size: ${errorMessage}`));
     }
   }
   
@@ -199,11 +204,13 @@ struct SettingsPage {
           // 缓存已清除提示
         })
         .catch(error => {
-          Logger.error(this.TAG, 'Failed to clear cache');
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.error(this.TAG, new Error(`Failed to clear cache: ${errorMessage}`));
           // 清除缓存失败提示
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear cache: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to clear cache: ${errorMessage}`));
       // 清除缓存失败提示
     }
   }
@@ -217,7 +224,8 @@ struct SettingsPage {
       // 暂时返回固定版本
       return '1.0.0';
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get app version: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to get app version: ${errorMessage}`));
       return '1.0.0';
     }
   }
@@ -233,7 +241,8 @@ struct SettingsPage {
       // 模拟检查更新
       // 当前已是最新版本提示
     } catch (error) {
-      Logger.error(this.TAG, `Failed to check for updates: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to check for updates: ${errorMessage}`));
       // 检查更新失败提示
     }
   }
@@ -253,11 +262,13 @@ struct SettingsPage {
           // 已重置为默认设置提示
         })
         .catch(error => {
-          Logger.error(this.TAG, `Failed to reset settings: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.error(this.TAG, new Error(`Failed to reset settings: ${errorMessage}`));
           // 重置设置失败提示
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to reset settings: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to reset settings: ${errorMessage}`));
       // 重置设置失败提示
     }
   }
@@ -283,21 +294,19 @@ struct SettingsPage {
    */
   @Builder
   private renderHeader(): void {
-    Stack({
-      width: '100%',
-      height: '80vp',
-      backgroundColor: '#00AA00',
-      justifyContent: FlexAlign.Center,
-      alignItems: FlexAlign.Start,
-      padding: { left: '20vp' }
-    }) {
-      Button({
-        width: '60vp',
-        height: '60vp',
-        backgroundColor: 'transparent',
-        justifyContent: FlexAlign.Center,
-        alignItems: FlexAlign.Center
-      }) {
+    Stack()
+    .width('100%')
+    .height('80vp')
+    .backgroundColor('#00AA00')
+    .justifyContent(FlexAlign.Center)
+    .alignItems(FlexAlign.Start)
+    .padding({ left: '20vp' }) {
+      Button()
+      .width('60vp')
+      .height('60vp')
+      .backgroundColor('transparent')
+      .justifyContent(FlexAlign.Center)
+      .alignItems(FlexAlign.Center) {
         Text("←")
           .fontSize('30vp')
           .fontColor('#FFFFFF')
@@ -316,26 +325,15 @@ struct SettingsPage {
    * 渲染设置分组
    */
   @Builder
-  private renderSettingGroup(title: string, content?: @BuilderParam () => void): void {
-    Column({
-      width: '100%',
-      margin: { top: '20vp' }
-    }) {
+  private renderSettingGroup(title: string): void {
+    Column()
+    .width('100%')
+    .margin({ top: '20vp' }) {
       Text(title)
         .fontSize('24vp')
         .fontColor('#333333')
         .fontWeight(FontWeight.Bold)
         .margin({ left: '20vp', bottom: '10vp' })
-      
-      // 渲染子内容 - 使用条件渲染
-      if (content) {
-        // 创建一个空的Column容器来包含content
-        Column() {
-          // 这里需要符合UI组件语法
-          // 由于content()调用不符合语法，我们采用不同的方法
-          // 创建一个空的容器，实际内容由调用者通过其他方式渲染
-        }
-      }
     }
   }
   
@@ -344,21 +342,19 @@ struct SettingsPage {
    */
   @Builder
   private renderSwitchItem(label: string, checked: boolean, onValueChange: (value: boolean) => void, description?: string): void {
-    Stack({
-      width: '90%',
-      height: '100vp',
-      margin: { left: '5%', right: '5%', bottom: '10vp' },
-      backgroundColor: '#FFFFFF',
-      borderRadius: '12vp',
-      padding: { left: '20vp', right: '20vp' },
-      justifyContent: FlexAlign.Center,
-      shadow: { radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 }
-    }) {
-      Flex({
-        width: '100%',
-        justifyContent: FlexAlign.SpaceBetween,
-        alignItems: FlexAlign.Center
-      }) {
+    Stack()
+    .width('90%')
+    .height('100vp')
+    .margin({ left: '5%', right: '5%', bottom: '10vp' })
+    .backgroundColor('#FFFFFF')
+    .borderRadius('12vp')
+    .padding({ left: '20vp', right: '20vp' })
+    .justifyContent(FlexAlign.Center)
+    .shadow({ radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 }) {
+      Flex()
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(FlexAlign.Center) {
         Flex({
           direction: FlexDirection.Column
         }) {
@@ -450,74 +446,73 @@ struct SettingsPage {
    */
   @Builder
   private renderThemeSettings(): void {
-    this.renderSettingGroup('外观设置', () => {
-      Stack({
-        width: '90%',
-        height: '140vp',
-        margin: { left: '5%', right: '5%', bottom: '10vp' },
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12vp',
-        padding: { left: '20vp', right: '20vp' },
-        justifyContent: FlexAlign.Center,
-        shadow: { radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 }
+    this.renderSettingGroup('外观设置');
+    Stack({
+      width: '90%',
+      height: '140vp',
+      margin: { left: '5%', right: '5%', bottom: '10vp' },
+      backgroundColor: '#FFFFFF',
+      borderRadius: '12vp',
+      padding: { left: '20vp', right: '20vp' },
+      justifyContent: FlexAlign.Center,
+      shadow: { radius: 4, color: '#00000020', offsetX: 0, offsetY: 2 }
+    }) {
+      Column({
+        width: '100%'
       }) {
-        Column({
-          width: '100%'
+        Text("主题模式")
+          .fontSize('20vp')
+          .fontColor('#333333')
+          .margin({ bottom: '20vp' })
+        
+        Flex({
+          width: '100%',
+          justifyContent: FlexAlign.SpaceBetween
         }) {
-          Text("主题模式")
-            .fontSize('20vp')
-            .fontColor('#333333')
-            .margin({ bottom: '20vp' })
-          
-          Flex({
-            width: '100%',
-            justifyContent: FlexAlign.SpaceBetween
+          Button({
+            width: '30%',
+            height: '50vp',
+            backgroundColor: this.themeMode === 'light' ? '#00AA00' : '#F0F0F0',
+            borderRadius: '8vp'
           }) {
-            Button({
-              width: '30%',
-              height: '50vp',
-              backgroundColor: this.themeMode === 'light' ? '#00AA00' : '#F0F0F0',
-              borderRadius: '8vp'
-            }) {
-              Text("浅色")
-                .fontSize('16vp')
-                .fontColor(this.themeMode === 'light' ? '#FFFFFF' : '#333333')
-            }
-            .onClick(() => this.handleThemeChange('light'))
-            
-            Button({
-              width: '30%',
-              height: '50vp',
-              backgroundColor: this.themeMode === 'dark' ? '#00AA00' : '#F0F0F0',
-              borderRadius: '8vp'
-            }) {
-              Text("深色")
-                .fontSize('16vp')
-                .fontColor(this.themeMode === 'dark' ? '#FFFFFF' : '#333333')
-            }
-            .onClick(() => this.handleThemeChange('dark'))
-            
-            Button({
-              width: '30%',
-              height: '50vp',
-              backgroundColor: this.themeMode === 'auto' ? '#00AA00' : '#F0F0F0',
-              borderRadius: '8vp'
-            }) {
-              Text("自动")
-                .fontSize('16vp')
-                .fontColor(this.themeMode === 'auto' ? '#FFFFFF' : '#333333')
-            }
-            .onClick(() => this.handleThemeChange('auto'))
+            Text("浅色")
+              .fontSize('16vp')
+              .fontColor(this.themeMode === 'light' ? '#FFFFFF' : '#333333')
           }
+          .onClick(() => this.handleThemeChange('light'))
+          
+          Button({
+            width: '30%',
+            height: '50vp',
+            backgroundColor: this.themeMode === 'dark' ? '#00AA00' : '#F0F0F0',
+            borderRadius: '8vp'
+          }) {
+            Text("深色")
+              .fontSize('16vp')
+              .fontColor(this.themeMode === 'dark' ? '#FFFFFF' : '#333333')
+          }
+          .onClick(() => this.handleThemeChange('dark'))
+          
+          Button({
+            width: '30%',
+            height: '50vp',
+            backgroundColor: this.themeMode === 'auto' ? '#00AA00' : '#F0F0F0',
+            borderRadius: '8vp'
+          }) {
+            Text("自动")
+              .fontSize('16vp')
+              .fontColor(this.themeMode === 'auto' ? '#FFFFFF' : '#333333')
+          }
+          .onClick(() => this.handleThemeChange('auto'))
         }
       }
-      
-      this.renderOptionItem(
-        '语言', 
-        this.language === 'zh' ? '简体中文' : 'English', 
-        () => {}
-      );
-    });
+    }
+    
+    this.renderOptionItem(
+      '语言', 
+      this.language === 'zh' ? '简体中文' : 'English', 
+      () => {}
+    );
   }
   
   /**
@@ -777,7 +772,8 @@ struct SettingsPage {
       // 这里应该调用广告屏蔽服务更新规则
       // 广告规则更新成功提示
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update ad block rules: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to update ad block rules: ${errorMessage}`));
       // 更新广告规则失败提示
     }
   }
@@ -791,7 +787,8 @@ struct SettingsPage {
       // 这里应该打开壁纸选择界面
       // 请选择壁纸提示
     } catch (error) {
-      Logger.error(this.TAG, `Failed to select wallpaper: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, new Error(`Failed to select wallpaper: ${errorMessage}`));
       // 选择壁纸失败提示
     }
   }
@@ -926,11 +923,12 @@ struct SettingsPage {
       this.renderHeader()
       
       // 设置内容
-      Scroll({
+      ScrollView({
         scrollBar: ScrollBarState.Auto,
-        padding: { top: '10vp', bottom: '30vp' },
         flexGrow: 1
       }) {
+        Column()
+        .padding({ top: '10vp', bottom: '30vp' }) {
         // 创建设置项网格布局
         Column({
           width: '100%'
@@ -949,6 +947,7 @@ struct SettingsPage {
           Blank()
             .height('30vp')
         }
+      }
       }
       
       // 对话框 - 使用条件渲染

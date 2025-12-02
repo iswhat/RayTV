@@ -690,6 +690,14 @@ export default class NetworkUtil {
    * @param cacheTime 缓存时间（毫秒）
    * @returns Promise<T>
    */
+  /**
+   * 缓存响应数据结构
+   */
+  export interface CachedResponse<T> {
+    data: T;
+    timestamp: number;
+  }
+
   public static async cachedRequest<T>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
       const cacheKey = `network_cache_${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -701,20 +709,20 @@ export default class NetworkUtil {
         try {
           const cachedData = cacheManager.get(cacheKey);
           if (cachedData && typeof cachedData === 'string') {
-            const parsedData = JSON.parse(cachedData);
-            const cacheData = parsedData.data;
-            const timestamp = parsedData.timestamp;
-            const now = Date.now();
+            const parsedData: CachedResponse<T> = JSON.parse(cachedData);
+            const cacheData: T = parsedData.data;
+            const timestamp: number = parsedData.timestamp;
+            const now: number = Date.now();
             
             // 检查缓存是否有效
             if (now - timestamp < cacheTime) {
               Logger.info(TAG, `Using cached data for ${url}`);
-              // 明确指定返回类型
-              return cacheData as T;
+              return cacheData;
             }
           }
         } catch (cacheError) {
-          Logger.warn(TAG, `Cache read error: ${cacheError}`);
+          const errorMessage = cacheError instanceof Error ? cacheError.message : String(cacheError);
+          Logger.warn(TAG, `Cache read error: ${errorMessage}`);
           // 缓存读取失败，继续发送网络请求
         }
       }
@@ -728,13 +736,13 @@ export default class NetworkUtil {
             const oldCachedData = cacheManager.get(cacheKey);
             if (oldCachedData && typeof oldCachedData === 'string') {
               Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
-              const parsedData = JSON.parse(oldCachedData);
-              const cacheData = parsedData.data;
-              // 明确指定返回类型
-              return cacheData as T;
+              const parsedData: CachedResponse<T> = JSON.parse(oldCachedData);
+              const cacheData: T = parsedData.data;
+              return cacheData;
             }
           } catch (offlineCacheError) {
-            Logger.error(TAG, `Offline cache error: ${offlineCacheError}`);
+            const errorMessage = offlineCacheError instanceof Error ? offlineCacheError.message : String(offlineCacheError);
+            Logger.error(TAG, `Offline cache error: ${errorMessage}`);
           }
         }
         throw new Error('Network unavailable and no cached data available');
@@ -744,7 +752,7 @@ export default class NetworkUtil {
       const response = await NetworkUtil.get<T>(url);
       
       // 保存新缓存
-      const cacheData = {
+      const cacheData: CachedResponse<T> = {
         data: response.data,
         timestamp: Date.now()
       };
@@ -755,20 +763,18 @@ export default class NetworkUtil {
           cacheManager.set(cacheKey, JSON.stringify(cacheData));
           Logger.info(TAG, `Cached response for ${url}`);
         } catch (cacheWriteError) {
-          Logger.warn(TAG, `Cache write error: ${cacheWriteError}`);
+          const errorMessage = cacheWriteError instanceof Error ? cacheWriteError.message : String(cacheWriteError);
+          Logger.warn(TAG, `Cache write error: ${errorMessage}`);
           // 缓存写入失败，继续返回数据
         }
       }
       
       return response.data;
     } catch (error) {
-      Logger.error(TAG, `Cached request failed: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(TAG, `Cached request failed: ${errorMessage}`);
       // 确保错误是Error类型
-      if (error instanceof Error) {
-        throw error;
-      } else {
-        throw new Error(String(error));
-      }
+      throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
 }

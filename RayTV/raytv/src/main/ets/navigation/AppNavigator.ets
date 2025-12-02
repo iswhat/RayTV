@@ -9,6 +9,8 @@ export interface RouterOptions {
   url: string;
   params?: Record<string, string | number | boolean | null>;
   mode?: router.RouterMode;
+  // 添加明确的类型检查方法
+  isValid(): boolean;
 }
 
 export class AppNavigator {
@@ -147,13 +149,13 @@ export class AppNavigator {
 
       // 使用新的router.pushUrl方法替代已弃用的router.push
       // 创建符合router.pushUrl要求的对象
-      const routerOptions: RouterOptions = {
-        url: url,
-        params: params instanceof NavigationParamsImpl ? 
+      const routerOptions: RouterOptions = new RouterOptionsImpl(
+        url,
+        params instanceof NavigationParamsImpl ? 
           params.toObject() : 
           (params || {} as Record<string, string | number | boolean | null>),
-        mode: router.RouterMode.Single
-      };
+        router.RouterMode.Single
+      );
       await router.pushUrl(routerOptions);
     } catch (error) {
         // 安全处理错误信息
@@ -186,11 +188,11 @@ export class AppNavigator {
     try {
       // 使用新的router.pushUrl方法替代已弃用的router.push
       // 创建符合router.pushUrl要求的对象
-      const routerOptions: RouterOptions = {
-        url: this.getPageUrl(PageRoute.HOME),
-        params: {} as Record<string, string | number | boolean | null>,
-        mode: router.RouterMode.Single
-      };
+      const routerOptions: RouterOptions = new RouterOptionsImpl(
+        this.getPageUrl(PageRoute.HOME),
+        {} as Record<string, string | number | boolean | null>,
+        router.RouterMode.Single
+      );
       await router.pushUrl(routerOptions);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
@@ -212,12 +214,12 @@ export class AppNavigator {
       const url = this.getPageUrl(route);
       // 使用新的router.replaceUrl方法替代已弃用的router.replace
       // 创建符合router.replaceUrl要求的对象
-      const routerOptions: RouterOptions = {
-        url: url,
-        params: params instanceof NavigationParamsImpl ? 
+      const routerOptions: RouterOptions = new RouterOptionsImpl(
+        url,
+        params instanceof NavigationParamsImpl ? 
           params.toObject() : 
           (params || {} as Record<string, string | number | boolean | null>)
-      };
+      );
       await router.replaceUrl(routerOptions);
       
       // 创建符合接口定义的历史记录项
@@ -443,22 +445,13 @@ export class RouteMappingImpl implements RouteMapping {
   }
 }
 
-// 定义导航选项接口 - 避免structural typing
-export interface RouterOptions {
-  url: string;
-  params?: Record<string, string | number | boolean | null>;
-  mode?: number;
-  // 添加明确的类型检查方法
-  isValid(): boolean;
-}
-
 // 实现导航选项类 - 完整实现接口
 export class RouterOptionsImpl implements RouterOptions {
   url: string = '';
   params?: Record<string, string | number | boolean | null>;
-  mode?: number;
+  mode?: router.RouterMode;
   
-  constructor(url?: string, params?: Record<string, string | number | boolean | null>, mode?: number) {
+  constructor(url?: string, params?: Record<string, string | number | boolean | null>, mode?: router.RouterMode) {
     if (url !== undefined) {
       this.url = url;
     }

@@ -2,12 +2,12 @@
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { MediaItem } from '../data/bean/MediaItem';
-import { SearchHistoryItem } from '../../data/repository/SearchHistoryRepository';
+import SearchHistoryRepository, { SearchHistoryItem } from '../data/repository/SearchHistoryRepository';
 import { mediaService } from '../service/media/MediaService';
 import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
 import { siteManager } from '../service/spider/SiteManager';
 import { lineManager } from '../service/config/LineManager';
-import { Column, Row, Text, Image, Flex, Stack, Button, List, ForEach, Scroller, Blank, ImageFit, BarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign } from '@ohos/arkui';
+import { Column, Row, Text, Image, Flex, Stack, Button, List, ListItem, ForEach, Scroller, ScrollView, Blank, TextInput, ImageFit, ScrollBarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign, FontWeight } from '@ohos.arkui';
 
 // 快速搜索结果接口
 interface QuickSearchResult {
@@ -282,18 +282,7 @@ struct SearchPage {
     });
   }
 
-  /**
-   * 构建页面UI
-   */
-  build() {
-    // 这里需要实现页面的UI构建逻辑
-    // 暂时返回一个空的Column作为占位符
-    Column() {
-      Text('搜索页面')
-        .fontSize(20)
-        .fontColor('#333333')
-    }
-  }
+
 
   /**
    * 处理快速搜索结果点击事件
@@ -522,29 +511,52 @@ struct SearchPage {
    */
   @Builder
   private renderSearchInput(): void {
-    Stack({ className: "search-input-container" }) {
-      Button({ className: "back-button", onClick: this.handleBack }) {
-        Text("←")
-      }
-      Flex({ className: "search-input-wrapper" }) {
-        Text({ className: "search-icon", content: "🔍" })
-        TextInput({
-          className: "search-input",
-          value: this.searchQuery,
-          onChange: this.handleSearchInputChange,
-          onSubmit: this.performSearch,
-          placeholder: "搜索电影、电视剧、动漫...",
-          enterKeyType: "search",
-          autoFocus: true
-        })
-        if (this.searchQuery) {
-          Button({ className: "clear-button", onClick: this.handleClearInput }) {
-            Text("✕")
+    Stack() {
+      Flex()
+      .direction(FlexDirection.Row)
+      .alignItems(ItemAlign.Center)
+      .padding({ left: 15, right: 15, top: 10, bottom: 10 }) {
+        Button()
+        .onClick(() => this.handleBack()) {
+          Text("←")
+            .fontSize(24)
+            .fontColor("#333333")
+        }
+        Flex()
+        .flex(1)
+        .backgroundColor("#FFFFFF")
+        .borderRadius(20)
+        .alignItems(ItemAlign.Center)
+        .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+        .margin({ left: 15, right: 15 }) {
+          Text("🔍")
+            .fontSize(20)
+            .margin({ right: 10 })
+          TextInput({
+            value: this.searchQuery,
+            placeholder: "搜索电影、电视剧、动漫...",
+            enterKeyType: "search"
+          })
+          .width("80%")
+          .height(40)
+          .fontSize(16)
+          .onChange((value: string) => this.handleSearchInputChange(value))
+          .onSubmit(() => this.performSearch())
+          if (this.searchQuery) {
+            Button()
+            .onClick(() => this.handleClearInput()) {
+              Text("✕")
+                .fontSize(20)
+                .fontColor("#999999")
+            }
           }
         }
-      }
-      Button({ className: "search-button", onClick: this.performSearch }) {
-        Text("搜索")
+        Button()
+        .onClick(() => this.performSearch()) {
+          Text("搜索")
+            .fontSize(16)
+            .fontColor("#333333")
+        }
       }
     }
   }
@@ -631,95 +643,111 @@ struct SearchPage {
    */
   @Builder
   private renderSearchResultItem(media: MediaItem): void {
-    Flex()
-    .direction(FlexDirection.Row)
-    .alignItems(ItemAlign.Center)
-    .padding(15)
-    .backgroundColor('#FFFFFF')
-    .borderRadius(10)
-    .margin({ bottom: 10 })
-    .onClick(() => this.handleSearchResultClick(media)) {
-      // 媒体封面 - 使用占位符替代Image组件
-      Column()
-      .width(100)
-      .height(150)
-      .backgroundColor('#E0E0E0')
-      .borderRadius(8)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
-      .margin({ right: 15 }) {
-        Text("封面")
-          .fontSize(14)
-          .fontColor('#666666')
-      }
-      Flex()
-      .direction(FlexDirection.Column)
-      .flex(1) {
-        Text(media.title)
-          .fontSize(20)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .numberOfLines(2)
+    if (media) {
+      Column() {
         Flex()
         .direction(FlexDirection.Row)
-        .flexWrap(FlexWrap.Wrap)
-        .gap(8)
-        .margin({ top: 8 }) {
-          if (media.year) {
-            Button()
-            .backgroundColor('#E0E0E0')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 }) {
-              Text(media.year)
-                .fontSize(14)
-                .fontColor('#666666')
-            }
+        .alignItems(ItemAlign.Center)
+        .padding(15)
+        .backgroundColor('#FFFFFF')
+        .borderRadius(10)
+        .margin({ bottom: 10 })
+        .onClick(() => this.handleSearchResultClick(media))
+        {
+          // 媒体封面 - 使用占位符替代Image组件
+          Column()
+          .width(100)
+          .height(150)
+          .backgroundColor('#E0E0E0')
+          .borderRadius(8)
+          .justifyContent(FlexAlign.Center)
+          .alignItems(HorizontalAlign.Center)
+          .margin({ right: 15 })
+          {
+            Text("封面")
+              .fontSize(14)
+              .fontColor('#666666')
           }
-          if (media.type) {
-            Button()
-            .backgroundColor('#E0E0E0')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 }) {
-              Text(media.type)
-                .fontSize(14)
-                .fontColor('#666666')
-            }
-          }
-          if (media.score) {
-            Button()
-            .backgroundColor('#FFEB3B')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 }) {
-              Text(media.score)
-                .fontSize(14)
-                .fontColor('#000000')
-                .fontWeight(600)
-            }
-          }
-        }
-        if (media.description) {
-          Text(media.description)
-            .fontSize(16)
-            .fontColor('#666666')
-            .numberOfLines(2)
+          Flex()
+          .direction(FlexDirection.Column)
+          .flex(1)
+          {
+            Text(media.title)
+              .fontSize(20)
+              .fontColor('#333333')
+              .fontWeight(600)
+              .numberOfLines(2)
+            Flex()
+            .direction(FlexDirection.Row)
+            .flexWrap(FlexWrap.Wrap)
+            .gap(8)
             .margin({ top: 8 })
-        }
-        if (media.directors && media.directors.length > 0) {
-          Text(`导演: ${media.directors.slice(0, 3).join(', ')}`)
-            .fontSize(14)
-            .fontColor('#999999')
-            .numberOfLines(1)
-            .margin({ top: 5 })
-        }
-        if (media.actors && media.actors.length > 0) {
-          Text(`主演: ${media.actors.slice(0, 3).join(', ')}`)
-            .fontSize(14)
-            .fontColor('#999999')
-            .numberOfLines(1)
-            .margin({ top: 2 })
+            {
+              if (media.year) {
+                Text(media.year.toString())
+                  .fontSize(14)
+                  .fontColor('#666666')
+                  .backgroundColor('#E0E0E0')
+                  .borderRadius(10)
+                  .padding({ horizontal: 10, vertical: 4 })
+              }
+              if (media.type) {
+                Text(media.type)
+                  .fontSize(14)
+                  .fontColor('#666666')
+                  .backgroundColor('#E0E0E0')
+                  .borderRadius(10)
+                  .padding({ horizontal: 10, vertical: 4 })
+              }
+              if (media.score) {
+                Text(media.score.toString())
+                  .fontSize(14)
+                  .fontColor('#000000')
+                  .fontWeight(600)
+                  .backgroundColor('#FFEB3B')
+                  .borderRadius(10)
+                  .padding({ horizontal: 10, vertical: 4 })
+              }
+            }
+            if (media.description) {
+              Text(media.description)
+                .fontSize(16)
+                .fontColor('#666666')
+                .numberOfLines(2)
+                .margin({ top: 8 })
+            }
+            if (media.directors && media.directors.length > 0) {
+              Text(`导演: ${media.directors.slice(0, 3).join(', ')}`)
+                .fontSize(14)
+                .fontColor('#999999')
+                .numberOfLines(1)
+                .margin({ top: 5 })
+            }
+            if (media.actors && media.actors.length > 0) {
+              Text(`主演: ${media.actors.slice(0, 3).join(', ')}`)
+                .fontSize(14)
+                .fontColor('#999999')
+                .numberOfLines(1)
+                .margin({ top: 2 })
+            }
+          }
         }
       }
     }
+  }
+  
+  /**
+   * 切换显示模式
+   */
+  private toggleDisplayMode(): void {
+    this.displayMode = this.displayMode === 'list' ? 'grid' : 'list';
+  }
+  
+  /**
+   * 切换筛选面板显示
+   */
+  private toggleFilterPanel(): void {
+    this.showFilterPanel = !this.showFilterPanel;
   }
   
   /**
@@ -727,15 +755,17 @@ struct SearchPage {
    */
   @Builder
   private renderDisplayModeToggle(): void {
-    Button()
-    .backgroundColor('#4CAF50')
-    .borderRadius(20)
-    .padding({ horizontal: 15, vertical: 8 })
-    .onClick(this.toggleDisplayMode) {
-      Text(this.displayMode === 'list' ? '网格' : '列表')
-        .fontSize(16)
-        .fontColor('#FFFFFF')
-        .fontWeight(600)
+    Column() {
+      Button()
+      .backgroundColor('#4CAF50')
+      .borderRadius(20)
+      .padding({ horizontal: 15, vertical: 8 })
+      .onClick(() => this.toggleDisplayMode()) {
+        Text(this.displayMode === 'list' ? '网格' : '列表')
+          .fontSize(16)
+          .fontColor('#FFFFFF')
+          .fontWeight(600)
+      }
     }
   }
   
@@ -744,15 +774,17 @@ struct SearchPage {
    */
   @Builder
   private renderFilterButton(): void {
-    Button()
-    .backgroundColor('#4CAF50')
-    .borderRadius(20)
-    .padding({ horizontal: 15, vertical: 8 })
-    .onClick(this.toggleFilterPanel) {
-      Text("筛选")
-        .fontSize(16)
-        .fontColor('#FFFFFF')
-        .fontWeight(600)
+    Column() {
+      Button()
+      .backgroundColor('#4CAF50')
+      .borderRadius(20)
+      .padding({ horizontal: 15, vertical: 8 })
+      .onClick(() => this.toggleFilterPanel()) {
+        Text("筛选")
+          .fontSize(16)
+          .fontColor('#FFFFFF')
+          .fontWeight(600)
+      }
     }
   }
   
@@ -928,60 +960,61 @@ struct SearchPage {
       .width('100%')
       .margin({ bottom: 15 })
       .onClick(() => this.handleSearchResultClick(item)) {
-      Stack({
-          width: '100%'
-        }) {
-        // 来源标签 - 改为绿色主题
-        if (item.siteKey) {
-          Text(`${item.siteKey} | APP`)
-            .backgroundColor('#4CAF50')
+        Stack({
+            width: '100%'
+          }) {
+          // 来源标签 - 改为绿色主题
+          if (item.siteKey) {
+            Text(`${item.siteKey} | APP`)
+              .backgroundColor('#4CAF50')
+              .fontColor('#FFFFFF')
+              .fontSize(16)
+              .padding({ horizontal: 8, vertical: 4 })
+              .borderRadius(4)
+              .position({ x: 0, y: 0 })
+              .margin({ top: 8, left: 8 })
+              .zIndex(10)
+              .fontWeight(600)
+          }
+          
+          // 图片 - 使用占位符替代Image组件
+          Column({
+            width: '100%',
+            aspectRatio: 2/3,
+            backgroundColor: '#E0E0E0',
+            borderRadius: 8,
+            justifyContent: FlexAlign.Center,
+            alignItems: HorizontalAlign.Center
+          }) {
+            Text("封面")
+              .fontSize(16)
+              .fontColor('#666666')
+          }
+          
+          // 标题
+          Text(item.title || '未知标题')
+            .fontSize(20)
             .fontColor('#FFFFFF')
-            .fontSize(16)
-            .padding({ horizontal: 8, vertical: 4 })
-            .borderRadius(4)
-            .position({ x: 0, y: 0 })
-            .margin({ top: 8, left: 8 })
-            .zIndex(10)
+            .margin({ top: 8 })
             .fontWeight(600)
-        }
-        
-        // 图片 - 使用占位符替代Image组件
-        Column({
-          width: '100%',
-          aspectRatio: 2/3,
-          backgroundColor: '#E0E0E0',
-          borderRadius: 8,
-          justifyContent: FlexAlign.Center,
-          alignItems: HorizontalAlign.Center
-        }) {
-          Text("封面")
-            .fontSize(16)
-            .fontColor('#666666')
-        }
-        
-        // 标题
-        Text(item.title || '未知标题')
-          .fontSize(20)
-          .fontColor('#FFFFFF')
-          .margin({ top: 8 })
-          .fontWeight(600)
-          .textShadow({
-            radius: 3,
-            color: 'rgba(0, 0, 0, 0.8)',
-            offset: { x: 1, y: 1 }
-          })
-          .numberOfLines(2)
-        
-        // 评分标签 - 如果有评分则显示
-        if (item.score) {
-          Text(`${item.score}分`)
-            .backgroundColor('#FFEB3B')
-            .fontColor('#000000')
-            .fontSize(16)
-            .padding({ horizontal: 8, vertical: 2 })
-            .borderRadius(4)
-            .margin({ top: 4 })
-            .fontWeight(700)
+            .textShadow({
+              radius: 3,
+              color: 'rgba(0, 0, 0, 0.8)',
+              offset: { x: 1, y: 1 }
+            })
+            .numberOfLines(2)
+          
+          // 评分标签 - 如果有评分则显示
+          if (item.score) {
+            Text(`${item.score}分`)
+              .backgroundColor('#FFEB3B')
+              .fontColor('#000000')
+              .fontSize(16)
+              .padding({ horizontal: 8, vertical: 2 })
+              .borderRadius(4)
+              .margin({ top: 4 })
+              .fontWeight(700)
+          }
         }
       }
     }
@@ -992,66 +1025,74 @@ struct SearchPage {
    */
   @Builder
   private renderSearchResults(): void {
-    // 渲染分类筛选按钮
-    Scroller()
-    .scrollable(ScrollDirection.Horizontal)
-    .margin({ bottom: 20 }) {
-      Flex()
-      .padding({ horizontal: 15 })
-      .alignItems(FlexAlign.Center)
-      .gap(10) {
-        // 全部显示按钮
-        Button()
-        .backgroundColor('#4CAF50')
-        .borderRadius(20)
-        .padding({ horizontal: 20, vertical: 8 })
-        .margin({ right: 10 })
-        .onClick(() => {}) {
-          Text("全部显示")
-            .fontSize(22)
-            .fontColor('#FFFFFF')
-            .fontWeight(600)
-        }
-        
-        // 分类按钮
-        ForEach(["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"], (category) => {
+    Column() {
+      // 渲染分类筛选按钮
+      Scroller({
+        scrollable: ScrollDirection.Horizontal
+      })
+      .margin({ bottom: 20 }) {
+        Flex()
+        .padding({ horizontal: 15 })
+        .alignItems(FlexAlign.Center)
+        .gap(10) {
+          // 全部显示按钮
           Button()
-          .backgroundColor('#FFFFFF')
+          .backgroundColor('#4CAF50')
           .borderRadius(20)
           .padding({ horizontal: 20, vertical: 8 })
           .margin({ right: 10 })
           .onClick(() => {}) {
-            Text(category)
+            Text("全部显示")
               .fontSize(22)
-              .fontColor('#4CAF50')
+              .fontColor('#FFFFFF')
               .fontWeight(600)
           }
-        })
-      }
-    }
-    
-    // 渲染网格结果 - 使用Flex布局替代Grid
-    Flex({
-      paddingHorizontal: 15,
-      gap: 15,
-      flexWrap: FlexWrap.Wrap,
-      justifyContent: FlexAlign.Start
-    }) {
-      if (this.searchResults.length === 0) {
-        // 无搜索结果时的提示
-        Column({ width: '100%', padding: 30, alignItems: HorizontalAlign.Center, justifyContent: FlexAlign.Center }) {
-          Text('没有找到相关内容')
-            .fontSize(24)
-            .fontColor('#FFFFFF')
-            .textAlign(TextAlign.Center)
+          
+          // 分类按钮
+          ForEach(["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"], (category) => {
+            Button()
+            .backgroundColor('#FFFFFF')
+            .borderRadius(20)
+            .padding({ horizontal: 20, vertical: 8 })
+            .margin({ right: 10 })
+            .onClick(() => {}) {
+              Text(category)
+                .fontSize(22)
+                .fontColor('#4CAF50')
+                .fontWeight(600)
+            }
+          })
         }
-      } else {
-        // 渲染搜索结果项
-        ForEach(this.searchResults, (item) => {
-          Column({ width: '18%', marginBottom: 15 }) {
-            this.renderGridItem(item)
+      }
+      
+      // 渲染网格结果 - 使用Flex布局替代Grid
+      Flex()
+      .padding({ left: 15, right: 15 })
+      .gap(15)
+      .flexWrap(FlexWrap.Wrap)
+      .justifyContent(FlexAlign.Start) {
+        if (this.searchResults.length === 0) {
+          // 无搜索结果时的提示
+          Column()
+          .width('100%')
+          .padding(30)
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center) {
+            Text('没有找到相关内容')
+              .fontSize(24)
+              .fontColor('#FFFFFF')
+              .textAlign(TextAlign.Center)
           }
-        })
+        } else {
+          // 渲染搜索结果项
+          ForEach(this.searchResults, (item) => {
+            Column()
+            .width('18%')
+            .margin({ bottom: 15 }) {
+              this.renderGridItem(item)
+            }
+          })
+        }
       }
     }
   }
@@ -1061,20 +1102,17 @@ struct SearchPage {
    */
   @Builder
   private renderLoading(): void {
-    Stack({
-      width: '100%',
-      height: '100%',
-      justifyContent: FlexAlign.Center,
-      alignItems: HorizontalAlign.Center
-    }) {
+    Stack()
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center) {
       // 自定义加载指示器
-      Column({
-        backgroundColor: '#FFFFFF',
-          borderRadius: 20,
-          padding: 20,
-          alignItems: 'center'
-        }
-      }) {
+      Column()
+      .backgroundColor('#FFFFFF')
+      .borderRadius(20)
+      .padding(20)
+      .alignItems(HorizontalAlign.Center) {
         Text("●")
           .fontSize(40)
           .fontColor('#4CAF50')

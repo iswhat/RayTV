@@ -364,32 +364,60 @@ export default class SearchResult {
    * 序列化对象（用于存储）
    * @returns 序列化后的对象
    */
-  public toSerializable(): Record<string, string | number | boolean | null | string[]> {
-    const result: Record<string, string | number | boolean | null | string[]> = {};
-    
-    result.id = this.id;
-    result.title = this.title;
-    if (this.originalTitle !== undefined) result.originalTitle = this.originalTitle;
-    result.type = this.type;
-    if (this.coverUrl !== undefined) result.coverUrl = this.coverUrl;
-    if (this.backdropUrl !== undefined) result.backdropUrl = this.backdropUrl;
-    if (this.description !== undefined) result.description = this.description;
-    if (this.score !== undefined) result.score = this.score;
-    if (this.year !== undefined) result.year = this.year;
-    if (this.releaseDate !== undefined) result.releaseDate = this.releaseDate;
-    if (this.genres !== undefined) result.genres = this.genres;
-    if (this.tags !== undefined) result.tags = this.tags;
-    if (this.duration !== undefined) result.duration = this.duration;
-    if (this.totalEpisodes !== undefined) result.totalEpisodes = this.totalEpisodes;
-    if (this.currentSeason !== undefined) result.currentSeason = this.currentSeason;
-    if (this.actors !== undefined) result.actors = this.actors;
-    if (this.directors !== undefined) result.directors = this.directors;
-    if (this.popularity !== undefined) result.popularity = this.popularity;
-    if (this.matchScore !== undefined) result.matchScore = this.matchScore;
-    if (this.extraInfo !== undefined) result.extraInfo = this.extraInfo;
-    if (this.link !== undefined) result.link = this.link;
-    if (this.sourceId !== undefined) result.sourceId = this.sourceId;
-    if (this.sourceName !== undefined) result.sourceName = this.sourceName;
+// 定义SearchResult序列化数据接口
+export interface SearchResultSerializable {
+  id: string;
+  title: string;
+  originalTitle?: string;
+  type: ResultType;
+  coverUrl?: string;
+  backdropUrl?: string;
+  description?: string;
+  score?: number;
+  year?: number;
+  releaseDate?: string;
+  genres?: string[];
+  tags?: string[];
+  duration?: number;
+  totalEpisodes?: number;
+  currentSeason?: number;
+  actors?: string[];
+  directors?: string[];
+  popularity?: number;
+  matchScore?: number;
+  extraInfo?: ExtraInfo;
+  link?: string;
+  sourceId?: string;
+  sourceName?: string;
+}
+
+  public toSerializable(): SearchResultSerializable {
+    // 使用明确的类型赋值，避免对象字面量错误
+    const result: SearchResultSerializable = {
+      id: this.id,
+      title: this.title,
+      originalTitle: this.originalTitle,
+      type: this.type,
+      coverUrl: this.coverUrl,
+      backdropUrl: this.backdropUrl,
+      description: this.description,
+      score: this.score,
+      year: this.year,
+      releaseDate: this.releaseDate,
+      genres: this.genres,
+      tags: this.tags,
+      duration: this.duration,
+      totalEpisodes: this.totalEpisodes,
+      currentSeason: this.currentSeason,
+      actors: this.actors,
+      directors: this.directors,
+      popularity: this.popularity,
+      matchScore: this.matchScore,
+      extraInfo: this.extraInfo,
+      link: this.link,
+      sourceId: this.sourceId,
+      sourceName: this.sourceName
+    };
     
     return result;
   }
@@ -399,7 +427,7 @@ export default class SearchResult {
    * @param data 序列化的数据
    * @returns SearchResult实例
    */
-  public static fromSerializable(data: Record<string, string | number | boolean | null | string[]>): SearchResult {
+  public static fromSerializable(data: SearchResultSerializable): SearchResult {
     // 明确类型的部分对象
     const searchResultData: Partial<SearchResult> = {
       id: undefined,

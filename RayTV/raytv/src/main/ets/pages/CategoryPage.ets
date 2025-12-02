@@ -2,7 +2,7 @@
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
-import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, HorizontalAlign, FlexAlign, ItemAlign, FlexDirection, ImageFit, TextAlign } from '@ohos/arkui';
+import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, HorizontalAlign, FlexAlign, ItemAlign, FlexDirection, ImageFit, TextAlign, Scroller, ScrollDirection } from '@ohos.arkui';
 import { MediaItem } from '../data/bean/MediaItem';
 
 /**
@@ -259,11 +259,12 @@ struct CategoryPage {
    */
   @Builder
   private renderCategorySelector(): void {
-    Scroller()
-    .scrollable(ScrollDirection.Horizontal) {
+    Scroller({
+      scrollable: ScrollDirection.Horizontal
+    }) {
       Flex()
       .className("category-list")
-      .wrap(FlexWrap.NoWrap) {
+      .flexWrap(FlexWrap.NoWrap) {
         ForEach(this.categories, (category: string) => {
           Button(category)
           .key(`category-${category}`)
