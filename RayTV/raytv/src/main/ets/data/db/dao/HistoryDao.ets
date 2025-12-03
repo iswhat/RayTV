@@ -17,7 +17,7 @@ export class HistoryDao {
   }
 
   /**
-   * 保存或更新历史记录
+   * 保存或更新历史记�?
    * @param history 历史记录信息
    */
   public async saveOrUpdate(history: History): Promise<void> {
@@ -35,7 +35,7 @@ export class HistoryDao {
         const rowsAffected = await db.update(TableSchema.HISTORY_TABLE, valuesBucket, predicates);
         Logger.info(this.TAG, `History updated: ${history.title}, rows affected: ${rowsAffected}`);
       } else {
-        // 保存新记录
+        // 保存新记�?
         await db.insert(TableSchema.HISTORY_TABLE, valuesBucket);
         Logger.info(this.TAG, `History saved: ${history.title}`);
       }
@@ -53,7 +53,7 @@ export class HistoryDao {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId);
+      predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId)))))));
       
       const resultSet = await db.query(TableSchema.HISTORY_TABLE, predicates);
       const histories = this.parseResultSet(resultSet);
@@ -66,11 +66,11 @@ export class HistoryDao {
   }
 
   /**
-   * 获取所有历史记录
+   * 获取所有历史记�?
    * @param limit 限制数量
-   * @param offset 偏移量
+   * @param offset 偏移�?
    */
-  public async getAll(limit: number = 50, offset: number = 0): Promise<History[]> {
+  public async getAll(limit: number = 50, offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0))))))): Promise<History[]> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
@@ -93,7 +93,7 @@ export class HistoryDao {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId);
+      predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId)))))));
       
       const rowsAffected = await db.delete(TableSchema.HISTORY_TABLE, predicates);
       Logger.info(this.TAG, `History deleted: ${contentId}, rows affected: ${rowsAffected}`);
@@ -105,14 +105,14 @@ export class HistoryDao {
   }
 
   /**
-   * 清空所有历史记录
+   * 清空所有历史记�?
    */
   public async clearAll(): Promise<boolean> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
       
-      const rowsAffected = await db.delete(TableSchema.HISTORY_TABLE, predicates);
+      const rowsAffected = await db.delete(TableSchema.HISTORY_TABLE, predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates)))))));
       Logger.info(this.TAG, `All histories cleared, rows affected: ${rowsAffected}`);
       return rowsAffected > 0;
     } catch (error) {
@@ -129,7 +129,7 @@ export class HistoryDao {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
       
-      const resultSet = await db.query(TableSchema.HISTORY_TABLE, predicates);
+      const resultSet = await db.query(TableSchema.HISTORY_TABLE, predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates)))))));
       return resultSet.rowCount;
     } catch (error) {
       Logger.error(this.TAG, `Failed to get history count: ${error}`);
@@ -139,13 +139,13 @@ export class HistoryDao {
 
   /**
    * 根据时间范围删除历史记录
-   * @param beforeTime 时间戳
+   * @param beforeTime 时间�?
    */
   public async deleteBeforeTime(beforeTime: number): Promise<boolean> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.lessThan(TableSchema.HISTORY_LAST_WATCH_TIME, beforeTime);
+      predicates.lessThan(TableSchema.HISTORY_LAST_WATCH_TIME, beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime : new Error(String(beforeTime instanceof Error ? beforeTime : new Error(String(beforeTime)))))));
       
       const rowsAffected = await db.delete(TableSchema.HISTORY_TABLE, predicates);
       Logger.info(this.TAG, `Histories deleted before ${beforeTime}, rows affected: ${rowsAffected}`);
@@ -166,7 +166,7 @@ export class HistoryDao {
       
       for (const contentId of contentIds) {
         const predicates = new RelationalPredicates();
-        predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId);
+        predicates.equalTo(TableSchema.HISTORY_CONTENT_ID, contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId instanceof Error ? contentId instanceof Error ? contentId : new Error(String(contentId : new Error(String(contentId instanceof Error ? contentId : new Error(String(contentId)))))));
         await db.delete(TableSchema.HISTORY_TABLE, predicates);
       }
       
@@ -183,12 +183,115 @@ export class HistoryDao {
    */
   private historyToValuesBucket(history: History): ValuesBucket {
     const bucket: ValuesBucket = {
-      [TableSchema.HISTORY_CONTENT_ID]: history.contentId,
-      [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_CONTENT_ID]: history.contentId, [TableSchema.HISTORY_TITLE]: history.title,
       [TableSchema.HISTORY_COVER]: history.cover || '',
       [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
       [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
-      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now(),
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( instanceof Error ? [TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now( : new Error(String([TableSchema.HISTORY_TITLE]: history.title,
+      [TableSchema.HISTORY_COVER]: history.cover || '',
+      [TableSchema.HISTORY_CURRENT_POSITION]: history.currentPosition || 0,
+      [TableSchema.HISTORY_TOTAL_DURATION]: history.totalDuration || 0,
+      [TableSchema.HISTORY_LAST_WATCH_TIME]: history.lastWatchTime || Date.now())))))),
       [TableSchema.HISTORY_SITE_KEY]: history.siteKey || '',
       [TableSchema.HISTORY_EPISODE_NAME]: history.episodeName || '',
       [TableSchema.HISTORY_OTHER_INFO]: JSON.stringify(history.otherInfo || {})
@@ -240,3 +343,5 @@ export class HistoryDao {
     return histories;
   }
 }
+
+

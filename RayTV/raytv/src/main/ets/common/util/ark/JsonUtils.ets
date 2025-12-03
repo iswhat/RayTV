@@ -13,9 +13,8 @@ import StringUtils from './StringUtils';
  */
 export const JsonUtils = {
   /**
-   * 检查值是否可以被序列化
-   */
-  isSerializable(value: unknown): boolean {
+   * 检查值是否可以被序列�?   */
+  isSerializable(value: Record<string, string | number | boolean | null>): boolean {
     try {
       JSON.stringify(value);
       return true;
@@ -25,10 +24,9 @@ export const JsonUtils = {
   },
 
   /**
-   * 安全的JSON序列化函数
-   * 替代JSON.stringify
+   * 安全的JSON序列化函�?   * 替代JSON.stringify
    */
-  stringify(value: unknown, replacer?: (key: string, value: SafeAny) => SafeAny | Array<number | string>, space?: string | number): string | null {
+  stringify(value: Record<string, string | number | boolean | null>, replacer?: (key: string, value: SafeAny) => SafeAny | Array<number | string>, space?: string | number): string | null {
     try {
       return JSON.stringify(value, replacer, space);
     } catch (e) {
@@ -55,8 +53,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 美化JSON字符串
-   */
+   * 美化JSON字符�?   */
   prettify(jsonString: Optional<string>, indent: number = 2): string | null {
     const parsed = JsonUtils.parse(jsonString);
     
@@ -76,8 +73,7 @@ export const JsonUtils = {
     }
     
     try {
-      // 先解析再序列化，移除所有空白字符
-      const parsed = JSON.parse(jsonString);
+      // 先解析再序列化，移除所有空白字�?      const parsed = JSON.parse(jsonString);
       return JSON.stringify(parsed);
     } catch (e) {
       console.error('JsonUtils.compress error:', e);
@@ -86,12 +82,10 @@ export const JsonUtils = {
   },
 
   /**
-   * 深拷贝对象（使用JSON序列化/反序列化）
-   */
+   * 深拷贝对象（使用JSON序列�?反序列化�?   */
   deepClone<T>(obj: T): T | null {
     if (obj === null || typeof obj !== 'object') {
-      // 对于原始类型，直接返回
-      return obj;
+      // 对于原始类型，直接返�?      return obj;
     }
     
     try {
@@ -103,19 +97,17 @@ export const JsonUtils = {
   },
 
   /**
-   * 合并两个对象（浅合并）
-   */
+   * 合并两个对象（浅合并�?   */
   merge<T extends Record<string, SafeAny>, U extends Record<string, SafeAny>>(target: T, source: U): T & U {
     if (!TypeUtils.isObject(target) || !TypeUtils.isObject(source)) {
       return target as T & U;
     }
     
-    const result = { ...target };
+    const result: Record<string, string | number | boolean | null> = { ... };
     
     for (const key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
-        // 使用类型安全的属性访问方式
-        const propertyValue = JsonUtils.getPropertyValue(source, key);
+        // 使用类型安全的属性访问方�?        const propertyValue = JsonUtils.getPropertyValue(source, key);
         (result as Record<string, SafeAny>)[key] = propertyValue;
       }
     }
@@ -124,19 +116,17 @@ export const JsonUtils = {
   },
 
   /**
-   * 合并两个对象（深合并）
-   */
+   * 合并两个对象（深合并�?   */
   deepMerge<T extends Record<string, SafeAny>, U extends Record<string, SafeAny>>(target: T, source: U): T & U {
     if (!TypeUtils.isObject(target) || !TypeUtils.isObject(source)) {
       return source !== undefined && source !== null ? source as T & U : target as T & U;
     }
     
-    const result = { ...target };
+    const result: Record<string, string | number | boolean | null> = { ... };
     
     for (const key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
-        // 使用类型安全的属性访问方式
-        const targetValue = JsonUtils.getPropertyValue(target, key);
+        // 使用类型安全的属性访问方�?        const targetValue = JsonUtils.getPropertyValue(target, key);
         const sourceValue = JsonUtils.getPropertyValue(source, key);
         
         if (TypeUtils.isObject(targetValue) && TypeUtils.isObject(sourceValue) && !Array.isArray(targetValue) && !Array.isArray(sourceValue)) {
@@ -154,7 +144,7 @@ export const JsonUtils = {
   /**
    * 比较两个对象是否相等（使用JSON序列化）
    */
-  equals(obj1: unknown, obj2: unknown): boolean {
+  equals(obj1: Record<string, string | number | boolean | null>, obj2: Record<string, string | number | boolean | null>): boolean {
     try {
       return JsonUtils.stringify(obj1) === JsonUtils.stringify(obj2);
     } catch (e) {
@@ -164,15 +154,13 @@ export const JsonUtils = {
   },
 
   /**
-   * 提取JSON对象的特定路径值
-   */
+   * 提取JSON对象的特定路径�?   */
   getValueByPath<T = SafeAny>(obj: Record<string, SafeAny>, path: string, defaultValue?: T): T | null {
     if (!TypeUtils.isObject(obj) || StringUtils.isEmpty(path)) {
       return defaultValue !== undefined ? defaultValue : null;
     }
     
-    // 处理点号分隔的路径
-    const pathParts = path.split('.');
+    // 处理点号分隔的路�?    const pathParts = path.split('.');
     let current: SafeAny = obj;
     
     for (let i = 0; i < pathParts.length; i++) {
@@ -189,19 +177,16 @@ export const JsonUtils = {
   },
 
   /**
-   * 设置JSON对象的特定路径值
-   */
+   * 设置JSON对象的特定路径�?   */
   setValueByPath(obj: Record<string, SafeAny>, path: string, value: SafeAny): boolean {
     if (!TypeUtils.isObject(obj) || StringUtils.isEmpty(path)) {
       return false;
     }
     
-    // 处理点号分隔的路径
-    const pathParts = path.split('.');
+    // 处理点号分隔的路�?    const pathParts = path.split('.');
     let current: Record<string, SafeAny> = obj;
     
-    // 遍历路径部分，除了最后一个
-    for (let i = 0; i < pathParts.length - 1; i++) {
+    // 遍历路径部分，除了最后一�?    for (let i = 0; i < pathParts.length - 1; i++) {
       const part = pathParts[i];
       
       if (!(part in current) || !TypeUtils.isObject(current[part])) {
@@ -211,38 +196,32 @@ export const JsonUtils = {
       current = current[part] as Record<string, SafeAny>;
     }
     
-    // 设置最后一个路径部分的值
-    const lastPart = pathParts[pathParts.length - 1];
+    // 设置最后一个路径部分的�?    const lastPart = pathParts[pathParts.length - 1];
     current[lastPart] = value;
     
     return true;
   },
 
   /**
-   * 移除JSON对象的特定路径值
-   */
+   * 移除JSON对象的特定路径�?   */
   removeValueByPath(obj: Record<string, SafeAny>, path: string): boolean {
     if (!TypeUtils.isObject(obj) || StringUtils.isEmpty(path)) {
       return false;
     }
     
-    // 处理点号分隔的路径
-    const pathParts = path.split('.');
+    // 处理点号分隔的路�?    const pathParts = path.split('.');
     let current: Record<string, SafeAny> = obj;
     let parent: Record<string, SafeAny> | null = null;
     let lastKey: string = '';
     
-    // 遍历路径部分，除了最后一个
-    for (let i = 0; i < pathParts.length; i++) {
+    // 遍历路径部分，除了最后一�?    for (let i = 0; i < pathParts.length; i++) {
       const part = pathParts[i];
       
       if (!(part in current)) {
-        return false; // 路径不存在
-      }
+        return false; // 路径不存�?      }
       
       if (i === pathParts.length - 1) {
-        // 最后一个部分，从父对象中删除
-        lastKey = part;
+        // 最后一个部分，从父对象中删�?        lastKey = part;
       } else {
         parent = current;
         current = current[part] as Record<string, SafeAny>;
@@ -262,12 +241,10 @@ export const JsonUtils = {
   },
 
   /**
-   * 安全地获取对象属性值
-   * @param obj - 要获取属性的对象
-   * @param key - 属性键名
-   * @returns 属性值，如果属性不存在则返回undefined
+   * 安全地获取对象属性�?   * @param obj - 要获取属性的对象
+   * @param key - 属性键�?   * @returns 属性值，如果属性不存在则返回undefined
    */
-  getPropertyValue(obj: Record<string, SafeAny>, key: string): unknown {
+  getPropertyValue(obj: Record<string, SafeAny>, key: string): Record<string, string | number | boolean | null> {
     if (!TypeUtils.isObject(obj)) {
       return undefined;
     }
@@ -276,8 +253,7 @@ export const JsonUtils = {
       return undefined;
     }
     
-    // 使用类型安全的属性访问方式
-    return obj[key];
+    // 使用类型安全的属性访问方�?    return obj[key];
   },
 
   /**
@@ -288,8 +264,7 @@ export const JsonUtils = {
       return false;
     }
     
-    // 处理点号分隔的路径
-    const pathParts = path.split('.');
+    // 处理点号分隔的路�?    const pathParts = path.split('.');
     let current: SafeAny = obj;
     
     for (let i = 0; i < pathParts.length; i++) {
@@ -306,8 +281,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 过滤JSON对象，只保留指定的属性
-   */
+   * 过滤JSON对象，只保留指定的属�?   */
   pick<T extends Record<string, SafeAny>>(obj: T, keys: string[]): Partial<T> {
     if (!TypeUtils.isObject(obj) || !Array.isArray(keys)) {
       return {};
@@ -326,8 +300,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 过滤JSON对象，排除指定的属性
-   */
+   * 过滤JSON对象，排除指定的属�?   */
   omit<T extends Record<string, SafeAny>>(obj: T, keys: string[]): Partial<T> {
     if (!TypeUtils.isObject(obj) || !Array.isArray(keys)) {
       return { ...obj };
@@ -346,8 +319,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 清理JSON对象，移除undefined和null值
-   */
+   * 清理JSON对象，移除undefined和null�?   */
   clean(obj: Record<string, SafeAny>, removeEmpty: boolean = false): Record<string, SafeAny> {
     if (!TypeUtils.isObject(obj)) {
       return {};
@@ -364,8 +336,7 @@ export const JsonUtils = {
             // 递归清理嵌套对象
             const cleanedValue = JsonUtils.clean(value as Record<string, SafeAny>, removeEmpty);
             
-            // 如果需要移除空对象，并且清理后的对象为空，则跳过
-            if (!removeEmpty || Object.keys(cleanedValue).length > 0) {
+            // 如果需要移除空对象，并且清理后的对象为空，则跳�?            if (!removeEmpty || Object.keys(cleanedValue).length > 0) {
               result[key] = cleanedValue;
             }
           } else if (!removeEmpty || (Array.isArray(value) && value.length > 0) || (!Array.isArray(value))) {
@@ -379,8 +350,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 将对象转换为查询字符串
-   */
+   * 将对象转换为查询字符�?   */
   toQueryString(obj: Record<string, SafeAny>): string {
     if (!TypeUtils.isObject(obj)) {
       return '';
@@ -404,8 +374,7 @@ export const JsonUtils = {
   },
 
   /**
-   * 将查询字符串转换为对象
-   */
+   * 将查询字符串转换为对�?   */
   fromQueryString(queryString: Optional<string>): Record<string, string> {
     if (StringUtils.isEmpty(queryString)) {
       return {};
@@ -435,3 +404,4 @@ export const JsonUtils = {
 };
 
 export default JsonUtils;
+

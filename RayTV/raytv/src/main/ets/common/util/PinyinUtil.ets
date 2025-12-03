@@ -1,30 +1,27 @@
-// PinyinUtil.ets - 拼音工具类
-// 负责中文到拼音的转换，支持全拼和首字母提取
-
+// PinyinUtil.ets - 拼音工具�?// 负责中文到拼音的转换，支持全拼和首字母提�?
 import Logger from './Logger';
 
 const TAG = 'PinyinUtil';
 
 /**
  * 汉字首字母映射表（常用汉字）
- * 这里只包含部分常用汉字的首字母映射，实际应用中可以扩展
- */
+ * 这里只包含部分常用汉字的首字母映射，实际应用中可以扩�? */
 const PINYIN_MAP: Record<string, string> = {
   // 声母部分
   'a': 'a', 'o': 'o', 'e': 'e', 'i': 'i', 'u': 'u', 'v': 'v',
   // 部分常用汉字
-  '一': 'y', '丁': 'd', '七': 'q', '万': 'w', '三': 's', '上': 's', '下': 'x', '不': 'b', '与': 'y', '丑': 'c',
-  '专': 'z', '且': 'q', '世': 's', '丙': 'b', '业': 'y', '丛': 'c', '东': 'd', '丝': 's', '丞': 'c', '丢': 'd',
-  '两': 'l', '严': 'y', '丧': 's', '个': 'g', '中': 'z', '丰': 'f', '临': 'l', '丸': 'w', '丹': 'd', '为': 'w',
-  '主': 'z', '丽': 'l', '举': 'j', '乃': 'n', '久': 'j', '么': 'm', '义': 'y', '之': 'z', '乌': 'w', '乍': 'z',
-  '乎': 'h', '乏': 'f', '乐': 'l', '乒': 'p', '乓': 'p', '乔': 'q', '乖': 'g', '乘': 'c', '乙': 'y', '九': 'j',
-  '乞': 'q', '也': 'y', '习': 'x', '乡': 'x', '书': 's', '予': 'y', '云': 'y', '互': 'h', '五': 'w', '井': 'j',
-  '亘': 'g', '亚': 'y', '亡': 'w', '亥': 'h', '交': 'j', '亦': 'y', '产': 'c', '亨': 'h', '亩': 'm', '享': 'x',
-  '京': 'j', '亭': 't', '亮': 'l', '亲': 'q', '人': 'r', '仁': 'r', '仅': 'j', '从': 'c', '仑': 'l', '仓': 'c',
-  '仕': 's', '他': 't', '仗': 'z', '付': 'f', '仙': 'x', '们': 'm', '代': 'd', '令': 'l', '以': 'y', '仪': 'y',
-  '仲': 'z', '任': 'r', '伊': 'y', '伍': 'w', '伏': 'f', '伐': 'f', '休': 'x', '会': 'h', '伟': 'w', '传': 'c',
-  '伞': 's', '伤': 's', '何': 'h', '估': 'g', '佑': 'y', '余': 'y', '佩': 'p', '侯': 'h', '侵': 'q', '便': 'b',
-  '促': 'c', '俄': 'e', '俅': 'q', '俊': 'j', '俏': 'q', '俐': 'l',
+  '一': 'y', '�?: 'd', '�?: 'q', '�?: 'w', '�?: 's', '�?: 's', '�?: 'x', '�?: 'b', '�?: 'y', '�?: 'c',
+  '�?: 'z', '�?: 'q', '�?: 's', '�?: 'b', '�?: 'y', '�?: 'c', '�?: 'd', '�?: 's', '�?: 'c', '�?: 'd',
+  '�?: 'l', '�?: 'y', '�?: 's', '�?: 'g', '�?: 'z', '�?: 'f', '�?: 'l', '�?: 'w', '�?: 'd', '�?: 'w',
+  '�?: 'z', '�?: 'l', '�?: 'j', '�?: 'n', '�?: 'j', '�?: 'm', '�?: 'y', '�?: 'z', '�?: 'w', '�?: 'z',
+  '�?: 'h', '�?: 'f', '�?: 'l', '�?: 'p', '�?: 'p', '�?: 'q', '�?: 'g', '�?: 'c', '�?: 'y', '�?: 'j',
+  '�?: 'q', '�?: 'y', '�?: 'x', '�?: 'x', '�?: 's', '�?: 'y', '�?: 'y', '�?: 'h', '�?: 'w', '�?: 'j',
+  '�?: 'g', '�?: 'y', '�?: 'w', '�?: 'h', '�?: 'j', '�?: 'y', '�?: 'c', '�?: 'h', '�?: 'm', '�?: 'x',
+  '�?: 'j', '�?: 't', '�?: 'l', '�?: 'q', '�?: 'r', '�?: 'r', '�?: 'j', '�?: 'c', '�?: 'l', '�?: 'c',
+  '�?: 's', '�?: 't', '�?: 'z', '�?: 'f', '�?: 'x', '�?: 'm', '�?: 'd', '�?: 'l', '�?: 'y', '�?: 'y',
+  '�?: 'z', '�?: 'r', '�?: 'y', '�?: 'w', '�?: 'f', '�?: 'f', '�?: 'x', '�?: 'h', '�?: 'w', '�?: 'c',
+  '�?: 's', '�?: 's', '�?: 'h', '�?: 'g', '�?: 'y', '�?: 'y', '�?: 'p', '�?: 'h', '�?: 'q', '�?: 'b',
+  '�?: 'c', '�?: 'e', '�?: 'q', '�?: 'j', '�?: 'q', '�?: 'l',
   // 数字
   '0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
   // 字母
@@ -34,9 +31,7 @@ const PINYIN_MAP: Record<string, string> = {
 };
 
 /**
- * 拼音工具类
- * 提供中文到拼音的转换功能，支持全拼和首字母提取
- */
+ * 拼音工具�? * 提供中文到拼音的转换功能，支持全拼和首字母提�? */
 export class PinyinUtil {
   private static instance: PinyinUtil;
   private constructor() {}
@@ -52,8 +47,7 @@ export class PinyinUtil {
   }
 
   /**
-   * 提取字符串的拼音首字母
-   * @param text 输入文本
+   * 提取字符串的拼音首字�?   * @param text 输入文本
    * @returns 拼音首字母字符串
    */
   public getFirstLetter(text: string): string {
@@ -64,16 +58,13 @@ export class PinyinUtil {
 
     let result = '';
     
-    // 遍历字符串中的每个字符
-    for (let i = 0; i < text.length; i++) {
+    // 遍历字符串中的每个字�?    for (let i = 0; i < text.length; i++) {
       const char = text.charAt(i);
       
       // 如果是英文字母，直接转为小写
-      // 避免使用正则表达式，使用字符码范围判断
-      const charCode = char.charCodeAt(0);
+      // 避免使用正则表达式，使用字符码范围判�?      const charCode = char.charCodeAt(0);
       if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
-        // 确保是小写
-        if (charCode >= 65 && charCode <= 90) {
+        // 确保是小�?        if (charCode >= 65 && charCode <= 90) {
           result += String.fromCharCode(charCode + 32);
         } else {
           result += char;
@@ -83,10 +74,8 @@ export class PinyinUtil {
       else if (charCode >= 48 && charCode <= 57) {
         result += char;
       }
-      // 如果是汉字，查找首字母
-      else {
-        // 避免使用in操作符，通过获取所有键并查找
-        let found = false;
+      // 如果是汉字，查找首字�?      else {
+        // 避免使用in操作符，通过获取所有键并查�?        let found = false;
         const mapKeys = this.getMapKeys(PINYIN_MAP);
         for (let j = 0; j < mapKeys.length; j++) {
           if (mapKeys[j] === char) {
@@ -109,15 +98,11 @@ export class PinyinUtil {
   }
   
   /**
-   * 获取映射表的所有键（兼容ArkTS）
-   * @param map 映射表
-   * @returns 键数组
-   */
+   * 获取映射表的所有键（兼容ArkTS�?   * @param map 映射�?   * @returns 键数�?   */
   private getMapKeys(map: Record<string, string>): string[] {
     const keys: string[] = [];
     try {
-      // 使用Object.keys获取对象的键，这在HarmonyOS环境中是支持的
-      const objKeys = Object.keys(map);
+      // 使用Object.keys获取对象的键，这在HarmonyOS环境中是支持�?      const objKeys = Object.keys(map);
       for (let i = 0; i < objKeys.length; i++) {
         keys.push(objKeys[i]);
       }
@@ -129,31 +114,25 @@ export class PinyinUtil {
   }
 
   /**
-   * 检查文本是否包含指定的拼音首字母序列
-   * @param text 输入文本
-   * @param pinyin 拼音首字母序列
-   * @returns 是否匹配
+   * 检查文本是否包含指定的拼音首字母序�?   * @param text 输入文本
+   * @param pinyin 拼音首字母序�?   * @returns 是否匹配
    */
-  public containsPinyin(text: string, pinyin: string): boolean {
+  public containsPinyin(text: string, pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string : new Error(String(pinyin: string instanceof Error ? pinyin: string : new Error(String(pinyin: string))))))): boolean {
     // 参数验证
     if (!text || !pinyin || typeof text !== 'string' || typeof pinyin !== 'string') {
       Logger.debug(TAG, 'Invalid parameters in containsPinyin');
       return false;
     }
 
-    // 获取拼音首字母
-    const firstLetters = this.getFirstLetter(text);
+    // 获取拼音首字�?    const firstLetters = this.getFirstLetter(text);
     const lowerPinyin = this.toLowercase(pinyin);
     
-    // 实现字符串包含检查（不使用内置的includes方法）
-    return this.stringContains(firstLetters, lowerPinyin);
+    // 实现字符串包含检查（不使用内置的includes方法�?    return this.stringContains(firstLetters, lowerPinyin);
   }
 
   /**
-   * 检查文本是否以指定的拼音首字母序列开头
-   * @param text 输入文本
-   * @param pinyin 拼音首字母序列
-   * @returns 是否匹配
+   * 检查文本是否以指定的拼音首字母序列开�?   * @param text 输入文本
+   * @param pinyin 拼音首字母序�?   * @returns 是否匹配
    */
   public startsWithPinyin(text: string, pinyin: string): boolean {
     // 参数验证
@@ -162,18 +141,14 @@ export class PinyinUtil {
       return false;
     }
 
-    // 获取拼音首字母
-    const firstLetters = this.getFirstLetter(text);
+    // 获取拼音首字�?    const firstLetters = this.getFirstLetter(text);
     const lowerPinyin = this.toLowercase(pinyin);
     
-    // 实现字符串开头匹配检查（不使用内置的startsWith方法）
-    return this.stringStartsWith(firstLetters, lowerPinyin);
+    // 实现字符串开头匹配检查（不使用内置的startsWith方法�?    return this.stringStartsWith(firstLetters, lowerPinyin);
   }
   
   /**
-   * 检查字符串是否以指定子字符串开头
-   * 兼容ArkTS语法的实现
-   */
+   * 检查字符串是否以指定子字符串开�?   * 兼容ArkTS语法的实�?   */
   private stringStartsWith(str: string, prefix: string): boolean {
     if (!str || !prefix || prefix.length > str.length) {
       return false;
@@ -188,9 +163,7 @@ export class PinyinUtil {
   }
   
   /**
-   * 将字符串转换为小写
-   * 兼容ArkTS语法的实现
-   */
+   * 将字符串转换为小�?   * 兼容ArkTS语法的实�?   */
   private toLowercase(str: string): string {
     if (!str || typeof str !== 'string') {
       return str || '';
@@ -200,7 +173,7 @@ export class PinyinUtil {
     for (let i = 0; i < str.length; i++) {
       const char = str.charAt(i);
       const charCode = char.charCodeAt(0);
-      // 大写字母A-Z (65-90) 转换为小写 a-z (97-122)
+      // 大写字母A-Z (65-90) 转换为小�?a-z (97-122)
       if (charCode >= 65 && charCode <= 90) {
         result += String.fromCharCode(charCode + 32);
       } else {
@@ -212,8 +185,7 @@ export class PinyinUtil {
   
   /**
    * 检查字符串是否包含子字符串
-   * 兼容ArkTS语法的实现
-   */
+   * 兼容ArkTS语法的实�?   */
   private stringContains(str: string, substr: string): boolean {
     if (!str || !substr || substr.length > str.length) {
       return false;
@@ -235,9 +207,7 @@ export class PinyinUtil {
   }
   
   /**
-   * 检查字符串是否以指定子字符串开头
-   * 兼容ArkTS语法的实现
-   */
+   * 检查字符串是否以指定子字符串开�?   * 兼容ArkTS语法的实�?   */
   private stringStartsWith(str: string, prefix: string): boolean {
     if (!str || !prefix || prefix.length > str.length) {
       return false;
@@ -252,8 +222,7 @@ export class PinyinUtil {
   }
 
   /**
-   * 扩展拼音映射表
-   * @param map 要添加的映射
+   * 扩展拼音映射�?   * @param map 要添加的映射
    */
   public extendPinyinMap(map: Record<string, string>): void {
     try {
@@ -293,18 +262,15 @@ export class PinyinUtil {
           }
           isEscaped = false;
         } else if (char === '\\') {
-          // 检测转义符号
-          isEscaped = true;
+          // 检测转义符�?          isEscaped = true;
         } else if (char === '"' && !inKey && !inValue) {
           // 开始解析键
           inKey = true;
           currentKey = '';
         } else if (char === '"' && inKey) {
-          // 键解析结束
-          inKey = false;
+          // 键解析结�?          inKey = false;
         } else if (char === ':' && !inKey && !inValue) {
-          // 开始解析值
-          inValue = true;
+          // 开始解析�?          inValue = true;
           currentValue = '';
           i++;
           valueStartIndex = i;
@@ -313,9 +279,7 @@ export class PinyinUtil {
           if (i < mapStr.length) {
             const nextChar = mapStr[i];
             if (nextChar === '"') {
-              // 字符串值，需要处理引号
-              i++; // 跳过开始引号
-              while (i < mapStr.length) {
+              // 字符串值，需要处理引�?              i++; // 跳过开始引�?              while (i < mapStr.length) {
                 const valueChar = mapStr[i];
                 if (valueChar === '\\') {
                   // 转义字符
@@ -326,8 +290,7 @@ export class PinyinUtil {
                     i++;
                   }
                 } else if (valueChar === '"') {
-                  // 字符串结束
-                  i++;
+                  // 字符串结�?                  i++;
                   break;
                 } else {
                   currentValue += valueChar;
@@ -336,8 +299,7 @@ export class PinyinUtil {
               }
               inValue = false;
             } else {
-              // 非字符串值（数字、布尔值等）
-              while (i < mapStr.length) {
+              // 非字符串值（数字、布尔值等�?              while (i < mapStr.length) {
                 const valueChar = mapStr[i];
                 if (valueChar === ',' || valueChar === '}') {
                   break;
@@ -345,8 +307,7 @@ export class PinyinUtil {
                 currentValue += valueChar;
                 i++;
               }
-              // 去除空格并转换为字符串
-              currentValue = currentValue.trim();
+              // 去除空格并转换为字符�?              currentValue = currentValue.trim();
               inValue = false;
             }
             
@@ -354,11 +315,10 @@ export class PinyinUtil {
             if (currentKey && currentValue) {
               const isUpdate = currentKey in PINYIN_MAP;
               
-              // 验证值的有效性 - 确保是单字符拼音（通常是字母）
+              // 验证值的有效�?- 确保是单字符拼音（通常是字母）
               // 但也允许特殊情况，如多字符拼音或音调标记
               if (typeof currentValue === 'string' && currentValue.length > 0) {
-                // 在ArkTS中安全地设置属性
-                const keyToSet = currentKey;
+                // 在ArkTS中安全地设置属�?                const keyToSet = currentKey;
                 const valueToSet = currentValue;
                 PINYIN_MAP[keyToSet] = valueToSet;
                 
@@ -392,19 +352,16 @@ export class PinyinUtil {
       
     } catch (error) {
       Logger.error(TAG, `Failed to extend pinyin map: ${error instanceof Error ? error.message : String(error)}`);
-      // 可以考虑抛出错误或返回失败状态
-      throw error instanceof Error ? error : new Error(String(error));
+      // 可以考虑抛出错误或返回失败状�?      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 搜索过滤函数 - 根据拼音首字母过滤数组
-   * @param items 要过滤的数组
-   * @param keyword 搜索关键词
-   * @param textExtractor 从数组项中提取文本的函数
+   * 搜索过滤函数 - 根据拼音首字母过滤数�?   * @param items 要过滤的数组
+   * @param keyword 搜索关键�?   * @param textExtractor 从数组项中提取文本的函数
    * @returns 过滤后的数组
    */
-  public filterByPinyin<T>(items: T[], keyword: string, textExtractor: (item: T) => string): T[] {
+  public filterByPinyin<T>(items: T[], keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T instanceof Error ? keyword: string, textExtractor: (item: T : new Error(String(keyword: string, textExtractor: (item: T))))))) => string): T[] {
     // 参数验证
     if (!items || !Array.isArray(items)) {
       Logger.warn(TAG, 'Invalid items array in filterByPinyin');
@@ -421,8 +378,7 @@ export class PinyinUtil {
       return [];
     }
     
-    // 去除关键词前后空格
-    const trimmedKeyword = this.trimString(keyword);
+    // 去除关键词前后空�?    const trimmedKeyword = this.trimString(keyword);
     if (trimmedKeyword === '') {
       return items;
     }
@@ -439,13 +395,12 @@ export class PinyinUtil {
         if (typeof text === 'string') {
           // 文本直接匹配
           const lowerText = this.toLowercase(text);
-          if (this.stringContains(lowerText, lowerKeyword)) {
+          if (this.stringContains(lowerText, lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword : new Error(String(lowerKeyword instanceof Error ? lowerKeyword : new Error(String(lowerKeyword)))))))) {
             filteredItems.push(item);
             continue;
           }
           
-          // 拼音首字母匹配
-          if (this.containsPinyin(text, lowerKeyword)) {
+          // 拼音首字母匹�?          if (this.containsPinyin(text, lowerKeyword)) {
             filteredItems.push(item);
           }
         }
@@ -460,9 +415,7 @@ export class PinyinUtil {
   }
   
   /**
-   * 去除字符串前后空格
-   * 兼容ArkTS语法的实现
-   */
+   * 去除字符串前后空�?   * 兼容ArkTS语法的实�?   */
   private trimString(str: string): string {
     if (!str || typeof str !== 'string') {
       return str || '';
@@ -471,13 +424,11 @@ export class PinyinUtil {
     let start = 0;
     let end = str.length;
     
-    // 查找起始非空格位置
-    while (start < end && this.isWhitespace(str.charAt(start))) {
+    // 查找起始非空格位�?    while (start < end && this.isWhitespace(str.charAt(start))) {
       start++;
     }
     
-    // 查找结束非空格位置
-    while (end > start && this.isWhitespace(str.charAt(end - 1))) {
+    // 查找结束非空格位�?    while (end > start && this.isWhitespace(str.charAt(end - 1))) {
       end--;
     }
     
@@ -489,11 +440,12 @@ export class PinyinUtil {
    */
   private isWhitespace(char: string): boolean {
     const charCode = char.charCodeAt(0);
-    // 空格、制表符、换行符、回车符等
-    return charCode === 32 || charCode === 9 || charCode === 10 || charCode === 13;
+    // 空格、制表符、换行符、回车符�?    return charCode === 32 || charCode === 9 || charCode === 10 || charCode === 13;
   }
 }
 
 // 导出单例
 export const pinyinUtil = PinyinUtil.getInstance();
 export default pinyinUtil;
+
+

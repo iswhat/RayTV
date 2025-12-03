@@ -1,6 +1,4 @@
-// NotificationRepository - 通知仓库类
-// 负责管理应用内通知、系统通知和用户偏好设置
-
+// NotificationRepository - 通知仓库�?// 负责管理应用内通知、系统通知和用户偏好设�?
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
@@ -53,8 +51,7 @@ export enum NotificationType {
 }
 
 /**
- * 通知优先级枚举
- */
+ * 通知优先级枚�? */
 export enum NotificationPriority {
   LOW = 'low',
   MEDIUM = 'medium',
@@ -63,8 +60,7 @@ export enum NotificationPriority {
 }
 
 /**
- * 通知状态枚举
- */
+ * 通知状态枚�? */
 export enum NotificationStatus {
   NEW = 'new',
   READ = 'read',
@@ -88,8 +84,7 @@ export interface NotificationContent {
 }
 
 /**
- * 通知元数据接口
- */
+ * 通知元数据接�? */
 export interface NotificationMetadata {
   relatedEntityId?: string;
   relatedEntityType?: 'video' | 'live' | 'user' | 'channel' | 'comment';
@@ -135,13 +130,11 @@ export interface NotificationConfig {
   enabledTypes: NotificationType[];
   mutedTypes: NotificationType[];
   
-  // 时间段设置
-  enableDoNotDisturb: boolean;
+  // 时间段设�?  enableDoNotDisturb: boolean;
   doNotDisturbStart: string; // HH:MM
   doNotDisturbEnd: string; // HH:MM
   
-  // 优先级设置
-  minPriority: NotificationPriority;
+  // 优先级设�?  minPriority: NotificationPriority;
   
   // 高级设置
   enableBadgeCount: boolean;
@@ -190,16 +183,14 @@ export const NotificationEventType = {
   ARCHIVED: 'notification:archived',
   RESTORED: 'notification:restored',
   
-  // 状态变更事件
-  STATUS_CHANGED: 'notification:statusChanged',
+  // 状态变更事�?  STATUS_CHANGED: 'notification:statusChanged',
   BADGE_COUNT_CHANGED: 'notification:badgeCountChanged',
   
   // 配置事件
   CONFIG_CHANGED: 'notification:configChanged',
   DO_NOT_DISTURB_TOGGLED: 'notification:doNotDisturbToggled',
   
-  // 组事件
-  GROUP_CREATED: 'notification:groupCreated',
+  // 组事�?  GROUP_CREATED: 'notification:groupCreated',
   GROUP_UPDATED: 'notification:groupUpdated',
   
   // 批量事件
@@ -233,8 +224,7 @@ export interface NotificationEvent {
 }
 
 /**
- * 通知过滤器接口
- */
+ * 通知过滤器接�? */
 export interface NotificationFilter {
   types?: NotificationType[];
   status?: NotificationStatus[];
@@ -266,8 +256,7 @@ export interface NotificationStats {
 }
 
 /**
- * 通知组接口
- */
+ * 通知组接�? */
 export interface NotificationGroup {
   id: string;
   title: string;
@@ -283,8 +272,7 @@ export interface NotificationGroup {
 }
 
 /**
- * 通知仓库类
- */
+ * 通知仓库�? */
 export class NotificationRepository {
   private static instance: NotificationRepository;
   private logger = Logger.getInstance();
@@ -292,8 +280,7 @@ export class NotificationRepository {
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
-  // 存储键配置
-  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     notifications: 'notification:notifications',
     config: 'notification:config',
     stats: 'notification:stats',
@@ -301,8 +288,7 @@ export class NotificationRepository {
     badgeCount: 'notification:badgeCount'
   };
   
-  // 缓存键配置
-  private cacheKeys = {
+  // 缓存键配�?  private cacheKeys = {
     notifications: 'notification:notifications',
     config: 'notification:config',
     stats: 'notification:stats',
@@ -344,8 +330,7 @@ export class NotificationRepository {
     enableErrorNotifications: true
   };
   
-  // 内部状态
-  private notifications: Map<string, Notification> = new Map();
+  // 内部状�?  private notifications: Map<string, Notification> = new Map();
   private groups: Map<string, NotificationGroup> = new Map();
   private config: NotificationConfig = this.defaultConfig;
   private stats: NotificationStats = this.createDefaultStats();
@@ -353,8 +338,7 @@ export class NotificationRepository {
   private isInitialized: boolean = false;
   
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     // 初始化事件监听器
     this.setupEventListeners();
@@ -371,8 +355,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 初始化仓库
-   */
+   * 初始化仓�?   */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
@@ -397,17 +380,16 @@ export class NotificationRepository {
       this.isInitialized = true;
       this.logger.info('NotificationRepository initialized successfully');
     } catch (error) {
-      this.logger.error('Failed to initialize NotificationRepository:', error);
+      this.Logger.error('Failed to initialize NotificationRepository:', error);
       throw error;
     }
   }
   
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
     // 监听应用生命周期事件
-    this.eventBus.on('app:foreground', () => {
+    this.eventBus.on('app:foreground', ( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(())))))) => {
       this.handleAppForeground();
     });
     
@@ -415,8 +397,7 @@ export class NotificationRepository {
       this.handleAppBackground();
     });
     
-    // 监听网络状态变化
-    this.eventBus.on('network:online', () => {
+    // 监听网络状态变�?    this.eventBus.on('network:online', () => {
       this.handleNetworkOnline();
     });
     
@@ -473,7 +454,7 @@ export class NotificationRepository {
         3600 // 1小时
       );
     } catch (error) {
-      this.logger.error('Failed to load notification config:', error);
+      this.Logger.error('Failed to load notification config:', error);
       this.config = this.defaultConfig;
     }
   }
@@ -484,10 +465,61 @@ export class NotificationRepository {
   private async saveConfig(): Promise<void> {
     try {
       await this.storageUtil.set(
-        this.storageKeys.config,
-        this.config,
+        this.storageKeys.config, this.config,
         LocalStorageType.PERSISTENT
-      );
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.config,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.config,
+        LocalStorageType.PERSISTENT
+      )))))));
       
       // 更新缓存
       await this.cacheService.set(
@@ -504,7 +536,7 @@ export class NotificationRepository {
         config: this.config
       });
     } catch (error) {
-      this.logger.error('Failed to save notification config:', error);
+      this.Logger.error('Failed to save notification config:', error);
     }
   }
   
@@ -514,9 +546,34 @@ export class NotificationRepository {
   private async loadNotifications(): Promise<void> {
     try {
       const notifications = await this.storageUtil.get<Notification[]>(
-        this.storageKeys.notifications,
-        LocalStorageType.PERSISTENT
-      );
+        this.storageKeys.notifications, LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+      )))))));
       
       if (notifications) {
         this.notifications.clear();
@@ -533,7 +590,7 @@ export class NotificationRepository {
         300 // 5分钟
       );
     } catch (error) {
-      this.logger.error('Failed to load notifications:', error);
+      this.Logger.error('Failed to load notifications:', error);
       this.notifications.clear();
     }
   }
@@ -546,10 +603,61 @@ export class NotificationRepository {
       const notifications = Array.from(this.notifications.values());
       
       await this.storageUtil.set(
-        this.storageKeys.notifications,
-        notifications,
+        this.storageKeys.notifications, notifications,
         LocalStorageType.PERSISTENT
-      );
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? notifications,
+        LocalStorageType.PERSISTENT
+       : new Error(String(notifications,
+        LocalStorageType.PERSISTENT
+      )))))));
       
       // 更新缓存
       await this.cacheService.set(
@@ -559,7 +667,7 @@ export class NotificationRepository {
         300
       );
     } catch (error) {
-      this.logger.error('Failed to save notifications:', error);
+      this.Logger.error('Failed to save notifications:', error);
     }
   }
   
@@ -569,9 +677,34 @@ export class NotificationRepository {
   private async loadStats(): Promise<void> {
     try {
       const stats = await this.storageUtil.get<NotificationStats>(
-        this.storageKeys.stats,
-        LocalStorageType.PERSISTENT
-      );
+        this.storageKeys.stats, LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+      )))))));
       
       if (stats) {
         this.stats = stats;
@@ -588,7 +721,7 @@ export class NotificationRepository {
         600 // 10分钟
       );
     } catch (error) {
-      this.logger.error('Failed to load notification stats:', error);
+      this.Logger.error('Failed to load notification stats:', error);
       this.stats = this.createDefaultStats();
     }
   }
@@ -599,10 +732,61 @@ export class NotificationRepository {
   private async saveStats(): Promise<void> {
     try {
       await this.storageUtil.set(
-        this.storageKeys.stats,
-        this.stats,
+        this.storageKeys.stats, this.stats,
         LocalStorageType.PERSISTENT
-      );
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.stats,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.stats,
+        LocalStorageType.PERSISTENT
+      )))))));
       
       // 更新缓存
       await this.cacheService.set(
@@ -619,7 +803,7 @@ export class NotificationRepository {
         stats: this.stats
       });
     } catch (error) {
-      this.logger.error('Failed to save notification stats:', error);
+      this.Logger.error('Failed to save notification stats:', error);
     }
   }
   
@@ -629,9 +813,34 @@ export class NotificationRepository {
   private async loadGroups(): Promise<void> {
     try {
       const groups = await this.storageUtil.get<NotificationGroup[]>(
-        this.storageKeys.groups,
-        LocalStorageType.PERSISTENT
-      );
+        this.storageKeys.groups, LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+      )))))));
       
       if (groups) {
         this.groups.clear();
@@ -648,7 +857,7 @@ export class NotificationRepository {
         300
       );
     } catch (error) {
-      this.logger.error('Failed to load notification groups:', error);
+      this.Logger.error('Failed to load notification groups:', error);
       this.groups.clear();
     }
   }
@@ -661,10 +870,61 @@ export class NotificationRepository {
       const groups = Array.from(this.groups.values());
       
       await this.storageUtil.set(
-        this.storageKeys.groups,
-        groups,
+        this.storageKeys.groups, groups,
         LocalStorageType.PERSISTENT
-      );
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? groups,
+        LocalStorageType.PERSISTENT
+       : new Error(String(groups,
+        LocalStorageType.PERSISTENT
+      )))))));
       
       // 更新缓存
       await this.cacheService.set(
@@ -674,7 +934,7 @@ export class NotificationRepository {
         300
       );
     } catch (error) {
-      this.logger.error('Failed to save notification groups:', error);
+      this.Logger.error('Failed to save notification groups:', error);
     }
   }
   
@@ -684,15 +944,40 @@ export class NotificationRepository {
   private async loadBadgeCount(): Promise<void> {
     try {
       const badgeCount = await this.storageUtil.get<number>(
-        this.storageKeys.badgeCount,
-        LocalStorageType.PERSISTENT
-      );
+        this.storageKeys.badgeCount, LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+       instanceof Error ? LocalStorageType.PERSISTENT
+       : new Error(String(LocalStorageType.PERSISTENT
+      )))))));
       
       if (badgeCount !== undefined) {
         this.badgeCount = badgeCount;
       }
     } catch (error) {
-      this.logger.error('Failed to load badge count:', error);
+      this.Logger.error('Failed to load badge count:', error);
       this.badgeCount = 0;
     }
   }
@@ -703,10 +988,61 @@ export class NotificationRepository {
   private async saveBadgeCount(): Promise<void> {
     try {
       await this.storageUtil.set(
-        this.storageKeys.badgeCount,
-        this.badgeCount,
+        this.storageKeys.badgeCount, this.badgeCount,
         LocalStorageType.PERSISTENT
-      );
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+       instanceof Error ? this.badgeCount,
+        LocalStorageType.PERSISTENT
+       : new Error(String(this.badgeCount,
+        LocalStorageType.PERSISTENT
+      )))))));
       
       // 发布徽章计数变更事件
       this.eventBus.emit(NotificationEventType.BADGE_COUNT_CHANGED, {
@@ -715,7 +1051,7 @@ export class NotificationRepository {
         badgeCount: this.badgeCount
       });
     } catch (error) {
-      this.logger.error('Failed to save badge count:', error);
+      this.Logger.error('Failed to save badge count:', error);
     }
   }
   
@@ -724,8 +1060,7 @@ export class NotificationRepository {
    */
   private handleAppForeground(): void {
     this.logger.debug('NotificationRepository: App entered foreground');
-    // 可以在这里执行一些前台操作，如刷新通知等
-  }
+    // 可以在这里执行一些前台操作，如刷新通知�?  }
   
   /**
    * 处理应用进入后台
@@ -741,8 +1076,7 @@ export class NotificationRepository {
    */
   private handleNetworkOnline(): void {
     this.logger.debug('NotificationRepository: Network online');
-    // 可以在这里执行一些网络恢复后的操作
-  }
+    // 可以在这里执行一些网络恢复后的操�?  }
   
   /**
    * 处理网络离线
@@ -755,14 +1089,12 @@ export class NotificationRepository {
   /**
    * 处理存储变化
    */
-  private handleStorageChanged(event: any): void {
-    this.logger.debug('NotificationRepository: Storage changed', event);
-    // 可以在这里处理存储变化事件
-  }
+  private handleStorageChanged(event: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): void {
+    this.logger.debug('NotificationRepository: Storage changed', event instanceof Error ? event : new Error(String(event instanceof Error ? event instanceof Error ? event : new Error(String(event : new Error(String(event instanceof Error ? event : new Error(String(event)))));
+    // 可以在这里处理存储变化事�?  }
   
   /**
-   * 保存所有数据
-   */
+   * 保存所有数�?   */
   private async saveAllData(): Promise<void> {
     try {
       await Promise.all([
@@ -774,7 +1106,7 @@ export class NotificationRepository {
       ]);
       this.logger.debug('NotificationRepository: All data saved successfully');
     } catch (error) {
-      this.logger.error('Failed to save all notification data:', error);
+      this.Logger.error('Failed to save all notification data:', error);
     }
   }
   
@@ -790,12 +1122,37 @@ export class NotificationRepository {
    */
   public async updateConfig(updates: Partial<NotificationConfig>): Promise<void> {
     this.config = { ...this.config, ...updates };
-    await this.saveConfig();
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig( instanceof Error ? ...updates };
+    await this.saveConfig( : new Error(String(...updates };
+    await this.saveConfig()))))));
   }
   
   /**
-   * 重置通知配置为默认值
-   */
+   * 重置通知配置为默认�?   */
   public async resetConfig(): Promise<void> {
     this.config = this.defaultConfig;
     await this.saveConfig();
@@ -857,8 +1214,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 获取优先级级别
-   */
+   * 获取优先级级�?   */
   private getPriorityLevel(priority: NotificationPriority): number {
     switch (priority) {
       case NotificationPriority.URGENT: return 4;
@@ -879,8 +1235,7 @@ export class NotificationRepository {
     }
     
     try {
-      // 检查通知是否已存在
-      if (this.notifications.has(notification.id)) {
+      // 检查通知是否已存�?      if (this.notifications.has(notification.id)) {
         this.logger.debug('Notification already exists:', notification.id);
         return false;
       }
@@ -914,7 +1269,7 @@ export class NotificationRepository {
       this.logger.debug('Notification added successfully:', notification.id);
       return true;
     } catch (error) {
-      this.logger.error('Failed to add notification:', error);
+      this.Logger.error('Failed to add notification:', error);
       return false;
     }
   }
@@ -955,13 +1310,11 @@ export class NotificationRepository {
   public getFilteredNotifications(filter: NotificationFilter): Notification[] {
     let notifications = this.getAllNotifications();
     
-    // 按类型过滤
-    if (filter.types && filter.types.length > 0) {
+    // 按类型过�?    if (filter.types && filter.types.length > 0) {
       notifications = notifications.filter(n => filter.types!.includes(n.type));
     }
     
-    // 按状态过滤
-    if (filter.status && filter.status.length > 0) {
+    // 按状态过�?    if (filter.status && filter.status.length > 0) {
       notifications = notifications.filter(n => filter.status!.includes(n.status));
     }
     
@@ -970,8 +1323,7 @@ export class NotificationRepository {
       notifications = notifications.filter(n => filter.priorities!.includes(n.priority));
     }
     
-    // 按时间范围过滤
-    if (filter.startDate) {
+    // 按时间范围过�?    if (filter.startDate) {
       notifications = notifications.filter(n => n.metadata.timestamp >= filter.startDate!);
     }
     
@@ -988,8 +1340,7 @@ export class NotificationRepository {
       );
     }
     
-    // 按相关实体过滤
-    if (filter.relatedEntityId) {
+    // 按相关实体过�?    if (filter.relatedEntityId) {
       notifications = notifications.filter(n => n.metadata.relatedEntityId === filter.relatedEntityId);
     }
     
@@ -997,13 +1348,11 @@ export class NotificationRepository {
       notifications = notifications.filter(n => n.metadata.relatedEntityType === filter.relatedEntityType);
     }
     
-    // 按发送者过滤
-    if (filter.senderId) {
+    // 按发送者过�?    if (filter.senderId) {
       notifications = notifications.filter(n => n.metadata.senderId === filter.senderId);
     }
     
-    // 排序（按时间倒序）
-    notifications.sort((a, b) => b.metadata.timestamp - a.metadata.timestamp);
+    // 排序（按时间倒序�?    notifications.sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.metadata.timestamp - a.metadata.timestamp);
     
     // 分页
     if (filter.limit) {
@@ -1015,8 +1364,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 标记通知为已读
-   */
+   * 标记通知为已�?   */
   public async markAsRead(id: string): Promise<boolean> {
     try {
       const notification = this.notifications.get(id);
@@ -1025,11 +1373,9 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.READ) {
-        return true; // 已经是已读状态
-      }
+        return true; // 已经是已读状�?      }
       
-      // 更新状态
-      notification.status = NotificationStatus.READ;
+      // 更新状�?      notification.status = NotificationStatus.READ;
       notification.readAt = Date.now();
       
       // 更新统计信息
@@ -1055,14 +1401,13 @@ export class NotificationRepository {
       this.logger.debug('Notification marked as read:', id);
       return true;
     } catch (error) {
-      this.logger.error('Failed to mark notification as read:', error);
+      this.Logger.error('Failed to mark notification as read:', error);
       return false;
     }
   }
   
   /**
-   * 批量标记为已读
-   */
+   * 批量标记为已�?   */
   public async markAsReadBatch(ids: string[]): Promise<number> {
     let successCount = 0;
     
@@ -1076,7 +1421,59 @@ export class NotificationRepository {
       // 发布批量标记已读事件
       this.eventBus.emit(NotificationEventType.BATCH_MARKED_READ, {
         type: NotificationEventType.BATCH_MARKED_READ,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_MARKED_READ,
+        timestamp: Date.now())))))),
         notificationIds: ids,
         count: successCount
       });
@@ -1097,11 +1494,9 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.DISMISSED) {
-        return true; // 已经是已关闭状态
-      }
+        return true; // 已经是已关闭状�?      }
       
-      // 更新状态
-      notification.status = NotificationStatus.DISMISSED;
+      // 更新状�?      notification.status = NotificationStatus.DISMISSED;
       notification.dismissedAt = Date.now();
       
       // 更新统计信息
@@ -1127,7 +1522,7 @@ export class NotificationRepository {
       this.logger.debug('Notification dismissed:', id);
       return true;
     } catch (error) {
-      this.logger.error('Failed to dismiss notification:', error);
+      this.Logger.error('Failed to dismiss notification:', error);
       return false;
     }
   }
@@ -1148,7 +1543,59 @@ export class NotificationRepository {
       // 发布批量关闭事件
       this.eventBus.emit(NotificationEventType.BATCH_DISMISSED, {
         type: NotificationEventType.BATCH_DISMISSED,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_DISMISSED,
+        timestamp: Date.now())))))),
         notificationIds: ids,
         count: successCount
       });
@@ -1169,11 +1616,9 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.ARCHIVED) {
-        return true; // 已经是归档状态
-      }
+        return true; // 已经是归档状�?      }
       
-      // 更新状态
-      notification.status = NotificationStatus.ARCHIVED;
+      // 更新状�?      notification.status = NotificationStatus.ARCHIVED;
       notification.archivedAt = Date.now();
       
       // 更新统计信息
@@ -1199,7 +1644,7 @@ export class NotificationRepository {
       this.logger.debug('Notification archived:', id);
       return true;
     } catch (error) {
-      this.logger.error('Failed to archive notification:', error);
+      this.Logger.error('Failed to archive notification:', error);
       return false;
     }
   }
@@ -1220,7 +1665,59 @@ export class NotificationRepository {
       // 发布批量归档事件
       this.eventBus.emit(NotificationEventType.BATCH_ARCHIVED, {
         type: NotificationEventType.BATCH_ARCHIVED,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.BATCH_ARCHIVED,
+        timestamp: Date.now())))))),
         notificationIds: ids,
         count: successCount
       });
@@ -1241,11 +1738,9 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.NEW) {
-        return true; // 已经是新状态
-      }
+        return true; // 已经是新状�?      }
       
-      // 恢复状态
-      const oldStatus = notification.status;
+      // 恢复状�?      const oldStatus = notification.status;
       notification.status = NotificationStatus.NEW;
       notification.readAt = undefined;
       notification.dismissedAt = undefined;
@@ -1272,7 +1767,7 @@ export class NotificationRepository {
       this.logger.debug('Notification restored:', id);
       return true;
     } catch (error) {
-      this.logger.error('Failed to restore notification:', error);
+      this.Logger.error('Failed to restore notification:', error);
       return false;
     }
   }
@@ -1306,10 +1801,10 @@ export class NotificationRepository {
       await this.saveNotifications();
       await this.saveStats();
       
-      this.logger.debug('Notification deleted:', id);
+      this.logger.debug('Notification deleted:', id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id)))))));
       return true;
     } catch (error) {
-      this.logger.error('Failed to delete notification:', error);
+      this.Logger.error('Failed to delete notification:', error);
       return false;
     }
   }
@@ -1358,36 +1853,85 @@ export class NotificationRepository {
       // 发布清空事件
       this.eventBus.emit(NotificationEventType.CLEARED_ALL, {
         type: NotificationEventType.CLEARED_ALL,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( instanceof Error ? {
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now( : new Error(String({
+        type: NotificationEventType.CLEARED_ALL,
+        timestamp: Date.now())))))),
         count: notificationCount
       });
       
       this.logger.debug('All notifications cleared');
       return true;
     } catch (error) {
-      this.logger.error('Failed to clear all notifications:', error);
+      this.Logger.error('Failed to clear all notifications:', error);
       return false;
     }
   }
   
   /**
-   * 更新新通知的统计信息
-   */
+   * 更新新通知的统计信�?   */
   private updateStatsForNewNotification(notification: Notification): void {
     this.stats.totalCount++;
     this.stats.newCount++;
-    this.stats.lastReceivedTime = Math.max(this.stats.lastReceivedTime, notification.metadata.timestamp);
+    this.stats.lastReceivedTime = Math.max(this.stats.lastReceivedTime, notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp)))))));
     
-    // 按类型统计
-    const typeCount = this.stats.byType.get(notification.type) || 0;
+    // 按类型统�?    const typeCount = this.stats.byType.get(notification.type) || 0;
     this.stats.byType.set(notification.type, typeCount + 1);
     
     // 按优先级统计
     const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
     this.stats.byPriority.set(notification.priority, priorityCount + 1);
     
-    // 按发送者统计
-    if (notification.metadata.senderId) {
+    // 按发送者统�?    if (notification.metadata.senderId) {
       const senderCount = this.stats.bySender.get(notification.metadata.senderId) || 0;
       this.stats.bySender.set(notification.metadata.senderId, senderCount + 1);
     }
@@ -1437,8 +1981,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 更新删除通知的统计信息
-   */
+   * 更新删除通知的统计信�?   */
   private updateStatsForDelete(notification: Notification): void {
     this.stats.totalCount--;
     
@@ -1466,16 +2009,14 @@ export class NotificationRepository {
       this.stats.byType.delete(notification.type);
     }
     
-    // 减少优先级统计
-    const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
+    // 减少优先级统�?    const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
     if (priorityCount > 1) {
       this.stats.byPriority.set(notification.priority, priorityCount - 1);
     } else {
       this.stats.byPriority.delete(notification.priority);
     }
     
-    // 减少发送者统计
-    if (notification.metadata.senderId) {
+    // 减少发送者统�?    if (notification.metadata.senderId) {
       const senderCount = this.stats.bySender.get(notification.metadata.senderId) || 0;
       if (senderCount > 1) {
         this.stats.bySender.set(notification.metadata.senderId, senderCount - 1);
@@ -1486,8 +2027,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 更新通知的分组
-   */
+   * 更新通知的分�?   */
   private async updateGroupsForNotification(notification: Notification): Promise<void> {
     // 根据通知类型和发送者创建或更新分组
     const groupId = this.generateGroupId(notification);
@@ -1539,8 +2079,7 @@ export class NotificationRepository {
         group.notificationIds.splice(index, 1);
         group.count--;
         
-        // 如果分组为空，删除分组
-        if (group.count === 0) {
+        // 如果分组为空，删除分�?        if (group.count === 0) {
           this.groups.delete(groupId);
         } else {
           // 更新新通知计数
@@ -1595,7 +2134,7 @@ export class NotificationRepository {
    * 获取分组摘要
    */
   private getGroupSummary(notification: Notification): string {
-    return `有${notification.metadata.senderName ? notification.metadata.senderName + '的' : ''}新通知`;
+    return `�?{notification.metadata.senderName ? notification.metadata.senderName + '�? : ''}新通知`;
   }
   
   /**
@@ -1613,8 +2152,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 获取所有分组
-   */
+   * 获取所有分�?   */
   public getAllGroups(): NotificationGroup[] {
     return Array.from(this.groups.values());
   }
@@ -1658,7 +2196,7 @@ export class NotificationRepository {
       this.logger.debug(`Cleaned up ${deletedCount} expired notifications`);
       return deletedCount;
     } catch (error) {
-      this.logger.error('Failed to cleanup expired notifications:', error);
+      this.Logger.error('Failed to cleanup expired notifications:', error);
       return 0;
     }
   }
@@ -1671,7 +2209,7 @@ export class NotificationRepository {
       const cutoffTime = Date.now() - (this.config.notificationHistoryDays * 24 * 60 * 60 * 1000);
       const oldNotifications: string[] = [];
       
-      for (const [id, notification] of this.notifications.entries()) {
+      for (const [id, notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries( instanceof Error ? notification] of this.notifications.entries( : new Error(String(notification] of this.notifications.entries()))))))) {
         if (notification.metadata.timestamp < cutoffTime) {
           oldNotifications.push(id);
         }
@@ -1681,7 +2219,7 @@ export class NotificationRepository {
       this.logger.debug(`Cleaned up ${deletedCount} old notifications`);
       return deletedCount;
     } catch (error) {
-      this.logger.error('Failed to cleanup old notifications:', error);
+      this.Logger.error('Failed to cleanup old notifications:', error);
       return 0;
     }
   }
@@ -1715,15 +2253,66 @@ export class NotificationRepository {
   }
   
   /**
-   * 应用通知过滤器
-   */
+   * 应用通知过滤�?   */
   public applyFilter(filter: NotificationFilter): Notification[] {
     const filteredNotifications = this.getFilteredNotifications(filter);
     
     // 发布过滤应用事件
     this.eventBus.emit(NotificationEventType.FILTER_APPLIED, {
       type: NotificationEventType.FILTER_APPLIED,
-      timestamp: Date.now(),
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( instanceof Error ? {
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now( : new Error(String({
+      type: NotificationEventType.FILTER_APPLIED,
+      timestamp: Date.now())))))),
       filter: filter,
       notifications: filteredNotifications
     });
@@ -1736,8 +2325,7 @@ export class NotificationRepository {
    */
   public async shutdown(): Promise<void> {
     try {
-      // 保存所有数据
-      await this.saveAllData();
+      // 保存所有数�?      await this.saveAllData();
       
       // 清理缓存
       await this.cacheService.delete(this.cacheKeys.notifications);
@@ -1752,3 +2340,5 @@ export class NotificationRepository {
     }
   }
 }
+
+

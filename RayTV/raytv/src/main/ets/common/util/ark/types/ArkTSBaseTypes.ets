@@ -2,27 +2,23 @@
 
 /**
  * 基础类型工具函数
- * 提供ArkTS环境中常用的类型定义和工具函数
- */
+ * 提供ArkTS环境中常用的类型定义和工具函�? */
 
 /**
- * 定义Any类型，替代TypeScript的any，在ArkTS中提供更安全的类型使用
- */
+ * 定义Any类型，替代TypeScript的any，在ArkTS中提供更安全的类型使�? */
 export type SafeAny = unknown;
 
 /**
- * 定义函数类型，避免使用Function关键字
- */
-export type SafeFunction = (...args: unknown[]) => unknown;
+ * 定义函数类型，避免使用Function关键�? */
+export type SafeFunction = (...args: Record<string, string | number | boolean | null>[]) => unknown;
 
 /**
  * 定义Async函数类型
  */
-export type SafeAsyncFunction = (...args: unknown[]) => Promise<unknown>;
+export type SafeAsyncFunction = (...args: Record<string, string | number | boolean | null>[]) => Promise<unknown>;
 
 /**
- * 安全对象类型，替代索引签名
- */
+ * 安全对象类型，替代索引签�? */
 export interface SafeObject {
   [key: string]: string | number | boolean | object | null | undefined;
 }
@@ -36,8 +32,7 @@ export interface KeyValuePair<K, V> {
 }
 
 /**
- * 可序列化的数据类型
- */
+ * 可序列化的数据类�? */
 export type SerializableData = 
   | string
   | number
@@ -47,8 +42,7 @@ export type SerializableData =
   | Record<string, SerializableData>;
 
 /**
- * 结果类型，包含成功和失败两种状态
- */
+ * 结果类型，包含成功和失败两种状�? */
 export interface Result<T, E = Error> {
   success: boolean;
   data?: T;
@@ -56,8 +50,7 @@ export interface Result<T, E = Error> {
 }
 
 /**
- * 可选值类型
- */
+ * 可选值类�? */
 export type Optional<T> = T | undefined | null;
 
 /**
@@ -75,3 +68,4 @@ export function assertNotNull<T>(value: Optional<T>): asserts value is T {
 export function isNonNull<T>(value: Optional<T>): value is T {
   return value !== null && value !== undefined;
 }
+

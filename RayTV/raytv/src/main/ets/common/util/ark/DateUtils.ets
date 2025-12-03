@@ -1,5 +1,4 @@
-// DateUtils.ets - ArkTS兼容的日期时间工具函数
-
+// DateUtils.ets - ArkTS兼容的日期时间工具函�?
 /**
  * 日期时间工具函数
  * 提供ArkTS环境中安全的日期时间操作功能
@@ -15,7 +14,7 @@ export const DateUtils = {
   /**
    * 检查值是否为Date对象
    */
-  isDate(value: unknown): boolean {
+  isDate(value: Record<string, string | number | boolean | null>): boolean {
     return value instanceof Date && !isNaN(value.getTime());
   },
 
@@ -27,8 +26,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取当前时间戳
-   */
+   * 获取当前时间�?   */
   timestamp(): number {
     return Date.now();
   },
@@ -37,13 +35,11 @@ export const DateUtils = {
    * 创建日期对象
    */
   create(year: number, month: number, date: number = 1, hours: number = 0, minutes: number = 0, seconds: number = 0, milliseconds: number = 0): Date {
-    // 注意：JavaScript中月份是从0开始的，这里也遵循相同的规则
-    return new Date(year, month, date, hours, minutes, seconds, milliseconds);
+    // 注意：JavaScript中月份是�?开始的，这里也遵循相同的规�?    return new Date(year, month, date, hours, minutes, seconds, milliseconds);
   },
 
   /**
-   * 解析日期字符串
-   */
+   * 解析日期字符�?   */
   parse(dateString: Optional<string>): Date | null {
     if (StringUtils.isEmpty(dateString)) {
       return null;
@@ -66,8 +62,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的月（0-11）
-   */
+   * 获取日期的月�?-11�?   */
   getMonth(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -77,8 +72,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的日（1-31）
-   */
+   * 获取日期的日�?-31�?   */
   getDate(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -88,8 +82,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的小时（0-23）
-   */
+   * 获取日期的小时（0-23�?   */
   getHours(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -99,8 +92,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的分钟（0-59）
-   */
+   * 获取日期的分钟（0-59�?   */
   getMinutes(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -110,8 +102,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的秒（0-59）
-   */
+   * 获取日期的秒�?-59�?   */
   getSeconds(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -121,8 +112,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的毫秒（0-999）
-   */
+   * 获取日期的毫秒（0-999�?   */
   getMilliseconds(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -132,8 +122,7 @@ export const DateUtils = {
   },
 
   /**
-   * 获取日期的星期（0-6，0表示周日）
-   */
+   * 获取日期的星期（0-6�?表示周日�?   */
   getDay(date: Optional<Date>): number {
     if (!DateUtils.isDate(date)) {
       return 0;
@@ -143,8 +132,7 @@ export const DateUtils = {
   },
 
   /**
-   * 格式化日期时间
-   */
+   * 格式化日期时�?   */
   format(date: Optional<Date>, formatString: string = 'YYYY-MM-DD HH:mm:ss'): string {
     if (!DateUtils.isDate(date)) {
       return '';
@@ -311,11 +299,9 @@ export const DateUtils = {
     // 转换为秒
     const diffSeconds = Math.floor(diff / 1000);
     
-    // 转换为分钟
-    const diffMinutes = Math.floor(diffSeconds / 60);
+    // 转换为分�?    const diffMinutes = Math.floor(diffSeconds / 60);
     
-    // 转换为小时
-    const diffHours = Math.floor(diffMinutes / 60);
+    // 转换为小�?    const diffHours = Math.floor(diffMinutes / 60);
     
     // 转换为天
     const diffDays = Math.floor(diffHours / 24);
@@ -345,3 +331,4 @@ export const DateUtils = {
 };
 
 export default DateUtils;
+

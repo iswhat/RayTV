@@ -5,8 +5,7 @@ import { MediaItem } from '../../data/bean/MediaItem';
 import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 
 /**
- * 历史记录项接口
- */
+ * 历史记录项接�? */
 /**
  * 历史记录附加信息接口
  */
@@ -15,23 +14,27 @@ export interface HistoryExtraData {
 }
 
 /**
- * 历史记录项接口
- */
+ * 播放源信息接�? */
+export interface PlaySource {
+  sourceId: string;     // 播放源ID
+  sourceName: string;   // 播放源名�?  url?: string;         // 播放URL
+  quality?: string;     // 视频质量
+  format?: string;      // 视频格式
+}
+
+/**
+ * 历史记录项接�? */
 export interface HistoryItem {
   id: string;           // 历史记录ID
   mediaId: string;      // 媒体ID
   siteKey: string;      // 站点标识
   title: string;        // 标题
-  cover?: string;       // 封面图
-  type: MediaType;      // 媒体类型
+  cover?: string;       // 封面�?  type: MediaType;      // 媒体类型
   episodeId?: string;   // 剧集ID
   episodeTitle?: string; // 剧集标题
-  progress: number;     // 播放进度（秒）
-  duration?: number;    // 总时长（秒）
-  lastPlayTime: number; // 最后播放时间
-  playCount: number;    // 播放次数
-  playSource?: PlaySource; // 播放源信息
-  extra?: HistoryExtraData; // 其他附加信息
+  progress: number;     // 播放进度（秒�?  duration?: number;    // 总时长（秒）
+  lastPlayTime: number; // 最后播放时�?  playCount: number;    // 播放次数
+  playSource?: PlaySource; // 播放源信�?  extra?: HistoryExtraData; // 其他附加信息
 }
 
 /**
@@ -56,8 +59,7 @@ export class HistoryService {
   }
 
   /**
-   * 构造函数
-   * 私有构造函数防止外部实例化
+   * 构造函�?   * 私有构造函数防止外部实例化
    */
   private constructor() {
     this.dbManager = DatabaseManager.getInstance();
@@ -66,12 +68,10 @@ export class HistoryService {
   }
 
   /**
-   * 初始化历史记录服务
-   */
+   * 初始化历史记录服�?   */
   public async initialize(): Promise<void> {
     try {
-      // 创建历史记录表
-      await this.dbManager.executeSql(`
+      // 创建历史记录�?      await this.dbManager.executeSql(`
         CREATE TABLE IF NOT EXISTS ${this.historyTable} (
           id TEXT PRIMARY KEY,
           mediaId TEXT NOT NULL,
@@ -104,15 +104,13 @@ export class HistoryService {
 
       Logger.info(this.TAG, 'History table initialized');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize history table: ${error}`);
+      Logger.error(this.TAG, 'Failed to initialize history table', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
 
   /**
-   * 添加或更新历史记录
-   * @param media 媒体信息
-   * @param progress 播放进度（秒）
-   * @param duration 总时长（秒）
+   * 添加或更新历史记�?   * @param media 媒体信息
+   * @param progress 播放进度（秒�?   * @param duration 总时长（秒）
    * @param episodeId 剧集ID（可选）
    * @param episodeTitle 剧集标题（可选）
    * @param playSource 播放源（可选）
@@ -131,8 +129,7 @@ export class HistoryService {
       const historyId = this.generateHistoryId(media.id, media.siteKey, episodeId);
       const progressValue = Math.max(0, Math.min(progress, duration));
 
-      // 构建历史记录项
-      const historyItem: HistoryItem = {
+      // 构建历史记录�?      const historyItem: HistoryItem = {
         id: historyId,
         mediaId: media.id,
         siteKey: media.siteKey,
@@ -179,8 +176,7 @@ export class HistoryService {
           ]
         );
       } else {
-        // 插入新记录
-        await this.dbManager.executeSql(
+        // 插入新记�?        await this.dbManager.executeSql(
           `INSERT INTO ${this.historyTable} 
            (id, mediaId, siteKey, title, cover, type, episodeId, episodeTitle, 
             progress, duration, lastPlayTime, playCount, playSource, extra) 
@@ -207,7 +203,7 @@ export class HistoryService {
       Logger.info(this.TAG, `Added/updated history: ${media.siteKey}:${media.id}${episodeId ? `:${episodeId}` : ''}`);
       return historyItem;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to add history: ${error}`);
+      Logger.error(this.TAG, 'Failed to add history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       throw new Error(`Failed to add history: ${error}`);
     }
   }
@@ -216,8 +212,7 @@ export class HistoryService {
    * 更新播放进度
    * @param mediaId 媒体ID
    * @param siteKey 站点标识
-   * @param progress 播放进度（秒）
-   * @param episodeId 剧集ID（可选）
+   * @param progress 播放进度（秒�?   * @param episodeId 剧集ID（可选）
    * @returns Promise<boolean>
    */
   public async updateProgress(
@@ -230,8 +225,7 @@ export class HistoryService {
       const historyId = this.generateHistoryId(mediaId, siteKey, episodeId);
       const now = Date.now();
 
-      // 先检查记录是否存在
-      const exists = await this.getHistoryById(historyId);
+      // 先检查记录是否存�?      const exists = await this.getHistoryById(historyId);
       if (!exists) {
         return false;
       }
@@ -246,7 +240,7 @@ export class HistoryService {
       Logger.info(this.TAG, `Updated progress for ${siteKey}:${mediaId}${episodeId ? `:${episodeId}` : ''}`);
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update progress: ${error}`);
+      Logger.error(this.TAG, 'Failed to update progress', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -272,7 +266,7 @@ export class HistoryService {
 
       // 构建查询条件
       let whereClause = '';
-      const whereParams: any[] = [];
+      const whereParams: Record<string, string | number | boolean | null>[] = [];
       
       if (type) {
         whereClause = 'WHERE type = ?';
@@ -306,7 +300,7 @@ export class HistoryService {
       
       return historyItems;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get history list: ${error}`);
+      Logger.error(this.TAG, 'Failed to get history list', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return [];
     }
   }
@@ -338,14 +332,13 @@ export class HistoryService {
       }
       return null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get history by id: ${error}`);
+      Logger.error(this.TAG, 'Failed to get history by id', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return null;
     }
   }
 
   /**
-   * 获取媒体的历史记录
-   * @param mediaId 媒体ID
+   * 获取媒体的历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @returns Promise<HistoryItem | null>
    */
@@ -373,14 +366,13 @@ export class HistoryService {
       }
       return null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get media history: ${error}`);
+      Logger.error(this.TAG, 'Failed to get media history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return null;
     }
   }
 
   /**
-   * 获取媒体剧集的历史记录
-   * @param mediaId 媒体ID
+   * 获取媒体剧集的历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @param episodeId 剧集ID
    * @returns Promise<HistoryItem | null>
@@ -412,7 +404,7 @@ export class HistoryService {
       }
       return null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get episode history: ${error}`);
+      Logger.error(this.TAG, 'Failed to get episode history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return null;
     }
   }
@@ -436,14 +428,13 @@ export class HistoryService {
       }
       return success;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete history: ${error}`);
+      Logger.error(this.TAG, 'Failed to delete history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
 
   /**
-   * 删除媒体的所有历史记录
-   * @param mediaId 媒体ID
+   * 删除媒体的所有历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @returns Promise<boolean>
    */
@@ -461,14 +452,13 @@ export class HistoryService {
       }
       return success;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete media history: ${error}`);
+      Logger.error(this.TAG, 'Failed to delete media history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
 
   /**
-   * 清空所有历史记录
-   * @returns Promise<boolean>
+   * 清空所有历史记�?   * @returns Promise<boolean>
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
@@ -477,14 +467,13 @@ export class HistoryService {
       Logger.info(this.TAG, 'Cleared all history');
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear all history: ${error}`);
+      Logger.error(this.TAG, 'Failed to clear all history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
 
   /**
-   * 清空指定类型的历史记录
-   * @param type 媒体类型
+   * 清空指定类型的历史记�?   * @param type 媒体类型
    * @returns Promise<boolean>
    */
   public async clearHistoryByType(type: MediaType): Promise<boolean> {
@@ -497,7 +486,7 @@ export class HistoryService {
       Logger.info(this.TAG, `Cleared history for type: ${type}`);
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear history by type: ${error}`);
+      Logger.error(this.TAG, 'Failed to clear history by type', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -510,7 +499,7 @@ export class HistoryService {
   public async getHistoryCount(type?: MediaType): Promise<number> {
     try {
       let query = `SELECT COUNT(*) as count FROM ${this.historyTable}`;
-      const params: any[] = [];
+      const params: Record<string, string | number | boolean | null>[] = [];
 
       if (type) {
         query += ' WHERE type = ?';
@@ -530,14 +519,13 @@ export class HistoryService {
       
       return count;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get history count: ${error}`);
+      Logger.error(this.TAG, 'Failed to get history count', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return 0;
     }
   }
 
   /**
-   * 检查是否存在历史记录
-   * @param mediaId 媒体ID
+   * 检查是否存在历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @param episodeId 剧集ID（可选）
    * @returns Promise<boolean>
@@ -571,7 +559,7 @@ export class HistoryService {
       }
       return count > 0;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to check history existence: ${error}`);
+      Logger.error(this.TAG, 'Failed to check history existence', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -616,31 +604,27 @@ export class HistoryService {
         extra: typedRow.extra ? this.safeParseJson<HistoryExtraData>(typedRow.extra) : {} as HistoryExtraData
       };
     } catch (error) {
-      Logger.error(this.TAG, `Failed to parse history row: ${error}`);
+      Logger.error(this.TAG, 'Failed to parse history row', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       throw new Error(`Invalid history data format`);
     }
   }
 
   /**
-   * 安全地解析JSON字符串
-   * @param jsonString JSON字符串
-   * @returns 解析后的对象或默认值
-   */
-  private safeParseJson<T>(jsonString: unknown, defaultValue?: T): T {
+   * 安全地解析JSON字符�?   * @param jsonString JSON字符�?   * @returns 解析后的对象或默认�?   */
+  private safeParseJson<T>(jsonString: Record<string, string | number | boolean | null>, defaultValue?: T): T {
     try {
       if (!jsonString || typeof jsonString !== 'string') {
         return defaultValue as T;
       }
       return JSON.parse(jsonString) as T;
     } catch (error) {
-      Logger.warn(this.TAG, `Failed to parse JSON: ${error}`);
+      Logger.warn(this.TAG, 'Failed to parse JSON', error instanceof Error ? error : new Error(String(error)));
       return defaultValue as T;
     }
   }
 
   /**
-   * 解析多行数据库记录
-   * @param rows 数据库行数组
+   * 解析多行数据库记�?   * @param rows 数据库行数组
    * @returns HistoryItem[]
    * @private
    */
@@ -649,8 +633,7 @@ export class HistoryService {
   }
 
   /**
-   * 清理过期的历史记录
-   * @param keepDays 保留天数
+   * 清理过期的历史记�?   * @param keepDays 保留天数
    * @returns Promise<number>
    */
   public async cleanupOldHistory(keepDays: number = 30): Promise<number> {
@@ -670,7 +653,7 @@ export class HistoryService {
       
       return deletedCount;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to cleanup old history: ${error}`);
+      Logger.error(this.TAG, 'Failed to cleanup old history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return 0;
     }
   }
@@ -678,3 +661,5 @@ export class HistoryService {
 
 // 导出历史记录服务单例
 export const historyService = HistoryService.getInstance();
+
+

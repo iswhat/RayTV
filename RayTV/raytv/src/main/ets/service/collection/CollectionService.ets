@@ -1,5 +1,4 @@
-// CollectionService - 收藏服务类
-import Logger from '../../common/util/Logger';
+// CollectionService - 收藏服务�?import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import DatabaseRepository from '../../data/repository/DatabaseRepository';
@@ -11,10 +10,8 @@ import { MovieDetailData } from '../../data/dto/MovieDetailDto';
 
 // 常量定义
 const TAG = 'CollectionService';
-const MAX_COLLECTION_SIZE = 1000; // 最大收藏数量限制
-
-// 收藏项接口定义
-export interface CollectionItem {
+const MAX_COLLECTION_SIZE = 1000; // 最大收藏数量限�?
+// 收藏项接口定�?export interface CollectionItem {
   id: string;              // 内容ID
   title: string;           // 标题
   coverUrl: string;        // 封面URL
@@ -22,24 +19,19 @@ export interface CollectionItem {
   rating?: number;         // 评分
   releaseYear?: number;    // 发布年份
   addedAt: number;         // 添加时间
-  isFavorite: boolean;     // 是否收藏（始终为true）
-  genres?: string[];       // 类型标签
-  description?: string;    // 简介
-  lastUpdate?: number;     // 最后更新时间
-  watchProgress?: number;  // 观看进度
+  isFavorite: boolean;     // 是否收藏（始终为true�?  genres?: string[];       // 类型标签
+  description?: string;    // 简�?  lastUpdate?: number;     // 最后更新时�?  watchProgress?: number;  // 观看进度
 }
 
 /**
- * 收藏服务类
- * 负责处理用户收藏相关的业务逻辑
+ * 收藏服务�? * 负责处理用户收藏相关的业务逻辑
  */
 export default class CollectionService {
   private static instance: CollectionService;
   private databaseRepo: DatabaseRepository;
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
   }
@@ -55,13 +47,11 @@ export default class CollectionService {
   }
 
   /**
-   * 初始化服务
-   * 用于兼容AppService的初始化流程
+   * 初始化服�?   * 用于兼容AppService的初始化流程
    */
   public async initialize(): Promise<void> {
     Logger.info(TAG, 'CollectionService initialized');
-    // 空实现，用于兼容AppService初始化流程
-  }
+    // 空实现，用于兼容AppService初始化流�?  }
 
   /**
    * 添加收藏
@@ -92,14 +82,12 @@ export default class CollectionService {
         return ApiResponse.error(ResponseCode.DUPLICATE_ERROR, '该内容已在收藏列表中');
       }
 
-      // 检查收藏数量限制
-      const collectionCount = await this.databaseRepo.getFavoriteCount();
+      // 检查收藏数量限�?      const collectionCount = await this.databaseRepo.getFavoriteCount();
       if (collectionCount >= MAX_COLLECTION_SIZE) {
-        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}个)`);
+        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}�?`);
       }
 
-      // 创建收藏项
-      const collectionItem: CollectionItem = {
+      // 创建收藏�?      const collectionItem: CollectionItem = {
         id: collectionData.id,
         title: collectionData.title,
         coverUrl: collectionData.coverUrl || '',
@@ -113,13 +101,12 @@ export default class CollectionService {
         lastUpdate: Date.now()
       };
 
-      // 添加到收藏
-      await this.databaseRepo.addToFavorites(collectionItem);
+      // 添加到收�?      await this.databaseRepo.addToFavorites(collectionItem);
       Logger.info(TAG, 'Added to collection', { id: collectionItem.id });
 
       return ApiResponse.success(collectionItem, '添加收藏成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to add to collection', error);
+      Logger.error(TAG, 'Failed to add to collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '添加收藏失败');
     }
   }
@@ -143,14 +130,13 @@ export default class CollectionService {
 
       return ApiResponse.success(true, '移除收藏成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to remove from collection', error);
+      Logger.error(TAG, 'Failed to remove from collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '移除收藏失败');
     }
   }
 
   /**
-   * 切换收藏状态
-   */
+   * 切换收藏状�?   */
   public async toggleFavorite(collectionData: Partial<CollectionItem>): Promise<ApiResponse<{ item: CollectionItem | null; isFavorite: boolean }>> {
     try {
       Logger.info(TAG, 'Toggling favorite status...', { 
@@ -165,8 +151,7 @@ export default class CollectionService {
         ]);
       }
 
-      // 检查当前收藏状态
-      const isFavorite = await this.databaseRepo.isMovieFavorite(contentId);
+      // 检查当前收藏状�?      const isFavorite = await this.databaseRepo.isMovieFavorite(contentId);
 
       if (isFavorite) {
         // 移除收藏
@@ -174,10 +159,9 @@ export default class CollectionService {
         Logger.info(TAG, 'Removed from collection', { contentId });
         return ApiResponse.success({ item: null, isFavorite: false }, '移除收藏成功');
       } else {
-        // 检查收藏数量限制
-        const collectionCount = await this.databaseRepo.getFavoriteCount();
+        // 检查收藏数量限�?        const collectionCount = await this.databaseRepo.getFavoriteCount();
         if (collectionCount >= MAX_COLLECTION_SIZE) {
-          return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}个)`);
+          return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}�?`);
         }
 
         // 添加收藏
@@ -200,8 +184,8 @@ export default class CollectionService {
         return ApiResponse.success({ item: collectionItem, isFavorite: true }, '添加收藏成功');
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to toggle favorite status', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '切换收藏状态失败');
+      Logger.error(TAG, 'Failed to toggle favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '切换收藏状态失�?);
     }
   }
 
@@ -256,7 +240,7 @@ export default class CollectionService {
         totalPages
       }, '获取收藏列表成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to get collection list', error);
+      Logger.error(TAG, 'Failed to get collection list', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取收藏列表失败');
     }
   }
@@ -275,7 +259,7 @@ export default class CollectionService {
         return ApiResponse.success(null, '收藏项不存在');
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to get collection item', error);
+      Logger.error(TAG, 'Failed to get collection item', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取收藏详情失败');
     }
   }
@@ -288,10 +272,10 @@ export default class CollectionService {
       Logger.info(TAG, 'Checking if favorite...', { contentId });
 
       const isFavorite = await this.databaseRepo.isMovieFavorite(contentId);
-      return ApiResponse.success(isFavorite, '检查完成');
+      return ApiResponse.success(isFavorite, '检查完�?);
     } catch (error) {
-      Logger.error(TAG, 'Failed to check favorite status', error);
-      return ApiResponse.success(false, '检查失败，默认返回未收藏');
+      Logger.error(TAG, 'Failed to check favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.success(false, '检查失败，默认返回未收�?);
     }
   }
 
@@ -310,16 +294,14 @@ export default class CollectionService {
       let failed = 0;
       const failedItems: string[] = [];
 
-      // 检查当前收藏数量
-      const currentCount = await this.databaseRepo.getFavoriteCount();
+      // 检查当前收藏数�?      const currentCount = await this.databaseRepo.getFavoriteCount();
       const availableSlots = MAX_COLLECTION_SIZE - currentCount;
 
       if (availableSlots <= 0) {
-        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}个)`);
+        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}�?`);
       }
 
-      // 限制批量添加的数量
-      const itemsToAdd = items.slice(0, Math.min(items.length, availableSlots));
+      // 限制批量添加的数�?      const itemsToAdd = items.slice(0, Math.min(items.length, availableSlots));
 
       for (const item of itemsToAdd) {
         try {
@@ -361,9 +343,9 @@ export default class CollectionService {
         success,
         failed,
         failedItems
-      }, `批量添加完成，成功${success}个，失败${failed}个`);
+      }, `批量添加完成，成�?{success}个，失败${failed}个`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to batch add to collection', error);
+      Logger.error(TAG, 'Failed to batch add to collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '批量添加收藏失败');
     }
   }
@@ -395,9 +377,9 @@ export default class CollectionService {
       return ApiResponse.success({
         success,
         failed
-      }, `批量移除完成，成功${success}个，失败${failed}个`);
+      }, `批量移除完成，成�?{success}个，失败${failed}个`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to batch remove from collection', error);
+      Logger.error(TAG, 'Failed to batch remove from collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '批量移除收藏失败');
     }
   }
@@ -414,7 +396,7 @@ export default class CollectionService {
 
       return ApiResponse.success(true, '清空收藏成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear all collection', error);
+      Logger.error(TAG, 'Failed to clear all collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '清空收藏失败');
     }
   }
@@ -470,7 +452,7 @@ export default class CollectionService {
         yearDistribution
       }, '获取收藏统计成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to get collection stats', error);
+      Logger.error(TAG, 'Failed to get collection stats', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取收藏统计失败');
     }
   }
@@ -484,14 +466,14 @@ export default class CollectionService {
 
       if (!keyword || keyword.trim().length === 0) {
         return ApiResponse.validationError([
-          { field: 'keyword', message: '搜索关键词不能为空' }
+          { field: 'keyword', message: '搜索关键词不能为�? }
         ]);
       }
 
       const results = await this.databaseRepo.searchFavorites(keyword.trim(), type);
       return ApiResponse.success(results, `找到${results.length}个匹配的收藏项`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to search collection', error);
+      Logger.error(TAG, 'Failed to search collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '搜索收藏失败');
     }
   }
@@ -503,11 +485,9 @@ export default class CollectionService {
     try {
       Logger.info(TAG, 'Exporting collection...');
 
-      // 获取所有收藏
-      const allItems = await this.databaseRepo.getAllFavorites();
+      // 获取所有收�?      const allItems = await this.databaseRepo.getAllFavorites();
 
-      // 转换为导出格式
-      const exportData = {
+      // 转换为导出格�?      const exportData = {
         exportDate: new Date().toISOString(),
         totalItems: allItems.length,
         items: allItems.map(item => ({
@@ -526,7 +506,7 @@ export default class CollectionService {
       const jsonStr = JSON.stringify(exportData, null, 2);
       return ApiResponse.success(jsonStr, '导出收藏成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to export collection', error);
+      Logger.error(TAG, 'Failed to export collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '导出收藏失败');
     }
   }
@@ -550,12 +530,11 @@ export default class CollectionService {
       let skipped = 0;
       let existing = 0;
 
-      // 检查收藏数量限制
-      const currentCount = await this.databaseRepo.getFavoriteCount();
+      // 检查收藏数量限�?      const currentCount = await this.databaseRepo.getFavoriteCount();
       const availableSlots = MAX_COLLECTION_SIZE - currentCount;
 
       if (availableSlots <= 0 && !merge) {
-        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}个)`);
+        return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, `收藏数量已达上限(${MAX_COLLECTION_SIZE}�?`);
       }
 
       for (const itemData of items) {
@@ -586,14 +565,12 @@ export default class CollectionService {
               existing++;
             }
           } else {
-            // 检查是否超出限制
-            if (imported >= availableSlots && !merge) {
+            // 检查是否超出限�?            if (imported >= availableSlots && !merge) {
               skipped++;
               continue;
             }
 
-            // 添加新收藏
-            const collectionItem: CollectionItem = {
+            // 添加新收�?            const collectionItem: CollectionItem = {
               id: itemData.id,
               title: itemData.title || '',
               coverUrl: itemData.coverUrl || '',
@@ -621,10 +598,10 @@ export default class CollectionService {
         imported,
         skipped,
         existing
-      }, `导入完成，成功导入${imported}个，跳过${skipped}个，已存在${existing}个`);
+      }, `导入完成，成功导�?{imported}个，跳过${skipped}个，已存�?{existing}个`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to import collection', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '导入收藏失败，请检查数据格式');
+      Logger.error(TAG, 'Failed to import collection', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '导入收藏失败，请检查数据格�?);
     }
   }
 
@@ -636,17 +613,15 @@ export default class CollectionService {
   private async enhanceCollectionWithMovieInfo(items: CollectionItem[]): Promise<(CollectionItem & { movieInfo?: Partial<MovieDetailData> })[]> {
     try {
       // 这里可以根据需要增强收藏数据，添加电影详细信息
-      // 目前只返回原始收藏数据
-      return items.map(item => ({ ...item }));
+      // 目前只返回原始收藏数�?      return items.map(item => ({ ...item }));
     } catch (error) {
-      Logger.error(TAG, 'Failed to enhance collection with movie info', error);
+      Logger.error(TAG, 'Failed to enhance collection with movie info', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return items;
     }
   }
 
   /**
-   * 按标签获取收藏
-   */
+   * 按标签获取收�?   */
   public async getFavoritesByGenre(genre: string, page: number = 1, pageSize: number = 20): Promise<ApiResponse<CollectionItem[]>> {
     try {
       Logger.info(TAG, 'Getting favorites by genre...', { genre, page, pageSize });
@@ -654,14 +629,13 @@ export default class CollectionService {
       const results = await this.databaseRepo.getFavoritesByGenre(genre, page, pageSize);
       return ApiResponse.success(results, `找到${results.length}个匹配的收藏项`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to get favorites by genre', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '按标签获取收藏失败');
+      Logger.error(TAG, 'Failed to get favorites by genre', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '按标签获取收藏失�?);
     }
   }
 
   /**
-   * 获取所有收藏标签
-   */
+   * 获取所有收藏标�?   */
   public async getAllGenres(): Promise<ApiResponse<Array<{ genre: string; count: number }>>> {
     try {
       Logger.info(TAG, 'Getting all genres...');
@@ -669,14 +643,13 @@ export default class CollectionService {
       const genres = await this.databaseRepo.getFavoriteGenres();
       return ApiResponse.success(genres, '获取标签列表成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to get all genres', error);
+      Logger.error(TAG, 'Failed to get all genres', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取标签列表失败');
     }
   }
 
   /**
-   * 按年份获取收藏
-   */
+   * 按年份获取收�?   */
   public async getFavoritesByYear(year: number, page: number = 1, pageSize: number = 20): Promise<ApiResponse<CollectionItem[]>> {
     try {
       Logger.info(TAG, 'Getting favorites by year...', { year, page, pageSize });
@@ -684,8 +657,10 @@ export default class CollectionService {
       const results = await this.databaseRepo.getFavoritesByYear(year, page, pageSize);
       return ApiResponse.success(results, `找到${results.length}个匹配的收藏项`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to get favorites by year', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '按年份获取收藏失败');
+      Logger.error(TAG, 'Failed to get favorites by year', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '按年份获取收藏失�?);
     }
   }
 }
+
+

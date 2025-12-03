@@ -81,8 +81,7 @@ export interface WatchHistory {
 }
 
 /**
- * 媒体详情页组件
- * 展示媒体详细信息、集数列表和操作按钮
+ * 媒体详情页组�? * 展示媒体详细信息、集数列表和操作按钮
  */
 @Entry
 @Component
@@ -93,8 +92,7 @@ struct MediaDetailPage {
   private mediaId: string = '';
   private siteKey: string = '';
   
-  // 状态管理
-  @State mediaDetail: MediaDetail | null = null;
+  // 状态管�?  @State mediaDetail: MediaDetail | null = null;
   @State episodes: Episode[] = [];
   @State playSources: PlaySource[] = [];
   @State filteredSources: PlaySource[] = [];
@@ -107,15 +105,11 @@ struct MediaDetailPage {
   @State errorMessage: string = '';
   @State selectedEpisodeIndex: number = 0;
   @State selectedSeason: number = 1;
-  @State seasons: number[] = [1]; // 默认只有第1季
-  @State searchText: string = '';
-  @State activeTab: string = 'episodes'; // 用于标签页切换
+  @State seasons: number[] = [1]; // 默认只有一�?  @State searchText: string = '';
+  @State activeTab: string = 'episodes'; // 用于标签页切�? 
+  // 每页显示的剧集数�?  private episodesPageSize: number = 50;
   
-  // 每页显示的剧集数量
-  private episodesPageSize: number = 50;
-  
-  // 初始化
-  aboutToAppear(): void {
+  // 初始�?  aboutToAppear(): void {
     Logger.info(this.TAG, 'MediaDetailPage mounted');
     
     // 获取路由参数
@@ -125,8 +119,7 @@ struct MediaDetailPage {
     
     Logger.info(this.TAG, `Loading media detail for: ${this.siteKey}:${this.mediaId}`);
     
-    // 检查是否有预加载的数据（从SearchPage传递过来的）
-    const title = params?.title as string;
+    // 检查是否有预加载的数据（从SearchPage传递过来的�?    const title = params?.title as string;
     const coverUrl = params?.coverUrl as string;
     const description = params?.description as string;
     
@@ -150,8 +143,7 @@ struct MediaDetailPage {
       this.isLoading = false;
     }
     
-    // 加载完整的媒体详情
-    this.loadMediaDetail();
+    // 加载完整的媒体详�?    this.loadMediaDetail();
   }
   
   // 清理资源
@@ -169,8 +161,7 @@ struct MediaDetailPage {
       return;
     }
     
-    this.isLoading = false; // 因为可能已有预加载数据，暂时不显示加载状态
-    this.errorMessage = '';
+    this.isLoading = false; // 因为可能已有预加载数据，暂时不显示加载状�?    this.errorMessage = '';
     
     try {
       // 获取媒体详情
@@ -178,12 +169,11 @@ struct MediaDetailPage {
         this.mediaDetail = detail;
         // 加载相关推荐
         this.loadRelatedMedia();
-        // 加载播放源
-        if (this.mediaDetail?.episodes?.length > 0) {
+        // 加载播放�?        if (this.mediaDetail?.episodes?.length > 0) {
           this.loadPlaySources(this.mediaDetail.episodes[0].id);
         }
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to load media detail: ${error}`);
+        Logger.error(this.TAG, 'Failed to load media detail', error instanceof Error ? error : new Error(String(error)));
         // 如果已经有预加载数据，则不显示错误信息
         if (!this.mediaDetail) {
           this.errorMessage = '加载详情失败';
@@ -192,10 +182,9 @@ struct MediaDetailPage {
         this.isLoading = false;
       });
       
-      // 检查收藏状态
-      this.checkIsFavorited();
+      // 检查收藏状�?      this.checkIsFavorited();
     } catch (error) {
-      Logger.error(this.TAG, `Error in loadMediaDetail: ${error}`);
+      Logger.error(this.TAG, 'Error in loadMediaDetail', error instanceof Error ? error : new Error(String(error)));
       this.isLoading = false;
     }
   }
@@ -210,11 +199,11 @@ struct MediaDetailPage {
       favoriteService.isFavorite(this.mediaId, this.siteKey).then((isFavorited) => {
         this.isFavorite = isFavorited;
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
+        Logger.error(this.TAG, 'Failed to check favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
         this.isFavorite = false;
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
+      Logger.error(this.TAG, 'Failed to check favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       this.isFavorite = false;
     }
   }
@@ -231,12 +220,10 @@ struct MediaDetailPage {
       
       try {
         mediaService.getMediaDetail(this.mediaId, this.siteKey).then((detail) => {
-          // 初始化剧集列表
-          if (detail.episodes && detail.episodes.length > 0) {
+          // 初始化剧集列�?          if (detail.episodes && detail.episodes.length > 0) {
             this.episodes = detail.episodes;
             
-            // 提取所有季数
-            this.seasons = [...new Set(detail.episodes.map(ep => ep.season || 1))].map(num => Number(num)).sort((a, b) => a - b);
+            // 提取所有季�?            this.seasons = [...new Set(detail.episodes.map(ep => ep.season || 1))].map(num => Number(num)).sort((a, b) => a - b);
             
             // 检查是否有更多剧集
             this.hasMoreEpisodes = detail.episodes.length >= this.episodesPageSize;
@@ -244,11 +231,11 @@ struct MediaDetailPage {
           
           resolve(detail);
         }).catch((error) => {
-          Logger.error(this.TAG, `Failed to fetch media detail: ${error}`);
+          Logger.error(this.TAG, 'Failed to fetch media detail', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
           reject(error);
         });
       } catch (error) {
-        Logger.error(this.TAG, `Failed to fetch media detail: ${error}`);
+        Logger.error(this.TAG, 'Failed to fetch media detail', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
         reject(error);
       }
     });
@@ -275,27 +262,24 @@ struct MediaDetailPage {
           this.hasMoreEpisodes = false;
         }
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to load more episodes: ${error}`);
+        Logger.error(this.TAG, 'Failed to load more episodes', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load more episodes: ${error}`);
+      Logger.error(this.TAG, 'Failed to load more episodes', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
   
   /**
-   * 加载播放源
-   */
+   * 加载播放�?   */
   private loadPlaySources(episodeId?: string): void {
     if (!this.mediaId || !this.siteKey) return;
     
     try {
       mediaService.getPlaySources(this.mediaId, this.siteKey, episodeId).then((playSources) => {
         this.playSources = playSources;
-        this.filteredSources = [...this.playSources]; // 初始化过滤后的列表
-        this.isLoading = false;
+        this.filteredSources = [...this.playSources]; // 初始化过滤后的列�?        this.isLoading = false;
         
-        // 如果有播放源且选择了剧集，跳转到播放页面
-        if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
+        // 如果有播放源且选择了剧集，跳转到播放页�?        if (this.playSources && this.playSources.length > 0 && this.selectedEpisodeIndex >= 0) {
           AppNavigator.getInstance().navigateToVideoPlay({
           videoId: this.mediaId,
           siteKey: this.siteKey,
@@ -303,13 +287,13 @@ struct MediaDetailPage {
         });
         }
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to load play sources: ${error}`);
-        this.errorMessage = '加载播放源失败';
+        Logger.error(this.TAG, 'Failed to load play sources', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+        this.errorMessage = '加载播放源失�?;
         this.isLoading = false;
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load play sources: ${error}`);
-      this.errorMessage = '加载播放源失败';
+      Logger.error(this.TAG, 'Failed to load play sources', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      this.errorMessage = '加载播放源失�?;
     }
   }
   
@@ -327,8 +311,11 @@ struct MediaDetailPage {
         (source.description && source.description.toLowerCase().includes(searchLower))
       );
     } else {
-      // 如果搜索文本为空，显示所有片源
-      this.filteredSources = [...this.playSources];
+      // 如果搜索文本为空，显示所有片�?      // 使用手动复制替代spread operator
+      this.filteredSources = [];
+      for (let i = 0; i < this.playSources.length; i++) {
+        this.filteredSources.push(this.playSources[i]);
+      }
     }
   }
   
@@ -346,10 +333,10 @@ struct MediaDetailPage {
       ).then((relatedMedia) => {
         this.relatedMedia = relatedMedia;
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to load related media: ${error}`);
+        Logger.error(this.TAG, 'Failed to load related media', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load related media: ${error}`);
+      Logger.error(this.TAG, 'Failed to load related media', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
   
@@ -366,8 +353,7 @@ struct MediaDetailPage {
       // 立即更新UI状态，提供即时反馈
       this.isFavorite = !this.isFavorite;
       
-      // 创建收藏项对象
-      const favoriteItem: FavoriteItem = {
+      // 创建收藏项对�?      const favoriteItem: FavoriteItem = {
         id: `${this.siteKey}_${this.mediaId}`,
         mediaId: this.mediaId,
         siteKey: this.siteKey,
@@ -377,7 +363,7 @@ struct MediaDetailPage {
         favoriteTime: Date.now()
       };
       
-      // 执行真实的收藏/取消收藏操作
+      // 执行真实的收�?取消收藏操作
       if (this.isFavorite) {
         await favoriteService.addToFavorites(favoriteItem);
         Logger.info(this.TAG, 'Added to favorites successfully');
@@ -386,9 +372,8 @@ struct MediaDetailPage {
         Logger.info(this.TAG, 'Removed from favorites successfully');
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to toggle favorite: ${error}`);
-      // 操作失败，恢复之前的状态
-      this.isFavorite = !this.isFavorite;
+      Logger.error(this.TAG, 'Failed to toggle favorite', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      // 操作失败，恢复之前的状�?      this.isFavorite = !this.isFavorite;
     }
   }
   
@@ -417,14 +402,13 @@ struct MediaDetailPage {
       // 加载播放源并播放
       this.loadPlaySources(episode.id);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to play episode: ${error}`);
+      Logger.error(this.TAG, 'Failed to play episode', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       this.errorMessage = '播放失败，请稍后重试';
     }
   }
   
   /**
-   * 处理播放源点击
-   */
+   * 处理播放源点�?   */
   private async handlePlaySourceClick(source: PlaySource): Promise<void> {
     if (!this.mediaId || !this.siteKey || !this.mediaDetail) return;
     
@@ -433,8 +417,7 @@ struct MediaDetailPage {
       let episodeName: string | undefined;
       let currentPlayPosition = 0;
       
-      // 如果没有选择剧集，默认选择第一个
-      if (this.episodes.length > 0) {
+      // 如果没有选择剧集，默认选择第一�?      if (this.episodes.length > 0) {
         const episodeIndex = this.selectedEpisodeIndex >= 0 ? this.selectedEpisodeIndex : 0;
         episodeId = this.episodes[episodeIndex].id;
         episodeName = this.episodes[episodeIndex].name;
@@ -453,23 +436,20 @@ struct MediaDetailPage {
               currentPlayPosition = watchHistory.position;
             }
           } catch (e) {
-            // 获取历史记录失败，使用默认进度
-            Logger.error(this.TAG, `Failed to get watch history: ${e}`);
+            // 获取历史记录失败，使用默认进�?            Logger.error(this.TAG, 'Failed to get watch history', e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e)))))));
           }
         }
       }
       
-      // 跳转到播放页面
-      this.navigateToPlayback(episodeId, episodeName, source, currentPlayPosition);
+      // 跳转到播放页�?      this.navigateToPlayback(episodeId, episodeName, source, currentPlayPosition);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle play source click: ${error}`);
+      Logger.error(this.TAG, 'Failed to handle play source click', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       this.errorMessage = '播放失败';
     }
   }
   
   /**
-   * 导航到播放页面
-   */
+   * 导航到播放页�?   */
   private navigateToPlayback(
     episodeId: string | undefined,
     episodeName: string | undefined,
@@ -500,19 +480,19 @@ struct MediaDetailPage {
                   position,
                   duration
                 ).catch(error => {
-                  Logger.error(this.TAG, `Failed to save watch progress: ${error}`);
+                  Logger.error(this.TAG, 'Failed to save watch progress', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
                 });
               }
             })
             .catch(error => {
-              Logger.error(this.TAG, `Failed to get duration: ${error}`);
+              Logger.error(this.TAG, 'Failed to get duration', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
             });
         })
         .catch(error => {
-          Logger.error(this.TAG, `Failed to get current position: ${error}`);
+          Logger.error(this.TAG, 'Failed to get current position', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save play progress: ${error}`);
+      Logger.error(this.TAG, 'Failed to save play progress', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
   
@@ -529,12 +509,10 @@ struct MediaDetailPage {
   }
   
   /**
-   * 处理季切换
-   */
+   * 处理季切�?   */
   private handleSeasonChange(season: number): void {
     this.selectedSeason = season;
-    // 重置选中的集数
-    this.selectedEpisodeIndex = -1;
+    // 重置选中的集�?    this.selectedEpisodeIndex = -1;
   }
   
   /**
@@ -545,8 +523,7 @@ struct MediaDetailPage {
     }
   
   /**
-   * 渲染加载状态
-   */
+   * 渲染加载状�?   */
   @Builder
   private renderLoading(): void {
     Column({
@@ -558,7 +535,7 @@ struct MediaDetailPage {
         alignItems: 'center'
       }
     }) {
-      // 加载指示器 - 使用简单的旋转动画
+      // 加载指示�?- 使用简单的旋转动画
       Column({
         width: 50,
         height: 50,
@@ -567,11 +544,11 @@ struct MediaDetailPage {
         justifyContent: 'center',
         alignItems: 'center'
       }) {
-        Text("●")
+        Text("�?)
           .fontSize(20)
           .fontColor('#4CAF50')
       }
-      Text("加载中...")
+      Text("加载�?..")
         .fontSize(24)
         .fontColor('#FFFFFF')
         .margin({ top: 20 })
@@ -579,8 +556,7 @@ struct MediaDetailPage {
   }
   
   /**
-   * 渲染错误状态
-   */
+   * 渲染错误状�?   */
   @Builder
   private renderError(): void {
     Column({
@@ -626,8 +602,7 @@ struct MediaDetailPage {
     Column({
       padding: 20
     }) {
-      // 媒体封面和基本信息
-      Row({
+      // 媒体封面和基本信�?      Row({
         alignItems: 'flex-start'
       }) {
         // 媒体封面
@@ -670,12 +645,11 @@ struct MediaDetailPage {
         }
       }
       
-      // 剧情简介
-      if (this.mediaDetail.description) {
+      // 剧情简�?      if (this.mediaDetail.description) {
         Column({
           marginTop: 20
         }) {
-          Text("剧情简介")
+          Text("剧情简�?)
             .fontSize(22)
             .fontColor('#FFFFFF')
             .fontWeight(600)
@@ -691,13 +665,11 @@ struct MediaDetailPage {
   }
   
   /**
-   * 渲染剧情简介
-   */
+   * 渲染剧情简�?   */
   @Builder
   private renderSynopsis(): void {
     // 此方法应返回UI组件，但当前实现不符合ArkTS规范
-    // 需要在build方法中直接使用条件渲染来实现剧情简介
-  }
+    // 需要在build方法中直接使用条件渲染来实现剧情简�?  }
   
   /**
    * 渲染标签页切换栏
@@ -734,7 +706,7 @@ struct MediaDetailPage {
         .borderRadius(20)
         .minWidth(100)
         .onClick(() => this.activeTab = 'sources')
-        Text("播放源")
+        Text("播放�?)
           .fontSize(24)
           .fontColor(this.activeTab === 'sources' ? '#4CAF50' : '#FFFFFF')
           .fontWeight(700)
@@ -743,19 +715,17 @@ struct MediaDetailPage {
   }
   
   /**
-   * 渲染季选择器
-   */
+   * 渲染季选择�?   */
   @Builder
   private renderSeasonSelector(): void {
-    // 季选择器
-    if (this.seasons.length === 0) {
+    // 季选择�?    if (this.seasons.length === 0) {
       Column({
         justifyContent: FlexAlign.Center,
         alignItems: ItemAlign.Center
       }) {
         .backgroundColor('#4CAF50')
         .padding(20)
-        Text("暂无季信息")
+        Text("暂无季信�?)
           .fontSize(24)
           .fontColor('#FFFFFF')
       }
@@ -766,7 +736,7 @@ struct MediaDetailPage {
         alignItems: 'center',
         justifyContent: 'flex-start'
       }) {
-        Text("选择季:")
+        Text("选择�?")
           .fontSize(28)
           .fontColor('#FFFFFF')
           .fontWeight(600)
@@ -783,7 +753,7 @@ struct MediaDetailPage {
             .borderRadius(6)
             .margin({ right: 10 })
             .onClick(() => this.handleSeasonChange(season))
-            Text(`第${season}季`)
+            Text(`�?{season}季`)
               .fontSize(24)
               .fontColor(this.selectedSeason === season ? '#FFFFFF' : '#666666')
               .fontWeight(600)
@@ -850,8 +820,7 @@ struct MediaDetailPage {
   }
   
   /**
-   * 渲染播放源列表
-   */
+   * 渲染播放源列�?   */
   @Builder
   private renderPlaySources(): void {
     Column({
@@ -859,8 +828,7 @@ struct MediaDetailPage {
       backgroundColor: '#4CAF50',
       padding: 20
     }) {
-      // 搜索框
-      Row({
+      // 搜索�?      Row({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#FFFFFF',
@@ -875,7 +843,7 @@ struct MediaDetailPage {
           .margin({ right: 10 })
         
         TextInput()
-          .placeholder('搜索播放源...')
+          .placeholder('搜索播放�?..')
           .flexGrow(1)
           .fontSize(20)
           .onChange((value: string) => {
@@ -894,7 +862,7 @@ struct MediaDetailPage {
             this.searchText = '';
             this.filteredSources = [...this.playSources];
           }) {
-            Text('✕')
+            Text('�?)
               .fontSize(24)
               .fontColor('#999999')
           }
@@ -908,7 +876,7 @@ struct MediaDetailPage {
         }) {
           .backgroundColor('#4CAF50')
           .padding(40)
-          Text("暂无播放源或没有匹配的片源")
+          Text("暂无播放源或没有匹配的片�?)
             .fontSize(24)
             .fontColor('#FFFFFF')
         }
@@ -936,7 +904,7 @@ struct MediaDetailPage {
                   justifyContent: FlexAlign.SpaceBetween
                 }) {
                   .width('100%')
-                  Text(source.name || `播放源${index + 1}`)
+                  Text(source.name || `播放�?{index + 1}`)
                     .fontSize(28)
                     .fontColor('#FFFFFF')
                     .fontWeight(700)
@@ -1053,8 +1021,7 @@ struct MediaDetailPage {
       flex: 1,
       backgroundColor: '#4CAF50'
     }) {
-      // 顶部导航栏
-      Row({
+      // 顶部导航�?      Row({
         backgroundColor: '#388E3C',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -1065,7 +1032,7 @@ struct MediaDetailPage {
         Button({
           backgroundColor: 'transparent'
         }) {
-          Text("← 返回")
+          Text("�?返回")
             .fontSize(24)
             .fontColor('#FFFFFF')
         }
@@ -1080,21 +1047,18 @@ struct MediaDetailPage {
           .width(80)
       }
       
-      // 主内容区域
-      if (this.isLoading) {
-        // 加载状态
-        Column({
+      // 主内容区�?      if (this.isLoading) {
+        // 加载状�?        Column({
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center'
         }) {
-          Text("加载中...")
+          Text("加载�?..")
             .fontSize(24)
             .fontColor('#FFFFFF')
         }
       } else if (this.errorMessage) {
-        // 错误状态
-        Column({
+        // 错误状�?        Column({
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center'
@@ -1108,8 +1072,7 @@ struct MediaDetailPage {
           flex: 1,
           backgroundColor: '#4CAF50'
         }) {
-          // 添加顶部间距，避免被导航栏遮挡
-          Blank()
+          // 添加顶部间距，避免被导航栏遮�?          Blank()
             .height(60)
           
           // 媒体头部信息
@@ -1177,3 +1140,5 @@ struct MediaDetailPage {
 }
 
 export default MediaDetailPage;
+
+

@@ -6,14 +6,12 @@ import { mediaService, MediaItem, MediaType } from '../service/media/MediaServic
 
 /**
  * 历史记录页面组件
- * 实现播放历史的展示、管理、编辑和清空等功能
- */
+ * 实现播放历史的展示、管理、编辑和清空等功�? */
 @Component
 struct HistoryPage {
   private readonly TAG: string = 'HistoryPage';
   
-  // 状态管理
-  @State histories: HistoryItem[] = [];
+  // 状态管�?  @State histories: HistoryItem[] = [];
   @State mediaItems: Map<string, MediaItem> = new Map();
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
@@ -22,18 +20,15 @@ struct HistoryPage {
   @State isRefreshing: boolean = false;
   @State autoPlayLast: boolean = true;
   
-  // 初始化
-  /**
-   * 页面加载时调用
-   */
+  // 初始�?  /**
+   * 页面加载时调�?   */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'HistoryPage appeared');
     this.loadHistories();
   }
 
   /**
-   * 页面卸载时调用
-   */
+   * 页面卸载时调�?   */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'HistoryPage disappeared');
   }
@@ -46,8 +41,7 @@ struct HistoryPage {
     this.errorMessage = '';
     
     try {
-      // 从历史服务获取历史记录列表（按播放时间倒序）
-      historyService.getHistories(100).then((histories) => {
+      // 从历史服务获取历史记录列表（按播放时间倒序�?      historyService.getHistories(100).then((histories) => {
         this.histories = histories;
         
         // 加载媒体详情
@@ -63,7 +57,7 @@ struct HistoryPage {
         this.isRefreshing = false;
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load histories: ${error}`);
+      Logger.error(this.TAG, `Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}` instanceof Error ? `Failed to load histories: ${error}` : new Error(String(`Failed to load histories: ${error}`)))))));
       this.errorMessage = '加载历史记录失败，请稍后重试';
       this.isLoading = false;
       this.isRefreshing = false;
@@ -112,7 +106,7 @@ struct HistoryPage {
         Logger.error(this.TAG, `Failed in Promise.all: ${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load media details: ${error}`);
+      Logger.error(this.TAG, `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}`)))))));
     }
   }
   
@@ -143,8 +137,7 @@ struct HistoryPage {
   }
   
   /**
-   * 处理全选/取消全选
-   */
+   * 处理全�?取消全�?   */
   private handleSelectAll(): void {
     if (this.selectedItems.size === this.histories.length) {
       this.selectedItems.clear();
@@ -154,22 +147,18 @@ struct HistoryPage {
   }
   
   /**
-   * 处理删除选中项
-   */
+   * 处理删除选中�?   */
   private handleDeleteSelected(): void {
     if (this.selectedItems.size === 0) return;
     
     try {
       const idsToDelete = Array.from(this.selectedItems);
       
-      // 删除选中的历史记录
-      historyService.removeHistories(idsToDelete)
+      // 删除选中的历史记�?      historyService.removeHistories(idsToDelete)
         .then(() => {
-          // 更新本地状态
-          this.histories = this.histories.filter(history => !idsToDelete.includes(history.id));
+          // 更新本地状�?          this.histories = this.histories.filter(history => !idsToDelete.includes(history.id));
           
-          // 清除已删除项的媒体详情缓存
-          idsToDelete.forEach(id => {
+          // 清除已删除项的媒体详情缓�?          idsToDelete.forEach(id => {
             const history = this.histories.find(h => h.id === id);
             if (history) {
               this.mediaItems.delete(history.mediaId);
@@ -179,8 +168,7 @@ struct HistoryPage {
           
           Logger.info(this.TAG, `Deleted ${idsToDelete.length} history records`);
           
-          // 如果没有历史记录了，退出编辑模式
-          if (this.histories.length === 0) {
+          // 如果没有历史记录了，退出编辑模�?          if (this.histories.length === 0) {
             this.isEditMode = false;
           }
         })
@@ -189,21 +177,18 @@ struct HistoryPage {
           this.errorMessage = '删除失败，请稍后重试';
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete histories: ${error}`);
+      Logger.error(this.TAG, `Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}` instanceof Error ? `Failed to delete histories: ${error}` : new Error(String(`Failed to delete histories: ${error}`)))))));
       this.errorMessage = '删除失败，请稍后重试';
     }
   }
   
   /**
-   * 处理清空所有历史
-   */
+   * 处理清空所有历�?   */
   private handleClearAll(): void {
     try {
-      // 清空所有历史记录
-      historyService.clearAllHistories()
+      // 清空所有历史记�?      historyService.clearAllHistories()
         .then(() => {
-          // 更新本地状态
-          this.histories = [];
+          // 更新本地状�?          this.histories = [];
           this.mediaItems.clear();
           this.selectedItems.clear();
           this.isEditMode = false;
@@ -215,14 +200,13 @@ struct HistoryPage {
           this.errorMessage = '清空失败，请稍后重试';
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear all histories: ${error}`);
+      Logger.error(this.TAG, `Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}` instanceof Error ? `Failed to clear all histories: ${error}` : new Error(String(`Failed to clear all histories: ${error}`)))))));
       this.errorMessage = '清空失败，请稍后重试';
     }
   }
   
   /**
-   * 处理历史项点击
-   */
+   * 处理历史项点�?   */
   private handleHistoryClick(history: HistoryItem): void {
     if (this.isEditMode) {
       this.handleItemSelect(history.id);
@@ -235,8 +219,7 @@ struct HistoryPage {
       // 更新播放历史时间
       historyService.updateHistoryTime(history.id)
         .then(() => {
-          // 跳转到播放页面，带上上次播放的进度
-          AppNavigator.getInstance().navigateToVideoPlay({
+          // 跳转到播放页面，带上上次播放的进�?          AppNavigator.getInstance().navigateToVideoPlay({
             mediaId: history.mediaId,
             siteKey: history.siteKey,
             episodeId: history.episodeId,
@@ -247,10 +230,8 @@ struct HistoryPage {
         })
         .catch(error => {
           Logger.error(this.TAG, `Failed to update history time: ${error}`);
-          // 即使更新失败，也跳转到播放页面
-          Router.push({
-            uri: 'pages/PlaybackPage',
-            params: {
+          // 即使更新失败，也跳转到播放页�?          Router.push({
+            uri: 'pages/PlaybackPage', params: {
               mediaId: history.mediaId,
               siteKey: history.siteKey,
               episodeId: history.episodeId,
@@ -258,19 +239,356 @@ struct HistoryPage {
               title: history.title,
               coverUrl: history.cover || ''
             }
-          });
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } instanceof Error ? params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          } : new Error(String(params: {
+              mediaId: history.mediaId,
+              siteKey: history.siteKey,
+              episodeId: history.episodeId,
+              playbackPosition: history.progress * 1000,
+              title: history.title,
+              coverUrl: history.cover || ''
+            }
+          })))))));
         });
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle history click: ${error}`);
       // 错误处理：跳转到播放页面
       AppNavigator.getInstance().navigateToVideoPlay({
-        mediaId: history.mediaId,
-        siteKey: history.siteKey,
+        mediaId: history.mediaId, siteKey: history.siteKey,
         episodeId: history.episodeId,
         playbackPosition: history.progress * 1000,
         title: history.title,
         coverUrl: history.cover || ''
-      });
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } instanceof Error ? siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      } : new Error(String(siteKey: history.siteKey,
+        episodeId: history.episodeId,
+        playbackPosition: history.progress * 1000,
+        title: history.title,
+        coverUrl: history.cover || ''
+      })))))));
     }
   }
   
@@ -280,8 +598,7 @@ struct HistoryPage {
   private handleContinuePlay(history: HistoryItem): void {
     Logger.info(this.TAG, `Continue playing: ${history.title} from ${history.playbackPosition}ms`);
     
-    // 跳转到播放页面，带上上次播放的进度
-    AppNavigator.getInstance().navigateToVideoPlay({
+    // 跳转到播放页面，带上上次播放的进�?    AppNavigator.getInstance().navigateToVideoPlay({
         mediaId: history.mediaId,
         siteKey: history.siteKey,
         episodeId: history.episodeId,
@@ -301,8 +618,7 @@ struct HistoryPage {
   }
   
   /**
-   * 格式化播放进度
-   */
+   * 格式化播放进�?   */
   private formatPlaybackProgress(position: number, duration: number): string {
     if (duration === 0) return '00:00';
     
@@ -318,8 +634,7 @@ struct HistoryPage {
   }
   
   /**
-   * 计算播放进度百分比
-   */
+   * 计算播放进度百分�?   */
   private getProgressPercentage(position: number, duration: number): number {
     if (duration === 0) return 0;
     return Math.min(100, Math.max(0, (position / duration) * 100));
@@ -332,7 +647,7 @@ struct HistoryPage {
   private renderHeader() {
     Stack({ className: "header" }) {
       Button({ className: "back-button", onClick: this.handleBack }) {
-        Text("←")
+        Text("�?)
       }
       Text("播放历史")
         .className("page-title")
@@ -343,8 +658,7 @@ struct HistoryPage {
   }
 
   /**
-   * 渲染编辑工具栏
-   */
+   * 渲染编辑工具�?   */
   @Builder
   private renderEditToolbar() {
     if (!this.isEditMode || this.histories.length === 0) return;
@@ -355,7 +669,7 @@ struct HistoryPage {
           checked: this.selectedItems.size === this.histories.length && this.histories.length > 0,
           onCheckChange: this.handleSelectAll
         })
-        Text("全选")
+        Text("全�?)
       }
       Text(`已选择 ${this.selectedItems.size} 项`)
         .className("selected-count")
@@ -386,16 +700,14 @@ struct HistoryPage {
         checked: this.autoPlayLast,
         onValueChange: (value) => {
           this.autoPlayLast = value;
-          // 这里可以保存设置到配置服务
-          Logger.info(this.TAG, `Auto play last content: ${value}`);
+          // 这里可以保存设置到配置服�?          Logger.info(this.TAG, `Auto play last content: ${value}`);
         }
       })
     }
   }
 
   /**
-   * 渲染历史记录项
-   */
+   * 渲染历史记录�?   */
   @Builder
   private renderHistoryItem(history: HistoryItem) {
     const media = this.mediaItems.get(history.mediaId);
@@ -459,7 +771,7 @@ struct HistoryPage {
     if (this.isLoading && !this.isRefreshing) {
       Stack({ className: "loading-container" }) {
         LoadingProgress({ className: "loading-progress", color: "#FF4500" })
-        Text("加载中...")
+        Text("加载�?..")
       }
       return;
     }
@@ -483,7 +795,7 @@ struct HistoryPage {
           .className("empty-icon")
         Text("暂无播放历史")
         Button({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() }) {
-          Text("去探索")
+          Text("去探�?)
         }
       }
       return;
@@ -506,8 +818,7 @@ struct HistoryPage {
       // 页面头部
       this.renderHeader()
       
-      // 编辑工具栏
-      this.renderEditToolbar()
+      // 编辑工具�?      this.renderEditToolbar()
       
       // 设置选项
       this.renderSettings()
@@ -522,3 +833,5 @@ struct HistoryPage {
 }
 
 export default HistoryPage;
+
+

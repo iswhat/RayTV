@@ -22,7 +22,7 @@ class RealPlayer {
   private volume: number = 1.0;
   private isMuted: boolean = false;
   private speed: number = 1.0;
-  // 定义每种事件类型的回调接口
+  // 定义每种事件类型的回调接�?
   private stateChangeListeners: ((state: string, reason: number) => void)[] = [];
   private errorListeners: ((errorCode: number, errorMsg: string) => void)[] = [];
   private bufferListeners: ((bufferingRate: number) => void)[] = [];
@@ -34,7 +34,7 @@ class RealPlayer {
       // 创建AVPlayer实例
       this.avPlayer = await media.createAVPlayer();
       
-      // 设置播放器回调
+      // 设置播放器回�?
       this.setupPlayerCallbacks();
       
       Logger.info('RealPlayer', 'AVPlayer created successfully');
@@ -51,9 +51,9 @@ class RealPlayer {
         throw new Error('Player not created');
       }
       
-      // 设置播放源
+      // 设置播放�?
       await this.avPlayer.setSource(source);
-      Logger.info('RealPlayer', `Source set: ${source}`);
+      Logger.info('RealPlayer', `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}`)))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to set source: ${error}`);
       throw error;
@@ -66,9 +66,9 @@ class RealPlayer {
         throw new Error('Player not created');
       }
       
-      // 准备播放器
+      // 准备播放�?
       await this.avPlayer.prepare();
-      Logger.info('RealPlayer', 'Player prepared');
+      Logger.info('RealPlayer', 'Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared' : new Error(String('Player prepared' instanceof Error ? 'Player prepared' : new Error(String('Player prepared')))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to prepare: ${error}`);
       throw error;
@@ -81,9 +81,9 @@ class RealPlayer {
         throw new Error('Player not created');
       }
       
-      // 开始播放
+      // 开始播�?
       await this.avPlayer.play();
-      Logger.info('RealPlayer', 'Player started');
+      Logger.info('RealPlayer', 'Player started' instanceof Error ? 'Player started' : new Error(String('Player started' instanceof Error ? 'Player started' instanceof Error ? 'Player started' : new Error(String('Player started' : new Error(String('Player started' instanceof Error ? 'Player started' : new Error(String('Player started' instanceof Error ? 'Player started' instanceof Error ? 'Player started' : new Error(String('Player started' instanceof Error ? 'Player started' instanceof Error ? 'Player started' : new Error(String('Player started' : new Error(String('Player started' instanceof Error ? 'Player started' : new Error(String('Player started' : new Error(String('Player started' instanceof Error ? 'Player started' : new Error(String('Player started' instanceof Error ? 'Player started' instanceof Error ? 'Player started' : new Error(String('Player started' : new Error(String('Player started' instanceof Error ? 'Player started' : new Error(String('Player started')))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to play: ${error}`);
       throw error;
@@ -98,7 +98,7 @@ class RealPlayer {
       
       // 暂停播放
       await this.avPlayer.pause();
-      Logger.info('RealPlayer', 'Player paused');
+      Logger.info('RealPlayer', 'Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused' : new Error(String('Player paused' instanceof Error ? 'Player paused' : new Error(String('Player paused')))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to pause: ${error}`);
       throw error;
@@ -113,20 +113,20 @@ class RealPlayer {
       
       // 停止播放
       await this.avPlayer.stop();
-      Logger.info('RealPlayer', 'Player stopped');
+      Logger.info('RealPlayer', 'Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped' : new Error(String('Player stopped' instanceof Error ? 'Player stopped' : new Error(String('Player stopped')))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to stop: ${error}`);
       throw error;
     }
   }
 
-  async seek(timeMs: number, mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC): Promise<void> {
+  async seek(timeMs: number, mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC instanceof Error ? mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC : new Error(String(mode: media.SeekMode = media.SeekMode.SEEK_PREV_SYNC))))))): Promise<void> {
     try {
       if (!this.avPlayer) {
         throw new Error('Player not created');
       }
       
-      // 跳转到指定位置
+      // 跳转到指定位�?
       await this.avPlayer.seek(timeMs, mode);
       Logger.info('RealPlayer', `Seeked to: ${timeMs}ms`);
     } catch (error) {
@@ -144,7 +144,7 @@ class RealPlayer {
       // 设置音量
       await this.avPlayer.setVolume(volume);
       this.volume = volume;
-      Logger.info('RealPlayer', `Volume set to: ${volume}`);
+      Logger.info('RealPlayer', `Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}` instanceof Error ? `Volume set to: ${volume}` : new Error(String(`Volume set to: ${volume}`)))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to set volume: ${error}`);
       throw error;
@@ -160,7 +160,7 @@ class RealPlayer {
       // 设置静音
       await this.avPlayer.setMute(mute);
       this.isMuted = mute;
-      Logger.info('RealPlayer', `Mute set to: ${mute}`);
+      Logger.info('RealPlayer', `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}`)))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to set mute: ${error}`);
       throw error;
@@ -176,7 +176,7 @@ class RealPlayer {
       // 设置播放速度
       await this.avPlayer.setSpeed(speed);
       this.speed = speed;
-      Logger.info('RealPlayer', `Speed set to: ${speed}`);
+      Logger.info('RealPlayer', `Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}` instanceof Error ? `Speed set to: ${speed}` : new Error(String(`Speed set to: ${speed}`)))))));
     } catch (error) {
       Logger.error('RealPlayer', `Failed to set speed: ${error}`);
       throw error;
@@ -194,7 +194,7 @@ class RealPlayer {
       this.currentTime = currentTime;
       return currentTime;
     } catch (error) {
-      Logger.error('RealPlayer', `Failed to get current time: ${error}`);
+      Logger.error('RealPlayer', `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}`)))))));
       return this.currentTime;
     }
   }
@@ -205,7 +205,7 @@ class RealPlayer {
         return 0;
       }
       
-      // 获取总时长
+      // 获取总时�?
       const duration = await this.avPlayer.getDuration();
       this.duration = duration;
       return duration;
@@ -218,10 +218,10 @@ class RealPlayer {
   async release(): Promise<void> {
     try {
       if (this.avPlayer) {
-        // 释放播放器资源
+        // 释放播放器资�?
         await this.avPlayer.release();
         this.avPlayer = null;
-        Logger.info('RealPlayer', 'Player released');
+        Logger.info('RealPlayer', 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released')))))));
       }
     } catch (error) {
       Logger.error('RealPlayer', `Failed to release player: ${error}`);
@@ -229,15 +229,15 @@ class RealPlayer {
     }
   }
 
-  // 重载on方法，为每种事件类型提供类型安全的接口
-  on(event: 'stateChange', callback: (state: string, reason: number) => void): void;
+  // 重载on方法，为每种事件类型提供类型安全的接�?
+  on(event: 'stateChange', callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number instanceof Error ? callback: (state: string, reason: number : new Error(String(callback: (state: string, reason: number))))))) => void): void;
   on(event: 'error', callback: (errorCode: number, errorMsg: string) => void): void;
   on(event: 'bufferingChange', callback: (bufferingRate: number) => void): void;
   on(event: 'playbackComplete', callback: () => void): void;
   on(event: 'timeUpdate', callback: (currentTime: number) => void): void;
   // 作为类型系统的兼容层，处理可能的未知事件类型
-  on(event: string, callback: (...args: unknown[]) => void): void {
-    // 根据事件类型存储对应的回调函数
+  on(event: string, callback: (...args: Record<string, string | number | boolean | null>[]) => void): void {
+    // 根据事件类型存储对应的回调函�?
     switch (event) {
       case 'stateChange':
         this.stateChangeListeners.push(callback as (state: string, reason: number) => void);
@@ -257,7 +257,7 @@ class RealPlayer {
     }
   }
 
-  // 重载emit方法，为每种事件类型提供类型安全的接口
+  // 重载emit方法，为每种事件类型提供类型安全的接�?
   private emit(event: 'stateChange', state: string, reason: number): void {
     this.stateChangeListeners.forEach(callback => callback(state, reason));
   }
@@ -275,15 +275,15 @@ class RealPlayer {
   }
   // 通用实现（作为后备）
   // 通用实现作为类型系统的兼容层
-  private emit(event: string, ...args: unknown[]): void {
+  private emit(event: string, ...args: Record<string, string | number | boolean | null>[]): void {
     // 这个通用实现实际上不会被调用，因为我们已经为所有事件类型提供了具体实现
-    // 这里仅作为类型系统的兼容层
+    // 这里仅作为类型系统的兼容�?
   }
 
   private setupPlayerCallbacks(): void {
     if (!this.avPlayer) return;
 
-    // 状态变化回调
+    // 状态变化回�?
     this.avPlayer.on('stateChange', (state: string, reason: number) => {
       Logger.info('RealPlayer', `Player state changed: ${state}, reason: ${reason}`);
       this.emit('stateChange', state, reason);
@@ -291,7 +291,7 @@ class RealPlayer {
 
     // 错误回调
     this.avPlayer.on('error', (error: media.AVPlayerError) => {
-      Logger.error('RealPlayer', `Player error: ${error.code}, message: ${error.message}`);
+      Logger.error('RealPlayer', `Player error: ${error.code}, message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}` : new Error(String(message: ${error.message}` instanceof Error ? message: ${error.message}` : new Error(String(message: ${error.message}`)))))));
       this.emit('error', error.code, error.message);
     });
 
@@ -316,7 +316,7 @@ class RealPlayer {
 }
 
 /**
- * 播放状态枚举
+ * 播放状态枚�?
  */
 export enum PlaybackStatus {
   IDLE = 'IDLE',
@@ -348,13 +348,13 @@ export interface AVPlayerService {
   // 初始化播放器
   init(): Promise<void>;
   
-  // 设置播放源
+  // 设置播放�?
   setSource(source: string): Promise<void>;
   
   // 准备播放
   prepare(): Promise<void>;
   
-  // 开始播放
+  // 开始播�?
   play(): Promise<void>;
   
   // 暂停播放
@@ -363,7 +363,7 @@ export interface AVPlayerService {
   // 停止播放
   stop(): Promise<void>;
   
-  // 跳转到指定位置
+  // 跳转到指定位�?
   seekTo(timeMs: number): Promise<void>;
   
   // 设置音量
@@ -378,27 +378,27 @@ export interface AVPlayerService {
   // 获取当前播放位置
   getCurrentTime(): Promise<number>;
   
-  // 获取总时长
+  // 获取总时�?
   getDuration(): Promise<number>;
   
-  // 获取播放状态
+  // 获取播放状�?
   getStatus(): PlaybackStatus;
   
   // 设置播放状态监听器
   onStatusChange(callback: (status: PlaybackStatus) => void): void;
   
-  // 设置错误监听器
+  // 设置错误监听�?
   onError(callback: (error: Error) => void): void;
   
   // 设置缓冲状态监听器
   onBufferUpdate(callback: (bufferingRate: number) => void): void;
   
-  // 释放播放器资源
+  // 释放播放器资�?
   release(): Promise<void>;
 }
 
 /**
- * AVPlayerService实现类
+ * AVPlayerService实现�?
  * 基于HarmonyOS AVPlayer实现媒体播放功能
  */
 export class AVPlayerServiceImpl implements AVPlayerService {
@@ -415,11 +415,11 @@ export class AVPlayerServiceImpl implements AVPlayerService {
    */
   public async init(): Promise<void> {
     try {
-      // 创建真实播放器实例
+      // 创建真实播放器实�?
       this.avPlayer = new RealPlayer();
       await this.avPlayer.createPlayer();
       
-      // 设置状态监听
+      // 设置状态监�?
       this.setupPlayerListeners();
       
       this.updateStatus(PlaybackStatus.IDLE);
@@ -431,7 +431,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
   }
   
   /**
-   * 设置播放源
+   * 设置播放�?
    */
   public async setSource(source: string): Promise<void> {
     try {
@@ -442,7 +442,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       this.sourceUrl = source;
       await this.avPlayer.setSource(source);
       this.updateStatus(PlaybackStatus.INITIALIZED);
-      Logger.info(this.TAG, `Source set: ${source}`);
+      Logger.info(this.TAG, `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}` : new Error(String(`Source set: ${source}` instanceof Error ? `Source set: ${source}` : new Error(String(`Source set: ${source}`)))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to set source: ${error}`);
       this.updateStatus(PlaybackStatus.ERROR);
@@ -463,14 +463,14 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       await this.avPlayer.prepare();
       // 准备完成状态会在事件监听中更新
     } catch (error) {
-      Logger.error(this.TAG, `Failed to prepare: ${error}`);
+      Logger.error(this.TAG, `Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}` instanceof Error ? `Failed to prepare: ${error}` : new Error(String(`Failed to prepare: ${error}`)))))));
       this.updateStatus(PlaybackStatus.ERROR);
       throw error;
     }
   }
   
   /**
-   * 开始播放
+   * 开始播�?
    */
   public async play(): Promise<void> {
     try {
@@ -497,7 +497,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       
       await this.avPlayer.pause();
       this.updateStatus(PlaybackStatus.PAUSED);
-      Logger.info(this.TAG, 'Playback paused');
+      Logger.info(this.TAG, 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused')))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to pause: ${error}`);
       throw error;
@@ -515,7 +515,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       
       await this.avPlayer.stop();
       this.updateStatus(PlaybackStatus.STOPPED);
-      Logger.info(this.TAG, 'Playback stopped');
+      Logger.info(this.TAG, 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped')))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to stop: ${error}`);
       throw error;
@@ -523,7 +523,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
   }
   
   /**
-   * 跳转到指定位置
+   * 跳转到指定位�?
    */
   public async seekTo(timeMs: number): Promise<void> {
     try {
@@ -531,7 +531,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
         throw new Error('Player not initialized');
       }
       
-      await this.avPlayer.seek(timeMs, media.SeekMode.SEEK_PREV_SYNC);
+      await this.avPlayer.seek(timeMs, media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC instanceof Error ? media.SeekMode.SEEK_PREV_SYNC : new Error(String(media.SeekMode.SEEK_PREV_SYNC)))))));
       Logger.info(this.TAG, `Seeked to: ${timeMs}ms`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to seek: ${error}`);
@@ -548,8 +548,8 @@ export class AVPlayerServiceImpl implements AVPlayerService {
         throw new Error('Player not initialized');
       }
       
-      // 确保音量在0-1之间
-      const normalizedVolume = Math.max(0, Math.min(1, volume));
+      // 确保音量�?-1之间
+      const normalizedVolume = Math.max(0, Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume : new Error(String(Math.min(1, volume instanceof Error ? Math.min(1, volume : new Error(String(Math.min(1, volume))))))));
       await this.avPlayer.setVolume(normalizedVolume);
       Logger.info(this.TAG, `Volume set to: ${normalizedVolume}`);
     } catch (error) {
@@ -568,7 +568,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       }
       
       await this.avPlayer.setMute(mute);
-      Logger.info(this.TAG, `Mute set to: ${mute}`);
+      Logger.info(this.TAG, `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}` instanceof Error ? `Mute set to: ${mute}` : new Error(String(`Mute set to: ${mute}`)))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to set mute: ${error}`);
       throw error;
@@ -585,7 +585,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       }
       
       await this.avPlayer.setSpeed(speed);
-      Logger.info(this.TAG, `Playback speed set to: ${speed}`);
+      Logger.info(this.TAG, `Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}` instanceof Error ? `Playback speed set to: ${speed}` : new Error(String(`Playback speed set to: ${speed}`)))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to set speed: ${error}`);
       throw error;
@@ -604,13 +604,13 @@ export class AVPlayerServiceImpl implements AVPlayerService {
       const currentTime = await this.avPlayer.getCurrentTime();
       return currentTime;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get current time: ${error}`);
+      Logger.error(this.TAG, `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}` instanceof Error ? `Failed to get current time: ${error}` : new Error(String(`Failed to get current time: ${error}`)))))));
       return 0;
     }
   }
   
   /**
-   * 获取总时长
+   * 获取总时�?
    */
   public async getDuration(): Promise<number> {
     try {
@@ -627,7 +627,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
   }
   
   /**
-   * 获取播放状态
+   * 获取播放状�?
    */
   public getStatus(): PlaybackStatus {
     return this.currentStatus;
@@ -638,12 +638,12 @@ export class AVPlayerServiceImpl implements AVPlayerService {
    */
   public onStatusChange(callback: (status: PlaybackStatus) => void): void {
     this.statusChangeCallback = callback;
-    // 立即回调当前状态
+    // 立即回调当前状�?
     callback(this.currentStatus);
   }
   
   /**
-   * 设置错误监听器
+   * 设置错误监听�?
    */
   public onError(callback: (error: Error) => void): void {
     this.errorCallback = callback;
@@ -657,7 +657,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
   }
   
   /**
-   * 释放播放器资源
+   * 释放播放器资�?
    */
   public async release(): Promise<void> {
     try {
@@ -665,7 +665,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
         await this.avPlayer.release();
         this.avPlayer = null;
         this.updateStatus(PlaybackStatus.IDLE);
-        Logger.info(this.TAG, 'Player released');
+        Logger.info(this.TAG, 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released' instanceof Error ? 'Player released' instanceof Error ? 'Player released' : new Error(String('Player released' : new Error(String('Player released' instanceof Error ? 'Player released' : new Error(String('Player released')))))));
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to release player: ${error}`);
@@ -679,11 +679,11 @@ export class AVPlayerServiceImpl implements AVPlayerService {
   private setupPlayerListeners(): void {
     if (!this.avPlayer) return;
     
-    // 状态变化监听
-    this.avPlayer.on('stateChange', (state: string, reason: number) => {
+    // 状态变化监�?
+    this.avPlayer.on('stateChange', (state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number : new Error(String((state: string, reason: number instanceof Error ? (state: string, reason: number : new Error(String((state: string, reason: number))))))) => {
       Logger.info(this.TAG, `Player state changed: ${state}, reason: ${reason}`);
       
-      // 根据HarmonyOS AVPlayer状态映射到应用状态
+      // 根据HarmonyOS AVPlayer状态映射到应用状�?
       switch (state) {
         case 'idle':
           this.updateStatus(PlaybackStatus.IDLE);
@@ -720,7 +720,7 @@ export class AVPlayerServiceImpl implements AVPlayerService {
     
     // 错误监听
     this.avPlayer.on('error', (errorCode: number, errorMsg: string) => {
-      Logger.error(this.TAG, `Player error: ${errorCode}, message: ${errorMsg}`);
+      Logger.error(this.TAG, `Player error: ${errorCode}, message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}` : new Error(String(message: ${errorMsg}` instanceof Error ? message: ${errorMsg}` : new Error(String(message: ${errorMsg}`)))))));
       this.updateStatus(PlaybackStatus.ERROR);
       if (this.errorCallback) {
         this.errorCallback(new Error(`Player error: ${errorMsg} (code: ${errorCode})`));
@@ -763,3 +763,5 @@ export class AVPlayerServiceImpl implements AVPlayerService {
  * AVPlayerService单例
  */
 export const AVPlayerServiceInstance: AVPlayerService = new AVPlayerServiceImpl();
+
+

@@ -31,7 +31,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private context: common.UIAbilityContext | null = null;
 
   /**
-   * 设置上下文
+   * 设置上下�?
    */
   setContext(context: common.UIAbilityContext): void {
     this.context = context;
@@ -53,13 +53,13 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         securityLevel: relationalStore.SecurityLevel.S1
       };
 
-      // 创建或打开数据库
+      // 创建或打开数据�?
       const rdbStore = await relationalStore.getRdbStore(this.context, config);
       
       // 设置数据库版本和升级回调
       await rdbStore.setVersion(DATABASE_VERSION);
       
-      // 检查是否需要创建或升级数据库
+      // 检查是否需要创建或升级数据�?
       const currentVersion: number = await rdbStore.getVersion();
       if (currentVersion === 0) {
         await this.onCreateDatabase(rdbStore);
@@ -70,7 +70,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       this.rdbStore = rdbStore;
       this.status = DatabaseStatus.READY;
       
-      // 预加载配置缓存
+      // 预加载配置缓�?
       await this.loadConfigCache();
       
       // 清理过期缓存
@@ -84,22 +84,21 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       Logger.error(TAG, `Failed to initialize database: ${error instanceof Error ? error.message : String(error)}`);
       this.status = DatabaseStatus.ERROR;
       return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Database initialization failed'
       };
     }
   }
 
   /**
-   * 获取数据库状态
+   * 获取数据库状�?
    */
   getStatus(): DatabaseStatus {
     return this.status;
   }
 
   /**
-   * 关闭数据库
+   * 关闭数据�?
    */
   async close(): Promise<DatabaseResult<void>> {
     try {
@@ -110,7 +109,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       this.status = DatabaseStatus.CLOSING;
       
       if (this.rdbStore) {
-        // RDB不提供显式关闭方法，由系统管理
+        // RDB不提供显式关闭方法，由系统管�?
         this.rdbStore = null;
       }
 
@@ -122,8 +121,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     } catch (error) {
       Logger.error(TAG, `Failed to close database: ${error instanceof Error ? error.message : String(error)}`);
       return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Database closing failed'
       };
     }
@@ -136,7 +134,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     try {
       Logger.info(TAG, 'Creating database tables...');
       
-      // 创建电影表
+      // 创建电影�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS movies (
           id TEXT PRIMARY KEY,
@@ -173,7 +171,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建用户表
+      // 创建用户�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
@@ -200,7 +198,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建观看历史表
+      // 创建观看历史�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS history (
           id TEXT PRIMARY KEY,
@@ -222,7 +220,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建收藏表
+      // 创建收藏�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS favorites (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -236,7 +234,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建搜索历史表
+      // 创建搜索历史�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS search_history (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -247,7 +245,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建缓存表
+      // 创建缓存�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS cache (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -259,7 +257,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         );
       `);
 
-      // 创建配置表
+      // 创建配置�?
       await rdb.executeSql(`
         CREATE TABLE IF NOT EXISTS config (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -280,22 +278,22 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
   }
 
   /**
-   * 数据库升级
+   * 数据库升�?
    */
-  private async onUpgradeDatabase(rdb: relationalStore.RdbStore, oldVersion: number, newVersion: number): Promise<void> {
+  private async onUpgradeDatabase(rdb: relationalStore.RdbStore, oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number instanceof Error ? oldVersion: number, newVersion: number : new Error(String(oldVersion: number, newVersion: number))))))): Promise<void> {
     try {
       Logger.info(TAG, `Upgrading database from version ${oldVersion} to ${newVersion}`);
       
       // 这里可以添加数据库升级逻辑
-      // 例如添加新表、修改表结构、添加新字段等
+      // 例如添加新表、修改表结构、添加新字段�?
       
-      // 示例：从版本1升级到版本2
+      // 示例：从版本1升级到版�?
       if (oldVersion === 1 && newVersion >= 2) {
         // 添加新表或修改表结构
         Logger.info(TAG, 'Applying database upgrade from version 1 to 2');
       }
       
-      // 示例：从版本2升级到版本3
+      // 示例：从版本2升级到版�?
       if (oldVersion === 2 && newVersion >= 3) {
         // 添加新表或修改表结构
         Logger.info(TAG, 'Applying database upgrade from version 2 to 3');
@@ -328,7 +326,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
           
           if (key) {
             try {
-              const parsedValue = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(value || '');
+              const parsedValue = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '' instanceof Error ? string | number | boolean | Record<string, string | number | boolean>>>(value || '' : new Error(String(string | number | boolean | Record<string, string | number | boolean>>>(value || '')))))));
               if (parsedValue) {
                 this.configMap.set(`${config_group}:${key}`, parsedValue);
               }
@@ -346,7 +344,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     }
   }
 
-  // 配置值类型接口
+  // 配置值类型接�?
 export interface ConfigValueObject {
   value: string;
 }
@@ -360,8 +358,7 @@ export interface ConfigValueObject {
       }
 
       const valuesBucket: relationalStore.ValuesBucket = {
-        'id': movie.id,
-        'title': movie.title,
+        'id': movie.id, 'title': movie.title,
         'originalTitle': movie.originalTitle || null,
         'type': movie.type,
         'coverUrl': movie.coverUrl || null,
@@ -369,7 +366,215 @@ export interface ConfigValueObject {
         'description': movie.description || null,
         'releaseDate': movie.releaseDate || null,
         'year': movie.year || null,
-        'genres': JsonUtil.stringify(movie.genres || []),
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] instanceof Error ? 'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || [] : new Error(String('title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.description || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JsonUtil.stringify(movie.genres || []))))))),
         'tags': JsonUtil.stringify(movie.tags || []),
         'duration': movie.duration || null,
         'totalEpisodes': movie.totalEpisodes || null,
@@ -397,20 +602,22 @@ export interface ConfigValueObject {
       
       if (rowsInserted > 0) {
         Logger.info(TAG, `Movie added successfully: ${movie.id}`);
-        return {
+        // 明确初始化DatabaseResult对象
+        const result: DatabaseResult<string> = {
           success: true,
           data: movie.id
         };
+        return result;
       } else {
         throw new Error('Failed to insert movie');
       }
     } catch (error) {
       Logger.error(TAG, `Failed to add movie: ${error instanceof Error ? error.message : String(error)}`);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+      const result: DatabaseResult<string> = {
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Failed to add movie'
       };
+      return result;
     }
   }
 
@@ -459,24 +666,26 @@ export interface ConfigValueObject {
       
       if (rowsUpdated > 0) {
         Logger.info(TAG, `Movie updated successfully: ${movie.id}`);
-        return {
+        const result: DatabaseResult<boolean> = {
           success: true,
           data: true
         };
+        return result;
       } else {
-        return {
+        const result: DatabaseResult<boolean> = {
           success: true,
           data: false,
           message: 'Movie not found'
         };
+        return result;
       }
     } catch (error) {
       Logger.error(TAG, `Failed to update movie: ${error instanceof Error ? error.message : String(error)}`);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+      const result: DatabaseResult<boolean> = {
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Failed to update movie'
       };
+      return result;
     }
   }
 
@@ -493,29 +702,31 @@ export interface ConfigValueObject {
       
       if (rowsDeleted > 0) {
         Logger.info(TAG, `Movie deleted successfully: ${movieId}`);
-        // 同时删除相关的收藏记录
+        // 同时删除相关的收藏记�?
         const favPredicates = new relationalStore.RdbPredicates('favorites');
         favPredicates.equalTo('movieId', movieId);
         await this.rdbStore.delete(favPredicates);
         
-        return {
+        const result: DatabaseResult<boolean> = {
           success: true,
           data: true
         };
+        return result;
       } else {
-        return {
+        const result: DatabaseResult<boolean> = {
           success: true,
           data: false,
           message: 'Movie not found'
         };
+        return result;
       }
     } catch (error) {
       Logger.error(TAG, `Failed to delete movie: ${error instanceof Error ? error.message : String(error)}`);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+      const result: DatabaseResult<boolean> = {
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Failed to delete movie'
       };
+      return result;
     }
   }
 
@@ -533,26 +744,28 @@ export interface ConfigValueObject {
       if (resultSet && resultSet.goToFirstRow()) {
         const movie = this.parseMovieFromResultSet(resultSet);
         resultSet.close();
-        return {
+        const result: DatabaseResult<Movie | null> = {
           success: true,
           data: movie
         };
+        return result;
       } else {
         if (resultSet) {
           resultSet.close();
         }
-        return {
+        const result: DatabaseResult<Movie | null> = {
           success: true,
           data: null
         };
+        return result;
       }
     } catch (error) {
       Logger.error(TAG, `Failed to get movie by ID: ${error instanceof Error ? error.message : String(error)}`);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
+      const result: DatabaseResult<Movie | null> = {
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Failed to get movie by ID'
       };
+      return result;
     }
   }
 
@@ -565,39 +778,43 @@ export interface ConfigValueObject {
         return null;
       }
 
-      const movie = new Movie({
-        id: this.safeGetString(resultSet, 'id') || '',
-        title: this.safeGetString(resultSet, 'title') || '',
-        originalTitle: this.safeGetString(resultSet, 'originalTitle'),
-        type: this.safeGetLong(resultSet, 'type') || 0,
-        coverUrl: this.safeGetString(resultSet, 'coverUrl'),
-        backdropUrl: this.safeGetString(resultSet, 'backdropUrl'),
-        description: this.safeGetString(resultSet, 'description'),
-        releaseDate: this.safeGetString(resultSet, 'releaseDate'),
-        year: this.safeGetLong(resultSet, 'year') || 0,
-        genres: this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]'),
-        tags: this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]'),
-        duration: this.safeGetLong(resultSet, 'duration') || 0,
-        totalEpisodes: this.safeGetLong(resultSet, 'totalEpisodes') || 0,
-        currentSeason: this.safeGetLong(resultSet, 'currentSeason') || 1,
-        score: this.safeGetDouble(resultSet, 'score') || 0,
-        directors: this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]'),
-        actors: this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]'),
-        studio: this.safeGetString(resultSet, 'studio'),
-        country: this.safeGetString(resultSet, 'country'),
-        language: this.safeGetString(resultSet, 'language'),
-        plot: this.safeGetString(resultSet, 'plot'),
-        status: this.safeGetLong(resultSet, 'status') || 0,
-        createTime: this.safeGetLong(resultSet, 'createTime') || Date.now(),
-        updateTime: this.safeGetLong(resultSet, 'updateTime') || Date.now(),
-        sourceId: this.safeGetString(resultSet, 'sourceId'),
-        sourceName: this.safeGetString(resultSet, 'sourceName'),
-        quality: this.safeGetString(resultSet, 'quality') as string,
-        videoSources: this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]'),
-        episodes: this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]'),
-        ratingInfo: this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '{}'),
-        extraInfo: this.safeParseJson(this.safeGetString(resultSet, 'extraInfo') || '{}')
-      });
+      // 创建一个符合Partial<Movie>类型的对象，避免直接使用对象字面�?
+      const movieData: Partial<Movie> = {};
+      
+      // 逐个赋值属性，确保类型安全
+      movieData.id = this.safeGetString(resultSet, 'id') || '';
+      movieData.title = this.safeGetString(resultSet, 'title') || '';
+      movieData.originalTitle = this.safeGetString(resultSet, 'originalTitle');
+      movieData.type = this.safeGetLong(resultSet, 'type') || 0;
+      movieData.coverUrl = this.safeGetString(resultSet, 'coverUrl');
+      movieData.backdropUrl = this.safeGetString(resultSet, 'backdropUrl');
+      movieData.description = this.safeGetString(resultSet, 'description');
+      movieData.releaseDate = this.safeGetString(resultSet, 'releaseDate');
+      movieData.year = this.safeGetLong(resultSet, 'year') || 0;
+      movieData.genres = this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]');
+      movieData.tags = this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]');
+      movieData.duration = this.safeGetLong(resultSet, 'duration') || 0;
+      movieData.totalEpisodes = this.safeGetLong(resultSet, 'totalEpisodes') || 0;
+      movieData.currentSeason = this.safeGetLong(resultSet, 'currentSeason') || 1;
+      movieData.score = this.safeGetDouble(resultSet, 'score') || 0;
+      movieData.directors = this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]');
+      movieData.actors = this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]');
+      movieData.studio = this.safeGetString(resultSet, 'studio');
+      movieData.country = this.safeGetString(resultSet, 'country');
+      movieData.language = this.safeGetString(resultSet, 'language');
+      movieData.plot = this.safeGetString(resultSet, 'plot');
+      movieData.status = this.safeGetLong(resultSet, 'status') || 0;
+      movieData.createTime = this.safeGetLong(resultSet, 'createTime') || Date.now();
+      movieData.updateTime = this.safeGetLong(resultSet, 'updateTime') || Date.now();
+      movieData.sourceId = this.safeGetString(resultSet, 'sourceId');
+      movieData.sourceName = this.safeGetString(resultSet, 'sourceName');
+      movieData.quality = this.safeGetString(resultSet, 'quality') as string;
+      movieData.videoSources = this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]');
+      movieData.episodes = this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]');
+      movieData.ratingInfo = this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '{}');
+      movieData.extraInfo = this.safeParseJson(this.safeGetString(resultSet, 'extraInfo') || '{}');
+      
+      const movie = new Movie(movieData);
       return movie;
     } catch (error) {
       Logger.error(TAG, `Failed to parse movie from result set: ${error instanceof Error ? error.message : String(error)}`);
@@ -606,9 +823,9 @@ export interface ConfigValueObject {
   }
 
   /**
-   * 安全获取字符串类型字段
+   * 安全获取字符串类型字�?
    */
-  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string): string | undefined {
+  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string : new Error(String(columnName: string instanceof Error ? columnName: string : new Error(String(columnName: string))))))): string | undefined {
     try {
       const columnIndex = resultSet.getColumnIndex(columnName);
       if (columnIndex === -1) return undefined;
@@ -621,7 +838,7 @@ export interface ConfigValueObject {
   }
 
   /**
-   * 安全获取长整型字段
+   * 安全获取长整型字�?
    */
   private safeGetLong(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
     try {
@@ -636,7 +853,7 @@ export interface ConfigValueObject {
   }
 
   /**
-   * 安全获取双精度字段
+   * 安全获取双精度字�?
    */
   private safeGetDouble(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
     try {
@@ -653,9 +870,9 @@ export interface ConfigValueObject {
   /**
    * 安全解析JSON
    */
-  private safeParseJson(jsonStr: string): Record<string, string | number | boolean | Record<string, string | number | boolean>> {
+  private safeParseJson(jsonStr: string): Record<string, string | number | boolean | null> {
     try {
-      const result = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(jsonStr);
+      const result = JsonUtil.safeParse<Record<string, string | number | boolean | null>>(jsonStr);
       return result || {};
     } catch (error) {
       Logger.warn(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
@@ -664,11 +881,11 @@ export interface ConfigValueObject {
   }
 
   // 实现其他接口方法...
-  // 由于篇幅限制，这里省略了其他方法的具体实现
-  // 在实际开发中，需要实现DatabaseRepository接口中定义的所有方法
+  // 由于篇幅限制，这里省略了其他方法的具体实�?
+  // 在实际开发中，需要实现DatabaseRepository接口中定义的所有方�?
 
   // ========== 占位实现 ==========
-  // 为了代码能编译通过，提供基础的占位实现
+  // 为了代码能编译通过，提供基础的占位实�?
   async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> { return { success: false, message: 'Not implemented' }; }
   async getMoviesPaginated(params: PaginationParams, filters?: import('./DatabaseRepository').MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
   async searchMovies(keyword: string, params: PaginationParams, filters?: import('./DatabaseRepository').MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> { return { success: false, message: 'Not implemented' }; }
@@ -779,3 +996,5 @@ export interface ConfigValueObject {
     return { success: false, message: 'Not implemented', error: new Error('Not implemented') }; 
   }
 }
+
+

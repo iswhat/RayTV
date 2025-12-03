@@ -15,14 +15,10 @@ const TAG = 'LiveStreamService';
 const LIVE_FAVORITES_KEY = 'live_favorites';
 const LIVE_CATEGORY_CACHE_KEY = 'live_categories';
 const LIVE_CHANNEL_CACHE_KEY = 'live_channels';
-const CACHE_EXPIRY_TIME = 30 * 60 * 1000; // 30分钟缓存有效期
-
-// 直播状态枚举
-export enum LiveStatus {
+const CACHE_EXPIRY_TIME = 30 * 60 * 1000; // 30分钟缓存有效�?
+// 直播状态枚�?export enum LiveStatus {
   OFFLINE = 'offline',    // 离线
-  LIVE = 'live',         // 直播中
-  UPCOMING = 'upcoming',  // 即将开始
-  ENDING = 'ending',      // 即将结束
+  LIVE = 'live',         // 直播�?  UPCOMING = 'upcoming',  // 即将开�?  ENDING = 'ending',      // 即将结束
   ERROR = 'error'         // 错误
 }
 
@@ -32,9 +28,7 @@ export enum LiveQuality {
   LOW = 'low',          // 低清晰度
   SD = 'sd',           // 标清
   HD = 'hd',           // 高清
-  FHD = 'fhd',         // 全高清
-  UHD = 'uhd'          // 超高清
-}
+  FHD = 'fhd',         // 全高�?  UHD = 'uhd'          // 超高�?}
 
 // 直播分类接口
 export interface LiveCategory {
@@ -53,12 +47,9 @@ export interface LiveChannel {
   description?: string; // 频道描述
   categoryId: string;  // 分类ID
   categoryName: string; // 分类名称
-  status: LiveStatus;  // 直播状态
-  url?: string;        // 直播源URL
-  qualities?: LiveQuality[]; // 可用清晰度
-  currentProgram?: LiveProgram; // 当前节目
-  nextProgram?: LiveProgram;   // 下一个节目
-  tags?: string[];     // 标签
+  status: LiveStatus;  // 直播状�?  url?: string;        // 直播源URL
+  qualities?: LiveQuality[]; // 可用清晰�?  currentProgram?: LiveProgram; // 当前节目
+  nextProgram?: LiveProgram;   // 下一个节�?  tags?: string[];     // 标签
   isFavorite: boolean; // 是否收藏
   viewCount?: number;  // 观看人数
   country?: string;    // 国家/地区
@@ -71,8 +62,7 @@ export interface LiveProgram {
   id: string;          // 节目ID
   title: string;       // 节目标题
   startTime: number;   // 开始时间（时间戳）
-  endTime: number;     // 结束时间（时间戳）
-  description?: string; // 节目描述
+  endTime: number;     // 结束时间（时间戳�?  description?: string; // 节目描述
   cover?: string;      // 节目封面
   genre?: string[];    // 节目类型
   actors?: string[];   // 演员
@@ -84,36 +74,24 @@ export interface LiveEvent {
   id: string;          // 事件ID
   title: string;       // 事件标题
   description: string; // 事件描述
-  startTime: number;   // 开始时间
-  endTime: number;     // 结束时间
-  coverImage?: string; // 封面图
-  channelId: string;   // 所属频道ID
-  channelName: string; // 所属频道名称
-  status: LiveStatus;  // 直播状态
-  isHighlight?: boolean; // 是否高亮
+  startTime: number;   // 开始时�?  endTime: number;     // 结束时间
+  coverImage?: string; // 封面�?  channelId: string;   // 所属频道ID
+  channelName: string; // 所属频道名�?  status: LiveStatus;  // 直播状�?  isHighlight?: boolean; // 是否高亮
 }
 
-// 直播源信息接口
-export interface LiveSource {
+// 直播源信息接�?export interface LiveSource {
   id: string;          // 源ID
   url: string;         // 源URL
-  quality: LiveQuality; // 清晰度
-  isDefault: boolean;  // 是否默认
-  bitrate?: number;    // 比特率
-  codec?: string;      // 编码格式
+  quality: LiveQuality; // 清晰�?  isDefault: boolean;  // 是否默认
+  bitrate?: number;    // 比特�?  codec?: string;      // 编码格式
   protocol?: string;   // 协议类型
-  resolution?: string; // 分辨率
-}
+  resolution?: string; // 分辨�?}
 
-// 直播筛选条件接口
-export interface LiveFilter {
+// 直播筛选条件接�?export interface LiveFilter {
   categories?: string[]; // 分类ID列表
-  search?: string;       // 搜索关键词
-  status?: LiveStatus[]; // 直播状态
-  countries?: string[];  // 国家/地区
+  search?: string;       // 搜索关键�?  status?: LiveStatus[]; // 直播状�?  countries?: string[];  // 国家/地区
   languages?: string[];  // 语言
-  favoritesOnly?: boolean; // 仅显示收藏
-}
+  favoritesOnly?: boolean; // 仅显示收�?}
 
 // 直播排序类型枚举
 export enum LiveSortType {
@@ -121,26 +99,20 @@ export enum LiveSortType {
   NAME_ASC = 'name_asc',    // 名称升序
   NAME_DESC = 'name_desc',  // 名称降序
   VIEW_COUNT = 'view_count', // 观看人数
-  STATUS = 'status'        // 状态
-}
+  STATUS = 'status'        // 状�?}
 
-// 频道组接口
-export interface ChannelGroup {
+// 频道组接�?export interface ChannelGroup {
   id: string;          // 组ID
-  name: string;        // 组名称
-  channelIds: string[]; // 频道ID列表
+  name: string;        // 组名�?  channelIds: string[]; // 频道ID列表
   order: number;       // 排序
-  isDefault?: boolean;  // 是否默认组
-}
+  isDefault?: boolean;  // 是否默认�?}
 
 // 直播统计信息接口
 export interface LiveStatistics {
   totalChannels: number;  // 总频道数
   liveChannels: number;   // 直播中频道数
-  offlineChannels: number; // 离线频道数
-  totalCategories: number; // 总分类数
-  favoriteChannels: number; // 收藏频道数
-  recentViews: number;    // 最近观看数
+  offlineChannels: number; // 离线频道�?  totalCategories: number; // 总分类数
+  favoriteChannels: number; // 收藏频道�?  recentViews: number;    // 最近观看数
 }
 
 /**
@@ -167,14 +139,12 @@ export default class LiveStreamService {
     timestamp: number;
   }> = new Map();
   
-  // 监听器
-  private favoriteListeners: Array<(channelId: string, isFavorite: boolean) => void> = [];
+  // 监听�?  private favoriteListeners: Array<(channelId: string, isFavorite: boolean) => void> = [];
   private channelGroupListeners: Array<(groups: ChannelGroup[]) => void> = [];
   private statusListeners: Map<string, Array<(status: LiveStatus) => void>> = new Map();
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
     this.networkRepo = RepositoryFactory.getRepository('network') as NetworkRepository;
@@ -192,8 +162,7 @@ export default class LiveStreamService {
   }
 
   /**
-   * 初始化直播服务
-   */
+   * 初始化直播服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing live stream service...');
@@ -201,8 +170,7 @@ export default class LiveStreamService {
       // 加载收藏频道
       await this.loadFavoriteChannels();
       
-      // 加载频道组
-      await this.loadChannelGroups();
+      // 加载频道�?      await this.loadChannelGroups();
       
       // 加载缓存数据
       await this.loadCachedData();
@@ -210,7 +178,7 @@ export default class LiveStreamService {
       this.isInitialized = true;
       Logger.info(TAG, 'Live stream service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize live stream service', error);
+      Logger.error(TAG, 'Failed to initialize live stream service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -228,7 +196,7 @@ export default class LiveStreamService {
       
       Logger.info(TAG, `Loaded ${this.favoriteChannels.size} favorite channels`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to load favorite channels', error);
+      Logger.error(TAG, 'Failed to load favorite channels', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       this.favoriteChannels = new Set();
     }
   }
@@ -242,17 +210,15 @@ export default class LiveStreamService {
       await StorageUtil.setString(LIVE_FAVORITES_KEY, favoritesJson);
       Logger.debug(TAG, 'Saved favorite channels');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save favorite channels', error);
+      Logger.error(TAG, 'Failed to save favorite channels', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 加载频道组
-   */
+   * 加载频道�?   */
   private async loadChannelGroups(): Promise<void> {
     try {
-      // 从数据库加载频道组
-      const result = await this.databaseRepo.getLiveChannelGroups();
+      // 从数据库加载频道�?      const result = await this.databaseRepo.getLiveChannelGroups();
       if (result.isSuccess() && result.data) {
         result.data.forEach(group => {
           this.channelGroups.set(group.id, group);
@@ -261,7 +227,7 @@ export default class LiveStreamService {
       
       Logger.info(TAG, `Loaded ${this.channelGroups.size} channel groups`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to load channel groups', error);
+      Logger.error(TAG, 'Failed to load channel groups', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -286,7 +252,7 @@ export default class LiveStreamService {
         });
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to load cached data', error);
+      Logger.error(TAG, 'Failed to load cached data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -310,30 +276,26 @@ export default class LiveStreamService {
         JSON.stringify(channelsCache)
       );
     } catch (error) {
-      Logger.error(TAG, 'Failed to save cached data', error);
+      Logger.error(TAG, 'Failed to save cached data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 检查缓存是否有效
-   */
+   * 检查缓存是否有�?   */
   private isCacheValid(timestamp: number): boolean {
     return Date.now() - timestamp < CACHE_EXPIRY_TIME;
   }
 
   /**
-   * 获取所有直播分类
-   */
+   * 获取所有直播分�?   */
   public async getCategories(): Promise<ApiResponse<LiveCategory[]>> {
     try {
-      // 检查缓存
-      if (this.cachedCategories && this.isCacheValid(this.cachedCategories.timestamp)) {
+      // 检查缓�?      if (this.cachedCategories && this.isCacheValid(this.cachedCategories.timestamp)) {
         Logger.debug(TAG, 'Returning categories from cache');
         return ApiResponse.success(this.cachedCategories.data, '获取分类成功（缓存）');
       }
       
-      // 从网络获取分类
-      Logger.debug(TAG, 'Fetching categories from network');
+      // 从网络获取分�?      Logger.debug(TAG, 'Fetching categories from network');
       const result = await this.networkRepo.getLiveCategories();
       
       if (result.isSuccess() && result.data) {
@@ -343,13 +305,11 @@ export default class LiveStreamService {
           timestamp: Date.now()
         };
         
-        // 保存缓存到本地
-        await this.saveCachedData();
+        // 保存缓存到本�?        await this.saveCachedData();
         
         return ApiResponse.success(result.data, '获取分类成功');
       } else {
-        // 如果网络请求失败，尝试使用缓存数据
-        if (this.cachedCategories) {
+        // 如果网络请求失败，尝试使用缓存数�?        if (this.cachedCategories) {
           Logger.warn(TAG, 'Network failed, using cached categories');
           return ApiResponse.success(this.cachedCategories.data, '获取分类成功（缓存）');
         }
@@ -357,10 +317,9 @@ export default class LiveStreamService {
         return ApiResponse.error(result.code, result.message || '获取分类失败');
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to get categories', error);
+      Logger.error(TAG, 'Failed to get categories', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
-      // 如果发生异常，尝试使用缓存数据
-      if (this.cachedCategories) {
+      // 如果发生异常，尝试使用缓存数�?      if (this.cachedCategories) {
         Logger.warn(TAG, 'Error occurred, using cached categories');
         return ApiResponse.success(this.cachedCategories.data, '获取分类成功（缓存）');
       }
@@ -374,8 +333,7 @@ export default class LiveStreamService {
    */
   public async getChannelsByCategory(categoryId: string): Promise<ApiResponse<LiveChannel[]>> {
     try {
-      // 检查缓存
-      const cacheKey = `category_${categoryId}`;
+      // 检查缓�?      const cacheKey = `category_${categoryId}`;
       const cached = this.cachedChannels.get(cacheKey);
       if (cached && this.isCacheValid(cached.timestamp)) {
         Logger.debug(TAG, `Returning channels for category ${categoryId} from cache`);
@@ -386,13 +344,11 @@ export default class LiveStreamService {
         return ApiResponse.success(channelsWithFavoriteStatus, '获取频道成功（缓存）');
       }
       
-      // 从网络获取频道
-      Logger.debug(TAG, `Fetching channels for category ${categoryId} from network`);
+      // 从网络获取频�?      Logger.debug(TAG, `Fetching channels for category ${categoryId} from network`);
       const result = await this.networkRepo.getLiveChannelsByCategory(categoryId);
       
       if (result.isSuccess() && result.data) {
-        // 更新收藏状态
-        const channelsWithFavoriteStatus = result.data.map(channel => ({
+        // 更新收藏状�?        const channelsWithFavoriteStatus = result.data.map(channel => ({
           ...channel,
           isFavorite: this.favoriteChannels.has(channel.id)
         }));
@@ -403,13 +359,11 @@ export default class LiveStreamService {
           timestamp: Date.now()
         });
         
-        // 保存缓存到本地
-        await this.saveCachedData();
+        // 保存缓存到本�?        await this.saveCachedData();
         
         return ApiResponse.success(channelsWithFavoriteStatus, '获取频道成功');
       } else {
-        // 如果网络请求失败，尝试使用缓存数据
-        if (cached) {
+        // 如果网络请求失败，尝试使用缓存数�?        if (cached) {
           Logger.warn(TAG, `Network failed, using cached channels for category ${categoryId}`);
           const channelsWithFavoriteStatus = cached.data.map(channel => ({
             ...channel,
@@ -421,10 +375,9 @@ export default class LiveStreamService {
         return ApiResponse.error(result.code, result.message || '获取频道失败');
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get channels for category ${categoryId}`, error);
+      Logger.error(TAG, `Failed to get channels for category ${categoryId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
-      // 如果发生异常，尝试使用缓存数据
-      const cacheKey = `category_${categoryId}`;
+      // 如果发生异常，尝试使用缓存数�?      const cacheKey = `category_${categoryId}`;
       const cached = this.cachedChannels.get(cacheKey);
       if (cached) {
         Logger.warn(TAG, `Error occurred, using cached channels for category ${categoryId}`);
@@ -440,8 +393,7 @@ export default class LiveStreamService {
   }
 
   /**
-   * 获取所有直播频道（分页）
-   */
+   * 获取所有直播频道（分页�?   */
   public async getAllChannels(
     page: number = 1,
     pageSize: number = 50
@@ -450,8 +402,7 @@ export default class LiveStreamService {
       const result = await this.networkRepo.getLiveChannels(page, pageSize);
       
       if (result.isSuccess() && result.data) {
-        // 更新收藏状态
-        const channelsWithFavoriteStatus = result.data.channels.map(channel => ({
+        // 更新收藏状�?        const channelsWithFavoriteStatus = result.data.channels.map(channel => ({
           ...channel,
           isFavorite: this.favoriteChannels.has(channel.id)
         }));
@@ -461,13 +412,13 @@ export default class LiveStreamService {
             channels: channelsWithFavoriteStatus,
             total: result.data.total
           }, 
-          '获取所有频道成功'
+          '获取所有频道成�?
         );
       } else {
         return ApiResponse.error(result.code, result.message || '获取频道失败');
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to get all channels', error);
+      Logger.error(TAG, 'Failed to get all channels', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道失败');
     }
   }
@@ -477,8 +428,7 @@ export default class LiveStreamService {
    */
   public async getChannelById(channelId: string): Promise<ApiResponse<LiveChannel>> {
     try {
-      // 先尝试从缓存中查找
-      let channel: LiveChannel | undefined;
+      // 先尝试从缓存中查�?      let channel: LiveChannel | undefined;
       for (const cache of this.cachedChannels.values()) {
         const found = cache.data.find(c => c.id === channelId);
         if (found) {
@@ -488,22 +438,16 @@ export default class LiveStreamService {
       }
       
       if (channel && this.isCacheValid(cache.timestamp)) {
-        // 更新收藏状态
-        channel.isFavorite = this.favoriteChannels.has(channel.id);
+        // 更新收藏状�?        channel.isFavorite = this.favoriteChannels.has(channel.id);
         Logger.debug(TAG, `Returning channel ${channelId} from cache`);
         return ApiResponse.success(channel, '获取频道详情成功（缓存）');
       }
       
-      // 从网络获取频道详情
-      Logger.debug(TAG, `Fetching channel ${channelId} from network`);
+      // 从网络获取频道详�?      Logger.debug(TAG, `Fetching channel ${channelId} from network`);
       const result = await this.networkRepo.getLiveChannelById(channelId);
       
       if (result.isSuccess() && result.data) {
-        // 更新收藏状态
-        const channelWithFavoriteStatus = {
-          ...result.data,
-          isFavorite: this.favoriteChannels.has(result.data.id)
-        };
+        // 更新收藏状�?        const channelWithFavoriteStatus: Record<string, string | number | boolean | null> = { ... };
         
         return ApiResponse.success(channelWithFavoriteStatus, '获取频道详情成功');
       } else {
@@ -517,7 +461,7 @@ export default class LiveStreamService {
         return ApiResponse.error(result.code, result.message || '获取频道详情失败');
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get channel by id: ${channelId}`, error);
+      Logger.error(TAG, `Failed to get channel by id: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道详情失败');
     }
   }
@@ -533,24 +477,18 @@ export default class LiveStreamService {
     try {
       if (!keyword || keyword.trim().length === 0) {
         return ApiResponse.validationError([
-          { field: 'keyword', message: '搜索关键词不能为空' }
+          { field: 'keyword', message: '搜索关键词不能为�? }
         ]);
       }
       
       // 构建搜索参数
-      const searchParams = {
-        keyword,
-        filter,
-        sortBy
-      };
+      const searchParams: Record<string, string | number | boolean | null> = { ... };
       
-      // 从网络搜索频道
-      Logger.debug(TAG, `Searching channels with keyword: ${keyword}`);
+      // 从网络搜索频�?      Logger.debug(TAG, `Searching channels with keyword: ${keyword}`);
       const result = await this.networkRepo.searchLiveChannels(searchParams);
       
       if (result.isSuccess() && result.data) {
-        // 更新收藏状态
-        const channelsWithFavoriteStatus = result.data.map(channel => ({
+        // 更新收藏状�?        const channelsWithFavoriteStatus = result.data.map(channel => ({
           ...channel,
           isFavorite: this.favoriteChannels.has(channel.id)
         }));
@@ -560,7 +498,7 @@ export default class LiveStreamService {
         return ApiResponse.error(result.code, result.message || '搜索频道失败');
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to search channels with keyword: ${keyword}`, error);
+      Logger.error(TAG, `Failed to search channels with keyword: ${keyword}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '搜索频道失败');
     }
   }
@@ -575,15 +513,14 @@ export default class LiveStreamService {
       const result = await this.networkRepo.getLiveChannelSources(channelId);
       
       if (result.isSuccess() && result.data) {
-        return ApiResponse.success(result.data, '获取播放源成功');
+        return ApiResponse.success(result.data, '获取播放源成�?);
       } else {
-        return ApiResponse.error(result.code, result.message || '获取播放源失败');
+        return ApiResponse.error(result.code, result.message || '获取播放源失�?);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get sources for channel: ${channelId}`, error);
+      Logger.error(TAG, `Failed to get sources for channel: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
-      // 尝试从频道信息中提取播放源
-      const channelResult = await this.getChannelById(channelId);
+      // 尝试从频道信息中提取播放�?      const channelResult = await this.getChannelById(channelId);
       if (channelResult.isSuccess() && channelResult.data && channelResult.data.url) {
         const sources: LiveSource[] = [{
           id: `${channelId}_default`,
@@ -595,13 +532,12 @@ export default class LiveStreamService {
         return ApiResponse.success(sources, '获取播放源成功（从频道信息）');
       }
       
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取播放源失败');
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取播放源失�?);
     }
   }
 
   /**
-   * 获取频道节目单
-   */
+   * 获取频道节目�?   */
   public async getChannelPrograms(
     channelId: string,
     date: Date = new Date()
@@ -615,13 +551,13 @@ export default class LiveStreamService {
       const result = await this.networkRepo.getLiveChannelPrograms(channelId, formattedDate);
       
       if (result.isSuccess() && result.data) {
-        return ApiResponse.success(result.data, '获取节目单成功');
+        return ApiResponse.success(result.data, '获取节目单成�?);
       } else {
-        return ApiResponse.error(result.code, result.message || '获取节目单失败');
+        return ApiResponse.error(result.code, result.message || '获取节目单失�?);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get programs for channel: ${channelId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取节目单失败');
+      Logger.error(TAG, `Failed to get programs for channel: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取节目单失�?);
     }
   }
 
@@ -634,8 +570,7 @@ export default class LiveStreamService {
     isUpcoming: boolean = false
   ): Promise<ApiResponse<{ events: LiveEvent[], total: number }>> {
     try {
-      // 从网络获取直播事件
-      Logger.debug(TAG, `Fetching live events (upcoming: ${isUpcoming})`);
+      // 从网络获取直播事�?      Logger.debug(TAG, `Fetching live events (upcoming: ${isUpcoming})`);
       const result = await this.networkRepo.getLiveEvents(page, pageSize, isUpcoming);
       
       if (result.isSuccess() && result.data) {
@@ -644,7 +579,7 @@ export default class LiveStreamService {
         return ApiResponse.error(result.code, result.message || '获取直播事件失败');
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to get live events', error);
+      Logger.error(TAG, 'Failed to get live events', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取直播事件失败');
     }
   }
@@ -654,8 +589,7 @@ export default class LiveStreamService {
    */
   public async toggleFavoriteChannel(channelId: string): Promise<ApiResponse<{ isFavorite: boolean }>> {
     try {
-      // 切换收藏状态
-      const isFavorite = this.favoriteChannels.has(channelId);
+      // 切换收藏状�?      const isFavorite = this.favoriteChannels.has(channelId);
       
       if (isFavorite) {
         this.favoriteChannels.delete(channelId);
@@ -663,14 +597,11 @@ export default class LiveStreamService {
         this.favoriteChannels.add(channelId);
       }
       
-      // 保存到存储
-      await this.saveFavoriteChannels();
+      // 保存到存�?      await this.saveFavoriteChannels();
       
-      // 通知监听器
-      this.notifyFavoriteChanged(channelId, !isFavorite);
+      // 通知监听�?      this.notifyFavoriteChanged(channelId, !isFavorite);
       
-      // 更新缓存中的收藏状态
-      this.updateFavoriteStatusInCache(channelId, !isFavorite);
+      // 更新缓存中的收藏状�?      this.updateFavoriteStatusInCache(channelId, !isFavorite);
       
       Logger.info(TAG, `${!isFavorite ? 'Added' : 'Removed'} channel ${channelId} from favorites`);
       return ApiResponse.success(
@@ -678,8 +609,8 @@ export default class LiveStreamService {
         `频道${!isFavorite ? '已添加到' : '已从'}收藏`
       );
     } catch (error) {
-      Logger.error(TAG, `Failed to toggle favorite for channel: ${channelId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新收藏状态失败');
+      Logger.error(TAG, `Failed to toggle favorite for channel: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新收藏状态失�?);
     }
   }
 
@@ -714,31 +645,28 @@ export default class LiveStreamService {
         }
       }
       
-      // 确保所有频道都标记为收藏
-      favoriteChannels.forEach(channel => {
+      // 确保所有频道都标记为收�?      favoriteChannels.forEach(channel => {
         channel.isFavorite = true;
       });
       
       return ApiResponse.success(favoriteChannels, '获取收藏频道成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to get favorite channels', error);
+      Logger.error(TAG, 'Failed to get favorite channels', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取收藏频道失败');
     }
   }
 
   /**
-   * 创建频道组
-   */
+   * 创建频道�?   */
   public async createChannelGroup(name: string): Promise<ApiResponse<ChannelGroup>> {
     try {
       if (!name || name.trim().length === 0) {
         return ApiResponse.validationError([
-          { field: 'name', message: '频道组名称不能为空' }
+          { field: 'name', message: '频道组名称不能为�? }
         ]);
       }
       
-      // 创建新的频道组
-      const newGroup: ChannelGroup = {
+      // 创建新的频道�?      const newGroup: ChannelGroup = {
         id: `group_${Date.now()}`,
         name: name.trim(),
         channelIds: [],
@@ -746,26 +674,23 @@ export default class LiveStreamService {
         isDefault: this.channelGroups.size === 0
       };
       
-      // 添加到内存
-      this.channelGroups.set(newGroup.id, newGroup);
+      // 添加到内�?      this.channelGroups.set(newGroup.id, newGroup);
       
       // 保存到数据库
       await this.databaseRepo.saveLiveChannelGroup(newGroup);
       
-      // 通知监听器
-      this.notifyChannelGroupsChanged();
+      // 通知监听�?      this.notifyChannelGroupsChanged();
       
       Logger.info(TAG, `Created new channel group: ${newGroup.name} (${newGroup.id})`);
-      return ApiResponse.success(newGroup, '创建频道组成功');
+      return ApiResponse.success(newGroup, '创建频道组成�?);
     } catch (error) {
-      Logger.error(TAG, 'Failed to create channel group', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '创建频道组失败');
+      Logger.error(TAG, 'Failed to create channel group', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '创建频道组失�?);
     }
   }
 
   /**
-   * 更新频道组
-   */
+   * 更新频道�?   */
   public async updateChannelGroup(
     groupId: string,
     updates: Partial<ChannelGroup>
@@ -776,8 +701,7 @@ export default class LiveStreamService {
         return ApiResponse.error(ResponseCode.NOT_FOUND, '频道组不存在');
       }
       
-      // 更新频道组
-      const updatedGroup: ChannelGroup = {
+      // 更新频道�?      const updatedGroup: ChannelGroup = {
         ...group,
         ...updates
       };
@@ -788,28 +712,25 @@ export default class LiveStreamService {
       // 保存到数据库
       await this.databaseRepo.updateLiveChannelGroup(updatedGroup);
       
-      // 通知监听器
-      this.notifyChannelGroupsChanged();
+      // 通知监听�?      this.notifyChannelGroupsChanged();
       
       Logger.info(TAG, `Updated channel group: ${groupId}`);
-      return ApiResponse.success(updatedGroup, '更新频道组成功');
+      return ApiResponse.success(updatedGroup, '更新频道组成�?);
     } catch (error) {
-      Logger.error(TAG, `Failed to update channel group: ${groupId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新频道组失败');
+      Logger.error(TAG, `Failed to update channel group: ${groupId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新频道组失�?);
     }
   }
 
   /**
-   * 删除频道组
-   */
+   * 删除频道�?   */
   public async deleteChannelGroup(groupId: string): Promise<ApiResponse<boolean>> {
     try {
       if (!this.channelGroups.has(groupId)) {
         return ApiResponse.error(ResponseCode.NOT_FOUND, '频道组不存在');
       }
       
-      // 移除内存中的频道组
-      this.channelGroups.delete(groupId);
+      // 移除内存中的频道�?      this.channelGroups.delete(groupId);
       
       // 从数据库删除
       await this.databaseRepo.deleteLiveChannelGroup(groupId);
@@ -821,14 +742,13 @@ export default class LiveStreamService {
         await this.databaseRepo.updateLiveChannelGroup(group);
       }
       
-      // 通知监听器
-      this.notifyChannelGroupsChanged();
+      // 通知监听�?      this.notifyChannelGroupsChanged();
       
       Logger.info(TAG, `Deleted channel group: ${groupId}`);
-      return ApiResponse.success(true, '删除频道组成功');
+      return ApiResponse.success(true, '删除频道组成�?);
     } catch (error) {
-      Logger.error(TAG, `Failed to delete channel group: ${groupId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '删除频道组失败');
+      Logger.error(TAG, `Failed to delete channel group: ${groupId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '删除频道组失�?);
     }
   }
 
@@ -838,24 +758,22 @@ export default class LiveStreamService {
   public getChannelGroups(): ApiResponse<ChannelGroup[]> {
     try {
       const groups = this.getSortedChannelGroups();
-      return ApiResponse.success(groups, '获取频道组成功');
+      return ApiResponse.success(groups, '获取频道组成�?);
     } catch (error) {
-      Logger.error(TAG, 'Failed to get channel groups', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道组失败');
+      Logger.error(TAG, 'Failed to get channel groups', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道组失�?);
     }
   }
 
   /**
-   * 获取排序后的频道组
-   */
+   * 获取排序后的频道�?   */
   private getSortedChannelGroups(): ChannelGroup[] {
     return Array.from(this.channelGroups.values())
       .sort((a, b) => a.order - b.order);
   }
 
   /**
-   * 更新频道组中的频道
-   */
+   * 更新频道组中的频�?   */
   public async updateGroupChannels(
     groupId: string,
     channelIds: string[]
@@ -872,20 +790,18 @@ export default class LiveStreamService {
       // 保存到数据库
       await this.databaseRepo.updateLiveChannelGroup(group);
       
-      // 通知监听器
-      this.notifyChannelGroupsChanged();
+      // 通知监听�?      this.notifyChannelGroupsChanged();
       
       Logger.info(TAG, `Updated channels in group: ${groupId}, count: ${channelIds.length}`);
-      return ApiResponse.success(group, '更新频道组成员成功');
+      return ApiResponse.success(group, '更新频道组成员成�?);
     } catch (error) {
-      Logger.error(TAG, `Failed to update channels in group: ${groupId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新频道组成员失败');
+      Logger.error(TAG, `Failed to update channels in group: ${groupId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新频道组成员失�?);
     }
   }
 
   /**
-   * 获取频道组中的频道列表
-   */
+   * 获取频道组中的频道列�?   */
   public async getGroupChannels(groupId: string): Promise<ApiResponse<LiveChannel[]>> {
     try {
       const group = this.channelGroups.get(groupId);
@@ -894,7 +810,7 @@ export default class LiveStreamService {
       }
       
       if (group.channelIds.length === 0) {
-        return ApiResponse.success([], '频道组为空');
+        return ApiResponse.success([], '频道组为�?);
       }
       
       const channels: LiveChannel[] = [];
@@ -907,10 +823,10 @@ export default class LiveStreamService {
         }
       }
       
-      return ApiResponse.success(channels, '获取频道组成员成功');
+      return ApiResponse.success(channels, '获取频道组成员成�?);
     } catch (error) {
-      Logger.error(TAG, `Failed to get channels in group: ${groupId}`, error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道组成员失败');
+      Logger.error(TAG, `Failed to get channels in group: ${groupId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道组成员失�?);
     }
   }
 
@@ -934,11 +850,10 @@ export default class LiveStreamService {
       
       // 如果网络请求失败，生成简单的统计信息
       const categoriesResult = await this.getCategories();
-      const allChannelsResult = await this.getAllChannels(1, 1); // 只获取第一页用于统计
-      
+      const allChannelsResult = await this.getAllChannels(1, 1); // 只获取第一页用于统�?      
       const statistics: LiveStatistics = {
         totalChannels: allChannelsResult.isSuccess() ? allChannelsResult.data.total : 0,
-        liveChannels: 0, // 没有实时数据，设为0
+        liveChannels: 0, // 没有实时数据，设�?
         offlineChannels: 0,
         totalCategories: categoriesResult.isSuccess() ? categoriesResult.data.length : 0,
         favoriteChannels: this.favoriteChannels.size,
@@ -947,7 +862,7 @@ export default class LiveStreamService {
       
       return ApiResponse.success(statistics, '获取统计信息成功（本地计算）');
     } catch (error) {
-      Logger.error(TAG, 'Failed to get statistics', error);
+      Logger.error(TAG, 'Failed to get statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
       // 返回基本统计信息
       const statistics: LiveStatistics = {
@@ -959,31 +874,28 @@ export default class LiveStreamService {
         recentViews: 0
       };
       
-      return ApiResponse.success(statistics, '获取统计信息成功（简化版）');
+      return ApiResponse.success(statistics, '获取统计信息成功（简化版�?);
     }
   }
 
   /**
-   * 刷新频道状态
-   */
+   * 刷新频道状�?   */
   public async refreshChannelStatus(channelIds: string[]): Promise<ApiResponse<Map<string, LiveStatus>>> {
     try {
-      // 从网络刷新频道状态
-      const result = await this.networkRepo.refreshLiveChannelStatus(channelIds);
+      // 从网络刷新频道状�?      const result = await this.networkRepo.refreshLiveChannelStatus(channelIds);
       
       if (result.isSuccess() && result.data) {
-        // 通知状态变更
-        result.data.forEach((status, channelId) => {
+        // 通知状态变�?        result.data.forEach((status, channelId) => {
           this.notifyChannelStatusChanged(channelId, status);
         });
         
-        return ApiResponse.success(result.data, '刷新频道状态成功');
+        return ApiResponse.success(result.data, '刷新频道状态成�?);
       } else {
-        return ApiResponse.error(result.code, result.message || '刷新频道状态失败');
+        return ApiResponse.error(result.code, result.message || '刷新频道状态失�?);
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to refresh channel status', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '刷新频道状态失败');
+      Logger.error(TAG, 'Failed to refresh channel status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '刷新频道状态失�?);
     }
   }
 
@@ -1003,41 +915,38 @@ export default class LiveStreamService {
       Logger.info(TAG, 'Cleared all live stream cache');
       return ApiResponse.success(true, '清除缓存成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear cache', error);
+      Logger.error(TAG, 'Failed to clear cache', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '清除缓存失败');
     }
   }
 
   /**
-   * 通知收藏状态变更
-   */
+   * 通知收藏状态变�?   */
   private notifyFavoriteChanged(channelId: string, isFavorite: boolean): void {
     for (const listener of this.favoriteListeners) {
       try {
         listener(channelId, isFavorite);
       } catch (error) {
-        Logger.error(TAG, 'Error in favorite listener', error);
+        Logger.error(TAG, 'Error in favorite listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
 
   /**
-   * 通知频道组变更
-   */
+   * 通知频道组变�?   */
   private notifyChannelGroupsChanged(): void {
     const groups = this.getSortedChannelGroups();
     for (const listener of this.channelGroupListeners) {
       try {
         listener(groups);
       } catch (error) {
-        Logger.error(TAG, 'Error in channel group listener', error);
+        Logger.error(TAG, 'Error in channel group listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
 
   /**
-   * 通知频道状态变更
-   */
+   * 通知频道状态变�?   */
   private notifyChannelStatusChanged(channelId: string, status: LiveStatus): void {
     if (!this.statusListeners.has(channelId)) return;
     
@@ -1046,14 +955,13 @@ export default class LiveStreamService {
       try {
         listener(status);
       } catch (error) {
-        Logger.error(TAG, `Error in status listener for channel ${channelId}`, error);
+        Logger.error(TAG, `Error in status listener for channel ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
 
   /**
-   * 更新缓存中的收藏状态
-   */
+   * 更新缓存中的收藏状�?   */
   private updateFavoriteStatusInCache(channelId: string, isFavorite: boolean): void {
     for (const [key, cache] of this.cachedChannels.entries()) {
       const channelIndex = cache.data.findIndex(channel => channel.id === channelId);
@@ -1088,8 +996,7 @@ export default class LiveStreamService {
   ): () => void {
     this.channelGroupListeners.push(listener);
     
-    // 立即回调当前频道组
-    listener(this.getSortedChannelGroups());
+    // 立即回调当前频道�?    listener(this.getSortedChannelGroups());
     
     // 返回取消监听函数
     return () => {
@@ -1128,8 +1035,7 @@ export default class LiveStreamService {
    */
   public async exportChannelList(format: 'm3u' | 'json' = 'json'): Promise<ApiResponse<string>> {
     try {
-      // 获取所有频道
-      const allChannelsResult = await this.getAllChannels(1, 1000);
+      // 获取所有频�?      const allChannelsResult = await this.getAllChannels(1, 1000);
       if (!allChannelsResult.isSuccess() || !allChannelsResult.data) {
         return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取频道列表失败');
       }
@@ -1145,9 +1051,9 @@ export default class LiveStreamService {
       }
       
       Logger.info(TAG, `Exported ${allChannelsResult.data.channels.length} channels in ${format} format`);
-      return ApiResponse.success(exportData, `导出频道列表成功（${format}格式）`);
+      return ApiResponse.success(exportData, `导出频道列表成功�?{format}格式）`);
     } catch (error) {
-      Logger.error(TAG, `Failed to export channel list in ${format} format`, error);
+      Logger.error(TAG, `Failed to export channel list in ${format} format`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '导出频道列表失败');
     }
   }
@@ -1170,29 +1076,28 @@ export default class LiveStreamService {
   }
 
   /**
-   * 销毁直播服务
-   */
+   * 销毁直播服�?   */
   public async destroy(): Promise<void> {
     try {
       Logger.info(TAG, 'Destroying live stream service...');
       
-      // 清除监听器
-      this.favoriteListeners = [];
+      // 清除监听�?      this.favoriteListeners = [];
       this.channelGroupListeners = [];
       this.statusListeners.clear();
       
       // 清除缓存
       await this.clearCache();
       
-      // 重置状态
-      this.favoriteChannels.clear();
+      // 重置状�?      this.favoriteChannels.clear();
       this.channelGroups.clear();
       this.cachedCategories = null;
       this.cachedChannels.clear();
       
       Logger.info(TAG, 'Live stream service destroyed successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to destroy live stream service', error);
+      Logger.error(TAG, 'Failed to destroy live stream service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 }
+
+

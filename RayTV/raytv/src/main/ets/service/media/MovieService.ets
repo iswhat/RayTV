@@ -1,5 +1,4 @@
-// MovieService - 电影/视频服务类
-import Logger from '../../common/util/Logger';
+// MovieService - 电影/视频服务�?import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
@@ -31,42 +30,14 @@ import ApiResponse, { ResponseCode } from '../dto/ApiResponse';
 
 // 常量定义
 const TAG = 'MovieService';
-const CACHE_PREFIX = {
-  MOVIE_DETAIL: 'movie_detail_',
-  SEARCH_RESULT: 'search_result_',
-  VIDEO_SOURCES: 'video_sources_',
-  HOT_SEARCH: 'hot_search_',
-  CATEGORY_LIST: 'category_list_'
-};
-const CACHE_DURATION = {
-  MOVIE_DETAIL: 24 * 60 * 60 * 1000, // 24小时
-  SEARCH_RESULT: 1 * 60 * 60 * 1000,  // 1小时
-  VIDEO_SOURCES: 6 * 60 * 60 * 1000,  // 6小时
-  HOT_SEARCH: 30 * 60 * 1000,         // 30分钟
-  CATEGORY_LIST: 6 * 60 * 60 * 1000   // 6小时
-};
+const CACHE_PREFIX: Record<string, string | number | boolean | null> = { ... };
+const CACHE_DURATION: Record<string, string | number | boolean | null> = { ... };
 
 // API端点
-const API_ENDPOINTS = {
-  SEARCH: '/api/movies/search',
-  SEARCH_SUGGESTIONS: '/api/movies/search/suggestions',
-  HOT_SEARCH: '/api/movies/search/hot',
-  MOVIE_DETAIL: '/api/movies/detail',
-  EPISODES: '/api/movies/episodes',
-  VIDEO_SOURCES: '/api/movies/sources',
-  CATEGORIES: '/api/movies/categories',
-  CATEGORY_ITEMS: '/api/movies/category',
-  RECOMMENDATIONS: '/api/movies/recommendations',
-  SIMILAR: '/api/movies/similar',
-  TRENDING: '/api/movies/trending',
-  NEW_RELEASES: '/api/movies/new-releases',
-  POPULAR: '/api/movies/popular',
-  TOP_RATED: '/api/movies/top-rated'
-};
+const API_ENDPOINTS: Record<string, string | number | boolean | null> = { ... };
 
 /**
- * 电影/视频服务类
- * 负责处理电影/视频相关的业务逻辑
+ * 电影/视频服务�? * 负责处理电影/视频相关的业务逻辑
  */
 export default class MovieService {
   private static instance: MovieService;
@@ -74,8 +45,7 @@ export default class MovieService {
   private databaseRepo: DatabaseRepository;
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.networkRepo = RepositoryFactory.getRepository('network') as NetworkRepository;
     this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
@@ -92,13 +62,11 @@ export default class MovieService {
   }
 
   /**
-   * 初始化服务
-   * 用于兼容AppService的初始化流程
+   * 初始化服�?   * 用于兼容AppService的初始化流程
    */
   public async initialize(): Promise<void> {
     Logger.info(TAG, 'MovieService initialized');
-    // 空实现，用于兼容AppService初始化流程
-  }
+    // 空实现，用于兼容AppService初始化流�?  }
 
   /**
    * 搜索电影/视频
@@ -107,18 +75,15 @@ export default class MovieService {
     try {
       Logger.info(TAG, 'Searching movies...', { keyword: request.keyword, type: request.type });
 
-      // 验证搜索关键词
-      if (!SearchUtils.validateKeyword(request.keyword)) {
+      // 验证搜索关键�?      if (!SearchUtils.validateKeyword(request.keyword)) {
         return ApiResponse.validationError<SearchResponseData>([
-          { field: 'keyword', message: '搜索关键词不能为空' }
+          { field: 'keyword', message: '搜索关键词不能为�? }
         ]);
       }
 
-      // 生成缓存键
-      const cacheKey = `${CACHE_PREFIX.SEARCH_RESULT}${request.keyword}_${request.type}_${request.page}_${request.pageSize}`;
+      // 生成缓存�?      const cacheKey = `${CACHE_PREFIX.SEARCH_RESULT}${request.keyword}_${request.type}_${request.page}_${request.pageSize}`;
 
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<SearchResponseData>>(cacheKey, CACHE_DURATION.SEARCH_RESULT);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<ApiResponse<SearchResponseData>>(cacheKey, CACHE_DURATION.SEARCH_RESULT);
       if (cachedData) {
         Logger.info(TAG, 'Returning search results from cache');
         return cachedData;
@@ -139,7 +104,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Search failed', error);
+      Logger.error(TAG, 'Search failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<SearchResponseData>('搜索失败，请检查网络连接或稍后重试');
     }
   }
@@ -151,8 +116,7 @@ export default class MovieService {
     try {
       Logger.info(TAG, 'Getting search suggestions...', { keyword });
 
-      // 验证关键词长度
-      if (keyword.length < 1) {
+      // 验证关键词长�?      if (keyword.length < 1) {
         return ApiResponse.success<SearchSuggestionsResponseData>({
           suggestions: [],
           keyword,
@@ -169,7 +133,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get search suggestions', error);
+      Logger.error(TAG, 'Failed to get search suggestions', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       // 失败时返回空建议，不影响用户体验
       return ApiResponse.success<SearchSuggestionsResponseData>({
         suggestions: [],
@@ -186,11 +150,9 @@ export default class MovieService {
     try {
       Logger.info(TAG, 'Getting hot search keywords...');
 
-      // 生成缓存键
-      const cacheKey = `${CACHE_PREFIX.HOT_SEARCH}`;
+      // 生成缓存�?      const cacheKey = `${CACHE_PREFIX.HOT_SEARCH}`;
 
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<HotSearchResponseData>>(cacheKey, CACHE_DURATION.HOT_SEARCH);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<ApiResponse<HotSearchResponseData>>(cacheKey, CACHE_DURATION.HOT_SEARCH);
       if (cachedData) {
         Logger.info(TAG, 'Returning hot search from cache');
         return cachedData;
@@ -209,7 +171,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get hot search', error);
+      Logger.error(TAG, 'Failed to get hot search', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<HotSearchResponseData>('获取热门搜索失败');
     }
   }
@@ -228,11 +190,9 @@ export default class MovieService {
         ]);
       }
 
-      // 生成缓存键
-      const cacheKey = `${CACHE_PREFIX.MOVIE_DETAIL}${movieId}`;
+      // 生成缓存�?      const cacheKey = `${CACHE_PREFIX.MOVIE_DETAIL}${movieId}`;
 
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<MovieDetailData>>(cacheKey, CACHE_DURATION.MOVIE_DETAIL);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<ApiResponse<MovieDetailData>>(cacheKey, CACHE_DURATION.MOVIE_DETAIL);
       if (cachedData) {
         // 检查是否已收藏
         const isFavorite = await this.databaseRepo.isMovieFavorite(movieId);
@@ -240,8 +200,7 @@ export default class MovieService {
           cachedData.data.isFavorite = isFavorite;
         }
         
-        // 检查观看进度
-        const watchProgress = await this.databaseRepo.getWatchProgress(movieId);
+        // 检查观看进�?        const watchProgress = await this.databaseRepo.getWatchProgress(movieId);
         if (cachedData.data && watchProgress) {
           cachedData.data.watchProgress = watchProgress.progress;
           cachedData.data.lastWatchTime = watchProgress.timestamp;
@@ -259,8 +218,7 @@ export default class MovieService {
       });
 
       if (response.isSuccess() && response.data) {
-        // 添加收藏和观看进度信息
-        response.data.isFavorite = await this.databaseRepo.isMovieFavorite(movieId);
+        // 添加收藏和观看进度信�?        response.data.isFavorite = await this.databaseRepo.isMovieFavorite(movieId);
         
         const watchProgress = await this.databaseRepo.getWatchProgress(movieId);
         if (watchProgress) {
@@ -277,7 +235,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get movie detail', error);
+      Logger.error(TAG, 'Failed to get movie detail', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<MovieDetailData>('获取电影详情失败');
     }
   }
@@ -297,27 +255,24 @@ export default class MovieService {
       });
 
       if (response.isSuccess() && response.data?.episodes) {
-        // 加载每集的观看进度
-        for (const episode of response.data.episodes) {
+        // 加载每集的观看进�?        for (const episode of response.data.episodes) {
           const progress = await this.databaseRepo.getEpisodeWatchProgress(movieId, episode.id);
           if (progress) {
             episode.watchProgress = progress.progress;
             episode.watchTime = progress.timestamp;
-            episode.isWatched = progress.progress >= 95; // 进度超过95%视为已观看
-          }
+            episode.isWatched = progress.progress >= 95; // 进度超过95%视为已观�?          }
         }
       }
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get episodes', error);
+      Logger.error(TAG, 'Failed to get episodes', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<EpisodesResponseData>('获取剧集列表失败');
     }
   }
 
   /**
-   * 获取视频播放源
-   */
+   * 获取视频播放�?   */
   public async getVideoSources(request: VideoSourceRequest): Promise<ApiResponse<VideoSourcesResponseData>> {
     try {
       Logger.info(TAG, 'Getting video sources...', { 
@@ -325,14 +280,12 @@ export default class MovieService {
         episodeId: request.episodeId
       });
 
-      // 生成缓存键
-      let cacheKey = `${CACHE_PREFIX.VIDEO_SOURCES}${request.contentId}`;
+      // 生成缓存�?      let cacheKey = `${CACHE_PREFIX.VIDEO_SOURCES}${request.contentId}`;
       if (request.episodeId) {
         cacheKey += `_${request.episodeId}`;
       }
 
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<VideoSourcesResponseData>>(cacheKey, CACHE_DURATION.VIDEO_SOURCES);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<ApiResponse<VideoSourcesResponseData>>(cacheKey, CACHE_DURATION.VIDEO_SOURCES);
       if (cachedData) {
         Logger.info(TAG, 'Returning video sources from cache');
         return cachedData;
@@ -352,14 +305,13 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get video sources', error);
-      return ApiResponse.networkError<VideoSourcesResponseData>('获取播放源失败');
+      Logger.error(TAG, 'Failed to get video sources', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.networkError<VideoSourcesResponseData>('获取播放源失�?);
     }
   }
 
   /**
-   * 更新播放状态
-   */
+   * 更新播放状�?   */
   public async updatePlaybackState(state: PlaybackState): Promise<ApiResponse<boolean>> {
     try {
       Logger.info(TAG, 'Updating playback state...', {
@@ -371,8 +323,7 @@ export default class MovieService {
       // 保存到本地数据库
       await this.databaseRepo.savePlaybackState(state);
 
-      // 如果播放完成，记录观看历史
-      if (state.completed) {
+      // 如果播放完成，记录观看历�?      if (state.completed) {
         await this.databaseRepo.addToHistory({
           userId: 'current', // 实际应用中应该使用当前登录用户ID
           contentId: state.contentId,
@@ -384,16 +335,15 @@ export default class MovieService {
         });
       }
 
-      return ApiResponse.success(true, '播放状态更新成功');
+      return ApiResponse.success(true, '播放状态更新成�?);
     } catch (error) {
-      Logger.error(TAG, 'Failed to update playback state', error);
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新播放状态失败');
+      Logger.error(TAG, 'Failed to update playback state', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '更新播放状态失�?);
     }
   }
 
   /**
-   * 获取播放状态
-   */
+   * 获取播放状�?   */
   public async getPlaybackState(contentId: string, episodeId?: string): Promise<ApiResponse<PlaybackState | null>> {
     try {
       Logger.info(TAG, 'Getting playback state...', { contentId, episodeId });
@@ -401,10 +351,10 @@ export default class MovieService {
       // 从本地数据库获取
       const state = await this.databaseRepo.getPlaybackState(contentId, episodeId);
       
-      return ApiResponse.success(state, '获取播放状态成功');
+      return ApiResponse.success(state, '获取播放状态成�?);
     } catch (error) {
-      Logger.error(TAG, 'Failed to get playback state', error);
-      return ApiResponse.success<null>(null, '获取播放状态失败，返回空');
+      Logger.error(TAG, 'Failed to get playback state', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.success<null>(null, '获取播放状态失败，返回�?);
     }
   }
 
@@ -415,8 +365,7 @@ export default class MovieService {
     try {
       Logger.info(TAG, 'Toggling favorite status...', { movieId });
 
-      // 检查当前收藏状态
-      const isFavorite = await this.databaseRepo.isMovieFavorite(movieId);
+      // 检查当前收藏状�?      const isFavorite = await this.databaseRepo.isMovieFavorite(movieId);
       
       if (isFavorite) {
         // 移除收藏
@@ -424,8 +373,7 @@ export default class MovieService {
         Logger.info(TAG, 'Movie removed from favorites', { movieId });
       } else {
         // 添加收藏
-        // 先获取电影详情
-        const detailResponse = await this.getMovieDetail(movieId);
+        // 先获取电影详�?        const detailResponse = await this.getMovieDetail(movieId);
         if (detailResponse.isSuccess() && detailResponse.data) {
           await this.databaseRepo.addToFavorites({
             id: movieId,
@@ -438,20 +386,18 @@ export default class MovieService {
           });
           Logger.info(TAG, 'Movie added to favorites', { movieId });
         } else {
-          return ApiResponse.error(ResponseCode.NOT_FOUND, '获取电影信息失败，无法添加收藏');
+          return ApiResponse.error(ResponseCode.NOT_FOUND, '获取电影信息失败，无法添加收�?);
         }
       }
 
-      // 返回新的收藏状态
-      const newFavoriteStatus = !isFavorite;
+      // 返回新的收藏状�?      const newFavoriteStatus = !isFavorite;
       
-      // 清除详情缓存，以便下次加载时更新收藏状态
-      await this.clearMovieDetailCache(movieId);
+      // 清除详情缓存，以便下次加载时更新收藏状�?      await this.clearMovieDetailCache(movieId);
       
       return ApiResponse.success({ isFavorite: newFavoriteStatus }, 
         newFavoriteStatus ? '添加收藏成功' : '移除收藏成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to toggle favorite status', error);
+      Logger.error(TAG, 'Failed to toggle favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '操作收藏失败');
     }
   }
@@ -471,7 +417,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get recommendations', error);
+      Logger.error(TAG, 'Failed to get recommendations', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<MovieDetailData[]>('获取推荐内容失败');
     }
   }
@@ -491,7 +437,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get similar movies', error);
+      Logger.error(TAG, 'Failed to get similar movies', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<MovieDetailData[]>('获取相似内容失败');
     }
   }
@@ -503,11 +449,9 @@ export default class MovieService {
     try {
       Logger.info(TAG, 'Getting categories...', { type });
 
-      // 生成缓存键
-      const cacheKey = `${CACHE_PREFIX.CATEGORY_LIST}${type}`;
+      // 生成缓存�?      const cacheKey = `${CACHE_PREFIX.CATEGORY_LIST}${type}`;
 
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<ApiResponse<unknown[]>>(cacheKey, CACHE_DURATION.CATEGORY_LIST);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<ApiResponse<unknown[]>>(cacheKey, CACHE_DURATION.CATEGORY_LIST);
       if (cachedData) {
         Logger.info(TAG, 'Returning categories from cache');
         return cachedData;
@@ -527,7 +471,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get categories', error);
+      Logger.error(TAG, 'Failed to get categories', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<unknown[]>('获取分类列表失败');
     }
   }
@@ -548,7 +492,7 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get category items', error);
+      Logger.error(TAG, 'Failed to get category items', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<SearchResponseData>('获取分类内容失败');
     }
   }
@@ -568,14 +512,13 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get trending movies', error);
+      Logger.error(TAG, 'Failed to get trending movies', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<MovieDetailData[]>('获取热门内容失败');
     }
   }
 
   /**
-   * 获取最新上线
-   */
+   * 获取最新上�?   */
   public async getNewReleases(type: VideoType = VideoType.ALL, limit: number = 20): Promise<ApiResponse<MovieDetailData[]>> {
     try {
       Logger.info(TAG, 'Getting new releases...', { type, limit });
@@ -588,8 +531,8 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get new releases', error);
-      return ApiResponse.networkError<MovieDetailData[]>('获取最新上线失败');
+      Logger.error(TAG, 'Failed to get new releases', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.networkError<MovieDetailData[]>('获取最新上线失�?);
     }
   }
 
@@ -608,14 +551,13 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get popular movies', error);
+      Logger.error(TAG, 'Failed to get popular movies', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.networkError<MovieDetailData[]>('获取流行内容失败');
     }
   }
 
   /**
-   * 获取高评分内容
-   */
+   * 获取高评分内�?   */
   public async getTopRated(type: VideoType = VideoType.ALL, limit: number = 20): Promise<ApiResponse<MovieDetailData[]>> {
     try {
       Logger.info(TAG, 'Getting top rated movies...', { type, limit });
@@ -628,16 +570,15 @@ export default class MovieService {
 
       return response;
     } catch (error) {
-      Logger.error(TAG, 'Failed to get top rated movies', error);
-      return ApiResponse.networkError<MovieDetailData[]>('获取高评分内容失败');
+      Logger.error(TAG, 'Failed to get top rated movies', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      return ApiResponse.networkError<MovieDetailData[]>('获取高评分内容失�?);
     }
   }
 
   // ========== 缓存相关方法 ==========
 
   /**
-   * 从缓存获取数据
-   */
+   * 从缓存获取数�?   */
   private async getCachedData<T>(key: string, maxAge: number): Promise<T | null> {
     try {
       const cached = await StorageUtil.getObject<{ data: T; timestamp: number }>(key);
@@ -648,14 +589,13 @@ export default class MovieService {
 
       const now = Date.now();
       if (now - cached.timestamp > maxAge) {
-        // 缓存已过期
-        await StorageUtil.remove(key);
+        // 缓存已过�?        await StorageUtil.remove(key);
         return null;
       }
 
       return cached.data;
     } catch (error) {
-      Logger.error(TAG, `Failed to get cached data for key ${key}`, error);
+      Logger.error(TAG, `Failed to get cached data for key ${key}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -670,7 +610,7 @@ export default class MovieService {
         timestamp: Date.now()
       });
     } catch (error) {
-      Logger.error(TAG, `Failed to set cached data for key ${key}`, error);
+      Logger.error(TAG, `Failed to set cached data for key ${key}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -682,15 +622,14 @@ export default class MovieService {
       const cacheKey = `${CACHE_PREFIX.MOVIE_DETAIL}${movieId}`;
       await StorageUtil.remove(cacheKey);
     } catch (error) {
-      Logger.error(TAG, `Failed to clear movie detail cache for movieId ${movieId}`, error);
+      Logger.error(TAG, `Failed to clear movie detail cache for movieId ${movieId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   // ========== 本地数据同步方法 ==========
 
   /**
-   * 将电影数据同步到本地数据库
-   */
+   * 将电影数据同步到本地数据�?   */
   private async syncMovieToLocal(movieData: MovieDetailData): Promise<void> {
     try {
       // 创建Movie对象
@@ -720,7 +659,9 @@ export default class MovieService {
       // 保存到本地数据库
       await this.databaseRepo.saveMovie(movie);
     } catch (error) {
-      Logger.error(TAG, `Failed to sync movie to local database: ${movieData.id}`, error);
+      Logger.error(TAG, `Failed to sync movie to local database: ${movieData.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 }
+
+

@@ -25,8 +25,7 @@ export enum NotificationType {
   CUSTOM = 'custom'
 }
 
-// 通知优先级枚举
-export enum NotificationPriority {
+// 通知优先级枚�?export enum NotificationPriority {
   LOW = 0,
   DEFAULT = 1,
   HIGH = 2,
@@ -46,49 +45,38 @@ export interface NotificationAction {
   id: string;              // 操作ID
   title: string;           // 按钮标题
   icon?: number;           // 按钮图标
-  actionData?: unknown;        // 操作数据
+  actionData?: Record<string, string | number | boolean | null>;        // 操作数据
 }
 
 // 通知内容接口
 export interface NotificationContent {
   title: string;           // 通知标题
   body: string;            // 通知内容
-  subtitle?: string;       // 通知副标题
-  icon?: number | string;  // 通知图标
-  largeIcon?: number | string; // 大图标
-  image?: string;          // 通知图片
+  subtitle?: string;       // 通知副标�?  icon?: number | string;  // 通知图标
+  largeIcon?: number | string; // 大图�?  image?: string;          // 通知图片
   sound?: boolean;         // 是否播放声音
   vibrate?: boolean;       // 是否振动
   badge?: number;          // 角标数字
   actions?: NotificationAction[]; // 操作按钮
-  data?: unknown;              // 附加数据
+  data?: Record<string, string | number | boolean | null>;              // 附加数据
   type?: NotificationType; // 通知类型
-  priority?: NotificationPriority; // 优先级
-  level?: NotificationLevel; // 通知级别
-  autoCancel?: boolean;    // 点击后自动取消
-  ongoing?: boolean;       // 是否为持续通知
+  priority?: NotificationPriority; // 优先�?  level?: NotificationLevel; // 通知级别
+  autoCancel?: boolean;    // 点击后自动取�?  ongoing?: boolean;       // 是否为持续通知
   timeoutMs?: number;      // 超时时间（毫秒）
   category?: string;       // 通知分类
-  visibility?: number;     // 可见性
-}
+  visibility?: number;     // 可见�?}
 
 // 进度通知配置接口
 export interface ProgressNotificationConfig extends NotificationContent {
-  progress: number;        // 进度（0-100）
-  maxProgress: number;     // 最大进度
-  indeterminate?: boolean; // 是否为不确定进度
+  progress: number;        // 进度�?-100�?  maxProgress: number;     // 最大进�?  indeterminate?: boolean; // 是否为不确定进度
   titleFormat?: string;    // 标题格式
   bodyFormat?: string;     // 内容格式
 }
 
 // 下载通知配置接口
 export interface DownloadNotificationConfig extends ProgressNotificationConfig {
-  fileName: string;        // 文件名
-  downloadSpeed?: number;  // 下载速度（字节/秒）
-  totalSize?: number;      // 总大小（字节）
-  remainingTime?: number;  // 剩余时间（秒）
-  status?: 'downloading' | 'paused' | 'completed' | 'failed'; // 下载状态
-}
+  fileName: string;        // 文件�?  downloadSpeed?: number;  // 下载速度（字�?秒）
+  totalSize?: number;      // 总大小（字节�?  remainingTime?: number;  // 剩余时间（秒�?  status?: 'downloading' | 'paused' | 'completed' | 'failed'; // 下载状�?}
 
 // 通知服务配置接口
 export interface NotificationServiceConfig {
@@ -124,8 +112,8 @@ export const DEFAULT_NOTIFICATION_SERVICE_CONFIG: NotificationServiceConfig = {
 };
 
 // 通知点击回调类型
-type NotificationClickCallback = (notificationId: string, actionId?: string, data?: unknown) => void;
-  type NotificationActionCallback = (actionId: string, data?: unknown) => void;
+type NotificationClickCallback = (notificationId: string, actionId?: string, data?: Record<string, string | number | boolean | null>) => void;
+  type NotificationActionCallback = (actionId: string, data?: Record<string, string | number | boolean | null>) => void;
 
 export default class NotificationService {
   private static instance: NotificationService;
@@ -149,16 +137,14 @@ export default class NotificationService {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
    * 初始化通知服务
-   * @param context 应用上下文
-   */
+   * @param context 应用上下�?   */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
       Logger.info(TAG, 'Notification service already initialized');
@@ -199,10 +185,9 @@ export default class NotificationService {
   private async checkPermission(): Promise<void> {
     try {
       const hasPerm = await notificationManager.checkPermission();
-      this.hasPermission = hasPerm === 0; // 0表示有权限
-      
+      this.hasPermission = hasPerm === 0; // 0表示有权�?      
       if (!this.hasPermission) {
-        Logger.warn(TAG, 'Notification permission not granted');
+        Logger.warn(TAG, 'Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted' : new Error(String('Notification permission not granted' instanceof Error ? 'Notification permission not granted' : new Error(String('Notification permission not granted')))))));
       }
     } catch (error) {
       Logger.error(TAG, `Failed to check notification permission: ${error}`);
@@ -220,7 +205,7 @@ export default class NotificationService {
       this.hasPermission = result === 0;
       
       if (this.hasPermission) {
-        Logger.info(TAG, 'Notification permission granted');
+        Logger.info(TAG, 'Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted' : new Error(String('Notification permission granted' instanceof Error ? 'Notification permission granted' : new Error(String('Notification permission granted')))))));
         if (!this.isInitialized) {
           // 如果初始化失败是因为权限问题，现在重新初始化
           await this.createNotificationChannel();
@@ -241,7 +226,7 @@ export default class NotificationService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('notificationServiceConfig', DEFAULT_NOTIFICATION_SERVICE_CONFIG);
+      const savedConfig = await this.configService.getConfig('notificationServiceConfig', DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG instanceof Error ? DEFAULT_NOTIFICATION_SERVICE_CONFIG : new Error(String(DEFAULT_NOTIFICATION_SERVICE_CONFIG)))))));
       if (savedConfig) {
         this.config = { ...DEFAULT_NOTIFICATION_SERVICE_CONFIG, ...savedConfig };
       }
@@ -256,7 +241,33 @@ export default class NotificationService {
   public async saveConfig(config: Partial<NotificationServiceConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('notificationServiceConfig', this.config);
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('notificationServiceConfig', this.config)))))));
       
       // 如果禁用了通知，取消所有活跃通知
       if (!this.config.enabled) {
@@ -280,9 +291,9 @@ export default class NotificationService {
    */
   private async createNotificationChannel(): Promise<void> {
     try {
-      const channel = {
-        id: NOTIFICATION_CHANNEL_ID,
-        name: NOTIFICATION_CHANNEL_NAME,
+      const channel: Record<string, string | number | boolean | null> = { ... };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
         description: 'RayTV应用通知渠道',
         importance: notificationManager.Importance.HIGH,
         enableLights: true,
@@ -293,7 +304,264 @@ export default class NotificationService {
         enableSound: this.config.soundEnabled
       };
       
-      await notificationManager.createNotificationChannel(channel);
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? string | number | boolean | null> = { ... };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(string | number | boolean | null> = { ... };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel instanceof Error ? name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel : new Error(String(name: NOTIFICATION_CHANNEL_NAME,
+        description: 'RayTV应用通知渠道',
+        importance: notificationManager.Importance.HIGH,
+        enableLights: true,
+        enableVibration: this.config.vibrationEnabled,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: 0xFF0000,
+        bypassDnd: true,
+        enableSound: this.config.soundEnabled
+      };
+      
+      await notificationManager.createNotificationChannel(channel)))))));
       Logger.info(TAG, 'Notification channel created');
     } catch (error) {
       Logger.error(TAG, `Failed to create notification channel: ${error}`);
@@ -305,7 +573,7 @@ export default class NotificationService {
    */
   private async registerNotificationCallback(): Promise<void> {
     try {
-      await notificationManager.on('notificationResponse', (response) => {
+      await notificationManager.on('notificationResponse', (response instanceof Error ? (response : new Error(String((response instanceof Error ? (response instanceof Error ? (response : new Error(String((response : new Error(String((response instanceof Error ? (response : new Error(String((response instanceof Error ? (response instanceof Error ? (response : new Error(String((response instanceof Error ? (response instanceof Error ? (response : new Error(String((response : new Error(String((response instanceof Error ? (response : new Error(String((response : new Error(String((response instanceof Error ? (response : new Error(String((response instanceof Error ? (response instanceof Error ? (response : new Error(String((response : new Error(String((response instanceof Error ? (response : new Error(String((response))))))) => {
         const notificationId = String(response.requestId);
         const actionId = response.actionType === notificationManager.ActionType.BUTTON ? response.actionData?.data?.actionId : undefined;
         
@@ -328,7 +596,7 @@ export default class NotificationService {
         }
       });
     } catch (error) {
-      Logger.error(TAG, `Failed to register notification callback: ${error}`);
+      Logger.error(TAG, `Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}` instanceof Error ? `Failed to register notification callback: ${error}` : new Error(String(`Failed to register notification callback: ${error}`)))))));
     }
   }
 
@@ -397,8 +665,7 @@ export default class NotificationService {
    */
   private buildNotificationContent(content: NotificationContent): notificationManager.NotificationContent {
     const notificationContent: notificationManager.NotificationContent = {
-      contentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
-      normal: {
+      contentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT, normal: {
         title: content.title,
         text: content.body,
         additionalText: content.subtitle
@@ -409,7 +676,293 @@ export default class NotificationService {
     notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
     
     // 如果有图片，使用多行文本类型
-    if (content.image) {
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image instanceof Error ? normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image : new Error(String(normal: {
+        title: content.title,
+        text: content.body,
+        additionalText: content.subtitle
+      }
+    };
+    
+    // 设置通知级别
+    notificationContent.level = content.level ?? this.config.notificationLevels[content.type || NotificationType.GENERAL];
+    
+    // 如果有图片，使用多行文本类型
+    if (content.image))))))) {
       notificationContent.contentType = notificationManager.ContentType.NOTIFICATION_CONTENT_LONG_TEXT;
       notificationContent.longText = {
         title: content.title,
@@ -488,33 +1041,170 @@ export default class NotificationService {
     }
 
     try {
-      // 默认标题和内容格式
-      const defaultTitleFormat = '正在下载: {{fileName}}';
+      // 默认标题和内容格�?      const defaultTitleFormat = '正在下载: {{fileName}}';
       const defaultBodyFormat = '{{statusText}} - {{progress}}% ({{speed}})';
       
-      // 状态文本映射
-      const statusTextMap = {
-        'downloading': '下载中',
-        'paused': '已暂停',
+      // 状态文本映�?      const statusTextMap: Record<string, string | number | boolean | null> = { ... };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
         'completed': '下载完成',
         'failed': '下载失败'
       };
       
       // 格式化速度
-      const formatSpeed = (speed: number): string => {
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? string | number | boolean | null> = { ... };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String(string | number | boolean | null> = { ... };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number instanceof Error ? 'paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number : new Error(String('paused': '已暂�?,
+        'completed': '下载完成',
+        'failed': '下载失败'
+      };
+      
+      // 格式化速度
+      const formatSpeed = (speed: number))))))): string => {
         if (speed < 1024) return `${speed} B/s`;
         if (speed < 1024 * 1024) return `${(speed / 1024).toFixed(1)} KB/s`;
         return `${(speed / (1024 * 1024)).toFixed(1)} MB/s`;
       };
       
       // 扩展配置
-      const extendedConfig = {
-        ...config,
-        statusText: statusTextMap[config.status || 'downloading'],
-        speed: config.downloadSpeed ? formatSpeed(config.downloadSpeed) : '',
-        titleFormat: config.titleFormat || defaultTitleFormat,
-        bodyFormat: config.bodyFormat || defaultBodyFormat
-      };
+      const extendedConfig: Record<string, string | number | boolean | null> = { ... };
       
       // 如果下载完成，转为普通通知
       if (config.status === 'completed' || config.status === 'failed') {
@@ -550,9 +1240,8 @@ export default class NotificationService {
   }
 
   /**
-   * 格式化进度文本
-   */
-  private formatProgressText(format: string, config: unknown): string {
+   * 格式化进度文�?   */
+  private formatProgressText(format: string, config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null> instanceof Error ? config: Record<string, string | number | boolean | null> : new Error(String(config: Record<string, string | number | boolean | null>))))))): string {
     return format
       .replace('{{fileName}}', config.fileName || '')
       .replace('{{progress}}', config.progress || 0)
@@ -568,8 +1257,7 @@ export default class NotificationService {
       // 先取消旧通知
       await this.cancelNotification(notificationId);
       
-      // 发送新通知，保持回调
-      const callback = this.clickCallbacks.get(notificationId);
+      // 发送新通知，保持回�?      const callback = this.clickCallbacks.get(notificationId);
       const newId = await this.sendNotification(content);
       
       if (newId && callback) {
@@ -587,7 +1275,7 @@ export default class NotificationService {
   /**
    * 更新进度通知
    */
-  public async updateProgressNotification(notificationId: string, progress: number, status?: string): Promise<boolean> {
+  public async updateProgressNotification(notificationId: string, progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string : new Error(String(progress: number, status?: string instanceof Error ? progress: number, status?: string : new Error(String(progress: number, status?: string))))))): Promise<boolean> {
     try {
       const notification = this.activeNotifications.get(notificationId);
       if (!notification || !notification.content.progressBar) {
@@ -614,11 +1302,10 @@ export default class NotificationService {
     try {
       await notificationManager.cancel(parseInt(notificationId));
       
-      // 移除活跃通知和回调
-      this.activeNotifications.delete(notificationId);
+      // 移除活跃通知和回�?      this.activeNotifications.delete(notificationId);
       this.clickCallbacks.delete(notificationId);
       
-      Logger.debug(TAG, `Notification cancelled: ${notificationId}`);
+      Logger.debug(TAG, `Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}` instanceof Error ? `Notification cancelled: ${notificationId}` : new Error(String(`Notification cancelled: ${notificationId}`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to cancel notification ${notificationId}: ${error}`);
     }
@@ -631,11 +1318,10 @@ export default class NotificationService {
     try {
       await notificationManager.cancelAll();
       
-      // 清空所有活跃通知和回调
-      this.activeNotifications.clear();
+      // 清空所有活跃通知和回�?      this.activeNotifications.clear();
       this.clickCallbacks.clear();
       
-      Logger.info(TAG, 'All notifications cancelled');
+      Logger.info(TAG, 'All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled' : new Error(String('All notifications cancelled' instanceof Error ? 'All notifications cancelled' : new Error(String('All notifications cancelled')))))));
     } catch (error) {
       Logger.error(TAG, `Failed to cancel all notifications: ${error}`);
     }
@@ -644,7 +1330,7 @@ export default class NotificationService {
   /**
    * 设置通知点击回调
    */
-  public setNotificationClickCallback(notificationId: string, callback: NotificationClickCallback): void {
+  public setNotificationClickCallback(notificationId: string, callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback instanceof Error ? callback: NotificationClickCallback : new Error(String(callback: NotificationClickCallback))))))): void {
     this.clickCallbacks.set(notificationId, callback);
   }
 
@@ -703,7 +1389,7 @@ export default class NotificationService {
   /**
    * 发送提醒通知
    */
-  public async sendReminder(title: string, message: string, remindTime?: Date): Promise<string> {
+  public async sendReminder(title: string, message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date instanceof Error ? message: string, remindTime?: Date : new Error(String(message: string, remindTime?: Date))))))): Promise<string> {
     const content: NotificationContent = {
       title,
       body: message,
@@ -768,6 +1454,8 @@ export default class NotificationService {
     });
 
     this.isInitialized = false;
-    Logger.info(TAG, 'Notification service closed');
+    Logger.info(TAG, 'Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed' : new Error(String('Notification service closed' instanceof Error ? 'Notification service closed' : new Error(String('Notification service closed')))))));
   }
 }
+
+

@@ -21,14 +21,14 @@ const TAG = 'VodRepository';
 // 缓存过期时间（毫秒）
 const CACHE_EXPIRY_TIME = 3600000; // 1小时
 
-// 批量操作的批次大小
+// 批量操作的批次大�?
 const BATCH_SIZE = 100;
 
 export class VodRepository {
   private static instance: VodRepository;
   private sqliteHelper: SQLiteHelper;
   private storageUtil: StorageUtil;
-  private recentVodsCache: Map<string, VodItem[]> = new Map(); // 按站点ID缓存最近内容
+  private recentVodsCache: Map<string, VodItem[]> = new Map(); // 按站点ID缓存最近内�?
   private popularVodsCache: Map<string, VodItem[]> = new Map(); // 按站点ID缓存热门内容
   
   private constructor() {
@@ -47,33 +47,15 @@ export class VodRepository {
   }
   
   /**
-   * 保存点播内容到缓存
-   * @param vodItem 点播内容项
+   * 保存点播内容到缓�?
+   * @param vodItem 点播内容�?
    * @returns 是否保存成功
    */
   public async cacheVodItem(vodItem: VodItem): Promise<boolean> {
     try {
       Logger.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.title}`);
       
-      const cacheData = {
-        [VOD_CACHE_TABLE.COLUMNS.ID]: vodItem.id,
-        [VOD_CACHE_TABLE.COLUMNS.SITE_ID]: vodItem.siteId,
-        [VOD_CACHE_TABLE.COLUMNS.TITLE]: vodItem.title,
-        [VOD_CACHE_TABLE.COLUMNS.SUBTITLE]: vodItem.subtitle || '',
-        [VOD_CACHE_TABLE.COLUMNS.COVER]: vodItem.cover || '',
-        [VOD_CACHE_TABLE.COLUMNS.POSTER]: vodItem.poster || '',
-        [VOD_CACHE_TABLE.COLUMNS.YEAR]: vodItem.year || '',
-        [VOD_CACHE_TABLE.COLUMNS.SCORE]: vodItem.score || '',
-        [VOD_CACHE_TABLE.COLUMNS.TYPE]: vodItem.type || '',
-        [VOD_CACHE_TABLE.COLUMNS.STATUS]: vodItem.status || '',
-        [VOD_CACHE_TABLE.COLUMNS.PLAY_URL]: vodItem.playUrl || '',
-        [VOD_CACHE_TABLE.COLUMNS.DATA]: JSON.stringify(vodItem),
-        [VOD_CACHE_TABLE.COLUMNS.CATEGORY_IDS]: vodItem.categoryIds ? JSON.stringify(vodItem.categoryIds) : '[]',
-        [VOD_CACHE_TABLE.COLUMNS.TAG_IDS]: vodItem.tagIds ? JSON.stringify(vodItem.tagIds) : '[]',
-        [VOD_CACHE_TABLE.COLUMNS.CREATE_TIME]: Date.now(),
-        [VOD_CACHE_TABLE.COLUMNS.UPDATE_TIME]: Date.now(),
-        [VOD_CACHE_TABLE.COLUMNS.EXPIRY_TIME]: Date.now() + CACHE_EXPIRY_TIME
-      };
+      const cacheData: Record<string, string | number | boolean | null> = { ... };
       
       // 检查是否已存在
       const exists = await this.isVodItemCached(vodItem.id, vodItem.siteId);
@@ -90,7 +72,7 @@ export class VodRepository {
         
         return (await this.sqliteHelper.update(VOD_CACHE_TABLE.TABLE_NAME, cacheData, conditions)).success;
       } else {
-        // 插入新记录
+        // 插入新记�?
         return (await this.sqliteHelper.insert(VOD_CACHE_TABLE.TABLE_NAME, cacheData)).success;
       }
     } catch (error) {
@@ -101,8 +83,8 @@ export class VodRepository {
   
   /**
    * 批量缓存点播内容
-   * @param vodItems 点播内容项列表
-   * @returns 成功缓存的数量
+   * @param vodItems 点播内容项列�?
+   * @returns 成功缓存的数�?
    */
   public async batchCacheVodItems(vodItems: VodItem[]): Promise<number> {
     if (!vodItems || vodItems.length === 0) {
@@ -113,7 +95,7 @@ export class VodRepository {
     
     // 分批处理以避免性能问题
     for (let i = 0; i < vodItems.length; i += BATCH_SIZE) {
-      const batch = vodItems.slice(i, i + BATCH_SIZE);
+      const batch = vodItems.slice(i, i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE : new Error(String(i + BATCH_SIZE instanceof Error ? i + BATCH_SIZE : new Error(String(i + BATCH_SIZE)))))));
       
       const batchData = batch.map(vodItem => ({
         [VOD_CACHE_TABLE.COLUMNS.ID]: vodItem.id,
@@ -145,7 +127,7 @@ export class VodRepository {
   }
   
   /**
-   * 获取缓存的点播内容
+   * 获取缓存的点播内�?
    * @param id 内容ID
    * @param siteId 站点ID
    * @returns 点播内容项或null
@@ -170,7 +152,7 @@ export class VodRepository {
         return null;
       }
       
-      // 检查是否过期
+      // 检查是否过�?
       const expiryTime = record[VOD_CACHE_TABLE.COLUMNS.EXPIRY_TIME];
       if (expiryTime < Date.now()) {
         Logger.debug(TAG, `VOD item ${id} expired, removing from cache`);
@@ -185,7 +167,7 @@ export class VodRepository {
         return null;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get cached VOD item ${id}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error instanceof Error ? `Failed to get cached VOD item ${id}: ${JSON.stringify(error : new Error(String(`Failed to get cached VOD item ${id}: ${JSON.stringify(error)))))))}`);
       return null;
     }
   }
@@ -194,7 +176,7 @@ export class VodRepository {
    * 检查点播内容是否已缓存
    * @param id 内容ID
    * @param siteId 站点ID
-   * @returns 是否已缓存
+   * @returns 是否已缓�?
    */
   public async isVodItemCached(id: string, siteId: string): Promise<boolean> {
     try {
@@ -214,12 +196,12 @@ export class VodRepository {
   }
   
   /**
-   * 移除缓存的点播内容
+   * 移除缓存的点播内�?
    * @param id 内容ID
    * @param siteId 站点ID
    * @returns 是否移除成功
    */
-  public async removeCachedVodItem(id: string, siteId: string): Promise<boolean> {
+  public async removeCachedVodItem(id: string, siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string : new Error(String(siteId: string instanceof Error ? siteId: string : new Error(String(siteId: string))))))): Promise<boolean> {
     try {
       const conditions: QueryCondition[] = [{
         column: VOD_CACHE_TABLE.COLUMNS.ID,
@@ -238,27 +220,16 @@ export class VodRepository {
   
   /**
    * 保存最近播放的点播内容
-   * @param vodItem 点播内容项
+   * @param vodItem 点播内容�?
    * @param episodeIndex 当前集数索引
    * @param progress 播放进度（毫秒）
    * @returns 是否保存成功
    */
-  public async saveVodHistory(vodItem: VodItem, episodeIndex: number = 0, progress: number = 0): Promise<boolean> {
+  public async saveVodHistory(vodItem: VodItem, episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0 instanceof Error ? episodeIndex: number = 0, progress: number = 0 : new Error(String(episodeIndex: number = 0, progress: number = 0))))))): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving VOD history: ${vodItem.title}`);
       
-      const historyData = {
-        [VOD_HISTORY_TABLE.COLUMNS.VOD_ID]: vodItem.id,
-        [VOD_HISTORY_TABLE.COLUMNS.SITE_ID]: vodItem.siteId,
-        [VOD_HISTORY_TABLE.COLUMNS.TITLE]: vodItem.title,
-        [VOD_HISTORY_TABLE.COLUMNS.COVER]: vodItem.cover || '',
-        [VOD_HISTORY_TABLE.COLUMNS.PLAY_URL]: vodItem.playUrl || '',
-        [VOD_HISTORY_TABLE.COLUMNS.EPISODE_INDEX]: episodeIndex,
-        [VOD_HISTORY_TABLE.COLUMNS.PROGRESS]: progress,
-        [VOD_HISTORY_TABLE.COLUMNS.TOTAL_DURATION]: 0, // 需要从播放器获取
-        [VOD_HISTORY_TABLE.COLUMNS.PLAY_COUNT]: 1,
-        [VOD_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME]: Date.now()
-      };
+      const historyData: Record<string, string | number | boolean | null> = { ... };
       
       // 检查是否已存在历史记录
       const conditions: QueryCondition[] = [{
@@ -286,7 +257,7 @@ export class VodRepository {
         
         return (await this.sqliteHelper.update(VOD_HISTORY_TABLE.TABLE_NAME, historyData, conditions)).success;
       } else {
-        // 插入新历史记录
+        // 插入新历史记�?
         return (await this.sqliteHelper.insert(VOD_HISTORY_TABLE.TABLE_NAME, historyData)).success;
       }
     } catch (error) {
@@ -303,7 +274,7 @@ export class VodRepository {
    * @param progress 播放进度（毫秒）
    * @returns 是否更新成功
    */
-  public async updatePlayProgress(vodId: string, siteId: string, episodeIndex: number, progress: number): Promise<boolean> {
+  public async updatePlayProgress(vodId: string, siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number instanceof Error ? siteId: string, episodeIndex: number, progress: number : new Error(String(siteId: string, episodeIndex: number, progress: number))))))): Promise<boolean> {
     try {
       const conditions: QueryCondition[] = [{
         column: VOD_HISTORY_TABLE.COLUMNS.VOD_ID,
@@ -313,11 +284,7 @@ export class VodRepository {
         value: siteId
       }];
       
-      const updateData = {
-        [VOD_HISTORY_TABLE.COLUMNS.EPISODE_INDEX]: episodeIndex,
-        [VOD_HISTORY_TABLE.COLUMNS.PROGRESS]: progress,
-        [VOD_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME]: Date.now()
-      };
+      const updateData: Record<string, string | number | boolean | null> = { ... };
       
       return (await this.sqliteHelper.update(VOD_HISTORY_TABLE.TABLE_NAME, updateData, conditions)).success;
     } catch (error) {
@@ -329,10 +296,10 @@ export class VodRepository {
   /**
    * 获取播放历史
    * @param limit 限制数量
-   * @param offset 偏移量
+   * @param offset 偏移�?
    * @returns 播放历史列表
    */
-  public async getVodHistory(limit: number = 50, offset: number = 0): Promise<Record<string, unknown>[]> {
+  public async getVodHistory(limit: number = 50, offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0))))))): Promise<Record<string, unknown>[]> {
     try {
       const sortOptions: SortOption[] = [{
         column: VOD_HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
@@ -357,12 +324,12 @@ export class VodRepository {
   
   /**
    * 搜索点播内容
-   * @param keyword 搜索关键词
+   * @param keyword 搜索关键�?
    * @param siteId 站点ID（可选）
    * @param limit 限制数量
    * @returns 搜索结果
    */
-  public async searchVod(keyword: string, siteId?: string, limit: number = 50): Promise<VodItem[]> {
+  public async searchVod(keyword: string, siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50 instanceof Error ? siteId?: string, limit: number = 50 : new Error(String(siteId?: string, limit: number = 50))))))): Promise<VodItem[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: VOD_CACHE_TABLE.COLUMNS.TITLE,
@@ -377,7 +344,7 @@ export class VodRepository {
         });
       }
       
-      // 添加不过期条件
+      // 添加不过期条�?
       conditions.push({
         column: VOD_CACHE_TABLE.COLUMNS.EXPIRY_TIME,
         value: Date.now(),
@@ -403,7 +370,7 @@ export class VodRepository {
       
       return results;
     } catch (error) {
-      Logger.error(TAG, `Failed to search VOD: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error instanceof Error ? `Failed to search VOD: ${JSON.stringify(error : new Error(String(`Failed to search VOD: ${JSON.stringify(error)))))))}`);
       return [];
     }
   }
@@ -413,13 +380,13 @@ export class VodRepository {
    * @param categoryId 分类ID
    * @param siteId 站点ID
    * @param limit 限制数量
-   * @param offset 偏移量
+   * @param offset 偏移�?
    * @returns 点播内容列表
    */
   public async getVodsByCategory(categoryId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<VodItem[]> {
     try {
       // 这里需要使用JSON_CONTAINS或者类似的方法查询JSON数组
-      // 由于SQLite版本限制，这里使用LIKE进行简单匹配
+      // 由于SQLite版本限制，这里使用LIKE进行简单匹�?
       const conditions: QueryCondition[] = [{
         column: VOD_CACHE_TABLE.COLUMNS.SITE_ID,
         value: siteId
@@ -458,7 +425,7 @@ export class VodRepository {
       
       return results;
     } catch (error) {
-      Logger.error(TAG, `Failed to get VODs by category: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by category: ${JSON.stringify(error : new Error(String(`Failed to get VODs by category: ${JSON.stringify(error)))))))}`);
       return [];
     }
   }
@@ -468,7 +435,7 @@ export class VodRepository {
    * @param tagId 标签ID
    * @param siteId 站点ID
    * @param limit 限制数量
-   * @param offset 偏移量
+   * @param offset 偏移�?
    * @returns 点播内容列表
    */
   public async getVodsByTag(tagId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<VodItem[]> {
@@ -512,7 +479,7 @@ export class VodRepository {
       
       return results;
     } catch (error) {
-      Logger.error(TAG, `Failed to get VODs by tag: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error instanceof Error ? `Failed to get VODs by tag: ${JSON.stringify(error : new Error(String(`Failed to get VODs by tag: ${JSON.stringify(error)))))))}`);
       return [];
     }
   }
@@ -556,8 +523,8 @@ export class VodRepository {
   }
   
   /**
-   * 清空过期的缓存
-   * @returns 清除的记录数量
+   * 清空过期的缓�?
+   * @returns 清除的记录数�?
    */
   public async clearExpiredCache(): Promise<number> {
     try {
@@ -578,7 +545,7 @@ export class VodRepository {
   }
   
   /**
-   * 清空所有缓存
+   * 清空所有缓�?
    * @returns 是否清空成功
    */
   public async clearAllCache(): Promise<boolean> {
@@ -589,7 +556,7 @@ export class VodRepository {
       this.recentVodsCache.clear();
       this.popularVodsCache.clear();
       
-      Logger.info(TAG, `Cleared all VOD cache (${result.affectedRows} records)`);
+      Logger.info(TAG, `Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records instanceof Error ? `Cleared all VOD cache (${result.affectedRows} records : new Error(String(`Cleared all VOD cache (${result.affectedRows} records)))))))`);
       return result.success;
     } catch (error) {
       Logger.error(TAG, `Failed to clear all VOD cache: ${JSON.stringify(error)}`);
@@ -605,7 +572,7 @@ export class VodRepository {
     try {
       const result = await this.sqliteHelper.delete(VOD_HISTORY_TABLE.TABLE_NAME);
       
-      Logger.info(TAG, `Cleared all VOD history (${result.affectedRows} records)`);
+      Logger.info(TAG, `Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records instanceof Error ? `Cleared all VOD history (${result.affectedRows} records : new Error(String(`Cleared all VOD history (${result.affectedRows} records)))))))`);
       return result.success;
     } catch (error) {
       Logger.error(TAG, `Failed to clear VOD history: ${JSON.stringify(error)}`);
@@ -619,10 +586,9 @@ export class VodRepository {
    */
   public async estimateCacheSize(): Promise<number> {
     try {
-      // 这里使用近似计算，实际项目中可能需要更精确的计算
+      // 这里使用近似计算，实际项目中可能需要更精确的计�?
       const records = await this.sqliteHelper.query(
-        VOD_CACHE_TABLE.TABLE_NAME,
-        ['COUNT(*)', 'SUM(LENGTH(' + VOD_CACHE_TABLE.COLUMNS.DATA + ')) as total_size']
+        VOD_CACHE_TABLE.TABLE_NAME, ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(*)))))))', 'SUM(LENGTH(' + VOD_CACHE_TABLE.COLUMNS.DATA + ')) as total_size']
       );
       
       if (records && records.length > 0 && records[0].total_size) {
@@ -649,12 +615,11 @@ export class VodRepository {
     try {
       // 获取总条目数
       const totalResult = await this.sqliteHelper.query(
-        VOD_CACHE_TABLE.TABLE_NAME,
-        ['COUNT(*) as count']
+        VOD_CACHE_TABLE.TABLE_NAME, ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(* : new Error(String(['COUNT(* instanceof Error ? ['COUNT(* : new Error(String(['COUNT(*))))))) as count']
       );
       const totalItems = totalResult && totalResult.length > 0 ? Number(totalResult[0].count) : 0;
       
-      // 获取过期条目数
+      // 获取过期条目�?
       const expiredResult = await this.sqliteHelper.query(
         VOD_CACHE_TABLE.TABLE_NAME,
         ['COUNT(*) as count'],
@@ -695,3 +660,5 @@ export class VodRepository {
     }
   }
 }
+
+

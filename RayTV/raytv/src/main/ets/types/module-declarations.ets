@@ -101,7 +101,7 @@ declare module '@ohos.app.ability.UIAbilityContext' {
 // Logger模块声明
 declare module '../common/util/Logger' {
   export interface LoggerExtraData {
-    [key: string]: unknown;
+    [key: string]: Record<string, string | number | boolean | null>;
   }
   export default class Logger {
     static d(tag: string, message: string, extra?: LoggerExtraData): void;
@@ -114,14 +114,14 @@ declare module '../common/util/Logger' {
 // Hvigor模块声明
 declare module '@ohos/hvigor-ohos-plugin' {
   export interface HvigorOhosPluginOptions {
-    [key: string]: any;
+    [key: string]: Record<string, string | number | boolean | null>;
   }
   
   export class HvigorOhosPlugin {
     constructor(options?: HvigorOhosPluginOptions);
   }
   
-  export const hapTasks: any;
+  export const hapTasks: Record<string, string | number | boolean | null>;
 }
 
 // 其他基础类型声明

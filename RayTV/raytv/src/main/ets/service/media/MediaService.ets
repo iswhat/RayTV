@@ -1,5 +1,5 @@
 // MediaService.ets - 媒体服务
-// 负责视频内容管理、播放状态同步和多设备媒体控制，整合了业务逻辑层媒体服务功能
+// 负责视频内容管理、播放状态同步和多设备媒体控制，整合了业务逻辑层媒体服务功�?
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
@@ -22,7 +22,7 @@ const TAG = 'MediaService';
 
 // 媒体类型枚举 - 整合业务层和服务层的媒体类型定义
 export enum MediaType {
-  // 服务层媒体类型
+  // 服务层媒体类�?
   MOVIE = 'movie',
   TV_SERIES = 'tv_series',
   LIVE = 'live',
@@ -32,16 +32,16 @@ export enum MediaType {
   SPORTS = 'sports',
   OTHER = 'other',
   
-  // 业务层媒体类型别名
+  // 业务层媒体类型别�?
   VOD = 'vod',
   EPISODE = 'episode'
 }
 
-// 媒体元数据接口
+// 媒体元数据接�?
 export interface MediaMetadata {
   id: string;               // 媒体唯一标识
   title: string;            // 标题
-  subtitle?: string;        // 副标题
+  subtitle?: string;        // 副标�?
   description?: string;     // 描述
   coverUrl?: string;        // 封面图片URL
   bannerUrl?: string;       // 横幅图片URL
@@ -49,15 +49,15 @@ export interface MediaMetadata {
   category?: string[];      // 分类标签
   tags?: string[];          // 标签
   year?: number;            // 年份
-  duration?: number;        // 时长（秒）
-  episodeCount?: number;    // 集数（电视剧）
+  duration?: number;        // 时长（秒�?
+  episodeCount?: number;    // 集数（电视剧�?
   director?: string[];      // 导演
   actors?: string[];        // 演员
   rating?: number;          // 评分
   region?: string[];        // 地区
   language?: string[];      // 语言
   releaseDate?: string;     // 发布日期
-  updateStatus?: string;    // 更新状态
+  updateStatus?: string;    // 更新状�?
   isFavorite?: boolean;     // 是否收藏
   isWatchLater?: boolean;   // 是否稍后观看
   sourceSite?: string;      // 来源站点
@@ -70,24 +70,24 @@ export interface MediaMetadata {
 export interface PlaybackRecord {
   mediaId: string;          // 媒体ID
   episodeId?: string;       // 剧集ID
-  position: number;         // 播放位置（秒）
-  lastPlayTime: number;     // 最后播放时间
+  position: number;         // 播放位置（秒�?
+  lastPlayTime: number;     // 最后播放时�?
   playCount: number;        // 播放次数
-  isFinished: boolean;      // 是否已播放完成
+  isFinished: boolean;      // 是否已播放完�?
   deviceId?: string;        // 最后播放设备ID
   totalDuration?: number;   // 总时长（业务层需要）
   title?: string;           // 标题（业务层需要）
   coverUrl?: string;        // 封面URL（业务层需要）
   currentEpisode?: string;  // 当前剧集（业务层需要）
-  progress?: number;        // 进度百分比 0-100（业务层需要）
+  progress?: number;        // 进度百分�?0-100（业务层需要）
 }
 
 // 媒体播放进度接口
 export interface PlaybackProgress {
   mediaId: string;          // 媒体ID
   episodeId?: string;       // 剧集ID
-  position: number;         // 播放位置（秒）
-  timestamp: number;        // 时间戳
+  position: number;         // 播放位置（秒�?
+  timestamp: number;        // 时间�?
   deviceId: string;         // 设备ID
   deviceName: string;       // 设备名称
   isPlaying: boolean;       // 是否正在播放
@@ -106,10 +106,10 @@ export interface MediaCollection {
 
 // 媒体服务配置接口
 export interface MediaServiceConfig {
-  enableCrossDevicePlayback: boolean;  // 启用跨设备播放
+  enableCrossDevicePlayback: boolean;  // 启用跨设备播�?
   syncPlaybackProgress: boolean;       // 同步播放进度
   autoResumePlayback: boolean;         // 自动恢复播放
-  maxPlaybackHistory: number;          // 最大播放历史数量
+  maxPlaybackHistory: number;          // 最大播放历史数�?
   enableRecommendations: boolean;      // 启用推荐
 }
 
@@ -175,13 +175,13 @@ export interface RecommendationResult {
 
 export default class MediaService {
   private static instance: MediaService;
-  // 服务层依赖
+  // 服务层依�?
   private configService: ConfigService;
   private distributedDataService: ModernDistributedDataService;
   private deviceManager: DeviceManager;
   private playerService: PlayerService;
   
-  // 业务层依赖
+  // 业务层依�?
   private vodRepository: VodRepository;
   private liveRepository: LiveRepository;
   private historyRepository: HistoryRepository;
@@ -189,7 +189,7 @@ export default class MediaService {
   private deviceService: DeviceService;
   private httpService: HttpService;
   
-  // 服务层状态
+  // 服务层状�?
   private config: MediaServiceConfig = DEFAULT_MEDIA_SERVICE_CONFIG;
   private mediaMetadataCache: Map<string, MediaMetadata> = new Map();
   private playbackRecords: Map<string, PlaybackRecord> = new Map();
@@ -212,7 +212,7 @@ export default class MediaService {
   private progressSyncInterval: number | null = null;
   private isInitialized: boolean = false;
   
-  // 业务层状态
+  // 业务层状�?
   private currentPlayingMedia: { id: string; type: MediaType } | null = null;
   private playListeners: Array<(media: { id: string; type: MediaType }) => void> = [];
 
@@ -227,7 +227,7 @@ export default class MediaService {
   }
 
   /**
-   * 构造函数
+   * 构造函�?
    */
   private constructor() {
     // 初始化服务层依赖
@@ -244,12 +244,12 @@ export default class MediaService {
     this.deviceService = DeviceService.getInstance();
     this.httpService = HttpService.getInstance();
     
-    // 初始化
+    // 初始�?
     this.initialize();
   }
 
   /**
-   * 初始化媒体服务
+   * 初始化媒体服�?
    */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
@@ -281,13 +281,13 @@ export default class MediaService {
   }
 
   /**
-   * 初始化业务逻辑层
+   * 初始化业务逻辑�?
    */
   private async initializeBusinessLayer(): Promise<void> {
     try {
-      Logger.info(TAG, 'Initializing business layer...');
+      Logger.info(TAG, 'Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...' : new Error(String('Initializing business layer...' instanceof Error ? 'Initializing business layer...' : new Error(String('Initializing business layer...')))))));
       
-      // 预加载常用数据
+      // 预加载常用数�?
       await this.preloadCommonData();
       
       Logger.info(TAG, 'Business layer initialized successfully');
@@ -297,17 +297,17 @@ export default class MediaService {
   }
   
   /**
-   * 预加载常用数据
+   * 预加载常用数�?
    */
   private async preloadCommonData(): Promise<void> {
     try {
-      // 预加载热门点播内容
+      // 预加载热门点播内�?
       await this.vodRepository.preloadPopularVods();
       
-      // 预加载直播频道列表
+      // 预加载直播频道列�?
       await this.liveRepository.preloadLiveGroups();
     } catch (error) {
-      Logger.warn(TAG, `Failed to preload common data: ${JSON.stringify(error)}`);
+      Logger.warn(TAG, `Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error instanceof Error ? `Failed to preload common data: ${JSON.stringify(error : new Error(String(`Failed to preload common data: ${JSON.stringify(error)))))))}`);
     }
   }
   
@@ -321,12 +321,12 @@ export default class MediaService {
         // 记录访问
         await this.vodRepository.incrementVodViewCount(vodId);
         
-        // 预加载相关信息
+        // 预加载相关信�?
         await this.preloadVodRelatedContent(vodId);
       }
       return vod;
     } catch (error) {
-      Logger.error(TAG, `Failed to get VOD detail for ID: ${vodId}`, error);
+      Logger.error(TAG, `Failed to get VOD detail for ID: ${vodId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -343,7 +343,7 @@ export default class MediaService {
       }
       return channel;
     } catch (error) {
-      Logger.error(TAG, `Failed to get live channel detail for ID: ${channelId}`, error);
+      Logger.error(TAG, `Failed to get live channel detail for ID: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -355,19 +355,19 @@ export default class MediaService {
     try {
       Logger.info(TAG, `Playing media: ${mediaId}, type: ${type}`);
       
-      // 更新当前播放的媒体
+      // 更新当前播放的媒�?
       this.currentPlayingMedia = { id: mediaId, type };
       
-      // 通知监听器
+      // 通知监听�?
       for (const listener of this.playListeners) {
         listener(this.currentPlayingMedia);
       }
       
-      // 调用播放器服务进行实际播放
+      // 调用播放器服务进行实际播�?
       const success = await this.playerService.play(mediaId, type, options);
       
       if (success) {
-        // 记录播放开始事件
+        // 记录播放开始事�?
         this.notifyEvent(MediaEvent.PLAYBACK_STARTED, {
           mediaId,
           episodeId: options.selectedEpisode,
@@ -385,24 +385,24 @@ export default class MediaService {
   }
 
   /**
-   * 添加播放监听器
+   * 添加播放监听�?
    */
   public addPlayListener(listener: (media: { id: string; type: MediaType }) => void): void {
     this.playListeners.push(listener);
   }
   
   /**
-   * 移除播放监听器
+   * 移除播放监听�?
    */
   public removePlayListener(listener: (media: { id: string; type: MediaType }) => void): void {
     const index = this.playListeners.indexOf(listener);
     if (index > -1) {
-      this.playListeners.splice(index, 1);
+      this.playListeners.splice(index, 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1)))))));
     }
   }
   
   /**
-   * 获取当前播放的媒体
+   * 获取当前播放的媒�?
    */
   public getCurrentPlayingMedia(): { id: string; type: MediaType } | null {
     return this.currentPlayingMedia;
@@ -443,7 +443,33 @@ export default class MediaService {
   public async saveConfig(config: Partial<MediaServiceConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('mediaServiceConfig', this.config);
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaServiceConfig', this.config)))))));
       
       // 根据配置调整进度同步
       if (this.config.syncPlaybackProgress) {
@@ -462,7 +488,7 @@ export default class MediaService {
    */
   private async loadPlaybackRecords(): Promise<void> {
     try {
-      const records = await this.configService.getConfig<Record<string, unknown>>('playbackRecords', {});
+      const records = await this.configService.getConfig<Record<string, unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {} instanceof Error ? unknown>>('playbackRecords', {} : new Error(String(unknown>>('playbackRecords', {})))))));
       
       if (records && TypeSafetyUtil.isObject(records)) {
         Object.entries(records).forEach(([key, value]) => {
@@ -498,7 +524,33 @@ export default class MediaService {
   private async savePlaybackRecords(): Promise<void> {
     try {
       const recordsObj: Record<string, PlaybackRecord> = {};
-      this.playbackRecords.forEach((record, key) => {
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key instanceof Error ? PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key : new Error(String(PlaybackRecord> = {};
+      this.playbackRecords.forEach((record, key))))))) => {
         recordsObj[key] = record;
       });
       await this.configService.setConfig('playbackRecords', recordsObj);
@@ -512,7 +564,7 @@ export default class MediaService {
    */
   private async loadCollections(): Promise<void> {
     try {
-      const collections = await this.configService.getConfig<Record<string, unknown>>('mediaCollections', {});
+      const collections = await this.configService.getConfig<Record<string, unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {} instanceof Error ? unknown>>('mediaCollections', {} : new Error(String(unknown>>('mediaCollections', {})))))));
       
       if (collections && TypeSafetyUtil.isObject(collections)) {
         Object.entries(collections).forEach(([key, value]) => {
@@ -542,7 +594,33 @@ export default class MediaService {
   private async saveCollections(): Promise<void> {
     try {
       const collectionsObj: Record<string, MediaCollection> = {};
-      this.collections.forEach((collection, key) => {
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key instanceof Error ? MediaCollection> = {};
+      this.collections.forEach((collection, key : new Error(String(MediaCollection> = {};
+      this.collections.forEach((collection, key))))))) => {
         collectionsObj[key] = collection;
       });
       await this.configService.setConfig('mediaCollections', collectionsObj);
@@ -552,17 +630,17 @@ export default class MediaService {
   }
 
   /**
-   * 注册播放器事件监听
+   * 注册播放器事件监�?
    */
   private registerPlayerEvents(): void {
-    // 这里应该注册PlayerService的事件监听
+    // 这里应该注册PlayerService的事件监�?
     // 例如播放开始、暂停、停止、进度变化等
-    // 由于PlayerService的具体实现可能尚未完成，这里先保留接口
-    Logger.debug(TAG, 'Player events registered');
+    // 由于PlayerService的具体实现可能尚未完成，这里先保留接�?
+    Logger.debug(TAG, 'Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered' : new Error(String('Player events registered' instanceof Error ? 'Player events registered' : new Error(String('Player events registered')))))));
   }
 
   /**
-   * 注册分布式数据监听
+   * 注册分布式数据监�?
    */
   private registerDistributedDataListeners(): void {
     // 监听播放进度同步
@@ -581,25 +659,25 @@ export default class MediaService {
    * 处理远程播放进度
    */
   private handleRemotePlaybackProgress(progress: PlaybackProgress): void {
-    // 处理来自其他设备的播放进度同步
+    // 处理来自其他设备的播放进度同�?
     Logger.debug(TAG, `Received remote playback progress from device ${progress.deviceId}`);
     
     // 更新当前播放进度
     this.currentPlaybackProgress = progress;
     
-    // 通知事件监听器
+    // 通知事件监听�?
     this.notifyEvent(MediaEvent.PLAYBACK_PROGRESS_CHANGED, progress);
   }
 
   /**
-   * 开始进度同步
+   * 开始进度同�?
    */
   private startProgressSync(): void {
     if (this.progressSyncInterval) {
       this.stopProgressSync();
     }
     
-    // 每5秒同步一次进度
+    // �?秒同步一次进�?
     this.progressSyncInterval = setInterval(async () => {
       await this.syncPlaybackProgress();
     }, 5000);
@@ -636,22 +714,22 @@ export default class MediaService {
   }
 
   /**
-   * 预加载相关内容
+   * 预加载相关内�?
    */
   private async preloadVodRelatedContent(vodId: string): Promise<void> {
     try {
-      // 预加载相关视频
+      // 预加载相关视�?
       await this.vodRepository.preloadRelatedVods(vodId);
     } catch (error) {
-      Logger.warn(TAG, `Failed to preload related content for VOD ${vodId}: ${error}`);
+      Logger.warn(TAG, `Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}` instanceof Error ? `Failed to preload related content for VOD ${vodId}: ${error}` : new Error(String(`Failed to preload related content for VOD ${vodId}: ${error}`)))))));
     }
   }
 
   /**
-   * 获取媒体元数据
+   * 获取媒体元数�?
    */
   public async getMediaMetadata(mediaId: string): Promise<MediaMetadata | null> {
-    // 先从缓存中查找
+    // 先从缓存中查�?
     let metadata = this.mediaMetadataCache.get(mediaId);
     
     if (!metadata) {
@@ -701,22 +779,151 @@ export default class MediaService {
   }
 
   /**
-   * 保存媒体元数据
+   * 保存媒体元数�?
    */
   public async saveMediaMetadata(metadata: MediaMetadata): Promise<void> {
     try {
       const key = `media_metadata_${metadata.id}`;
       const now = Date.now();
       
-      // 确保时间戳正确
+      // 确保时间戳正�?
       const updatedMetadata: MediaMetadata = {
-        ...metadata,
-        createTime: metadata.createTime || now,
+        ...metadata, createTime: metadata.createTime || now,
         updateTime: now
       };
       
       // 保存到配置和缓存
-      await this.configService.setConfig(key, updatedMetadata);
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata instanceof Error ? createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata : new Error(String(createTime: metadata.createTime || now,
+        updateTime: now
+      };
+      
+      // 保存到配置和缓存
+      await this.configService.setConfig(key, updatedMetadata)))))));
       this.mediaMetadataCache.set(metadata.id, updatedMetadata);
       
       this.notifyEvent(MediaEvent.MEDIA_ADDED, updatedMetadata);
@@ -727,20 +934,16 @@ export default class MediaService {
   }
 
   /**
-   * 更新媒体元数据
+   * 更新媒体元数�?
    */
-  public async updateMediaMetadata(mediaId: string, updates: Partial<MediaMetadata>): Promise<void> {
+  public async updateMediaMetadata(mediaId: string, updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata> instanceof Error ? updates: Partial<MediaMetadata> : new Error(String(updates: Partial<MediaMetadata>))))))): Promise<void> {
     try {
       const metadata = await this.getMediaMetadata(mediaId);
       if (!metadata) {
         throw new Error(`Media ${mediaId} not found`);
       }
       
-      const updatedMetadata = {
-        ...metadata,
-        ...updates,
-        updateTime: Date.now()
-      };
+      const updatedMetadata: Record<string, string | number | boolean | null> = { ... };
       
       await this.saveMediaMetadata(updatedMetadata);
       this.notifyEvent(MediaEvent.MEDIA_UPDATED, updatedMetadata);
@@ -753,7 +956,7 @@ export default class MediaService {
   /**
    * 获取播放记录
    */
-  public getPlaybackRecord(mediaId: string, episodeId?: string): PlaybackRecord | null {
+  public getPlaybackRecord(mediaId: string, episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string : new Error(String(episodeId?: string instanceof Error ? episodeId?: string : new Error(String(episodeId?: string))))))): PlaybackRecord | null {
     const key = episodeId ? `${mediaId}_${episodeId}` : mediaId;
     return this.playbackRecords.get(key) || null;
   }
@@ -788,10 +991,10 @@ export default class MediaService {
       
       this.playbackRecords.set(key, record);
       
-      // 保存到配置
+      // 保存到配�?
       await this.savePlaybackRecords();
       
-      // 如果启用了跨设备播放，同步播放记录
+      // 如果启用了跨设备播放，同步播放记�?
       if (this.config.enableCrossDevicePlayback) {
         await this.distributedDataService.saveSyncData(
           SyncDataType.HISTORY,
@@ -812,7 +1015,7 @@ export default class MediaService {
    */
   public getPlaybackHistory(limit: number = 20): PlaybackRecord[] {
     return Array.from(this.playbackRecords.values())
-      .sort((a, b) => b.lastPlayTime - a.lastPlayTime)
+      .sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.lastPlayTime - a.lastPlayTime)
       .slice(0, limit);
   }
 
@@ -842,9 +1045,9 @@ export default class MediaService {
   }
 
   /**
-   * 添加媒体到集合
+   * 添加媒体到集�?
    */
-  public async addMediaToCollection(collectionId: string, mediaId: string): Promise<void> {
+  public async addMediaToCollection(collectionId: string, mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string))))))): Promise<void> {
     try {
       const collection = this.collections.get(collectionId);
       if (!collection) {
@@ -867,7 +1070,7 @@ export default class MediaService {
   /**
    * 从集合中移除媒体
    */
-  public async removeMediaFromCollection(collectionId: string, mediaId: string): Promise<void> {
+  public async removeMediaFromCollection(collectionId: string, mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string : new Error(String(mediaId: string instanceof Error ? mediaId: string : new Error(String(mediaId: string))))))): Promise<void> {
     try {
       const collection = this.collections.get(collectionId);
       if (!collection) {
@@ -889,11 +1092,11 @@ export default class MediaService {
   }
 
   /**
-   * 获取所有媒体集合
+   * 获取所有媒体集�?
    */
   public getCollections(): MediaCollection[] {
     return Array.from(this.collections.values())
-      .sort((a, b) => b.updateTime - a.updateTime);
+      .sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.updateTime - a.updateTime);
   }
 
   /**
@@ -939,7 +1142,7 @@ export default class MediaService {
   }
 
   /**
-   * 确保事件存在于监听器映射中
+   * 确保事件存在于监听器映射�?
    */
   private ensureEventExists(event: MediaEvent): void {
     if (!this.hasEvent(event)) {
@@ -948,14 +1151,14 @@ export default class MediaService {
   }
   
   /**
-   * 检查事件是否存在
+   * 检查事件是否存�?
    */
   private hasEvent(event: MediaEvent): boolean {
     return this.eventListeners[event] !== undefined;
   }
   
   /**
-   * 获取事件监听器
+   * 获取事件监听�?
    */
   private getEventListeners(event: MediaEvent): MediaEventListener[] {
     this.ensureEventExists(event);
@@ -963,7 +1166,7 @@ export default class MediaService {
   }
   
   /**
-   * 跨设备切换播放
+   * 跨设备切换播�?
    */
   public async switchPlaybackToDevice(deviceId: string): Promise<boolean> {
     try {
@@ -987,16 +1190,184 @@ export default class MediaService {
       }
 
       // 构建切换播放命令
-      const playbackCommand = {
-        action: 'switch_playback',
-        mediaId,
+      const playbackCommand: Record<string, string | number | boolean | null> = { ... };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
         episodeId,
         position,
         isPlaying
       };
 
       // 发送到目标设备
-      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand);
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? string | number | boolean | null> = { ... };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(string | number | boolean | null> = { ... };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand instanceof Error ? mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand : new Error(String(mediaId,
+        episodeId,
+        position,
+        isPlaying
+      };
+
+      // 发送到目标设备
+      const success = await this.deviceManager.sendCommandToDevice(deviceId, playbackCommand)))))));
       
       if (success) {
         // 本地停止播放
@@ -1025,9 +1396,9 @@ export default class MediaService {
 
     this.stopProgressSync();
     
-    // 保存所有数据
+    // 保存所有数�?
     this.savePlaybackRecords().catch(error => {
-      Logger.error(TAG, `Error saving playback records on close: ${error}`);
+      Logger.error(TAG, `Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}` instanceof Error ? `Error saving playback records on close: ${error}` : new Error(String(`Error saving playback records on close: ${error}`)))))));
     });
     
     this.saveCollections().catch(error => {
@@ -1035,6 +1406,8 @@ export default class MediaService {
     });
 
     this.isInitialized = false;
-    Logger.info(TAG, 'Media service closed');
+    Logger.info(TAG, 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed')))))));
   }
 }
+
+

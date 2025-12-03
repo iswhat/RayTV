@@ -1,5 +1,4 @@
-// HistoryManager.ets - 历史记录管理器
-// 负责管理视频播放历史记录
+// HistoryManager.ets - 历史记录管理�?// 负责管理视频播放历史记录
 
 import Logger from '../../common/util/Logger';
 import HistoryDao from '../../data/db/dao/HistoryDao';
@@ -7,23 +6,17 @@ import ConfigService from '../config/ConfigService';
 
 // 常量定义
 const TAG = 'HistoryManager';
-const DEFAULT_MAX_HISTORY_COUNT = 100; // 默认最大历史记录数量
-
-// 历史记录项接口
-export interface HistoryItem {
+const DEFAULT_MAX_HISTORY_COUNT = 100; // 默认最大历史记录数�?
+// 历史记录项接�?export interface HistoryItem {
   id: string;           // 唯一标识
   title: string;        // 标题
-  subtitle?: string;    // 副标题
-  url: string;          // 播放地址
+  subtitle?: string;    // 副标�?  url: string;          // 播放地址
   coverUrl?: string;    // 封面图片
   position: number;     // 播放位置（毫秒）
-  duration: number;     // 总时长（毫秒）
-  progress: number;     // 播放进度（0-1）
-  lastPlayed: number;   // 最后播放时间戳
+  duration: number;     // 总时长（毫秒�?  progress: number;     // 播放进度�?-1�?  lastPlayed: number;   // 最后播放时间戳
   siteKey?: string;     // 站点标识
   videoId?: string;     // 视频ID
-  metadata?: Record<string, unknown>; // 额外元数据
-}
+  metadata?: Record<string, unknown>; // 额外元数�?}
 
 export default class HistoryManager {
   private static instance: HistoryManager;
@@ -43,8 +36,7 @@ export default class HistoryManager {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     this.historyDao = new HistoryDao();
     this.configService = ConfigService.getInstance();
@@ -84,14 +76,12 @@ export default class HistoryManager {
         this.maxHistoryCount = maxCount;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load history config: ${error}`);
+      Logger.error(TAG, `Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}` instanceof Error ? `Failed to load history config: ${error}` : new Error(String(`Failed to load history config: ${error}`)))))));
     }
   }
 
   /**
-   * 保存或更新历史记录
-   * @param historyItem 历史记录项
-   */
+   * 保存或更新历史记�?   * @param historyItem 历史记录�?   */
   public async saveHistory(historyItem: HistoryItem): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -108,8 +98,7 @@ export default class HistoryManager {
       historyItem.progress = historyItem.duration > 0 ? 
         Math.min(1, Math.max(0, historyItem.position / historyItem.duration)) : 0;
 
-      // 检查是否已存在该记录
-      const existingItem = await this.historyDao.getById(historyItem.id);
+      // 检查是否已存在该记�?      const existingItem = await this.historyDao.getById(historyItem.id);
       
       if (existingItem) {
         // 更新现有记录
@@ -123,13 +112,11 @@ export default class HistoryManager {
         });
         Logger.debug(TAG, `Updated history: ${historyItem.title}`);
       } else {
-        // 插入新记录
-        await this.historyDao.insert(historyItem);
+        // 插入新记�?        await this.historyDao.insert(historyItem);
         Logger.debug(TAG, `Added history: ${historyItem.title}`);
       }
 
-      // 检查并清理超出限制的历史记录
-      await this.cleanupExcessHistory();
+      // 检查并清理超出限制的历史记�?      await this.cleanupExcessHistory();
     } catch (error) {
       Logger.error(TAG, `Failed to save history: ${error}`);
       throw error;
@@ -139,9 +126,8 @@ export default class HistoryManager {
   /**
    * 获取历史记录列表
    * @param limit 限制数量
-   * @param offset 偏移量
-   */
-  public async getHistoryList(limit: number = 50, offset: number = 0): Promise<HistoryItem[]> {
+   * @param offset 偏移�?   */
+  public async getHistoryList(limit: number = 50, offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0))))))): Promise<HistoryItem[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -171,7 +157,7 @@ export default class HistoryManager {
     try {
       return await this.historyDao.getById(id);
     } catch (error) {
-      Logger.error(TAG, `Failed to get history by id: ${error}`);
+      Logger.error(TAG, `Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}` instanceof Error ? `Failed to get history by id: ${error}` : new Error(String(`Failed to get history by id: ${error}`)))))));
       return null;
     }
   }
@@ -208,7 +194,7 @@ export default class HistoryManager {
 
     try {
       await this.historyDao.delete(id);
-      Logger.debug(TAG, `Deleted history: ${id}`);
+      Logger.debug(TAG, `Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` : new Error(String(`Deleted history: ${id}` instanceof Error ? `Deleted history: ${id}` : new Error(String(`Deleted history: ${id}`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to delete history: ${error}`);
       throw error;
@@ -216,8 +202,7 @@ export default class HistoryManager {
   }
 
   /**
-   * 清空所有历史记录
-   */
+   * 清空所有历史记�?   */
   public async clearAllHistory(): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -225,7 +210,7 @@ export default class HistoryManager {
 
     try {
       await this.historyDao.clear();
-      Logger.info(TAG, 'Cleared all history records');
+      Logger.info(TAG, 'Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records' : new Error(String('Cleared all history records' instanceof Error ? 'Cleared all history records' : new Error(String('Cleared all history records')))))));
     } catch (error) {
       Logger.error(TAG, `Failed to clear history: ${error}`);
       throw error;
@@ -233,15 +218,14 @@ export default class HistoryManager {
   }
 
   /**
-   * 清理超出限制的历史记录
-   */
+   * 清理超出限制的历史记�?   */
   private async cleanupExcessHistory(): Promise<void> {
     try {
       const count = await this.historyDao.count();
       if (count > this.maxHistoryCount) {
         const excessCount = count - this.maxHistoryCount;
         await this.historyDao.deleteOldest(excessCount);
-        Logger.info(TAG, `Cleaned up ${excessCount} excess history records`);
+        Logger.info(TAG, `Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records` instanceof Error ? `Cleaned up ${excessCount} excess history records` : new Error(String(`Cleaned up ${excessCount} excess history records`)))))));
       }
     } catch (error) {
       Logger.error(TAG, `Failed to cleanup excess history: ${error}`);
@@ -255,3 +239,5 @@ export default class HistoryManager {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 }
+
+

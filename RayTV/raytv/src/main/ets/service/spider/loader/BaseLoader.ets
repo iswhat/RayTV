@@ -2,8 +2,7 @@ import Logger from '../../../common/util/Logger';
 import { Site } from '../../../data/bean/Site';
 
 /**
- * 爬虫加载器类型枚举
- */
+ * 爬虫加载器类型枚�? */
 export enum LoaderType {
   JAR = 'jar',
   JS = 'js',
@@ -159,9 +158,7 @@ export interface LiveResult {
 }
 
 /**
- * 爬虫加载器基类
- * 定义爬虫加载器的核心接口和抽象方法
- */
+ * 爬虫加载器基�? * 定义爬虫加载器的核心接口和抽象方�? */
 export abstract class BaseLoader {
   protected readonly TAG: string = `BaseLoader-${this.constructor.name}`;
   protected site: Site;
@@ -173,8 +170,7 @@ export abstract class BaseLoader {
   protected lastInvokeTime: number = 0;
 
   /**
-   * 构造函数
-   * @param site 站点信息
+   * 构造函�?   * @param site 站点信息
    */
   constructor(site: Site) {
     this.site = site;
@@ -183,8 +179,7 @@ export abstract class BaseLoader {
 
   /**
    * 初始化加载器
-   * @returns Promise<boolean> 初始化是否成功
-   */
+   * @returns Promise<boolean> 初始化是否成�?   */
   public async init(): Promise<boolean> {
     if (this.isDestroyed) {
       Logger.error(this.TAG, 'Cannot initialize destroyed loader');
@@ -193,7 +188,7 @@ export abstract class BaseLoader {
     
     if (!this.isInitialized) {
       try {
-        Logger.info(this.TAG, `Initializing loader for site: ${this.site.name}`);
+        Logger.info(this.TAG, `Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}` instanceof Error ? `Initializing loader for site: ${this.site.name}` : new Error(String(`Initializing loader for site: ${this.site.name}`)))))));
         await this.onInit();
         this.isInitialized = true;
         this.initializedTime = Date.now();
@@ -210,12 +205,11 @@ export abstract class BaseLoader {
   }
 
   /**
-   * 销毁加载器，释放资源
-   */
+   * 销毁加载器，释放资�?   */
   public async destroy(): Promise<void> {
     if (!this.isDestroyed) {
       try {
-        Logger.info(this.TAG, `Destroying loader for site: ${this.site.name}`);
+        Logger.info(this.TAG, `Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}` instanceof Error ? `Destroying loader for site: ${this.site.name}` : new Error(String(`Destroying loader for site: ${this.site.name}`)))))));
         await this.onDestroy();
         this.isDestroyed = true;
         this.isInitialized = false;
@@ -232,15 +226,13 @@ export abstract class BaseLoader {
    * @param params 方法参数
    * @returns Promise<CrawlerResult<T>> 方法执行结果
    */
-  public async invoke<T>(method: string, params: Record<string, string | number | boolean | null> = {}): Promise<CrawlerResult<T>> {
+  public async invoke<T>(method: string, params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {} instanceof Error ? params: Record<string, string | number | boolean | null> = {} : new Error(String(params: Record<string, string | number | boolean | null> = {}))))))): Promise<CrawlerResult<T>> {
     try {
-      // 检查状态
-      if (this.isDestroyed) {
+      // 检查状�?      if (this.isDestroyed) {
         return this.createErrorResult('Cannot invoke method on destroyed loader');
       }
       
-      // 自动初始化
-      if (!this.isInitialized) {
+      // 自动初始�?      if (!this.isInitialized) {
         const initialized = await this.init();
         if (!initialized) {
           return this.createErrorResult('Loader initialization failed');
@@ -281,44 +273,63 @@ export abstract class BaseLoader {
    */
   public updateConfig(config: Partial<Site>): void {
     this.site = { ...this.site, ...config };
-    Logger.info(this.TAG, `Site config updated for ${this.site.name}`);
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` instanceof Error ? ...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}` : new Error(String(...config };
+    Logger.info(this.TAG, `Site config updated for ${this.site.name}`)))))));
   }
 
   /**
-   * 获取加载器类型
-   * @returns LoaderType 加载器类型
-   */
+   * 获取加载器类�?   * @returns LoaderType 加载器类�?   */
   public getLoaderType(): LoaderType {
     return this.site.type as LoaderType;
   }
 
   /**
-   * 检查是否已初始化
-   * @returns boolean 是否已初始化
+   * 检查是否已初始�?   * @returns boolean 是否已初始化
    */
   public isInitialized(): boolean {
     return this.isInitialized;
   }
 
   /**
-   * 检查是否已销毁
-   * @returns boolean 是否已销毁
-   */
+   * 检查是否已销�?   * @returns boolean 是否已销�?   */
   public isDestroyed(): boolean {
     return this.isDestroyed;
   }
 
   /**
-   * 检查是否可用
-   * @returns boolean 是否可用
+   * 检查是否可�?   * @returns boolean 是否可用
    */
   public isAvailable(): boolean {
     return !this.isDestroyed && this.errorCount < this.maxErrorCount;
   }
 
   /**
-   * 获取加载器状态
-   */
+   * 获取加载器状�?   */
   public getStatus(): {
     initialized: boolean;
     destroyed: boolean;
@@ -364,7 +375,7 @@ export abstract class BaseLoader {
     Logger.warn(this.TAG, `Site ${this.site.key} error count: ${this.errorCount}/${this.maxErrorCount}`);
     
     if (this.errorCount >= this.maxErrorCount) {
-      Logger.error(this.TAG, `Site ${this.site.key} reached max error count, disabling...`);
+      Logger.error(this.TAG, `Site ${this.site.key} reached max error count, disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` instanceof Error ? disabling...` : new Error(String(disabling...` : new Error(String(disabling...` instanceof Error ? disabling...` : new Error(String(disabling...`)))))));
     }
   }
 
@@ -456,8 +467,7 @@ export abstract class BaseLoader {
   protected abstract onInit(): Promise<void>;
 
   /**
-   * 方法调用（由子类实现）
-   * @param method 方法名称
+   * 方法调用（由子类实现�?   * @param method 方法名称
    * @param params 方法参数
    * @protected
    */
@@ -469,3 +479,5 @@ export abstract class BaseLoader {
    */
   protected abstract onDestroy(): Promise<void>;
 }
+
+

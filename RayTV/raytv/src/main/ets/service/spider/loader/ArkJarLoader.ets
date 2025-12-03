@@ -9,7 +9,7 @@ import sandbox from '@ohos.sandbox';
 import BusinessError from '@ohos.base';
 
 /**
- * JAR加载器配置
+ * JAR加载器配�?
  */
 interface JarLoaderConfig {
   timeout?: number;
@@ -18,8 +18,8 @@ interface JarLoaderConfig {
 }
 
 /**
- * Ark JAR加载器
- * 实现基于HarmonyOS ArkNative能力的JAR文件加载器
+ * Ark JAR加载�?
+ * 实现基于HarmonyOS ArkNative能力的JAR文件加载�?
  */
 export class ArkJarLoader extends BaseLoader {
   private readonly TAG: string = 'ArkJarLoader';
@@ -31,13 +31,13 @@ export class ArkJarLoader extends BaseLoader {
   private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
   private sandboxId: string = '';
-  private sandboxFs: unknown = null;
+  private sandboxFs: Record<string, string | number | boolean | null> = null;
   private jarLoaded: boolean = false;
   private methodExecutedCount: number = 0;
   private lastMemoryCheckTime: number = 0;
 
   /**
-   * 构造函数
+   * 构造函�?
    * @param site 站点配置
    */
   constructor(site: Site) {
@@ -65,7 +65,7 @@ export class ArkJarLoader extends BaseLoader {
     try {
       Logger.info(this.TAG, `Initializing JAR loader for site: ${this.site.name}`);
       
-      // 检查内存是否充足
+      // 检查内存是否充�?
       if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
         throw new Error('Insufficient memory to initialize JAR loader');
       }
@@ -96,13 +96,13 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected async onInvoke(method: string, params: unknown): Promise<unknown> {
+  protected async onInvoke(method: string, params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null>))))))): Promise<unknown> {
     try {
       if (!this.jarLoaded) {
         throw new Error('JAR file is not loaded');
       }
       
-      // 定期检查内存
+      // 定期检查内�?
       this.methodExecutedCount++;
       if (this.methodExecutedCount % 10 === 0 || Date.now() - this.lastMemoryCheckTime > 60000) {
         if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
@@ -114,21 +114,46 @@ export class ArkJarLoader extends BaseLoader {
         this.lastMemoryCheckTime = Date.now();
       }
       
-      // 参数验证和安全检查
+      // 参数验证和安全检�?
       this.validateParams(params);
       this.validateMethod(method);
       
       // 在后台线程执行JAR方法
       Logger.info(this.TAG, `Invoking JAR method: ${method} for site: ${this.site.name}`);
       
-      // 使用超时管理器处理超时
+      // 使用超时管理器处理超�?
       const timeoutId = this.timeoutManager.setTimeout(
         this.loaderConfig.timeout,
         (methodName) => {
           Logger.error(this.TAG, `Method execution timed out: ${methodName}`);
-        },
-        method
-      );
+        }, method
+       instanceof Error ? method
+       : new Error(String(method
+       instanceof Error ? method
+       instanceof Error ? method
+       : new Error(String(method
+       : new Error(String(method
+       instanceof Error ? method
+       : new Error(String(method
+       instanceof Error ? method
+       instanceof Error ? method
+       : new Error(String(method
+       instanceof Error ? method
+       instanceof Error ? method
+       : new Error(String(method
+       : new Error(String(method
+       instanceof Error ? method
+       : new Error(String(method
+       : new Error(String(method
+       instanceof Error ? method
+       : new Error(String(method
+       instanceof Error ? method
+       instanceof Error ? method
+       : new Error(String(method
+       : new Error(String(method
+       instanceof Error ? method
+       : new Error(String(method
+      )))))));
       
       try {
         const result = await this.taskPoolManager.execute(async () => {
@@ -143,7 +168,7 @@ export class ArkJarLoader extends BaseLoader {
       // 增加错误计数
       this.errorCount++;
       if (this.errorCount > this.maxErrorCount) {
-        Logger.warn(this.TAG, `Too many errors, destroying loader for site: ${this.site.name}`);
+        Logger.warn(this.TAG, `Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}` instanceof Error ? `Too many errors, destroying loader for site: ${this.site.name}` : new Error(String(`Too many errors, destroying loader for site: ${this.site.name}`)))))));
         await this.onDestroy();
       }
       throw error;
@@ -151,7 +176,7 @@ export class ArkJarLoader extends BaseLoader {
   }
 
   /**
-   * 销毁方法
+   * 销毁方�?
    * @protected
    */
   protected async onDestroy(): Promise<void> {
@@ -164,7 +189,7 @@ export class ArkJarLoader extends BaseLoader {
       // 释放JAR资源
       await this.releaseJarResources();
       
-      // 销毁沙箱环境
+      // 销毁沙箱环�?
       await this.destroySecuritySandbox();
       
       // 清理临时文件
@@ -173,7 +198,7 @@ export class ArkJarLoader extends BaseLoader {
       // 清理超时任务
       this.timeoutManager.clearAllTimeouts();
       
-      // 通知内存管理器释放内存
+      // 通知内存管理器释放内�?
       this.memoryManager.releaseMemory(this.site.key);
       
       this.jarLoaded = false;
@@ -191,35 +216,35 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async createSecuritySandbox(): Promise<void> {
     if (!this.loaderConfig.sandboxEnabled) {
-      Logger.info(this.TAG, 'Sandbox disabled for JAR loader');
+      Logger.info(this.TAG, 'Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader' instanceof Error ? 'Sandbox disabled for JAR loader' : new Error(String('Sandbox disabled for JAR loader')))))));
       return;
     }
     
     try {
       Logger.info(this.TAG, 'Creating true sandbox environment using @ohos.sandbox API');
       
-      // 使用@ohos.sandbox API创建真正的安全沙箱
+      // 使用@ohos.sandbox API创建真正的安全沙�?
       this.sandboxId = await sandbox.createSandbox({ 
         name: `raytv_jar_${this.site.key}`,
-        // 设置最小权限原则
+        // 设置最小权限原�?
         permissions: [
-          'file.read',   // 只允许读取文件
+          'file.read',   // 只允许读取文�?
           'network.http'  // 只允许HTTP请求
         ],
         // 资源限制
         resourceLimits: {
           memoryLimitMB: this.loaderConfig.maxMemory || 256,
-          cpuLimitPercent: 30,  // 限制CPU使用率
+          cpuLimitPercent: 30,  // 限制CPU使用�?
           diskQuotaMB: 512     // 限制磁盘使用
         }
       });
       
       Logger.info(this.TAG, `Created true security sandbox with ID: ${this.sandboxId}`);
       
-      // 获取沙箱内的文件系统访问器
+      // 获取沙箱内的文件系统访问�?
       this.sandboxFs = await sandbox.getSandboxFileSystem(this.sandboxId);
       
-      // 创建沙箱内目录结构
+      // 创建沙箱内目录结�?
       await this.sandboxFs.mkdir('/jar', { recursive: true });
       await this.sandboxFs.mkdir('/temp', { recursive: true });
       
@@ -240,7 +265,7 @@ export class ArkJarLoader extends BaseLoader {
       throw new Error('Invalid JAR file URL');
     }
     
-    // 验证URL安全性
+    // 验证URL安全�?
     if (!this.validateUrl(config.url)) {
       throw new Error('Security violation: Invalid or restricted JAR file URL');
     }
@@ -249,7 +274,7 @@ export class ArkJarLoader extends BaseLoader {
       // 生成本地存储路径
       this.jarFilePath = this.getJarFilePath();
       
-      Logger.info(this.TAG, `Downloading JAR file from: ${config.url}`);
+      Logger.info(this.TAG, `Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}` instanceof Error ? `Downloading JAR file from: ${config.url}` : new Error(String(`Downloading JAR file from: ${config.url}`)))))));
       
       // 下载JAR文件
       const response = await this.httpService.downloadFile({
@@ -262,7 +287,7 @@ export class ArkJarLoader extends BaseLoader {
         throw new Error(`Failed to download JAR file: ${response.code}`);
       }
       
-      // 验证JAR文件完整性
+      // 验证JAR文件完整�?
       await this.verifyJarFile();
       
       Logger.info(this.TAG, `JAR file downloaded successfully to: ${this.jarFilePath}`);
@@ -278,10 +303,10 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async initializeJarResources(): Promise<void> {
     try {
-      Logger.info(this.TAG, `Initializing JAR resources for: ${this.site.name}`);
+      Logger.info(this.TAG, `Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}` instanceof Error ? `Initializing JAR resources for: ${this.site.name}` : new Error(String(`Initializing JAR resources for: ${this.site.name}`)))))));
       
       // 这里需要使用HarmonyOS的ArkNative API加载JAR文件
-      // 由于实际API可能有所不同，这里提供一个框架实现
+      // 由于实际API可能有所不同，这里提供一个框架实�?
       
       // 1. 检查JAR文件是否存在
       if (!this.fsManager.existsSync(this.jarFilePath)) {
@@ -291,7 +316,7 @@ export class ArkJarLoader extends BaseLoader {
       // 2. 加载JAR文件
       // ArkNativeAPI.loadJar(this.jarFilePath);
       
-      // 3. 初始化JAR中的主要类
+      // 3. 初始化JAR中的主要�?
       // ArkNativeAPI.initializeMainClass();
       
       Logger.info(this.TAG, `JAR resources initialized successfully`);
@@ -307,7 +332,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 参数
    * @private
    */
-  private async executeJarMethod(method: string, params: unknown): Promise<unknown> {
+  private async executeJarMethod(method: string, params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null>))))))): Promise<unknown> {
     try {
       Logger.info(this.TAG, `Executing JAR method: ${method}`);
       
@@ -334,7 +359,7 @@ export class ArkJarLoader extends BaseLoader {
       // 转换结果格式
       const jsResult = this.convertFromJavaResult(result);
       
-      // 检查内存使用增长
+      // 检查内存使用增�?
       const endMemory = this.memoryManager.getCurrentMemoryUsage();
       if (endMemory - startMemory > 32 * 1024 * 1024) { // 超过32MB增长
         Logger.warn(this.TAG, `Memory usage increased significantly during method execution: ${method}`);
@@ -353,7 +378,7 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async releaseJarResources(): Promise<void> {
     try {
-      Logger.info(this.TAG, `Releasing JAR resources`);
+      Logger.info(this.TAG, `Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources` : new Error(String(`Releasing JAR resources` instanceof Error ? `Releasing JAR resources` : new Error(String(`Releasing JAR resources`)))))));
       
       // 使用ArkNative API释放JAR资源
       // ArkNativeAPI.releaseJar();
@@ -364,7 +389,7 @@ export class ArkJarLoader extends BaseLoader {
   }
 
   /**
-   * 销毁安全沙箱
+   * 销毁安全沙�?
    * @private
    */
   private async destroySecuritySandbox(): Promise<void> {
@@ -373,9 +398,9 @@ export class ArkJarLoader extends BaseLoader {
     }
     
     try {
-      Logger.info(this.TAG, `Destroying true security sandbox: ${this.sandboxId}`);
+      Logger.info(this.TAG, `Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}` instanceof Error ? `Destroying true security sandbox: ${this.sandboxId}` : new Error(String(`Destroying true security sandbox: ${this.sandboxId}`)))))));
       
-      // 使用@ohos.sandbox API销毁沙箱，会自动清理所有资源
+      // 使用@ohos.sandbox API销毁沙箱，会自动清理所有资�?
       await sandbox.destroySandbox(this.sandboxId);
       
       this.sandboxId = '';
@@ -394,14 +419,14 @@ export class ArkJarLoader extends BaseLoader {
   private async verifyJarFile(): Promise<void> {
     // 检查JAR文件大小
     const fileStats = this.fsManager.statSync(this.jarFilePath);
-    const maxSize = this.loaderConfig.maxMemory * 1024 * 1024; // 转换为字节
+    const maxSize = this.loaderConfig.maxMemory * 1024 * 1024; // 转换为字�?
     
     if (fileStats.size > maxSize) {
       throw new Error(`JAR file exceeds maximum allowed size (${maxSize} bytes)`);
     }
     
     // 简单的文件头验证，确保是有效的JAR/ZIP文件
-    const file = this.fsManager.openSync(this.jarFilePath, 'r');
+    const file = this.fsManager.openSync(this.jarFilePath, 'r' instanceof Error ? 'r' : new Error(String('r' instanceof Error ? 'r' instanceof Error ? 'r' : new Error(String('r' : new Error(String('r' instanceof Error ? 'r' : new Error(String('r' instanceof Error ? 'r' instanceof Error ? 'r' : new Error(String('r' instanceof Error ? 'r' instanceof Error ? 'r' : new Error(String('r' : new Error(String('r' instanceof Error ? 'r' : new Error(String('r' : new Error(String('r' instanceof Error ? 'r' : new Error(String('r' instanceof Error ? 'r' instanceof Error ? 'r' : new Error(String('r' : new Error(String('r' instanceof Error ? 'r' : new Error(String('r')))))));
     const header = new Uint8Array(4);
     this.fsManager.readSync(file.fd, header.buffer, 0, 4, 0);
     this.fsManager.closeSync(file.fd);
@@ -436,7 +461,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 方法参数
    * @private
    */
-  private validateParams(params: unknown): void {
+  private validateParams(params: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): void {
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 1024 * 1024) { // 1MB限制
       throw new Error('JAR method parameters too large');
@@ -461,7 +486,7 @@ export class ArkJarLoader extends BaseLoader {
   }
   
   /**
-   * 验证URL安全性
+   * 验证URL安全�?
    * @private
    */
   private validateUrl(url: string): boolean {
@@ -479,19 +504,27 @@ export class ArkJarLoader extends BaseLoader {
   }
   
   /**
-   * 验证方法名
+   * 验证方法�?
    * @private
    */
   private validateMethod(method: string): void {
-    // 检查方法名是否包含危险字符或模式
+    // 检查方法名是否包含危险字符或模�?
     const dangerousPatterns = [/\s/, /\./, /\//, /\\/, /\*/];
-    for (const pattern of dangerousPatterns) {
+    for (const pattern of dangerousPatterns instanceof Error ? /\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns : new Error(String(/\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns instanceof Error ? /\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns instanceof Error ? /\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns : new Error(String(/\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns : new Error(String(/\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns instanceof Error ? /\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns : new Error(String(/\./, /\//, /\\/, /\*/];
+    for (const pattern of dangerousPatterns))))) {
       if (pattern.test(method)) {
         throw new Error(`Security violation: Invalid method name: ${method}`);
       }
     }
     
-    // 方法名长度限制
+    // 方法名长度限�?
     if (method.length > 100) {
       throw new Error('Method name too long');
     }
@@ -509,17 +542,17 @@ export class ArkJarLoader extends BaseLoader {
       Logger.info(this.TAG, 'System garbage collection completed successfully');
     } catch (error) {
       Logger.error(this.TAG, `Failed to trigger system garbage collection: ${error}`);
-      // 如果系统垃圾回收失败，回退到基本清理
+      // 如果系统垃圾回收失败，回退到基本清�?
       await this.cleanupResources();
     }
   }
   
   /**
-   * 清理资源作为垃圾回收的补充
+   * 清理资源作为垃圾回收的补�?
    */
   private async cleanupResources(): Promise<void> {
-    Logger.info(this.TAG, 'Performing resource cleanup');
-    // 清理临时对象和缓存
+    Logger.info(this.TAG, 'Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup' : new Error(String('Performing resource cleanup' instanceof Error ? 'Performing resource cleanup' : new Error(String('Performing resource cleanup')))))));
+    // 清理临时对象和缓�?
     if (this.jarCache) {
       this.jarCache.clear();
     }
@@ -535,7 +568,7 @@ export class ArkJarLoader extends BaseLoader {
     try {
       Logger.info(this.TAG, `Cleaning up JAR loader resources for site: ${this.site.name}`);
       
-      // 如果已创建沙箱，先销毁沙箱
+      // 如果已创建沙箱，先销毁沙�?
       if (this.sandboxId && this.loaderConfig.sandboxEnabled) {
         try {
           Logger.info(this.TAG, `Destroying security sandbox with ID: ${this.sandboxId}`);
@@ -550,7 +583,7 @@ export class ArkJarLoader extends BaseLoader {
       // 清理JAR文件
       if (this.jarFilePath) {
         try {
-          if (this.fsManager.accessSync(this.jarFilePath, this.fsManager.F_OK)) {
+          if (this.fsManager.accessSync(this.jarFilePath, this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK : new Error(String(this.fsManager.F_OK instanceof Error ? this.fsManager.F_OK : new Error(String(this.fsManager.F_OK)))))))) {
             this.fsManager.unlinkSync(this.jarFilePath);
           }
           this.jarFilePath = '';
@@ -566,7 +599,7 @@ export class ArkJarLoader extends BaseLoader {
       // 触发垃圾回收
       await this.garbageCollect();
       
-      Logger.info(this.TAG, `Resources cleaned up successfully for site: ${this.site.name}`);
+      Logger.info(this.TAG, `Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}` instanceof Error ? `Resources cleaned up successfully for site: ${this.site.name}` : new Error(String(`Resources cleaned up successfully for site: ${this.site.name}`)))))));
     } catch (error) {
       Logger.error(this.TAG, `Error during cleanup: ${error}`);
       // 即使出错也继续执行，确保尽可能多的资源被释放
@@ -578,9 +611,9 @@ export class ArkJarLoader extends BaseLoader {
    * @param params JavaScript参数
    * @private
    */
-  private convertToJavaParams(params: unknown): unknown {
+  private convertToJavaParams(params: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): Record<string, string | number | boolean | null> {
     // 转换JavaScript数据结构为Java兼容格式
-    // 在实际实现中需要根据ArkNative API的要求进行转换
+    // 在实际实现中需要根据ArkNative API的要求进行转�?
     return params;
   }
 
@@ -589,9 +622,11 @@ export class ArkJarLoader extends BaseLoader {
    * @param result Java结果
    * @private
    */
-  private convertFromJavaResult(result: unknown): unknown {
+  private convertFromJavaResult(result: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
     // 转换Java结果为JavaScript格式
-    // 在实际实现中需要根据ArkNative API的要求进行转换
+    // 在实际实现中需要根据ArkNative API的要求进行转�?
     return result;
   }
 }
+
+

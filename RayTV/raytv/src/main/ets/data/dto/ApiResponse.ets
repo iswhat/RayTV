@@ -42,10 +42,7 @@ export enum ResponseCode {
 export interface PaginationInfo {
   page: number;        // 当前页码
   pageSize: number;    // 每页大小
-  total: number;       // 总条数
-  totalPages: number;  // 总页数
-  hasMore: boolean;    // 是否有更多
-}
+  total: number;       // 总条�?  totalPages: number;  // 总页�?  hasMore: boolean;    // 是否有更�?}
 
 /**
    * 错误详情接口
@@ -54,12 +51,10 @@ export interface ErrorDetail {
   field?: string;      // 字段名称（用于验证错误）
   message: string;     // 错误消息
   code?: string;       // 错误代码
-  value?: string | number | boolean | null;     // 错误值
-}
+  value?: string | number | boolean | null;     // 错误�?}
 
 /**
- * API响应类
- * 用于标准化API响应结构
+ * API响应�? * 用于标准化API响应结构
  */
 // API响应参数接口
 export interface ApiResponseParams<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
@@ -76,15 +71,12 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据
-  errors?: ErrorDetail[];         // 错误详情（用于表单验证等）
-  pagination?: PaginationInfo;    // 分页信息
-  timestamp: number;              // 响应时间戳
-  requestId?: string;             // 请求ID（用于跟踪）
+  errors?: ErrorDetail[];         // 错误详情（用于表单验证等�?  pagination?: PaginationInfo;    // 分页信息
+  timestamp: number;              // 响应时间�?  requestId?: string;             // 请求ID（用于跟踪）
   trace?: string;                 // 跟踪信息
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor(params: ApiResponseParams<T>) {
     this.code = params.code;
     this.message = params.message;
@@ -111,8 +103,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 是否客户端错误
-   */
+   * 是否客户端错�?   */
   isClientError(): boolean {
     return this.code >= 400 && this.code < 500 || 
            this.code === ResponseCode.AUTHENTICATION_ERROR || 
@@ -120,8 +111,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 是否服务器错误
-   */
+   * 是否服务器错�?   */
   isServerError(): boolean {
     return this.code >= 500 || 
            this.code === ResponseCode.NETWORK_ERROR ||
@@ -156,15 +146,13 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 是否未找到资源
-   */
+   * 是否未找到资�?   */
   isNotFound(): boolean {
     return this.code === ResponseCode.NOT_FOUND;
   }
 
   /**
-   * 获取第一个错误消息
-   */
+   * 获取第一个错误消�?   */
   getFirstErrorMessage(): string | null {
     if (this.errors && this.errors.length > 0) {
       return this.errors[0].message;
@@ -174,15 +162,13 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
 
   /**
    * 获取字段错误信息
-   * @param field 字段名
-   */
+   * @param field 字段�?   */
   getFieldError(field: string): ErrorDetail | undefined {
     return this.errors?.find(error => error.field === field);
   }
 
   /**
-   * 获取所有错误消息
-   */
+   * 获取所有错误消�?   */
   getAllErrorMessages(): string[] {
     if (!this.errors || this.errors.length === 0) {
       return [];
@@ -204,7 +190,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
     if (this.isSuccess()) {
       Logger.info(TAG, `Success response: ${this.toString()}`);
     } else {
-      Logger.error(TAG, `Error response: ${this.toString()}, errors: ${JSON.stringify(this.errors)}`);
+      Logger.error(TAG, `Error response: ${this.toString()}, errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors instanceof Error ? errors: ${JSON.stringify(this.errors : new Error(String(errors: ${JSON.stringify(this.errors)))))))}`);
     }
   }
 
@@ -225,8 +211,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 从对象创建实例
-   * @param obj 对象数据
+   * 从对象创建实�?   * @param obj 对象数据
    */
   static fromObject<T = unknown>(obj: Record<string, unknown>): ApiResponse<T> {
     const params: ApiResponseParams<T> = {
@@ -241,7 +226,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
     return new ApiResponse<T>(params);
   }
 
-  // ========== 静态工厂方法 ==========
+  // ========== 静态工厂方�?==========
 
   /**
    * 创建成功响应
@@ -293,8 +278,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 创建未授权错误响应
-   */
+   * 创建未授权错误响�?   */
   static unauthorized<T = unknown>(message: string = 'Unauthorized'): ApiResponse<T> {
     return this.error<T>(ResponseCode.UNAUTHORIZED, message);
   }
@@ -307,15 +291,13 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 创建未找到资源错误响应
-   */
+   * 创建未找到资源错误响�?   */
   static notFound<T = unknown>(message: string = 'Resource not found'): ApiResponse<T> {
     return this.error<T>(ResponseCode.NOT_FOUND, message);
   }
 
   /**
-   * 创建服务器错误响应
-   */
+   * 创建服务器错误响�?   */
   static serverError<T = unknown>(message: string = 'Internal server error'): ApiResponse<T> {
     return this.error<T>(ResponseCode.INTERNAL_SERVER_ERROR, message);
   }
@@ -357,11 +339,10 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   }
 
   /**
-   * 从错误创建响应
-   */
+   * 从错误创建响�?   */
   static fromError<T = unknown>(error: Error): ApiResponse<T> {
     // 可以根据不同类型的错误返回不同的响应
-    Logger.error(TAG, `Creating response from error: ${error.message}`, error);
+    Logger.error(TAG, `Creating response from error: ${error.message}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     
     return this.error<T>(ResponseCode.UNKNOWN_ERROR, error.message);
   }
@@ -391,7 +372,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
     message: string,
     field?: string,
     code?: string,
-    value?: unknown
+    value?: Record<string, string | number | boolean | null>
   ): ErrorDetail {
     return {
       field,
@@ -401,3 +382,5 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
     };
   }
 }
+
+

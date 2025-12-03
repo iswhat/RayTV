@@ -1,27 +1,22 @@
 // StringUtils.ets - ArkTS兼容的字符串工具函数
 
 /**
- * 字符串工具函数
- * 提供ArkTS环境中安全的字符串操作功能
- */
+ * 字符串工具函�? * 提供ArkTS环境中安全的字符串操作功�? */
 import { Optional } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
 import ArrayUtils from './ArrayUtils';
 
 /**
- * 字符串工具函数集合
- */
+ * 字符串工具函数集�? */
 export const StringUtils = {
   /**
-   * 检查值是否为字符串
-   */
-  isString(value: unknown): boolean {
+   * 检查值是否为字符�?   */
+  isString(value: Record<string, string | number | boolean | null>): boolean {
     return TypeUtils.isString(value);
   },
 
   /**
-   * 获取字符串长度
-   */
+   * 获取字符串长�?   */
   length(str: Optional<string>): number {
     if (str === null || str === undefined) {
       return 0;
@@ -45,8 +40,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串截取函数
-   * 替代String.prototype.substring
+   * 字符串截取函�?   * 替代String.prototype.substring
    */
   substring(str: Optional<string>, start: number, end?: number): string {
     if (str === null || str === undefined) {
@@ -60,8 +54,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串截断函数
-   */
+   * 字符串截断函�?   */
   truncate(str: Optional<string>, maxLength: number, suffix: string = '...'): string {
     if (StringUtils.isEmpty(str)) {
       return str || '';
@@ -106,8 +99,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串去除首尾空格函数
-   * 替代String.prototype.trim
+   * 字符串去除首尾空格函�?   * 替代String.prototype.trim
    */
   trim(str: Optional<string>): string {
     if (str === null || str === undefined) {
@@ -118,8 +110,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串分割函数
-   * 替代String.prototype.split
+   * 字符串分割函�?   * 替代String.prototype.split
    */
   split(str: Optional<string>, separator: string | RegExp, limit?: number): string[] {
     if (str === null || str === undefined) {
@@ -136,8 +127,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串连接函数
-   * 替代String.prototype.join
+   * 字符串连接函�?   * 替代String.prototype.join
    */
   join(separator: string, ...parts: Optional<string>[]): string {
     const nonEmptyParts: string[] = [];
@@ -153,8 +143,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串包含检查函数
-   * 替代String.prototype.includes
+   * 字符串包含检查函�?   * 替代String.prototype.includes
    */
   includes(str: Optional<string>, searchString: string, position?: number): boolean {
     if (str === null || str === undefined) {
@@ -179,8 +168,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串开头检查函数
-   * 替代String.prototype.startsWith
+   * 字符串开头检查函�?   * 替代String.prototype.startsWith
    */
   startsWith(str: Optional<string>, searchString: string, position?: number): boolean {
     if (str === null || str === undefined) {
@@ -191,8 +179,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串结尾检查函数
-   * 替代String.prototype.endsWith
+   * 字符串结尾检查函�?   * 替代String.prototype.endsWith
    */
   endsWith(str: Optional<string>, searchString: string, length?: number): boolean {
     if (str === null || str === undefined) {
@@ -203,8 +190,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串查找函数
-   * 替代String.prototype.indexOf
+   * 字符串查找函�?   * 替代String.prototype.indexOf
    */
   indexOf(str: Optional<string>, searchValue: string, fromIndex?: number): number {
     if (str === null || str === undefined) {
@@ -215,8 +201,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串最后查找函数
-   * 替代String.prototype.lastIndexOf
+   * 字符串最后查找函�?   * 替代String.prototype.lastIndexOf
    */
   lastIndexOf(str: Optional<string>, searchValue: string, fromIndex?: number): number {
     if (str === null || str === undefined) {
@@ -227,8 +212,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串替换函数
-   * 替代String.prototype.replace
+   * 字符串替换函�?   * 替代String.prototype.replace
    */
   replace(str: Optional<string>, searchValue: string | RegExp, replaceValue: string): string {
     if (str === null || str === undefined) {
@@ -239,22 +223,19 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串全部替换函数
-   * 替代String.prototype.replaceAll
+   * 字符串全部替换函�?   * 替代String.prototype.replaceAll
    */
   replaceAll(str: Optional<string>, searchValue: string, replaceValue: string): string {
     if (str === null || str === undefined) {
       return '';
     }
     
-    // 使用正则表达式实现全部替换
-    const regex = new RegExp(searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    // 使用正则表达式实现全部替�?    const regex = new RegExp(searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
     return str.replace(regex, replaceValue);
   },
 
   /**
-   * 字符串填充函数
-   * 替代String.prototype.padStart
+   * 字符串填充函�?   * 替代String.prototype.padStart
    */
   padStart(str: Optional<string>, targetLength: number, padString: string = ' '): string {
     if (str === null || str === undefined) {
@@ -265,8 +246,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串填充函数
-   * 替代String.prototype.padEnd
+   * 字符串填充函�?   * 替代String.prototype.padEnd
    */
   padEnd(str: Optional<string>, targetLength: number, padString: string = ' '): string {
     if (str === null || str === undefined) {
@@ -295,8 +275,7 @@ export const StringUtils = {
   },
 
   /**
-   * 首字母大写函数
-   */
+   * 首字母大写函�?   */
   capitalize(str: Optional<string>): string {
     if (StringUtils.isEmpty(str)) {
       return str || '';
@@ -330,8 +309,7 @@ export const StringUtils = {
   },
 
   /**
-   * 生成随机字符串函数
-   */
+   * 生成随机字符串函�?   */
   generateRandomString(length: number = 16): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -345,8 +323,7 @@ export const StringUtils = {
   },
 
   /**
-   * 格式化文件大小函数
-   */
+   * 格式化文件大小函�?   */
   formatFileSize(bytes: number, decimals: number = 2): string {
     if (bytes === 0) {
       return '0 B';
@@ -361,3 +338,4 @@ export const StringUtils = {
 };
 
 export default StringUtils;
+

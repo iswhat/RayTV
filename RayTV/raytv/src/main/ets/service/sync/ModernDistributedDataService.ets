@@ -1,6 +1,5 @@
 // ModernDistributedDataService.ets - 现代化分布式数据服务
-// 基于HarmonyOS 5.0+分布式KVStore API实现多设备数据同步
-
+// 基于HarmonyOS 5.0+分布式KVStore API实现多设备数据同�?
 import Logger from '../../common/util/Logger';
 import distributedKVStore from '@ohos.data.distributedKVStore';
 import deviceManager from '@ohos.distributedDeviceManager';
@@ -29,8 +28,7 @@ export enum ConflictResolutionStrategy {
   MERGE = 'merge'            // 合并数据
 }
 
-// 同步状态枚举
-export enum SyncStatus {
+// 同步状态枚�?export enum SyncStatus {
   IDLE = 'idle',
   SYNCHRONIZING = 'synchronizing',
   COMPLETED = 'completed',
@@ -42,8 +40,7 @@ export enum SyncStatus {
 export interface SyncConfig {
   enabled: boolean;
   autoSync: boolean;
-  syncInterval: number; // 秒
-  conflictStrategy: ConflictResolutionStrategy;
+  syncInterval: number; // �?  conflictStrategy: ConflictResolutionStrategy;
   syncTypes: SyncDataType[];
   allowCellularSync: boolean;
   showSyncNotifications: boolean;
@@ -60,8 +57,7 @@ const DEFAULT_SYNC_CONFIG: SyncConfig = {
   showSyncNotifications: true
 };
 
-// 同步状态接口
-export interface SyncState {
+// 同步状态接�?export interface SyncState {
   status: SyncStatus;
   lastSyncTime?: number;
   lastSyncResult?: boolean;
@@ -78,8 +74,7 @@ export interface SyncData<T = any> {
   deviceId: string;
 }
 
-// 分布式数据监听回调类型
-type DataChangeListener = <T = any>(key: string, data: T, deviceId: string) => void;
+// 分布式数据监听回调类�?type DataChangeListener = <T = any>(key: string, data: T, deviceId: string) => void;
 
 export default class ModernDistributedDataService {
   static instance: ModernDistributedDataService;
@@ -105,24 +100,19 @@ export default class ModernDistributedDataService {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
-   * 设置应用上下文
-   * @param ctx 应用上下文
-   */
+   * 设置应用上下�?   * @param ctx 应用上下�?   */
   public setContext(ctx: common.Context): void {
     this.context = ctx;
   }
 
   /**
-   * 获取应用上下文
-   * @returns 应用上下文
-   */
+   * 获取应用上下�?   * @returns 应用上下�?   */
   private getContext(): common.Context {
     if (!this.context) {
       throw new Error('ModernDistributedDataService context not set. Please call setContext() first.');
@@ -192,7 +182,7 @@ export default class ModernDistributedDataService {
    */
   async loadSyncConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('syncConfig', DEFAULT_SYNC_CONFIG);
+      const savedConfig = await this.configService.getConfig('syncConfig', DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG)))))));
       if (savedConfig) {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
@@ -207,7 +197,33 @@ export default class ModernDistributedDataService {
   async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = { ...this.syncConfig, ...config };
-      await this.configService.setConfig('syncConfig', this.syncConfig);
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig)))))));
       
       // 根据配置调整自动同步
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
@@ -238,7 +254,7 @@ export default class ModernDistributedDataService {
 
     try {
       // 使用新的数据变化监听API
-      this.kvStore.on('dataChange', distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data) => {
+      this.kvStore.on('dataChange', distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data instanceof Error ? distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data : new Error(String(distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, (data))))))) => {
         Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
         
         if (data && data.insertEntries && data.insertEntries.length > 0) {
@@ -246,8 +262,7 @@ export default class ModernDistributedDataService {
             const key = entry.key.toString();
             const deviceId = entry.deviceId || 'local';
             
-            // 获取数据并通知监听器
-            if (this.kvStore !== null && this.kvStore !== undefined) {
+            // 获取数据并通知监听�?            if (this.kvStore !== null && this.kvStore !== undefined) {
               this.kvStore.get(key).then((value) => {
                 if (this.dataListeners.has(key)) {
                   const listeners = this.dataListeners.get(key)!;
@@ -260,7 +275,7 @@ export default class ModernDistributedDataService {
                   }
                 }
               }).catch((error) => {
-                Logger.error(TAG, `Failed to get changed data: ${error}`);
+                Logger.error(TAG, `Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}` instanceof Error ? `Failed to get changed data: ${error}` : new Error(String(`Failed to get changed data: ${error}`)))))));
               });
             }
           });
@@ -272,11 +287,10 @@ export default class ModernDistributedDataService {
   }
 
   /**
-   * 监听特定类型的数据变化
-   * @param dataType 数据类型
+   * 监听特定类型的数据变�?   * @param dataType 数据类型
    * @param listener 监听回调
    */
-  addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
+  addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener))))))): void {
     const keyPrefix = `${dataType}_`;
     
     if (!this.dataListeners.has(keyPrefix)) {
@@ -308,8 +322,7 @@ export default class ModernDistributedDataService {
   /**
    * 保存同步数据
    * @param dataType 数据类型
-   * @param key 数据键
-   * @param data 数据内容
+   * @param key 数据�?   * @param data 数据内容
    */
   async saveSyncData<T = any>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
@@ -318,11 +331,7 @@ export default class ModernDistributedDataService {
 
     try {
       const fullKey = `${dataType}_${key}`;
-      const syncData = {
-        data,
-        timestamp: Date.now(),
-        deviceId: await this.getLocalDeviceId()
-      };
+      const syncData: Record<string, string | number | boolean | null> = { ... };
 
       await this.kvStore.put(fullKey, syncData);
       Logger.debug(TAG, `Saved sync data: ${fullKey}`);
@@ -335,9 +344,8 @@ export default class ModernDistributedDataService {
   /**
    * 获取同步数据
    * @param dataType 数据类型
-   * @param key 数据键
-   */
-  async getSyncData<T = any>(dataType: SyncDataType, key: string): Promise<T | null> {
+   * @param key 数据�?   */
+  async getSyncData<T = any>(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }
@@ -361,9 +369,8 @@ export default class ModernDistributedDataService {
   /**
    * 删除同步数据
    * @param dataType 数据类型
-   * @param key 数据键
-   */
-  async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
+   * @param key 数据�?   */
+  async deleteSyncData(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -386,7 +393,7 @@ export default class ModernDistributedDataService {
       const deviceInfo = await deviceManager.getLocalDeviceInfo();
       return deviceInfo.deviceId;
     } catch (error) {
-      Logger.error(TAG, `Failed to get local device ID: ${error}`);
+      Logger.error(TAG, `Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}` instanceof Error ? `Failed to get local device ID: ${error}` : new Error(String(`Failed to get local device ID: ${error}`)))))));
       return 'unknown';
     }
   }
@@ -409,13 +416,12 @@ export default class ModernDistributedDataService {
    * 启动自动同步
    */
   private startAutoSync(): void {
-    this.stopAutoSync(); // 先停止现有的定时器
-    
+    this.stopAutoSync(); // 先停止现有的定时�?    
     this.syncTimerId = setInterval(async () => {
       try {
         await this.synchronizeData();
       } catch (error) {
-        Logger.error(TAG, `Auto sync failed: ${error}`);
+        Logger.error(TAG, `Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}` instanceof Error ? `Auto sync failed: ${error}` : new Error(String(`Auto sync failed: ${error}`)))))));
       }
     }, this.syncConfig.syncInterval * 1000);
     
@@ -469,8 +475,7 @@ export default class ModernDistributedDataService {
     } catch (error) {
       Logger.error(TAG, `Data synchronization failed: ${error}`);
       this.syncState = {
-        status: SyncStatus.FAILED,
-        error: String(error),
+        status: SyncStatus.FAILED, error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error : new Error(String(error: String(error instanceof Error ? error: String(error : new Error(String(error: String(error))))))),
       };
       throw error;
     }
@@ -520,26 +525,25 @@ export default class ModernDistributedDataService {
         entry.key.toString().startsWith(prefix)
       ).map((entry: distributedKVStore.Entry) => entry.key.toString());
     } catch (error) {
-      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}`);
+      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}` instanceof Error ? `Failed to get keys with prefix ${prefix}: ${error}` : new Error(String(`Failed to get keys with prefix ${prefix}: ${error}`)))))));
       return [];
     }
   }
 
   /**
-   * 获取同步状态
-   */
+   * 获取同步状�?   */
   getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
-   * 关闭分布式数据服务
-   */
+   * 关闭分布式数据服�?   */
   close(): void {
     this.stopAutoSync();
     if (this.kvManager) {
-      // KVStore会由系统自动管理生命周期，不需要手动关闭
-    }
+      // KVStore会由系统自动管理生命周期，不需要手动关�?    }
     Logger.info(TAG, 'Modern distributed data service closed');
   }
 }
+
+

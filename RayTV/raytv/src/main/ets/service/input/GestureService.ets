@@ -70,16 +70,14 @@ export interface GestureConfig {
   enablePinch?: boolean;
   enableRotate?: boolean;
   enablePan?: boolean;
-  swipeThreshold?: number; // 滑动阈值
-  longPressDuration?: number; // 长按持续时间
+  swipeThreshold?: number; // 滑动阈�?  longPressDuration?: number; // 长按持续时间
 }
 
 /**
  * 手势服务接口
  */
 export interface GestureService {
-  // 初始化手势识别
-  init(config?: GestureConfig): Promise<void>;
+  // 初始化手势识�?  init(config?: GestureConfig): Promise<void>;
   
   // 设置手势监听
   onGesture(callback: (event: GestureEvent) => void): void;
@@ -90,16 +88,13 @@ export interface GestureService {
   // 取消特定类型手势监听
   off(type: GestureType): void;
   
-  // 取消所有手势监听
-  offAll(): void;
+  // 取消所有手势监�?  offAll(): void;
   
-  // 销毁手势服务
-  destroy(): void;
+  // 销毁手势服�?  destroy(): void;
 }
 
 /**
- * 手势服务实现类
- * 基于HarmonyOS @ohos.multimodalInput.gesture API实现手势识别功能
+ * 手势服务实现�? * 基于HarmonyOS @ohos.multimodalInput.gesture API实现手势识别功能
  */
 export class GestureServiceImpl implements GestureService {
   private readonly TAG: string = 'GestureServiceImpl';
@@ -111,8 +106,7 @@ export class GestureServiceImpl implements GestureService {
   private subscription: number = -1;
   
   /**
-   * 初始化手势识别
-   */
+   * 初始化手势识�?   */
   async init(config?: GestureConfig): Promise<void> {
     try {
       if (this.isInitialized) {
@@ -134,8 +128,7 @@ export class GestureServiceImpl implements GestureService {
         ...config
       };
       
-      // 创建手势管理器
-      this.gestureManager = await gesture.createGestureManager();
+      // 创建手势管理�?      this.gestureManager = await gesture.createGestureManager();
       
       // 订阅手势事件
       this.subscribeToGestureEvents();
@@ -153,7 +146,7 @@ export class GestureServiceImpl implements GestureService {
    */
   onGesture(callback: (event: GestureEvent) => void): void {
     this.globalCallback = callback;
-    Logger.info(this.TAG, 'Global gesture callback set');
+    Logger.info(this.TAG, 'Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set' : new Error(String('Global gesture callback set' instanceof Error ? 'Global gesture callback set' : new Error(String('Global gesture callback set')))))));
   }
   
   /**
@@ -173,8 +166,7 @@ export class GestureServiceImpl implements GestureService {
   }
   
   /**
-   * 取消所有手势监听
-   */
+   * 取消所有手势监�?   */
   offAll(): void {
     this.globalCallback = undefined;
     this.gestureCallbacks.clear();
@@ -182,8 +174,7 @@ export class GestureServiceImpl implements GestureService {
   }
   
   /**
-   * 销毁手势服务
-   */
+   * 销毁手势服�?   */
   destroy(): void {
     try {
       if (this.subscription >= 0) {
@@ -206,7 +197,7 @@ export class GestureServiceImpl implements GestureService {
    */
   subscribeToGestureEvents(): void {
     try {
-      this.subscription = input.on('multimodalGesture', (event) => {
+      this.subscription = input.on('multimodalGesture', (event instanceof Error ? (event : new Error(String((event instanceof Error ? (event instanceof Error ? (event : new Error(String((event : new Error(String((event instanceof Error ? (event : new Error(String((event instanceof Error ? (event instanceof Error ? (event : new Error(String((event instanceof Error ? (event instanceof Error ? (event : new Error(String((event : new Error(String((event instanceof Error ? (event : new Error(String((event : new Error(String((event instanceof Error ? (event : new Error(String((event instanceof Error ? (event instanceof Error ? (event : new Error(String((event : new Error(String((event instanceof Error ? (event : new Error(String((event))))))) => {
         this.handleGestureEvent(event);
       });
       
@@ -236,7 +227,7 @@ export class GestureServiceImpl implements GestureService {
         specificCallback(gestureEvent);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle gesture event: ${error}`);
+      Logger.error(this.TAG, `Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}` instanceof Error ? `Failed to handle gesture event: ${error}` : new Error(String(`Failed to handle gesture event: ${error}`)))))));
     }
   }
   
@@ -245,8 +236,7 @@ export class GestureServiceImpl implements GestureService {
    */
   buildGestureEvent(event: GestureRawEvent): GestureEvent | null {
     try {
-      // 根据事件类型转换为标准手势事件
-      switch (event.type) {
+      // 根据事件类型转换为标准手势事�?      switch (event.type) {
         case 'tap':
           if (!this.config.enableTap) return null;
           return {
@@ -277,8 +267,7 @@ export class GestureServiceImpl implements GestureService {
           
         case 'swipe':
           if (!this.config.enableSwipe) return null;
-          // 检查滑动距离是否超过阈值
-          if (Math.abs(event.distance) < this.config.swipeThreshold) return null;
+          // 检查滑动距离是否超过阈�?          if (Math.abs(event.distance) < this.config.swipeThreshold) return null;
           
           let direction: Direction;
           if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
@@ -341,3 +330,5 @@ export class GestureServiceImpl implements GestureService {
  * 手势服务单例
  */
 export const GestureServiceInstance: GestureService = new GestureServiceImpl();
+
+

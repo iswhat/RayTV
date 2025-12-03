@@ -1,6 +1,5 @@
 // UserService.ets - 用户服务
-// 用户服务类
-// 负责处理用户认证、用户信息管理和用户数据同步
+// 用户服务�?// 负责处理用户认证、用户信息管理和用户数据同步
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
@@ -19,48 +18,27 @@ const USER_DATA_KEY = 'user_data';
 const AUTH_TOKEN_KEY = 'auth_token';
 const USER_PREFERENCES_KEY = 'user_preferences';
 const AUTO_LOGIN_KEY = 'auto_login_enabled';
-const SESSION_EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // 7天
-
+const SESSION_EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // 7�?
 // 认证相关的API端点
-const API_ENDPOINTS = {
-  LOGIN: '/api/auth/login',
-  REGISTER: '/api/auth/register',
-  LOGOUT: '/api/auth/logout',
-  REFRESH_TOKEN: '/api/auth/refresh',
-  FORGOT_PASSWORD: '/api/auth/forgot-password',
-  RESET_PASSWORD: '/api/auth/reset-password',
-  VERIFY_EMAIL: '/api/auth/verify-email',
-  VERIFY_PHONE: '/api/auth/verify-phone',
-  SEND_CAPTCHA: '/api/auth/send-captcha',
-  GET_CAPTCHA: '/api/auth/captcha',
-  ME: '/api/auth/me',
-  UPDATE_PROFILE: '/api/auth/profile',
-  CHANGE_PASSWORD: '/api/auth/change-password'
-};
+const API_ENDPOINTS: Record<string, string | number | boolean | null> = { ... };
 
 // 用户角色枚举
 export enum UserRole {
   GUEST = 0,              // 访客
   REGISTERED = 1,         // 注册用户
   PREMIUM = 2,            // 高级用户
-  ADMIN = 3               // 管理员
-}
+  ADMIN = 3               // 管理�?}
 
 // 登录类型枚举
 export enum LoginType {
   LOCAL = 0,              // 本地登录
   WECHAT = 1,             // 微信登录
   QQ = 2,                 // QQ登录
-  PHONE = 3,              // 手机号登录
-  EMAIL = 4               // 邮箱登录
+  PHONE = 3,              // 手机号登�?  EMAIL = 4               // 邮箱登录
 }
 
-// 认证状态枚举
-export enum AuthStatus {
-  UNAUTHENTICATED = 0,    // 未认证
-  AUTHENTICATING = 1,     // 认证中
-  AUTHENTICATED = 2,      // 已认证
-  EXPIRED = 3,            // 认证过期
+// 认证状态枚�?export enum AuthStatus {
+  UNAUTHENTICATED = 0,    // 未认�?  AUTHENTICATING = 1,     // 认证�?  AUTHENTICATED = 2,      // 已认�?  EXPIRED = 3,            // 认证过期
   ERROR = 4               // 认证错误
 }
 
@@ -71,32 +49,26 @@ export enum Gender {
   OTHER = 2
 }
 
-// 用户状态枚举
-export enum UserStatus {
+// 用户状态枚�?export enum UserStatus {
   ACTIVE = 0,             // 活跃
-  INACTIVE = 1,           // 非活跃
-  SUSPENDED = 2,          // 暂停
+  INACTIVE = 1,           // 非活�?  SUSPENDED = 2,          // 暂停
   BANNED = 3              // 封禁
 }
 
 // 用户接口
 export interface User {
   id: string;             // 用户ID
-  username: string;       // 用户名
-  email?: string;         // 邮箱（可选）
+  username: string;       // 用户�?  email?: string;         // 邮箱（可选）
   phone?: string;         // 手机号（可选）
   nickname: string;       // 昵称
   avatar?: string;        // 头像URL
   gender?: Gender;        // 性别
   birthday?: string;      // 生日
   location?: string;      // 所在地
-  bio?: string;           // 个人简介
-  role: UserRole;         // 用户角色
-  status: UserStatus;     // 用户状态
-  createdAt: number;      // 创建时间
+  bio?: string;           // 个人简�?  role: UserRole;         // 用户角色
+  status: UserStatus;     // 用户状�?  createdAt: number;      // 创建时间
   updatedAt: number;      // 更新时间
-  lastLoginAt?: number;   // 最后登录时间
-  loginCount: number;     // 登录次数
+  lastLoginAt?: number;   // 最后登录时�?  loginCount: number;     // 登录次数
   preferences?: UserPreferences; // 用户偏好设置
   statistics?: UserStatistics;   // 用户统计信息
 }
@@ -106,8 +78,7 @@ export interface AuthToken {
   accessToken: string;    // 访问令牌
   refreshToken: string;   // 刷新令牌
   tokenType: string;      // 令牌类型
-  expiresIn: number;      // 过期时间（秒）
-  issuedAt: number;       // 颁发时间
+  expiresIn: number;      // 过期时间（秒�?  issuedAt: number;       // 颁发时间
   scope?: string;         // 权限范围
   userId: string;         // 用户ID
 }
@@ -122,8 +93,7 @@ export interface UserPreferences {
   autoPlay: boolean;      // 是否自动播放
   bandwidthSaver: boolean; // 是否启用流量节省
   parentalControlEnabled: boolean; // 是否启用家长控制
-  parentalControlPin?: string; // 家长控制PIN码
-  notificationEnabled: boolean; // 是否启用通知
+  parentalControlPin?: string; // 家长控制PIN�?  notificationEnabled: boolean; // 是否启用通知
   downloadQuality: string; // 下载质量偏好
   downloadWifiOnly: boolean; // 是否仅WiFi下载
 }
@@ -132,29 +102,22 @@ export interface UserPreferences {
 export interface UserStatistics {
   totalWatchTime: number; // 总观看时长（秒）
   watchedMovies: number;  // 已观看电影数
-  favoriteMovies: number; // 收藏电影数
-  downloadCount: number;  // 下载次数
-  totalDownloadSize: number; // 总下载大小（字节）
-  lastWatchDate?: number; // 最后观看时间
-  mostWatchedGenre?: string; // 最常观看的类型
+  favoriteMovies: number; // 收藏电影�?  downloadCount: number;  // 下载次数
+  totalDownloadSize: number; // 总下载大小（字节�?  lastWatchDate?: number; // 最后观看时�?  mostWatchedGenre?: string; // 最常观看的类型
   currentStreak: number;  // 当前连续观看天数
-  longestStreak: number;  // 最长连续观看天数
-}
+  longestStreak: number;  // 最长连续观看天�?}
 
 // 登录请求接口
 export interface LoginRequest {
-  username: string;       // 用户名/手机号/邮箱
-  password?: string;      // 密码（如果是账号密码登录）
-  code?: string;          // 验证码（如果是验证码登录）
-  type: LoginType;        // 登录类型
+  username: string;       // 用户�?手机�?邮箱
+  password?: string;      // 密码（如果是账号密码登录�?  code?: string;          // 验证码（如果是验证码登录�?  type: LoginType;        // 登录类型
   deviceId?: string;      // 设备ID
   deviceInfo?: DeviceInfo; // 设备信息
 }
 
 // 注册请求接口
 export interface RegisterRequest {
-  username: string;       // 用户名
-  email?: string;         // 邮箱（可选）
+  username: string;       // 用户�?  email?: string;         // 邮箱（可选）
   phone?: string;         // 手机号（可选）
   password: string;       // 密码
   confirmPassword: string; // 确认密码
@@ -182,16 +145,12 @@ export interface UpdateProfileRequest {
   gender?: Gender;        // 性别
   birthday?: string;      // 生日
   location?: string;      // 所在地
-  bio?: string;           // 个人简介
-}
+  bio?: string;           // 个人简�?}
 
 // 密码重置请求接口
 export interface ResetPasswordRequest {
   oldPassword?: string;   // 旧密码（可选，如果是修改密码）
-  newPassword: string;    // 新密码
-  confirmPassword: string; // 确认新密码
-  resetToken?: string;    // 重置令牌（如果是忘记密码）
-}
+  newPassword: string;    // 新密�?  confirmPassword: string; // 确认新密�?  resetToken?: string;    // 重置令牌（如果是忘记密码�?}
 
 // 认证响应接口
 export interface AuthResponse {
@@ -199,8 +158,7 @@ export interface AuthResponse {
   user?: User;            // 用户信息
   token?: AuthToken;      // 认证令牌
   error?: string;         // 错误信息
-  errorCode?: number;     // 错误码
-}
+  errorCode?: number;     // 错误�?}
 
 // 默认用户偏好设置
 const DEFAULT_USER_PREFERENCES: UserPreferences = {
@@ -258,8 +216,7 @@ export default class UserService {
   private deviceInfo: DeviceInfo | null = null;
   private tokenRefreshTimer: number | null = null;
   
-  // 监听器
-  private userChangeListeners: Array<(user: User | null) => void> = [];
+  // 监听�?  private userChangeListeners: Array<(user: User | null) => void> = [];
   private authStatusListeners: Array<(status: AuthStatus) => void> = [];
   private preferenceListeners: Array<(preferences: UserPreferences) => void> = [];
   private statisticsListeners: Array<(statistics: UserStatistics) => void> = [];
@@ -275,8 +232,7 @@ export default class UserService {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     this.configService = ConfigService.getInstance();
     this.databaseManager = DatabaseManager.getInstance();
@@ -286,8 +242,7 @@ export default class UserService {
   }
   
   /**
-   * 初始化设备信息
-   */
+   * 初始化设备信�?   */
   private async initializeDeviceInfo(): Promise<void> {
     try {
       // 尝试从存储中获取设备ID
@@ -313,7 +268,7 @@ export default class UserService {
 
       Logger.info(TAG, `Device initialized: ${JSON.stringify(this.deviceInfo)}`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize device info', error);
+      Logger.error(TAG, 'Failed to initialize device info', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
   
@@ -400,8 +355,7 @@ export default class UserService {
   }
 
   /**
-   * 初始化用户服务
-   */
+   * 初始化用户服�?   */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       Logger.info(TAG, 'User service already initialized');
@@ -441,21 +395,19 @@ export default class UserService {
     
     if (!this.authToken) return;
     
-    // 计算刷新时间（在令牌过期前5分钟）
-    const refreshTime = (this.authToken.expiresIn * 1000) - (5 * 60 * 1000);
+    // 计算刷新时间（在令牌过期�?分钟�?    const refreshTime = (this.authToken.expiresIn * 1000) - (5 * 60 * 1000);
     
     if (refreshTime > 0) {
       this.tokenRefreshTimer = setTimeout(async () => {
         await this.refreshToken();
-      }, refreshTime);
+      }, refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime : new Error(String(refreshTime instanceof Error ? refreshTime : new Error(String(refreshTime)))))));
       
       Logger.info(TAG, `Token refresh scheduled in ${refreshTime}ms`);
     }
   }
   
   /**
-   * 清除令牌刷新定时器
-   */
+   * 清除令牌刷新定时�?   */
   private clearTokenRefreshTimer(): void {
     if (this.tokenRefreshTimer) {
       clearTimeout(this.tokenRefreshTimer);
@@ -479,23 +431,19 @@ export default class UserService {
    */
   private async restoreSession(): Promise<boolean> {
     try {
-      // 从存储中加载用户数据和令牌
-      const savedUser = await StorageUtil.getObject<User>(USER_DATA_KEY);
+      // 从存储中加载用户数据和令�?      const savedUser = await StorageUtil.getObject<User>(USER_DATA_KEY);
       const savedToken = await StorageUtil.getObject<AuthToken>(AUTH_TOKEN_KEY);
       
       if (savedUser && savedToken) {
-        // 检查令牌是否过期
-        const now = Date.now();
+        // 检查令牌是否过�?        const now = Date.now();
         const expiresAt = savedToken.issuedAt + (savedToken.expiresIn * 1000);
         
         if (now < expiresAt) {
-          // 令牌有效，恢复用户会话
-          this.currentUser = savedUser;
+          // 令牌有效，恢复用户会�?          this.currentUser = savedUser;
           this.authToken = savedToken;
           this.authStatus = AuthStatus.AUTHENTICATED;
           
-          // 验证会话有效性（可选：向服务器验证）
-          // const isValid = await this.validateSession();
+          // 验证会话有效性（可选：向服务器验证�?          // const isValid = await this.validateSession();
           // if (!isValid) {
           //   this.logout();
           //   return false;
@@ -515,8 +463,7 @@ export default class UserService {
         }
       }
       
-      // 无法恢复会话，使用访客模式
-      this.setGuestMode();
+      // 无法恢复会话，使用访客模�?      this.setGuestMode();
       return false;
     } catch (error) {
       Logger.error(TAG, `Failed to restore session: ${error}`);
@@ -530,10 +477,9 @@ export default class UserService {
    */
   public async login(request: LoginRequest): Promise<AuthResponse> {
     try {
-      Logger.info(TAG, 'Attempting login...', { username: request.username });
+      Logger.info(TAG, 'Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username } instanceof Error ? 'Attempting login...', { username: request.username } : new Error(String('Attempting login...', { username: request.username })))))));
       
-      // 检查登录尝试频率
-      if (!this.canAttemptLogin()) {
+      // 检查登录尝试频�?      if (!this.canAttemptLogin()) {
         return {
           success: false,
           error: '登录尝试过于频繁，请稍后再试',
@@ -545,15 +491,10 @@ export default class UserService {
       this.loginAttempts++;
       this.lastLoginAttempt = Date.now();
       
-      // 设置认证状态为认证中
-      this.authStatus = AuthStatus.AUTHENTICATING;
+      // 设置认证状态为认证�?      this.authStatus = AuthStatus.AUTHENTICATING;
       this.notifyAuthStatusChanged();
       
-      // 添加设备信息到登录请求
-      const loginData = {
-        ...request,
-        deviceInfo: this.deviceInfo
-      };
+      // 添加设备信息到登录请�?      const loginData: Record<string, string | number | boolean | null> = { ... };
       
       // 调用实际的登录API
       try {
@@ -595,13 +536,11 @@ export default class UserService {
             this.authStatus = AuthStatus.AUTHENTICATED;
             this.loginAttempts = 0;
             
-            // 更新最后登录信息
-            this.currentUser.lastLoginAt = Date.now();
+            // 更新最后登录信�?            this.currentUser.lastLoginAt = Date.now();
             this.currentUser.loginCount++;
             this.currentUser.updatedAt = Date.now();
             
-            // 保存用户数据和令牌
-            await this.saveUserData();
+            // 保存用户数据和令�?            await this.saveUserData();
             await this.saveAuthToken();
             
             // 设置令牌自动刷新
@@ -610,8 +549,7 @@ export default class UserService {
             // 同步用户信息到本地数据库
             await this.syncUserInfo(user);
             
-            // 通知监听器
-            this.notifyUserChanged();
+            // 通知监听�?            this.notifyUserChanged();
             this.notifyAuthStatusChanged();
             
             Logger.info(TAG, 'Login successful');
@@ -630,7 +568,7 @@ export default class UserService {
         
         return {
           success: false,
-          error: apiResponse.message || '登录失败，请检查用户名和密码',
+          error: apiResponse.message || '登录失败，请检查用户名和密�?,
           errorCode: apiResponse.code || 401
         };
       } catch (apiError) {
@@ -647,13 +585,11 @@ export default class UserService {
           this.authStatus = AuthStatus.AUTHENTICATED;
           this.loginAttempts = 0;
           
-          // 更新最后登录信息
-          this.currentUser.lastLoginAt = Date.now();
+          // 更新最后登录信�?          this.currentUser.lastLoginAt = Date.now();
           this.currentUser.loginCount++;
           this.currentUser.updatedAt = Date.now();
           
-          // 保存用户数据和令牌
-          await this.saveUserData();
+          // 保存用户数据和令�?          await this.saveUserData();
           await this.saveAuthToken();
           
           // 设置令牌自动刷新
@@ -662,8 +598,7 @@ export default class UserService {
           // 同步用户数据
         await this.syncUserData();
         
-        // 通知监听器
-        this.notifyUserChanged();
+        // 通知监听�?        this.notifyUserChanged();
         this.notifyAuthStatusChanged();
         
         Logger.info(TAG, `User logged in successfully: ${this.currentUser.username}`);
@@ -677,7 +612,7 @@ export default class UserService {
         return response;
       }
     } catch (error) {
-      Logger.error(TAG, `Login error: ${error}`);
+      Logger.error(TAG, `Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}` : new Error(String(`Login error: ${error}` instanceof Error ? `Login error: ${error}` : new Error(String(`Login error: ${error}`)))))));
       
       this.authStatus = AuthStatus.ERROR;
       this.notifyAuthStatusChanged();
@@ -691,15 +626,12 @@ export default class UserService {
   }
 
   /**
-   * 检查是否可以尝试登录
-   */
+   * 检查是否可以尝试登�?   */
   private canAttemptLogin(): boolean {
-    // 限制登录尝试频率：每10分钟最多5次尝试
-    const now = Date.now();
+    // 限制登录尝试频率：每10分钟最�?次尝�?    const now = Date.now();
     const tenMinutesAgo = now - (10 * 60 * 1000);
     
-    // 如果最后一次尝试是10分钟前，重置计数器
-    if (this.lastLoginAttempt < tenMinutesAgo) {
+    // 如果最后一次尝试是10分钟前，重置计数�?    if (this.lastLoginAttempt < tenMinutesAgo) {
       this.loginAttempts = 0;
     }
     
@@ -764,15 +696,14 @@ export default class UserService {
   }
 
   /**
-   * 注册新用户
-   */
+   * 注册新用�?   */
   public async register(request: RegisterRequest): Promise<AuthResponse> {
     try {
       // 验证注册信息
       if (!request.username || request.username.length < 3) {
         return {
           success: false,
-          error: '用户名长度至少为3个字符',
+          error: '用户名长度至少为3个字�?,
           errorCode: 400
         };
       }
@@ -780,7 +711,7 @@ export default class UserService {
       if (!request.password || request.password.length < 6) {
         return {
           success: false,
-          error: '密码长度至少为6个字符',
+          error: '密码长度至少�?个字�?,
           errorCode: 400
         };
       }
@@ -788,7 +719,7 @@ export default class UserService {
       if (request.password !== request.confirmPassword) {
         return {
           success: false,
-          error: '两次输入的密码不一致',
+          error: '两次输入的密码不一�?,
           errorCode: 400
         };
       }
@@ -808,17 +739,14 @@ export default class UserService {
       const response = await this.mockRegisterResponse(request);
       
       if (response.success && response.user && response.token) {
-        // 注册成功，自动登录
-        this.currentUser = response.user;
+        // 注册成功，自动登�?        this.currentUser = response.user;
         this.authToken = response.token;
         this.authStatus = AuthStatus.AUTHENTICATED;
         
-        // 保存用户数据和令牌
-        await this.saveUserData();
+        // 保存用户数据和令�?        await this.saveUserData();
         await this.saveAuthToken();
         
-        // 通知监听器
-        this.notifyUserChanged();
+        // 通知监听�?        this.notifyUserChanged();
         this.notifyAuthStatusChanged();
         
         Logger.info(TAG, `User registered successfully: ${this.currentUser.username}`);
@@ -828,7 +756,7 @@ export default class UserService {
         return response;
       }
     } catch (error) {
-      Logger.error(TAG, `Registration error: ${error}`);
+      Logger.error(TAG, `Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}` : new Error(String(`Registration error: ${error}` instanceof Error ? `Registration error: ${error}` : new Error(String(`Registration error: ${error}`)))))));
       return {
         success: false,
         error: error instanceof Error ? error.message : '注册失败，请稍后再试',
@@ -896,19 +824,16 @@ export default class UserService {
         // await this.performLogoutRequest();
       }
       
-      // 清除用户数据和令牌
-      await this.clearUserData();
+      // 清除用户数据和令�?      await this.clearUserData();
       
-      // 重置状态
-      this.setGuestMode();
+      // 重置状�?      this.setGuestMode();
       
       Logger.info(TAG, 'User logged out successfully');
       return true;
     } catch (error) {
       Logger.error(TAG, `Logout error: ${error}`);
       
-      // 即使出错，也要清理本地数据
-      await this.clearUserData();
+      // 即使出错，也要清理本地数�?      await this.clearUserData();
       this.setGuestMode();
       
       return false;
@@ -924,7 +849,7 @@ export default class UserService {
       // const response = await this.performRefreshTokenRequest(refreshToken);
       
       // 模拟刷新令牌成功
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500 instanceof Error ? 500 : new Error(String(500 instanceof Error ? 500 instanceof Error ? 500 : new Error(String(500 : new Error(String(500 instanceof Error ? 500 : new Error(String(500 instanceof Error ? 500 instanceof Error ? 500 : new Error(String(500 instanceof Error ? 500 instanceof Error ? 500 : new Error(String(500 : new Error(String(500 instanceof Error ? 500 : new Error(String(500 : new Error(String(500 instanceof Error ? 500 : new Error(String(500 instanceof Error ? 500 instanceof Error ? 500 : new Error(String(500 : new Error(String(500 instanceof Error ? 500 : new Error(String(500))))))));
       
       if (this.currentUser) {
         const newToken: AuthToken = {
@@ -955,7 +880,7 @@ export default class UserService {
    */
   private async saveUserData(): Promise<void> {
     if (this.currentUser) {
-      await StorageUtil.setObject(USER_DATA_KEY, this.currentUser);
+      await StorageUtil.setObject(USER_DATA_KEY, this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser : new Error(String(this.currentUser instanceof Error ? this.currentUser : new Error(String(this.currentUser)))))));
     }
   }
 
@@ -986,8 +911,7 @@ export default class UserService {
   }
 
   /**
-   * 获取认证状态
-   */
+   * 获取认证状�?   */
   public getAuthStatus(): AuthStatus {
     return this.authStatus;
   }
@@ -1045,8 +969,7 @@ export default class UserService {
       // 同步到服务器
       await this.syncUserData();
       
-      // 通知监听器
-      this.notifyUserChanged();
+      // 通知监听�?      this.notifyUserChanged();
       
       Logger.info(TAG, `User profile updated: ${this.currentUser.username}`);
       return true;
@@ -1067,18 +990,18 @@ export default class UserService {
     try {
       // 验证密码
       if (request.newPassword !== request.confirmPassword) {
-        throw new Error('两次输入的密码不一致');
+        throw new Error('两次输入的密码不一�?);
       }
       
       if (request.newPassword.length < 6) {
-        throw new Error('密码长度至少为6个字符');
+        throw new Error('密码长度至少�?个字�?);
       }
       
       // 模拟密码更改请求
       // await this.performChangePasswordRequest(request);
       
       // 模拟成功
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000 instanceof Error ? 1000 : new Error(String(1000 instanceof Error ? 1000 instanceof Error ? 1000 : new Error(String(1000 : new Error(String(1000 instanceof Error ? 1000 : new Error(String(1000 instanceof Error ? 1000 instanceof Error ? 1000 : new Error(String(1000 instanceof Error ? 1000 instanceof Error ? 1000 : new Error(String(1000 : new Error(String(1000 instanceof Error ? 1000 : new Error(String(1000 : new Error(String(1000 instanceof Error ? 1000 : new Error(String(1000 instanceof Error ? 1000 instanceof Error ? 1000 : new Error(String(1000 : new Error(String(1000 instanceof Error ? 1000 : new Error(String(1000))))))));
       
       Logger.info(TAG, 'Password changed successfully');
       return true;
@@ -1116,10 +1039,87 @@ export default class UserService {
       this.currentUser.preferences = { ...this.currentUser.preferences, ...preferences };
       
       // 保存用户数据
-      await this.saveUserData();
+      await this.saveUserData( instanceof Error ? ...preferences };
       
-      // 同步到配置服务
-      if (preferences.theme) {
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...preferences };
+      
+      // 保存用户数据
+      await this.saveUserData()))))));
+      
+      // 同步到配置服�?      if (preferences.theme) {
         await this.configService.setConfig('theme', preferences.theme);
       }
       if (preferences.language) {
@@ -1129,8 +1129,7 @@ export default class UserService {
         await this.configService.setConfig('playQuality', preferences.playQuality);
       }
       
-      // 通知监听器
-      this.notifyUserChanged();
+      // 通知监听�?      this.notifyUserChanged();
       this.notifyPreferenceChanged();
       
       Logger.info(TAG, 'User preferences updated');
@@ -1169,10 +1168,87 @@ export default class UserService {
       this.currentUser.statistics = { ...this.currentUser.statistics, ...updates };
       
       // 保存用户数据
-      await this.saveUserData();
+      await this.saveUserData( instanceof Error ? ...updates };
       
-      // 通知监听器
-      this.notifyUserChanged();
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( instanceof Error ? ...updates };
+      
+      // 保存用户数据
+      await this.saveUserData( : new Error(String(...updates };
+      
+      // 保存用户数据
+      await this.saveUserData()))))));
+      
+      // 通知监听�?      this.notifyUserChanged();
       this.notifyStatisticsChanged();
       
       return true;
@@ -1219,13 +1295,11 @@ export default class UserService {
     const lastWatchDate = this.currentUser.statistics.lastWatchDate;
     
     if (lastWatchDate) {
-      const daysSinceLastWatch = DateUtil.daysBetween(lastWatchDate, now);
+      const daysSinceLastWatch = DateUtil.daysBetween(lastWatchDate, now instanceof Error ? now : new Error(String(now instanceof Error ? now instanceof Error ? now : new Error(String(now : new Error(String(now instanceof Error ? now : new Error(String(now instanceof Error ? now instanceof Error ? now : new Error(String(now instanceof Error ? now instanceof Error ? now : new Error(String(now : new Error(String(now instanceof Error ? now : new Error(String(now : new Error(String(now instanceof Error ? now : new Error(String(now instanceof Error ? now instanceof Error ? now : new Error(String(now : new Error(String(now instanceof Error ? now : new Error(String(now)))))));
       
       if (daysSinceLastWatch === 1) {
-        // 连续观看，增加当前连续天数
-        this.currentUser.statistics.currentStreak++;
-        // 更新最长连续天数
-        if (this.currentUser.statistics.currentStreak > this.currentUser.statistics.longestStreak) {
+        // 连续观看，增加当前连续天�?        this.currentUser.statistics.currentStreak++;
+        // 更新最长连续天�?        if (this.currentUser.statistics.currentStreak > this.currentUser.statistics.longestStreak) {
           this.currentUser.statistics.longestStreak = this.currentUser.statistics.currentStreak;
         }
       } else if (daysSinceLastWatch > 1) {
@@ -1264,8 +1338,7 @@ export default class UserService {
     }
 
     try {
-      // 检查网络连接
-      const isConnected = await NetworkUtil.isNetworkAvailable();
+      // 检查网络连�?      const isConnected = await NetworkUtil.isNetworkAvailable();
       if (!isConnected) {
         Logger.warn(TAG, 'Cannot sync user data: no network connection');
         return false;
@@ -1287,8 +1360,7 @@ export default class UserService {
    */
   public getAccessToken(): string | null {
     if (this.authToken) {
-      // 检查令牌是否过期
-      const now = Date.now();
+      // 检查令牌是否过�?      const now = Date.now();
       const expiresAt = this.authToken.issuedAt + (this.authToken.expiresIn * 1000);
       
       if (now < expiresAt) {
@@ -1296,7 +1368,7 @@ export default class UserService {
       } else {
         // 令牌已过期，尝试刷新
         this.refreshToken(this.authToken.refreshToken).catch(error => {
-          Logger.error(TAG, `Failed to refresh token automatically: ${error}`);
+          Logger.error(TAG, `Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}` instanceof Error ? `Failed to refresh token automatically: ${error}` : new Error(String(`Failed to refresh token automatically: ${error}`)))))));
         });
       }
     }
@@ -1314,13 +1386,11 @@ export default class UserService {
   }
 
   /**
-   * 添加用户变更监听器
-   */
+   * 添加用户变更监听�?   */
   public addUserChangeListener(listener: (user: User | null) => void): () => void {
     this.userChangeListeners.push(listener);
     
-    // 立即通知当前用户状态
-    listener(this.getCurrentUser());
+    // 立即通知当前用户状�?    listener(this.getCurrentUser());
     
     // 返回取消监听函数
     return () => {
@@ -1337,8 +1407,7 @@ export default class UserService {
   public addAuthStatusListener(listener: (status: AuthStatus) => void): () => void {
     this.authStatusListeners.push(listener);
     
-    // 立即通知当前认证状态
-    listener(this.authStatus);
+    // 立即通知当前认证状�?    listener(this.authStatus);
     
     // 返回取消监听函数
     return () => {
@@ -1350,8 +1419,7 @@ export default class UserService {
   }
 
   /**
-   * 添加偏好设置监听器
-   */
+   * 添加偏好设置监听�?   */
   public addPreferenceListener(listener: (preferences: UserPreferences) => void): () => void {
     this.preferenceListeners.push(listener);
     
@@ -1368,8 +1436,7 @@ export default class UserService {
   }
 
   /**
-   * 添加统计信息监听器
-   */
+   * 添加统计信息监听�?   */
   public addStatisticsListener(listener: (statistics: UserStatistics) => void): () => void {
     this.statisticsListeners.push(listener);
     
@@ -1400,14 +1467,13 @@ export default class UserService {
   }
 
   /**
-   * 通知认证状态变更
-   */
+   * 通知认证状态变�?   */
   private notifyAuthStatusChanged(): void {
     for (const listener of this.authStatusListeners) {
       try {
         listener(this.authStatus);
       } catch (error) {
-        Logger.error(TAG, `Error in auth status listener: ${error}`);
+        Logger.error(TAG, `Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}` instanceof Error ? `Error in auth status listener: ${error}` : new Error(String(`Error in auth status listener: ${error}`)))))));
       }
     }
   }
@@ -1435,7 +1501,7 @@ export default class UserService {
       try {
         listener(statistics);
       } catch (error) {
-        Logger.error(TAG, `Error in statistics listener: ${error}`);
+        Logger.error(TAG, `Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}` instanceof Error ? `Error in statistics listener: ${error}` : new Error(String(`Error in statistics listener: ${error}`)))))));
       }
     }
   }
@@ -1476,23 +1542,18 @@ export default class UserService {
   }
 
   /**
-   * 清理用户数据（用于账户删除等场景）
-   */
+   * 清理用户数据（用于账户删除等场景�?   */
   public async clearAllUserData(): Promise<boolean> {
     try {
-      // 清除所有用户相关数据
-      await Promise.all([
-        StorageUtil.remove(USER_DATA_KEY),
-        StorageUtil.remove(AUTH_TOKEN_KEY),
+      // 清除所有用户相关数�?      await Promise.all([
+        StorageUtil.remove(USER_DATA_KEY), StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY instanceof Error ? StorageUtil.remove(AUTH_TOKEN_KEY : new Error(String(StorageUtil.remove(AUTH_TOKEN_KEY))))))),
         StorageUtil.remove(USER_PREFERENCES_KEY),
         StorageUtil.remove(AUTO_LOGIN_KEY)
       ]);
       
-      // 清除数据库中的用户数据
-      await this.databaseManager.clearUserData();
+      // 清除数据库中的用户数�?      await this.databaseManager.clearUserData();
       
-      // 重置状态
-      this.setGuestMode();
+      // 重置状�?      this.setGuestMode();
       
       Logger.info(TAG, 'All user data cleared');
       return true;
@@ -1507,20 +1568,20 @@ export default class UserService {
    */
   public async close(): Promise<void> {
     try {
-      // 清理监听器
-      this.userChangeListeners = [];
+      // 清理监听�?      this.userChangeListeners = [];
       this.authStatusListeners = [];
       this.preferenceListeners = [];
       this.statisticsListeners = [];
       
-      // 保存当前状态
-      if (this.currentUser) {
+      // 保存当前状�?      if (this.currentUser) {
         await this.saveUserData();
       }
       
-      Logger.info(TAG, 'User service closed');
+      Logger.info(TAG, 'User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed' : new Error(String('User service closed' instanceof Error ? 'User service closed' : new Error(String('User service closed')))))));
     } catch (error) {
       Logger.error(TAG, `Error closing user service: ${error}`);
     }
   }
 }
+
+

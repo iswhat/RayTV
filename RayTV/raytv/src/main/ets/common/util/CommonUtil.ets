@@ -1,15 +1,12 @@
-// 通用工具类
-// 提供各种辅助函数
+// 通用工具�?// 提供各种辅助函数
 
 /**
- * 通用工具类
- */
+ * 通用工具�? */
 export class CommonUtil {
   private static instance: CommonUtil;
   
   private constructor() {
-    // 初始化
-  }
+    // 初始�?  }
   
   /**
    * 获取CommonUtil单例实例
@@ -22,8 +19,7 @@ export class CommonUtil {
   }
   
   /**
-   * 检查对象是否包含指定属性
-   * 替代Object.prototype.hasOwnProperty.call
+   * 检查对象是否包含指定属�?   * 替代Object.prototype.hasOwnProperty.call
    */
   private hasOwnProperty<T extends object>(obj: T, key: string): boolean {
     return Object.getOwnPropertyNames(obj).includes(key);
@@ -44,18 +40,15 @@ export class CommonUtil {
   }
 
   /**
-   * 安全地获取对象属性值
-   * @param obj - 要获取属性的对象
-   * @param key - 属性键名
-   * @returns 属性值，如果属性不存在则返回undefined
+   * 安全地获取对象属性�?   * @param obj - 要获取属性的对象
+   * @param key - 属性键�?   * @returns 属性值，如果属性不存在则返回undefined
    */
-  private getPropertyValue<T extends object>(obj: T, key: string): unknown {
+  private getPropertyValue<T extends object>(obj: T, key: string): Record<string, string | number | boolean | null> {
     if (!obj || typeof obj !== 'object') {
       return undefined;
     }
     
-    // 使用类型安全的属性访问方式
-    if (this.hasOwnProperty(obj, key)) {
+    // 使用类型安全的属性访问方�?    if (this.hasOwnProperty(obj, key)) {
       const safeObj = obj as Record<string, unknown>;
       return safeObj[key];
     }
@@ -66,8 +59,7 @@ export class CommonUtil {
   /**
    * 生成唯一ID
    * @param prefix ID前缀
-   * @returns 唯一ID字符串
-   */
+   * @returns 唯一ID字符�?   */
   public generateUniqueId(prefix: string = 'id'): string {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substr(2, 9);
@@ -75,10 +67,8 @@ export class CommonUtil {
   }
   
   /**
-   * 深拷贝对象
-   * @param obj 要拷贝的对象
-   * @returns 拷贝后的新对象
-   */
+   * 深拷贝对�?   * @param obj 要拷贝的对象
+   * @returns 拷贝后的新对�?   */
   public deepClone<T>(obj: T): T {
     if (obj === null || typeof obj !== 'object') {
       return obj;
@@ -152,8 +142,7 @@ export class CommonUtil {
   }
   
   /**
-   * 格式化时间
-   * @param date 日期对象或时间戳
+   * 格式化时�?   * @param date 日期对象或时间戳
    * @param format 格式化字符串
    * @returns 格式化后的时间字符串
    */
@@ -177,9 +166,7 @@ export class CommonUtil {
   }
   
   /**
-   * 格式化文件大小
-   * @param bytes 字节数
-   * @returns 格式化后的大小字符串
+   * 格式化文件大�?   * @param bytes 字节�?   * @returns 格式化后的大小字符串
    */
   public formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -191,8 +178,7 @@ export class CommonUtil {
   }
   
   /**
-   * 格式化播放时长
-   * @param seconds 秒数
+   * 格式化播放时�?   * @param seconds 秒数
    * @returns 格式化后的时长字符串
    */
   public formatDuration(seconds: number): string {
@@ -214,8 +200,7 @@ export class CommonUtil {
   /**
    * 截断文本
    * @param text 文本内容
-   * @param maxLength 最大长度
-   * @param suffix 后缀
+   * @param maxLength 最大长�?   * @param suffix 后缀
    * @returns 截断后的文本
    */
   public truncateText(text: string, maxLength: number, suffix: string = '...'): string {
@@ -229,34 +214,29 @@ export class CommonUtil {
   /**
    * 验证邮箱格式
    * @param email 邮箱地址
-   * @returns 是否为有效邮箱
-   */
+   * @returns 是否为有效邮�?   */
   public isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
   
   /**
-   * 验证手机号格式
-   * @param phone 手机号码
+   * 验证手机号格�?   * @param phone 手机号码
    * @returns 是否为有效手机号
    */
   public isValidPhone(phone: string): boolean {
-    // 简单的中国手机号验证
-    const phoneRegex = /^1[3-9]\d{9}$/;
+    // 简单的中国手机号验�?    const phoneRegex = /^1[3-9]\d{9}$/;
     return phoneRegex.test(phone);
   }
   
   /**
    * 验证密码强度
    * @param password 密码
-   * @returns 密码强度：0-弱，1-中，2-强
-   */
+   * @returns 密码强度�?-弱，1-中，2-�?   */
   public checkPasswordStrength(password: string): 0 | 1 | 2 {
     let strength = 0;
     
-    // 长度检查
-    if (password.length >= 8) strength++;
+    // 长度检�?    if (password.length >= 8) strength++;
     
     // 包含数字
     if (/\d/.test(password)) strength++;
@@ -278,11 +258,9 @@ export class CommonUtil {
   /**
    * 随机打乱数组
    * @param array 要打乱的数组
-   * @returns 打乱后的新数组
-   */
+   * @returns 打乱后的新数�?   */
   public shuffleArray<T>(array: T[]): T[] {
-    // 使用slice替代spread操作符
-    const shuffled = array.slice();
+    // 使用slice替代spread操作�?    const shuffled = array.slice();
     
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -296,8 +274,7 @@ export class CommonUtil {
    * 数组去重
    * @param array 要去重的数组
    * @param key 用于比较的键（对象数组）
-   * @returns 去重后的新数组
-   */
+   * @returns 去重后的新数�?   */
   public uniqueArray<T>(array: T[], key?: keyof T): T[] {
     if (!array || array.length === 0) {
       return [];
@@ -320,8 +297,7 @@ export class CommonUtil {
   
   /**
    * 延迟执行
-   * @param ms 延迟毫秒数
-   * @returns Promise
+   * @param ms 延迟毫秒�?   * @returns Promise
    */
   public delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -397,8 +373,7 @@ export class CommonUtil {
   /**
    * 合并对象
    * @param target 目标对象
-   * @param sources 源对象
-   * @returns 合并后的对象
+   * @param sources 源对�?   * @returns 合并后的对象
    */
   public mergeObjects<T extends Record<string, unknown>>(target: T, ...sources: Record<string, unknown>[]): T {
     if (!sources.length) return target;
@@ -410,8 +385,7 @@ export class CommonUtil {
       const keys = this.getObjectKeys(source);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        // 安全检查属性是否存在
-        if (typeof source === 'object' && source !== null && this.hasOwnProperty(source, key)) {
+        // 安全检查属性是否存�?        if (typeof source === 'object' && source !== null && this.hasOwnProperty(source, key)) {
           if (source[key] && typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
             if (!target[key]) {
               target[key] = {};
@@ -426,8 +400,7 @@ export class CommonUtil {
       }
     }
     
-    // 递归合并后续源对象
-    if (sources.length > 0) {
+    // 递归合并后续源对�?    if (sources.length > 0) {
       return this.mergeObjects(target, ...sources);
     }
     
@@ -436,9 +409,7 @@ export class CommonUtil {
   
   /**
    * 生成随机颜色
-   * @param alpha 透明度
-   * @returns 颜色字符串
-   */
+   * @param alpha 透明�?   * @returns 颜色字符�?   */
   public generateRandomColor(alpha: number = 1): string {
     const r = Math.floor(Math.random() * 256);
     const g = Math.floor(Math.random() * 256);
@@ -467,12 +438,10 @@ export class CommonUtil {
   }
   
   /**
-   * RGB颜色转十六进制
-   * @param r 红色通道
+   * RGB颜色转十六进�?   * @param r 红色通道
    * @param g 绿色通道
    * @param b 蓝色通道
-   * @returns 十六进制颜色字符串
-   */
+   * @returns 十六进制颜色字符�?   */
   public rgbToHex(r: number, g: number, b: number): string {
     return `#${[r, g, b].map(x => {
       const hex = x.toString(16);
@@ -481,11 +450,9 @@ export class CommonUtil {
   }
   
   /**
-   * 计算文本相似度（Levenshtein距离）
-   * @param str1 文本1
+   * 计算文本相似度（Levenshtein距离�?   * @param str1 文本1
    * @param str2 文本2
-   * @returns 相似度（0-1）
-   */
+   * @returns 相似度（0-1�?   */
   public calculateSimilarity(str1: string, str2: string): number {
     if (str1 === str2) return 1;
     
@@ -496,8 +463,7 @@ export class CommonUtil {
     
     const matrix: number[][] = [];
     
-    // 初始化矩阵
-    for (let i = 0; i <= len2; i++) {
+    // 初始化矩�?    for (let i = 0; i <= len2; i++) {
       matrix[i] = [i];
     }
     
@@ -517,16 +483,14 @@ export class CommonUtil {
       }
     }
     
-    // 计算相似度
-    const distance = matrix[len2][len1];
+    // 计算相似�?    const distance = matrix[len2][len1];
     const maxLen = Math.max(len1, len2);
     return 1 - distance / maxLen;
   }
   
   /**
    * 解析URL参数
-   * @param url URL字符串
-   * @returns 参数对象
+   * @param url URL字符�?   * @returns 参数对象
    */
   public parseUrlParams(url: string): Record<string, string> {
     const params: Record<string, string> = {};
@@ -570,11 +534,9 @@ export class CommonUtil {
   }
   
   /**
-   * 检查值是否为空
-   * @param value 要检查的值
-   * @returns 是否为空
+   * 检查值是否为�?   * @param value 要检查的�?   * @returns 是否为空
    */
-  public isEmpty(value: unknown): boolean {
+  public isEmpty(value: Record<string, string | number | boolean | null>): boolean {
     if (value === null || value === undefined) return true;
     if (typeof value === 'string') return value.trim() === '';
     if (Array.isArray(value)) return value.length === 0;
@@ -583,13 +545,9 @@ export class CommonUtil {
   }
   
   /**
-   * 安全地获取嵌套属性
-   * @param obj 对象
-   * @param path 属性路径
-   * @param defaultValue 默认值
-   * @returns 属性值或默认值
-   */
-  public getNestedProperty<T>(obj: unknown, path: string, defaultValue: T): T {
+   * 安全地获取嵌套属�?   * @param obj 对象
+   * @param path 属性路�?   * @param defaultValue 默认�?   * @returns 属性值或默认�?   */
+  public getNestedProperty<T>(obj: Record<string, string | number | boolean | null>, path: string, defaultValue: T): T {
     const keys = path.split('.');
     let result = obj;
     
@@ -604,13 +562,10 @@ export class CommonUtil {
   }
   
   /**
-   * 安全地设置嵌套属性
-   * @param obj 对象
-   * @param path 属性路径
-   * @param value 属性值
-   * @returns 是否设置成功
+   * 安全地设置嵌套属�?   * @param obj 对象
+   * @param path 属性路�?   * @param value 属性�?   * @returns 是否设置成功
    */
-  public setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): boolean {
+  public setNestedProperty(obj: Record<string, unknown>, path: string, value: Record<string, string | number | boolean | null>): boolean {
     if (!obj || typeof obj !== 'object') return false;
     
     const keys = path.split('.');
@@ -633,8 +588,7 @@ export class CommonUtil {
   }
   
   /**
-   * 计算数组中元素出现次数
-   * @param array 数组
+   * 计算数组中元素出现次�?   * @param array 数组
    * @returns 元素出现次数映射
    */
   public countOccurrences<T>(array: T[]): Record<string, number> {
@@ -651,8 +605,7 @@ export class CommonUtil {
   /**
    * 按属性对对象数组进行排序
    * @param array 数组
-   * @param key 排序键
-   * @param order 排序顺序
+   * @param key 排序�?   * @param order 排序顺序
    * @returns 排序后的数组
    */
   public sortByProperty<T>(array: T[], key: keyof T, order: 'asc' | 'desc' = 'asc'): T[] {
@@ -689,11 +642,9 @@ export class CommonUtil {
   }
   
   /**
-   * 从数组中提取唯一的值列表
-   * @param array 对象数组
+   * 从数组中提取唯一的值列�?   * @param array 对象数组
    * @param key 属性键
-   * @returns 唯一值数组
-   */
+   * @returns 唯一值数�?   */
   public extractUniqueValues<T, K extends keyof T>(array: T[], key: K): T[K][] {
     const values = array.map(item => item[key]);
     return this.uniqueArray(values);
@@ -701,40 +652,29 @@ export class CommonUtil {
   
   /**
    * 检查是否为数字
-   * @param value 要检查的值
-   * @returns 是否为数字
-   */
-  public isNumber(value: unknown): boolean {
+   * @param value 要检查的�?   * @returns 是否为数�?   */
+  public isNumber(value: Record<string, string | number | boolean | null>): boolean {
     return typeof value === 'number' && !isNaN(value);
   }
   
   /**
    * 检查是否为整数
-   * @param value 要检查的值
-   * @returns 是否为整数
-   */
-  public isInteger(value: unknown): boolean {
+   * @param value 要检查的�?   * @returns 是否为整�?   */
+  public isInteger(value: Record<string, string | number | boolean | null>): boolean {
     return Number.isInteger(value);
   }
   
   /**
    * 限制数字在指定范围内
    * @param value 要限制的数字
-   * @param min 最小值
-   * @param max 最大值
-   * @returns 限制后的数字
+   * @param min 最小�?   * @param max 最大�?   * @returns 限制后的数字
    */
   public clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
   }
   
   /**
-   * 线性插值
-   * @param start 起始值
-   * @param end 结束值
-   * @param t 插值因子（0-1）
-   * @returns 插值结果
-   */
+   * 线性插�?   * @param start 起始�?   * @param end 结束�?   * @param t 插值因子（0-1�?   * @returns 插值结�?   */
   public lerp(start: number, end: number, t: number): number {
     const clampedT = this.clamp(t, 0, 1);
     return start + (end - start) * clampedT;

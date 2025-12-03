@@ -6,7 +6,7 @@ import { mediaService } from '../service/media/MediaService';
 import { Stack, Button, Image, ScrollView, List, LoadingProgress, Blank, Checkbox, Tag, Empty, ListItem } from '@kit.ArkUI';
 
 /**
- * 收藏项接口定义
+ * 收藏项接口定�?
  */
 interface FavoriteItem {
   id: string;
@@ -19,7 +19,7 @@ interface FavoriteItem {
 }
 
 /**
- * 媒体项接口定义
+ * 媒体项接口定�?
  */
 interface MediaItem {
   id: string;
@@ -48,7 +48,7 @@ interface MediaItem {
 struct FavoritesPage {
   private readonly TAG: string = 'FavoritesPage';
   
-  // 状态管理
+  // 状态管�?
   @State favorites: FavoriteItem[] = [];
   @State mediaItems: Map<string, MediaItem> = new Map();
   @State isLoading: boolean = false;
@@ -58,9 +58,9 @@ struct FavoritesPage {
   @State isRefreshing: boolean = false;
   @State sortBy: 'time' | 'title' = 'time';
   
-  // 初始化
+  // 初始�?
   /**
-   * 页面加载时调用
+   * 页面加载时调�?
    */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'FavoritesPage appeared');
@@ -68,7 +68,7 @@ struct FavoritesPage {
   }
 
   /**
-   * 页面卸载时调用
+   * 页面卸载时调�?
    */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'FavoritesPage disappeared');
@@ -81,7 +81,7 @@ struct FavoritesPage {
     this.isLoading = true;
     this.errorMessage = '';
     
-    // 从收藏服务获取收藏列表
+    // 从收藏服务获取收藏列�?
     favoriteService.getFavorites()
       .then(favorites => {
         // 根据排序方式排序
@@ -121,7 +121,7 @@ struct FavoritesPage {
     try {
       // 并行加载媒体详情
       const detailPromises = favorites.map((fav) => {
-        return mediaService.getMediaDetail(fav.id, fav.siteKey)
+        return mediaService.getMediaDetail(fav.id, fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey : new Error(String(fav.siteKey instanceof Error ? fav.siteKey : new Error(String(fav.siteKey)))))))
           .then(media => {
             if (media) {
               this.mediaItems.set(fav.id, media);
@@ -156,7 +156,7 @@ struct FavoritesPage {
         Logger.error(this.TAG, `Failed in Promise.all: ${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load media details: ${error}`);
+      Logger.error(this.TAG, `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}` instanceof Error ? `Failed to load media details: ${error}` : new Error(String(`Failed to load media details: ${error}`)))))));
     }
   }
   
@@ -187,7 +187,7 @@ struct FavoritesPage {
   }
   
   /**
-   * 处理全选/取消全选
+   * 处理全�?取消全�?
    */
   private handleSelectAll(): void {
     if (this.selectedItems.size === this.favorites.length) {
@@ -198,7 +198,7 @@ struct FavoritesPage {
   }
   
   /**
-   * 处理删除选中项
+   * 处理删除选中�?
    */
   private handleDeleteSelected(): void {
     if (this.selectedItems.size === 0) return;
@@ -208,7 +208,7 @@ struct FavoritesPage {
     // 删除选中的收藏项
     favoriteService.removeFavorites(idsToDelete)
       .then(() => {
-        // 更新本地状态
+        // 更新本地状�?
         this.favorites = this.favorites.filter(fav => !idsToDelete.includes(fav.id));
         idsToDelete.forEach(id => {
           this.mediaItems.delete(id);
@@ -217,7 +217,7 @@ struct FavoritesPage {
         
         Logger.info(this.TAG, `Deleted ${idsToDelete.length} favorites`);
         
-        // 如果没有收藏项了，退出编辑模式
+        // 如果没有收藏项了，退出编辑模�?
         if (this.favorites.length === 0) {
           this.isEditMode = false;
         }
@@ -229,7 +229,7 @@ struct FavoritesPage {
   }
   
   /**
-   * 处理媒体项点击
+   * 处理媒体项点�?
    */
   private handleMediaClick(favorite: FavoriteItem): void {
     if (this.isEditMode) {
@@ -237,7 +237,7 @@ struct FavoritesPage {
       return;
     }
     
-    Logger.info(this.TAG, `Favorite clicked: ${favorite.title}`);
+    Logger.info(this.TAG, `Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}` instanceof Error ? `Favorite clicked: ${favorite.title}` : new Error(String(`Favorite clicked: ${favorite.title}`)))))));
     // 跳转到详情页
     AppNavigator.getInstance().navigateToDetail({
       id: favorite.id,
@@ -270,7 +270,7 @@ struct FavoritesPage {
   private renderHeader(): void {
     Stack({ className: "header" }) {
       Button({ className: "back-button", onClick: this.handleBack }) {
-        Text("←")
+        Text("�?)
       }
       Text("我的收藏").className("page-title")
       Button({ className: "action-button", onClick: this.toggleEditMode }) {
@@ -280,7 +280,7 @@ struct FavoritesPage {
   }
   
   /**
-   * 渲染编辑工具栏
+   * 渲染编辑工具�?
    */
   @Builder
   private renderEditToolbar(): void {
@@ -292,9 +292,9 @@ struct FavoritesPage {
           checked: this.selectedItems.size === this.favorites.length && this.favorites.length > 0,
           onCheckChange: this.handleSelectAll 
         })
-        Text("全选")
+        Text("全�?)
       }
-      Text("已选择 " + this.selectedItems.size + " 项").className("selected-count")
+      Text("已选择 " + this.selectedItems.size + " �?).className("selected-count")
       Button({ 
         className: "delete-button", 
         onClick: this.handleDeleteSelected,
@@ -313,7 +313,7 @@ struct FavoritesPage {
     if (this.isEditMode || this.favorites.length === 0) return;
     
     Flex({ className: "sort-option" }) {
-      Text("排序：")
+      Text("排序�?)
       Button({ 
         className: `sort-button ${this.sortBy === 'time' ? 'selected' : ''}`,
         onClick: () => {
@@ -336,7 +336,7 @@ struct FavoritesPage {
   }
   
   /**
-   * 渲染收藏项
+   * 渲染收藏�?
    */
   @Builder
   private renderFavoriteItem(favorite: FavoriteItem): void {
@@ -391,7 +391,7 @@ struct FavoritesPage {
     if (this.isLoading && !this.isRefreshing) {
       Stack({ className: "loading-container" }) {
         LoadingProgress({ className: "loading-progress", color: "#FF4500" })
-        Text("加载中...")
+        Text("加载�?..")
       }
       return;
     }
@@ -412,7 +412,7 @@ struct FavoritesPage {
         Text("🌟").className("empty-icon")
         Text("暂无收藏内容")
         Button({ className: "explore-button", onClick: () => AppNavigator.getInstance().navigateToHome() }) {
-          Text("去探索")
+          Text("去探�?)
         }
       }
       return;
@@ -435,7 +435,7 @@ struct FavoritesPage {
       // 页面头部
       this.renderHeader()
       
-      // 编辑工具栏
+      // 编辑工具�?
       this.renderEditToolbar()
       
       // 排序选项
@@ -451,3 +451,5 @@ struct FavoritesPage {
 }
 
 export default FavoritesPage;
+
+

@@ -11,18 +11,15 @@ export enum DateFormatType {
   DATE,        // 日期格式：YYYY-MM-DD
   TIME,        // 时间格式：HH:mm:ss
   TIME_SHORT,  // 短时间格式：HH:mm
-  DATE_CHINESE,// 中文日期格式：YYYY年MM月DD日
-  FULL_CHINESE // 完整中文格式：YYYY年MM月DD日 HH:mm:ss
+  DATE_CHINESE,// 中文日期格式：YYYY年MM月DD�?  FULL_CHINESE // 完整中文格式：YYYY年MM月DD�?HH:mm:ss
 }
 
 /**
- * 日期工具类
- * 提供日期格式化、解析、比较等功能
+ * 日期工具�? * 提供日期格式化、解析、比较等功能
  */
 export default class DateUtil {
   /**
-   * 格式化日期
-   * @param date 日期对象或时间戳
+   * 格式化日�?   * @param date 日期对象或时间戳
    * @param format 格式化类型或自定义格式字符串
    * @returns 格式化后的日期字符串
    */
@@ -50,18 +47,17 @@ export default class DateUtil {
             formatStr = 'HH:mm';
             break;
           case DateFormatType.DATE_CHINESE:
-            formatStr = 'YYYY年MM月DD日';
+            formatStr = 'YYYY年MM月DD�?;
             break;
           case DateFormatType.FULL_CHINESE:
-            formatStr = 'YYYY年MM月DD日 HH:mm:ss';
+            formatStr = 'YYYY年MM月DD�?HH:mm:ss';
             break;
           default:
             formatStr = 'YYYY-MM-DD HH:mm:ss';
         }
       }
 
-      // 格式化替换
-      return formatStr
+      // 格式化替�?      return formatStr
         .replace('YYYY', dateObj.getFullYear().toString())
         .replace('MM', DateUtil.padZero(dateObj.getMonth() + 1))
         .replace('DD', DateUtil.padZero(dateObj.getDate()))
@@ -75,12 +71,10 @@ export default class DateUtil {
   }
 
   /**
-   * 解析日期字符串
-   * @param dateStr 日期字符串
-   * @param format 格式字符串（可选）
+   * 解析日期字符�?   * @param dateStr 日期字符�?   * @param format 格式字符串（可选）
    * @returns 解析后的日期对象
    */
-  public static parse(dateStr: string, format?: string): Date | null {
+  public static parse(dateStr: string, format?: string instanceof Error ? format?: string : new Error(String(format?: string instanceof Error ? format?: string instanceof Error ? format?: string : new Error(String(format?: string : new Error(String(format?: string instanceof Error ? format?: string : new Error(String(format?: string instanceof Error ? format?: string instanceof Error ? format?: string : new Error(String(format?: string instanceof Error ? format?: string instanceof Error ? format?: string : new Error(String(format?: string : new Error(String(format?: string instanceof Error ? format?: string : new Error(String(format?: string : new Error(String(format?: string instanceof Error ? format?: string : new Error(String(format?: string instanceof Error ? format?: string instanceof Error ? format?: string : new Error(String(format?: string : new Error(String(format?: string instanceof Error ? format?: string : new Error(String(format?: string))))))): Date | null {
     try {
       if (!dateStr) return null;
 
@@ -99,12 +93,9 @@ export default class DateUtil {
   }
 
   /**
-   * 根据格式解析日期字符串
-   * @param dateStr 日期字符串
-   * @param format 格式字符串
-   * @returns 解析后的日期对象
+   * 根据格式解析日期字符�?   * @param dateStr 日期字符�?   * @param format 格式字符�?   * @returns 解析后的日期对象
    */
-  private static parseWithFormat(dateStr: string, format: string): Date | null {
+  private static parseWithFormat(dateStr: string, format: string instanceof Error ? format: string : new Error(String(format: string instanceof Error ? format: string instanceof Error ? format: string : new Error(String(format: string : new Error(String(format: string instanceof Error ? format: string : new Error(String(format: string instanceof Error ? format: string instanceof Error ? format: string : new Error(String(format: string instanceof Error ? format: string instanceof Error ? format: string : new Error(String(format: string : new Error(String(format: string instanceof Error ? format: string : new Error(String(format: string : new Error(String(format: string instanceof Error ? format: string : new Error(String(format: string instanceof Error ? format: string instanceof Error ? format: string : new Error(String(format: string : new Error(String(format: string instanceof Error ? format: string : new Error(String(format: string))))))): Date | null {
     try {
       // 提取格式中的年月日时分秒位置
       const yearMatch = format.match(/YYYY/g);
@@ -121,19 +112,16 @@ export default class DateUtil {
       let minute = 0;
       let second = 0;
 
-      // 提取年月日
-      if (yearMatch && yearMatch.index !== undefined) {
+      // 提取年月�?      if (yearMatch && yearMatch.index !== undefined) {
         year = parseInt(dateStr.substr(yearMatch.index, 4));
       }
       if (monthMatch && monthMatch.index !== undefined) {
-        month = parseInt(dateStr.substr(monthMatch.index, 2)) - 1; // 月份从0开始
-      }
+        month = parseInt(dateStr.substr(monthMatch.index, 2)) - 1; // 月份�?开�?      }
       if (dayMatch && dayMatch.index !== undefined) {
         day = parseInt(dateStr.substr(dayMatch.index, 2));
       }
 
-      // 提取时分秒
-      if (hourMatch && hourMatch.index !== undefined) {
+      // 提取时分�?      if (hourMatch && hourMatch.index !== undefined) {
         hour = parseInt(dateStr.substr(hourMatch.index, 2));
       }
       if (minuteMatch && minuteMatch.index !== undefined) {
@@ -187,7 +175,7 @@ export default class DateUtil {
         return `${years}年前`;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get relative time: ${error}`);
+      Logger.error(TAG, `Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}` instanceof Error ? `Failed to get relative time: ${error}` : new Error(String(`Failed to get relative time: ${error}`)))))));
       return '';
     }
   }
@@ -236,11 +224,61 @@ export default class DateUtil {
 
   /**
    * 比较两个日期
-   * @param date1 第一个日期
-   * @param date2 第二个日期
-   * @returns 1:date1>date2, -1:date1<date2, 0:相等
+   * @param date1 第一个日�?   * @param date2 第二个日�?   * @returns 1:date1>date2, -1:date1<date2, 0:相等
    */
-  public static compare(date1: Date | number | string, date2: Date | number | string): number {
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string instanceof Error ? -1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string : new Error(String(-1:date1<date2, 0:相等
+   */
+  public static compare(date1: Date | number | string, date2: Date | number | string))))))): number {
     try {
       const d1 = DateUtil.parseDate(date1);
       const d2 = DateUtil.parseDate(date2);
@@ -260,13 +298,9 @@ export default class DateUtil {
   }
 
   /**
-   * 获取两个日期之间的差值
-   * @param date1 第一个日期
-   * @param date2 第二个日期
-   * @param unit 时间单位
-   * @returns 差值
-   */
-  public static diff(date1: Date | number | string, date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'): number {
+   * 获取两个日期之间的差�?   * @param date1 第一个日�?   * @param date2 第二个日�?   * @param unit 时间单位
+   * @returns 差�?   */
+  public static diff(date1: Date | number | string, date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' instanceof Error ? date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' : new Error(String(date2: Date | number | string, unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'))))))): number {
     try {
       const d1 = DateUtil.parseDate(date1);
       const d2 = DateUtil.parseDate(date2);
@@ -299,10 +333,8 @@ export default class DateUtil {
   }
 
   /**
-   * 判断日期是否为今天
-   * @param date 日期对象或时间戳
-   * @returns 是否为今天
-   */
+   * 判断日期是否为今�?   * @param date 日期对象或时间戳
+   * @returns 是否为今�?   */
   public static isToday(date: Date | number | string): boolean {
     try {
       const dateObj = DateUtil.parseDate(date);
@@ -312,16 +344,14 @@ export default class DateUtil {
       return dateObj.toDateString() === today.toDateString();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to check if date is today: ${errorMessage}`);
+      Logger.error(TAG, `Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}` instanceof Error ? `Failed to check if date is today: ${errorMessage}` : new Error(String(`Failed to check if date is today: ${errorMessage}`)))))));
       return false;
     }
   }
 
   /**
-   * 判断日期是否为昨天
-   * @param date 日期对象或时间戳
-   * @returns 是否为昨天
-   */
+   * 判断日期是否为昨�?   * @param date 日期对象或时间戳
+   * @returns 是否为昨�?   */
   public static isYesterday(date: Date | number | string): boolean {
     try {
       const dateObj = DateUtil.parseDate(date);
@@ -339,11 +369,10 @@ export default class DateUtil {
   /**
    * 判断日期是否在指定范围内
    * @param date 要检查的日期
-   * @param start 开始日期
-   * @param end 结束日期
+   * @param start 开始日�?   * @param end 结束日期
    * @returns 是否在范围内
    */
-  public static isBetween(date: Date | number | string, start: Date | number | string, end: Date | number | string): boolean {
+  public static isBetween(date: Date | number | string, start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string instanceof Error ? start: Date | number | string, end: Date | number | string : new Error(String(start: Date | number | string, end: Date | number | string))))))): boolean {
     try {
       const dateObj = DateUtil.parseDate(date);
       const startObj = DateUtil.parseDate(start);
@@ -360,12 +389,10 @@ export default class DateUtil {
   }
 
   /**
-   * 获取指定月份的天数
-   * @param year 年份
-   * @param month 月份（1-12）
-   * @returns 天数
+   * 获取指定月份的天�?   * @param year 年份
+   * @param month 月份�?-12�?   * @returns 天数
    */
-  public static getDaysInMonth(year: number, month: number): number {
+  public static getDaysInMonth(year: number, month: number instanceof Error ? month: number : new Error(String(month: number instanceof Error ? month: number instanceof Error ? month: number : new Error(String(month: number : new Error(String(month: number instanceof Error ? month: number : new Error(String(month: number instanceof Error ? month: number instanceof Error ? month: number : new Error(String(month: number instanceof Error ? month: number instanceof Error ? month: number : new Error(String(month: number : new Error(String(month: number instanceof Error ? month: number : new Error(String(month: number : new Error(String(month: number instanceof Error ? month: number : new Error(String(month: number instanceof Error ? month: number instanceof Error ? month: number : new Error(String(month: number : new Error(String(month: number instanceof Error ? month: number : new Error(String(month: number))))))): number {
     try {
       return new Date(year, month, 0).getDate();
     } catch (error) {
@@ -384,10 +411,8 @@ export default class DateUtil {
   }
 
   /**
-   * 获取毫秒时间戳
-   * @param date 日期对象（可选）
-   * @returns 毫秒时间戳
-   */
+   * 获取毫秒时间�?   * @param date 日期对象（可选）
+   * @returns 毫秒时间�?   */
   public static getMillisecondTimestamp(date?: Date): number {
     return date ? date.getTime() : Date.now();
   }
@@ -410,16 +435,13 @@ export default class DateUtil {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to format duration: ${errorMessage}`);
+      Logger.error(TAG, `Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}` instanceof Error ? `Failed to format duration: ${errorMessage}` : new Error(String(`Failed to format duration: ${errorMessage}`)))))));
       return '0:00';
     }
   }
 
   /**
-   * 解析持续时间字符串
-   * @param durationStr 持续时间字符串（如 "1:30:45" 或 "45:30"）
-   * @returns 总秒数
-   */
+   * 解析持续时间字符�?   * @param durationStr 持续时间字符串（�?"1:30:45" �?"45:30"�?   * @returns 总秒�?   */
   public static parseDuration(durationStr: string): number {
     try {
       const parts = durationStr.split(':').map(p => parseInt(p));
@@ -437,13 +459,11 @@ export default class DateUtil {
     }
   }
 
-  // 工具方法：数字补零
-  private static padZero(num: number): string {
+  // 工具方法：数字补�?  private static padZero(num: number): string {
     return num < 10 ? `0${num}` : num.toString();
   }
 
-  // 工具方法：解析日期
-  private static parseDate(date: Date | number | string): Date | null {
+  // 工具方法：解析日�?  private static parseDate(date: Date | number | string): Date | null {
     if (date instanceof Date) {
       return isNaN(date.getTime()) ? null : date;
     } else if (typeof date === 'number') {
@@ -455,3 +475,5 @@ export default class DateUtil {
     return null;
   }
 }
+
+

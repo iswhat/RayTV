@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 RayTV. All rights reserved.
- * 视频仓库类 - 负责视频相关数据的获取和管理
+ * 视频仓库�?- 负责视频相关数据的获取和管理
  */
 
 import Logger from '@ohos:common@ohos/common/src/main/ets/utils/Logger';
@@ -48,12 +48,11 @@ export interface VideoEvent {
   type: string;
   timestamp: number;
   videoId?: string;
-  data?: any;
+  data?: Record<string, string | number | boolean | null>;
   error?: Error;
 }
 
-// 收藏状态变更事件接口
-export interface FavoriteChangeEvent extends VideoEvent {
+// 收藏状态变更事件接�?export interface FavoriteChangeEvent extends VideoEvent {
   favorited: boolean;
   userId: string;
 }
@@ -182,8 +181,7 @@ export interface PlaybackProgress {
 }
 
 /**
- * 视频仓库类
- */
+ * 视频仓库�? */
 export class VideoRepository {
   private static instance: VideoRepository;
   private logger: Logger;
@@ -191,7 +189,7 @@ export class VideoRepository {
   private networkUtil: NetworkUtil;
   private cacheService: CacheService;
   private userRepository: UserRepository;
-  private eventBus: any; // EventBus实例
+  private eventBus: Record<string, string | number | boolean | null>; // EventBus实例
   
   // API端点配置
   private apiEndpoints = {
@@ -208,8 +206,7 @@ export class VideoRepository {
     watchHistory: '/user/watch-history'
   };
   
-  // 存储键配置
-  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     videoCache: 'video:detail:',
     videoListCache: 'video:list:',
     categories: 'video:categories',
@@ -233,8 +230,7 @@ export class VideoRepository {
   private progressCache: Map<string, PlaybackProgress> = new Map();
   
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger = Logger.getInstance();
     this.storageUtil = StorageUtil.getInstance();
@@ -255,22 +251,20 @@ export class VideoRepository {
   }
   
   /**
-   * 初始化视频仓库
-   */
+   * 初始化视频仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载播放进度缓存
       await this.loadProgressCache();
       
-      // 预加载分类
-      await this.loadCategories();
+      // 预加载分�?      await this.loadCategories();
       
       // 设置事件监听
       this.setupEventListeners();
       
       this.logger.info('VideoRepository initialized successfully');
     } catch (error) {
-      this.logger.error('Failed to initialize VideoRepository', error as Error);
+      this.Logger.error('Failed to initialize VideoRepository', error as Error);
       throw error;
     }
   }
@@ -279,16 +273,13 @@ export class VideoRepository {
    * 设置事件监听
    */
   private setupEventListeners(): void {
-    // 监听应用退出事件
-    // this.eventBus.on('app:exit', async () => {
+    // 监听应用退出事�?    // this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
     //   await this.saveAllProgress();
     // });
     
-    // 监听网络状态变化
-    // this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    // 监听网络状态变�?    // this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
     //   if (status.isOnline) {
-    //     // 在线时同步播放进度
-    //     await this.syncPlaybackProgress();
+    //     // 在线时同步播放进�?    //     await this.syncPlaybackProgress();
     //   }
     // });
     
@@ -300,8 +291,7 @@ export class VideoRepository {
     // });
     
     // this.eventBus.on('user:logout', async () => {
-    //   // 登出前保存所有进度
-    //   await this.saveAllProgress();
+    //   // 登出前保存所有进�?    //   await this.saveAllProgress();
     // });
   }
   
@@ -314,8 +304,7 @@ export class VideoRepository {
     try {
       const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
       
-      // 尝试从缓存获取
-      if (!forceRefresh) {
+      // 尝试从缓存获�?      if (!forceRefresh) {
         const cachedVideo = await this.cacheService.getCache<VideoInfo>(cacheKey);
         if (cachedVideo) {
           this.logger.debug(`Video detail loaded from cache: ${videoId}`);
@@ -338,8 +327,7 @@ export class VideoRepository {
       // 构建请求配置
       const config: Record<string, unknown> = {};
       
-      // 如果用户已登录，添加认证头
-      const authToken = this.userRepository.getAuthToken();
+      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
       if (authToken) {
         config.headers = {
           'Authorization': `Bearer ${authToken}`
@@ -376,13 +364,91 @@ export class VideoRepository {
       
       return videoInfo;
     } catch (error) {
-      this.logger.error(`Failed to get video detail for ${videoId}`, error as Error);
+      this.Logger.error(`Failed to get video detail for ${videoId}`, error as Error);
       
       // 发布视频错误事件
       // this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
       //   videoId,
       //   type: VideoEventType.VIDEO_ERROR,
-      //   timestamp: Date.now(),
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now())))))),
       //   error: error as Error
       // } as VideoEvent);
       
@@ -399,11 +465,9 @@ export class VideoRepository {
       // 验证请求参数
       this.validateVideoListRequest(request);
       
-      // 生成缓存键
-      const cacheKey = this.generateVideoListCacheKey(request);
+      // 生成缓存�?      const cacheKey = this.generateVideoListCacheKey(request);
       
-      // 尝试从缓存获取
-      const cachedList = await this.cacheService.getCache<VideoListResponse>(cacheKey);
+      // 尝试从缓存获�?      const cachedList = await this.cacheService.getCache<VideoListResponse>(cacheKey);
       if (cachedList) {
         this.logger.debug(`Video list loaded from cache`);
         
@@ -425,8 +489,7 @@ export class VideoRepository {
         params
       };
       
-      // 如果用户已登录，添加认证头
-      const authToken = this.userRepository.getAuthToken();
+      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
       if (authToken) {
         config.headers = {
           'Authorization': `Bearer ${authToken}`
@@ -462,12 +525,64 @@ export class VideoRepository {
       
       return videoList;
     } catch (error) {
-      this.logger.error('Failed to get video list', error as Error);
+      this.Logger.error('Failed to get video list', error as Error);
       
       // 发布视频错误事件
       // this.eventBus.emit(VideoEventType.VIDEO_ERROR, {
       //   type: VideoEventType.VIDEO_ERROR,
-      //   timestamp: Date.now(),
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now( : new Error(String({
+      //   type: VideoEventType.VIDEO_ERROR,
+      //   timestamp: Date.now())))))),
       //   error: error as Error
       // } as VideoEvent);
       
@@ -480,8 +595,7 @@ export class VideoRepository {
    */
   public async getCategories(): Promise<VideoCategory[]> {
     try {
-      // 尝试从缓存获取
-      const cachedCategories = await this.cacheService.getCache<VideoCategory[]>(this.storageKeys.categories);
+      // 尝试从缓存获�?      const cachedCategories = await this.cacheService.getCache<VideoCategory[]>(this.storageKeys.categories);
       if (cachedCategories) {
         return cachedCategories;
       }
@@ -505,7 +619,7 @@ export class VideoRepository {
       
       return categories;
     } catch (error) {
-      this.logger.error('Failed to get video categories', error as Error);
+      this.Logger.error('Failed to get video categories', error as Error);
       return [];
     }
   }
@@ -515,22 +629,97 @@ export class VideoRepository {
    */
   public async getPopularTags(limit: number = 50): Promise<VideoTag[]> {
     try {
-      // 生成缓存键
-      const cacheKey = `${this.storageKeys.tags}:${limit}`;
+      // 生成缓存�?      const cacheKey = `${this.storageKeys.tags}:${limit}`;
       
-      // 尝试从缓存获取
-      const cachedTags = await this.cacheService.getCache<VideoTag[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedTags = await this.cacheService.getCache<VideoTag[]>(cacheKey);
       if (cachedTags) {
         return cachedTags;
       }
       
       // 调用API获取标签
       const response = await this.networkUtil.get<VideoTag[]>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.videoTags}`,
-        {
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.videoTags}`, {
           params: { limit }
         }
-      );
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+       instanceof Error ? {
+          params: { limit }
+        }
+       : new Error(String({
+          params: { limit }
+        }
+      )))))));
       
       const tags = response.data;
       
@@ -546,7 +735,7 @@ export class VideoRepository {
       
       return tags;
     } catch (error) {
-      this.logger.error('Failed to get popular tags', error as Error);
+      this.Logger.error('Failed to get popular tags', error as Error);
       return [];
     }
   }
@@ -558,7 +747,7 @@ export class VideoRepository {
   public async getVideoStatistics(videoId: string): Promise<VideoStatistics> {
     try {
       // 构建请求URL
-      const url = this.apiEndpoints.videoStatistics.replace(':id', videoId);
+      const url = this.apiEndpoints.videoStatistics.replace(':id', videoId instanceof Error ? videoId : new Error(String(videoId instanceof Error ? videoId instanceof Error ? videoId : new Error(String(videoId : new Error(String(videoId instanceof Error ? videoId : new Error(String(videoId instanceof Error ? videoId instanceof Error ? videoId : new Error(String(videoId instanceof Error ? videoId instanceof Error ? videoId : new Error(String(videoId : new Error(String(videoId instanceof Error ? videoId : new Error(String(videoId : new Error(String(videoId instanceof Error ? videoId : new Error(String(videoId instanceof Error ? videoId instanceof Error ? videoId : new Error(String(videoId : new Error(String(videoId instanceof Error ? videoId : new Error(String(videoId)))))));
       
       // 调用API获取统计信息
       const response = await this.networkUtil.get<VideoStatistics>(
@@ -567,12 +756,11 @@ export class VideoRepository {
       
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to get statistics for video ${videoId}`, error as Error);
+      this.Logger.error(`Failed to get statistics for video ${videoId}`, error as Error);
       
       // 返回默认统计信息
       return {
-        viewCount: 0,
-        likeCount: 0,
+        viewCount: 0, likeCount: 0,
         dislikeCount: 0,
         favoriteCount: 0,
         commentCount: 0,
@@ -586,13 +774,375 @@ export class VideoRepository {
    * @param videoId 视频ID
    * @param limit 限制数量
    */
-  public async getRelatedVideos(videoId: string, limit: number = 10): Promise<RelatedVideo[]> {
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 instanceof Error ? likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10 : new Error(String(likeCount: 0,
+        dislikeCount: 0,
+        favoriteCount: 0,
+        commentCount: 0,
+        averageRating: 0
+      };
+    }
+  }
+  
+  /**
+   * 获取相关视频
+   * @param videoId 视频ID
+   * @param limit 限制数量
+   */
+  public async getRelatedVideos(videoId: string, limit: number = 10))))))): Promise<RelatedVideo[]> {
     try {
-      // 生成缓存键
-      const cacheKey = `video:related:${videoId}:${limit}`;
+      // 生成缓存�?      const cacheKey = `video:related:${videoId}:${limit}`;
       
-      // 尝试从缓存获取
-      const cachedRelated = await this.cacheService.getCache<RelatedVideo[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedRelated = await this.cacheService.getCache<RelatedVideo[]>(cacheKey);
       if (cachedRelated) {
         return cachedRelated;
       }
@@ -622,7 +1172,7 @@ export class VideoRepository {
       
       return relatedVideos;
     } catch (error) {
-      this.logger.error(`Failed to get related videos for ${videoId}`, error as Error);
+      this.Logger.error(`Failed to get related videos for ${videoId}`, error as Error);
       return [];
     }
   }
@@ -633,7 +1183,7 @@ export class VideoRepository {
    * @param page 页码
    * @param pageSize 每页数量
    */
-  public async getVideoComments(videoId: string, page: number = 1, pageSize: number = 20): Promise<{
+  public async getVideoComments(videoId: string, page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20 instanceof Error ? page: number = 1, pageSize: number = 20 : new Error(String(page: number = 1, pageSize: number = 20))))))): Promise<{
     comments: VideoComment[];
     total: number;
     page: number;
@@ -658,12 +1208,10 @@ export class VideoRepository {
       
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to get comments for video ${videoId}`, error as Error);
+      this.Logger.error(`Failed to get comments for video ${videoId}`, error as Error);
       
-      // 返回空评论列表
-      return {
-        comments: [],
-        total: 0,
+      // 返回空评论列�?      return {
+        comments: [], total: 0,
         page,
         pageSize
       };
@@ -675,7 +1223,319 @@ export class VideoRepository {
    * @param videoId 视频ID
    * @param content 评论内容
    */
-  public async addVideoComment(videoId: string, content: string): Promise<VideoComment> {
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string instanceof Error ? total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string : new Error(String(total: 0,
+        page,
+        pageSize
+      };
+    }
+  }
+  
+  /**
+   * 添加视频评论
+   * @param videoId 视频ID
+   * @param content 评论内容
+   */
+  public async addVideoComment(videoId: string, content: string))))))): Promise<VideoComment> {
     try {
       // 检查用户是否已登录
       if (!this.userRepository.isLoggedIn()) {
@@ -713,7 +1573,7 @@ export class VideoRepository {
       
       return comment;
     } catch (error) {
-      this.logger.error(`Failed to add comment to video ${videoId}`, error as Error);
+      this.Logger.error(`Failed to add comment to video ${videoId}`, error as Error);
       throw error;
     }
   }
@@ -723,7 +1583,7 @@ export class VideoRepository {
    * @param videoId 视频ID
    * @param favorited 是否收藏
    */
-  public async setFavoriteStatus(videoId: string, favorited: boolean): Promise<boolean> {
+  public async setFavoriteStatus(videoId: string, favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean : new Error(String(favorited: boolean instanceof Error ? favorited: boolean : new Error(String(favorited: boolean))))))): Promise<boolean> {
     try {
       // 检查用户是否已登录
       if (!this.userRepository.isLoggedIn()) {
@@ -739,8 +1599,7 @@ export class VideoRepository {
       const url = this.apiEndpoints.videoFavorites.replace(':id', videoId);
       
       try {
-        // 调用API更新收藏状态
-        await this.networkUtil.post(
+        // 调用API更新收藏状�?        await this.networkUtil.post(
           `${this.apiEndpoints.baseUrl}${url}`,
           { favorited },
           {
@@ -750,18 +1609,15 @@ export class VideoRepository {
           }
         );
       } catch (error) {
-        // API调用失败时，仍然更新本地状态
-        this.logger.warn(`Failed to update favorite status on server for video ${videoId}`, error as Error);
+        // API调用失败时，仍然更新本地状�?        this.logger.warn(`Failed to update favorite status on server for video ${videoId}`, error as Error);
       }
       
-      // 更新本地收藏状态
-      const favorites = await this.getFavorites();
+      // 更新本地收藏状�?      const favorites = await this.getFavorites();
       
       if (favorited) {
         // 添加收藏
         if (!favorites.includes(videoId)) {
-          // 检查收藏数量限制
-          if (favorites.length >= this.videoConfig.maxFavorites) {
+          // 检查收藏数量限�?          if (favorites.length >= this.videoConfig.maxFavorites) {
             throw new Error(`Maximum number of favorites (${this.videoConfig.maxFavorites}) reached`);
           }
           favorites.push(videoId);
@@ -777,8 +1633,7 @@ export class VideoRepository {
       // 保存更新后的收藏列表
       await this.storageUtil.setObject(this.storageKeys.favorites, favorites, LocalStorageType.DEFAULT);
       
-      // 发布收藏状态变更事件
-      // this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
+      // 发布收藏状态变更事�?      // this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
       //   videoId,
       //   type: favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED,
       //   timestamp: Date.now(),
@@ -786,12 +1641,11 @@ export class VideoRepository {
       //   userId
       // } as FavoriteChangeEvent);
       
-      // 更新视频缓存中的收藏状态
-      await this.updateVideoFavoriteStatus(videoId, favorited);
+      // 更新视频缓存中的收藏状�?      await this.updateVideoFavoriteStatus(videoId, favorited);
       
       return true;
     } catch (error) {
-      this.logger.error(`Failed to ${favorited ? 'favorite' : 'unfavorite'} video ${videoId}`, error as Error);
+      this.Logger.error(`Failed to ${favorited ? 'favorite' : 'unfavorite'} video ${videoId}`, error as Error);
       throw error;
     }
   }
@@ -801,9 +1655,9 @@ export class VideoRepository {
    */
   public async getFavorites(): Promise<string[]> {
     try {
-      return await this.storageUtil.getObject<string[]>(this.storageKeys.favorites, LocalStorageType.DEFAULT) || [];
+      return await this.storageUtil.getObject<string[]>(this.storageKeys.favorites, LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT))))))) || [];
     } catch (error) {
-      this.logger.error('Failed to get favorites', error as Error);
+      this.Logger.error('Failed to get favorites', error as Error);
       return [];
     }
   }
@@ -817,16 +1671,14 @@ export class VideoRepository {
       const favorites = await this.getFavorites();
       return favorites.includes(videoId);
     } catch (error) {
-      this.logger.warn(`Failed to check favorite status for video ${videoId}`, error as Error);
+      this.logger.warn(`Failed to check favorite status for video ${videoId}`, error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return false;
     }
   }
   
   /**
-   * 对视频进行评分
-   * @param videoId 视频ID
-   * @param rating 评分（1-5）
-   */
+   * 对视频进行评�?   * @param videoId 视频ID
+   * @param rating 评分�?-5�?   */
   public async rateVideo(videoId: string, rating: number): Promise<VideoRating> {
     try {
       // 检查用户是否已登录
@@ -865,7 +1717,7 @@ export class VideoRepository {
       
       return videoRating;
     } catch (error) {
-      this.logger.error(`Failed to rate video ${videoId}`, error as Error);
+      this.Logger.error(`Failed to rate video ${videoId}`, error as Error);
       throw error;
     }
   }
@@ -877,10 +1729,61 @@ export class VideoRepository {
    * @param saveToStorage 是否保存到持久化存储
    */
   public async updatePlaybackProgress(
-    videoId: string, 
-    progress: PlaybackProgress, 
+    videoId: string, progress: PlaybackProgress, 
     saveToStorage: boolean = true
-  ): Promise<void> {
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   instanceof Error ? progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+   : new Error(String(progress: PlaybackProgress, 
+    saveToStorage: boolean = true
+  ))))))): Promise<void> {
     try {
       // 更新内存缓存
       this.progressCache.set(videoId, progress);
@@ -891,8 +1794,7 @@ export class VideoRepository {
         await this.storageUtil.setObject(key, progress, LocalStorageType.DEFAULT);
       }
       
-      // 更新最后观看记录
-      await this.updateLastWatched(videoId, progress.currentTime);
+      // 更新最后观看记�?      await this.updateLastWatched(videoId, progress.currentTime);
       
       // 发布进度更新事件
       // this.eventBus.emit(VideoEventType.VIDEO_PROGRESS_UPDATED, {
@@ -902,8 +1804,7 @@ export class VideoRepository {
       //   progress
       // } as ProgressUpdateEvent);
       
-      // 如果视频接近完成，记录为已观看
-      if (progress.duration > 0 && progress.currentTime / progress.duration > 0.9) {
+      // 如果视频接近完成，记录为已观�?      if (progress.duration > 0 && progress.currentTime / progress.duration > 0.9) {
         await this.markAsWatched(videoId);
       }
     } catch (error) {
@@ -917,8 +1818,7 @@ export class VideoRepository {
    */
   public async getPlaybackProgress(videoId: string): Promise<PlaybackProgress | null> {
     try {
-      // 首先检查内存缓存
-      const cachedProgress = this.progressCache.get(videoId);
+      // 首先检查内存缓�?      const cachedProgress = this.progressCache.get(videoId);
       if (cachedProgress) {
         return cachedProgress;
       }
@@ -933,8 +1833,7 @@ export class VideoRepository {
   }
   
   /**
-   * 添加到观看历史
-   * @param videoId 视频ID
+   * 添加到观看历�?   * @param videoId 视频ID
    * @param videoInfo 视频信息
    */
   public async addToWatchHistory(videoId: string, videoInfo?: VideoInfo): Promise<void> {
@@ -942,11 +1841,9 @@ export class VideoRepository {
       // 获取现有观看历史
       const history = await this.getWatchHistory();
       
-      // 移除重复项
-      const filteredHistory = history.filter(item => item.videoId !== videoId);
+      // 移除重复�?      const filteredHistory = history.filter(item => item.videoId !== videoId);
       
-      // 获取视频信息（如果未提供）
-      let video = videoInfo;
+      // 获取视频信息（如果未提供�?      let video = videoInfo;
       if (!video) {
         try {
           video = await this.getVideoDetail(videoId, false);
@@ -956,17 +1853,9 @@ export class VideoRepository {
         }
       }
       
-      // 创建历史记录项
-      const historyItem = {
-        videoId,
-        title: video.title,
-        thumbnailUrl: video.coverUrl,
-        duration: video.duration,
-        watchedAt: Date.now()
-      };
+      // 创建历史记录�?      const historyItem: Record<string, string | number | boolean | null> = { ... };
       
-      // 添加到历史记录开头
-      filteredHistory.unshift(historyItem);
+      // 添加到历史记录开�?      filteredHistory.unshift(historyItem);
       
       // 限制历史记录数量
       const limitedHistory = filteredHistory.slice(0, this.videoConfig.maxWatchHistoryItems);
@@ -1009,7 +1898,7 @@ export class VideoRepository {
       
       return history;
     } catch (error) {
-      this.logger.error('Failed to get watch history', error as Error);
+      this.Logger.error('Failed to get watch history', error as Error);
       return [];
     }
   }
@@ -1019,10 +1908,10 @@ export class VideoRepository {
    */
   public async clearWatchHistory(): Promise<void> {
     try {
-      await this.storageUtil.remove(this.storageKeys.watchHistory, LocalStorageType.DEFAULT);
+      await this.storageUtil.remove(this.storageKeys.watchHistory, LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT)))))));
       this.logger.info('Watch history cleared');
     } catch (error) {
-      this.logger.error('Failed to clear watch history', error as Error);
+      this.Logger.error('Failed to clear watch history', error as Error);
       throw error;
     }
   }
@@ -1033,15 +1922,91 @@ export class VideoRepository {
    */
   private async markAsWatched(videoId: string): Promise<void> {
     try {
-      // 发布视频已观看事件
-      // this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
+      // 发布视频已观看事�?      // this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
       //   videoId,
       //   type: VideoEventType.VIDEO_WATCHED,
-      //   timestamp: Date.now()
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( instanceof Error ? {
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now( : new Error(String({
+      //   videoId,
+      //   type: VideoEventType.VIDEO_WATCHED,
+      //   timestamp: Date.now()))))))
       // } as VideoEvent);
       
-      // 异步发送观看记录到服务器
-      if (this.userRepository.isLoggedIn()) {
+      // 异步发送观看记录到服务�?      if (this.userRepository.isLoggedIn()) {
         this.networkUtil.post(
           `${this.apiEndpoints.baseUrl}${this.apiEndpoints.watchHistory}`,
           {
@@ -1063,8 +2028,7 @@ export class VideoRepository {
   }
 
   /**
-   * 更新最后观看记录
-   * @param videoId 视频ID
+   * 更新最后观看记�?   * @param videoId 视频ID
    * @param currentTime 当前播放时间
    */
   private async updateLastWatched(videoId: string, currentTime: number): Promise<void> {
@@ -1088,8 +2052,7 @@ export class VideoRepository {
    */
   private async loadProgressCache(): Promise<void> {
     try {
-      // 获取所有存储的进度记录键
-      const keys = await this.storageUtil.getAllKeys(LocalStorageType.DEFAULT);
+      // 获取所有存储的进度记录�?      const keys = await this.storageUtil.getAllKeys(LocalStorageType.DEFAULT);
       const progressKeys = keys.filter(key => key.startsWith(this.storageKeys.playbackProgress));
       
       // 加载所有进度记录到内存缓存
@@ -1108,12 +2071,10 @@ export class VideoRepository {
   }
 
   /**
-   * 保存所有播放进度
-   */
+   * 保存所有播放进�?   */
   private async saveAllProgress(): Promise<void> {
     try {
-      // 将内存缓存中的所有进度保存到持久化存储
-      for (const [videoId, progress] of this.progressCache.entries()) {
+      // 将内存缓存中的所有进度保存到持久化存�?      for (const [videoId, progress] of this.progressCache.entries()) {
         const key = `${this.storageKeys.playbackProgress}${videoId}`;
         await this.storageUtil.setObject(key, progress, LocalStorageType.DEFAULT);
       }
@@ -1133,10 +2094,8 @@ export class VideoRepository {
         return;
       }
       
-      // 获取需要同步的进度记录（例如最近更新的）
-      const recentProgress = Array.from(this.progressCache.entries())
-        .filter(([_, progress]) => progress.lastUpdated > Date.now() - 3600000) // 最近1小时更新的
-        .slice(0, 50); // 限制同步数量
+      // 获取需要同步的进度记录（例如最近更新的�?      const recentProgress = Array.from(this.progressCache.entries())
+        .filter(([_, progress]) => progress.lastUpdated > Date.now() - 3600000) // 最�?小时更新�?        .slice(0, 50); // 限制同步数量
       
       if (recentProgress.length === 0) {
         return;
@@ -1208,8 +2167,7 @@ export class VideoRepository {
   }
 
   /**
-   * 更新视频缓存中的收藏状态
-   * @param videoId 视频ID
+   * 更新视频缓存中的收藏状�?   * @param videoId 视频ID
    * @param favorited 是否收藏
    */
   private async updateVideoFavoriteStatus(videoId: string, favorited: boolean): Promise<void> {
@@ -1305,8 +2263,7 @@ export class VideoRepository {
   }
 
   /**
-   * 生成视频列表缓存键
-   */
+   * 生成视频列表缓存�?   */
   private generateVideoListCacheKey(request: VideoListRequest): string {
     const filtersString = request.filters ? 
       JSON.stringify(request.filters) : '';
@@ -1323,25 +2280,21 @@ export class VideoRepository {
 
   /**
    * 清除视频缓存
-   * @param videoId 可选的视频ID，如果不提供则清除所有缓存
-   */
+   * @param videoId 可选的视频ID，如果不提供则清除所有缓�?   */
   public async clearVideoCache(videoId?: string): Promise<void> {
     try {
       if (videoId) {
-        // 清除特定视频的缓存
-        const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
+        // 清除特定视频的缓�?        const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
         await this.cacheService.removeCache(cacheKey);
         
         // 清除相关缓存
         await this.cacheService.removeCache(`video:related:${videoId}:*`);
         await this.cacheService.removeCache(`search:item:*:${videoId}`);
       } else {
-        // 清除所有视频列表缓存
-        const pattern = `${this.storageKeys.videoListCache}*`;
+        // 清除所有视频列表缓�?        const pattern = `${this.storageKeys.videoListCache}*`;
         await this.cacheService.removeCacheByPattern(pattern);
         
-        // 清除所有视频详情缓存
-        const detailPattern = `${this.storageKeys.videoCache}*`;
+        // 清除所有视频详情缓�?        const detailPattern = `${this.storageKeys.videoCache}*`;
         await this.cacheService.removeCacheByPattern(detailPattern);
       }
       
@@ -1362,3 +2315,5 @@ export class VideoRepository {
 
 // 导出默认实例
 export default VideoRepository.getInstance();
+
+

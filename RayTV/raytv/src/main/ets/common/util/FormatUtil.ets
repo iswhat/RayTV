@@ -1,6 +1,5 @@
 // FormatUtil - 格式化工具类
-// 提供数据格式化相关的工具函数，包括时间、数字、字符串等的格式化
-
+// 提供数据格式化相关的工具函数，包括时间、数字、字符串等的格式�?
 import Logger from './Logger';
 
 /**
@@ -11,8 +10,7 @@ export class FormatUtil {
   private logger = Logger.getInstance();
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('FormatUtil initialized');
   }
@@ -29,9 +27,7 @@ export class FormatUtil {
 
   /**
    * 格式化时间戳为日期字符串
-   * @param timestamp 时间戳
-   * @param format 格式化模式
-   */
+   * @param timestamp 时间�?   * @param format 格式化模�?   */
   public formatDate(timestamp: number | Date, format: string = 'YYYY-MM-DD'): string {
     try {
       const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
@@ -61,7 +57,7 @@ export class FormatUtil {
         .replace('ss', seconds)
         .replace('s', date.getSeconds().toString());
     } catch (error) {
-      this.logger.error('Failed to format date', error as Error);
+      this.Logger.error('Failed to format date', error as Error);
       return '';
     }
   }
@@ -69,9 +65,9 @@ export class FormatUtil {
   /**
    * 格式化持续时间（秒）为可读字符串
    * @param seconds 秒数
-   * @param format 格式化模式 (short/long)
+   * @param format 格式化模�?(short/long)
    */
-  public formatDuration(seconds: number, format: 'short' | 'long' = 'short'): string {
+  public formatDuration(seconds: number, format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short' instanceof Error ? format: 'short' | 'long' = 'short' : new Error(String(format: 'short' | 'long' = 'short'))))))): string {
     try {
       if (seconds < 0 || isNaN(seconds)) {
         return '0:00';
@@ -94,7 +90,7 @@ export class FormatUtil {
         }
         return parts.join(' ');
       } else {
-        // 短格式：00:00:00 或 00:00
+        // 短格式：00:00:00 �?00:00
         if (hours > 0) {
           return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
         } else {
@@ -102,32 +98,28 @@ export class FormatUtil {
         }
       }
     } catch (error) {
-      this.logger.error('Failed to format duration', error as Error);
+      this.Logger.error('Failed to format duration', error as Error);
       return '0:00';
     }
   }
 
   /**
-   * 格式化数字（添加千位分隔符等）
-   * @param number 数字
+   * 格式化数字（添加千位分隔符等�?   * @param number 数字
    * @param decimals 小数位数
    * @param useCommas 是否使用逗号分隔
    */
-  public formatNumber(number: number, decimals: number = 0, useCommas: boolean = true): string {
+  public formatNumber(number: number, decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true instanceof Error ? decimals: number = 0, useCommas: boolean = true : new Error(String(decimals: number = 0, useCommas: boolean = true))))))): string {
     try {
       if (isNaN(number)) {
         return '0';
       }
 
-      // 确保小数位数是有效的非负数
-      const safeDecimals = Math.max(0, Math.floor(decimals));
+      // 确保小数位数是有效的非负�?      const safeDecimals = Math.max(0, Math.floor(decimals));
       let formatted = number.toFixed(safeDecimals);
 
       if (useCommas) {
-        // 分离整数和小数部分
-        const parts = formatted.split('.');
-        // 为整数部分添加千位分隔符 - 使用字符串操作替代正则表达式以提高兼容性
-        let integerPart = parts[0];
+        // 分离整数和小数部�?        const parts = formatted.split('.');
+        // 为整数部分添加千位分隔符 - 使用字符串操作替代正则表达式以提高兼容�?        let integerPart = parts[0];
         const isNegative = integerPart.startsWith('-');
         if (isNegative) {
           integerPart = integerPart.substring(1);
@@ -149,7 +141,7 @@ export class FormatUtil {
 
       return formatted;
     } catch (error) {
-      this.logger.error('Failed to format number', error as Error);
+      this.Logger.error('Failed to format number', error as Error);
       return '0';
     }
   }
@@ -159,7 +151,7 @@ export class FormatUtil {
    * @param number 数字
    * @param decimals 小数位数
    */
-  public formatLargeNumber(number: number, decimals: number = 1): string {
+  public formatLargeNumber(number: number, decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1 : new Error(String(decimals: number = 1 instanceof Error ? decimals: number = 1 : new Error(String(decimals: number = 1))))))): string {
     try {
       if (isNaN(number)) {
         return '0';
@@ -180,17 +172,15 @@ export class FormatUtil {
         return sign + number.toString();
       }
     } catch (error) {
-      this.logger.error('Failed to format large number', error as Error);
+      this.Logger.error('Failed to format large number', error as Error);
       return '0';
     }
   }
 
   /**
-   * 格式化文件大小
-   * @param bytes 字节数
-   * @param decimals 小数位数
+   * 格式化文件大�?   * @param bytes 字节�?   * @param decimals 小数位数
    */
-  public formatFileSize(bytes: number, decimals: number = 2): string {
+  public formatFileSize(bytes: number, decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2 : new Error(String(decimals: number = 2 instanceof Error ? decimals: number = 2 : new Error(String(decimals: number = 2))))))): string {
     try {
       if (bytes === 0 || isNaN(bytes)) {
         return '0 Bytes';
@@ -199,8 +189,7 @@ export class FormatUtil {
       const k = 1024;
       // 修复：添加明确的类型注解
       const sizes: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
-      // 安全计算索引，避免无效值
-      const logValue = Math.log(bytes);
+      // 安全计算索引，避免无效�?      const logValue = Math.log(bytes);
       const logKValue = Math.log(k);
       const i = Math.min(
         Math.max(0, Math.floor(logValue / logKValue)), 
@@ -209,18 +198,16 @@ export class FormatUtil {
 
       return this.formatNumber(bytes / Math.pow(k, i), decimals) + ' ' + sizes[i];
     } catch (error) {
-      this.logger.error('Failed to format file size', error as Error);
+      this.Logger.error('Failed to format file size', error as Error);
       return '0 Bytes';
     }
   }
 
   /**
    * 格式化百分比
-   * @param value 值（0-1）
-   * @param decimals 小数位数
-   * @param includeSymbol 是否包含百分号
-   */
-  public formatPercentage(value: number, decimals: number = 0, includeSymbol: boolean = true): string {
+   * @param value 值（0-1�?   * @param decimals 小数位数
+   * @param includeSymbol 是否包含百分�?   */
+  public formatPercentage(value: number, decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true instanceof Error ? decimals: number = 0, includeSymbol: boolean = true : new Error(String(decimals: number = 0, includeSymbol: boolean = true))))))): string {
     try {
       if (isNaN(value)) {
         return includeSymbol ? '0%' : '0';
@@ -231,7 +218,7 @@ export class FormatUtil {
 
       return includeSymbol ? `${formatted}%` : formatted;
     } catch (error) {
-      this.logger.error('Failed to format percentage', error as Error);
+      this.Logger.error('Failed to format percentage', error as Error);
       return includeSymbol ? '0%' : '0';
     }
   }
@@ -241,14 +228,13 @@ export class FormatUtil {
    * @param width 宽度
    * @param height 高度
    */
-  public formatResolution(width: number, height: number): string {
+  public formatResolution(width: number, height: number instanceof Error ? height: number : new Error(String(height: number instanceof Error ? height: number instanceof Error ? height: number : new Error(String(height: number : new Error(String(height: number instanceof Error ? height: number : new Error(String(height: number instanceof Error ? height: number instanceof Error ? height: number : new Error(String(height: number instanceof Error ? height: number instanceof Error ? height: number : new Error(String(height: number : new Error(String(height: number instanceof Error ? height: number : new Error(String(height: number : new Error(String(height: number instanceof Error ? height: number : new Error(String(height: number instanceof Error ? height: number instanceof Error ? height: number : new Error(String(height: number : new Error(String(height: number instanceof Error ? height: number : new Error(String(height: number))))))): string {
     try {
       if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
         return 'Unknown';
       }
 
-      // 定义常见分辨率名称
-      const resolutions: Array<{ name: string; minWidth: number; minHeight: number }> = [
+      // 定义常见分辨率名�?      const resolutions: Array<{ name: string; minWidth: number; minHeight: number }> = [
         { name: 'SD', minWidth: 0, minHeight: 0 },
         { name: 'HD', minWidth: 1280, minHeight: 720 },
         { name: 'Full HD', minWidth: 1920, minHeight: 1080 },
@@ -269,14 +255,13 @@ export class FormatUtil {
 
       return resolutionName;
     } catch (error) {
-      this.logger.error('Failed to format resolution', error as Error);
+      this.Logger.error('Failed to format resolution', error as Error);
       return 'Unknown';
     }
   }
 
   /**
-   * 格式化视频帧率
-   * @param fps 帧率
+   * 格式化视频帧�?   * @param fps 帧率
    */
   public formatFrameRate(fps: number): string {
     try {
@@ -301,15 +286,14 @@ export class FormatUtil {
         return `${fps.toFixed(1)} FPS`;
       }
     } catch (error) {
-      this.logger.error('Failed to format frame rate', error as Error);
+      this.logger.error('Failed to format frame rate', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return 'Unknown';
     }
   }
 
   /**
    * 格式化比特率
-   * @param bitrate 比特率（bps）
-   */
+   * @param bitrate 比特率（bps�?   */
   public formatBitrate(bitrate: number): string {
     try {
       if (isNaN(bitrate) || bitrate < 0) {
@@ -326,16 +310,41 @@ export class FormatUtil {
         return bitrate + ' bps';
       }
     } catch (error) {
-      this.logger.error('Failed to format bitrate', error as Error);
+      this.Logger.error('Failed to format bitrate', error as Error);
       return 'Unknown';
     }
   }
 
   /**
    * 格式化语言代码
-   * @param languageCode 语言代码（如 en-US, zh-CN）
-   */
-  public formatLanguage(languageCode: string): string {
+   * @param languageCode 语言代码（如 en-US, zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string instanceof Error ? zh-CN�?   */
+  public formatLanguage(languageCode: string : new Error(String(zh-CN�?   */
+  public formatLanguage(languageCode: string))))))): string {
     try {
       const languageMap: Record<string, string> = {
         'en': 'English',
@@ -362,17 +371,15 @@ export class FormatUtil {
 
       return languageMap[languageCode] || languageCode;
     } catch (error) {
-      this.logger.error('Failed to format language', error as Error);
+      this.Logger.error('Failed to format language', error as Error);
       return languageCode;
     }
   }
 
   /**
-   * 格式化日期范围
-   * @param startDate 开始日期
-   * @param endDate 结束日期
+   * 格式化日期范�?   * @param startDate 开始日�?   * @param endDate 结束日期
    */
-  public formatDateRange(startDate: Date | string | number, endDate: Date | string | number): string {
+  public formatDateRange(startDate: Date | string | number, endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number : new Error(String(endDate: Date | string | number instanceof Error ? endDate: Date | string | number : new Error(String(endDate: Date | string | number))))))): string {
     try {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -385,28 +392,24 @@ export class FormatUtil {
       const endYear = end.getFullYear();
 
       if (startYear === endYear) {
-        // 同一年
-        return `${startYear}`;
+        // 同一�?        return `${startYear}`;
       } else if (endYear === new Date().getFullYear()) {
-        // 结束年份是当前年，显示至今
-        return `${startYear} - Present`;
+        // 结束年份是当前年，显示至�?        return `${startYear} - Present`;
       } else {
         // 不同年份
         return `${startYear} - ${endYear}`;
       }
     } catch (error) {
-      this.logger.error('Failed to format date range', error as Error);
+      this.Logger.error('Failed to format date range', error as Error);
       return '';
     }
   }
 
   /**
-   * 格式化搜索关键词（高亮等）
-   * @param text 原始文本
-   * @param keyword 关键词
-   * @param highlight 是否高亮
+   * 格式化搜索关键词（高亮等�?   * @param text 原始文本
+   * @param keyword 关键�?   * @param highlight 是否高亮
    */
-  public formatSearchKeyword(text: string, keyword: string, highlight: boolean = true): string {
+  public formatSearchKeyword(text: string, keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true instanceof Error ? keyword: string, highlight: boolean = true : new Error(String(keyword: string, highlight: boolean = true))))))): string {
     try {
       if (!text || !keyword) {
         return text || '';
@@ -416,16 +419,14 @@ export class FormatUtil {
         return text;
       }
 
-      // 不使用正则表达式，改用字符串方法实现关键词高亮
-      const lowerText = text.toLowerCase();
+      // 不使用正则表达式，改用字符串方法实现关键词高�?      const lowerText = text.toLowerCase();
       const lowerKeyword = keyword.toLowerCase();
       let result = '';
       let lastIndex = 0;
       let currentIndex = lowerText.indexOf(lowerKeyword, lastIndex);
       
       while (currentIndex !== -1) {
-        // 添加关键词前的文本
-        result += text.substring(lastIndex, currentIndex);
+        // 添加关键词前的文�?        result += text.substring(lastIndex, currentIndex);
         // 添加高亮的关键词
         result += '<mark>' + text.substring(currentIndex, currentIndex + keyword.length) + '</mark>';
         // 更新索引继续查找
@@ -437,31 +438,27 @@ export class FormatUtil {
       result += text.substring(lastIndex);
       return result;
     } catch (error) {
-      this.logger.error('Failed to format search keyword', error as Error);
+      this.Logger.error('Failed to format search keyword', error as Error);
       return text || '';
     }
   }
 
   /**
    * 格式化文件扩展名（大写）
-   * @param extension 扩展名
-   */
+   * @param extension 扩展�?   */
   public formatExtension(extension: string): string {
     try {
-      return extension ? extension.toUpperCase().replace(/^./, '') : '';
+      return extension ? extension.toUpperCase().replace(/^./, '' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String(''))))))) : '';
     } catch (error) {
-      this.logger.error('Failed to format extension', error as Error);
+      this.Logger.error('Failed to format extension', error as Error);
       return '';
     }
   }
 
   /**
-   * 格式化评分
-   * @param score 评分值
-   * @param maxScore 最大评分值
-   * @param decimals 小数位数
+   * 格式化评�?   * @param score 评分�?   * @param maxScore 最大评分�?   * @param decimals 小数位数
    */
-  public formatRating(score: number, maxScore: number = 10, decimals: number = 1): string {
+  public formatRating(score: number, maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1 instanceof Error ? maxScore: number = 10, decimals: number = 1 : new Error(String(maxScore: number = 10, decimals: number = 1))))))): string {
     try {
       if (isNaN(score) || score < 0) {
         return '0';
@@ -470,13 +467,13 @@ export class FormatUtil {
       const normalizedScore = Math.min(score, maxScore);
       return normalizedScore.toFixed(decimals);
     } catch (error) {
-      this.logger.error('Failed to format rating', error as Error);
+      this.Logger.error('Failed to format rating', error as Error);
       return '0';
     }
   }
 
   /**
-   * 格式化国家/地区代码
+   * 格式化国�?地区代码
    * @param countryCode 国家/地区代码
    */
   public formatCountry(countryCode: string): string {
@@ -505,18 +502,640 @@ export class FormatUtil {
       };
 
       return countryMap[countryCode] || countryCode;
-    } catch (error) {
-      this.logger.error('Failed to format country', error as Error);
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error instanceof Error ? string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error : new Error(String(string> = {
+        'US': 'United States',
+        'CN': 'China',
+        'JP': 'Japan',
+        'KR': 'South Korea',
+        'UK': 'United Kingdom',
+        'FR': 'France',
+        'DE': 'Germany',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'RU': 'Russia',
+        'BR': 'Brazil',
+        'IN': 'India',
+        'AU': 'Australia',
+        'CA': 'Canada',
+        'MX': 'Mexico',
+        'TH': 'Thailand',
+        'VN': 'Vietnam',
+        'SG': 'Singapore',
+        'HK': 'Hong Kong',
+        'TW': 'Taiwan'
+      };
+
+      return countryMap[countryCode] || countryCode;
+    } catch (error))))))) {
+      this.Logger.error('Failed to format country', error as Error);
       return countryCode;
     }
   }
 
   /**
-   * 格式化字符串首字母大写
-   * @param text 文本
-   * @param allWords 是否所有单词都首字母大写
-   */
-  public capitalize(text: string, allWords: boolean = false): string {
+   * 格式化字符串首字母大�?   * @param text 文本
+   * @param allWords 是否所有单词都首字母大�?   */
+  public capitalize(text: string, allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false : new Error(String(allWords: boolean = false instanceof Error ? allWords: boolean = false : new Error(String(allWords: boolean = false))))))): string {
     try {
       if (!text) {
         return '';
@@ -528,16 +1147,14 @@ export class FormatUtil {
         return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
       }
     } catch (error) {
-      this.logger.error('Failed to capitalize text', error as Error);
+      this.Logger.error('Failed to capitalize text', error as Error);
       return text || '';
     }
   }
 
   /**
-   * 格式化错误消息
-   * @param error 错误对象或消息
-   */
-  public formatErrorMessage(error: unknown): string {
+   * 格式化错误消�?   * @param error 错误对象或消�?   */
+  public formatErrorMessage(error: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): string {
     try {
       if (!error) {
         return 'Unknown error';
@@ -553,7 +1170,7 @@ export class FormatUtil {
         return String(error);
       }
     } catch (error) {
-      this.logger.error('Failed to format error message', error as Error);
+      this.Logger.error('Failed to format error message', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))));
       return 'Unknown error';
     }
   }
@@ -561,9 +1178,8 @@ export class FormatUtil {
   /**
    * 格式化文件路径（短路径显示）
    * @param path 文件路径
-   * @param maxLength 最大长度
-   */
-  public formatPath(path: string, maxLength: number = 40): string {
+   * @param maxLength 最大长�?   */
+  public formatPath(path: string, maxLength: number = 40 instanceof Error ? maxLength: number = 40 : new Error(String(maxLength: number = 40))): string {
     try {
       if (!path) {
         return '';
@@ -580,19 +1196,17 @@ export class FormatUtil {
 
       return path.slice(0, firstPartLength) + ellipsis + path.slice(-lastPartLength);
     } catch (error) {
-      this.logger.error('Failed to format path', error as Error);
+      this.Logger.error('Failed to format path', error as Error);
       return path || '';
     }
   }
 
   /**
-   * 格式化JSON字符串（美化）
-   * @param json JSON字符串或对象
-   * @param indent 缩进空格数
-   */
-  public formatJSON(json: string | object, indent: number = 2): string {
+   * 格式化JSON字符串（美化�?   * @param json JSON字符串或对象
+   * @param indent 缩进空格�?   */
+  public formatJSON(json: string | object, indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2 : new Error(String(indent: number = 2 instanceof Error ? indent: number = 2 : new Error(String(indent: number = 2))))))): string {
     try {
-      let obj: unknown;
+      let obj: Record<string, string | number | boolean | null>;
       if (typeof json === 'string') {
         obj = JSON.parse(json);
       } else {
@@ -601,37 +1215,34 @@ export class FormatUtil {
 
       return JSON.stringify(obj, null, indent);
     } catch (error) {
-      this.logger.error('Failed to format JSON', error as Error);
+      this.Logger.error('Failed to format JSON', error as Error);
       return typeof json === 'string' ? json : '';
     }
   }
 
   /**
    * 格式化版本号
-   * @param version 版本号
-   */
+   * @param version 版本�?   */
   public formatVersion(version: string): string {
     try {
       if (!version) {
         return '0.0.0';
       }
 
-      // 确保版本号格式正确
-      const parts = version.split('.').map(p => parseInt(p, 10) || 0);
+      // 确保版本号格式正�?      const parts = version.split('.').map(p => parseInt(p, 10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10))))))) || 0);
       while (parts.length < 3) {
         parts.push(0);
       }
 
       return parts.slice(0, 3).join('.');
     } catch (error) {
-      this.logger.error('Failed to format version', error as Error);
+      this.Logger.error('Failed to format version', error as Error);
       return '0.0.0';
     }
   }
 
   /**
-   * 格式化播放次数
-   * @param count 播放次数
+   * 格式化播放次�?   * @param count 播放次数
    */
   public formatPlayCount(count: number): string {
     try {
@@ -649,14 +1260,13 @@ export class FormatUtil {
         return this.formatLargeNumber(count) + ' plays';
       }
     } catch (error) {
-      this.logger.error('Failed to format play count', error as Error);
+      this.logger.error('Failed to format play count', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return '0';
     }
   }
 
   /**
-   * 格式化相对时间
-   * @param date 日期
+   * 格式化相对时�?   * @param date 日期
    */
   public formatRelativeTime(date: Date | number | string): string {
     try {
@@ -696,3 +1306,5 @@ export class FormatUtil {
     }
   }
 }
+
+

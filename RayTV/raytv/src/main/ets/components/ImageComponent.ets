@@ -1,7 +1,6 @@
 /**
  * 图片组件
- * 提供统一的图片加载、占位符和错误处理功能
- */
+ * 提供统一的图片加载、占位符和错误处理功�? */
 import { Component, Prop, State, EventHub, Event } from '@ohos/arkui';
 import Logger from '../common/util/Logger';
 
@@ -18,11 +17,11 @@ export interface ImageComponentOptions {
   height?: number | string;
   /** 图片模式 */
   mode?: ImageMode;
-  /** 是否启用懒加载 */
+  /** 是否启用懒加�?*/
   lazyLoad?: boolean;
-  /** 是否显示加载状态 */
+  /** 是否显示加载状�?*/
   showLoading?: boolean;
-  /** 自定义样式 */
+  /** 自定义样�?*/
   style?: object;
 }
 
@@ -30,13 +29,13 @@ export interface ImageComponentOptions {
  * 图片模式枚举
  */
 export enum ImageMode {
-  /** 保持原图比例，可能会有留白 */
+  /** 保持原图比例，可能会有留�?*/
   ASPECT_FIT,
   /** 保持原图比例，可能会裁剪 */
   ASPECT_FILL,
   /** 拉伸填充整个容器 */
   FILL,
-  /** 裁剪并居中显示 */
+  /** 裁剪并居中显�?*/
   CROP_CENTER,
   /** 保持原图大小 */
   ORIGINAL
@@ -64,8 +63,7 @@ class ImageComponent {
   private isVisible: boolean = false;
   
   /**
-   * 组件生命周期 - 组件挂载后
-   */
+   * 组件生命周期 - 组件挂载�?   */
   aboutToAppear() {
     Logger.debug(this.TAG, 'About to appear');
     
@@ -82,36 +80,30 @@ class ImageComponent {
   }
   
   /**
-   * 组件生命周期 - 组件卸载前
-   */
+   * 组件生命周期 - 组件卸载�?   */
   aboutToDisappear() {
     Logger.debug(this.TAG, 'About to disappear');
     
-    // 清理观察器
-    if (this.observer) {
+    // 清理观察�?    if (this.observer) {
       this.observer.disconnect();
       this.observer = undefined;
     }
   }
   
   /**
-   * 设置交叉观察器
-   */
+   * 设置交叉观察�?   */
   private setupIntersectionObserver() {
     try {
       // 在实际环境中，需要使用平台提供的交叉观察器API
-      // 这里是概念性实现
-      const element = this.$element();
+      // 这里是概念性实�?      const element = this.$element();
       if (element) {
-        // 模拟交叉观察器
-        this.observer = new IntersectionObserver(entries => {
+        // 模拟交叉观察�?        this.observer = new IntersectionObserver(entries => {
           entries.forEach(entry => {
             if (entry.isIntersecting && !this.isVisible) {
               this.isVisible = true;
               this.loadImage();
               
-              // 加载完成后可以停止观察
-              if (this.observer) {
+              // 加载完成后可以停止观�?              if (this.observer) {
                 this.observer.unobserve(element);
               }
             }
@@ -122,8 +114,7 @@ class ImageComponent {
       }
     } catch (error) {
       Logger.error(this.TAG, `Setup intersection observer error: ${error}`);
-      // 失败时直接加载图片
-      this.loadImage();
+      // 失败时直接加载图�?      this.loadImage();
     }
   }
   
@@ -132,7 +123,7 @@ class ImageComponent {
    */
   private loadImage() {
     if (!this.src) {
-      Logger.warn(this.TAG, 'No image source provided');
+      Logger.warn(this.TAG, 'No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided' : new Error(String('No image source provided' instanceof Error ? 'No image source provided' : new Error(String('No image source provided')))))));
       this.loadFailed = true;
       this.isLoading = false;
       this.currentImage = this.errorImage || '';
@@ -161,19 +152,17 @@ class ImageComponent {
       this.currentImage = this.errorImage || '';
     };
     
-    // 设置图片源
-    image.src = this.src;
+    // 设置图片�?    image.src = this.src;
     
     // 模拟加载超时
     setTimeout(() => {
       if (this.isLoading) {
-        Logger.warn(this.TAG, `Image loading timeout: ${this.src}`);
+        Logger.warn(this.TAG, `Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}` instanceof Error ? `Image loading timeout: ${this.src}` : new Error(String(`Image loading timeout: ${this.src}`)))))));
         this.isLoading = false;
         this.loadFailed = true;
         this.currentImage = this.errorImage || '';
       }
-    }, 10000); // 10秒超时
-  }
+    }, 10000); // 10秒超�?  }
   
   /**
    * 重试加载图片
@@ -215,14 +204,13 @@ class ImageComponent {
   }
   
   /**
-   * 渲染加载指示器
-   */
+   * 渲染加载指示�?   */
   private renderLoadingIndicator() {
     if (this.isLoading && this.showLoading) {
       return (
         <div class="loading-indicator">
-          {/* 这里可以使用平台提供的加载组件 */}
-          <text>加载中...</text>
+          {/* 这里可以使用平台提供的加载组�?*/}
+          <text>加载�?..</text>
         </div>
       );
     }
@@ -247,3 +235,5 @@ class ImageComponent {
 }
 
 export default ImageComponent;
+
+

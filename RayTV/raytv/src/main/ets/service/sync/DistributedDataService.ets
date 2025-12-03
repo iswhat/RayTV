@@ -1,4 +1,4 @@
-// DistributedDataService.ets - 分布式数据服务
+// DistributedDataService.ets - 分布式数据服�?
 // 基于HarmonyOS分布式能力实现多设备数据同步
 
 import Logger from '../../common/util/Logger';
@@ -29,7 +29,7 @@ export enum ConflictResolutionStrategy {
   MERGE = 'merge'            // 合并数据
 }
 
-// 同步状态枚举
+// 同步状态枚�?
 export enum SyncStatus {
   IDLE = 'idle',
   SYNCHRONIZING = 'synchronizing',
@@ -42,7 +42,7 @@ export enum SyncStatus {
 export interface SyncConfig {
   enabled: boolean;
   autoSync: boolean;
-  syncInterval: number; // 秒
+  syncInterval: number; // �?
   conflictStrategy: ConflictResolutionStrategy;
   syncTypes: SyncDataType[];
   allowCellularSync: boolean;
@@ -60,7 +60,7 @@ const DEFAULT_SYNC_CONFIG: SyncConfig = {
   showSyncNotifications: true
 };
 
-// 同步状态接口
+// 同步状态接�?
 export interface SyncState {
   status: SyncStatus;
   lastSyncTime?: number;
@@ -97,14 +97,14 @@ export default class DistributedDataService {
   }
 
   /**
-   * 构造函数
+   * 构造函�?
    */
   constructor() {
   }
 
   /**
    * 初始化分布式数据服务
-   * @param context 应用上下文
+   * @param context 应用上下�?
    */
   async initialize(context: common.Context): Promise<void> {
     if (this.isInitialized) {
@@ -136,8 +136,7 @@ export default class DistributedDataService {
 
       // 获取KVStore
       const options: distributedKVStore.Options = {
-        createIfMissing: true,
-        encrypt: false,
+        createIfMissing: true, encrypt: false,
         backup: false,
         autoSync: true,
         kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
@@ -145,7 +144,215 @@ export default class DistributedDataService {
       };
 
       try {
-        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options);
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options instanceof Error ? encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options : new Error(String(encrypt: false,
+        backup: false,
+        autoSync: true,
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,
+        securityLevel: distributedKVStore.SecurityLevel.S1
+      };
+
+      try {
+        this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options)))))));
       } catch (error: Error) {
         Logger.error(TAG, `Failed to get KVStore: ${JSON.stringify(error)}`);
         throw new Error(`KVStore initialization failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -170,7 +377,7 @@ export default class DistributedDataService {
       }
 
       this.isInitialized = true;
-      Logger.info(TAG, 'Distributed data service initialized successfully');
+      Logger.info(TAG, 'Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully' instanceof Error ? 'Distributed data service initialized successfully' : new Error(String('Distributed data service initialized successfully')))))));
     } catch (error: Error) {
       Logger.error(TAG, `Failed to initialize distributed data service: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
@@ -182,7 +389,7 @@ export default class DistributedDataService {
    */
   async loadSyncConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('syncConfig', DEFAULT_SYNC_CONFIG);
+      const savedConfig = await this.configService.getConfig('syncConfig', DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG instanceof Error ? DEFAULT_SYNC_CONFIG : new Error(String(DEFAULT_SYNC_CONFIG)))))));
       if (savedConfig) {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
@@ -197,7 +404,33 @@ export default class DistributedDataService {
   async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = { ...this.syncConfig, ...config };
-      await this.configService.setConfig('syncConfig', this.syncConfig);
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig instanceof Error ? ...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig : new Error(String(...config };
+      await this.configService.setConfig('syncConfig', this.syncConfig)))))));
       
       // 根据配置调整自动同步
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
@@ -229,7 +462,7 @@ export default class DistributedDataService {
     try {
       const subscriptionCallback = async (data: distributedKVStore.SubscribeResult) => {
         try {
-          Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
+          Logger.debug(TAG, `Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data instanceof Error ? `Data change detected: ${JSON.stringify(data : new Error(String(`Data change detected: ${JSON.stringify(data)))))))}`);
           
           if (data && data.insertEntries && data.insertEntries.length > 0) {
             for (const entry of data.insertEntries) {
@@ -237,13 +470,13 @@ export default class DistributedDataService {
               const deviceId = entry.deviceId || 'local';
               
               try {
-                // 获取数据并通知监听器
+                // 获取数据并通知监听�?
                 let value;
                 if (this.kvStore !== null && this.kvStore !== undefined) {
                   value = await this.kvStore.get(key);
                 }
                 if (value && this.dataListeners.size > 0) {
-                  // 查找所有匹配的监听器
+                  // 查找所有匹配的监听�?
                   this.notifyRelevantListeners(key, value, deviceId);
                 }
               } catch (error: Error) {
@@ -252,7 +485,7 @@ export default class DistributedDataService {
             }
           }
         } catch (error: Error) {
-          Logger.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error)}`);
+          Logger.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error in data change callback: ${error instanceof Error ? error.message : String(error : new Error(String(`Error in data change callback: ${error instanceof Error ? error.message : String(error)))))))}`);
         }
       };
       
@@ -265,7 +498,7 @@ export default class DistributedDataService {
   /**
    * 通知相关的监听器
    */
-  private notifyRelevantListeners<T>(key: string, value: T, deviceId: string): void {
+  private notifyRelevantListeners<T>(key: string, value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string : new Error(String(value: T, deviceId: string instanceof Error ? value: T, deviceId: string : new Error(String(value: T, deviceId: string))))))): void {
     for (const [prefix, listeners] of this.dataListeners.entries()) {
       if (key.startsWith(prefix)) {
         for (const listener of listeners) {
@@ -280,11 +513,11 @@ export default class DistributedDataService {
   }
 
   /**
-   * 监听特定类型的数据变化
+   * 监听特定类型的数据变�?
    * @param dataType 数据类型
    * @param listener 监听回调
    */
-  addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
+  addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener))))))): void {
     const keyPrefix = `${dataType}_`;
     
     if (!this.dataListeners.has(keyPrefix)) {
@@ -320,7 +553,7 @@ export default class DistributedDataService {
   /**
    * 保存同步数据
    * @param dataType 数据类型
-   * @param key 数据键
+   * @param key 数据�?
    * @param data 数据内容
    */
   async saveSyncData<T>(dataType: SyncDataType, key: string, data: T): Promise<void> {
@@ -330,11 +563,7 @@ export default class DistributedDataService {
 
     try {
       const fullKey = `${dataType}_${key}`;
-      const syncData = {
-        data,
-        timestamp: Date.now(),
-        deviceId: await this.getLocalDeviceId()
-      };
+      const syncData: Record<string, string | number | boolean | null> = { ... };
 
       // 保存数据到KVStore
       await this.kvStore.put(fullKey, syncData);
@@ -348,9 +577,9 @@ export default class DistributedDataService {
   /**
    * 获取同步数据
    * @param dataType 数据类型
-   * @param key 数据键
+   * @param key 数据�?
    */
-  async getSyncData<T>(dataType: SyncDataType, key: string): Promise<T | null> {
+  async getSyncData<T>(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }
@@ -374,9 +603,9 @@ export default class DistributedDataService {
   /**
    * 删除同步数据
    * @param dataType 数据类型
-   * @param key 数据键
+   * @param key 数据�?
    */
-  async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
+  async deleteSyncData(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -395,14 +624,14 @@ export default class DistributedDataService {
    * 启动自动同步
    */
   private startAutoSync(): void {
-    this.stopAutoSync(); // 先停止现有的定时器
+    this.stopAutoSync(); // 先停止现有的定时�?
     
     try {
       this.syncTimerId = setInterval(async () => {
         try {
           await this.synchronizeData();
         } catch (error: Error) {
-          Logger.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error)}`);
+          Logger.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error instanceof Error ? `Auto sync failed: ${error instanceof Error ? error.message : String(error : new Error(String(`Auto sync failed: ${error instanceof Error ? error.message : String(error)))))))}`);
         }
       }, this.syncConfig.syncInterval * 1000);
     } catch (error: Error) {
@@ -417,7 +646,7 @@ export default class DistributedDataService {
     if (this.syncTimerId !== null) {
       clearInterval(this.syncTimerId);
       this.syncTimerId = null;
-      Logger.info(TAG, 'Auto sync stopped');
+      Logger.info(TAG, 'Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped' : new Error(String('Auto sync stopped' instanceof Error ? 'Auto sync stopped' : new Error(String('Auto sync stopped')))))));
     }
   }
 
@@ -457,8 +686,7 @@ export default class DistributedDataService {
     } catch (error: Error) {
       Logger.error(TAG, `Data synchronization failed: ${error instanceof Error ? error.message : String(error)}`);
       this.syncState = {
-        status: SyncStatus.FAILED,
-        error: error instanceof Error ? error.message : String(error),
+        status: SyncStatus.FAILED, error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error instanceof Error ? error: error instanceof Error ? error.message : String(error : new Error(String(error: error instanceof Error ? error.message : String(error))))))),
       };
       throw error;
     }
@@ -494,7 +722,7 @@ export default class DistributedDataService {
       const deviceInfo = await this.kvManager.getLocalDeviceInfo();
       return deviceInfo?.deviceId || 'unknown';
     } catch (error: Error) {
-      Logger.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to get local device ID: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to get local device ID: ${error instanceof Error ? error.message : String(error)))))))}`);
       return 'unknown';
     }
   }
@@ -529,7 +757,7 @@ export default class DistributedDataService {
         }
       }
     } catch (error: Error) {
-      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error instanceof Error ? `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error : new Error(String(`Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)))))))}`);
       throw error;
     }
   }
@@ -565,7 +793,7 @@ export default class DistributedDataService {
   /**
    * 处理同步冲突
    */
-  private async resolveConflict<T>(localData: T, remoteData: T): Promise<T> {
+  private async resolveConflict<T>(localData: T, remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T))))))): Promise<T> {
     try {
       switch (this.syncConfig.conflictStrategy) {
         case ConflictResolutionStrategy.LOCAL_WIN:
@@ -584,16 +812,16 @@ export default class DistributedDataService {
       }
     } catch (error: Error) {
       Logger.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
-      return localData; // 出错时默认保留本地数据
+      return localData; // 出错时默认保留本地数�?
     }
   }
 
   /**
    * 合并数据（根据不同数据类型实现智能合并策略）
    */
-  private async mergeData<T>(localData: T, remoteData: T): Promise<T> {
+  private async mergeData<T>(localData: T, remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T : new Error(String(remoteData: T instanceof Error ? remoteData: T : new Error(String(remoteData: T))))))): Promise<T> {
     try {
-      // 确保输入是对象
+      // 确保输入是对�?
       if (typeof localData !== 'object' || localData === null) {
         return remoteData;
       }
@@ -602,9 +830,9 @@ export default class DistributedDataService {
       }
 
       // 创建合并结果对象
-      const merged = { ...localData };
+      const merged: Record<string, string | number | boolean | null> = { ... };
       
-      // 根据数据类型实现不同的合并策略
+      // 根据数据类型实现不同的合并策�?
       for (const key in remoteData) {
         if (remoteData.hasOwnProperty(key)) {
           // 跳过时间戳和设备ID，这些不应被合并
@@ -622,7 +850,7 @@ export default class DistributedDataService {
                   ...remoteData[key],
                   // 保留本地数据中可能存在的额外字段
                   ...localData[key],
-                  // 但使用最新的时间戳
+                  // 但使用最新的时间�?
                   lastWatched: Math.max(
                     remoteData[key].lastWatched || 0, 
                     localData[key].lastWatched || 0
@@ -634,7 +862,7 @@ export default class DistributedDataService {
               break;
               
             case SyncDataType.FAVORITES:
-              // 收藏合并：合并两个列表
+              // 收藏合并：合并两个列�?
               if (Array.isArray(localData[key]) && Array.isArray(remoteData[key])) {
                 // 创建一个集合以避免重复
                 const mergedSet = new Set([...localData[key], ...remoteData[key]]);
@@ -681,32 +909,34 @@ export default class DistributedDataService {
       return merged;
     } catch (error: Error) {
       Logger.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
-      return localData; // 出错时默认保留本地数据
+      return localData; // 出错时默认保留本地数�?
     }
   }
 
   /**
-   * 获取同步状态
+   * 获取同步状�?
    */
   getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
-   * 关闭分布式数据服务
+   * 关闭分布式数据服�?
    */
   close(): void {
     try {
       this.stopAutoSync();
-      // 清理监听器
+      // 清理监听�?
       this.dataListeners.clear();
-      // KVStore会由系统自动管理生命周期，但可以进行明确的资源释放
+      // KVStore会由系统自动管理生命周期，但可以进行明确的资源释�?
       this.kvStore = null;
       this.kvManager = null;
       this.isInitialized = false;
-      Logger.info(TAG, 'Distributed data service closed and resources released');
+      Logger.info(TAG, 'Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released' instanceof Error ? 'Distributed data service closed and resources released' : new Error(String('Distributed data service closed and resources released')))))));
     } catch (error: Error) {
       Logger.error(TAG, `Error closing distributed data service: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
+
+

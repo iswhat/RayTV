@@ -9,7 +9,7 @@ import { SearchHistoryRepository } from '../../data/repository/SearchHistoryRepo
 const TAG = 'SearchVodUseCase';
 
 /**
- * 搜索点播内容的业务用例
+ * 搜索点播内容的业务用�?
  */
 export class SearchVodUseCase {
   private vodRepository: VodRepository;
@@ -28,7 +28,7 @@ export class SearchVodUseCase {
   
   /**
    * 搜索点播内容
-   * @param keyword 搜索关键词
+   * @param keyword 搜索关键�?
    * @param page 页码
    * @param pageSize 每页数量
    * @param siteKey 可选的站点过滤
@@ -45,7 +45,7 @@ export class SearchVodUseCase {
       
       // 参数验证
       if (!keyword || keyword.trim().length === 0) {
-        throw new Error('搜索关键词不能为空');
+        throw new Error('搜索关键词不能为�?);
       }
       
       // 保存搜索历史
@@ -73,19 +73,96 @@ export class SearchVodUseCase {
   }
   
   /**
-   * 按分类搜索点播内容
+   * 按分类搜索点播内�?
    * @param category 分类
    * @param page 页码
    * @param pageSize 每页数量
-   * @param filters 筛选条件
+   * @param filters 筛选条�?
    * @returns 搜索结果
    */
   public async searchByCategory(
-    category: string,
-    page: number = 1,
+    category: string, page: number = 1,
     pageSize: number = 20,
     filters?: Record<string, string>
-  ): Promise<SearchResult<Vod>> {
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   instanceof Error ? page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+   : new Error(String(page: number = 1,
+    pageSize: number = 20,
+    filters?: Record<string, string>
+  ))))))): Promise<SearchResult<Vod>> {
     try {
       Logger.info(TAG, `Searching vod by category: ${category}, page: ${page}`);
       
@@ -109,15 +186,15 @@ export class SearchVodUseCase {
   }
   
   /**
-   * 获取热门搜索关键词
+   * 获取热门搜索关键�?
    * @param limit 数量限制
-   * @returns 热门搜索关键词列表
+   * @returns 热门搜索关键词列�?
    */
   public async getHotSearchKeywords(limit: number = 10): Promise<string[]> {
     try {
       return await this.searchRepository.getHotSearchKeywords(limit);
     } catch (error) {
-      Logger.error(TAG, `Failed to get hot search keywords: ${error}`);
+      Logger.error(TAG, `Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}` instanceof Error ? `Failed to get hot search keywords: ${error}` : new Error(String(`Failed to get hot search keywords: ${error}`)))))));
       return [];
     }
   }
@@ -134,3 +211,5 @@ export class SearchVodUseCase {
     }
   }
 }
+
+

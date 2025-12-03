@@ -6,7 +6,7 @@ import { configService } from '../config/ConfigService';
  * 壁纸类型枚举
  */
 export enum WallpaperType {
-  NONE = 'none',      // 无壁纸
+  NONE = 'none',      // 无壁�?
   IMAGE = 'image',    // 图片壁纸
   GIF = 'gif',        // GIF动画壁纸
   VIDEO = 'video'     // 视频壁纸
@@ -20,7 +20,7 @@ export interface WallpaperInfo {
   type: WallpaperType;  // 壁纸类型
   name?: string;        // 壁纸名称
   duration?: number;    // 视频/GIF持续时间（毫秒）
-  lastModified?: number;// 最后修改时间
+  lastModified?: number;// 最后修改时�?
 }
 
 /**
@@ -30,13 +30,13 @@ export class WallTypeDetector {
   private static readonly TAG: string = 'WallTypeDetector';
   
   /**
-   * 检测壁纸类型
+   * 检测壁纸类�?
    */
   public static async detectType(uri: string): Promise<WallpaperType> {
     try {
       Logger.info(WallTypeDetector.TAG, `Detecting type for: ${uri}`);
       
-      // 根据文件扩展名判断
+      // 根据文件扩展名判�?
       const extension = this.getFileExtension(uri).toLowerCase();
       
       switch (extension) {
@@ -71,9 +71,9 @@ export class WallTypeDetector {
   
   private static async detectByMimeType(uri: string): Promise<WallpaperType> {
     try {
-      // 这里应该实现通过读取文件头或请求MIME类型来判断
-      // 暂时返回默认值
-      Logger.warn(WallTypeDetector.TAG, 'MIME type detection not implemented, returning NONE');
+      // 这里应该实现通过读取文件头或请求MIME类型来判�?
+      // 暂时返回默认�?
+      Logger.warn(WallTypeDetector.TAG, 'MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE' instanceof Error ? 'MIME type detection not implemented, returning NONE' : new Error(String('MIME type detection not implemented, returning NONE')))))));
       return WallpaperType.NONE;
     } catch (error) {
       return WallpaperType.NONE;
@@ -82,7 +82,7 @@ export class WallTypeDetector {
 }
 
 /**
- * 壁纸管理器
+ * 壁纸管理�?
  */
 export class WallManager {
   private static readonly TAG: string = 'WallTypeDetector';
@@ -112,14 +112,14 @@ export class WallManager {
     try {
       Logger.info(WallManager.TAG, 'Initializing WallManager...');
       
-      // 从配置加载设置
+      // 从配置加载设�?
       const enableWallpaper = await configService.getConfig('enableWallpaper', false);
       const wallpaperType = await configService.getConfig('wallpaperType', WallpaperType.NONE);
       const wallpaperUri = await configService.getConfig('wallpaperUri', '');
       
       this.isEnabled = enableWallpaper;
       
-      // 如果有设置壁纸，加载它
+      // 如果有设置壁纸，加载�?
       if (this.isEnabled && wallpaperUri) {
         await this.loadWallpaper(wallpaperUri, wallpaperType as WallpaperType);
       }
@@ -134,11 +134,11 @@ export class WallManager {
   /**
    * 加载壁纸
    */
-  public async loadWallpaper(uri: string, type?: WallpaperType): Promise<WallpaperInfo> {
+  public async loadWallpaper(uri: string, type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType : new Error(String(type?: WallpaperType instanceof Error ? type?: WallpaperType : new Error(String(type?: WallpaperType))))))): Promise<WallpaperInfo> {
     try {
       Logger.info(WallManager.TAG, `Loading wallpaper: ${uri}`);
       
-      // 如果未指定类型，自动检测
+      // 如果未指定类型，自动检�?
       const wallpaperType = type || await WallTypeDetector.detectType(uri);
       
       if (wallpaperType === WallpaperType.NONE) {
@@ -153,17 +153,17 @@ export class WallManager {
         lastModified: Date.now()
       };
       
-      // 如果是视频或GIF，尝试获取持续时间
+      // 如果是视频或GIF，尝试获取持续时�?
       if (wallpaperType === WallpaperType.VIDEO || wallpaperType === WallpaperType.GIF) {
         // 这里应该实现获取媒体持续时间的逻辑
-        // 暂时设置默认值
+        // 暂时设置默认�?
         wallpaperInfo.duration = 0;
       }
       
       // 缓存壁纸信息
       this.currentWallpaper = wallpaperInfo;
       
-      // 保存到配置
+      // 保存到配�?
       await configService.setConfig('wallpaperUri', uri);
       await configService.setConfig('wallpaperType', wallpaperType);
       
@@ -181,7 +181,7 @@ export class WallManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await configService.setConfig('enableWallpaper', enabled);
+      await configService.setConfig('enableWallpaper', enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled)))))));
       
       Logger.info(WallManager.TAG, `Wallpaper ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
@@ -202,7 +202,7 @@ export class WallManager {
    */
   public async clearWallpaper(): Promise<void> {
     try {
-      Logger.info(WallManager.TAG, 'Clearing current wallpaper');
+      Logger.info(WallManager.TAG, 'Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper' : new Error(String('Clearing current wallpaper' instanceof Error ? 'Clearing current wallpaper' : new Error(String('Clearing current wallpaper')))))));
       
       this.currentWallpaper = null;
       this.isEnabled = false;
@@ -221,11 +221,11 @@ export class WallManager {
   }
   
   /**
-   * 创建壁纸快照（用于视频壁纸的预览）
+   * 创建壁纸快照（用于视频壁纸的预览�?
    */
   public async createSnapshot(videoUri: string): Promise<string> {
     try {
-      Logger.info(WallManager.TAG, `Creating snapshot for video: ${videoUri}`);
+      Logger.info(WallManager.TAG, `Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}` instanceof Error ? `Creating snapshot for video: ${videoUri}` : new Error(String(`Creating snapshot for video: ${videoUri}`)))))));
       
       // 这里应该实现从视频创建快照的逻辑
       // 暂时返回原URI
@@ -241,7 +241,7 @@ export class WallManager {
    */
   private async cleanCache(): Promise<void> {
     try {
-      Logger.info(WallManager.TAG, 'Cleaning wallpaper cache');
+      Logger.info(WallManager.TAG, 'Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache' instanceof Error ? 'Cleaning wallpaper cache' : new Error(String('Cleaning wallpaper cache')))))));
       
       // 实现缓存清理逻辑
       // 暂时不做实际操作
@@ -271,7 +271,7 @@ export class WallManager {
       // 实现获取缓存大小的逻辑
       return 0;
     } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to get cache size: ${error}`);
+      Logger.error(WallManager.TAG, `Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}` instanceof Error ? `Failed to get cache size: ${error}` : new Error(String(`Failed to get cache size: ${error}`)))))));
       return 0;
     }
   }
@@ -281,3 +281,5 @@ export class WallManager {
 export function getWallManager(): WallManager {
   return WallManager.getInstance();
 }
+
+

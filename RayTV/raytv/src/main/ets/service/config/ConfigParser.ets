@@ -1,5 +1,4 @@
-// ConfigParser - 配置解析器
-// 实现Fongmi配置文件解析和适配功能
+// ConfigParser - 配置解析�?// 实现Fongmi配置文件解析和适配功能
 import Logger from '../../common/util/Logger';
 import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 import { Site, SiteType } from '../../data/bean/Site';
@@ -14,8 +13,7 @@ export interface CategoryItem {
   name: string;
 }
 
-// 搜索规则接口 - 替换any和unknown为具体类型
-export interface SearchRuleItem {
+// 搜索规则接口 - 替换any和unknown为具体类�?export interface SearchRuleItem {
   name: string;
   regex?: string;
   fixed?: string;
@@ -31,8 +29,7 @@ export interface SearchRules {
   list: SearchRuleItem[];
 }
 
-// 详情规则接口 - 替换unknown为具体类型
-export interface DetailRules {
+// 详情规则接口 - 替换unknown为具体类�?export interface DetailRules {
   title?: SearchRuleItem;
   cover?: SearchRuleItem;
   desc?: SearchRuleItem;
@@ -47,23 +44,20 @@ export interface DetailRules {
   tags?: SearchRuleItem;
 }
 
-// 播放规则接口 - 替换unknown为具体类型
-export interface PlaySource {
+// 播放规则接口 - 替换unknown为具体类�?export interface PlaySource {
   name: string;
   rules: Record<string, SearchRuleItem>;
 }
 
 export interface PlayRules {
-  // ArkTS兼容：使用数组替代索引签名
-  sources: Array<{
+  // ArkTS兼容：使用数组替代索引签�?  sources: Array<{
     key: string;
     source: PlaySource;
   }>;
 }
 
 /**
- * 配置解析器，负责解析和适配各种格式的配置文件
- */
+ * 配置解析器，负责解析和适配各种格式的配置文�? */
 export class ConfigParser {
   private static instance: ConfigParser;
   
@@ -91,7 +85,7 @@ export class ConfigParser {
    * 验证站点配置
    * @param site 站点配置
    */
-  public validateSite(site: unknown): site is Site {
+  public validateSite(site: Record<string, string | number | boolean | null>): site is Site {
     try {
       // 使用TypeSafetyUtil确保安全访问
       const siteObj = TypeSafetyUtil.asObject(site);
@@ -147,8 +141,7 @@ export class ConfigParser {
         TypeSafetyUtil.setProperty(siteObj, 'detail', {});
       }
       
-      // 确保必要的默认值
-      this.ensureDefaultValues(siteObj);
+      // 确保必要的默认�?      this.ensureDefaultValues(siteObj);
       
       return true;
     } catch (error) {
@@ -158,11 +151,36 @@ export class ConfigParser {
   }
   
   /**
-   * 检查是否为有效的站点类型
-   */
+   * 检查是否为有效的站点类�?   */
   private isValidSiteType(type: string): boolean {
     const validTypes: SiteType[] = [SiteType.ALL, SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
-    return validTypes.includes(type as SiteType);
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType instanceof Error ? SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType : new Error(String(SiteType.MOVIE, SiteType.SERIES, SiteType.ANIME, SiteType.VOD, SiteType.LIVE];
+    return validTypes.includes(type as SiteType)))))));
   }
   private ensureDefaultValues(site: Record<string, string | number | boolean | object | null>): void {
     TypeSafetyUtil.setProperty(site, 'type', TypeSafetyUtil.getProperty(site, 'type', SiteType.ALL));
@@ -200,8 +218,7 @@ export class ConfigParser {
       // 尝试解析为JSON
       const config = this.parseJsonContent(configContent);
       
-      // 支持不同格式的配置结构
-      const sitesData = config.sites || config.subscriptions || config.data || config;
+      // 支持不同格式的配置结�?      const sitesData = config.sites || config.subscriptions || config.data || config;
       if (!sitesData) {
         throw new Error('Invalid sites configuration format');
       }
@@ -224,7 +241,7 @@ export class ConfigParser {
         }
       }
       
-      Logger.info(TAG, `Successfully parsed ${sites.length} sites`);
+      Logger.info(TAG, `Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites` instanceof Error ? `Successfully parsed ${sites.length} sites` : new Error(String(`Successfully parsed ${sites.length} sites`)))))));
       return sites;
     } catch (error) {
       Logger.error(TAG, `Failed to parse sites configuration: ${error}`);
@@ -235,18 +252,32 @@ export class ConfigParser {
   /**
    * 判断是否为Fongmi格式配置
    */
-  private isFongmiFormat(config: unknown): boolean {
+  private isFongmiFormat(config: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): boolean {
     if (!TypeSafetyUtil.isValidObject(config)) return false;
     
-    // Fongmi格式通常是对象，每个键对应一个站点
-    const configObj = TypeSafetyUtil.asObject(config);
+    // Fongmi格式通常是对象，每个键对应一个站�?    const configObj = TypeSafetyUtil.asObject(config);
     return !Array.isArray(config) && 
            this.getObjectKeys(configObj).length > 0 &&
            this.getObjectKeys(configObj).some(key => {
-             // 先将configObj转换为更宽泛的类型，支持对象值
-             const broadConfigObj = configObj as Record<string, string | number | boolean | object | null>;
+             // 先将configObj转换为更宽泛的类型，支持对象�?             const broadConfigObj = configObj as Record<string, string | number | boolean | object | null>;
              // 使用getNestedProperty获取嵌套对象
-             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null);
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null instanceof Error ? string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null : new Error(String(string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null instanceof Error ? string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null instanceof Error ? string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null : new Error(String(string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null : new Error(String(string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null instanceof Error ? string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null : new Error(String(string | number | boolean | object | null>;
+             // 使用getNestedProperty获取嵌套对象
+             const value = TypeSafetyUtil.getNestedProperty(broadConfigObj, key, null)))));
              return TypeSafetyUtil.isValidObject(value) && 
                     (TypeSafetyUtil.getNestedProperty(value as Record<string, string | number | boolean | object | null>, 'api', null) !== null || 
                      TypeSafetyUtil.getNestedProperty(value as Record<string, string | number | boolean | object | null>, 'name', null) !== null);
@@ -268,8 +299,7 @@ export class ConfigParser {
         if (TypeSafetyUtil.isValidObject(value)) {
           const siteData = TypeSafetyUtil.asObject(value);
           
-          // 转换为标准站点格式
-          const site: Site = {
+          // 转换为标准站点格�?          const site: Site = {
             key: key,
             name: TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', key)),
             type: this.detectSiteType(siteData),
@@ -305,18 +335,16 @@ export class ConfigParser {
   }
   
   /**
-   * 自动检测站点类型
-   * @param siteData 站点数据
+   * 自动检测站点类�?   * @param siteData 站点数据
    */
-  public detectSiteType(siteData: Record<string, unknown>): SiteType {
+  public detectSiteType(siteData: Record<string, unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown>))))))): SiteType {
     // 根据站点配置特征自动判断类型
     const type = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'type', ''));
     if (type) {
       return this.convertSiteType(type);
     }
     
-    // 通过关键词判断
-    const name = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', '')).toLowerCase();
+    // 通过关键词判�?    const name = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'name', '')).toLowerCase();
     const api = TypeSafetyUtil.asString(TypeSafetyUtil.getProperty(siteData, 'api', '')).toLowerCase();
     
     if (name.includes('live') || name.includes('直播') || 
@@ -326,7 +354,7 @@ export class ConfigParser {
     
     if (name.includes('vod') || name.includes('点播') || 
         name.includes('电影') || name.includes('tv') || 
-        name.includes('电视剧')) {
+        name.includes('电视�?)) {
       return SiteType.VOD;
     }
     
@@ -336,12 +364,10 @@ export class ConfigParser {
 
   /**
    * 安全解析JSON内容
-   * @param content JSON字符串内容
-   */
+   * @param content JSON字符串内�?   */
   public parseJsonContent(content: string): Record<string, unknown> {
     try {
-      // 预处理，移除注释和多余空格
-      const cleanContent = this.cleanJsonContent(content);
+      // 预处理，移除注释和多余空�?      const cleanContent = this.cleanJsonContent(content);
       return JSON.parse(cleanContent);
     } catch (error) {
       Logger.error(TAG, `Failed to parse JSON content: ${error}`);
@@ -355,7 +381,7 @@ export class ConfigParser {
    */
   private cleanJsonContent(content: string): string {
     // 移除单行注释
-    let clean = content.replace(/\/\/.*$/gm, '');
+    let clean = content.replace(/\/\/.*$/gm, '' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('' instanceof Error ? '' instanceof Error ? '' : new Error(String('' : new Error(String('' instanceof Error ? '' : new Error(String('')))))));
     // 移除多行注释
     clean = clean.replace(/\/\*[\s\S]*?\*\//g, '');
     // 移除多余空白字符
@@ -364,8 +390,7 @@ export class ConfigParser {
   }
   
   /**
-   * 解析单个站点配置项
-   * @param siteData 站点数据
+   * 解析单个站点配置�?   * @param siteData 站点数据
    */
   private parseSiteItem(siteData: Record<string, unknown>): Site {
     if (!TypeSafetyUtil.isValidObject(siteData)) {
@@ -406,8 +431,7 @@ export class ConfigParser {
   }
   
   /**
-   * 生成站点唯一键
-   * @param name 站点名称
+   * 生成站点唯一�?   * @param name 站点名称
    */
   private generateSiteKey(name: string): string {
     return name.toLowerCase().replace(/[^a-z0-9]/g, '_');
@@ -427,10 +451,8 @@ export class ConfigParser {
   }
 
   /**
-   * 转换请求头
-   * @param headers 原始请求头
-   */
-  public convertHeaders(headers: unknown): Record<string, string> {
+   * 转换请求�?   * @param headers 原始请求�?   */
+  public convertHeaders(headers: Record<string, string | number | boolean | null>): Record<string, string> {
     const result: Record<string, string> = {};
     
     if (!headers) {
@@ -439,7 +461,7 @@ export class ConfigParser {
     
     // 处理不同格式的请求头
     if (TypeSafetyUtil.isValidString(headers)) {
-      // 字符串格式: "User-Agent: xxx; Referer: yyy"
+      // 字符串格�? "User-Agent: xxx; Referer: yyy"
       headers.split(';').forEach((header: string) => {
         const parts = header.split(':');
         if (parts.length >= 2) {
@@ -449,8 +471,7 @@ export class ConfigParser {
         }
       });
     } else if (TypeSafetyUtil.isValidObject(headers)) {
-      // 对象格式，手动复制字符串值
-      const headersObj = TypeSafetyUtil.asObject(headers);
+      // 对象格式，手动复制字符串�?      const headersObj = TypeSafetyUtil.asObject(headers);
       for (const [key, value] of TypeSafetyUtil.getObjectEntries(headersObj)) {
         result[key] = TypeSafetyUtil.asString(value, '');
       }
@@ -463,7 +484,7 @@ export class ConfigParser {
    * 转换分类配置
    * @param categories 原始分类
    */
-  public convertCategories(categories: unknown): CategoryItem[] {
+  public convertCategories(categories: Record<string, string | number | boolean | null>): CategoryItem[] {
     const result: CategoryItem[] = [];
     
     if (!categories) {
@@ -472,7 +493,7 @@ export class ConfigParser {
     
     // 处理数组格式分类
     if (Array.isArray(categories)) {
-      categories.forEach((cat: unknown) => {
+      categories.forEach((cat: Record<string, string | number | boolean | null>) => {
         if (TypeSafetyUtil.isValidString(cat)) {
             const category: CategoryItem = {
               key: cat,
@@ -521,7 +542,7 @@ export class ConfigParser {
    * 转换搜索规则
    * @param searchData 原始搜索配置
    */
-  public convertSearchRules(searchData: unknown): SearchRules {
+  public convertSearchRules(searchData: Record<string, string | number | boolean | null>): SearchRules {
     if (!TypeSafetyUtil.isValidObject(searchData)) {
       return {
         page: true,
@@ -533,8 +554,7 @@ export class ConfigParser {
     }
     
     const searchObj = TypeSafetyUtil.asObject(searchData);
-    // 标准化搜索规则格式
-    const result: SearchRules = {
+    // 标准化搜索规则格�?    const result: SearchRules = {
       // Fongmi格式搜索规则适配
       page: TypeSafetyUtil.getProperty(searchObj, 'page', true),
       searchKey: TypeSafetyUtil.asString(
@@ -547,8 +567,7 @@ export class ConfigParser {
       list: TypeSafetyUtil.asArray(TypeSafetyUtil.getProperty(searchObj, 'list', []))
     };
     
-    // 手动合并其他属性（确保类型安全）
-    for (const [key, value] of TypeSafetyUtil.getObjectEntries(searchObj)) {
+    // 手动合并其他属性（确保类型安全�?    for (const [key, value] of TypeSafetyUtil.getObjectEntries(searchObj)) {
       if (!['page', 'searchKey', 'pageKey', 'resultPath', 'list'].includes(key)) {
         TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
       }
@@ -558,10 +577,9 @@ export class ConfigParser {
   }
   
   /**
-   * 转换详情页规则
-   * @param detailData 原始详情配置
+   * 转换详情页规�?   * @param detailData 原始详情配置
    */
-  public convertDetailRules(detailData: unknown): DetailRules {
+  public convertDetailRules(detailData: Record<string, string | number | boolean | null>): DetailRules {
     if (!TypeSafetyUtil.isValidObject(detailData)) {
       return {};
     }
@@ -569,8 +587,7 @@ export class ConfigParser {
     const detailObj = TypeSafetyUtil.asObject(detailData);
     const result: DetailRules = {};
     
-    // 手动复制所有属性
-    for (const [key, value] of TypeSafetyUtil.getObjectEntries(detailObj)) {
+    // 手动复制所有属�?    for (const [key, value] of TypeSafetyUtil.getObjectEntries(detailObj)) {
       TypeSafetyUtil.setProperty(result as Record<string, unknown>, key, value);
     }
     
@@ -581,7 +598,7 @@ export class ConfigParser {
    * 转换播放规则
    * @param playData 原始播放配置
    */
-  public convertPlayRules(playData: unknown): PlayRules {
+  public convertPlayRules(playData: Record<string, string | number | boolean | null>): PlayRules {
     if (!TypeSafetyUtil.isValidObject(playData)) {
       return { sources: [] };
     }
@@ -605,8 +622,7 @@ export class ConfigParser {
   
   /**
    * 验证URL是否有效
-   * @param url 要验证的URL字符串
-   */
+   * @param url 要验证的URL字符�?   */
   private isValidUrl(url: string): boolean {
     if (typeof url !== 'string' || url.trim() === '') {
       return false;
@@ -627,7 +643,7 @@ export class ConfigParser {
    */
   public parseAppConfig(configContent: string): HarmonyConfig {
     try {
-      Logger.info(TAG, 'Parsing application configuration');
+      Logger.info(TAG, 'Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration' : new Error(String('Parsing application configuration' instanceof Error ? 'Parsing application configuration' : new Error(String('Parsing application configuration')))))));
       
       const config = this.parseJsonContent(configContent);
       const harmonySection = TypeSafetyUtil.asObject(TypeSafetyUtil.getProperty(config, 'harmony', {}));
@@ -663,8 +679,7 @@ export class ConfigParser {
   private getDefaultConfig(): HarmonyConfig {
     return {
       app: {
-        name: 'RayTV',
-        version: '1.0.0',
+        name: 'RayTV', version: '1.0.0',
         debug: false
       },
       services: {
@@ -689,8 +704,661 @@ export class ConfigParser {
         dataEncryption: false
       },
       sites: [],
-      updateTime: Date.now()
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( instanceof Error ? version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now( : new Error(String(version: '1.0.0',
+        debug: false
+      },
+      services: {
+        autoStart: false,
+        backgroundRefresh: false,
+        dataSync: false
+      },
+      player: {
+        defaultEngine: 'system',
+        autoPlayNext: true,
+        rememberPosition: true,
+        subtitles: { enabled: true }
+      },
+      ui: {
+        theme: 'system',
+        fontSize: 'medium',
+        layout: 'default'
+      },
+      security: {
+        enableScreenLock: false,
+        allowScreenshots: true,
+        dataEncryption: false
+      },
+      sites: [],
+      updateTime: Date.now()))))))
     };
   }
 
 }
+
+
+

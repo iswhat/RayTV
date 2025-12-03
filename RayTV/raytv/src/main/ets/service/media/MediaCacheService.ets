@@ -12,47 +12,32 @@ const DEFAULT_CACHE_DIR = '/cache/media';
 // 缓存级别枚举
 export enum CacheLevel {
   LOW = 'low',           // 低缓存（仅基本信息）
-  MEDIUM = 'medium',     // 中等缓存（基本信息+部分视频）
-  HIGH = 'high',         // 高缓存（完整视频缓存）
-  PREMIUM = 'premium'    // 高级缓存（多质量缓存）
-}
+  MEDIUM = 'medium',     // 中等缓存（基本信�?部分视频�?  HIGH = 'high',         // 高缓存（完整视频缓存�?  PREMIUM = 'premium'    // 高级缓存（多质量缓存�?}
 
 // 缓存策略枚举
 export enum CacheStrategy {
   FIRST_IN_FIRST_OUT = 'fifo',      // 先进先出
-  LEAST_RECENTLY_USED = 'lru',      // 最近最少使用
-  LEAST_FREQUENTLY_USED = 'lfu',    // 最不经常使用
-  SIZE_BASED = 'size',              // 基于大小
+  LEAST_RECENTLY_USED = 'lru',      // 最近最少使�?  LEAST_FREQUENTLY_USED = 'lfu',    // 最不经常使�?  SIZE_BASED = 'size',              // 基于大小
   TIME_BASED = 'time'               // 基于时间
 }
 
-// 缓存状态枚举
-export enum CacheStatus {
-  NOT_CACHED = 'not_cached',        // 未缓存
-  CACHING = 'caching',              // 缓存中
-  CACHED = 'cached',                // 已缓存
-  FAILED = 'failed',                // 缓存失败
+// 缓存状态枚�?export enum CacheStatus {
+  NOT_CACHED = 'not_cached',        // 未缓�?  CACHING = 'caching',              // 缓存�?  CACHED = 'cached',                // 已缓�?  FAILED = 'failed',                // 缓存失败
   PARTIALLY_CACHED = 'partially_cached', // 部分缓存
-  EXPIRED = 'expired'               // 已过期
-}
+  EXPIRED = 'expired'               // 已过�?}
 
 // 缓存配置接口
 export interface CacheConfig {
   enabled: boolean;               // 是否启用缓存
-  maxCacheSize: number;           // 最大缓存大小（字节）
-  cacheLevel: CacheLevel;         // 缓存级别
+  maxCacheSize: number;           // 最大缓存大小（字节�?  cacheLevel: CacheLevel;         // 缓存级别
   cacheStrategy: CacheStrategy;   // 缓存策略
   autoClean: boolean;             // 自动清理
-  cleanInterval: number;          // 清理间隔（秒）
-  cacheExpiryDays: number;        // 缓存过期时间（天）
-  wifiOnly: boolean;              // 仅WiFi缓存
+  cleanInterval: number;          // 清理间隔（秒�?  cacheExpiryDays: number;        // 缓存过期时间（天�?  wifiOnly: boolean;              // 仅WiFi缓存
   backgroundDownload: boolean;    // 后台下载
-  preloadEnabled: boolean;        // 预加载启用
-  preloadBufferSize: number;      // 预加载缓冲区大小
+  preloadEnabled: boolean;        // 预加载启�?  preloadBufferSize: number;      // 预加载缓冲区大小
   maxConcurrentDownloads: number; // 最大并发下载数
   autoResumeDownloads: boolean;   // 自动恢复下载
-  priorityHighQuality: boolean;   // 优先高质量
-}
+  priorityHighQuality: boolean;   // 优先高质�?}
 
 // 默认缓存配置
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {
@@ -62,8 +47,7 @@ export const DEFAULT_CACHE_CONFIG: CacheConfig = {
   cacheStrategy: CacheStrategy.LEAST_RECENTLY_USED,
   autoClean: true,
   cleanInterval: 3600, // 1小时
-  cacheExpiryDays: 7, // 7天
-  wifiOnly: true,
+  cacheExpiryDays: 7, // 7�?  wifiOnly: true,
   backgroundDownload: true,
   preloadEnabled: true,
   preloadBufferSize: 1024 * 1024 * 50, // 50MB
@@ -72,43 +56,27 @@ export const DEFAULT_CACHE_CONFIG: CacheConfig = {
   priorityHighQuality: false
 };
 
-// 缓存项接口
-export interface CacheItem {
+// 缓存项接�?export interface CacheItem {
   id: string;                     // 缓存项ID
   url: string;                    // 媒体URL
   filePath: string;               // 本地文件路径
-  fileName: string;               // 文件名
-  size: number;                   // 文件大小（字节）
-  downloadedSize: number;         // 已下载大小
-  duration: number;               // 媒体时长（秒）
-  format: string;                 // 媒体格式
+  fileName: string;               // 文件�?  size: number;                   // 文件大小（字节）
+  downloadedSize: number;         // 已下载大�?  duration: number;               // 媒体时长（秒�?  format: string;                 // 媒体格式
   quality: string;                // 媒体质量
   mimeType: string;               // MIME类型
-  status: CacheStatus;            // 缓存状态
-  lastAccessTime: number;         // 最后访问时间
-  creationTime: number;           // 创建时间
+  status: CacheStatus;            // 缓存状�?  lastAccessTime: number;         // 最后访问时�?  creationTime: number;           // 创建时间
   accessCount: number;            // 访问次数
   sourceId: string;               // 源ID
-  sourceName: string;             // 源名称
-  metadata?: unknown;                 // 额外元数据
-  error?: string;                 // 错误信息
+  sourceName: string;             // 源名�?  metadata?: Record<string, string | number | boolean | null>;                 // 额外元数�?  error?: string;                 // 错误信息
 }
 
 // 缓存统计接口
 export interface CacheStatistics {
-  totalSize: number;              // 总缓存大小
-  usedSize: number;               // 已使用大小
-  freeSize: number;               // 可用大小
-  itemCount: number;              // 缓存项数量
-  cachedCount: number;            // 已缓存数量
-  cachingCount: number;           // 缓存中数量
-  failedCount: number;            // 失败数量
+  totalSize: number;              // 总缓存大�?  usedSize: number;               // 已使用大�?  freeSize: number;               // 可用大小
+  itemCount: number;              // 缓存项数�?  cachedCount: number;            // 已缓存数�?  cachingCount: number;           // 缓存中数�?  failedCount: number;            // 失败数量
   expiredCount: number;           // 过期数量
-  cacheHitRate: number;           // 缓存命中率
-  cacheRatio: number;             // 缓存占用比例
-  oldestCacheTime: number;        // 最旧缓存时间
-  newestCacheTime: number;        // 最新缓存时间
-}
+  cacheHitRate: number;           // 缓存命中�?  cacheRatio: number;             // 缓存占用比例
+  oldestCacheTime: number;        // 最旧缓存时�?  newestCacheTime: number;        // 最新缓存时�?}
 
 // 下载任务接口
 export interface DownloadTask {
@@ -116,17 +84,11 @@ export interface DownloadTask {
   cacheItemId: string;            // 缓存项ID
   url: string;                    // 下载URL
   filePath: string;               // 保存路径
-  startTime: number;              // 开始时间
-  endTime?: number;               // 结束时间
+  startTime: number;              // 开始时�?  endTime?: number;               // 结束时间
   size: number;                   // 文件大小
-  downloadedSize: number;         // 已下载大小
-  progress: number;               // 进度（0-100）
-  speed: number;                  // 下载速度（字节/秒）
-  status: 'pending' | 'downloading' | 'paused' | 'completed' | 'failed' | 'canceled'; // 状态
-  retries: number;                // 重试次数
-  priority: number;               // 优先级（1-10）
-  headers?: Record<string, string>; // 请求头
-}
+  downloadedSize: number;         // 已下载大�?  progress: number;               // 进度�?-100�?  speed: number;                  // 下载速度（字�?秒）
+  status: 'pending' | 'downloading' | 'paused' | 'completed' | 'failed' | 'canceled'; // 状�?  retries: number;                // 重试次数
+  priority: number;               // 优先级（1-10�?  headers?: Record<string, string>; // 请求�?}
 
 // 预加载选项接口
 export interface PreloadOptions {
@@ -134,40 +96,29 @@ export interface PreloadOptions {
   priority: number;               // 预加载优先级
   maxSize?: number;               // 最大预加载大小
   quality?: string;               // 优先质量
-  metadata?: unknown;                 // 元数据
-}
+  metadata?: Record<string, string | number | boolean | null>;                 // 元数�?}
 
 // 缓存查询选项接口
 export interface CacheQueryOptions {
-  status?: CacheStatus;           // 按状态查询
-  sourceId?: string;              // 按源ID查询
-  minSize?: number;               // 最小大小
-  maxSize?: number;               // 最大大小
-  startDate?: number;             // 开始日期
-  endDate?: number;               // 结束日期
+  status?: CacheStatus;           // 按状态查�?  sourceId?: string;              // 按源ID查询
+  minSize?: number;               // 最小大�?  maxSize?: number;               // 最大大�?  startDate?: number;             // 开始日�?  endDate?: number;               // 结束日期
   quality?: string;               // 媒体质量
   limit?: number;                 // 限制数量
-  offset?: number;                // 偏移量
-  sortBy?: 'size' | 'time' | 'accessCount'; // 排序字段
+  offset?: number;                // 偏移�?  sortBy?: 'size' | 'time' | 'accessCount'; // 排序字段
   sortOrder?: 'asc' | 'desc';     // 排序顺序
 }
 
 // 缓存清理选项接口
 export interface CacheCleanOptions {
   olderThanDays?: number;         // 清理指定天数前的缓存
-  maxSize?: number;               // 清理到最大大小以下
-  status?: CacheStatus;           // 按状态清理
-  sourceId?: string;              // 按源ID清理
-  quality?: string;               // 按质量清理
-  exceptIds?: string[];           // 排除的ID列表
+  maxSize?: number;               // 清理到最大大小以�?  status?: CacheStatus;           // 按状态清�?  sourceId?: string;              // 按源ID清理
+  quality?: string;               // 按质量清�?  exceptIds?: string[];           // 排除的ID列表
   dryRun?: boolean;               // 模拟运行
 }
 
-// 缓存监听器回调类型
-type CacheListener = (item: CacheItem) => void;
+// 缓存监听器回调类�?type CacheListener = (item: CacheItem) => void;
 
-// 下载监听器回调类型
-type DownloadListener = (task: DownloadTask) => void;
+// 下载监听器回调类�?type DownloadListener = (task: DownloadTask) => void;
 
 export default class MediaCacheService {
   private static instance: MediaCacheService;
@@ -197,16 +148,13 @@ export default class MediaCacheService {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
-   * 初始化媒体缓存服务
-   * @param context 应用上下文
-   */
+   * 初始化媒体缓存服�?   * @param context 应用上下�?   */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
       Logger.info(TAG, 'Media cache service already initialized');
@@ -223,8 +171,7 @@ export default class MediaCacheService {
       // 加载配置
       await this.loadConfig();
       
-      // 加载缓存项
-      await this.loadCacheItems();
+      // 加载缓存�?      await this.loadCacheItems();
       
       // 更新缓存统计
       await this.updateCacheStatistics();
@@ -263,7 +210,7 @@ export default class MediaCacheService {
   private async ensureCacheDirectory(): Promise<void> {
     try {
       // TODO: 使用文件API创建目录
-      Logger.debug(TAG, `Ensuring cache directory exists: ${this.cacheDir}`);
+      Logger.debug(TAG, `Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}` instanceof Error ? `Ensuring cache directory exists: ${this.cacheDir}` : new Error(String(`Ensuring cache directory exists: ${this.cacheDir}`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to create cache directory: ${error}`);
       throw error;
@@ -275,7 +222,7 @@ export default class MediaCacheService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('mediaCacheConfig', DEFAULT_CACHE_CONFIG);
+      const savedConfig = await this.configService.getConfig('mediaCacheConfig', DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG instanceof Error ? DEFAULT_CACHE_CONFIG : new Error(String(DEFAULT_CACHE_CONFIG)))))));
       if (savedConfig) {
         this.config = { ...DEFAULT_CACHE_CONFIG, ...savedConfig };
       }
@@ -290,7 +237,33 @@ export default class MediaCacheService {
   public async saveConfig(config: Partial<CacheConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('mediaCacheConfig', this.config);
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('mediaCacheConfig', this.config)))))));
       
       // 根据配置调整自动清理
       if (this.config.autoClean && this.config.enabled) {
@@ -317,24 +290,20 @@ export default class MediaCacheService {
   }
 
   /**
-   * 加载缓存项
-   */
+   * 加载缓存�?   */
   private async loadCacheItems(): Promise<void> {
     try {
-      // 从配置中加载缓存项信息
-      const savedItems = await this.configService.getConfig<CacheItem[]>('cacheItems', []);
+      // 从配置中加载缓存项信�?      const savedItems = await this.configService.getConfig<CacheItem[]>('cacheItems', [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([])))))));
       
       // 验证缓存项的实际文件是否存在
       for (const item of savedItems) {
         const exists = await this.checkFileExists(item.filePath);
         
         if (exists) {
-          // 更新缓存项状态
-          item.status = CacheStatus.CACHED;
+          // 更新缓存项状�?          item.status = CacheStatus.CACHED;
           this.cacheItems.set(item.id, item);
         } else {
-          // 文件不存在，移除缓存项
-          Logger.warn(TAG, `Cache file not found: ${item.filePath}, removing cache item`);
+          // 文件不存在，移除缓存�?          Logger.warn(TAG, `Cache file not found: ${item.filePath}, removing cache item`);
         }
       }
       
@@ -345,26 +314,22 @@ export default class MediaCacheService {
   }
 
   /**
-   * 保存缓存项
-   */
+   * 保存缓存�?   */
   private async saveCacheItems(): Promise<void> {
     try {
       const items = Array.from(this.cacheItems.values());
-      await this.configService.setConfig('cacheItems', items);
+      await this.configService.setConfig('cacheItems', items instanceof Error ? items : new Error(String(items instanceof Error ? items instanceof Error ? items : new Error(String(items : new Error(String(items instanceof Error ? items : new Error(String(items instanceof Error ? items instanceof Error ? items : new Error(String(items instanceof Error ? items instanceof Error ? items : new Error(String(items : new Error(String(items instanceof Error ? items : new Error(String(items : new Error(String(items instanceof Error ? items : new Error(String(items instanceof Error ? items instanceof Error ? items : new Error(String(items : new Error(String(items instanceof Error ? items : new Error(String(items)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to save cache items: ${error}`);
     }
   }
 
   /**
-   * 检查文件是否存在
-   */
+   * 检查文件是否存�?   */
   private async checkFileExists(filePath: string): Promise<boolean> {
     try {
-      // TODO: 使用文件API检查文件是否存在
-      Logger.debug(TAG, `Checking if file exists: ${filePath}`);
-      return false; // 临时返回false，实际需要实现
-    } catch (error) {
+      // TODO: 使用文件API检查文件是否存�?      Logger.debug(TAG, `Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}` instanceof Error ? `Checking if file exists: ${filePath}` : new Error(String(`Checking if file exists: ${filePath}`)))))));
+      return false; // 临时返回false，实际需要实�?    } catch (error) {
       Logger.error(TAG, `Failed to check file existence: ${error}`);
       return false;
     }
@@ -375,8 +340,7 @@ export default class MediaCacheService {
    */
   private createEmptyCacheStats(): CacheStatistics {
     return {
-      totalSize: this.config.maxCacheSize,
-      usedSize: 0,
+      totalSize: this.config.maxCacheSize, usedSize: 0,
       freeSize: this.config.maxCacheSize,
       itemCount: 0,
       cachedCount: 0,
@@ -385,7 +349,241 @@ export default class MediaCacheService {
       expiredCount: 0,
       cacheHitRate: 0,
       cacheRatio: 0,
-      oldestCacheTime: Date.now(),
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( instanceof Error ? usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now( : new Error(String(usedSize: 0,
+      freeSize: this.config.maxCacheSize,
+      itemCount: 0,
+      cachedCount: 0,
+      cachingCount: 0,
+      failedCount: 0,
+      expiredCount: 0,
+      cacheHitRate: 0,
+      cacheRatio: 0,
+      oldestCacheTime: Date.now())))))),
       newestCacheTime: Date.now()
     };
   }
@@ -413,8 +611,7 @@ export default class MediaCacheService {
       switch (item.status) {
         case CacheStatus.CACHED:
           cachedCount++;
-          // 检查是否过期
-          if (item.lastAccessTime < expiryTime) {
+          // 检查是否过�?          if (item.lastAccessTime < expiryTime) {
             item.status = CacheStatus.EXPIRED;
             expiredCount++;
           }
@@ -449,8 +646,7 @@ export default class MediaCacheService {
   }
 
   /**
-   * 计算缓存命中率
-   */
+   * 计算缓存命中�?   */
   private calculateCacheHitRate(): number {
     const totalRequests = this.cacheHitCount + this.cacheMissCount;
     return totalRequests > 0 ? (this.cacheHitCount / totalRequests) * 100 : 0;
@@ -464,8 +660,7 @@ export default class MediaCacheService {
   }
 
   /**
-   * 开始自动清理
-   */
+   * 开始自动清�?   */
   private startAutoCleanup(): void {
     this.stopAutoCleanup();
     
@@ -473,7 +668,7 @@ export default class MediaCacheService {
       this.performAutoCleanup().catch(error => {
         Logger.error(TAG, `Auto cleanup failed: ${error}`);
       });
-    }, this.config.cleanInterval * 1000);
+    }, this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000 instanceof Error ? this.config.cleanInterval * 1000 : new Error(String(this.config.cleanInterval * 1000)))))));
     
     Logger.info(TAG, `Auto cleanup started with interval: ${this.config.cleanInterval}s`);
   }
@@ -502,8 +697,7 @@ export default class MediaCacheService {
     // 清理过期缓存
     await this.cleanExpiredCache();
     
-    // 如果缓存大小超过限制，根据策略清理
-    if (this.cacheStats.usedSize > this.config.maxCacheSize) {
+    // 如果缓存大小超过限制，根据策略清�?    if (this.cacheStats.usedSize > this.config.maxCacheSize) {
       const bytesToClean = this.cacheStats.usedSize - this.config.maxCacheSize;
       await this.cleanCacheByStrategy(bytesToClean);
     }
@@ -547,20 +741,17 @@ export default class MediaCacheService {
         sortedItems = [...cacheItems].sort((a, b) => a.creationTime - b.creationTime);
         break;
       case CacheStrategy.LEAST_RECENTLY_USED:
-        // 最近最少使用：按最后访问时间排序
-        sortedItems = [...cacheItems].sort((a, b) => a.lastAccessTime - b.lastAccessTime);
+        // 最近最少使用：按最后访问时间排�?        sortedItems = [...cacheItems].sort((a, b) => a.lastAccessTime - b.lastAccessTime);
         break;
       case CacheStrategy.LEAST_FREQUENTLY_USED:
-        // 最不经常使用：按访问次数排序
-        sortedItems = [...cacheItems].sort((a, b) => a.accessCount - b.accessCount);
+        // 最不经常使用：按访问次数排�?        sortedItems = [...cacheItems].sort((a, b) => a.accessCount - b.accessCount);
         break;
       case CacheStrategy.SIZE_BASED:
         // 基于大小：按文件大小排序，优先删除大文件
         sortedItems = [...cacheItems].sort((a, b) => b.size - a.size);
         break;
       case CacheStrategy.TIME_BASED:
-        // 基于时间：按最后访问时间排序
-        sortedItems = [...cacheItems].sort((a, b) => a.lastAccessTime - b.lastAccessTime);
+        // 基于时间：按最后访问时间排�?        sortedItems = [...cacheItems].sort((a, b) => a.lastAccessTime - b.lastAccessTime);
         break;
     }
     
@@ -602,10 +793,40 @@ export default class MediaCacheService {
   public async cacheMedia(options: {
     url: string;
     quality?: string;
-    metadata?: unknown;
+    metadata?: Record<string, string | number | boolean | null>;
     priority?: number;
     headers?: Record<string, string>;
-  }): Promise<CacheItem> {
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string | number | boolean | null>;
+    priority?: number;
+    headers?: Record<string, string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } : new Error(String(string | number | boolean | null>;
+    priority?: number;
+    headers?: Record<string, string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  } : new Error(String(string>;
+  } instanceof Error ? string>;
+  } : new Error(String(string>;
+  }))))))): Promise<CacheItem> {
     if (!this.config.enabled) {
       throw new Error('Media cache is disabled');
     }
@@ -622,8 +843,7 @@ export default class MediaCacheService {
     // 检查是否已存在
     let cacheItem = this.cacheItems.get(cacheId);
     if (cacheItem) {
-      // 更新访问时间和计数
-      cacheItem.lastAccessTime = Date.now();
+      // 更新访问时间和计�?      cacheItem.lastAccessTime = Date.now();
       cacheItem.accessCount++;
       cacheItem.metadata = { ...cacheItem.metadata, ...metadata };
       
@@ -634,16 +854,14 @@ export default class MediaCacheService {
         return cacheItem;
       }
       
-      // 如果正在缓存，检查是否有对应的下载任务
-      const existingTask = Array.from(this.downloadTasks.values())
+      // 如果正在缓存，检查是否有对应的下载任�?      const existingTask = Array.from(this.downloadTasks.values())
         .find(task => task.cacheItemId === cacheId);
       
       if (existingTask && existingTask.status === 'downloading') {
         return cacheItem;
       }
     } else {
-      // 创建新的缓存项
-      const fileName = this.generateFileName(url, quality);
+      // 创建新的缓存�?      const fileName = this.generateFileName(url, quality);
       const filePath = `${this.cacheDir}/${fileName}`;
       
       cacheItem = {
@@ -688,15 +906,13 @@ export default class MediaCacheService {
     
     this.downloadTasks.set(downloadTask.id, downloadTask);
     
-    // 更新缓存项状态
-    cacheItem.status = CacheStatus.CACHING;
+    // 更新缓存项状�?    cacheItem.status = CacheStatus.CACHING;
     this.notifyCacheUpdate(cacheItem);
     
     // 启动下载任务
     this.startDownloadTask(downloadTask);
     
-    // 保存缓存项
-    await this.saveCacheItems();
+    // 保存缓存�?    await this.saveCacheItems();
     
     return cacheItem;
   }
@@ -706,20 +922,17 @@ export default class MediaCacheService {
    */
   private generateCacheId(url: string, quality: string): string {
     // 简单实现：使用URL和质量的哈希作为ID
-    // 实际应用中应该使用更安全的哈希算法
-    let hash = 0;
+    // 实际应用中应该使用更安全的哈希算�?    let hash = 0;
     const data = url + quality;
     for (let i = 0; i < data.length; i++) {
       const char = data.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash |= 0; // 转换为32位整数
-    }
+      hash |= 0; // 转换�?2位整�?    }
     return `cache_${hash.toString(16)}`;
   }
 
   /**
-   * 生成文件名
-   */
+   * 生成文件�?   */
   private generateFileName(url: string, quality: string): string {
     const timestamp = Date.now();
     const format = this.getFileFormat(url);
@@ -728,8 +941,7 @@ export default class MediaCacheService {
   }
 
   /**
-   * 清理文件名
-   */
+   * 清理文件�?   */
   private sanitizeFileName(name: string): string {
     // 移除不安全的字符
     return name.replace(/[<>"/\|?*]/g, '_').substring(0, 50);
@@ -772,8 +984,7 @@ export default class MediaCacheService {
       return;
     }
     
-    // 更新任务状态
-    task.status = 'downloading';
+    // 更新任务状�?    task.status = 'downloading';
     this.activeTasks++;
     
     // 通知任务更新
@@ -792,8 +1003,7 @@ export default class MediaCacheService {
       task.endTime = Date.now();
       task.progress = 100;
       
-      // 更新缓存项
-      const cacheItem = this.cacheItems.get(task.cacheItemId);
+      // 更新缓存�?      const cacheItem = this.cacheItems.get(task.cacheItemId);
       if (cacheItem) {
         cacheItem.status = CacheStatus.CACHED;
         cacheItem.size = task.size;
@@ -812,8 +1022,7 @@ export default class MediaCacheService {
       task.endTime = Date.now();
       task.retries++;
       
-      // 更新缓存项
-      const cacheItem = this.cacheItems.get(task.cacheItemId);
+      // 更新缓存�?      const cacheItem = this.cacheItems.get(task.cacheItemId);
       if (cacheItem) {
         cacheItem.status = CacheStatus.FAILED;
         cacheItem.error = String(error);
@@ -824,7 +1033,7 @@ export default class MediaCacheService {
       if (task.retries < 3) {
         setTimeout(() => {
           this.retryDownloadTask(task);
-        }, 5000);
+        }, 5000 instanceof Error ? 5000 : new Error(String(5000 instanceof Error ? 5000 instanceof Error ? 5000 : new Error(String(5000 : new Error(String(5000 instanceof Error ? 5000 : new Error(String(5000 instanceof Error ? 5000 instanceof Error ? 5000 : new Error(String(5000 instanceof Error ? 5000 instanceof Error ? 5000 : new Error(String(5000 : new Error(String(5000 instanceof Error ? 5000 : new Error(String(5000 : new Error(String(5000 instanceof Error ? 5000 : new Error(String(5000 instanceof Error ? 5000 instanceof Error ? 5000 : new Error(String(5000 : new Error(String(5000 instanceof Error ? 5000 : new Error(String(5000)))))));
       }
     } finally {
       this.activeTasks--;
@@ -833,12 +1042,10 @@ export default class MediaCacheService {
       // 处理下一个待处理任务
       this.processNextPendingTask();
       
-      // 如果任务已完成或失败，从活动任务中移除
-      if (task.status === 'completed' || task.status === 'failed') {
+      // 如果任务已完成或失败，从活动任务中移�?      if (task.status === 'completed' || task.status === 'failed') {
         setTimeout(() => {
           this.downloadTasks.delete(task.id);
-        }, 60000); // 1分钟后移除
-      }
+        }, 60000); // 1分钟后移�?      }
     }
   }
 
@@ -846,8 +1053,7 @@ export default class MediaCacheService {
    * 模拟下载过程
    */
   private async simulateDownload(task: DownloadTask): Promise<void> {
-    // 模拟随机文件大小（10MB - 500MB）
-    const fileSize = Math.floor(Math.random() * 490 * 1024 * 1024) + 10 * 1024 * 1024;
+    // 模拟随机文件大小�?0MB - 500MB�?    const fileSize = Math.floor(Math.random() * 490 * 1024 * 1024) + 10 * 1024 * 1024;
     task.size = fileSize;
     
     let downloaded = task.downloadedSize;
@@ -864,8 +1070,7 @@ export default class MediaCacheService {
       task.progress = Math.round((downloaded / fileSize) * 100);
       
       // 计算速度
-      const elapsed = (Date.now() - startTime) / 1000; // 秒
-      task.speed = elapsed > 0 ? (downloaded / elapsed) : 0;
+      const elapsed = (Date.now() - startTime) / 1000; // �?      task.speed = elapsed > 0 ? (downloaded / elapsed) : 0;
       
       // 通知更新
       this.notifyDownloadUpdate(task);
@@ -894,8 +1099,7 @@ export default class MediaCacheService {
     // 按优先级排序
     this.pendingTasks.sort((a, b) => b.priority - a.priority);
     
-    // 取出下一个任务
-    const nextTask = this.pendingTasks.shift();
+    // 取出下一个任�?    const nextTask = this.pendingTasks.shift();
     if (nextTask) {
       this.startDownloadTask(nextTask);
     }
@@ -915,11 +1119,9 @@ export default class MediaCacheService {
       // 从活动任务中减少计数
       this.activeTasks--;
       
-      // 处理下一个任务
-      this.processNextPendingTask();
+      // 处理下一个任�?      this.processNextPendingTask();
       
-      // 更新缓存项状态
-      const cacheItem = this.cacheItems.get(cacheItemId);
+      // 更新缓存项状�?      const cacheItem = this.cacheItems.get(cacheItemId);
       if (cacheItem) {
         cacheItem.status = CacheStatus.PARTIALLY_CACHED;
         cacheItem.downloadedSize = task.downloadedSize;
@@ -963,20 +1165,17 @@ export default class MediaCacheService {
       task.status = 'canceled';
       this.notifyDownloadUpdate(task);
       
-      // 如果正在下载，减少活动任务计数
-      if (task.status === 'downloading') {
+      // 如果正在下载，减少活动任务计�?      if (task.status === 'downloading') {
         this.activeTasks--;
         this.processNextPendingTask();
       }
       
-      // 从待处理队列中移除
-      const pendingIndex = this.pendingTasks.findIndex(t => t.id === task.id);
+      // 从待处理队列中移�?      const pendingIndex = this.pendingTasks.findIndex(t => t.id === task.id);
       if (pendingIndex > -1) {
         this.pendingTasks.splice(pendingIndex, 1);
       }
       
-      // 更新缓存项
-      const cacheItem = this.cacheItems.get(cacheItemId);
+      // 更新缓存�?      const cacheItem = this.cacheItems.get(cacheItemId);
       if (cacheItem) {
         cacheItem.status = CacheStatus.NOT_CACHED;
         cacheItem.downloadedSize = 0;
@@ -1002,13 +1201,11 @@ export default class MediaCacheService {
   }
 
   /**
-   * 获取缓存项
-   */
+   * 获取缓存�?   */
   public getCacheItem(cacheItemId: string): CacheItem | null {
     const item = this.cacheItems.get(cacheItemId);
     if (item) {
-      // 更新访问时间和计数
-      item.lastAccessTime = Date.now();
+      // 更新访问时间和计�?      item.lastAccessTime = Date.now();
       item.accessCount++;
       this.notifyCacheUpdate(item);
       this.cacheHitCount++;
@@ -1020,16 +1217,14 @@ export default class MediaCacheService {
   }
 
   /**
-   * 通过URL查找缓存项
-   */
-  public findCacheItemByUrl(url: string, quality?: string): CacheItem | null {
+   * 通过URL查找缓存�?   */
+  public findCacheItemByUrl(url: string, quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string : new Error(String(quality?: string instanceof Error ? quality?: string : new Error(String(quality?: string))))))): CacheItem | null {
     const cacheId = this.generateCacheId(url, quality || 'auto');
     return this.getCacheItem(cacheId);
   }
 
   /**
-   * 列出缓存项
-   */
+   * 列出缓存�?   */
   public listCacheItems(options?: CacheQueryOptions): CacheItem[] {
     let items = Array.from(this.cacheItems.values());
     
@@ -1067,8 +1262,8 @@ export default class MediaCacheService {
     // 应用排序
     if (options?.sortBy) {
       items.sort((a, b) => {
-        let aValue: unknown;
-  let bValue: unknown;
+        let aValue: Record<string, string | number | boolean | null>;
+  let bValue: Record<string, string | number | boolean | null>;
         
         switch (options.sortBy) {
           case 'size':
@@ -1104,8 +1299,7 @@ export default class MediaCacheService {
   }
 
   /**
-   * 移除缓存项
-   */
+   * 移除缓存�?   */
   public async removeCacheItems(cacheItemIds: string[]): Promise<void> {
     for (const id of cacheItemIds) {
       const item = this.cacheItems.get(id);
@@ -1116,8 +1310,7 @@ export default class MediaCacheService {
         // 删除文件
         await this.deleteFile(item.filePath);
         
-        // 从缓存项列表中移除
-        this.cacheItems.delete(id);
+        // 从缓存项列表中移�?        this.cacheItems.delete(id);
         
         Logger.info(TAG, `Removed cache item: ${id}`);
       }
@@ -1167,8 +1360,7 @@ export default class MediaCacheService {
       }
       
       if (options.maxSize && this.cacheStats.usedSize > options.maxSize) {
-        // 根据缓存策略清理到指定大小
-        const bytesToClean = this.cacheStats.usedSize - options.maxSize;
+        // 根据缓存策略清理到指定大�?        const bytesToClean = this.cacheStats.usedSize - options.maxSize;
         const sortedItems = this.sortItemsByStrategy(allItems);
         
         let cleanedBytes = 0;
@@ -1184,8 +1376,7 @@ export default class MediaCacheService {
         }
       }
     } else {
-      // 清理所有缓存
-      itemsToRemove = allItems;
+      // 清理所有缓�?      itemsToRemove = allItems;
     }
     
     // 排除指定的ID
@@ -1213,16 +1404,14 @@ export default class MediaCacheService {
   }
 
   /**
-   * 清空所有缓存
-   */
+   * 清空所有缓�?   */
   public async clearAllCache(): Promise<void> {
     await this.cleanCache();
     Logger.info(TAG, 'All cache cleared');
   }
 
   /**
-   * 根据策略排序缓存项
-   */
+   * 根据策略排序缓存�?   */
   private sortItemsByStrategy(items: CacheItem[]): CacheItem[] {
     const sorted = [...items];
     
@@ -1243,8 +1432,7 @@ export default class MediaCacheService {
   }
 
   /**
-   * 预加载媒体
-   */
+   * 预加载媒�?   */
   public async preloadMedia(options: PreloadOptions): Promise<void> {
     if (!this.config.enabled || !this.config.preloadEnabled) {
       return;
@@ -1303,7 +1491,7 @@ export default class MediaCacheService {
       try {
         listener({ ...task });
       } catch (error) {
-        Logger.error(TAG, `Error in download listener: ${error}`);
+        Logger.error(TAG, `Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}` instanceof Error ? `Error in download listener: ${error}` : new Error(String(`Error in download listener: ${error}`)))))));
       }
     }
   }
@@ -1366,8 +1554,7 @@ export default class MediaCacheService {
       return;
     }
 
-    // 停止所有下载
-    const activeTasks = Array.from(this.downloadTasks.values())
+    // 停止所有下�?    const activeTasks = Array.from(this.downloadTasks.values())
       .filter(task => task.status === 'downloading');
     
     for (const task of activeTasks) {
@@ -1387,3 +1574,5 @@ export default class MediaCacheService {
     Logger.info(TAG, 'Media cache service closed');
   }
 }
+
+

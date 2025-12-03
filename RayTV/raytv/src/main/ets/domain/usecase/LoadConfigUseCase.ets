@@ -48,8 +48,7 @@ export class LoadConfigUseCase {
       // 从数据库加载配置
       let config = await this.configRepository.getAppConfig();
       
-      // 如果数据库中没有配置，使用默认配置
-      if (!config) {
+      // 如果数据库中没有配置，使用默认配�?      if (!config) {
         Logger.info(TAG, 'No configuration found, using default configuration');
         config = this.getDefaultConfig();
         // 保存默认配置到数据库
@@ -66,8 +65,7 @@ export class LoadConfigUseCase {
       return config;
     } catch (error) {
       Logger.error(TAG, `Failed to load configuration: ${error}`);
-      // 发生错误时返回默认配置
-      const defaultConfig = this.getDefaultConfig();
+      // 发生错误时返回默认配�?      const defaultConfig = this.getDefaultConfig();
       await this.cacheConfig(defaultConfig);
       return defaultConfig;
     }
@@ -79,7 +77,7 @@ export class LoadConfigUseCase {
    */
   public async saveAppConfig(config: AppConfig): Promise<void> {
     try {
-      Logger.info(TAG, 'Saving app configuration');
+      Logger.info(TAG, 'Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration' : new Error(String('Saving app configuration' instanceof Error ? 'Saving app configuration' : new Error(String('Saving app configuration')))))));
       
       // 验证配置
       this.validateConfig(config);
@@ -98,13 +96,11 @@ export class LoadConfigUseCase {
   }
   
   /**
-   * 更新播放器配置
-   * @param playerConfig 播放器配置
-   * @returns 更新后的完整配置
+   * 更新播放器配�?   * @param playerConfig 播放器配�?   * @returns 更新后的完整配置
    */
   public async updatePlayerConfig(playerConfig: Partial<PlayerConfig>): Promise<AppConfig> {
     try {
-      Logger.info(TAG, 'Updating player configuration');
+      Logger.info(TAG, 'Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration' : new Error(String('Updating player configuration' instanceof Error ? 'Updating player configuration' : new Error(String('Updating player configuration')))))));
       
       const currentConfig = await this.loadAppConfig();
       
@@ -131,7 +127,7 @@ export class LoadConfigUseCase {
    */
   public async updateDisplayConfig(displayConfig: Partial<DisplayConfig>): Promise<AppConfig> {
     try {
-      Logger.info(TAG, 'Updating display configuration');
+      Logger.info(TAG, 'Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration' : new Error(String('Updating display configuration' instanceof Error ? 'Updating display configuration' : new Error(String('Updating display configuration')))))));
       
       const currentConfig = await this.loadAppConfig();
       
@@ -158,7 +154,7 @@ export class LoadConfigUseCase {
    */
   public async updateNetworkConfig(networkConfig: Partial<NetworkConfig>): Promise<AppConfig> {
     try {
-      Logger.info(TAG, 'Updating network configuration');
+      Logger.info(TAG, 'Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration' : new Error(String('Updating network configuration' instanceof Error ? 'Updating network configuration' : new Error(String('Updating network configuration')))))));
       
       const currentConfig = await this.loadAppConfig();
       
@@ -172,8 +168,7 @@ export class LoadConfigUseCase {
       
       await this.saveAppConfig(updatedConfig);
       
-      // 如果网络配置改变，清除网络相关缓存
-      await this.clearNetworkCache();
+      // 如果网络配置改变，清除网络相关缓�?      await this.clearNetworkCache();
       
       return updatedConfig;
     } catch (error) {
@@ -183,12 +178,11 @@ export class LoadConfigUseCase {
   }
   
   /**
-   * 重置配置到默认值
-   * @returns 默认配置
+   * 重置配置到默认�?   * @returns 默认配置
    */
   public async resetToDefaultConfig(): Promise<AppConfig> {
     try {
-      Logger.info(TAG, 'Resetting configuration to default values');
+      Logger.info(TAG, 'Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values' : new Error(String('Resetting configuration to default values' instanceof Error ? 'Resetting configuration to default values' : new Error(String('Resetting configuration to default values')))))));
       
       const defaultConfig = this.getDefaultConfig();
       
@@ -198,8 +192,7 @@ export class LoadConfigUseCase {
       // 更新缓存
       await this.cacheConfig(defaultConfig);
       
-      // 清除所有相关缓存
-      await this.clearAllRelatedCache();
+      // 清除所有相关缓�?      await this.clearAllRelatedCache();
       
       return defaultConfig;
     } catch (error) {
@@ -215,8 +208,7 @@ export class LoadConfigUseCase {
   private getDefaultConfig(): AppConfig {
     return {
       player: {
-        defaultPlayer: 'avplayer',
-        enableHardwareDecode: true,
+        defaultPlayer: 'avplayer', enableHardwareDecode: true,
         autoContinuePlay: true,
         rememberPosition: true,
         speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
@@ -251,12 +243,972 @@ export class LoadConfigUseCase {
   }
   
   /**
-   * 验证配置有效性
-   * @param config 要验证的配置
+   * 验证配置有效�?   * @param config 要验证的配置
    */
-  private validateConfig(config: AppConfig): void {
-    // 验证播放器配置
-    if (config.player) {
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig instanceof Error ? enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig : new Error(String(enableHardwareDecode: true,
+        autoContinuePlay: true,
+        rememberPosition: true,
+        speedList: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
+      },
+      display: {
+        theme: 'system',
+        fontSize: 16,
+        autoFullScreen: true,
+        enableGestures: true
+      },
+      network: {
+        timeout: 30,
+        retryCount: 3,
+        enableCache: true,
+        cacheSize: 50
+      },
+      security: {
+        enableSandbox: true,
+        allowThirdParty: false
+      },
+      adBlock: {
+        enabled: false,
+        rules: [],
+        updateInterval: 24
+      },
+      harmony: {
+        enableVoiceAssistant: true,
+        enableDeviceFlow: true,
+        enableGestureControl: true
+      }
+    };
+  }
+  
+  /**
+   * 验证配置有效�?   * @param config 要验证的配置
+   */
+  private validateConfig(config: AppConfig))))))): void {
+    // 验证播放器配�?    if (config.player) {
       if (config.player.timeout < 5 || config.player.timeout > 300) {
         throw new Error('Player timeout must be between 5 and 300 seconds');
       }
@@ -291,8 +1243,7 @@ export class LoadConfigUseCase {
       // 根据设备类型调整配置
       if (deviceInfo.isTvMode) {
         // TV模式下的优化配置
-        config.display.enableGestures = false; // TV通常不使用手势
-        config.display.autoFullScreen = true; // TV默认全屏
+        config.display.enableGestures = false; // TV通常不使用手�?        config.display.autoFullScreen = true; // TV默认全屏
         config.player.enableHardwareDecode = true; // TV优先使用硬件解码
       }
       
@@ -320,8 +1271,7 @@ export class LoadConfigUseCase {
   }
   
   /**
-   * 获取缓存的配置
-   */
+   * 获取缓存的配�?   */
   private async getCachedConfig(): Promise<AppConfig | null> {
     try {
       return await this.cacheRepository.getObject<AppConfig>(CONFIG_CACHE_KEY);
@@ -351,8 +1301,7 @@ export class LoadConfigUseCase {
   }
   
   /**
-   * 清除所有相关缓存
-   */
+   * 清除所有相关缓�?   */
   private async clearAllRelatedCache(): Promise<void> {
     try {
       // 清除配置缓存
@@ -366,3 +1315,5 @@ export class LoadConfigUseCase {
     }
   }
 }
+
+

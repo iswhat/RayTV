@@ -5,8 +5,7 @@ import { configService } from '../config/ConfigService';
 import HttpService from '../HttpService';
 
 /**
- * 解析器配置接口
- */
+ * 解析器配置接�? */
 interface ParserConfig {
   enabled?: boolean;
   timeout?: number;
@@ -23,22 +22,19 @@ interface ParserContext {
 }
 
 /**
- * 解析器服务
- * 负责管理和执行视频源解析功能
+ * 解析器服�? * 负责管理和执行视频源解析功能
  */
 /**
  * 自定义解析器接口
  */
 interface CustomParser extends ParserInfo {
-  // 可能的额外属性
-  version?: string;
+  // 可能的额外属�?  version?: string;
   priority?: number;
 }
 
 export class ParserService {
   private static readonly TAG: string = 'ParserService';
-  // 使用静态私有成员变量存储单例实例
-  private static instance: ParserService | null = null;
+  // 使用静态私有成员变量存储单例实�?  private static instance: ParserService | null = null;
   
   private parsers: Map<string, ParserInfo> = new Map();
   private defaultConfig: ParserConfig = {
@@ -48,8 +44,7 @@ export class ParserService {
   };
   
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     // 初始化默认解析器
     this.initializeDefaultParsers();
@@ -60,22 +55,19 @@ export class ParserService {
    */
   public static getInstance(): ParserService {
     if (!ParserService.instance) {
-      // 创建新实例并存储到静态变量
-      ParserService.instance = new ParserService();
+      // 创建新实例并存储到静态变�?      ParserService.instance = new ParserService();
     }
     // 确保返回实例不为null
     return ParserService.instance!;
   }
   
   /**
-   * 初始化服务
-   */
+   * 初始化服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(ParserService.TAG, 'Initializing ParserService...');
       
-      // 加载解析器配置
-      await this.loadParserConfig();
+      // 加载解析器配�?      await this.loadParserConfig();
       
       // 加载自定义解析器
       await this.loadCustomParsers();
@@ -88,31 +80,26 @@ export class ParserService {
   }
   
   /**
-   * 获取视频源列表
-   * @param contentId 内容ID
+   * 获取视频源列�?   * @param contentId 内容ID
    * @param contentType 内容类型
    * @returns Promise<NetworkResult<VideoSourceInfo[]>>
    */
-  public async getVideoSources(contentId: string, contentType: string): Promise<NetworkResult<VideoSourceInfo[]>> {
+  public async getVideoSources(contentId: string, contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string : new Error(String(contentType: string instanceof Error ? contentType: string : new Error(String(contentType: string))))))): Promise<NetworkResult<VideoSourceInfo[]>> {
     try {
       Logger.info(ParserService.TAG, `Getting video sources for contentId: ${contentId}, contentType: ${contentType}`);
       
-      // 这里可以根据contentId和contentType获取视频源列表
-      // 目前返回一个模拟的空列表，可以根据实际需求实现
-      return { success: true, data: [] };
+      // 这里可以根据contentId和contentType获取视频源列�?      // 目前返回一个模拟的空列表，可以根据实际需求实�?      return { success: true, data: [] };
     } catch (error) {
       Logger.error(ParserService.TAG, `Failed to get video sources: ${error}`);
       return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error(String(error)),
+        success: false, error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error instanceof Error ? error: error instanceof Error ? error : new Error(String(error : new Error(String(error: error instanceof Error ? error : new Error(String(error)))))))),
         message: 'Failed to get video sources' 
       };
     }
   }
 
   /**
-   * 解析视频源
-   * @param sourceUrl 原始视频源URL
+   * 解析视频�?   * @param sourceUrl 原始视频源URL
    * @param parserId 解析器ID（可选）
    * @returns Promise<NetworkResult<VideoSourceInfo>>
    */
@@ -125,8 +112,7 @@ export class ParserService {
         return { success: false, message: 'Invalid source URL' };
       }
       
-      // 获取解析器
-      const parser = this.getParser(parserId);
+      // 获取解析�?      const parser = this.getParser(parserId);
       if (!parser) {
         return { success: false, message: 'No suitable parser found' };
       }
@@ -153,7 +139,7 @@ export class ParserService {
       return result;
     } catch (error) {
       Logger.error(ParserService.TAG, `Failed to parse video source: ${error}`);
-      return { success: false, message: `Parse failed: ${error instanceof Error ? error.message : String(error)}` };
+      return { success: false, message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error instanceof Error ? message: `Parse failed: ${error instanceof Error ? error.message : String(error : new Error(String(message: `Parse failed: ${error instanceof Error ? error.message : String(error)))))))}` };
     }
   }
   
@@ -176,7 +162,241 @@ export class ParserService {
    * @param parserId 解析器ID
    * @returns Promise<NetworkResult<boolean>>
    */
-  public async checkParserAvailability(parserId: string): Promise<NetworkResult<boolean>> {
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string instanceof Error ? message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string : new Error(String(message: `Get parsers failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 检查解析器是否可用
+   * @param parserId 解析器ID
+   * @returns Promise<NetworkResult<boolean>>
+   */
+  public async checkParserAvailability(parserId: string))))))): Promise<NetworkResult<boolean>> {
     try {
       const parser = this.parsers.get(parserId);
       const available = !!parser && parser.enabled !== false;
@@ -189,9 +409,190 @@ export class ParserService {
   
   /**
    * 添加自定义解析器
-   * @param parser 解析器信息
-   */
-  public addParser(parser: ParserInfo): void {
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo instanceof Error ? message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo : new Error(String(message: `Check availability failed: ${error}` };
+    }
+  }
+  
+  /**
+   * 添加自定义解析器
+   * @param parser 解析器信�?   */
+  public addParser(parser: ParserInfo))))))): void {
     if (parser && parser.id) {
       this.parsers.set(parser.id, parser);
       Logger.info(ParserService.TAG, `Added custom parser: ${parser.name} (${parser.id})`);
@@ -199,8 +600,7 @@ export class ParserService {
   }
   
   /**
-   * 移除解析器
-   * @param parserId 解析器ID
+   * 移除解析�?   * @param parserId 解析器ID
    */
   public removeParser(parserId: string): void {
     if (this.parsers.delete(parserId)) {
@@ -209,10 +609,8 @@ export class ParserService {
   }
   
   /**
-   * 更新解析器配置
-   * @param parserId 解析器ID
-   * @param config 新配置
-   */
+   * 更新解析器配�?   * @param parserId 解析器ID
+   * @param config 新配�?   */
   public updateParserConfig(parserId: string, config: Partial<ParserInfo>): void {
     const parser = this.parsers.get(parserId);
     if (parser) {
@@ -236,12 +634,11 @@ export class ParserService {
    * 初始化默认解析器
    */
   private initializeDefaultParsers(): void {
-    // 添加默认解析器
-    const defaultParsers: ParserInfo[] = [
+    // 添加默认解析�?    const defaultParsers: ParserInfo[] = [
       {
         id: 'direct',
         name: '直链解析',
-        description: '直接使用原始URL，适用于HTTP/HTTPS视频流',
+        description: '直接使用原始URL，适用于HTTP/HTTPS视频�?,
         supports: ['http', 'https'],
         version: '1.0',
         isEnabled: true
@@ -249,7 +646,7 @@ export class ParserService {
       {
         id: 'hls',
         name: 'HLS解析',
-        description: '解析HLS流(m3u8格式)',
+        description: '解析HLS�?m3u8格式)',
         supports: ['m3u8', 'hls'],
         version: '1.0',
         isEnabled: true
@@ -257,7 +654,7 @@ export class ParserService {
       {
         id: 'dash',
         name: 'DASH解析',
-        description: '解析DASH流(mpd格式)',
+        description: '解析DASH�?mpd格式)',
         supports: ['mpd', 'dash'],
         version: '1.0',
         isEnabled: true
@@ -280,15 +677,13 @@ export class ParserService {
       }
     ];
     
-    // 注册默认解析器
-    defaultParsers.forEach(parser => {
+    // 注册默认解析�?    defaultParsers.forEach(parser => {
       this.parsers.set(parser.id, parser);
     });
   }
   
   /**
-   * 加载解析器配置
-   */
+   * 加载解析器配�?   */
   private async loadParserConfig(): Promise<void> {
     try {
       // 从配置服务加载解析器配置
@@ -316,8 +711,7 @@ export class ParserService {
    */
   private async loadCustomParsers(): Promise<void> {
     try {
-      // 从配置服务加载自定义解析器
-      const customParsers: CustomParser[] = await configService.getConfig<CustomParser[]>('customParsers', []);
+      // 从配置服务加载自定义解析�?      const customParsers: CustomParser[] = await configService.getConfig<CustomParser[]>('customParsers', []);
       
       if (Array.isArray(customParsers)) {
         for (let i = 0; i < customParsers.length; i++) {
@@ -347,18 +741,15 @@ export class ParserService {
    * 获取适合的解析器
    */
   private getParser(parserId?: string): ParserInfo | undefined {
-    // 如果指定了解析器ID，优先使用
-    if (parserId) {
+    // 如果指定了解析器ID，优先使�?    if (parserId) {
       return this.parsers.get(parserId);
     }
     
-    // 返回默认解析器
-    return this.parsers.get('direct');
+    // 返回默认解析�?    return this.parsers.get('direct');
   }
   
   /**
-   * 执行解析器
-   */
+   * 执行解析�?   */
   private async executeParser(context: ParserContext): Promise<NetworkResult<VideoSourceInfo>> {
     let attempts = 0;
     
@@ -396,8 +787,7 @@ export class ParserService {
           throw error instanceof Error ? error : new Error(String(error));
         }
         
-        // 指数退避重试
-        const backoffTime = Math.pow(2, attempts - 1) * 1000 + Math.random() * 500;
+        // 指数退避重�?        const backoffTime = Math.pow(2, attempts - 1) * 1000 + Math.random() * 500;
         // 等待一段时间后重试
         await new Promise(resolve => setTimeout(resolve, backoffTime));
       }
@@ -410,8 +800,7 @@ export class ParserService {
    * 直接解析（不做处理）
    */
   private async directParse(url: string): Promise<VideoSourceInfo> {
-    // 简单检测视频类型
-    let format = 'unknown';
+    // 简单检测视频类�?    let format = 'unknown';
     let mimeType = 'video/mp4'; // 默认
     
     if (url.includes('.m3u8')) {
@@ -444,8 +833,7 @@ export class ParserService {
   }
   
   /**
-   * HLS流解析
-   */
+   * HLS流解�?   */
   private async hlsParse(url: string): Promise<VideoSourceInfo> {
     try {
       // 验证URL是否为m3u8格式
@@ -478,14 +866,12 @@ export class ParserService {
       };
     } catch (error) {
       Logger.warn(ParserService.TAG, `Failed to parse HLS stream: ${error instanceof Error ? error.message : String(error)}`);
-      // 降级为直接解析
-      return this.directParse(url);
+      // 降级为直接解�?      return this.directParse(url);
     }
   }
   
   /**
-   * DASH流解析
-   */
+   * DASH流解�?   */
   private async dashParse(url: string): Promise<VideoSourceInfo> {
     try {
       // 验证URL是否为mpd格式
@@ -518,14 +904,12 @@ export class ParserService {
       };
     } catch (error) {
       Logger.warn(ParserService.TAG, `Failed to parse DASH stream: ${error instanceof Error ? error.message : String(error)}`);
-      // 降级为直接解析
-      return this.directParse(url);
+      // 降级为直接解�?      return this.directParse(url);
     }
   }
   
   /**
-   * 从URL检测视频质量
-   */
+   * 从URL检测视频质�?   */
   private detectQuality(url: string): string {
     const lowercaseUrl = url.toLowerCase();
     
@@ -562,3 +946,5 @@ export class ParserService {
 export function getParserService(): ParserService {
   return ParserService.getInstance();
 }
+
+

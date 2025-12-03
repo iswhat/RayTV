@@ -25,8 +25,7 @@ export enum ServiceType {
 export type ServiceInstance = ConfigService | HistoryService | SiteService | ConfigManager | HistoryManager;
 
 /**
- * 服务工厂类
- * 负责创建和管理各种服务的实例
+ * 服务工厂�? * 负责创建和管理各种服务的实例
  */
 export default class ServiceFactory {
   private static instance: ServiceFactory | null = null;
@@ -34,8 +33,7 @@ export default class ServiceFactory {
   private isInitialized: boolean = false;
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {}
 
   /**
@@ -50,9 +48,7 @@ export default class ServiceFactory {
   }
 
   /**
-   * 初始化所有服务
-   * @returns 是否初始化成功
-   */
+   * 初始化所有服�?   * @returns 是否初始化成�?   */
   public async initialize(): Promise<boolean> {
     try {
       if (this.isInitialized) {
@@ -69,19 +65,16 @@ export default class ServiceFactory {
         return false;
       }
 
-      // 初始化配置服务
-      const configService = ConfigService.getInstance();
+      // 初始化配置服�?      const configService = ConfigService.getInstance();
       await configService.initializeConfig();
-      this.serviceMap.set(ServiceType.CONFIG, configService);
+      this.serviceMap.set(ServiceType.CONFIG, configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService)))))));
       Logger.info(TAG, 'ConfigService initialized successfully');
 
-      // 初始化历史服务
-      const historyService = HistoryService.getInstance();
+      // 初始化历史服�?      const historyService = HistoryService.getInstance();
       this.serviceMap.set(ServiceType.HISTORY, historyService);
       Logger.info(TAG, 'HistoryService initialized successfully');
 
-      // 初始化站点服务
-      const siteService = SiteService.getInstance();
+      // 初始化站点服�?      const siteService = SiteService.getInstance();
       await siteService.initialize();
       this.serviceMap.set(ServiceType.SITE, siteService);
       Logger.info(TAG, 'SiteService initialized successfully');
@@ -132,24 +125,21 @@ export default class ServiceFactory {
   }
 
   /**
-   * 获取配置管理器实例
-   * @returns ConfigManager实例
+   * 获取配置管理器实�?   * @returns ConfigManager实例
    */
   public getConfigManager(): ConfigManager {
     return this.getService(ServiceType.CONFIG_MANAGER);
   }
 
   /**
-   * 获取历史管理器实例
-   * @returns HistoryManager实例
+   * 获取历史管理器实�?   * @returns HistoryManager实例
    */
   public getHistoryManager(): HistoryManager {
     return this.getService(ServiceType.HISTORY_MANAGER);
   }
 
   /**
-   * 获取指定类型的服务实例
-   * @param type 服务类型
+   * 获取指定类型的服务实�?   * @param type 服务类型
    * @returns 服务实例
    */
   private getService<T>(type: ServiceType): T {
@@ -161,11 +151,10 @@ export default class ServiceFactory {
   }
 
   /**
-   * 设置自定义服务实例
-   * @param type 服务类型
+   * 设置自定义服务实�?   * @param type 服务类型
    * @param service 服务实例
    */
-  public setService(type: ServiceType, service: ServiceInstance): void {
+  public setService(type: ServiceType, service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance))))))): void {
     this.serviceMap.set(type, service);
     Logger.info(TAG, `Custom service set for type: ${type}`);
   }
@@ -173,15 +162,13 @@ export default class ServiceFactory {
   /**
    * 检查服务是否初始化
    * @param type 服务类型
-   * @returns 是否初始化
-   */
+   * @returns 是否初始�?   */
   public isServiceInitialized(type: ServiceType): boolean {
     return this.serviceMap.has(type);
   }
 
   /**
-   * 关闭所有服务资源
-   */
+   * 关闭所有服务资�?   */
   public async close(): Promise<void> {
     try {
       Logger.info(TAG, 'Closing services...');
@@ -205,10 +192,12 @@ export default class ServiceFactory {
   public static reset(): void {
     if (ServiceFactory.instance) {
       ServiceFactory.instance.close().catch(error => {
-        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
+        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error)))))))}`);
       });
       ServiceFactory.instance = null;
     }
     Logger.info(TAG, 'Service factory reset');
   }
 }
+
+

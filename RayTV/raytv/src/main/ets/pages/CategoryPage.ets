@@ -2,8 +2,9 @@
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import { mediaService } from '../service/media/MediaService';
-import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, HorizontalAlign, FlexAlign, ItemAlign, FlexDirection, ImageFit, TextAlign, Scroller, ScrollDirection } from '@ohos.arkui';
 import { MediaItem } from '../data/bean/MediaItem';
+// 导入必要的ArkTS组件
+import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, Scroller, Refresh, TextInput } from '@ohos.arkui';
 
 /**
  * 分类页面组件
@@ -14,16 +15,16 @@ import { MediaItem } from '../data/bean/MediaItem';
 struct CategoryPage {
   private readonly TAG: string = 'CategoryPage';
   
-  // 状态管理
+  // 状态管�?
   @State selectedCategory: string = '全部';
   @State selectedRegion: string = '全部';
   @State selectedYear: string = '全部';
-  @State selectedSort: string = '最新';
+  @State selectedSort: string = '最�?;
   @State mediaList: MediaItem[] = [];
   @State categories: string[] = [];
   @State regions: string[] = [];
   @State years: string[] = [];
-  @State sortOptions: string[] = ['最新', '最热', '评分最高', '最早'];
+  @State sortOptions: string[] = ['最�?, '最�?, '评分最�?, '最�?];
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
   @State currentPage: number = 1;
@@ -34,7 +35,7 @@ struct CategoryPage {
   private pageSize: number = 20;
   
   /**
-   * 页面加载时调用
+   * 页面加载时调�?
    */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'CategoryPage appeared');
@@ -45,20 +46,20 @@ struct CategoryPage {
       this.selectedCategory = params.category as string;
     }
     
-    // 初始化数据
+    // 初始化数�?
     this.initCategoryData();
     this.loadMediaList(true);
   }
   
   /**
-   * 页面卸载时调用
+   * 页面卸载时调�?
    */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'CategoryPage disappeared');
   }
   
   /**
-   * 初始化分类数据
+   * 初始化分类数�?
    */
   private initCategoryData(): void {
     try {
@@ -73,24 +74,24 @@ struct CategoryPage {
         .then(regions => {
           this.regions = ['全部', ...regions];
           
-          // 加载年份列表 (最近10年)
+          // 加载年份列表 (最�?0�?
           const currentYear = new Date().getFullYear();
           this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
           
           Logger.info(this.TAG, `Loaded categories: ${this.categories.length}, regions: ${this.regions.length}`);
         })
         .catch(error => {
-          Logger.error(this.TAG, `Failed to load category data: ${error}`);
+          Logger.error(this.TAG, 'Failed to load category data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
           
           // 使用默认数据
-          this.categories = ['全部', '电影', '电视剧', '动漫', '综艺', '纪录片'];
+          this.categories = ['全部', '电影', '电视�?, '动漫', '综艺', '纪录�?];
           this.regions = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
         });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load category data: ${error}`);
+      Logger.error(this.TAG, 'Failed to load category data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       
       // 使用默认数据
-      this.categories = ['全部', '电影', '电视剧', '动漫', '综艺', '纪录片'];
+      this.categories = ['全部', '电影', '电视�?, '动漫', '综艺', '纪录�?];
       this.regions = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
     }
   }
@@ -140,7 +141,7 @@ struct CategoryPage {
       Logger.info(this.TAG, `Media list loaded, total: ${this.mediaList.length}, has more: ${this.hasMoreResults}`);
     })
     .catch(error => {
-      Logger.error(this.TAG, `Failed to load media list: ${error}`);
+      Logger.error(this.TAG, 'Failed to load media list', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       this.errorMessage = '加载失败，请稍后重试';
       this.hasMoreResults = false;
     })
@@ -151,7 +152,7 @@ struct CategoryPage {
   }
   
   /**
-   * 处理筛选条件变更
+   * 处理筛选条件变�?
    */
   private handleFilterChange(): void {
     this.currentPage = 1;
@@ -201,7 +202,7 @@ struct CategoryPage {
   }
   
   /**
-   * 处理媒体项点击
+   * 处理媒体项点�?
    */
   private handleMediaItemClick(media: MediaItem): void {
     Logger.info(this.TAG, `Media item clicked: ${media.title}`);
@@ -246,7 +247,7 @@ struct CategoryPage {
     Flex()
     .alignItems(FlexAlign.Center)
     .justifyContent(FlexAlign.SpaceBetween) {
-      Button("←")
+      Button("�?)
         .onClick(() => this.handleBack())
       Text("分类浏览")
       // 使用空的Flex作为占位符替代Blank组件
@@ -255,13 +256,11 @@ struct CategoryPage {
   }
   
   /**
-   * 渲染分类选择器
+   * 渲染分类选择�?
    */
   @Builder
-  private renderCategorySelector(): void {
-    Scroller({
-      scrollable: ScrollDirection.Horizontal
-    }) {
+  private renderCategorySelector() {
+    Scroller() {
       Flex()
       .className("category-list")
       .flexWrap(FlexWrap.NoWrap) {
@@ -276,14 +275,14 @@ struct CategoryPage {
   }
   
   /**
-   * 渲染筛选条件
+   * 渲染筛选条�?
    */
   @Builder
   private renderFilters(): void {
     Flex()
     .alignItems(FlexAlign.Center)
     .gap(10) {
-      // 地区筛选 - 使用按钮组替代Select组件
+      // 地区筛�?- 使用按钮组替代Select组件
       Flex()
       .alignItems(FlexAlign.Center) {
         Text("地区:")
@@ -301,7 +300,7 @@ struct CategoryPage {
         }
       }
       
-      // 年份筛选 - 使用按钮组替代Select组件
+      // 年份筛�?- 使用按钮组替代Select组件
       Flex()
       .alignItems(FlexAlign.Center) {
         Text("年份:")
@@ -319,7 +318,7 @@ struct CategoryPage {
         }
       }
       
-      // 排序筛选 - 使用按钮组替代Select组件
+      // 排序筛�?- 使用按钮组替代Select组件
       Flex()
       .alignItems(FlexAlign.Center) {
         Text("排序:")
@@ -340,7 +339,7 @@ struct CategoryPage {
   }
   
   /**
-   * 渲染媒体项
+   * 渲染媒体�?
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
@@ -392,7 +391,7 @@ struct CategoryPage {
       .padding(20) {
         LoadingProgress()
           .color("#FF4500")
-        Text("加载中...")
+        Text("加载�?..")
           .fontSize(16)
           .fontColor('#333333')
           .margin({ top: 10 })
@@ -453,7 +452,7 @@ struct CategoryPage {
           .margin({ top: 10 })
       }
     } else if (!this.hasMoreResults && this.mediaList.length > 0) {
-      Text("没有更多内容了")
+      Text("没有更多内容�?)
         .fontSize(14)
         .fontColor('#666666')
         .textAlign(TextAlign.Center)
@@ -472,7 +471,7 @@ struct CategoryPage {
       // 分类选择
       this.renderCategorySelector()
       
-      // 筛选条件
+      // 筛选条�?
       this.renderFilters()
       
       // 媒体列表
@@ -487,3 +486,5 @@ struct CategoryPage {
 }
 
 export default CategoryPage;
+
+

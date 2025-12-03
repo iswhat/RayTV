@@ -2,8 +2,7 @@
 // 定义RayTV应用的所有数据库表结构和字段常量
 
 /**
- * 站点表定义
- */
+ * 站点表定�? */
 export const SITE_TABLE = {
   NAME: 'site',
   CREATE_SQL: `
@@ -81,8 +80,7 @@ export const SITE_TABLE = {
 };
 
 /**
- * 历史记录表定义
- */
+ * 历史记录表定�? */
 export const HISTORY_TABLE = {
   NAME: 'history',
   CREATE_SQL: `
@@ -181,8 +179,7 @@ export const HISTORY_TABLE = {
 };
 
 /**
- * 收藏表定义
- */
+ * 收藏表定�? */
 export const KEEP_TABLE = {
   NAME: 'keep',
   CREATE_SQL: `
@@ -235,8 +232,7 @@ export const KEEP_TABLE = {
 };
 
 /**
- * 配置表定义
- */
+ * 配置表定�? */
 export const CONFIG_TABLE = {
   NAME: 'config',
   CREATE_SQL: `
@@ -313,8 +309,7 @@ export const KEEP_FOLDER_TABLE = {
 };
 
 /**
- * 搜索历史表定义
- */
+ * 搜索历史表定�? */
 export const SEARCH_HISTORY_TABLE = {
   NAME: 'search_history',
   CREATE_SQL: `
@@ -340,8 +335,7 @@ export const SEARCH_HISTORY_TABLE = {
 };
 
 /**
- * 线路表定义
- */
+ * 线路表定�? */
 export const LINE_TABLE = {
   NAME: 'line',
   CREATE_SQL: `
@@ -377,8 +371,7 @@ export const LINE_TABLE = {
 };
 
 /**
- * 订阅表定义
- */
+ * 订阅表定�? */
 export const SUBSCRIPTION_TABLE = {
   NAME: 'subscription',
   CREATE_SQL: `
@@ -408,8 +401,7 @@ export const SUBSCRIPTION_TABLE = {
 };
 
 /**
- * 直播频道表定义
- */
+ * 直播频道表定�? */
 export const LIVE_CHANNEL_TABLE = {
   NAME: 'live_channel',
   CREATE_SQL: `
@@ -473,8 +465,7 @@ export const LIVE_CHANNEL_TABLE = {
 };
 
 /**
- * 直播分组表定义
- */
+ * 直播分组表定�? */
 export const LIVE_GROUP_TABLE = {
   NAME: 'live_group',
   CREATE_SQL: `
@@ -522,8 +513,7 @@ export function getAllTables(): string[] {
 }
 
 /**
- * 获取所有表名
- */
+ * 获取所有表�? */
 export function getAllTableNames(): string[] {
   return [
     SITE_TABLE.NAME,
@@ -545,47 +535,8 @@ export function getAllTableNames(): string[] {
 /**
  * 索引创建SQL语句
  */
-export const INDEXES = {
-  CREATE_INDEXES: [
-    // 站点表索引
-    `CREATE INDEX IF NOT EXISTS idx_site_enabled ON site(enabled)`,
-    `CREATE INDEX IF NOT EXISTS idx_site_group ON site("group")`,
-    `CREATE INDEX IF NOT EXISTS idx_site_order ON site("order")`,
-    
-    // 历史记录表索引
-    `CREATE INDEX IF NOT EXISTS idx_history_last_played ON history(last_played_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_history_content_id ON history(content_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_history_type ON history("type")`,
-    `CREATE INDEX IF NOT EXISTS idx_history_content_type ON history(content_type)`,
-    `CREATE INDEX IF NOT EXISTS idx_history_source_key ON history(source_key)`,
-    
-    // 收藏表索引
-    `CREATE INDEX IF NOT EXISTS idx_keep_add_time ON keep(add_time)`,
-    `CREATE INDEX IF NOT EXISTS idx_keep_folder ON keep(folder_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_keep_content_id ON keep(content_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_keep_type ON keep("type")`,
-    
-    // 搜索历史索引
-    `CREATE INDEX IF NOT EXISTS idx_search_time ON search_history(search_time)`,
-    `CREATE INDEX IF NOT EXISTS idx_search_keyword ON search_history(keyword)`,
-    
-    // 直播频道索引
-    `CREATE INDEX IF NOT EXISTS idx_live_channel_group ON live_channel(group_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_live_channel_favorite ON live_channel(is_favorite)`,
-    `CREATE INDEX IF NOT EXISTS idx_live_channel_order ON live_channel("order")`,
-    `CREATE INDEX IF NOT EXISTS idx_live_channel_status ON live_channel("status")`,
-    
-    // 直播分组索引
-    `CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order")`,
-    `CREATE INDEX IF NOT EXISTS idx_live_group_default ON live_group(is_default)`
-  ]
-};
+export const INDEXES: Record<string, string | number | boolean | null> = { ... };
 
 /**
- * 数据库版本信息
- */
-export const DATABASE_INFO = {
-  NAME: 'raytv.db',
-  VERSION: 1,
-  SECURITY_LEVEL: 'S1'
-};
+ * 数据库版本信�? */
+export const DATABASE_INFO: Record<string, string | number | boolean | null> = { ... };

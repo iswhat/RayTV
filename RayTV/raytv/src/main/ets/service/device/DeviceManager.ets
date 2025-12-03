@@ -22,7 +22,7 @@ export enum DeviceType {
   OTHER = 'other'
 }
 
-// 设备状态枚举
+// 设备状态枚�?
 export enum DeviceStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
@@ -31,7 +31,7 @@ export enum DeviceStatus {
   UNAUTHORIZED = 'unauthorized'
 }
 
-// 设备认证状态枚举
+// 设备认证状态枚�?
 export enum AuthStatus {
   UNKNOWN = 'unknown',
   UNAUTHENTICATED = 'unauthenticated',
@@ -40,7 +40,7 @@ export enum AuthStatus {
   AUTHENTICATION_FAILED = 'authentication_failed'
 }
 
-// 原始设备信息接口（来自系统API）
+// 原始设备信息接口（来自系统API�?
 interface RawDeviceInfo {
   deviceId: string;          // 设备唯一标识
   deviceName: string;        // 设备名称
@@ -60,14 +60,14 @@ export interface DeviceInfo {
   ip?: string;               // IP地址
   mac?: string;              // MAC地址
   version?: string;          // 版本信息
-  status: DeviceStatus;      // 设备状态
-  authStatus: AuthStatus;    // 认证状态
-  isLocalDevice: boolean;    // 是否为本机
-  batteryLevel?: number;     // 电池电量（0-100）
+  status: DeviceStatus;      // 设备状�?
+  authStatus: AuthStatus;    // 认证状�?
+  isLocalDevice: boolean;    // 是否为本�?
+  batteryLevel?: number;     // 电池电量�?-100�?
   screenOn?: boolean;        // 屏幕是否点亮
   connectedTime?: number;    // 连接时间
-  lastActiveTime?: number;   // 最后活跃时间
-  deviceLabel?: string;      // 自定义标签
+  lastActiveTime?: number;   // 最后活跃时�?
+  deviceLabel?: string;      // 自定义标�?
 }
 
 // 同步数据接口 - 支持具体数据类型
@@ -92,18 +92,18 @@ export interface PlaybackControlParams {
 // 设备选择条件接口
 export interface DeviceFilter {
   deviceTypes?: DeviceType[];     // 设备类型过滤
-  onlineOnly?: boolean;           // 仅在线设备
+  onlineOnly?: boolean;           // 仅在线设�?
   authenticatedOnly?: boolean;    // 仅已认证设备
-  nameKeyword?: string;           // 设备名称关键字
+  nameKeyword?: string;           // 设备名称关键�?
 }
 
 // 设备管理配置接口
 export interface DeviceManagerConfig {
   enableAutoConnect: boolean;     // 启用自动连接
   enableDeviceDiscovery: boolean; // 启用设备发现
-  requireAuthentication: boolean; // 需要认证
+  requireAuthentication: boolean; // 需要认�?
   autoAuthorizeDevices: boolean;  // 自动授权设备
-  rememberAuthorizedDevices: boolean; // 记住已授权设备
+  rememberAuthorizedDevices: boolean; // 记住已授权设�?
 }
 
 // 默认设备管理配置
@@ -152,7 +152,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 构造函数
+   * 构造函�?
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
@@ -161,7 +161,7 @@ export default class DeviceManager {
 
   /**
    * 初始化设备管理器
-   * @param context 应用上下文
+   * @param context 应用上下�?
    */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
@@ -178,10 +178,10 @@ export default class DeviceManager {
       // 加载配置
       await this.loadConfig();
       
-      // 加载已授权设备列表
+      // 加载已授权设备列�?
       await this.loadAuthorizedDevices();
       
-      // 注册设备状态回调
+      // 注册设备状态回�?
       await this.registerDeviceStateCallback();
       
       // 注册认证回调
@@ -190,7 +190,7 @@ export default class DeviceManager {
       // 获取本地设备信息
       await this.updateLocalDeviceInfo();
       
-      // 如果启用了设备发现，开始发现设备
+      // 如果启用了设备发现，开始发现设�?
       if (this.config.enableDeviceDiscovery) {
         await this.startDeviceDiscovery();
       }
@@ -214,7 +214,7 @@ export default class DeviceManager {
       }
       this.deviceManagerInstance = dmInstance;
     } catch (error) {
-      Logger.error(TAG, `Failed to create DeviceManager instance: ${error}`);
+      Logger.error(TAG, `Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}` instanceof Error ? `Failed to create DeviceManager instance: ${error}` : new Error(String(`Failed to create DeviceManager instance: ${error}`)))))));
       throw error;
     }
   }
@@ -239,9 +239,35 @@ export default class DeviceManager {
   public async saveConfig(config: Partial<DeviceManagerConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('deviceManagerConfig', this.config);
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('deviceManagerConfig', this.config)))))));
       
-      // 根据配置调整设备发现状态
+      // 根据配置调整设备发现状�?
       if (this.config.enableDeviceDiscovery && this.isInitialized) {
         await this.startDeviceDiscovery();
       } else {
@@ -261,11 +287,11 @@ export default class DeviceManager {
   }
 
   /**
-   * 加载已授权设备列表
+   * 加载已授权设备列�?
    */
   private async loadAuthorizedDevices(): Promise<void> {
     try {
-      const savedDevices = await this.configService.getConfig<string[]>('authorizedDevices', []);
+      const savedDevices = await this.configService.getConfig<string[]>('authorizedDevices', [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([])))))));
       savedDevices.forEach(deviceId => this.authorizedDevices.add(deviceId));
     } catch (error) {
       Logger.error(TAG, `Failed to load authorized devices: ${error}`);
@@ -273,19 +299,19 @@ export default class DeviceManager {
   }
 
   /**
-   * 保存已授权设备列表
+   * 保存已授权设备列�?
    */
   private async saveAuthorizedDevices(): Promise<void> {
     try {
       const deviceIds = Array.from(this.authorizedDevices);
-      await this.configService.setConfig('authorizedDevices', deviceIds);
+      await this.configService.setConfig('authorizedDevices', deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds : new Error(String(deviceIds instanceof Error ? deviceIds : new Error(String(deviceIds)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to save authorized devices: ${error}`);
     }
   }
 
   /**
-   * 注册设备状态回调
+   * 注册设备状态回�?
    */
   private async registerDeviceStateCallback(): Promise<void> {
     if (!this.deviceManagerInstance) {
@@ -293,14 +319,14 @@ export default class DeviceManager {
     }
 
     try {
-      const callbackId = this.deviceManagerInstance.on('deviceStateChange', async (data) => {
+      const callbackId = this.deviceManagerInstance.on('deviceStateChange', async (data instanceof Error ? async (data : new Error(String(async (data instanceof Error ? async (data instanceof Error ? async (data : new Error(String(async (data : new Error(String(async (data instanceof Error ? async (data : new Error(String(async (data instanceof Error ? async (data instanceof Error ? async (data : new Error(String(async (data instanceof Error ? async (data instanceof Error ? async (data : new Error(String(async (data : new Error(String(async (data instanceof Error ? async (data : new Error(String(async (data : new Error(String(async (data instanceof Error ? async (data : new Error(String(async (data instanceof Error ? async (data instanceof Error ? async (data : new Error(String(async (data : new Error(String(async (data instanceof Error ? async (data : new Error(String(async (data))))))) => {
         Logger.debug(TAG, `Device state changed: ${JSON.stringify(data)}`);
         
         const deviceId = data.deviceId;
         let deviceInfo = this.devices.get(deviceId);
         
         if (!deviceInfo) {
-          // 如果是新设备，尝试获取完整信息
+          // 如果是新设备，尝试获取完整信�?
           try {
             const device = await this.getDeviceInfo(deviceId);
             deviceInfo = this.convertToDeviceInfo(device);
@@ -311,12 +337,12 @@ export default class DeviceManager {
           }
         }
         
-        // 更新设备状态
+        // 更新设备状�?
         switch (data.action) {
           case deviceManager.DeviceStateChangeAction.ONLINE:
             deviceInfo.status = DeviceStatus.ONLINE;
             deviceInfo.lastActiveTime = Date.now();
-            this.notifyEvent(DeviceEvent.DEVICE_ONLINE, deviceInfo);
+            this.notifyEvent(DeviceEvent.DEVICE_ONLINE, deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo)))))));
             break;
           case deviceManager.DeviceStateChangeAction.OFFLINE:
             deviceInfo.status = DeviceStatus.OFFLINE;
@@ -343,7 +369,7 @@ export default class DeviceManager {
     }
 
     try {
-      const callbackId = this.deviceManagerInstance.on('deviceAuth', (data) => {
+      const callbackId = this.deviceManagerInstance.on('deviceAuth', (data instanceof Error ? (data : new Error(String((data instanceof Error ? (data instanceof Error ? (data : new Error(String((data : new Error(String((data instanceof Error ? (data : new Error(String((data instanceof Error ? (data instanceof Error ? (data : new Error(String((data instanceof Error ? (data instanceof Error ? (data : new Error(String((data : new Error(String((data instanceof Error ? (data : new Error(String((data : new Error(String((data instanceof Error ? (data : new Error(String((data instanceof Error ? (data instanceof Error ? (data : new Error(String((data : new Error(String((data instanceof Error ? (data : new Error(String((data))))))) => {
         Logger.debug(TAG, `Device auth event: ${JSON.stringify(data)}`);
         
         const deviceId = data.deviceId;
@@ -363,7 +389,7 @@ export default class DeviceManager {
               break;
           }
           
-          this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
+          this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo)))))));
         }
       });
       
@@ -384,9 +410,34 @@ export default class DeviceManager {
     try {
       const localDeviceId = this.deviceManagerInstance.getLocalDeviceId();
       const deviceInfo: DeviceInfo = {
-        deviceId: localDeviceId,
-        deviceName: '本机',
-        deviceType: this.getDeviceTypeByModel(),
+        deviceId: localDeviceId, deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( instanceof Error ? deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel( : new Error(String(deviceName: '本机',
+        deviceType: this.getDeviceTypeByModel())))))),
         status: DeviceStatus.ONLINE,
         authStatus: AuthStatus.AUTHENTICATED,
         isLocalDevice: true,
@@ -405,7 +456,7 @@ export default class DeviceManager {
    */
   private getDeviceTypeByModel(): DeviceType {
     try {
-      // 使用系统API获取设备信息来判断设备类型
+      // 使用系统API获取设备信息来判断设备类�?
       // 1. 获取屏幕信息
       const screenDpi = this.getScreenDpi();
       const screenWidth = this.getScreenWidth();
@@ -415,7 +466,7 @@ export default class DeviceManager {
       const deviceModel = this.getDeviceModel();
       const deviceBrand = this.getDeviceBrand();
       
-      Logger.debug(TAG, `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}`);
+      Logger.debug(TAG, `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` instanceof Error ? `Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}` : new Error(String(`Device info: model=${deviceModel}, brand=${deviceBrand}, screen=${screenWidth}x${screenHeight}, dpi=${screenDpi}`)))))));
       
       // 3. 根据屏幕尺寸和分辨率判断
       const screenDiagonal = Math.sqrt(screenWidth * screenWidth + screenHeight * screenHeight) / screenDpi;
@@ -434,7 +485,7 @@ export default class DeviceManager {
         return DeviceType.TV;
       }
       
-      // 平板判断：中等屏幕(7-12英寸)，特定分辨率
+      // 平板判断：中等屏�?7-12英寸)，特定分辨率
       if (screenDiagonal >= 7 && screenDiagonal <= 12) {
         return DeviceType.TABLET;
       }
@@ -451,7 +502,7 @@ export default class DeviceManager {
         return DeviceType.WEARABLE;
       }
       
-      // 智能座舱判断：特定品牌或型号关键词
+      // 智能座舱判断：特定品牌或型号关键�?
       if (deviceModel.toLowerCase().includes('car') ||
           deviceBrand.toLowerCase().includes('car')) {
         return DeviceType.CAR;
@@ -478,7 +529,7 @@ export default class DeviceManager {
   private getScreenDpi(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕DPI
-      // 这里使用默认值作为后备
+      // 这里使用默认值作为后�?
       return 160;
     } catch {
       return 160;
@@ -491,7 +542,7 @@ export default class DeviceManager {
   private getScreenWidth(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕宽度
-      // 这里使用默认值作为后备
+      // 这里使用默认值作为后�?
       return 1920;
     } catch {
       return 1920;
@@ -504,7 +555,7 @@ export default class DeviceManager {
   private getScreenHeight(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕高度
-      // 这里使用默认值作为后备
+      // 这里使用默认值作为后�?
       return 1080;
     } catch {
       return 1080;
@@ -517,7 +568,7 @@ export default class DeviceManager {
   private getDeviceModel(): string {
     try {
       // 在HarmonyOS中，可以通过systemParameter API获取设备型号
-      // 这里返回默认值作为后备
+      // 这里返回默认值作为后�?
       return 'DefaultDevice';
     } catch {
       return 'DefaultDevice';
@@ -530,7 +581,7 @@ export default class DeviceManager {
   private getDeviceBrand(): string {
     try {
       // 在HarmonyOS中，可以通过systemParameter API获取设备品牌
-      // 这里返回默认值作为后备
+      // 这里返回默认值作为后�?
       return 'DefaultBrand';
     } catch {
       return 'DefaultBrand';
@@ -538,7 +589,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 开始设备发现
+   * 开始设备发�?
    */
   public async startDeviceDiscovery(): Promise<void> {
     if (!this.deviceManagerInstance || !this.config.enableDeviceDiscovery) {
@@ -547,7 +598,7 @@ export default class DeviceManager {
 
     try {
       await this.deviceManagerInstance.startDeviceDiscovery();
-      Logger.info(TAG, 'Device discovery started');
+      Logger.info(TAG, 'Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started' : new Error(String('Device discovery started' instanceof Error ? 'Device discovery started' : new Error(String('Device discovery started')))))));
     } catch (error) {
       Logger.error(TAG, `Failed to start device discovery: ${error}`);
       throw error;
@@ -564,7 +615,7 @@ export default class DeviceManager {
 
     try {
       await this.deviceManagerInstance.stopDeviceDiscovery();
-      Logger.info(TAG, 'Device discovery stopped');
+      Logger.info(TAG, 'Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped' : new Error(String('Device discovery stopped' instanceof Error ? 'Device discovery stopped' : new Error(String('Device discovery stopped')))))));
     } catch (error) {
       Logger.error(TAG, `Failed to stop device discovery: ${error}`);
     }
@@ -581,13 +632,13 @@ export default class DeviceManager {
     try {
       return await this.deviceManagerInstance.getDeviceInfo(deviceId);
     } catch (error) {
-      Logger.error(TAG, `Failed to get device info for ${deviceId}: ${error}`);
+      Logger.error(TAG, `Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}` instanceof Error ? `Failed to get device info for ${deviceId}: ${error}` : new Error(String(`Failed to get device info for ${deviceId}: ${error}`)))))));
       throw error;
     }
   }
 
   /**
-   * 转换为统一的设备信息格式
+   * 转换为统一的设备信息格�?
    */
   private convertToDeviceInfo(device: RawDeviceInfo): DeviceInfo {
     // 转换设备类型
@@ -613,7 +664,7 @@ export default class DeviceManager {
         break;
     }
 
-    // 转换认证状态
+    // 转换认证状�?
     let authStatus = AuthStatus.UNAUTHENTICATED;
     if (this.authorizedDevices.has(device.deviceId)) {
       authStatus = AuthStatus.AUTHENTICATED;
@@ -695,11 +746,11 @@ export default class DeviceManager {
   }
   
   /**
-   * 向目标设备发起认证请求
+   * 向目标设备发起认证请�?
    * @param deviceId 目标设备ID
    * @param authCode 认证码（可选）
    */
-  public async authenticateDevice(deviceId: string, authCode?: string): Promise<boolean> {
+  public async authenticateDevice(deviceId: string, authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string : new Error(String(authCode?: string instanceof Error ? authCode?: string : new Error(String(authCode?: string))))))): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }
@@ -712,7 +763,7 @@ export default class DeviceManager {
         throw new Error(`Device not found: ${deviceId}`);
       }
       
-      // 更新设备认证状态为认证中
+      // 更新设备认证状态为认证�?
       deviceInfo.authStatus = AuthStatus.AUTHENTICATING;
       this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
       
@@ -725,8 +776,8 @@ export default class DeviceManager {
       // 发起认证
       await this.deviceManagerInstance.authenticateDevice(deviceId, authParams);
       
-      // 等待认证结果（这里会通过认证回调处理）
-      // 给认证过程一个超时时间
+      // 等待认证结果（这里会通过认证回调处理�?
+      // 给认证过程一个超时时�?
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => reject(new Error('Authentication timeout')), 30000);
         
@@ -739,7 +790,7 @@ export default class DeviceManager {
             clearTimeout(timeout);
             reject(new Error('Authentication failed'));
           } else {
-            // 继续检查
+            // 继续检�?
             setTimeout(checkAuthStatus, 1000);
           }
         };
@@ -755,7 +806,7 @@ export default class DeviceManager {
       const deviceInfo = this.devices.get(deviceId);
       if (deviceInfo) {
         deviceInfo.authStatus = AuthStatus.AUTHENTICATION_FAILED;
-        this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
+        this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo)))))));
       }
       
       return false;
@@ -763,7 +814,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 同步数据到目标设备
+   * 同步数据到目标设�?
    * @param deviceId 目标设备ID
    * @param dataType 数据类型
    * @param data 要同步的数据
@@ -797,12 +848,12 @@ export default class DeviceManager {
   }
   
   /**
-   * 控制跨设备媒体播放
+   * 控制跨设备媒体播�?
    * @param deviceId 目标设备ID
    * @param action 播放动作（play/pause/stop/seek等）
    * @param params 动作参数
    */
-  public async controlRemotePlayback(deviceId: string, action: string, params?: PlaybackControlParams): Promise<boolean> {
+  public async controlRemotePlayback(deviceId: string, action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams instanceof Error ? action: string, params?: PlaybackControlParams : new Error(String(action: string, params?: PlaybackControlParams))))))): Promise<boolean> {
     if (!this.deviceManagerInstance) {
       throw new Error('DeviceManager instance not initialized');
     }
@@ -823,7 +874,7 @@ export default class DeviceManager {
         timestamp: Date.now()
       };
       
-      // 通过DistributedDataService发送播放控制命令
+      // 通过DistributedDataService发送播放控制命�?
       const controlResult = await this.distributedDataService.syncData({
         deviceId: deviceId,
         dataType: 'playback_control',
@@ -846,14 +897,14 @@ export default class DeviceManager {
     }
 
     try {
-      // 先从缓存中查找
+      // 先从缓存中查�?
       let deviceInfo = this.devices.get(deviceId);
       
       if (!deviceInfo && !deviceInfo?.isLocalDevice) {
-        // 如果缓存中没有且不是本地设备，尝试获取
+        // 如果缓存中没有且不是本地设备，尝试获�?
         const device = await this.getDeviceInfo(deviceId);
         deviceInfo = this.convertToDeviceInfo(device);
-        this.devices.set(deviceId, deviceInfo);
+        this.devices.set(deviceId, deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo)))))));
       }
       
       return deviceInfo || null;
@@ -864,9 +915,9 @@ export default class DeviceManager {
   }
   
   /**
-   * 注册设备事件监听器
+   * 注册设备事件监听�?
    */
-  public on(event: DeviceEvent, listener: DeviceEventListener): void {
+  public on(event: DeviceEvent, listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener))))))): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
@@ -874,7 +925,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 取消注册设备事件监听器
+   * 取消注册设备事件监听�?
    */
   public off(event: DeviceEvent, listener: DeviceEventListener): void {
     if (this.eventListeners.has(event)) {
@@ -913,7 +964,7 @@ export default class DeviceManager {
       // 移除回调
       if (this.deviceManagerInstance) {
         if (this.deviceStateCallbackId) {
-          this.deviceManagerInstance.off('deviceStateChange', this.deviceStateCallbackId);
+          this.deviceManagerInstance.off('deviceStateChange', this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId instanceof Error ? this.deviceStateCallbackId : new Error(String(this.deviceStateCallbackId)))))));
           this.deviceStateCallbackId = null;
         }
         if (this.authCallbackId) {
@@ -933,3 +984,5 @@ export default class DeviceManager {
     }
   }
 }
+
+

@@ -1,5 +1,5 @@
 // NetworkModel - 网络相关模型定义
-// 定义网络请求和响应相关的数据结构和枚举
+// 定义网络请求和响应相关的数据结构和枚�?
 
 /**
  * HTTP请求方法枚举
@@ -29,14 +29,14 @@ export enum ResponseType {
  */
 export interface RequestOptions {
   /**
-   * 请求头
+   * 请求�?
    */
   headers?: Map<string, string>;
   
   /**
    * 请求数据
    */
-  data?: unknown;
+  data?: Record<string, string | number | boolean | null>;
   
   /**
    * URL查询参数
@@ -64,17 +64,17 @@ export interface RequestOptions {
   cacheTime?: number;
   
   /**
-   * 是否允许重定向
+   * 是否允许重定�?
    */
   allowRedirects?: boolean;
   
   /**
-   * 是否发送凭证
+   * 是否发送凭�?
    */
   withCredentials?: boolean;
   
   /**
-   * 请求优先级
+   * 请求优先�?
    */
   priority?: 'low' | 'normal' | 'high';
   
@@ -95,21 +95,21 @@ export interface RequestOptions {
 }
 
 /**
- * 网络状态枚举
+ * 网络状态枚�?
  */
 export enum NetworkStatus {
   /**
-   * 未连接
+   * 未连�?
    */
   DISCONNECTED = 'disconnected',
   
   /**
-   * 已连接
+   * 已连�?
    */
   CONNECTED = 'connected',
   
   /**
-   * 连接中
+   * 连接�?
    */
   CONNECTING = 'connecting',
   
@@ -169,7 +169,7 @@ export enum NetworkType {
  */
 export enum ProxyType {
   /**
-   * 不使用代理
+   * 不使用代�?
    */
   NONE = 'none',
   
@@ -204,7 +204,7 @@ export interface ProxyConfig {
   host: string;
   
   /**
-   * 代理服务器端口
+   * 代理服务器端�?
    */
   port: number;
   
@@ -219,7 +219,7 @@ export interface ProxyConfig {
   password?: string;
   
   /**
-   * 绕过代理的域名列表
+   * 绕过代理的域名列�?
    */
   bypassList?: string[];
 }
@@ -279,7 +279,7 @@ export interface NetworkConfig {
  */
 export interface NetworkStats {
   /**
-   * 总请求次数
+   * 总请求次�?
    */
   totalRequests: number;
   
@@ -299,12 +299,12 @@ export interface NetworkStats {
   averageResponseTime: number;
   
   /**
-   * 总上传流量（字节）
+   * 总上传流量（字节�?
    */
   totalUploadBytes: number;
   
   /**
-   * 总下载流量（字节）
+   * 总下载流量（字节�?
    */
   totalDownloadBytes: number;
   
@@ -314,7 +314,7 @@ export interface NetworkStats {
   currentNetworkType: NetworkType;
   
   /**
-   * 当前网络状态
+   * 当前网络状�?
    */
   currentNetworkStatus: NetworkStatus;
   
@@ -329,7 +329,7 @@ export interface NetworkStats {
  */
 export enum NetworkEventType {
   /**
-   * 网络状态变化
+   * 网络状态变�?
    */
   STATUS_CHANGED = 'status_changed',
   
@@ -344,7 +344,7 @@ export enum NetworkEventType {
   BANDWIDTH_CHANGED = 'bandwidth_changed',
   
   /**
-   * 代理状态变化
+   * 代理状态变�?
    */
   PROXY_STATUS_CHANGED = 'proxy_status_changed',
   
@@ -355,7 +355,7 @@ export enum NetworkEventType {
 }
 
 /**
- * 网络监听器接口
+ * 网络监听器接�?
  */
 export interface NetworkListener {
   /**
@@ -363,11 +363,11 @@ export interface NetworkListener {
    * @param eventType 事件类型
    * @param data 事件数据
    */
-  onNetworkEvent(eventType: NetworkEventType, data: unknown): void;
+  onNetworkEvent(eventType: NetworkEventType, data: Record<string, string | number | boolean | null>): void;
 }
 
 /**
- * 网络拦截器接口
+ * 网络拦截器接�?
  */
 export interface NetworkInterceptor<T = unknown, R = unknown> {
   /**
@@ -382,20 +382,20 @@ export interface NetworkInterceptor<T = unknown, R = unknown> {
    * @param response 响应数据
    * @returns 处理后的响应数据
    */
-  interceptResponse(response: unknown): R;
+  interceptResponse(response: Record<string, string | number | boolean | null>): R;
 }
 
 /**
- * 网络测速结果接口
+ * 网络测速结果接�?
  */
 export interface SpeedTestResult {
   /**
-   * 下载速度（字节/秒）
+   * 下载速度（字�?秒）
    */
   downloadSpeed: number;
   
   /**
-   * 上传速度（字节/秒）
+   * 上传速度（字�?秒）
    */
   uploadSpeed: number;
   
@@ -426,16 +426,16 @@ export interface SpeedTestResult {
 }
 
 /**
- * 下载任务状态枚举
+ * 下载任务状态枚�?
  */
 export enum DownloadTaskStatus {
   /**
-   * 等待中
+   * 等待�?
    */
   WAITING = 'waiting',
   
   /**
-   * 下载中
+   * 下载�?
    */
   DOWNLOADING = 'downloading',
   
@@ -475,7 +475,7 @@ export interface UploadConfig {
   fileType?: string;
   
   /**
-   * 上传字段名
+   * 上传字段�?
    */
   fieldName?: string;
   
@@ -510,42 +510,42 @@ export interface DownloadProgress {
   totalBytes: number;
   
   /**
-   * 下载百分比
+   * 下载百分�?
    */
   progress: number;
   
   /**
-   * 当前速度（字节/秒）
+   * 当前速度（字�?秒）
    */
   speed: number;
   
   /**
-   * 剩余时间（秒）
+   * 剩余时间（秒�?
    */
   remainingTime?: number;
 }
 
 /**
- * WebSocket状态枚举
+ * WebSocket状态枚�?
  */
 export enum WebSocketStatus {
   /**
-   * 连接中
+   * 连接�?
    */
   CONNECTING = 'connecting',
   
   /**
-   * 已连接
+   * 已连�?
    */
   CONNECTED = 'connected',
   
   /**
-   * 关闭中
+   * 关闭�?
    */
   CLOSING = 'closing',
   
   /**
-   * 已关闭
+   * 已关�?
    */
   CLOSED = 'closed',
   
@@ -589,3 +589,4 @@ export interface WebSocketConfig {
    */
   autoReconnect?: boolean;
 }
+

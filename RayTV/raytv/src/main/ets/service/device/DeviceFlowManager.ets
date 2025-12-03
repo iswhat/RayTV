@@ -12,10 +12,7 @@ import BusinessError from '@ohos.base';
 export interface DeviceInfo {
   deviceId: string;        // 设备ID
   deviceName: string;      // 设备名称
-  deviceType: string;      // 设备类型（手机、平板、电视等）
-  status: 'online' | 'offline';  // 设备状态
-  capabilities: string[];  // 设备支持的能力
-  distance?: number;       // 距离（用于排序）
+  deviceType: string;      // 设备类型（手机、平板、电视等�?  status: 'online' | 'offline';  // 设备状�?  capabilities: string[];  // 设备支持的能�?  distance?: number;       // 距离（用于排序）
 }
 
 /**
@@ -56,8 +53,7 @@ export interface FlowParams {
 }
 
 /**
- * 设备管理器
- */
+ * 设备管理�? */
 class DeviceManager {
   private static readonly TAG: string = 'DeviceManager';
   private devices: Map<string, DeviceInfo> = new Map();
@@ -72,28 +68,23 @@ class DeviceManager {
     try {
       Logger.info(DeviceManager.TAG, 'Initializing DeviceManager with HarmonyOS distributed device API...');
       
-      // 获取设备管理器实例
-      this.dmInstance = await this.getDeviceManagerInstance();
+      // 获取设备管理器实�?      this.dmInstance = await this.getDeviceManagerInstance();
       
-      // 设置设备状态变化监听
-      this.setupDeviceStateListener();
+      // 设置设备状态变化监�?      this.setupDeviceStateListener();
       
-      // 开始设备发现
-      await this.startDeviceDiscovery();
+      // 开始设备发�?      await this.startDeviceDiscovery();
       
       Logger.info(DeviceManager.TAG, 'DeviceManager initialized successfully');
     } catch (error) {
       Logger.error(DeviceManager.TAG, `Failed to initialize DeviceManager: ${error}`);
-      // 如果分布式设备API失败，回退到基本功能
-      await this.initializeFallback();
+      // 如果分布式设备API失败，回退到基本功�?      await this.initializeFallback();
     }
   }
   
   /**
-   * 获取设备管理器实例
-   */
+   * 获取设备管理器实�?   */
   private async getDeviceManagerInstance(): Promise<deviceManager.DeviceManager> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject))))))) => {
       try {
         deviceManager.createDeviceManager('RayTV', (error: BusinessError, dm: deviceManager.DeviceManager) => {
           if (error) {
@@ -101,7 +92,7 @@ class DeviceManager {
             reject(error);
             return;
           }
-          Logger.info(DeviceManager.TAG, 'Device manager created successfully');
+          Logger.info(DeviceManager.TAG, 'Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully' : new Error(String('Device manager created successfully' instanceof Error ? 'Device manager created successfully' : new Error(String('Device manager created successfully')))))));
           resolve(dm);
         });
       } catch (error) {
@@ -112,13 +103,12 @@ class DeviceManager {
   }
   
   /**
-   * 设置设备状态变化监听
-   */
+   * 设置设备状态变化监�?   */
   private setupDeviceStateListener(): void {
     if (!this.dmInstance) return;
     
     try {
-      this.dmInstance.on('deviceStateChange', (device: Record<string, unknown>) => {
+      this.dmInstance.on('deviceStateChange', (device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown> : new Error(String((device: Record<string, unknown> instanceof Error ? (device: Record<string, unknown> : new Error(String((device: Record<string, unknown>))))))) => {
         Logger.info(DeviceManager.TAG, `Device state changed: ${JSON.stringify(device)}`);
         this.handleDeviceStateChange(device);
       });
@@ -133,13 +123,12 @@ class DeviceManager {
   }
   
   /**
-   * 开始设备发现
-   */
+   * 开始设备发�?   */
   private async startDeviceDiscovery(): Promise<void> {
     if (!this.dmInstance || this.discoveryStarted) return;
     
     try {
-      Logger.info(DeviceManager.TAG, 'Starting device discovery...');
+      Logger.info(DeviceManager.TAG, 'Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...' : new Error(String('Starting device discovery...' instanceof Error ? 'Starting device discovery...' : new Error(String('Starting device discovery...')))))));
       
       // 发布本地设备信息
       this.dmInstance.publishDeviceDiscovery({});
@@ -162,14 +151,12 @@ class DeviceManager {
   }
   
   /**
-   * 设备状态变化接口
-   */
+   * 设备状态变化接�?   */
   interface DeviceStateChangeData {
     deviceId: string;
     status: number;
     
-    // 可能的额外字段，但使用具体名称而不是索引签名
-    deviceName?: string;
+    // 可能的额外字段，但使用具体名称而不是索引签�?    deviceName?: string;
     deviceTypeId?: number;
     networkId?: string;
     isLocal?: boolean;
@@ -178,17 +165,145 @@ class DeviceManager {
   }
 
   /**
-   * 处理设备状态变化
-   */
-  private handleDeviceStateChange(device: DeviceStateChangeData): void {
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData instanceof Error ? string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData : new Error(String(string | number | boolean>;
+  }
+
+  /**
+   * 处理设备状态变�?   */
+  private handleDeviceStateChange(device: DeviceStateChangeData))))))): void {
     if (!device || !device.deviceId) return;
     
     const deviceId = device.deviceId;
     const existingDevice = this.devices.get(deviceId);
     
     if (existingDevice) {
-      // 更新设备状态
-      existingDevice.status = device.status === 0 ? 'online' : 'offline';
+      // 更新设备状�?      existingDevice.status = device.status === 0 ? 'online' : 'offline';
       this.notifyDeviceListChanged();
     }
   }
@@ -201,8 +316,7 @@ class DeviceManager {
     deviceName?: string;
     deviceTypeId?: number;
     
-    // 可能的额外字段，但使用具体名称而不是索引签名
-    networkId?: string;
+    // 可能的额外字段，但使用具体名称而不是索引签�?    networkId?: string;
     isLocal?: boolean;
     authType?: number;
     isTrusted?: boolean;
@@ -210,8 +324,7 @@ class DeviceManager {
   }
 
   /**
-   * 处理发现的设备
-   */
+   * 处理发现的设�?   */
   private handleDevicesFound(devices: DiscoveredDevice[]): void {
     if (!devices || devices.length === 0) return;
     
@@ -220,8 +333,7 @@ class DeviceManager {
     devices.forEach(device => {
       if (!device.deviceId) return;
       
-      // 转换为标准设备信息格式
-      const standardDevice: DeviceInfo = {
+      // 转换为标准设备信息格�?      const standardDevice: DeviceInfo = {
         deviceId: device.deviceId,
         deviceName: device.deviceName || `Device-${device.deviceId.substring(0, 8)}`,
         deviceType: this.getDeviceType(device),
@@ -269,19 +381,16 @@ class DeviceManager {
   private async initializeFallback(): Promise<void> {
     Logger.warning(DeviceManager.TAG, 'Using fallback device manager implementation');
     
-    // 扫描设备（使用简化逻辑）
-    await this.scanDevices();
+    // 扫描设备（使用简化逻辑�?    await this.scanDevices();
   }
   
   /**
-   * 扫描设备（回退方法）
-   */
+   * 扫描设备（回退方法�?   */
   public async scanDevices(): Promise<void> {
     try {
       Logger.info(DeviceManager.TAG, 'Scanning for available devices...');
       
-      // 如果有分布式设备管理器实例，使用它获取设备列表
-      if (this.dmInstance) {
+      // 如果有分布式设备管理器实例，使用它获取设备列�?      if (this.dmInstance) {
         const trustedDevices = this.dmInstance.getTrustedDeviceListSync();
         if (trustedDevices && trustedDevices.length > 0) {
           this.handleDevicesFound(trustedDevices);
@@ -292,8 +401,7 @@ class DeviceManager {
       
       Logger.info(DeviceManager.TAG, 'No devices found or using fallback mode');
       
-      // 通知监听器（可能是空列表）
-      this.notifyDeviceListChanged();
+      // 通知监听器（可能是空列表�?      this.notifyDeviceListChanged();
     } catch (error) {
       Logger.error(DeviceManager.TAG, `Failed to scan devices: ${error}`);
       throw error;
@@ -317,19 +425,17 @@ class DeviceManager {
   }
   
   /**
-   * 添加设备列表变化监听器
-   */
+   * 添加设备列表变化监听�?   */
   public addDeviceListListener(listener: (devices: DeviceInfo[]) => void): void {
     this.listeners.push(listener);
   }
   
   /**
-   * 移除设备列表变化监听器
-   */
+   * 移除设备列表变化监听�?   */
   public removeDeviceListListener(listener: (devices: DeviceInfo[]) => void): void {
     const index = this.listeners.indexOf(listener);
     if (index > -1) {
-      this.listeners.splice(index, 1);
+      this.listeners.splice(index, 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1)))))));
     }
   }
   
@@ -349,8 +455,7 @@ class DeviceManager {
 }
 
 /**
- * 设备流转管理器
- */
+ * 设备流转管理�? */
 export class DeviceFlowManager {
   private static readonly TAG: string = 'DeviceFlowManager';
   private static instance: DeviceFlowManager;
@@ -377,7 +482,7 @@ export class DeviceFlowManager {
    */
   public async initialize(): Promise<void> {
     try {
-      Logger.info(DeviceFlowManager.TAG, 'Initializing DeviceFlowManager...');
+      Logger.info(DeviceFlowManager.TAG, 'Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...' instanceof Error ? 'Initializing DeviceFlowManager...' : new Error(String('Initializing DeviceFlowManager...')))))));
       
       // 加载配置
       this.isEnabled = await configService.getConfig('enableDeviceFlow', true);
@@ -401,7 +506,7 @@ export class DeviceFlowManager {
         throw new Error('Device flow is disabled');
       }
       
-      Logger.info(DeviceFlowManager.TAG, `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}`);
+      Logger.info(DeviceFlowManager.TAG, `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` instanceof Error ? `Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}` : new Error(String(`Starting flow to device: ${params.targetDeviceId}, type: ${params.flowType}`)))))));
       
       // 检查目标设备是否存在且在线
       const targetDevice = this.deviceManager.getDeviceById(params.targetDeviceId);
@@ -414,8 +519,7 @@ export class DeviceFlowManager {
         throw new Error(`Target device does not support ${params.flowType} flow`);
       }
       
-      // 更新流转状态
-      this.currentFlowStatus = {
+      // 更新流转状�?      this.currentFlowStatus = {
         flowType: params.flowType,
         status: 'initiating',
         progress: 0,
@@ -425,8 +529,7 @@ export class DeviceFlowManager {
       
       this.notifyFlowStatusChanged();
       
-      // 如果是视频流转，保存当前播放状态
-      let flowData = params.data;
+      // 如果是视频流转，保存当前播放状�?      let flowData = params.data;
       if (params.flowType === 'video' && !flowData) {
         flowData = {
           currentMedia: playerManager.getCurrentMedia(),
@@ -453,8 +556,7 @@ export class DeviceFlowManager {
     } catch (error) {
       Logger.error(DeviceFlowManager.TAG, `Failed to start flow: ${error}`);
       
-      // 更新为失败状态
-      if (this.currentFlowStatus) {
+      // 更新为失败状�?      if (this.currentFlowStatus) {
         this.currentFlowStatus.status = 'failed';
         this.notifyFlowStatusChanged();
       }
@@ -464,9 +566,8 @@ export class DeviceFlowManager {
   }
   
   /**
-   * 执行分布式数据传输
-   */
-  private async performDistributedTransfer(targetDeviceId: string, data: Record<string, unknown>): Promise<void> {
+   * 执行分布式数据传�?   */
+  private async performDistributedTransfer(targetDeviceId: string, data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown> : new Error(String(data: Record<string, unknown> instanceof Error ? data: Record<string, unknown> : new Error(String(data: Record<string, unknown>))))))): Promise<void> {
     try {
       Logger.info(DeviceFlowManager.TAG, `Performing distributed data transfer to ${targetDeviceId}`);
       
@@ -499,7 +600,7 @@ export class DeviceFlowManager {
         throw new Error('No active flow to stop');
       }
       
-      Logger.info(DeviceFlowManager.TAG, 'Stopping current flow');
+      Logger.info(DeviceFlowManager.TAG, 'Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow' : new Error(String('Stopping current flow' instanceof Error ? 'Stopping current flow' : new Error(String('Stopping current flow')))))));
       
       this.currentFlowStatus.status = 'cancelled';
       this.notifyFlowStatusChanged();
@@ -527,8 +628,7 @@ export class DeviceFlowManager {
   }
   
   /**
-   * 获取当前流转状态
-   */
+   * 获取当前流转状�?   */
   public getCurrentFlowStatus(): DeviceFlowStatus | null {
     return this.currentFlowStatus;
   }
@@ -539,7 +639,7 @@ export class DeviceFlowManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await configService.setConfig('enableDeviceFlow', enabled);
+      await configService.setConfig('enableDeviceFlow', enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled instanceof Error ? enabled instanceof Error ? enabled : new Error(String(enabled : new Error(String(enabled instanceof Error ? enabled : new Error(String(enabled)))))));
       
       Logger.info(DeviceFlowManager.TAG, `Device flow ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
@@ -561,13 +661,12 @@ export class DeviceFlowManager {
   public removeFlowStatusListener(listener: (status: DeviceFlowStatus) => void): void {
     const index = this.flowListeners.indexOf(listener);
     if (index > -1) {
-      this.flowListeners.splice(index, 1);
+      this.flowListeners.splice(index, 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1)))))));
     }
   }
   
   /**
-   * 通知流转状态变化
-   */
+   * 通知流转状态变�?   */
   private notifyFlowStatusChanged(): void {
     if (this.currentFlowStatus) {
       this.flowListeners.forEach(listener => {
@@ -583,7 +682,7 @@ export class DeviceFlowManager {
   /**
    * 模拟流转过程（用于演示）
    */
-  private async simulateFlowProcess(flowType: string, targetDeviceId: string): Promise<void> {
+  private async simulateFlowProcess(flowType: string, targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string : new Error(String(targetDeviceId: string instanceof Error ? targetDeviceId: string : new Error(String(targetDeviceId: string))))))): Promise<void> {
     return new Promise((resolve) => {
       // 模拟2秒的流转过程
       let progress = 0;
@@ -604,8 +703,7 @@ export class DeviceFlowManager {
   }
   
   /**
-   * 从流转参数恢复应用状态
-   */
+   * 从流转参数恢复应用状�?   */
   public async restoreFromFlowParams(params: Record<string, unknown>): Promise<void> {
     try {
       Logger.info(DeviceFlowManager.TAG, 'Restoring application state from flow params');
@@ -617,10 +715,8 @@ export class DeviceFlowManager {
       
       const flowData = params.data as Record<string, unknown>;
       
-      // 检查是否有视频播放状态需要恢复
-      if (flowData.currentMedia && flowData.position !== undefined) {
-        // 恢复播放状态
-        await playerManager.loadMedia(flowData.currentMedia);
+      // 检查是否有视频播放状态需要恢�?      if (flowData.currentMedia && flowData.position !== undefined) {
+        // 恢复播放状�?        await playerManager.loadMedia(flowData.currentMedia);
         await playerManager.seekTo(flowData.position);
         
         if (flowData.playState === 'playing') {
@@ -638,3 +734,5 @@ export class DeviceFlowManager {
 export function getDeviceFlowManager(): DeviceFlowManager {
   return DeviceFlowManager.getInstance();
 }
+
+

@@ -1,5 +1,4 @@
-// CacheRepository - 缓存仓库类
-// 负责管理应用程序的缓存数据，提供统一的缓存读写和管理接口
+// CacheRepository - 缓存仓库�?// 负责管理应用程序的缓存数据，提供统一的缓存读写和管理接口
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -37,15 +36,12 @@ export const CacheEventType = {
  * 缓存变更事件数据
  */
 export interface CacheChangeEvent<T = unknown> {
-  key: string;          // 缓存键
-  type: CacheType;      // 缓存类型
+  key: string;          // 缓存�?  type: CacheType;      // 缓存类型
   value?: T;            // 缓存值（添加/更新时）
-  metadata?: CacheMetadata; // 缓存元数据
-}
+  metadata?: CacheMetadata; // 缓存元数�?}
 
 /**
- * 缓存仓库类
- */
+ * 缓存仓库�? */
 export class CacheRepository {
   private static instance: CacheRepository;
   private logger = Logger.getInstance();
@@ -64,8 +60,7 @@ export class CacheRepository {
     cleanupInterval: 300000,    // 5分钟
     memoryLimit: 64 * 1024 * 1024, // 64MB
     diskLimit: 448 * 1024 * 1024,  // 448MB
-    evictionPolicy: 'LRU'      // 最近最少使用策略
-  };
+    evictionPolicy: 'LRU'      // 最近最少使用策�?  };
   
   // 缓存统计信息
   private cacheStatistics: CacheStatistics = {
@@ -83,8 +78,7 @@ export class CacheRepository {
   // 缓存目录
   private cacheDirectory: string | null = null;
   
-  // 定时清理器
-  private cleanupTimer: number | null = null;
+  // 定时清理�?  private cleanupTimer: number | null = null;
   
   // 是否已初始化
   private initialized: boolean = false;
@@ -94,8 +88,7 @@ export class CacheRepository {
   private pendingEvents: CacheChangeEvent[] = [];
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('CacheRepository initialized');
     this.setupEventListeners();
@@ -112,8 +105,7 @@ export class CacheRepository {
   }
 
   /**
-   * 初始化缓存仓库
-   * @param config 缓存配置
+   * 初始化缓存仓�?   * @param config 缓存配置
    * @param cacheDir 缓存目录
    */
   public async initialize(config?: Partial<CacheConfig>, cacheDir?: string): Promise<void> {
@@ -149,16 +141,15 @@ export class CacheRepository {
         cacheDir: this.cacheDirectory
       });
     } catch (error) {
-      this.logger.error('Failed to initialize CacheRepository', error as Error);
+      this.Logger.error('Failed to initialize CacheRepository', error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error })))))));
     }
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
     // 监听应用退出事件，保存统计信息
     this.eventBus.on('app:exit', async () => {
@@ -167,16 +158,12 @@ export class CacheRepository {
   }
 
   /**
-   * 添加或更新缓存
-   * @param key 缓存键
-   * @param value 缓存值
-   * @param options 缓存选项
+   * 添加或更新缓�?   * @param key 缓存�?   * @param value 缓存�?   * @param options 缓存选项
    */
   public async setCache<T>(key: string, value: T, options?: {
     expiry?: number;          // 过期时间（毫秒）
     type?: CacheType;         // 缓存类型
-    priority?: CachePriority; // 优先级
-    policy?: CachePolicy;     // 缓存策略
+    priority?: CachePriority; // 优先�?    policy?: CachePolicy;     // 缓存策略
     tags?: string[];          // 缓存标签
   }): Promise<void> {
     // 检查是否初始化
@@ -191,8 +178,7 @@ export class CacheRepository {
       const priority = options?.priority || CachePriority.NORMAL;
       const tags = options?.tags || [];
       
-      // 创建缓存元数据
-      const metadata: CacheMetadata = {
+      // 创建缓存元数�?      const metadata: CacheMetadata = {
         key,
         type: cacheType,
         priority,
@@ -205,29 +191,25 @@ export class CacheRepository {
         tags
       };
       
-      // 创建缓存项
-      const cacheItem: CacheItem<T> = {
+      // 创建缓存�?      const cacheItem: CacheItem<T> = {
         value,
         metadata
       };
       
-      // 检查缓存大小限制
-      if (!this.checkCacheSizeLimit(metadata.size)) {
+      // 检查缓存大小限�?      if (!this.checkCacheSizeLimit(metadata.size)) {
         // 尝试清理空间
         await this.cleanupCache({
           targetSizeReduction: metadata.size,
           priorityThreshold: priority
         });
         
-        // 再次检查
-        if (!this.checkCacheSizeLimit(metadata.size)) {
+        // 再次检�?        if (!this.checkCacheSizeLimit(metadata.size)) {
           this.logger.warn(`Cache size limit exceeded, cannot store item: ${key}`);
           throw new Error('Cache size limit exceeded');
         }
       }
       
-      // 存储到内存
-      if (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK) {
+      // 存储到内�?      if (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK) {
         // 移除旧缓存项（如果存在）
         const oldItem = this.memoryCache.get(key);
         if (oldItem) {
@@ -239,8 +221,7 @@ export class CacheRepository {
         this.updateItemCountStats(true);
       }
       
-      // 存储到磁盘
-      if (cacheType === CacheType.DISK || cacheType === CacheType.MEMORY_DISK) {
+      // 存储到磁�?      if (cacheType === CacheType.DISK || cacheType === CacheType.MEMORY_DISK) {
         await this.storeToDisk(key, cacheItem);
       }
       
@@ -270,10 +251,10 @@ export class CacheRepository {
         expiry: expiry > 0 ? this.formatUtil.formatTime(expiry) : 'never'
       });
     } catch (error) {
-      this.logger.error(`Failed to set cache: ${key}`, error as Error);
+      this.Logger.error(`Failed to set cache: ${key}`, error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error })))))));
       
       throw error;
     }
@@ -281,8 +262,7 @@ export class CacheRepository {
 
   /**
    * 获取缓存
-   * @param key 缓存键
-   * @param options 获取选项
+   * @param key 缓存�?   * @param options 获取选项
    */
   public async getCache<T>(key: string, options?: {
     ignoreExpiry?: boolean;  // 是否忽略过期
@@ -296,11 +276,9 @@ export class CacheRepository {
     try {
       this.cacheStatistics.requests++;
       
-      // 优先从内存获取
-      const memoryItem = this.memoryCache.get(key);
+      // 优先从内存获�?      const memoryItem = this.memoryCache.get(key);
       if (memoryItem) {
-        // 检查是否过期
-        if (!options?.ignoreExpiry && this.isExpired(memoryItem.metadata)) {
+        // 检查是否过�?        if (!options?.ignoreExpiry && this.isExpired(memoryItem.metadata)) {
           this.cacheStatistics.misses++;
           this.cacheStatistics.expirations++;
           
@@ -328,11 +306,9 @@ export class CacheRepository {
         return memoryItem.value as T;
       }
       
-      // 从磁盘获取
-      const diskItem = await this.getFromDisk(key);
+      // 从磁盘获�?      const diskItem = await this.getFromDisk(key);
       if (diskItem) {
-        // 检查是否过期
-        if (!options?.ignoreExpiry && this.isExpired(diskItem.metadata)) {
+        // 检查是否过�?        if (!options?.ignoreExpiry && this.isExpired(diskItem.metadata)) {
           this.cacheStatistics.misses++;
           this.cacheStatistics.expirations++;
           
@@ -361,25 +337,22 @@ export class CacheRepository {
         return diskItem.value as T;
       }
       
-      // 缓存未命中
-      this.cacheStatistics.misses++;
+      // 缓存未命�?      this.cacheStatistics.misses++;
       this.logger.debug(`Cache miss: ${key}`);
       
       return null;
     } catch (error) {
-      this.logger.error(`Failed to get cache: ${key}`, error as Error);
+      this.Logger.error(`Failed to get cache: ${key}`, error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error })))))));
       
       throw error;
     }
   }
 
   /**
-   * 检查缓存是否存在
-   * @param key 缓存键
-   */
+   * 检查缓存是否存�?   * @param key 缓存�?   */
   public hasCache(key: string): boolean {
     if (!this.initialized) {
       return false;
@@ -390,8 +363,7 @@ export class CacheRepository {
 
   /**
    * 删除缓存
-   * @param key 缓存键
-   */
+   * @param key 缓存�?   */
   public async removeCache(key: string): Promise<void> {
     if (!this.initialized) {
       return;
@@ -400,8 +372,7 @@ export class CacheRepository {
     try {
       let removedItem: CacheItem<unknown> | null = null;
       
-      // 从内存删除
-      const memoryItem = this.memoryCache.get(key);
+      // 从内存删�?      const memoryItem = this.memoryCache.get(key);
       if (memoryItem) {
         removedItem = memoryItem;
         this.memoryCache.delete(key);
@@ -409,8 +380,7 @@ export class CacheRepository {
         this.updateItemCountStats(false);
       }
       
-      // 从磁盘删除
-      const diskPath = this.getDiskCachePath(key);
+      // 从磁盘删�?      const diskPath = this.getDiskCachePath(key);
       if (this.fileUtil.fileExists(diskPath)) {
         if (!removedItem) {
           removedItem = await this.getFromDisk(key);
@@ -442,10 +412,10 @@ export class CacheRepository {
         this.logger.debug(`Cache removed: ${key}`);
       }
     } catch (error) {
-      this.logger.error(`Failed to remove cache: ${key}`, error as Error);
+      this.Logger.error(`Failed to remove cache: ${key}`, error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error } instanceof Error ? { key, error } instanceof Error ? { key, error } : new Error(String({ key, error } : new Error(String({ key, error } instanceof Error ? { key, error } : new Error(String({ key, error })))))));
       
       throw error;
     }
@@ -457,8 +427,7 @@ export class CacheRepository {
    */
   public async clearCache(options?: {
     type?: CacheType;        // 缓存类型
-    priority?: CachePriority; // 优先级阈值
-    tags?: string[];         // 标签过滤
+    priority?: CachePriority; // 优先级阈�?    tags?: string[];         // 标签过滤
   }): Promise<void> {
     if (!this.initialized) {
       return;
@@ -467,8 +436,7 @@ export class CacheRepository {
     try {
       const keysToRemove: string[] = [];
       
-      // 收集要删除的缓存键
-      for (const [key, item] of this.memoryCache.entries()) {
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries()) {
         if (this.shouldRemoveItem(item.metadata, options)) {
           keysToRemove.push(key);
         }
@@ -517,10 +485,10 @@ export class CacheRepository {
         options
       });
     } catch (error) {
-      this.logger.error('Failed to clear cache', error as Error);
+      this.Logger.error('Failed to clear cache', error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error })))))));
       
       throw error;
     }
@@ -534,8 +502,7 @@ export class CacheRepository {
   }
 
   /**
-   * 开始批量操作
-   */
+   * 开始批量操�?   */
   public startBatchOperation(): void {
     this.batchOperation = true;
     this.pendingEvents = [];
@@ -550,8 +517,7 @@ export class CacheRepository {
     // 发布所有待处理事件
     for (const event of this.pendingEvents) {
       // 根据事件类型发布相应事件
-      // 这里简化处理，实际应根据事件类型区分
-      this.eventBus.emit(CacheEventType.CACHE_UPDATED, event);
+      // 这里简化处理，实际应根据事件类型区�?      this.eventBus.emit(CacheEventType.CACHE_UPDATED, event);
     }
     
     this.pendingEvents = [];
@@ -611,10 +577,10 @@ export class CacheRepository {
       
       return results;
     } catch (error) {
-      this.logger.error('Failed to search cache', error as Error);
+      this.Logger.error('Failed to search cache', error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error })))))));
       
       throw error;
     }
@@ -641,10 +607,10 @@ export class CacheRepository {
       this.initialized = false;
       this.logger.info('CacheRepository shutdown');
     } catch (error) {
-      this.logger.error('Failed to shutdown CacheRepository', error as Error);
+      this.Logger.error('Failed to shutdown CacheRepository', error as Error);
       
       // 发布缓存错误事件
-      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error });
+      this.eventBus.emit(CacheEventType.CACHE_ERROR, { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error } instanceof Error ? { error } instanceof Error ? { error } : new Error(String({ error } : new Error(String({ error } instanceof Error ? { error } : new Error(String({ error })))))));
       
       throw error;
     }
@@ -693,9 +659,9 @@ export class CacheRepository {
         await this.cleanupExpiredCache();
         await this.cleanupCacheBySize();
       } catch (error) {
-        this.logger.error('Periodic cleanup failed', error as Error);
+        this.Logger.error('Periodic cleanup failed', error as Error);
       }
-    }, this.cacheConfig.cleanupInterval) as unknown as number;
+    }, this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval))))))) as unknown as number;
   }
 
   /**
@@ -709,8 +675,7 @@ export class CacheRepository {
   }
 
   /**
-   * 检查缓存是否过期
-   */
+   * 检查缓存是否过�?   */
   private isExpired(metadata: CacheMetadata): boolean {
     return metadata.expiry > 0 && Date.now() > metadata.expiry;
   }
@@ -718,7 +683,7 @@ export class CacheRepository {
   /**
    * 计算对象大小
    */
-  private calculateSize(value: unknown): number {
+  private calculateSize(value: Record<string, string | number | boolean | null>): number {
     try {
       const jsonString = JSON.stringify(value);
       return new Blob([jsonString]).size;
@@ -728,8 +693,7 @@ export class CacheRepository {
   }
 
   /**
-   * 检查缓存大小限制
-   */
+   * 检查缓存大小限�?   */
   private checkCacheSizeLimit(newSize: number): boolean {
     const totalSize = this.cacheStatistics.memorySize + this.cacheStatistics.diskSize;
     return totalSize + newSize <= this.cacheConfig.maxSize;
@@ -756,14 +720,12 @@ export class CacheRepository {
   }
 
   /**
-   * 更新缓存项数量统计
-   */
+   * 更新缓存项数量统�?   */
   private updateItemCountStats(isMemory: boolean): void {
     if (isMemory) {
       this.cacheStatistics.memoryItems = this.memoryCache.size;
     } else {
-      // 磁盘项数量需要扫描文件系统，这里简化处理
-      this.cacheStatistics.diskItems = Math.max(0, this.cacheStatistics.diskItems);
+      // 磁盘项数量需要扫描文件系统，这里简化处�?      this.cacheStatistics.diskItems = Math.max(0, this.cacheStatistics.diskItems);
     }
   }
 
@@ -792,8 +754,7 @@ export class CacheRepository {
   }
 
   /**
-   * 存储到磁盘
-   */
+   * 存储到磁�?   */
   private async storeToDisk<T>(key: string, item: CacheItem<T>): Promise<void> {
     if (!this.cacheDirectory) {
       return;
@@ -806,8 +767,7 @@ export class CacheRepository {
   }
 
   /**
-   * 从磁盘获取
-   */
+   * 从磁盘获�?   */
   private async getFromDisk<T>(key: string): Promise<CacheItem<T> | null> {
     if (!this.cacheDirectory) {
       return null;
@@ -825,8 +785,7 @@ export class CacheRepository {
     } catch (error) {
       this.logger.warn(`Failed to read cache from disk: ${key}`, error as Error);
       
-      // 删除损坏的文件
-      await this.fileUtil.deleteFile(filePath);
+      // 删除损坏的文�?      await this.fileUtil.deleteFile(filePath);
       
       return null;
     }
@@ -839,8 +798,7 @@ export class CacheRepository {
     try {
       const expiredKeys: string[] = [];
       
-      // 检查内存缓存
-      for (const [key, item] of this.memoryCache.entries()) {
+      // 检查内存缓�?      for (const [key, item] of this.memoryCache.entries()) {
         if (this.isExpired(item.metadata)) {
           expiredKeys.push(key);
         }
@@ -851,8 +809,7 @@ export class CacheRepository {
         await this.removeCache(key);
       }
       
-      // 检查磁盘缓存
-      if (this.cacheDirectory) {
+      // 检查磁盘缓�?      if (this.cacheDirectory) {
         const files = await this.fileUtil.listFiles(this.cacheDirectory);
         for (const file of files) {
           if (file.endsWith('.json')) {
@@ -869,7 +826,7 @@ export class CacheRepository {
         this.logger.info(`Cleaned up ${expiredKeys.length} expired cache items`);
       }
     } catch (error) {
-      this.logger.error('Failed to cleanup expired cache', error as Error);
+      this.Logger.error('Failed to cleanup expired cache', error as Error);
       throw error;
     }
   }
@@ -885,14 +842,39 @@ export class CacheRepository {
         return;
       }
       
-      const targetReduction = totalSize - this.cacheConfig.maxSize * 0.9; // 清理到90%容量
+      const targetReduction = totalSize - this.cacheConfig.maxSize * 0.9; // 清理�?0%容量
       
       await this.cleanupCache({
-        targetSizeReduction: targetReduction,
-        priorityThreshold: CachePriority.LOW
-      });
+        targetSizeReduction: targetReduction, priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      } instanceof Error ? priorityThreshold: CachePriority.LOW
+      } : new Error(String(priorityThreshold: CachePriority.LOW
+      })))))));
     } catch (error) {
-      this.logger.error('Failed to cleanup cache by size', error as Error);
+      this.Logger.error('Failed to cleanup cache by size', error as Error);
       throw error;
     }
   }
@@ -905,8 +887,85 @@ export class CacheRepository {
       const itemsToRemove: Array<{key: string, metadata: CacheMetadata}> = [];
       let totalSizeToRemove = 0;
       
-      // 收集要删除的缓存项
-      for (const [key, item] of this.memoryCache.entries()) {
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
+      let totalSizeToRemove = 0;
+      
+      // 收集要删除的缓存�?      for (const [key, item] of this.memoryCache.entries()))))))) {
         if (item.metadata.priority <= (options.priorityThreshold || CachePriority.LOW)) {
           itemsToRemove.push({ key, metadata: item.metadata });
           totalSizeToRemove += item.metadata.size;
@@ -917,8 +976,7 @@ export class CacheRepository {
         }
       }
       
-      // 如果内存缓存不够，检查磁盘缓存
-      if (totalSizeToRemove < options.targetSizeReduction && this.cacheDirectory) {
+      // 如果内存缓存不够，检查磁盘缓�?      if (totalSizeToRemove < options.targetSizeReduction && this.cacheDirectory) {
         const files = await this.fileUtil.listFiles(this.cacheDirectory);
         
         for (const file of files) {
@@ -938,8 +996,7 @@ export class CacheRepository {
         }
       }
       
-      // 删除缓存项
-      for (const { key } of itemsToRemove) {
+      // 删除缓存�?      for (const { key } of itemsToRemove) {
         await this.removeCache(key);
       }
       
@@ -952,7 +1009,7 @@ export class CacheRepository {
         });
       }
     } catch (error) {
-      this.logger.error('Failed to cleanup cache', error as Error);
+      this.Logger.error('Failed to cleanup cache', error as Error);
       throw error;
     }
   }
@@ -964,9 +1021,112 @@ export class CacheRepository {
     type?: CacheType;
     priority?: CachePriority;
     tags?: string[];
-  }): boolean {
-    // 检查类型
-    if (options?.type && metadata.type !== options.type) {
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } instanceof Error ? options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  } : new Error(String(options?: {
+    type?: CacheType;
+    priority?: CachePriority;
+    tags?: string[];
+  }))))))): boolean {
+    // 检查类�?    if (options?.type && metadata.type !== options.type) {
       return false;
     }
     
@@ -975,8 +1135,7 @@ export class CacheRepository {
       return false;
     }
     
-    // 检查标签
-    if (options?.tags && options.tags.length > 0) {
+    // 检查标�?    if (options?.tags && options.tags.length > 0) {
       const hasMatchingTag = options.tags.some(tag => metadata.tags.includes(tag));
       if (!hasMatchingTag) {
         return false;
@@ -987,11 +1146,9 @@ export class CacheRepository {
   }
 
   /**
-   * 检查是否匹配搜索条件
-   */
+   * 检查是否匹配搜索条�?   */
   private matchesSearchCriteria(metadata: CacheMetadata, params: CacheSearchParams): boolean {
-    // 检查类型
-    if (params.type && metadata.type !== params.type) {
+    // 检查类�?    if (params.type && metadata.type !== params.type) {
       return false;
     }
     
@@ -1000,16 +1157,14 @@ export class CacheRepository {
       return false;
     }
     
-    // 检查标签
-    if (params.tags && params.tags.length > 0) {
+    // 检查标�?    if (params.tags && params.tags.length > 0) {
       const hasMatchingTag = params.tags.some(tag => metadata.tags.includes(tag));
       if (!hasMatchingTag) {
         return false;
       }
     }
     
-    // 检查创建时间范围
-    if (params.createdAfter && metadata.createdAt < params.createdAfter) {
+    // 检查创建时间范�?    if (params.createdAfter && metadata.createdAt < params.createdAfter) {
       return false;
     }
     
@@ -1017,8 +1172,7 @@ export class CacheRepository {
       return false;
     }
     
-    // 检查访问时间范围
-    if (params.accessedAfter && metadata.lastAccessedAt < params.accessedAfter) {
+    // 检查访问时间范�?    if (params.accessedAfter && metadata.lastAccessedAt < params.accessedAfter) {
       return false;
     }
     
@@ -1026,8 +1180,7 @@ export class CacheRepository {
       return false;
     }
     
-    // 检查过期状态
-    if (params.expiredOnly && !this.isExpired(metadata)) {
+    // 检查过期状�?    if (params.expiredOnly && !this.isExpired(metadata)) {
       return false;
     }
     
@@ -1039,8 +1192,7 @@ export class CacheRepository {
   }
 
   /**
-   * 获取排序值
-   */
+   * 获取排序�?   */
   private getSortValue(metadata: CacheMetadata, sortBy: keyof CacheMetadata): number | string {
     const value = metadata[sortBy];
     
@@ -1051,3 +1203,5 @@ export class CacheRepository {
     return 0;
   }
 }
+
+

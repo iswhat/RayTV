@@ -1,20 +1,16 @@
-// TimeoutManager - 超时管理工具类
-import Logger from './Logger';
+// TimeoutManager - 超时管理工具�?import Logger from './Logger';
 
 const TAG = 'TimeoutManager';
 
 /**
- * 超时管理器
- * 提供统一的超时控制和管理功能
+ * 超时管理�? * 提供统一的超时控制和管理功能
  */
 export default class TimeoutManager {
   private static instance: TimeoutManager;
   private timeouts: Map<string, number> = new Map();
-  private defaultTimeout: number = 30000; // 默认30秒超时
-
+  private defaultTimeout: number = 30000; // 默认30秒超�?
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     Logger.info(TAG, 'TimeoutManager initialized');
   }
@@ -44,11 +40,9 @@ export default class TimeoutManager {
    * 创建超时任务
    * @param id 超时任务ID
    * @param callback 超时回调函数
-   * @param timeout 超时时间（毫秒），如果不指定则使用默认值
-   */
+   * @param timeout 超时时间（毫秒），如果不指定则使用默认�?   */
   public setTimeout(id: string, callback: () => void, timeout?: number): void {
-    // 清除已存在的相同ID的超时任务
-    this.clearTimeout(id);
+    // 清除已存在的相同ID的超时任�?    this.clearTimeout(id);
 
     // 设置新的超时任务
     const actualTimeout = timeout || this.defaultTimeout;
@@ -59,15 +53,14 @@ export default class TimeoutManager {
       } catch (error) {
         Logger.error(TAG, `Error in timeout callback for ${id}: ${error}`);
       }
-    }, actualTimeout);
+    }, actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout : new Error(String(actualTimeout instanceof Error ? actualTimeout : new Error(String(actualTimeout)))))));
 
     this.timeouts.set(id, timerId);
     Logger.debug(TAG, `Timeout set for ${id}: ${actualTimeout}ms`);
   }
 
   /**
-   * 清除指定ID的超时任务
-   * @param id 超时任务ID
+   * 清除指定ID的超时任�?   * @param id 超时任务ID
    * @returns 是否成功清除
    */
   public clearTimeout(id: string): boolean {
@@ -82,8 +75,7 @@ export default class TimeoutManager {
   }
 
   /**
-   * 清除所有超时任务
-   */
+   * 清除所有超时任�?   */
   public clearAllTimeouts(): void {
     for (const [id, timerId] of this.timeouts) {
       clearTimeout(timerId);
@@ -132,15 +124,13 @@ export default class TimeoutManager {
   }
 
   /**
-   * 获取当前活跃的超时任务数量
-   */
+   * 获取当前活跃的超时任务数�?   */
   public getActiveTimeoutCount(): number {
     return this.timeouts.size;
   }
 
   /**
-   * 检查指定ID的超时任务是否存在
-   * @param id 超时任务ID
+   * 检查指定ID的超时任务是否存�?   * @param id 超时任务ID
    * @returns 是否存在
    */
   public hasTimeout(id: string): boolean {
@@ -148,10 +138,8 @@ export default class TimeoutManager {
   }
 
   /**
-   * 创建一个可取消的延迟函数
-   * @param delay 延迟时间（毫秒）
-   * @returns 包含promise和cancel方法的对象
-   */
+   * 创建一个可取消的延迟函�?   * @param delay 延迟时间（毫秒）
+   * @returns 包含promise和cancel方法的对�?   */
   public delay(delay: number): {
     promise: Promise<void>;
     cancel: () => void;
@@ -204,8 +192,7 @@ export default class TimeoutManager {
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
 
-          // 如果是最后一次尝试，则抛出错误
-          if (attempt >= maxRetries) {
+          // 如果是最后一次尝试，则抛出错�?          if (attempt >= maxRetries) {
             Logger.error(TAG, `All ${maxRetries + 1} attempts failed: ${lastError.message}`);
             throw lastError;
           }
@@ -213,28 +200,29 @@ export default class TimeoutManager {
           // 调用重试回调
           if (onRetry) {
             try {
-              onRetry(attempt + 1, lastError);
+              onRetry(attempt + 1, lastError instanceof Error ? lastError : new Error(String(lastError instanceof Error ? lastError instanceof Error ? lastError : new Error(String(lastError : new Error(String(lastError instanceof Error ? lastError : new Error(String(lastError instanceof Error ? lastError instanceof Error ? lastError : new Error(String(lastError instanceof Error ? lastError instanceof Error ? lastError : new Error(String(lastError : new Error(String(lastError instanceof Error ? lastError : new Error(String(lastError : new Error(String(lastError instanceof Error ? lastError : new Error(String(lastError instanceof Error ? lastError instanceof Error ? lastError : new Error(String(lastError : new Error(String(lastError instanceof Error ? lastError : new Error(String(lastError)))))));
             } catch (callbackError) {
               Logger.error(TAG, `Error in retry callback: ${callbackError instanceof Error ? callbackError.message : String(callbackError)}`);
             }
           }
 
-          Logger.warn(TAG, `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}`);
+          Logger.warn(TAG, `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` instanceof Error ? `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}` : new Error(String(`Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}`)))))));
 
           // 等待重试延迟
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }
 
-      // 这一行理论上不会执行到，但为了类型安全
-      const finalError = lastError || new Error('Retry failed without error');
+      // 这一行理论上不会执行到，但为了类型安�?      const finalError = lastError || new Error('Retry failed without error');
       Logger.error(TAG, 'Unexpected end of retry loop: ' + finalError.message);
       throw finalError;
     } catch (error) {
       // 确保抛出的总是Error类型
       const finalError = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Error in withRetry method: ${finalError.message}`);
+      Logger.error(TAG, `Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}` instanceof Error ? `Error in withRetry method: ${finalError.message}` : new Error(String(`Error in withRetry method: ${finalError.message}`)))))));
       throw finalError;
     }
   }
 }
+
+

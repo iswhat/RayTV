@@ -4,11 +4,162 @@
 import router from '@ohos.router';
 import StorageUtil from '../common/util/StorageUtil';
 
-// 定义router.pushUrl和router.replaceUrl方法的参数类型接口
-export interface RouterOptions {
+// 页面路由常量
+export class PageRoute {
+  static readonly HOME = 'home';
+  static readonly VIDEO_PLAY = 'videoPlay';
+  static readonly LINE_MANAGER = 'lineManager';
+  static readonly SETTINGS = 'settings';
+  static readonly SEARCH = 'search';
+  static readonly FAVORITES = 'favorites';
+  static readonly HISTORY = 'history';
+  static readonly CATEGORY = 'category';
+  static readonly DETAIL = 'detail';
+  static readonly LIVE = 'live';
+}
+
+// 视频播放参数接口
+export interface VideoPlayParams {
+  videoId: string;
+  siteKey: string;
+  episodeName?: string;
+  position?: number;
+  fromSearch?: boolean;
+}
+
+// 分类信息接口
+export interface CategoryInfo {
+  id: string;
+  name: string;
+  type?: string;
+}
+
+// 详情参数接口
+export interface DetailParams {
+  id: string;
+  siteKey: string;
+  type: string;
+}
+
+// 路由映射接口
+export interface RouteMapping {
   url: string;
-  params?: Record<string, string | number | boolean | null>;
-  mode?: router.RouterMode;
+  route: string;
+  equals(other: RouteMapping): boolean;
+}
+
+// 路由映射实现类
+export class RouteMappingImpl implements RouteMapping {
+  url: string = '';
+  route: string = '';
+  
+  constructor(url?: string, route?: string) {
+    if (url !== undefined) {
+      this.url = url;
+    }
+    if (route !== undefined) {
+      this.route = route;
+    }
+  }
+  
+  equals(other: RouteMapping): boolean {
+    return this.url === other.url && this.route === other.route;
+  }
+}
+
+// 导航历史项接口
+export interface NavigationHistoryItem {
+  route: string;
+  url: string;
+  params?: NavigationParams;
+  timestamp: number;
+  clone(): NavigationHistoryItem;
+}
+
+// 导航历史项实现类
+export class NavigationHistoryItemImpl implements NavigationHistoryItem {
+  route: string = '';
+  url: string = '';
+  params?: NavigationParams;
+  timestamp: number = 0;
+  
+  constructor(route?: string, url?: string, params?: NavigationParams, timestamp?: number) {
+    if (route !== undefined) {
+      this.route = route;
+    }
+    if (url !== undefined) {
+      this.url = url;
+    }
+    if (params !== undefined) {
+      this.params = params;
+    }
+    if (timestamp !== undefined) {
+      this.timestamp = timestamp;
+    }
+  }
+  
+  clone(): NavigationHistoryItem {
+    const clone = new NavigationHistoryItemImpl();
+    clone.route = this.route;
+    clone.url = this.url;
+    clone.timestamp = this.timestamp;
+    if (this.params instanceof NavigationParamsImpl) {
+      clone.params = this.params.clone();
+    }
+    return clone;
+  }
+}
+
+// 导航参数接口
+export interface NavigationParams {
+  id?: string;
+  name?: string;
+  title?: string;
+  category?: string;
+  page?: number;
+  keyword?: string;
+  isFavorite?: boolean;
+  getParam(key: string): string | number | boolean | null | undefined;
+  setParam(key: string, value: string | number | boolean | null): void;
+  clone(): NavigationParams;
+}
+
+// 导航参数实现类
+export class NavigationParamsImpl implements NavigationParams {
+  private _data: Record<string, string | number | boolean | null> = {};
+  
+  getParam(key: string): string | number | boolean | null | undefined {
+    return this._data[key];
+  }
+  
+  setParam(key: string, value: string | number | boolean | null): void {
+    this._data[key] = value;
+  }
+  
+  clone(): NavigationParams {
+    const clone = new NavigationParamsImpl();
+    const keys = Object.keys(this._data);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      clone.setParam(key, this._data[key]);
+    }
+    return clone;
+  }
+  
+  // 转换为普通对象以便在router中使用
+  toObject(): Record<string, string | number | boolean | null> {
+    // 手动构建对象，避免使用Object.fromEntries
+    const result: Record<string, string | number | boolean | null> = {};
+    const keys = Object.keys(this._data);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const value = this._data[key];
+      if (value !== undefined) {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
 }
 
 export class AppNavigator {
@@ -46,10 +197,15 @@ export class AppNavigator {
     // 修复结构类型错误：将VideoPlayParams转换为NavigationParams
     const navParams: NavigationParams = new NavigationParamsImpl();
     navParams.setParam('videoId', params.videoId);
-    navParams.setParam('siteKey', params.siteKey);
-    navParams.setParam('episodeName', params.episodeName);
-    navParams.setParam('position', params.position);
-    navParams.setParam('fromSearch', params.fromSearch);
+    // 确保传递给setParam的参数明确不是undefined
+    const siteKey: string | null = params.siteKey !== undefined ? params.siteKey : null;
+    const episodeName: string | null = params.episodeName !== undefined ? params.episodeName : null;
+    const position: number | null = params.position !== undefined ? params.position : null;
+    const fromSearch: boolean | null = params.fromSearch !== undefined ? params.fromSearch : null;
+    navParams.setParam('siteKey', siteKey);
+    navParams.setParam('episodeName', episodeName);
+    navParams.setParam('position', position);
+    navParams.setParam('fromSearch', fromSearch);
     await this.navigateTo(PageRoute.VIDEO_PLAY, navParams);
   }
 
@@ -146,15 +302,14 @@ export class AppNavigator {
       this.addToHistory(historyItem);
 
       // 使用新的router.pushUrl方法替代已弃用的router.push
-      // 创建符合router.pushUrl要求的对象
-      const routerOptions: RouterOptions = new RouterOptionsImpl(
-        url,
-        params instanceof NavigationParamsImpl ? 
+      const pushOptions: router.PushOptions = {
+        url: url,
+        params: params instanceof NavigationParamsImpl ? 
           params.toObject() : 
           (params || {} as Record<string, string | number | boolean | null>),
-        router.RouterMode.Single
-      );
-      await router.pushUrl(routerOptions);
+        mode: router.RouterMode.Single
+      };
+      await router.pushUrl(pushOptions);
     } catch (error) {
         // 安全处理错误信息
         const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
@@ -185,13 +340,12 @@ export class AppNavigator {
   async backToHome(): Promise<void> {
     try {
       // 使用新的router.pushUrl方法替代已弃用的router.push
-      // 创建符合router.pushUrl要求的对象
-      const routerOptions: RouterOptions = new RouterOptionsImpl(
-        this.getPageUrl(PageRoute.HOME),
-        {} as Record<string, string | number | boolean | null>,
-        router.RouterMode.Single
-      );
-      await router.pushUrl(routerOptions);
+      const pushOptions: router.PushOptions = {
+        url: this.getPageUrl(PageRoute.HOME),
+        params: {} as Record<string, string | number | boolean | null>,
+        mode: router.RouterMode.Single
+      };
+      await router.pushUrl(pushOptions);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
     } catch (error) {
@@ -211,14 +365,13 @@ export class AppNavigator {
     try {
       const url = this.getPageUrl(route);
       // 使用新的router.replaceUrl方法替代已弃用的router.replace
-      // 创建符合router.replaceUrl要求的对象
-      const routerOptions: RouterOptions = new RouterOptionsImpl(
-        url,
-        params instanceof NavigationParamsImpl ? 
+      const replaceOptions: router.ReplaceOptions = {
+        url: url,
+        params: params instanceof NavigationParamsImpl ? 
           params.toObject() : 
           (params || {} as Record<string, string | number | boolean | null>)
-      );
-      await router.replaceUrl(routerOptions);
+      };
+      await router.replaceUrl(replaceOptions);
       
       // 创建符合接口定义的历史记录项
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
@@ -413,302 +566,4 @@ export class AppNavigator {
     
     return PageRoute.HOME;
   }
-}
-
-// 定义路由映射接口 - 避免structural typing问题
-export interface RouteMapping {
-  url: string;
-  route: string;
-  // 显式定义方法，避免隐式结构类型比较
-  equals(other: RouteMapping): boolean;
-}
-
-// 实现路由映射类 - 确保完整实现接口
-export class RouteMappingImpl implements RouteMapping {
-  url: string = '';
-  route: string = '';
-  
-  constructor(url?: string, route?: string) {
-    if (url !== undefined) {
-      this.url = url;
-    }
-    if (route !== undefined) {
-      this.route = route;
-    }
-  }
-  
-  // 明确实现equals方法，避免依赖structural typing
-  equals(other: RouteMapping): boolean {
-    return this.url === other.url && this.route === other.route;
-  }
-}
-
-// 实现导航选项类 - 完整实现接口
-export class RouterOptionsImpl implements RouterOptions {
-  url: string = '';
-  params?: Record<string, string | number | boolean | null>;
-  mode?: router.RouterMode;
-  
-  constructor(url?: string, params?: Record<string, string | number | boolean | null>, mode?: router.RouterMode) {
-    if (url !== undefined) {
-      this.url = url;
-    }
-    if (params !== undefined) {
-      this.params = params;
-    }
-    if (mode !== undefined) {
-      this.mode = mode;
-    }
-  }
-  
-  
-}
-
-// 导航历史项接口
-export interface NavigationHistoryItem {
-  route: string;
-  url: string;
-  params?: NavigationParams;
-  timestamp: number;
-  // 添加克隆方法，避免结构类型转换问题
-  clone(): NavigationHistoryItem;
-}
-
-// 实现导航历史项接口 - 完整实现所有方法
-export class NavigationHistoryItemImpl implements NavigationHistoryItem {
-  route: string = '';
-  url: string = '';
-  params?: NavigationParams;
-  timestamp: number = 0;
-  
-  constructor(route?: string, url?: string, params?: NavigationParams, timestamp?: number) {
-    if (route !== undefined) {
-      this.route = route;
-    }
-    if (url !== undefined) {
-      this.url = url;
-    }
-    if (params !== undefined) {
-      this.params = params;
-    }
-    if (timestamp !== undefined) {
-      this.timestamp = timestamp;
-    }
-  }
-  
-  // 实现clone方法，避免结构类型转换
-  clone(): NavigationHistoryItem {
-    const clone = new NavigationHistoryItemImpl();
-    clone.route = this.route;
-    clone.url = this.url;
-    clone.timestamp = this.timestamp;
-    // 深拷贝params
-    if (this.params instanceof NavigationParamsImpl) {
-      clone.params = this.params.clone();
-    }
-    return clone;
-  }
-}
-
-/**
- * 页面路由常量
- */
-export class PageRoute {
-  static readonly HOME = 'home';
-  static readonly VIDEO_PLAY = 'videoPlay';
-  static readonly LINE_MANAGER = 'lineManager';
-  static readonly SETTINGS = 'settings';
-  static readonly SEARCH = 'search';
-  static readonly FAVORITES = 'favorites';
-  static readonly HISTORY = 'history';
-  static readonly CATEGORY = 'category';
-  static readonly DETAIL = 'detail';
-  static readonly LIVE = 'live';
-}
-
-/**
-   * 导航参数类型
-   */
-// 统一NavigationParams接口定义，避免声明合并问题
-export interface NavigationParams {
-  // 定义常用的参数键值对
-  id?: string;
-  name?: string;
-  title?: string;
-  category?: string;
-  page?: number;
-  keyword?: string;
-  isFavorite?: boolean;
-  // 如果需要处理更多动态参数，可以使用以下方法
-  getParam(key: string): string | number | boolean | null | undefined;
-  setParam(key: string, value: string | number | boolean | null): void;
-  // 添加clone方法，避免结构类型问题
-  clone(): NavigationParams;
-}
-
-// 实现NavigationParams接口
-export class NavigationParamsImpl implements NavigationParams {
-  // 内部存储 - 移除any/unknown类型，使用明确类型
-  private _data: Record<string, string | number | boolean | null> = {};
-  
-  // 实现接口方法 - 使用明确类型
-  getParam(key: string): string | number | boolean | null | undefined {
-    return this._data[key];
-  }
-  
-  setParam(key: string, value: string | number | boolean | null): void {
-    this._data[key] = value;
-  }
-  
-  // 实现clone方法，避免结构类型转换问题
-  clone(): NavigationParams {
-    const clone = new NavigationParamsImpl();
-    // 深拷贝数据 - 使用Object.keys代替for..in循环，避免ArkTS严格模式警告
-    const keys = Object.keys(this._data);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const value = this._data[key];
-      clone.setParam(key, value);
-    }
-    return clone;
-  }
-  
-  // 属性访问器
-  get id(): string | undefined {
-    return this._data.id as string | undefined;
-  }
-  
-  set id(value: string | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
-      this._data.id = null;
-    } else {
-      this._data.id = value;
-    }
-  }
-  
-  get name(): string | undefined {
-    return this._data.name as string | undefined;
-  }
-  
-  set name(value: string | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
-      this._data.name = null;
-    } else {
-      this._data.name = value;
-    }
-  }
-  
-  get title(): string | undefined {
-    return this._data.title as string | undefined;
-  }
-  
-  set title(value: string | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
-      this._data.title = null;
-    } else {
-      this._data.title = value;
-    }
-  }
-  
-  get category(): string | undefined {
-    return this._data.category as string | undefined;
-  }
-  
-  set category(value: string | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用null或空字符串代替undefined
-      this._data.category = null;
-    } else {
-      this._data.category = value;
-    }
-  }
-  
-  get page(): number | undefined {
-    return this._data.page as number | undefined;
-  }
-  
-  set page(value: number | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用0或null代替undefined
-      this._data.page = 0;
-    } else {
-      this._data.page = value;
-    }
-  }
-  
-  get keyword(): string | undefined {
-    return this._data.keyword as string | undefined;
-  }
-  
-  set keyword(value: string | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用空字符串代替undefined
-      this._data.keyword = '';
-    } else {
-      this._data.keyword = value;
-    }
-  }
-  
-  get isFavorite(): boolean | undefined {
-    return this._data.isFavorite as boolean | undefined;
-  }
-  
-  set isFavorite(value: boolean | undefined) {
-    if (value === undefined) {
-      // 修复undefined类型赋值错误：使用false代替undefined
-      this._data.isFavorite = false;
-    } else {
-      this._data.isFavorite = value;
-    }
-  }
-  
-  // 转换为普通对象以便在router中使用
-  toObject(): Record<string, string | number | boolean | null> {
-    const result: Record<string, string | number | boolean | null> = {};
-    // 使用Object.keys代替for..in循环，避免ArkTS严格模式警告
-    const keys = Object.keys(this._data);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const value = this._data[key];
-      // 只序列化基本类型
-      if (value !== undefined) {
-        result[key] = value;
-      }
-    }
-    return result;
-  }
-}
-
-
-
-/**
- * 视频播放参数
- */
-export interface VideoPlayParams {
-  videoId: string;
-  siteKey: string;
-  episodeName: string; // 移除可选标记
-  position: number; // 移除可选标记
-  fromSearch: boolean; // 移除可选标记
-}
-
-/**
- * 详情页参数
- */
-export interface DetailParams {
-  id: string;
-  siteKey: string;
-  type: string; // 改为string类型
-}
-
-/**
- * 分类信息
- */
-export interface CategoryInfo {
-  id: string; // 移除可选标记，确保类型一致性
-  name: string;
-  type: string; // 改为string类型，避免联合类型
 }

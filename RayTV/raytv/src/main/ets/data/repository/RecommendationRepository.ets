@@ -1,5 +1,4 @@
-// 推荐仓库类 - 管理内容推荐算法和数据
-import Logger from '../utils/Logger';
+// 推荐仓库�?- 管理内容推荐算法和数�?import Logger from '../utils/Logger';
 import StorageUtil from '../utils/StorageUtil';
 import NetworkUtil from '../utils/NetworkUtil';
 import EventBusUtil from '../utils/EventBusUtil';
@@ -121,8 +120,7 @@ export interface UserPreferences {
   updatedAt: number;
 }
 
-// 推荐仓库类
-export class RecommendationRepository {
+// 推荐仓库�?export class RecommendationRepository {
   private static instance: RecommendationRepository;
   private readonly logger: Logger;
   private readonly storageUtil: StorageUtil;
@@ -143,8 +141,7 @@ export class RecommendationRepository {
     userPreferences: '/user/preferences'
   };
   
-  // 存储键配置
-  private readonly storageKeys = {
+  // 存储键配�?  private readonly storageKeys = {
     userPreferences: 'recommendation:userPreferences',
     recommendationCache: 'recommendation:cache:',
     watchHistory: 'recommendation:watchHistory',
@@ -184,15 +181,12 @@ export class RecommendationRepository {
     }
   };
   
-  // 缓存的配置
-  private cachedConfig: RecommendationConfig | null = null;
+  // 缓存的配�?  private cachedConfig: RecommendationConfig | null = null;
   
-  // 缓存的用户偏好
-  private cachedUserPreferences: UserPreferences | null = null;
+  // 缓存的用户偏�?  private cachedUserPreferences: UserPreferences | null = null;
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger = Logger.getInstance();
     this.storageUtil = StorageUtil.getInstance();
@@ -218,8 +212,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取推荐类型枚举的所有值
-   * 替代Object.values，兼容ArkTS语法
+   * 获取推荐类型枚举的所有�?   * 替代Object.values，兼容ArkTS语法
    */
   private getRecommendationTypeValues(): string[] {
     return [
@@ -238,8 +231,7 @@ export class RecommendationRepository {
   }
 
   /**
-   * 初始化推荐仓库
-   */
+   * 初始化推荐仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载配置
@@ -255,26 +247,23 @@ export class RecommendationRepository {
       
       this.logger.info('RecommendationRepository initialization completed');
     } catch (error) {
-      this.logger.error('Failed to initialize RecommendationRepository', error as Error);
+      this.Logger.error('Failed to initialize RecommendationRepository', error as Error);
     }
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
     // 监听用户登录/登出事件
-    this.eventBus.on('user:login', async () => {
-      // 登录后加载用户偏好
-      await this.loadUserPreferences();
+    this.eventBus.on('user:login', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
+      // 登录后加载用户偏�?      await this.loadUserPreferences();
       
       // 清除个性化推荐缓存
       await this.clearCache(RecommendationType.PERSONALIZED);
     });
     
     this.eventBus.on('user:logout', async () => {
-      // 登出时重置用户偏好
-      this.cachedUserPreferences = null;
+      // 登出时重置用户偏�?      this.cachedUserPreferences = null;
     });
     
     // 监听播放进度更新事件
@@ -286,8 +275,7 @@ export class RecommendationRepository {
     
     // 监听搜索历史更新事件
     this.eventBus.on('search:historyUpdated', async () => {
-      // 清除基于搜索历史的推荐缓存
-      await this.clearCache(RecommendationType.BASED_ON_WATCH_HISTORY);
+      // 清除基于搜索历史的推荐缓�?      await this.clearCache(RecommendationType.BASED_ON_WATCH_HISTORY);
     });
   }
   
@@ -308,7 +296,7 @@ export class RecommendationRepository {
         await this.saveConfig();
       }
     } catch (error) {
-      this.logger.error('Failed to load recommendation config', error as Error);
+      this.Logger.error('Failed to load recommendation config', error as Error);
       this.cachedConfig = this.defaultConfig;
     }
   }
@@ -319,12 +307,63 @@ export class RecommendationRepository {
   private async saveConfig(): Promise<void> {
     try {
       await this.storageUtil.setObject(
-        this.storageKeys.recommendationConfig,
-        this.cachedConfig,
+        this.storageKeys.recommendationConfig, this.cachedConfig,
         LocalStorageType.DEFAULT
-      );
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig,
+        LocalStorageType.DEFAULT
+      )))))));
     } catch (error) {
-      this.logger.error('Failed to save recommendation config', error as Error);
+      this.Logger.error('Failed to save recommendation config', error as Error);
     }
   }
   
@@ -334,15 +373,40 @@ export class RecommendationRepository {
   private async loadUserPreferences(): Promise<void> {
     try {
       const preferences = await this.storageUtil.getObject<UserPreferences>(
-        this.storageKeys.userPreferences,
-        LocalStorageType.DEFAULT
-      );
+        this.storageKeys.userPreferences, LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+      )))))));
       
       if (preferences) {
         this.cachedUserPreferences = preferences;
       }
     } catch (error) {
-      this.logger.error('Failed to load user preferences', error as Error);
+      this.Logger.error('Failed to load user preferences', error as Error);
     }
   }
   
@@ -354,20 +418,71 @@ export class RecommendationRepository {
       if (this.cachedUserPreferences) {
         this.cachedUserPreferences.updatedAt = Date.now();
         await this.storageUtil.setObject(
-          this.storageKeys.userPreferences,
-          this.cachedUserPreferences,
+          this.storageKeys.userPreferences, this.cachedUserPreferences,
           LocalStorageType.DEFAULT
-        );
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedUserPreferences,
+          LocalStorageType.DEFAULT
+        )))))));
       }
     } catch (error) {
-      this.logger.error('Failed to save user preferences', error as Error);
+      this.Logger.error('Failed to save user preferences', error as Error);
     }
   }
   
   /**
    * 更新观看历史
    */
-  private async updateWatchHistory(videoId: string, progress: number, duration: number): Promise<void> {
+  private async updateWatchHistory(videoId: string, progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number : new Error(String(progress: number, duration: number instanceof Error ? progress: number, duration: number : new Error(String(progress: number, duration: number))))))): Promise<void> {
     try {
       const watchHistory = await this.storageUtil.getObject<Record<string, { progress: number; duration: number; timestamp: number }>>(
         this.storageKeys.watchHistory,
@@ -393,20 +508,43 @@ export class RecommendationRepository {
         duration
       });
     } catch (error) {
-      this.logger.error('Failed to update watch history', error as Error);
+      this.Logger.error('Failed to update watch history', error as Error);
     }
   }
   
   /**
-   * 预加载推荐数据
-   */
+   * 预加载推荐数�?   */
   private async preloadRecommendations(): Promise<void> {
     try {
-      // 预加载热门推荐
-      await this.getRecommendations({
-        type: RecommendationType.TRENDING,
-        limit: 10
-      });
+      // 预加载热门推�?      await this.getRecommendations({
+        type: RecommendationType.TRENDING, limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      } : new Error(String(limit: 10
+      } instanceof Error ? limit: 10
+      } : new Error(String(limit: 10
+      })))))));
       
       // 预加载新发布内容
       await this.getRecommendations({
@@ -425,8 +563,7 @@ export class RecommendationRepository {
    */
   public async getRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
     try {
-      // 检查缓存
-      const cacheKey = this.getCacheKey(request);
+      // 检查缓�?      const cacheKey = this.getCacheKey(request);
       const cachedResponse = await this.cacheService.get<RecommendationResponse>(cacheKey, CacheType.RECOMMENDATION);
       
       if (cachedResponse) {
@@ -462,8 +599,7 @@ export class RecommendationRepository {
         error: error as Error
       });
       
-      // 尝试从离线缓存获取
-      return await this.getOfflineRecommendations(request);
+      // 尝试从离线缓存获�?      return await this.getOfflineRecommendations(request);
     }
   }
   
@@ -527,8 +663,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 构建请求头
-   */
+   * 构建请求�?   */
   private buildRequestHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
@@ -571,8 +706,7 @@ export class RecommendationRepository {
       );
       
       if (offlineData) {
-        // 过滤离线数据以匹配请求类型
-        const filteredItems = offlineData.items.filter(item => {
+        // 过滤离线数据以匹配请求类�?        const filteredItems = offlineData.items.filter(item => {
           if (request.contentTypes && !request.contentTypes.includes(item.type)) {
             return false;
           }
@@ -603,8 +737,7 @@ export class RecommendationRepository {
       this.logger.warn('Failed to get offline recommendations', error as Error);
     }
     
-    // 返回空响应作为后备
-    return {
+    // 返回空响应作为后�?    return {
       items: [],
       total: 0,
       type: request.type,
@@ -617,8 +750,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取缓存键
-   */
+   * 获取缓存�?   */
   private getCacheKey(request: RecommendationRequest): string {
     const keyParts = [
       request.type,
@@ -644,12 +776,10 @@ export class RecommendationRepository {
   public async clearCache(type?: RecommendationType): Promise<void> {
     try {
       if (type) {
-        // 清除特定类型的缓存
-        const cacheKey = this.getCacheKey({ type, limit: 0 });
+        // 清除特定类型的缓�?        const cacheKey = this.getCacheKey({ type, limit: 0 });
         await this.cacheService.delete(cacheKey, CacheType.RECOMMENDATION);
       } else {
-        // 清除所有推荐缓存
-        const cacheKeys = this.getRecommendationTypeValues().map(t => 
+        // 清除所有推荐缓�?        const cacheKeys = this.getRecommendationTypeValues().map(t => 
           this.getCacheKey({ type: t as RecommendationType, limit: 0 })
         );
         
@@ -660,7 +790,7 @@ export class RecommendationRepository {
       
       this.logger.info(`Recommendation cache cleared for type: ${type || 'all'}`);
     } catch (error) {
-      this.logger.error('Failed to clear recommendation cache', error as Error);
+      this.Logger.error('Failed to clear recommendation cache', error as Error);
     }
   }
   
@@ -677,13 +807,142 @@ export class RecommendationRepository {
   public async updateUserPreferences(preferences: Partial<UserPreferences>): Promise<void> {
     if (!this.cachedUserPreferences) {
       this.cachedUserPreferences = {
-        preferredCategories: [],
-        preferredTags: [],
+        preferredCategories: [], preferredTags: [],
         dislikedCategories: [],
         dislikedTags: [],
         preferredContentTypes: ['video', 'live'],
         excludePremiumContent: false,
-        updatedAt: Date.now()
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( instanceof Error ? preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now( : new Error(String(preferredTags: [],
+        dislikedCategories: [],
+        dislikedTags: [],
+        preferredContentTypes: ['video', 'live'],
+        excludePremiumContent: false,
+        updatedAt: Date.now()))))))
       };
     }
     
@@ -736,8 +995,7 @@ export class RecommendationRepository {
         return [];
       }
       
-      // 过滤出未完成的观看记录
-      const continueWatchingItems: RecommendationItem[] = [];
+      // 过滤出未完成的观看记�?      const continueWatchingItems: RecommendationItem[] = [];
       
       for (const [videoId, history] of Object.entries(watchHistory)) {
         if (history.progress < history.duration * 0.9) { // 进度小于90%的视为未完成
@@ -760,9 +1018,8 @@ export class RecommendationRepository {
         return bTime - aTime;
       });
       
-      return continueWatchingItems.slice(0, 10); // 最多返回10个
-    } catch (error) {
-      this.logger.error('Failed to get continue watching items', error as Error);
+      return continueWatchingItems.slice(0, 10); // 最多返�?0�?    } catch (error) {
+      this.Logger.error('Failed to get continue watching items', error as Error);
       return [];
     }
   }
@@ -770,7 +1027,7 @@ export class RecommendationRepository {
   /**
    * 获取相似内容推荐
    */
-  public async getSimilarContent(videoId: string, limit: number = 10): Promise<RecommendationItem[]> {
+  public async getSimilarContent(videoId: string, limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10 : new Error(String(limit: number = 10 instanceof Error ? limit: number = 10 : new Error(String(limit: number = 10))))))): Promise<RecommendationItem[]> {
     try {
       const response = await this.getRecommendations({
         type: RecommendationType.SIMILAR,
@@ -780,7 +1037,7 @@ export class RecommendationRepository {
       
       return response.items;
     } catch (error) {
-      this.logger.error('Failed to get similar content', error as Error);
+      this.Logger.error('Failed to get similar content', error as Error);
       return [];
     }
   }
@@ -791,30 +1048,79 @@ export class RecommendationRepository {
   public async getTrending(limit: number = 20): Promise<RecommendationItem[]> {
     try {
       const response = await this.getRecommendations({
-        type: RecommendationType.TRENDING,
-        limit
-      });
+        type: RecommendationType.TRENDING, limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      })))))));
       
       return response.items;
     } catch (error) {
-      this.logger.error('Failed to get trending content', error as Error);
+      this.Logger.error('Failed to get trending content', error as Error);
       return [];
     }
   }
   
   /**
-   * 获取新发布内容
-   */
+   * 获取新发布内�?   */
   public async getNewReleases(limit: number = 20): Promise<RecommendationItem[]> {
     try {
       const response = await this.getRecommendations({
-        type: RecommendationType.NEW_RELEASES,
-        limit
-      });
+        type: RecommendationType.NEW_RELEASES, limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      } : new Error(String(limit
+      } instanceof Error ? limit
+      } : new Error(String(limit
+      })))))));
       
       return response.items;
     } catch (error) {
-      this.logger.error('Failed to get new releases', error as Error);
+      this.Logger.error('Failed to get new releases', error as Error);
       return [];
     }
   }
@@ -825,10 +1131,61 @@ export class RecommendationRepository {
   public async saveOfflineRecommendations(recommendations: RecommendationItem[]): Promise<void> {
     try {
       const offlineData: RecommendationResponse = {
-        items: recommendations,
-        total: recommendations.length,
+        items: recommendations, total: recommendations.length,
         type: RecommendationType.PERSONALIZED,
-        generatedAt: Date.now()
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( instanceof Error ? total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now( : new Error(String(total: recommendations.length,
+        type: RecommendationType.PERSONALIZED,
+        generatedAt: Date.now()))))))
       };
       
       await this.storageUtil.setObject(
@@ -839,7 +1196,7 @@ export class RecommendationRepository {
       
       this.logger.info(`Saved ${recommendations.length} recommendations for offline use`);
     } catch (error) {
-      this.logger.error('Failed to save offline recommendations', error as Error);
+      this.Logger.error('Failed to save offline recommendations', error as Error);
     }
   }
   
@@ -848,11 +1205,88 @@ export class RecommendationRepository {
    */
   public async cleanupExpiredData(): Promise<void> {
     try {
-      // 清理过期的观看历史（30天前）
-      const watchHistory = await this.storageUtil.getObject<Record<string, { progress: number; duration: number; timestamp: number }>>(
+      // 清理过期的观看历史（30天前�?      const watchHistory = await this.storageUtil.getObject<Record<string, { progress: number; duration: number; timestamp: number }>>(
         this.storageKeys.watchHistory,
         LocalStorageType.DEFAULT
-      );
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       instanceof Error ? { progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+       : new Error(String({ progress: number; duration: number; timestamp: number }>>(
+        this.storageKeys.watchHistory,
+        LocalStorageType.DEFAULT
+      )))))));
       
       if (watchHistory) {
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
@@ -875,11 +1309,10 @@ export class RecommendationRepository {
         }
       }
       
-      // 清理过期的推荐缓存
-      await this.clearCache();
+      // 清理过期的推荐缓�?      await this.clearCache();
       
     } catch (error) {
-      this.logger.error('Failed to cleanup expired data', error as Error);
+      this.Logger.error('Failed to cleanup expired data', error as Error);
     }
   }
   
@@ -888,13 +1321,14 @@ export class RecommendationRepository {
    */
   public async shutdown(): Promise<void> {
     try {
-      // 保存当前状态
-      await this.saveConfig();
+      // 保存当前状�?      await this.saveConfig();
       await this.saveUserPreferences();
       
       this.logger.info('RecommendationRepository shutdown completed');
     } catch (error) {
-      this.logger.error('Failed to shutdown RecommendationRepository', error as Error);
+      this.logger.error('Failed to shutdown RecommendationRepository', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
     }
   }
 }
+
+

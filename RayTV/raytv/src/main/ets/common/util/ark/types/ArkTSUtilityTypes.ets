@@ -8,45 +8,36 @@
 // ============= 基础工具类型 =============
 
 /**
- * 将所有属性设置为可选
- * 替代TypeScript的Partial<T>
- * ArkTS简化版本，不使用映射类型
- */
+ * 将所有属性设置为可�? * 替代TypeScript的Partial<T>
+ * ArkTS简化版本，不使用映射类�? */
 export type ArkTSPartial<T> = T;
 
 /**
  * 将所有属性设置为必需
  * 替代TypeScript的Required<T>
- * ArkTS简化版本，不使用映射类型
- */
+ * ArkTS简化版本，不使用映射类�? */
 export type ArkTSRequired<T> = T;
 
 /**
- * 从对象类型中选取指定的属性
- * 替代TypeScript的Pick<T, K>
- * ArkTS简化版本
- */
+ * 从对象类型中选取指定的属�? * 替代TypeScript的Pick<T, K>
+ * ArkTS简化版�? */
 export type ArkTSPick<T, K> = T;
 
 /**
- * 从对象类型中排除指定的属性
- * 替代TypeScript的Omit<T, K>
- * ArkTS简化版本
- */
+ * 从对象类型中排除指定的属�? * 替代TypeScript的Omit<T, K>
+ * ArkTS简化版�? */
 export type ArkTSOmit<T, K> = T;
 
 /**
  * 创建具有指定键类型和值类型的对象类型
  * 替代TypeScript的Record<K, T>
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type ArkTSRecord<K extends string | number | symbol, T> = Record<string | number | symbol, T>;
 
 /**
  * 将所有属性设置为只读
  * 替代TypeScript的Readonly<T>
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type ArkTSReadonly<T> = T;
 
 /**
@@ -64,15 +55,13 @@ export type ArkTSExclude<T, U> = T;
 export type ArkTSExtract<T, U> = T;
 
 /**
- * 获取函数的返回类型
- * 替代TypeScript的ReturnType<T>
+ * 获取函数的返回类�? * 替代TypeScript的ReturnType<T>
  * ArkTS简化版本，使用unknown作为返回类型
  */
 export type ArkTSReturnType<T> = unknown;
 
 /**
- * 获取函数的参数类型元组
- * 替代TypeScript的Parameters<T>
+ * 获取函数的参数类型元�? * 替代TypeScript的Parameters<T>
  * ArkTS简化版本，返回unknown[]
  */
 export type ArkTSParameters<T> = unknown[];
@@ -109,74 +98,61 @@ export type ArkTSAwaited<T> = T;
 
 /**
  * 深度Partial类型
- * ArkTS简化版本，不使用条件类型
- */
+ * ArkTS简化版本，不使用条件类�? */
 export type ArkTSDeepPartial<T> = T;
 
 /**
  * 深度Required类型
- * ArkTS简化版本，不使用条件类型
- */
+ * ArkTS简化版本，不使用条件类�? */
 export type ArkTSDeepRequired<T> = T;
 
 /**
  * 深度数组接口
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export interface ArkTSDeepArray<T> extends Array<T> {}
 
 /**
  * 深度Readonly类型
- * ArkTS简化版本，不使用条件类型
- */
+ * ArkTS简化版本，不使用条件类�? */
 export type ArkTSDeepReadonly<T> = T;
 
 /**
  * 深度Readonly数组接口
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export interface ArkTSDeepReadonlyArray<T> extends ReadonlyArray<T> {}
 
 /**
  * 可写类型
- * ArkTS简化版本，不使用映射类型
- */
+ * ArkTS简化版本，不使用映射类�? */
 export type ArkTSWritable<T> = T;
 
 /**
  * 深度Writable类型
- * ArkTS简化版本，不使用条件类型
- */
+ * ArkTS简化版本，不使用条件类�? */
 export type ArkTSDeepWritable<T> = T;
 
 /**
  * 深度Writable数组接口
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export interface ArkTSDeepWritableArray<T> extends Array<T> {}
 
 /**
- * 扁平化对象类型
- * 将嵌套对象的属性展平为单层
- * ArkTS简化版本
- */
+ * 扁平化对象类�? * 将嵌套对象的属性展平为单层
+ * ArkTS简化版�? */
 export type Flatten<T> = T;
 
 /**
  * 合并两个对象类型
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type Merge<T, U> = T & U;
 
 /**
- * 联合类型转交叉类型
- * ArkTS简化版本，直接返回U
+ * 联合类型转交叉类�? * ArkTS简化版本，直接返回U
  */
 export type UnionToIntersection<U> = U;
 
 /**
- * 获取对象的键类型的联合
- */
+ * 获取对象的键类型的联�? */
 export type KeyOf<T> = keyof T;
 
 /**
@@ -192,7 +168,7 @@ export type IndexAccess<T, K extends keyof T> = T[K];
 /**
  * 类型断言函数工具类型
  */
-export type TypeGuard<T> = (value: any) => value is T;
+export type TypeGuard<T> = (value: Record<string, string | number | boolean | null>) => value is T;
 
 /**
  * 类型转换函数工具类型
@@ -215,79 +191,58 @@ export type Nullable<T> = T | null;
 export type MaybeUndefined<T> = T | undefined;
 
 /**
- * 函数属性类型
- * ArkTS简化版本
- */
+ * 函数属性类�? * ArkTS简化版�? */
 export type FunctionPropertyNames<T> = string;
 
 /**
- * 非函数属性类型
- * ArkTS简化版本
- */
+ * 非函数属性类�? * ArkTS简化版�? */
 export type NonFunctionPropertyNames<T> = string;
 
 /**
- * 仅获取对象的函数属性
- * ArkTS简化版本
- */
+ * 仅获取对象的函数属�? * ArkTS简化版�? */
 export type FunctionProperties<T> = T;
 
 /**
- * 仅获取对象的非函数属性
- * ArkTS简化版本
- */
+ * 仅获取对象的非函数属�? * ArkTS简化版�? */
 export type NonFunctionProperties<T> = T;
 
 /**
  * 字符串属性键类型
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type StringPropertyNames<T> = string;
 
 /**
  * 数字属性键类型
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type NumberPropertyNames<T> = number;
 
 /**
  * 符号属性键类型
- * ArkTS简化版本
- */
+ * ArkTS简化版�? */
 export type SymbolPropertyNames<T> = symbol;
 
 /**
- * 仅获取对象的字符串键属性
- * ArkTS简化版本
- */
+ * 仅获取对象的字符串键属�? * ArkTS简化版�? */
 export type StringProperties<T> = T;
 
 /**
- * 仅获取对象的数字键属性
- * ArkTS简化版本
- */
+ * 仅获取对象的数字键属�? * ArkTS简化版�? */
 export type NumberProperties<T> = T;
 
 /**
- * 仅获取对象的符号键属性
- * ArkTS简化版本
- */
+ * 仅获取对象的符号键属�? * ArkTS简化版�? */
 export type SymbolProperties<T> = T;
 
 /**
- * 确保所有属性值类型一致
- */
+ * 确保所有属性值类型一�? */
 export type HomogeneousObject<T> = Record<string | number | symbol, T>;
 
 /**
- * 精确类型，不允许额外属性
- * ArkTS简化版本
- */
+ * 精确类型，不允许额外属�? * ArkTS简化版�? */
 export type Exact<T, U> = T;
 
 /**
- * 延迟解析的类型
- */
+ * 延迟解析的类�? */
 export type Deferred<T> = T;
 
 /**
@@ -295,5 +250,6 @@ export type Deferred<T> = T;
  * 在ArkTS中，这是一个简化版本的条件类型
  */
 export type If<T, U, X, Y> = T;
+
 
 

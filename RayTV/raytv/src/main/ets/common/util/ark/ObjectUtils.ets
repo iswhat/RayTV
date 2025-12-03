@@ -1,4 +1,4 @@
-// ObjectUtils.ets - ArkTS兼容的对象工具函数
+// ObjectUtils.ets - ArkTS兼容的对象工具函�?
 
 /**
  * 对象工具函数
@@ -12,7 +12,7 @@ import TypeUtils from './TypeUtils';
  */
 export const ObjectUtils = {
   /**
-   * 安全地检查对象是否包含指定属性
+   * 安全地检查对象是否包含指定属�?
    * 替代Object.prototype.hasOwnProperty.call
    */
   hasProperty(obj: SafeAny, key: string | number): boolean {
@@ -38,7 +38,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 获取对象的所有值
+   * 获取对象的所有�?
    * 替代Object.values
    */
   getValues<T>(obj: SafeAny): T[] {
@@ -51,7 +51,7 @@ export const ObjectUtils = {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      // 使用类型安全的属性访问方式
+      // 使用类型安全的属性访问方�?
       const propertyValue = ObjectUtils.getPropertyValue(obj, key);
       values.push(propertyValue as T);
     }
@@ -73,7 +73,7 @@ export const ObjectUtils = {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      // 使用类型安全的属性访问方式
+      // 使用类型安全的属性访问方�?
       const propertyValue = ObjectUtils.getPropertyValue(obj, key);
       entries.push([key, propertyValue as T]);
     }
@@ -82,7 +82,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 从对象中获取属性值，如果属性不存在则返回默认值
+   * 从对象中获取属性值，如果属性不存在则返回默认�?
    */
   getProperty<T>(obj: SafeAny, key: string | number, defaultValue: T): T {
     if (!TypeUtils.isObject(obj) || !ObjectUtils.hasProperty(obj, key)) {
@@ -90,13 +90,13 @@ export const ObjectUtils = {
     }
     
     const keyStr = String(key);
-    // 使用类型安全的属性访问方式
+    // 使用类型安全的属性访问方�?
     const propertyValue = ObjectUtils.getPropertyValue(obj, keyStr);
     return propertyValue as T;
   },
 
   /**
-   * 安全地设置对象属性
+   * 安全地设置对象属�?
    */
   setProperty(obj: SafeAny, key: string | number, value: SafeAny): boolean {
     if (!TypeUtils.isObject(obj)) {
@@ -113,7 +113,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 安全地删除对象属性
+   * 安全地删除对象属�?
    */
   deleteProperty(obj: SafeAny, key: string | number): boolean {
     if (!TypeUtils.isObject(obj) || !ObjectUtils.hasProperty(obj, key)) {
@@ -130,12 +130,12 @@ export const ObjectUtils = {
   },
 
   /**
-   * 安全地获取对象属性值
+   * 安全地获取对象属性�?
    * @param obj - 要获取属性的对象
-   * @param key - 属性键名
+   * @param key - 属性键�?
    * @returns 属性值，如果属性不存在则返回undefined
    */
-  getPropertyValue(obj: SafeAny, key: string | number): unknown {
+  getPropertyValue(obj: SafeAny, key: string | number): Record<string, string | number | boolean | null> {
     if (!TypeUtils.isObject(obj)) {
       return undefined;
     }
@@ -145,7 +145,7 @@ export const ObjectUtils = {
       return undefined;
     }
     
-    // 使用类型安全的属性访问方式
+    // 使用类型安全的属性访问方�?
     const safeObj = obj as Record<string, unknown>;
     return safeObj[keyStr];
   },
@@ -172,7 +172,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 深拷贝对象
+   * 深拷贝对�?
    */
   deepClone<T>(value: T): T {
     // 处理null和undefined
@@ -192,14 +192,14 @@ export const ObjectUtils = {
     
     // 处理数组
     if (Array.isArray(value)) {
-      const clonedArray: unknown[] = [];
+      const clonedArray: Record<string, string | number | boolean | null>[] = [];
       for (let i = 0; i < value.length; i++) {
         clonedArray.push(ObjectUtils.deepClone(value[i]));
       }
       return clonedArray as T;
     }
     
-    // 处理普通对象
+    // 处理普通对�?
     const cloned: Record<string, unknown> = {};
     const entries = ObjectUtils.getEntries(value as Record<string, unknown>);
     
@@ -231,7 +231,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 过滤对象的属性
+   * 过滤对象的属�?
    */
   filter<T extends SafeObject>(
     obj: Optional<T>, 
@@ -255,7 +255,7 @@ export const ObjectUtils = {
   },
 
   /**
-   * 转换对象的属性
+   * 转换对象的属�?
    */
   map<T extends SafeObject, R extends SafeObject>(
     obj: Optional<T>, 

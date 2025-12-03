@@ -30,8 +30,7 @@ export enum SearchType {
 // 搜索结果类型枚举
 export enum SearchResultType {
   MOVIE = 'movie',         // 电影
-  TV_SERIES = 'tv_series', // 电视剧
-  LIVE = 'live',           // 直播
+  TV_SERIES = 'tv_series', // 电视�?  LIVE = 'live',           // 直播
   CHANNEL = 'channel',     // 频道
   ACTOR = 'actor',         // 演员
   DIRECTOR = 'director',   // 导演
@@ -47,19 +46,15 @@ export interface SearchFilter {
   genres?: string[];         // 类型过滤
   countries?: string[];      // 国家过滤
   languages?: string[];      // 语言过滤
-  minRating?: number;        // 最低评分
-  maxDuration?: number;      // 最大时长（分钟）
-  sortBy?: 'relevance' | 'date' | 'rating' | 'popularity'; // 排序方式
+  minRating?: number;        // 最低评�?  maxDuration?: number;      // 最大时长（分钟�?  sortBy?: 'relevance' | 'date' | 'rating' | 'popularity'; // 排序方式
   sortOrder?: 'asc' | 'desc'; // 排序顺序
 }
 
-// 搜索结果项接口
-export interface SearchResultItem {
+// 搜索结果项接�?export interface SearchResultItem {
   id: string;               // 结果ID
   type: SearchResultType;   // 结果类型
   title: string;            // 标题
-  subtitle?: string;        // 副标题
-  description?: string;     // 描述
+  subtitle?: string;        // 副标�?  description?: string;     // 描述
   posterUrl?: string;       // 海报URL
   coverUrl?: string;        // 封面URL
   year?: number;            // 年份
@@ -73,54 +68,38 @@ export interface SearchResultItem {
     title?: string[];       // 标题高亮位置
     description?: string[]; // 描述高亮位置
   };
-  meta?: { viewCount?: number; extraData?: Record<string, unknown> }; // 额外元数据
-  siteKey?: string;         // 站点键
-  siteName?: string;        // 站点名称
+  meta?: { viewCount?: number; extraData?: Record<string, unknown> }; // 额外元数�?  siteKey?: string;         // 站点�?  siteName?: string;        // 站点名称
 }
 
 // 搜索结果接口
 export interface SearchResponse {
-  query: string;            // 搜索词
-  total: number;            // 总结果数
-  items: SearchResultItem[]; // 结果项列表
-  page: number;             // 当前页码
+  query: string;            // 搜索�?  total: number;            // 总结果数
+  items: SearchResultItem[]; // 结果项列�?  page: number;             // 当前页码
   pageSize: number;         // 每页大小
-  filters: SearchFilter;    // 应用的过滤条件
-  searchType: SearchType;   // 搜索类型
+  filters: SearchFilter;    // 应用的过滤条�?  searchType: SearchType;   // 搜索类型
   searchTime: number;       // 搜索耗时（毫秒）
-  successSites?: number;    // 成功的站点数量
-  totalSites?: number;      // 总站点数量
-}
+  successSites?: number;    // 成功的站点数�?  totalSites?: number;      // 总站点数�?}
 
-// 搜索历史项接口
-export interface SearchHistoryItem {
+// 搜索历史项接�?export interface SearchHistoryItem {
   id: string;               // 历史记录ID
-  keyword: string;          // 搜索词
-  timestamp: number;        // 搜索时间
+  keyword: string;          // 搜索�?  timestamp: number;        // 搜索时间
   resultCount: number;      // 结果数量
   clickCount: number;       // 点击次数
-  lastClickTime?: number;   // 最后点击时间
-  searchType: SearchType;   // 搜索类型
-  type?: 'vod' | 'live';    // 兼容旧接口
-  filters?: SearchFilter;   // 使用的过滤条件
-}
+  lastClickTime?: number;   // 最后点击时�?  searchType: SearchType;   // 搜索类型
+  type?: 'vod' | 'live';    // 兼容旧接�?  filters?: SearchFilter;   // 使用的过滤条�?}
 
-// 热门搜索项接口
-export interface HotSearchItem {
+// 热门搜索项接�?export interface HotSearchItem {
   id: string;               // 热门搜索ID
-  keyword: string;          // 关键词
-  rank: number;             // 排名
+  keyword: string;          // 关键�?  rank: number;             // 排名
   searchCount: number;      // 搜索次数
   trend: 'up' | 'down' | 'stable'; // 趋势
   changeCount?: number;     // 变化数量
-  isNew?: boolean;          // 是否新上榜
-  category?: string;        // 分类
+  isNew?: boolean;          // 是否新上�?  category?: string;        // 分类
   imageUrl?: string;        // 图片URL
   tag?: string;             // 标签
 }
 
-// 搜索建议项接口
-export interface SearchSuggestionItem {
+// 搜索建议项接�?export interface SearchSuggestionItem {
   text: string;             // 建议文本
   type: 'query' | 'tag' | 'actor' | 'director'; // 建议类型
   count?: number;           // 相关结果数量
@@ -133,12 +112,8 @@ export interface SearchConfig {
   enableHistory: boolean;   // 是否启用历史记录
   enableSuggestions: boolean; // 是否启用搜索建议
   enableHotSearches: boolean; // 是否启用热门搜索
-  maxHistoryItems: number;  // 最大历史记录数量
-  minSearchLength: number;  // 最小搜索长度
-  autoSearchDelay: number;  // 自动搜索延迟（毫秒）
-  saveHistoryOnEnter: boolean; // 按Enter时保存历史
-  saveHistoryOnClick: boolean; // 点击建议时保存历史
-  highlightResults: boolean; // 是否高亮搜索结果
+  maxHistoryItems: number;  // 最大历史记录数�?  minSearchLength: number;  // 最小搜索长�?  autoSearchDelay: number;  // 自动搜索延迟（毫秒）
+  saveHistoryOnEnter: boolean; // 按Enter时保存历�?  saveHistoryOnClick: boolean; // 点击建议时保存历�?  highlightResults: boolean; // 是否高亮搜索结果
   searchInDescription: boolean; // 是否在描述中搜索
 }
 
@@ -156,11 +131,9 @@ export const DEFAULT_SEARCH_CONFIG: SearchConfig = {
   searchInDescription: true
 };
 
-// 搜索监听器回调类型
-type SearchListener = (response: SearchResponse) => void;
+// 搜索监听器回调类�?type SearchListener = (response: SearchResponse) => void;
 
-// 搜索建议监听器回调类型
-type SuggestionListener = (suggestions: SearchSuggestionItem[]) => void;
+// 搜索建议监听器回调类�?type SuggestionListener = (suggestions: SearchSuggestionItem[]) => void;
 
 export class SearchService {
   static instance: SearchService;
@@ -201,8 +174,7 @@ export class SearchService {
   }
 
   /**
-   * 初始化搜索服务
-   */
+   * 初始化搜索服�?   */
   async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing search service...');
@@ -226,8 +198,7 @@ export class SearchService {
   }
 
   /**
-   * 搜索视频（高级搜索，支持多种过滤条件）
-   */
+   * 搜索视频（高级搜索，支持多种过滤条件�?   */
   async search(options: {
     query: string;
     type?: SearchType;
@@ -239,8 +210,7 @@ export class SearchService {
     timeout?: number;
   }): Promise<SearchResponse> {
     const { 
-      query = '', 
-      type = SearchType.ALL, 
+      query = '', type = SearchType.ALL, 
       page = 1, 
       pageSize = 20, 
       filters = {},
@@ -250,8 +220,268 @@ export class SearchService {
     } = options;
     
     // 验证搜索条件
-    if (query.length < this.config.minSearchLength) {
-      throw new Error(`搜索关键词必须至少${this.config.minSearchLength}个字符`);
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength instanceof Error ? type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength : new Error(String(type = SearchType.ALL, 
+      page = 1, 
+      pageSize = 20, 
+      filters = {},
+      siteKeys = [],
+      limitPerSite = 20,
+      timeout = 10000
+    } = options;
+    
+    // 验证搜索条件
+    if (query.length < this.config.minSearchLength))))))) {
+      throw new Error(`搜索关键词必须至�?{this.config.minSearchLength}个字符`);
     }
     
     const startTime = Date.now();
@@ -262,8 +492,7 @@ export class SearchService {
       // 记录搜索事件
       this.analyticsService.trackSearch(query);
 
-      // 检查缓存
-      const cacheKey = this.getCacheKey(query, type, filters, siteKeys, limitPerSite);
+      // 检查缓�?      const cacheKey = this.getCacheKey(query, type, filters, siteKeys, limitPerSite);
       if (this.searchCache.has(cacheKey)) {
         const cachedResult = this.searchCache.get(cacheKey)!;
         await this.addToSearchHistory({
@@ -279,11 +508,9 @@ export class SearchService {
       // 获取要搜索的站点
       const sites = await this.getSearchableSites(siteKeys);
       
-      // 执行跨站点搜索
-      const searchResults = await this.searchInSites(query, sites, limitPerSite, timeout);
+      // 执行跨站点搜�?      const searchResults = await this.searchInSites(query, sites, limitPerSite, timeout);
       
-      // 合并和转换结果
-      const mergedResults = this.mergeAndTransformSearchResults(searchResults, filters, type);
+      // 合并和转换结�?      const mergedResults = this.mergeAndTransformSearchResults(searchResults, filters, type);
       
       const searchTime = Date.now() - startTime;
       const response: SearchResponse = {
@@ -302,11 +529,9 @@ export class SearchService {
       // 保存活跃搜索结果
       this.activeSearches.set(cacheKey, response);
       
-      // 通知监听器
-      this.notifySearchCompleted(response);
+      // 通知监听�?      this.notifySearchCompleted(response);
       
-      // 保存到搜索历史
-      if (this.config.enableHistory && this.config.saveHistoryOnEnter) {
+      // 保存到搜索历�?      if (this.config.enableHistory && this.config.saveHistoryOnEnter) {
         await this.addToSearchHistory({
           query,
           resultCount: mergedResults.total,
@@ -318,8 +543,7 @@ export class SearchService {
       // 缓存结果
       this.cacheResult(cacheKey, response);
       
-      // 更新最后搜索记录
-      this.lastSearchQuery = query;
+      // 更新最后搜索记�?      this.lastSearchQuery = query;
       
       return response;
     } catch (error) {
@@ -331,7 +555,7 @@ export class SearchService {
   /**
    * 兼容旧版搜索接口
    */
-  async searchVod(keyword: string, options?: SearchOptions): Promise<SearchResult> {
+  async searchVod(keyword: string, options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions))))))): Promise<SearchResult> {
     try {
       const response = await this.search({
         query: keyword,
@@ -340,8 +564,7 @@ export class SearchService {
         ...options
       });
       
-      // 转换为旧版结果格式
-      return {
+      // 转换为旧版结果格�?      return {
         results: response.items.map(item => ({
           id: item.id,
           title: item.title,
@@ -367,13 +590,12 @@ export class SearchService {
 
   /**
    * 搜索直播频道
-   * @param keyword 搜索关键词
-   * @param options 搜索选项
+   * @param keyword 搜索关键�?   * @param options 搜索选项
    */
-  public async searchLiveChannels(keyword: string, options?: SearchOptions): Promise<LiveSearchResult> {
+  public async searchLiveChannels(keyword: string, options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions : new Error(String(options?: SearchOptions instanceof Error ? options?: SearchOptions : new Error(String(options?: SearchOptions))))))): Promise<LiveSearchResult> {
     try {
       if (!keyword.trim()) {
-        throw new Error('搜索关键词不能为空');
+        throw new Error('搜索关键词不能为�?);
       }
 
       // 记录搜索事件
@@ -405,12 +627,11 @@ export class SearchService {
             });
           }
         } catch (error) {
-          Logger.warn(TAG, `在站点 ${site.name} 搜索失败:`, error);
+          Logger.warn(TAG, `在站�?${site.name} 搜索失败:`, error);
         }
       }
 
-      // 保存到历史
-      await this.addToSearchHistory({
+      // 保存到历�?      await this.addToSearchHistory({
         query: keyword,
         resultCount: results.length,
         searchType: SearchType.ALL,
@@ -430,14 +651,64 @@ export class SearchService {
   }
 
   /**
-   * 按类型搜索内容
-   */
+   * 按类型搜索内�?   */
   public async searchByType(
-    query: string, 
-    resultTypes: SearchResultType[],
+    query: string, resultTypes: SearchResultType[],
     options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
-  ): Promise<SearchResponse> {
-    const filters = { ...options?.filters, types: resultTypes };
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   instanceof Error ? resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+   : new Error(String(resultTypes: SearchResultType[],
+    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}> 
+  ))))))): Promise<SearchResponse> {
+    const filters: Record<string, string | number | boolean | null> = { ... };
     return this.search({
       query,
       type: SearchType.ALL,
@@ -473,7 +744,7 @@ export class SearchService {
           success: true
         };
       } catch (error) {
-        Logger.warn(TAG, `在站点 ${site.name} 搜索失败:`, error);
+        Logger.warn(TAG, `在站�?${site.name} 搜索失败:`, error);
         return {
           siteKey: site.key,
           siteName: site.name,
@@ -488,8 +759,7 @@ export class SearchService {
   }
 
   /**
-   * 搜索项接口定义
-   */
+   * 搜索项接口定�?   */
   interface SearchItem {
     id?: string;
     vodId?: string;
@@ -531,8 +801,7 @@ export class SearchService {
   }
 
   /**
-   * 合并并转换搜索结果
-   */
+   * 合并并转换搜索结�?   */
   private mergeAndTransformSearchResults(siteResults: SiteSearchResult[], filters: SearchFilter, searchType: SearchType): { 
     items: SearchResultItem[], 
     total: number, 
@@ -592,7 +861,7 @@ export class SearchService {
   private determineResultType(category: string): SearchResultType {
     const categoryLower = category.toLowerCase();
     if (categoryLower.includes('电影')) return SearchResultType.MOVIE;
-    if (categoryLower.includes('电视剧') || categoryLower.includes('剧集')) return SearchResultType.TV_SERIES;
+    if (categoryLower.includes('电视�?) || categoryLower.includes('剧集')) return SearchResultType.TV_SERIES;
     return SearchResultType.MOVIE; // 默认类型
   }
 
@@ -600,8 +869,7 @@ export class SearchService {
    * 计算匹配得分
    */
   private calculateMatchScore(item: VideoItem, searchType: SearchType): number {
-    let score = 50; // 基础分
-    
+    let score = 50; // 基础�?    
     // 根据类型调整分数
     switch (searchType) {
       case SearchType.TITLE:
@@ -637,8 +905,7 @@ export class SearchService {
         return false;
       }
       
-      // 其他过滤条件可以在这里添加
-      
+      // 其他过滤条件可以在这里添�?      
       return true;
     });
   }
@@ -657,8 +924,7 @@ export class SearchService {
           comparison = (b.rating || 0) - (a.rating || 0);
           break;
         case 'popularity':
-          // 这里可以使用viewCount等指标，如果有的话
-          comparison = (b.meta?.viewCount || 0) - (a.meta?.viewCount || 0);
+          // 这里可以使用viewCount等指标，如果有的�?          comparison = (b.meta?.viewCount || 0) - (a.meta?.viewCount || 0);
           break;
         case 'relevance':
         default:
@@ -671,12 +937,10 @@ export class SearchService {
   }
 
   /**
-   * 添加高亮到结果
-   */
+   * 添加高亮到结�?   */
   private addHighlightToResults(items: SearchResultItem[]): SearchResultItem[] {
     // 注意：这里需要知道当前搜索词才能添加高亮
-    // 在实际使用时，可以从缓存或参数中获取搜索词
-    return items;
+    // 在实际使用时，可以从缓存或参数中获取搜索�?    return items;
   }
 
   /**
@@ -694,8 +958,7 @@ export class SearchService {
   }
 
   /**
-   * 添加到搜索历史（新版）
-   */
+   * 添加到搜索历史（新版�?   */
   private async addToSearchHistory(data: {
     query: string;
     resultCount: number;
@@ -705,8 +968,7 @@ export class SearchService {
   }): Promise<void> {
     const { query, resultCount, searchType, filters, type = 'vod' } = data;
     
-    // 检查是否已存在相同的搜索记录
-    const existingIndex = this.searchHistory.findIndex(
+    // 检查是否已存在相同的搜索记�?    const existingIndex = this.searchHistory.findIndex(
       item => item.keyword === query && item.searchType === searchType
     );
     
@@ -726,8 +988,7 @@ export class SearchService {
       const [updatedItem] = this.searchHistory.splice(existingIndex, 1);
       this.searchHistory.unshift(updatedItem);
     } else {
-      // 添加新记录
-      const historyItem: SearchHistoryItem = {
+      // 添加新记�?      const historyItem: SearchHistoryItem = {
         id: `history_${now}_${Math.random().toString(36).substr(2, 9)}`,
         keyword: query,
         timestamp: now,
@@ -763,7 +1024,7 @@ export class SearchService {
   public async clearSearchHistory(): Promise<void> {
     this.searchHistory = [];
     await this.saveSearchHistory();
-    Logger.info(TAG, '搜索历史已清除');
+    Logger.info(TAG, '搜索历史已清�?);
   }
 
   /**
@@ -776,8 +1037,7 @@ export class SearchService {
   }
 
   /**
-   * 通过ID删除搜索历史项
-   */
+   * 通过ID删除搜索历史�?   */
   public async removeSearchHistoryItem(historyId: string): Promise<void> {
     const index = this.searchHistory.findIndex(item => item.id === historyId);
     if (index >= 0) {
@@ -795,8 +1055,7 @@ export class SearchService {
       const history = await this.storageUtil.get<SearchHistoryItem[]>('searchHistory', []);
       // 兼容旧格式，转换为新格式
       this.searchHistory = history.map(item => {
-        // 如果是旧格式，转换为新格式
-        if (!item.id && 'keyword' in item) {
+        // 如果是旧格式，转换为新格�?        if (!item.id && 'keyword' in item) {
           return {
             id: `history_${item.timestamp}_${Math.random().toString(36).substr(2, 9)}`,
             keyword: item.keyword,
@@ -810,7 +1069,7 @@ export class SearchService {
         return item;
       }).filter(item => item);
       
-      Logger.info(TAG, `已加载 ${this.searchHistory.length} 条搜索历史`);
+      Logger.info(TAG, `已加�?${this.searchHistory.length} 条搜索历史`);
     } catch (error) {
       Logger.error(TAG, `加载搜索历史失败: ${error}`);
       this.searchHistory = [];
@@ -822,7 +1081,7 @@ export class SearchService {
    */
   private async saveSearchHistory(): Promise<void> {
     try {
-      await this.storageUtil.save('searchHistory', this.searchHistory);
+      await this.storageUtil.save('searchHistory', this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory : new Error(String(this.searchHistory instanceof Error ? this.searchHistory : new Error(String(this.searchHistory)))))));
     } catch (error) {
       Logger.error(TAG, `保存搜索历史失败: ${error}`);
     }
@@ -833,13 +1092,12 @@ export class SearchService {
    */
   public getRecentSearches(limit: number = 10): SearchHistoryItem[] {
     return [...this.searchHistory]
-      .sort((a, b) => b.timestamp - a.timestamp)
+      .sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
 
   /**
-   * 获取最常搜索
-   */
+   * 获取最常搜�?   */
   public getFrequentSearches(limit: number = 10): SearchHistoryItem[] {
     return [...this.searchHistory]
       .sort((a, b) => b.clickCount - a.clickCount)
@@ -847,8 +1105,7 @@ export class SearchService {
   }
 
   /**
-   * 获取缓存键
-   */
+   * 获取缓存�?   */
   private getCacheKey(query: string, type: SearchType, filters: SearchFilter, siteKeys: string[], limitPerSite: number): string {
     const siteKeysStr = siteKeys.join(',') || 'all';
     const filtersStr = JSON.stringify(filters);
@@ -888,7 +1145,33 @@ export class SearchService {
   public async saveConfig(config: Partial<SearchConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('searchConfig', this.config);
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config instanceof Error ? ...config };
+      await this.configService.setConfig('searchConfig', this.config : new Error(String(...config };
+      await this.configService.setConfig('searchConfig', this.config)))))));
       
       // 如果历史记录数量配置变化，清理超出限制的历史
       if (config.maxHistoryItems && this.searchHistory.length > config.maxHistoryItems) {
@@ -913,10 +1196,9 @@ export class SearchService {
    */
   private async loadHotSearches(): Promise<void> {
     try {
-      // 检查是否需要更新
-      const now = Date.now();
+      // 检查是否需要更�?      const now = Date.now();
       if (now - this.lastHotSearchUpdate < HOT_SEARCH_UPDATE_INTERVAL && this.hotSearches.length > 0) {
-        Logger.info(TAG, '使用缓存的热门搜索');
+        Logger.info(TAG, '使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�? instanceof Error ? '使用缓存的热门搜�? : new Error(String('使用缓存的热门搜�?)))))));
         return;
       }
       
@@ -925,7 +1207,7 @@ export class SearchService {
       this.hotSearches = this.generateMockHotSearches();
       this.lastHotSearchUpdate = now;
       
-      Logger.info(TAG, `已加载 ${this.hotSearches.length} 条热门搜索`);
+      Logger.info(TAG, `已加�?${this.hotSearches.length} 条热门搜索`);
     } catch (error) {
       Logger.error(TAG, `加载热门搜索失败: ${error}`);
     }
@@ -937,18 +1219,330 @@ export class SearchService {
   private generateMockHotSearches(): HotSearchItem[] {
     const mockData = [
       { keyword: '流浪地球3', rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
-      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播剧' },
-      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上映' },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
       { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
-      { keyword: '周冬雨', rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
-      { keyword: '张艺谋', rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
       { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
-      { keyword: '复仇者联盟5', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
       { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
       { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
     ];
     
-    return mockData.map((item, index) => ({
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index instanceof Error ? rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index : new Error(String(rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
+      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播�? },
+      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上�? },
+      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
+      { keyword: '周冬�?, rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
+      { keyword: '张艺�?, rank: 6, searchCount: 543210, trend: 'stable' },
+      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
+      { keyword: '复仇者联�?', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
+      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
+      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+    ];
+    
+    return mockData.map((item, index))))))) => ({
       id: `hot_${index + 1}`,
       ...item,
       imageUrl: item.rank <= 3 ? `https://example.com/hot${item.rank}.jpg` : undefined
@@ -987,8 +1581,7 @@ export class SearchService {
   }
 
   /**
-   * 获取搜索建议（新版，返回更丰富的建议信息）
-   */
+   * 获取搜索建议（新版，返回更丰富的建议信息�?   */
   public async getSearchSuggestions(query: string, maxResults: number = 10): Promise<SearchSuggestionItem[]> {
     if (!this.config.enableSuggestions || query.length < this.config.minSearchLength) {
       return [];
@@ -1010,8 +1603,7 @@ export class SearchService {
           highlight: true
         }));
       
-      // 添加到建议列表
-      suggestions.push(...historySuggestions);
+      // 添加到建议列�?      suggestions.push(...historySuggestions);
       
       // 2. 尝试从VodRepository获取建议
       try {
@@ -1028,8 +1620,7 @@ export class SearchService {
               count: item.viewCount || 0
             }));
           
-          // 合并建议，去重
-          const existingTexts = new Set(suggestions.map(s => s.text));
+          // 合并建议，去�?          const existingTexts = new Set(suggestions.map(s => s.text));
           vodSuggestions.forEach(suggestion => {
             if (!existingTexts.has(suggestion.text)) {
               suggestions.push(suggestion);
@@ -1041,10 +1632,8 @@ export class SearchService {
         Logger.warn(TAG, '从VodRepository获取建议失败:', error);
       }
       
-      // 排序和限制数量
-      suggestions.sort((a, b) => {
-        // 高亮项优先
-        if (a.highlight && !b.highlight) return -1;
+      // 排序和限制数�?      suggestions.sort((a, b) => {
+        // 高亮项优�?        if (a.highlight && !b.highlight) return -1;
         if (!a.highlight && b.highlight) return 1;
         // 然后按相关度排序
         return (b.count || 0) - (a.count || 0);
@@ -1073,7 +1662,7 @@ export class SearchService {
       try {
         listener({ ...response });
       } catch (error) {
-        Logger.error(TAG, `搜索监听器错误: ${error}`);
+        Logger.error(TAG, `搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}` instanceof Error ? `搜索监听器错�? ${error}` : new Error(String(`搜索监听器错�? ${error}`)))))));
       }
     }
   }
@@ -1086,38 +1675,34 @@ export class SearchService {
       try {
         listener([...suggestions]);
       } catch (error) {
-        Logger.error(TAG, `建议监听器错误: ${error}`);
+        Logger.error(TAG, `建议监听器错�? ${error}`);
       }
     }
   }
 
   /**
-   * 添加搜索监听器
-   */
+   * 添加搜索监听�?   */
   public addSearchListener(listener: SearchListener): void {
     this.searchListeners.push(listener);
   }
 
   /**
-   * 移除搜索监听器
-   */
+   * 移除搜索监听�?   */
   public removeSearchListener(listener: SearchListener): void {
     const index = this.searchListeners.indexOf(listener);
     if (index > -1) {
-      this.searchListeners.splice(index, 1);
+      this.searchListeners.splice(index, 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1 instanceof Error ? 1 instanceof Error ? 1 : new Error(String(1 : new Error(String(1 instanceof Error ? 1 : new Error(String(1)))))));
     }
   }
 
   /**
-   * 添加搜索建议监听器
-   */
+   * 添加搜索建议监听�?   */
   public addSuggestionListener(listener: SuggestionListener): void {
     this.suggestionListeners.push(listener);
   }
 
   /**
-   * 移除搜索建议监听器
-   */
+   * 移除搜索建议监听�?   */
   public removeSuggestionListener(listener: SuggestionListener): void {
     const index = this.suggestionListeners.indexOf(listener);
     if (index > -1) {
@@ -1126,8 +1711,7 @@ export class SearchService {
   }
 
   /**
-   * 获取最后一次搜索查询
-   */
+   * 获取最后一次搜索查�?   */
   public getLastSearchQuery(): string {
     return this.lastSearchQuery;
   }
@@ -1140,8 +1724,7 @@ export class SearchService {
       return;
     }
 
-    // 清除定时器
-    if (this.debounceTimerId !== null) {
+    // 清除定时�?    if (this.debounceTimerId !== null) {
       clearTimeout(this.debounceTimerId);
     }
     
@@ -1149,7 +1732,7 @@ export class SearchService {
     await this.saveSearchHistory();
 
     this.isInitialized = false;
-    Logger.info(TAG, '搜索服务已关闭');
+    Logger.info(TAG, '搜索服务已关�?);
   }
 }
 
@@ -1174,8 +1757,7 @@ export interface SearchResult {
 }
 
 /**
- * 搜索项
- */
+ * 搜索�? */
 export interface SearchItem extends VideoItem {
   siteName?: string;
 }
@@ -1202,10 +1784,11 @@ export interface LiveSearchResult {
 }
 
 /**
- * 搜索历史项
- */
+ * 搜索历史�? */
 export interface SearchHistoryItem {
   keyword: string;
   type: 'vod' | 'live';
   timestamp: number;
 }
+
+

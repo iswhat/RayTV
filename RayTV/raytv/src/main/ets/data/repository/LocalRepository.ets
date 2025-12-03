@@ -8,16 +8,14 @@ import { LocalStorageType, FileMetadata } from '../model/LocalModel';
 import { FileService } from '../service/FileService';
 
 /**
- * 本地存储仓库类
- * 封装所有本地存储和文件操作
+ * 本地存储仓库�? * 封装所有本地存储和文件操作
  */
 class LocalRepository {
   private static instance: LocalRepository;
   private fileService: FileService;
   private initialized: boolean = false;
 
-  // 私有构造函数
-  private constructor() {
+  // 私有构造函�?  private constructor() {
     this.fileService = FileService.getInstance();
     this.initialize();
   }
@@ -34,14 +32,12 @@ class LocalRepository {
   }
 
   /**
-   * 初始化本地仓库
-   */
+   * 初始化本地仓�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info('Initializing local repository');
       
-      // 确保必要的目录存在
-      await this.ensureDirectories();
+      // 确保必要的目录存�?      await this.ensureDirectories();
       
       this.initialized = true;
       Logger.info('Local repository initialized successfully');
@@ -52,8 +48,7 @@ class LocalRepository {
   }
 
   /**
-   * 确保必要的目录存在
-   */
+   * 确保必要的目录存�?   */
   private async ensureDirectories(): Promise<void> {
     try {
       // 确保缓存目录存在
@@ -65,16 +60,14 @@ class LocalRepository {
       // 确保用户数据目录存在
       await this.fileService.ensureDirectoryExists('user_data');
     } catch (error) {
-      Logger.error('Failed to ensure directories', error);
+      Logger.error('Failed to ensure directories', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       throw error;
     }
   }
 
   /**
-   * 保存数据到本地存储
-   * @param key 存储键名
-   * @param value 存储值
-   * @param type 存储类型
+   * 保存数据到本地存�?   * @param key 存储键名
+   * @param value 存储�?   * @param type 存储类型
    */
   public async saveData(key: string, value: string | number | boolean | null, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<void> {
     try {
@@ -87,8 +80,7 @@ class LocalRepository {
           await StorageUtil.setObject(prefixedKey, value);
           break;
         case LocalStorageType.PERSISTENT:
-          // 持久化存储使用文件
-          const filePath = await this.getPersistentFilePath(key);
+          // 持久化存储使用文�?          const filePath = await this.getPersistentFilePath(key);
           await FileUtil.writeFile(filePath, JSON.stringify(value));
           break;
       }
@@ -101,12 +93,11 @@ class LocalRepository {
   }
 
   /**
-   * 从本地存储读取数据
-   * @param key 存储键名
+   * 从本地存储读取数�?   * @param key 存储键名
    * @param type 存储类型
    * @returns 存储的数据或null
    */
-  public async getData<T>(key: string, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<T | null> {
+  public async getData<T>(key: string, type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT))))))): Promise<T | null> {
     try {
       const prefixedKey = this.getPrefixedKey(key, type);
       
@@ -135,7 +126,7 @@ class LocalRepository {
    * @param type 存储类型
    * @returns 是否删除成功
    */
-  public async removeData(key: string, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<boolean> {
+  public async removeData(key: string, type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT))))))): Promise<boolean> {
     try {
       const prefixedKey = this.getPrefixedKey(key, type);
       
@@ -167,7 +158,7 @@ class LocalRepository {
    * @param type 存储类型
    * @returns 是否存在
    */
-  public async hasData(key: string, type: LocalStorageType = LocalStorageType.DEFAULT): Promise<boolean> {
+  public async hasData(key: string, type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT instanceof Error ? type: LocalStorageType = LocalStorageType.DEFAULT : new Error(String(type: LocalStorageType = LocalStorageType.DEFAULT))))))): Promise<boolean> {
     try {
       const prefixedKey = this.getPrefixedKey(key, type);
       
@@ -187,24 +178,16 @@ class LocalRepository {
   }
 
   /**
-   * 获取带前缀的键名
-   * @param key 原始键名
+   * 获取带前缀的键�?   * @param key 原始键名
    * @param type 存储类型
-   * @returns 带前缀的键名
-   */
-  private getPrefixedKey(key: string, type: LocalStorageType): string {
-    const prefixes = {
-      [LocalStorageType.DEFAULT]: 'default_',
-      [LocalStorageType.TEMPORARY]: 'temp_',
-      [LocalStorageType.SECURE]: 'secure_',
-      [LocalStorageType.PERSISTENT]: 'persist_'
-    };
+   * @returns 带前缀的键�?   */
+  private getPrefixedKey(key: string, type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType : new Error(String(type: LocalStorageType instanceof Error ? type: LocalStorageType : new Error(String(type: LocalStorageType))))))): string {
+    const prefixes: Record<string, string | number | boolean | null> = { ... };
     return `${prefixes[type]}${key}`;
   }
 
   /**
-   * 获取持久化文件路径
-   * @param key 存储键名
+   * 获取持久化文件路�?   * @param key 存储键名
    * @returns 文件路径
    */
   private async getPersistentFilePath(key: string): Promise<string> {
@@ -213,10 +196,7 @@ class LocalRepository {
   }
 
   /**
-   * 清理文件名
-   * @param fileName 原始文件名
-   * @returns 清理后的文件名
-   */
+   * 清理文件�?   * @param fileName 原始文件�?   * @returns 清理后的文件�?   */
   private sanitizeFileName(fileName: string): string {
     return fileName.replace(/[^a-zA-Z0-9_-]/g, '_');
   }
@@ -251,7 +231,7 @@ class LocalRepository {
       }
       return null;
     } catch (error) {
-      Logger.error(`Failed to read text file: ${filePath}`, error);
+      Logger.error(`Failed to read text file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -285,14 +265,13 @@ class LocalRepository {
       }
       return null;
     } catch (error) {
-      Logger.error(`Failed to read JSON file: ${filePath}`, error);
+      Logger.error(`Failed to read JSON file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
 
   /**
-   * 获取文件元数据
-   * @param filePath 文件路径
+   * 获取文件元数�?   * @param filePath 文件路径
    * @returns 文件元数据或null
    */
   public async getFileMetadata(filePath: string): Promise<FileMetadata | null> {
@@ -323,7 +302,7 @@ class LocalRepository {
     try {
       return await FileUtil.listFiles(dirPath);
     } catch (error) {
-      Logger.error(`Failed to list directory: ${dirPath}`, error);
+      Logger.error(`Failed to list directory: ${dirPath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return [];
     }
   }
@@ -345,9 +324,7 @@ class LocalRepository {
   }
 
   /**
-   * 删除文件或目录
-   * @param path 文件或目录路径
-   * @returns 是否删除成功
+   * 删除文件或目�?   * @param path 文件或目录路�?   * @returns 是否删除成功
    */
   public async delete(path: string): Promise<boolean> {
     try {
@@ -364,15 +341,14 @@ class LocalRepository {
       }
       return false;
     } catch (error) {
-      Logger.error(`Failed to delete: ${path}`, error);
+      Logger.error(`Failed to delete: ${path}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
 
   /**
    * 复制文件
-   * @param sourcePath 源文件路径
-   * @param destPath 目标文件路径
+   * @param sourcePath 源文件路�?   * @param destPath 目标文件路径
    * @returns 是否复制成功
    */
   public async copyFile(sourcePath: string, destPath: string): Promise<boolean> {
@@ -388,11 +364,10 @@ class LocalRepository {
 
   /**
    * 移动文件
-   * @param sourcePath 源文件路径
-   * @param destPath 目标文件路径
+   * @param sourcePath 源文件路�?   * @param destPath 目标文件路径
    * @returns 是否移动成功
    */
-  public async moveFile(sourcePath: string, destPath: string): Promise<boolean> {
+  public async moveFile(sourcePath: string, destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string : new Error(String(destPath: string instanceof Error ? destPath: string : new Error(String(destPath: string))))))): Promise<boolean> {
     try {
       await FileUtil.moveFile(sourcePath, destPath);
       Logger.debug(`File moved from ${sourcePath} to ${destPath}`);
@@ -408,8 +383,7 @@ class LocalRepository {
    */
   public async clearTemporaryStorage(): Promise<void> {
     try {
-      // 获取所有临时键并删除
-      const allKeys = await StorageUtil.getAllKeys();
+      // 获取所有临时键并删�?      const allKeys = await StorageUtil.getAllKeys();
       const tempKeys = allKeys.filter(key => key.startsWith('temp_'));
       
       for (const key of tempKeys) {
@@ -426,7 +400,7 @@ class LocalRepository {
       
       Logger.info('Temporary storage cleared');
     } catch (error) {
-      Logger.error('Failed to clear temporary storage', error);
+      Logger.error('Failed to clear temporary storage', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -437,11 +411,9 @@ class LocalRepository {
     try {
       Logger.info('Resetting local repository');
       
-      // 清空所有存储
-      await this.clearTemporaryStorage();
+      // 清空所有存�?      await this.clearTemporaryStorage();
       
-      // 重置其他必要的状态
-      
+      // 重置其他必要的状�?      
       Logger.info('Local repository reset completed');
     } catch (error) {
       Logger.error('Failed to reset local repository', error);
@@ -458,7 +430,137 @@ class LocalRepository {
       const usage: Record<string, number> = {};
       const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
       
-      for (const dir of directories) {
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories instanceof Error ? number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories : new Error(String(number>> {
+    try {
+      const usage: Record<string, number> = {};
+      const directories = ['cache', 'downloads', 'subtitles', 'user_data'];
+      
+      for (const dir of directories))))))) {
         const dirPath = await this.fileService.getDirectoryPath(dir);
         if (await FileUtil.exists(dirPath)) {
           const size = await FileUtil.getDirectorySize(dirPath);
@@ -475,3 +577,6 @@ class LocalRepository {
 }
 
 export default LocalRepository;
+
+
+

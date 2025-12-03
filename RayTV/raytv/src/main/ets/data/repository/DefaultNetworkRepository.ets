@@ -1,5 +1,4 @@
-// DefaultNetworkRepository - 网络服务默认实现类
-import Logger from '../../common/util/Logger';
+// DefaultNetworkRepository - 网络服务默认实现�?import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -24,16 +23,13 @@ const DEFAULT_CACHE_KEY_PREFIX = 'network_cache_';
 const DEFAULT_CACHE_EXPIRY = 3600000; // 默认缓存1小时
 
 /**
- * 网络仓库默认实现类
- * 实现了NetworkRepository接口，提供基于HTTP请求的网络服务功能
- */
+ * 网络仓库默认实现�? * 实现了NetworkRepository接口，提供基于HTTP请求的网络服务功�? */
 export default class DefaultNetworkRepository implements NetworkRepository {
   private config: NetworkConfig;
   private requestMap: Map<string, http.HttpRequest> = new Map();
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor() {
     // 默认配置
     this.config = {
@@ -50,10 +46,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
- * 初始化网络服务
- * @param config 网络配置对象，包含基础URL、超时时间、重试次数等
- * @returns 初始化结果，成功或失败信息
- */
+ * 初始化网络服�? * @param config 网络配置对象，包含基础URL、超时时间、重试次数等
+ * @returns 初始化结果，成功或失败信�? */
 async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
     try {
       Logger.info(TAG, 'Initializing network repository...');
@@ -81,7 +75,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
         success: true
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize network repository: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to initialize network repository`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -124,8 +118,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
    */
   private async testConnection(): Promise<void> {
     try {
-      // 发送一个简单的GET请求来测试连接
-      const testUrl = `${this.config.baseUrl}/api/test`;
+      // 发送一个简单的GET请求来测试连�?      const testUrl = `${this.config.baseUrl}/api/test`;
       const response = await NetworkUtil.request<Record<string, string | number | boolean | null>>({ 
         url: testUrl,
         method: 'GET',
@@ -138,8 +131,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
       }
     } catch (error) {
       Logger.warn(TAG, `Connection test failed, continuing anyway: ${error instanceof Error ? error.message : String(error)}`);
-      // 即使测试失败也继续初始化，因为某些API可能不提供测试端点
-    }
+      // 即使测试失败也继续初始化，因为某些API可能不提供测试端�?    }
   }
 
   /**
@@ -152,9 +144,8 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
   /**
  * 创建请求配置
  * @param url 请求URL，可以是相对路径或绝对URL
- * @param method HTTP方法 (GET, POST, PUT, DELETE等)
- * @param data 请求体数据
- * @param params URL查询参数
+ * @param method HTTP方法 (GET, POST, PUT, DELETE�?
+ * @param data 请求体数�? * @param params URL查询参数
  * @param customHeaders 自定义请求头
  * @returns 构建好的请求配置对象
  */
@@ -183,13 +174,11 @@ private createRequestConfig(
       }
     }
     
-    // 处理请求体类型
-    if (data && headers['Content-Type'] === 'application/json') {
+    // 处理请求体类�?    if (data && headers['Content-Type'] === 'application/json') {
       data = JsonUtil.stringify(data);
     }
 
-    // 过滤掉params中的null值，确保符合RequestConfig的类型要求
-    const filteredParams: Record<string, string | number | boolean | string[]> = {};
+    // 过滤掉params中的null值，确保符合RequestConfig的类型要�?    const filteredParams: Record<string, string | number | boolean | string[]> = {};
     if (params) {
       for (const [key, value] of Object.entries(params)) {
         if (value !== null) {
@@ -222,8 +211,7 @@ private createRequestConfig(
   }
 
   /**
-   * 生成缓存键
-   */
+   * 生成缓存�?   */
   private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
     const paramsStr = params ? JsonUtil.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
@@ -240,8 +228,7 @@ private createRequestConfig(
     try {
       const cached = await StorageUtil.get(key);
       if (cached && typeof cached === 'object') {
-        // 使用Object.keys检查属性存在性，替代in操作符
-        const cacheKeys = Object.keys(cached);
+        // 使用Object.keys检查属性存在性，替代in操作�?        const cacheKeys = Object.keys(cached);
         if (cacheKeys.includes('data') && cacheKeys.includes('timestamp')) {
           const cacheItem = cached as { data: T; timestamp: number };
           const now = Date.now();
@@ -272,10 +259,7 @@ private createRequestConfig(
     }
 
     try {
-      const cacheItem = {
-        data,
-        timestamp: Date.now()
-      };
+      const cacheItem: Record<string, string | number | boolean | null> = { ... };
       await StorageUtil.set(key, cacheItem);
       Logger.debug(TAG, `Cache set for key: ${key}`);
     } catch (error) {
@@ -291,8 +275,7 @@ private createRequestConfig(
       const requestId = this.generateRequestId(requestUrl, 'GET');
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<PaginatedResponse<SearchResult>>(cacheKey);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<PaginatedResponse<SearchResult>>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -304,10 +287,8 @@ private createRequestConfig(
       const controller = new AbortController();
       this.requestMap.set(requestId, controller);
 
-      // 发送请求
-      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
-      // 手动添加signal属性，不使用展开运算符
-      (requestConfig as any).signal = controller.signal;
+      // 发送请�?      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
+      // 手动添加signal属性，不使用展开运算�?      (requestConfig as any).signal = controller.signal;
       const response = await NetworkUtil.request(requestUrl, requestConfig);
 
       // 从请求映射中移除
@@ -315,14 +296,13 @@ private createRequestConfig(
 
       const result = this.processNetworkResponse<PaginatedResponse<SearchResult>>(response);
       
-      // 缓存成功的响应
-      if (result.success && result.data) {
+      // 缓存成功的响�?      if (result.success && result.data) {
         await this.setCachedData(cacheKey, result.data);
       }
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to search content: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to search content`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -334,11 +314,10 @@ private createRequestConfig(
   async getHotSearchKeywords(limit: number = 20): Promise<NetworkResult<string[]>> {
     try {
       const requestUrl = '/api/search/hot';
-      const params = { limit };
+      const params: Record<string, string | number | boolean | null> = { ... };
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<string[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<string[]>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -349,14 +328,13 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, this.createRequestConfig(requestUrl, 'GET', undefined, params));
       const result = this.processNetworkResponse<string[]>(response);
       
-      // 缓存成功的响应
-      if (result.success && result.data) {
+      // 缓存成功的响�?      if (result.success && result.data) {
         await this.setCachedData(cacheKey, result.data);
       }
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to get hot search keywords: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get hot search keywords`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -374,7 +352,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, requestConfig);
       return this.processNetworkResponse<string[]>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get search suggestions`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -390,8 +368,7 @@ private createRequestConfig(
       const requestUrl = `/api/movies/${movieId}`;
       const cacheKey = this.generateCacheKey(requestUrl, 'GET');
       
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<Movie>(cacheKey);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<Movie>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -403,8 +380,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, requestConfig);
       const result = this.processNetworkResponse<Movie>(response);
       
-      // 缓存成功的响应
-      if (result.success && result.data) {
+      // 缓存成功的响�?      if (result.success && result.data) {
         // 转换API响应数据为Movie对象
         const movie = new Movie(result.data);
         result.data = movie;
@@ -413,7 +389,7 @@ private createRequestConfig(
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to get movie detail: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get movie detail`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -427,8 +403,7 @@ private createRequestConfig(
       const requestUrl = '/api/movies';
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获取
-      const cachedData = await this.getCachedData<PaginatedResponse<Movie>>(cacheKey);
+      // 尝试从缓存获�?      const cachedData = await this.getCachedData<PaginatedResponse<Movie>>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -449,7 +424,7 @@ private createRequestConfig(
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to get movie list: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get movie list`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -466,7 +441,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send GET request: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to send GET request`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -481,7 +456,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send POST request: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to send POST request`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -496,7 +471,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send PUT request: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to send PUT request`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -511,7 +486,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(url, requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send DELETE request: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to send DELETE request`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -555,7 +530,7 @@ private createRequestConfig(
       
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to upload file: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to upload file`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -601,7 +576,7 @@ private createRequestConfig(
         };
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to download file: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to download file`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -618,7 +593,7 @@ private createRequestConfig(
       this.requestMap.clear();
       Logger.info(TAG, 'All requests cancelled');
     } catch (error) {
-      Logger.error(TAG, `Failed to cancel all requests: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to cancel all requests`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
 
@@ -631,13 +606,12 @@ private createRequestConfig(
         Logger.info(TAG, `Request cancelled: ${requestId}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to cancel request: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to cancel request`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
 
   // ========== 占位实现 ==========
-  // 为了代码能编译通过，提供基础的占位实现
-  async getRecommendedMovies(movieId: string, limit: number = 20): Promise<NetworkResult<Movie[]>> { 
+  // 为了代码能编译通过，提供基础的占位实�?  async getRecommendedMovies(movieId: string, limit: number = 20): Promise<NetworkResult<Movie[]>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -656,7 +630,7 @@ private createRequestConfig(
       // 使用解析器服务获取视频源
       return await getParserService().getVideoSources(contentId, contentType);
     } catch (error) {
-      Logger.error(TAG, `Failed to get video sources: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get video sources`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return { 
         success: false, 
         error: error instanceof Error ? error : new Error(String(error)),
@@ -672,7 +646,7 @@ private createRequestConfig(
       // 使用解析器服务解析视频源
       return await getParserService().parseVideoSource(sourceUrl, parserId);
     } catch (error) {
-      Logger.error(TAG, `Failed to parse video source: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to parse video source`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return { 
         success: false, 
         error: error instanceof Error ? error : new Error(String(error)),
@@ -740,7 +714,7 @@ private createRequestConfig(
       // 使用解析器服务获取所有解析器
       return await getParserService().getParsers();
     } catch (error) {
-      Logger.error(TAG, `Failed to get parsers: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to get parsers`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return { 
         success: false, 
         error: error instanceof Error ? error : new Error(String(error)),
@@ -753,10 +727,9 @@ private createRequestConfig(
     try {
       Logger.info(TAG, `Checking parser availability: ${parserId}`);
       
-      // 使用解析器服务检查解析器可用性
-      return await getParserService().checkParserAvailability(parserId);
+      // 使用解析器服务检查解析器可用�?      return await getParserService().checkParserAvailability(parserId);
     } catch (error) {
-      Logger.error(TAG, `Failed to check parser availability: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to check parser availability`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return { 
         success: false, 
         error: error instanceof Error ? error : new Error(String(error)),
@@ -781,3 +754,5 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
 }
+
+

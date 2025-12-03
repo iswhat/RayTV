@@ -1,5 +1,4 @@
-// AuthRepository - 认证授权仓库类
-// 负责处理用户认证、授权和会话管理相关的业务逻辑
+// AuthRepository - 认证授权仓库�?// 负责处理用户认证、授权和会话管理相关的业务逻辑
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -11,8 +10,7 @@ import { CacheType } from '../model/CacheModel';
 import { UserInfo, UserCredentials, UserRegisterInfo } from '../../service/user/UserService';
 
 /**
- * 认证状态枚举
- */
+ * 认证状态枚�? */
 export enum AuthStatus {
   UNAUTHENTICATED = 'unauthenticated',
   AUTHENTICATING = 'authenticating',
@@ -28,11 +26,9 @@ export enum AuthStatus {
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number; // 过期时间（秒）
-  tokenType: string;
+  expiresIn: number; // 过期时间（秒�?  tokenType: string;
   scope: string;
-  issuedAt: number; // 签发时间戳
-}
+  issuedAt: number; // 签发时间�?}
 
 /**
  * 认证响应接口
@@ -71,8 +67,7 @@ export interface AuthConfig {
   enableAutoLogin: boolean;
   autoLoginTimeout: number; // 自动登录超时时间（毫秒）
   tokenRefreshThreshold: number; // 令牌刷新阈值（秒）
-  sessionTimeout: number; // 会话超时时间（秒）
-  rememberMeDuration: number; // 记住我持续时间（秒）
+  sessionTimeout: number; // 会话超时时间（秒�?  rememberMeDuration: number; // 记住我持续时间（秒）
   enableTokenRotation: boolean; // 是否启用令牌轮换
   secureTokenStorage: boolean; // 是否使用安全存储
 }
@@ -119,8 +114,7 @@ export interface Permission {
   name: string;
   description: string;
   category: string;
-  level: number; // 权限级别：1-最低，10-最高
-  isEnabled: boolean;
+  level: number; // 权限级别�?-最低，10-最�?  isEnabled: boolean;
 }
 
 /**
@@ -148,8 +142,7 @@ export interface UserPermissions {
 }
 
 /**
- * 权限检查请求
- */
+ * 权限检查请�? */
 export interface PermissionCheckRequest {
   permissionId: string;
   userId?: string;
@@ -157,8 +150,7 @@ export interface PermissionCheckRequest {
 }
 
 /**
- * 认证仓库类
- */
+ * 认证仓库�? */
 export class AuthRepository {
   private static instance: AuthRepository;
 
@@ -185,8 +177,7 @@ export class AuthRepository {
     biometricAuth: '/auth/biometric'
   };
   
-  // 存储键配置
-  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     authToken: 'auth:token',
     currentUser: 'auth:currentUser',
     authConfig: 'auth:config',
@@ -205,28 +196,21 @@ export class AuthRepository {
     autoLoginTimeout: 1800000, // 30分钟
     tokenRefreshThreshold: 300, // 5分钟
     sessionTimeout: 3600, // 1小时
-    rememberMeDuration: 604800, // 7天
-    enableTokenRotation: true,
+    rememberMeDuration: 604800, // 7�?    enableTokenRotation: true,
     secureTokenStorage: true
   };
   
-  // 缓存的配置
-  private cachedConfig: AuthConfig | null = null;
+  // 缓存的配�?  private cachedConfig: AuthConfig | null = null;
   
-  // 当前认证状态
-  private currentStatus: AuthStatus = AuthStatus.UNAUTHENTICATED;
+  // 当前认证状�?  private currentStatus: AuthStatus = AuthStatus.UNAUTHENTICATED;
   
-  // 缓存的认证令牌
-  private cachedToken: AuthToken | null = null;
+  // 缓存的认证令�?  private cachedToken: AuthToken | null = null;
   
-  // 缓存的用户信息
-  private cachedUser: UserInfo | null = null;
+  // 缓存的用户信�?  private cachedUser: UserInfo | null = null;
   
-  // 缓存的用户权限
-  private cachedUserPermissions: UserPermissions | null = null;
+  // 缓存的用户权�?  private cachedUserPermissions: UserPermissions | null = null;
   
-  // 令牌刷新中标志
-  private isRefreshingToken: boolean = false;
+  // 令牌刷新中标�?  private isRefreshingToken: boolean = false;
   
   // 登录尝试次数
   private loginAttempts: number = 0;
@@ -235,8 +219,7 @@ export class AuthRepository {
   private lastLoginAttempt: number = 0;
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('AuthRepository initialized');
     this.setupEventListeners();
@@ -254,33 +237,27 @@ export class AuthRepository {
   }
 
   /**
-   * 初始化认证仓库
-   */
+   * 初始化认证仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载配置
       await this.loadConfig();
       
-      // 恢复认证状态
-      await this.restoreAuthState();
+      // 恢复认证状�?      await this.restoreAuthState();
       
       this.logger.info('AuthRepository initialization completed');
     } catch (error) {
-      this.logger.error('Failed to initialize AuthRepository', error as Error);
-      // 出错时重置认证状态
-      await this.resetAuthState();
+      this.Logger.error('Failed to initialize AuthRepository', error as Error);
+      // 出错时重置认证状�?      await this.resetAuthState();
     }
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听网络状态变化
-    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean }))))))) => {
       if (status.isOnline && this.cachedToken && this.isTokenExpiredSoon()) {
-        // 网络恢复且令牌即将过期时，尝试刷新令牌
-        this.refreshTokenIfNeeded().catch(err => {
+        // 网络恢复且令牌即将过期时，尝试刷新令�?        this.refreshTokenIfNeeded().catch(err => {
           this.logger.warn('Failed to refresh token after network recovery', err);
         });
       }
@@ -289,14 +266,12 @@ export class AuthRepository {
     // 监听应用前台/后台切换
     this.eventBus.on('app:stateChanged', async (state: { isActive: boolean }) => {
       if (state.isActive && this.cachedToken) {
-        // 应用切换到前台时，检查令牌是否过期
-        if (this.isTokenExpired()) {
+        // 应用切换到前台时，检查令牌是否过�?        if (this.isTokenExpired()) {
           this.handleTokenExpiry().catch(err => {
             this.logger.warn('Failed to handle token expiry when app becomes active', err);
           });
         } else if (this.isTokenExpiredSoon()) {
-          // 令牌即将过期，尝试刷新
-          this.refreshTokenIfNeeded().catch(err => {
+          // 令牌即将过期，尝试刷�?          this.refreshTokenIfNeeded().catch(err => {
             this.logger.warn('Failed to refresh token when app becomes active', err);
           });
         }
@@ -324,7 +299,7 @@ export class AuthRepository {
       
       this.logger.debug('Auth configuration loaded');
     } catch (error) {
-      this.logger.error('Failed to load auth config', error as Error);
+      this.Logger.error('Failed to load auth config', error as Error);
       this.cachedConfig = { ...this.defaultConfig };
     }
   }
@@ -337,14 +312,116 @@ export class AuthRepository {
       // 获取当前配置
       const currentConfig = await this.getConfig();
       
-      // 合并新配置
-      const updatedConfig: AuthConfig = {
-        ...currentConfig,
-        ...config
+      // 合并新配�?      const updatedConfig: AuthConfig = {
+        ...currentConfig, ...config
       };
       
       // 验证配置
-      this.validateConfig(updatedConfig);
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig instanceof Error ? ...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig : new Error(String(...config
+      };
+      
+      // 验证配置
+      this.validateConfig(updatedConfig)))))));
       
       // 保存配置
       this.cachedConfig = updatedConfig;
@@ -365,7 +442,7 @@ export class AuthRepository {
       
       return updatedConfig;
     } catch (error) {
-      this.logger.error('Failed to set auth config', error as Error);
+      this.Logger.error('Failed to set auth config', error as Error);
       throw error;
     }
   }
@@ -375,14 +452,13 @@ export class AuthRepository {
    */
   public async getConfig(): Promise<AuthConfig> {
     try {
-      // 如果缓存为空，加载配置
-      if (!this.cachedConfig) {
+      // 如果缓存为空，加载配�?      if (!this.cachedConfig) {
         await this.loadConfig();
       }
       
       return { ...this.cachedConfig! };
     } catch (error) {
-      this.logger.error('Failed to get auth config', error as Error);
+      this.logger.error('Failed to get auth config', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return { ...this.defaultConfig };
     }
   }
@@ -415,8 +491,7 @@ export class AuthRepository {
   }
 
   /**
-   * 恢复认证状态
-   */
+   * 恢复认证状�?   */
   private async restoreAuthState(): Promise<void> {
     try {
       // 加载令牌
@@ -450,8 +525,7 @@ export class AuthRepository {
             
             this.logger.info('Auth state restored successfully');
             
-            // 发布认证状态变更事件
-            this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
+            // 发布认证状态变更事�?            this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
           } else {
             // 只有令牌但没有用户信息，清除令牌
             this.logger.warn('Token exists but user info is missing, clearing auth state');
@@ -460,8 +534,7 @@ export class AuthRepository {
         }
       }
       
-      // 加载认证状态
-      const savedStatus = await this.storageUtil.getString(
+      // 加载认证状�?      const savedStatus = await this.storageUtil.getString(
         this.storageKeys.authStatus,
         LocalStorageType.DEFAULT
       );
@@ -471,18 +544,16 @@ export class AuthRepository {
       }
       
     } catch (error) {
-      this.logger.error('Failed to restore auth state', error as Error);
+      this.Logger.error('Failed to restore auth state', error as Error);
       await this.resetAuthState();
     }
   }
 
   /**
-   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法）
-   */
+   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法�?   */
   private getAuthStatusValues(): string[] {
     return [
-      AuthStatus.UNAUTHENTICATED,
-      AuthStatus.AUTHENTICATING,
+      AuthStatus.UNAUTHENTICATED, AuthStatus.AUTHENTICATING,
       AuthStatus.AUTHENTICATED,
       AuthStatus.TOKEN_EXPIRED,
       AuthStatus.REFRESHING,
@@ -491,9 +562,268 @@ export class AuthRepository {
   }
 
   /**
-   * 保存认证状态
-   */
-  private async saveAuthState(token: AuthToken, user: UserInfo): Promise<void> {
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo instanceof Error ? AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo : new Error(String(AuthStatus.AUTHENTICATING,
+      AuthStatus.AUTHENTICATED,
+      AuthStatus.TOKEN_EXPIRED,
+      AuthStatus.REFRESHING,
+      AuthStatus.ERROR
+    ];
+  }
+
+  /**
+   * 保存认证状�?   */
+  private async saveAuthState(token: AuthToken, user: UserInfo))))))): Promise<void> {
     try {
       // 保存令牌
       await this.storageUtil.setObject(
@@ -509,8 +839,7 @@ export class AuthRepository {
         this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
       );
       
-      // 保存认证状态
-      await this.storageUtil.setString(
+      // 保存认证状�?      await this.storageUtil.setString(
         this.storageKeys.authStatus,
         AuthStatus.AUTHENTICATED,
         LocalStorageType.DEFAULT
@@ -530,21 +859,45 @@ export class AuthRepository {
       
       this.logger.info('Auth state saved successfully');
     } catch (error) {
-      this.logger.error('Failed to save auth state', error as Error);
+      this.Logger.error('Failed to save auth state', error as Error);
       throw error;
     }
   }
 
   /**
-   * 重置认证状态
-   */
+   * 重置认证状�?   */
   private async resetAuthState(): Promise<void> {
     try {
       // 清除令牌
       await this.storageUtil.remove(
-        this.storageKeys.authToken,
-        this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
-      );
+        this.storageKeys.authToken, this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+       : new Error(String(this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
+      )))))));
       
       // 清除用户信息
       await this.storageUtil.remove(
@@ -558,8 +911,7 @@ export class AuthRepository {
         LocalStorageType.DEFAULT
       );
       
-      // 清除认证状态
-      await this.storageUtil.remove(
+      // 清除认证状�?      await this.storageUtil.remove(
         this.storageKeys.authStatus,
         LocalStorageType.DEFAULT
       );
@@ -582,31 +934,28 @@ export class AuthRepository {
       
       this.logger.info('Auth state reset successfully');
     } catch (error) {
-      this.logger.error('Failed to reset auth state', error as Error);
+      this.Logger.error('Failed to reset auth state', error as Error);
     }
   }
 
   /**
    * 用户登录
    */
-  public async login(credentials: UserCredentials, rememberMe: boolean = false): Promise<AuthResponse> {
+  public async login(credentials: UserCredentials, rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false))))))): Promise<AuthResponse> {
     try {
-      // 检查登录频率限制
-      this.checkLoginRateLimit();
+      // 检查登录频率限�?      this.checkLoginRateLimit();
       
       // 记录登录尝试
       this.loginAttempts++;
       this.lastLoginAttempt = Date.now();
       
-      // 发布登录开始事件
-      this.eventBus.emit(AuthEventType.LOGIN_START, {
+      // 发布登录开始事�?      this.eventBus.emit(AuthEventType.LOGIN_START, {
         type: AuthEventType.LOGIN_START,
         timestamp: Date.now(),
         data: { username: credentials.username, rememberMe }
       } as AuthEvent);
       
-      // 更新状态为认证中
-      this.updateAuthStatus(AuthStatus.AUTHENTICATING);
+      // 更新状态为认证�?      this.updateAuthStatus(AuthStatus.AUTHENTICATING);
       
       // 调用登录API
       const response = await this.networkUtil.post<AuthResponse>(
@@ -616,8 +965,7 @@ export class AuthRepository {
       
       const authResponse = response.data;
       
-      // 保存认证状态
-      await this.saveAuthState(authResponse.token, authResponse.user);
+      // 保存认证状�?      await this.saveAuthState(authResponse.token, authResponse.user);
       
       // 保存会话ID
       if (authResponse.sessionId) {
@@ -631,8 +979,7 @@ export class AuthRepository {
       // 重置登录尝试计数
       this.loginAttempts = 0;
       
-      // 更新状态为已认证
-      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
+      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
       
       // 发布登录成功事件
       this.eventBus.emit(AuthEventType.LOGIN_SUCCESS, {
@@ -641,23 +988,46 @@ export class AuthRepository {
         data: authResponse
       } as AuthEvent);
       
-      // 更新认证状态变更事件
-      this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
+      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
       
       this.logger.info(`User ${authResponse.user.username} logged in successfully`);
       
       return authResponse;
     } catch (error) {
-      this.logger.error('Login failed', error as Error);
+      this.Logger.error('Login failed', error as Error);
       
-      // 更新状态为未认证
-      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
+      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
       
       // 构建认证错误
       const authError: AuthError = {
-        code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
-        message: error instanceof Error ? error.message : 'Login failed',
-        timestamp: Date.now()
+        code: error instanceof Error ? error.name : 'UNKNOWN_ERROR', message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( instanceof Error ? message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now( : new Error(String(message: error instanceof Error ? error.message : 'Login failed',
+        timestamp: Date.now()))))))
       };
       
       // 发布登录失败事件
@@ -673,11 +1043,9 @@ export class AuthRepository {
   }
 
   /**
-   * 检查登录频率限制
-   */
+   * 检查登录频率限�?   */
   private checkLoginRateLimit(): void {
-    // 如果登录尝试次数过多，应用临时锁定
-    const MAX_ATTEMPTS = 5;
+    // 如果登录尝试次数过多，应用临时锁�?    const MAX_ATTEMPTS = 5;
     const LOCK_DURATION = 300000; // 5分钟
     
     if (this.loginAttempts >= MAX_ATTEMPTS) {
@@ -687,8 +1055,7 @@ export class AuthRepository {
         const remainingTime = Math.ceil((LOCK_DURATION - timeSinceLastAttempt) / 1000);
         throw new Error(`Too many login attempts. Please try again in ${remainingTime} seconds.`);
       } else {
-        // 锁定时间已过，重置尝试计数
-        this.loginAttempts = 0;
+        // 锁定时间已过，重置尝试计�?        this.loginAttempts = 0;
       }
     }
   }
@@ -698,8 +1065,7 @@ export class AuthRepository {
    */
   public async logout(): Promise<void> {
     try {
-      // 发布登出开始事件
-      this.eventBus.emit(AuthEventType.LOGOUT_START, {
+      // 发布登出开始事�?      this.eventBus.emit(AuthEventType.LOGOUT_START, {
         type: AuthEventType.LOGOUT_START,
         timestamp: Date.now()
       } as AuthEvent);
@@ -712,16 +1078,13 @@ export class AuthRepository {
             { token: this.cachedToken.accessToken }
           );
         } catch (error) {
-          // 登出API调用失败不影响本地登出
-          this.logger.warn('Logout API call failed, proceeding with local logout', error);
+          // 登出API调用失败不影响本地登�?          this.logger.warn('Logout API call failed, proceeding with local logout', error);
         }
       }
       
-      // 重置认证状态
-      await this.resetAuthState();
+      // 重置认证状�?      await this.resetAuthState();
       
-      // 更新状态为未认证
-      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
+      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
       
       // 发布登出成功事件
       this.eventBus.emit(AuthEventType.LOGOUT_SUCCESS, {
@@ -729,17 +1092,68 @@ export class AuthRepository {
         timestamp: Date.now()
       } as AuthEvent);
       
-      // 更新认证状态变更事件
-      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
+      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
       
       this.logger.info('User logged out successfully');
     } catch (error) {
-      this.logger.error('Logout failed', error as Error);
+      this.Logger.error('Logout failed', error as Error);
       
       // 发布登出失败事件
       this.eventBus.emit(AuthEventType.LOGOUT_FAILURE, {
         type: AuthEventType.LOGOUT_FAILURE,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.LOGOUT_FAILURE,
+        timestamp: Date.now())))))),
         error: {
           code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
           message: error instanceof Error ? error.message : 'Logout failed',
@@ -752,8 +1166,7 @@ export class AuthRepository {
   }
 
   /**
-   * 获取当前认证状态
-   */
+   * 获取当前认证状�?   */
   public getAuthStatus(): AuthStatus {
     return this.currentStatus;
   }
@@ -782,8 +1195,7 @@ export class AuthRepository {
   }
 
   /**
-   * 检查令牌是否过期
-   */
+   * 检查令牌是否过�?   */
   public isTokenExpired(): boolean {
     if (!this.cachedToken) {
       return true;
@@ -795,8 +1207,7 @@ export class AuthRepository {
   }
 
   /**
-   * 检查令牌是否即将过期
-   */
+   * 检查令牌是否即将过�?   */
   public isTokenExpiredSoon(): boolean {
     if (!this.cachedToken) {
       return true;
@@ -824,14 +1235,12 @@ export class AuthRepository {
     this.isRefreshingToken = true;
     
     try {
-      // 发布令牌刷新开始事件
-      this.eventBus.emit(AuthEventType.TOKEN_REFRESH_START, {
+      // 发布令牌刷新开始事�?      this.eventBus.emit(AuthEventType.TOKEN_REFRESH_START, {
         type: AuthEventType.TOKEN_REFRESH_START,
         timestamp: Date.now()
       } as AuthEvent);
       
-      // 更新状态为刷新中
-      this.updateAuthStatus(AuthStatus.REFRESHING);
+      // 更新状态为刷新�?      this.updateAuthStatus(AuthStatus.REFRESHING);
       
       // 调用刷新令牌API
       const response = await this.networkUtil.post<RefreshTokenResponse>(
@@ -851,8 +1260,7 @@ export class AuthRepository {
         this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
       );
       
-      // 更新状态为已认证
-      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
+      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
       
       // 发布令牌刷新成功事件
       this.eventBus.emit(AuthEventType.TOKEN_REFRESH_SUCCESS, {
@@ -865,7 +1273,7 @@ export class AuthRepository {
       
       return refreshResponse;
     } catch (error) {
-      this.logger.error('Token refresh failed', error as Error);
+      this.Logger.error('Token refresh failed', error as Error);
       
       // 更新状态为令牌过期
       this.updateAuthStatus(AuthStatus.TOKEN_EXPIRED);
@@ -873,7 +1281,59 @@ export class AuthRepository {
       // 发布令牌刷新失败事件
       this.eventBus.emit(AuthEventType.TOKEN_REFRESH_FAILURE, {
         type: AuthEventType.TOKEN_REFRESH_FAILURE,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( instanceof Error ? {
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now( : new Error(String({
+        type: AuthEventType.TOKEN_REFRESH_FAILURE,
+        timestamp: Date.now())))))),
         error: {
           code: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
           message: error instanceof Error ? error.message : 'Token refresh failed',
@@ -911,8 +1371,7 @@ export class AuthRepository {
       // 尝试刷新令牌
       await this.refreshToken();
     } catch (error) {
-      // 刷新失败，发布会话过期事件
-      this.eventBus.emit(AuthEventType.SESSION_EXPIRED, {
+      // 刷新失败，发布会话过期事�?      this.eventBus.emit(AuthEventType.SESSION_EXPIRED, {
         type: AuthEventType.SESSION_EXPIRED,
         timestamp: Date.now(),
         error: {
@@ -922,16 +1381,14 @@ export class AuthRepository {
         }
       } as AuthEvent);
       
-      // 重置认证状态
-      await this.resetAuthState();
+      // 重置认证状�?      await this.resetAuthState();
       
       this.logger.warn('Session expired, user needs to login again');
     }
   }
 
   /**
-   * 更新认证状态
-   */
+   * 更新认证状�?   */
   private updateAuthStatus(status: AuthStatus): void {
     if (this.currentStatus !== status) {
       this.currentStatus = status;
@@ -950,8 +1407,7 @@ export class AuthRepository {
   }
 
   /**
-   * 发布认证状态变更事件
-   */
+   * 发布认证状态变更事�?   */
   private emitAuthStatusChange(status: AuthStatus): void {
     this.eventBus.emit(AuthEventType.AUTH_STATUS_CHANGED, {
       type: AuthEventType.AUTH_STATUS_CHANGED,
@@ -973,8 +1429,7 @@ export class AuthRepository {
       
       const authResponse = response.data;
       
-      // 保存认证状态
-      await this.saveAuthState(authResponse.token, authResponse.user);
+      // 保存认证状�?      await this.saveAuthState(authResponse.token, authResponse.user);
       
       // 发布注册成功事件
       this.eventBus.emit(AuthEventType.REGISTRATION_SUCCESS, {
@@ -987,7 +1442,7 @@ export class AuthRepository {
       
       return authResponse;
     } catch (error) {
-      this.logger.error('Registration failed', error as Error);
+      this.Logger.error('Registration failed', error as Error);
       throw error;
     }
   }
@@ -999,9 +1454,34 @@ export class AuthRepository {
     try {
       // 调用忘记密码API
       await this.networkUtil.post(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.forgotPassword}`,
-        { email }
-      );
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.forgotPassword}`, { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+      )))))));
       
       // 发布忘记密码请求事件
       this.eventBus.emit(AuthEventType.PASSWORD_RESET_REQUEST, {
@@ -1012,7 +1492,7 @@ export class AuthRepository {
       
       this.logger.info(`Password reset request sent for ${email}`);
     } catch (error) {
-      this.logger.error('Forgot password request failed', error as Error);
+      this.Logger.error('Forgot password request failed', error as Error);
       throw error;
     }
   }
@@ -1020,7 +1500,7 @@ export class AuthRepository {
   /**
    * 重置密码
    */
-  public async resetPassword(token: string, newPassword: string): Promise<void> {
+  public async resetPassword(token: string, newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string : new Error(String(newPassword: string instanceof Error ? newPassword: string : new Error(String(newPassword: string))))))): Promise<void> {
     try {
       // 调用重置密码API
       await this.networkUtil.post(
@@ -1037,7 +1517,7 @@ export class AuthRepository {
       
       this.logger.info('Password reset successfully');
     } catch (error) {
-      this.logger.error('Password reset failed', error as Error);
+      this.Logger.error('Password reset failed', error as Error);
       throw error;
     }
   }
@@ -1049,49 +1529,122 @@ export class AuthRepository {
     try {
       // 调用验证邮箱API
       await this.networkUtil.post(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.verifyEmail}`,
-        { token }
-      );
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.verifyEmail}`, { token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+       : new Error(String({ token }
+       instanceof Error ? { token }
+       : new Error(String({ token }
+      )))))));
       
       this.logger.info('Email verified successfully');
     } catch (error) {
-      this.logger.error('Email verification failed', error as Error);
+      this.Logger.error('Email verification failed', error as Error);
       throw error;
     }
   }
 
   /**
-   * 重新发送验证邮件
-   */
+   * 重新发送验证邮�?   */
   public async resendVerification(email: string): Promise<void> {
     try {
       // 调用重新发送验证邮件API
       await this.networkUtil.post(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resendVerification}`,
-        { email }
-      );
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.resendVerification}`, { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+       : new Error(String({ email }
+       instanceof Error ? { email }
+       : new Error(String({ email }
+      )))))));
       
       this.logger.info(`Verification email resent to ${email}`);
     } catch (error) {
-      this.logger.error('Failed to resend verification email', error as Error);
+      this.Logger.error('Failed to resend verification email', error as Error);
       throw error;
     }
   }
 
   /**
-   * 检查权限
-   */
+   * 检查权�?   */
   public async checkPermission(request: PermissionCheckRequest): Promise<boolean> {
     try {
       // 调用权限检查API
       const response = await this.networkUtil.post<{ hasPermission: boolean }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.checkPermission}`,
-        request
-      );
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.checkPermission}`, request
+       instanceof Error ? request
+       : new Error(String(request
+       instanceof Error ? request
+       instanceof Error ? request
+       : new Error(String(request
+       : new Error(String(request
+       instanceof Error ? request
+       : new Error(String(request
+       instanceof Error ? request
+       instanceof Error ? request
+       : new Error(String(request
+       instanceof Error ? request
+       instanceof Error ? request
+       : new Error(String(request
+       : new Error(String(request
+       instanceof Error ? request
+       : new Error(String(request
+       : new Error(String(request
+       instanceof Error ? request
+       : new Error(String(request
+       instanceof Error ? request
+       instanceof Error ? request
+       : new Error(String(request
+       : new Error(String(request
+       instanceof Error ? request
+       : new Error(String(request
+      )))))));
       
       return response.data.hasPermission;
     } catch (error) {
-      this.logger.error('Permission check failed', error as Error);
+      this.Logger.error('Permission check failed', error as Error);
       return false;
     }
   }
@@ -1101,8 +1654,7 @@ export class AuthRepository {
    */
   public async getUserPermissions(userId: string): Promise<UserPermissions | null> {
     try {
-      // 如果缓存中有权限信息，直接返回
-      if (this.cachedUserPermissions && this.cachedUserPermissions.userId === userId) {
+      // 如果缓存中有权限信息，直接返�?      if (this.cachedUserPermissions && this.cachedUserPermissions.userId === userId) {
         return this.cachedUserPermissions;
       }
       
@@ -1113,16 +1665,66 @@ export class AuthRepository {
       
       this.cachedUserPermissions = response.data;
       
-      // 保存到存储
-      await this.storageUtil.setObject(
-        this.storageKeys.userPermissions,
-        this.cachedUserPermissions,
+      // 保存到存�?      await this.storageUtil.setObject(
+        this.storageKeys.userPermissions, this.cachedUserPermissions,
         LocalStorageType.DEFAULT
-      );
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       instanceof Error ? this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+       : new Error(String(this.cachedUserPermissions,
+        LocalStorageType.DEFAULT
+      )))))));
       
       return this.cachedUserPermissions;
     } catch (error) {
-      this.logger.error('Failed to get user permissions', error as Error);
+      this.Logger.error('Failed to get user permissions', error as Error);
       return null;
     }
   }
@@ -1132,11 +1734,35 @@ export class AuthRepository {
    */
   private async loadUserPermissions(userId: string): Promise<void> {
     try {
-      // 从存储加载权限信息
-      const savedPermissions = await this.storageUtil.getObject<UserPermissions>(
-        this.storageKeys.userPermissions,
-        LocalStorageType.DEFAULT
-      );
+      // 从存储加载权限信�?      const savedPermissions = await this.storageUtil.getObject<UserPermissions>(
+        this.storageKeys.userPermissions, LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+      )))))));
       
       if (savedPermissions && savedPermissions.userId === userId) {
         this.cachedUserPermissions = savedPermissions;
@@ -1150,8 +1776,7 @@ export class AuthRepository {
   }
 
   /**
-   * 获取所有角色
-   */
+   * 获取所有角�?   */
   public async getRoles(): Promise<Role[]> {
     try {
       // 调用获取角色API
@@ -1161,7 +1786,7 @@ export class AuthRepository {
       
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to get roles', error as Error);
+      this.Logger.error('Failed to get roles', error as Error);
       return [];
     }
   }
@@ -1171,8 +1796,7 @@ export class AuthRepository {
    */
   public async authenticateWithBiometric(): Promise<AuthResponse> {
     try {
-      // 检查是否启用生物认证
-      const config = await this.getConfig();
+      // 检查是否启用生物认�?      const config = await this.getConfig();
       if (!config.enableBiometricAuth) {
         throw new Error('Biometric authentication is not enabled');
       }
@@ -1181,7 +1805,7 @@ export class AuthRepository {
       // 由于是示例实现，返回错误
       throw new Error('Biometric authentication not implemented');
     } catch (error) {
-      this.logger.error('Biometric authentication failed', error as Error);
+      this.logger.error('Biometric authentication failed', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       
       // 发布生物认证失败事件
       this.eventBus.emit(AuthEventType.BIOMETRIC_AUTH_FAILURE, {
@@ -1203,8 +1827,7 @@ export class AuthRepository {
    */
   public async cleanup(): Promise<void> {
     try {
-      // 移除事件监听器
-      this.eventBus.removeAllListeners('network:statusChanged');
+      // 移除事件监听�?      this.eventBus.removeAllListeners('network:statusChanged');
       this.eventBus.removeAllListeners('app:stateChanged');
       
       // 重置实例
@@ -1216,3 +1839,5 @@ export class AuthRepository {
     }
   }
 }
+
+

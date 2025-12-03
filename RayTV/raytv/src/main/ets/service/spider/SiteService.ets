@@ -26,19 +26,19 @@ const TAG = 'SiteService';
  */
 export interface ISiteService {
   /**
-   * 初始化站点服务
+   * 初始化站点服�?
    */
   initialize(): Promise<void>;
   
   /**
-   * 获取所有站点
+   * 获取所有站�?
    * @returns 站点列表
    */
   getAllSites(): Promise<Site[]>;
   
   /**
-   * 获取启用的站点
-   * @returns 启用的站点列表
+   * 获取启用的站�?
+   * @returns 启用的站点列�?
    */
   getEnabledSites(): Promise<Site[]>;
   
@@ -57,7 +57,7 @@ export interface ISiteService {
   getSiteByKey(key: string): Promise<Site | null>;
   
   /**
-   * 保存站点（新增或更新）
+   * 保存站点（新增或更新�?
    * @param site 站点信息
    */
   saveSite(site: Site): Promise<void>;
@@ -75,7 +75,7 @@ export interface ISiteService {
   deleteSite(key: string): Promise<void>;
   
   /**
-   * 更新站点启用状态
+   * 更新站点启用状�?
    * @param key 站点唯一标识
    * @param enabled 是否启用
    */
@@ -89,7 +89,7 @@ export interface ISiteService {
   updateSiteOrder(key: string, order: number): Promise<void>;
   
   /**
-   * 更新站点最后使用时间
+   * 更新站点最后使用时�?
    * @param key 站点唯一标识
    */
   updateSiteLastUsed(key: string): Promise<void>;
@@ -104,7 +104,7 @@ export interface ISiteService {
   /**
    * 导出站点配置
    * @param config 导出配置
-   * @param siteKeys 可选的站点key列表，不提供则导出所有
+   * @param siteKeys 可选的站点key列表，不提供则导出所�?
    * @returns 导出的配置字符串
    */
   exportSites(config?: SiteImportExportConfig, siteKeys?: string[]): Promise<string>;
@@ -118,13 +118,13 @@ export interface ISiteService {
   importSites(data: string, config?: SiteImportExportConfig): Promise<{success: number, skipped: number, failed: number}>;
   
   /**
-   * 清空所有站点
+   * 清空所有站�?
    */
   clearAllSites(): Promise<void>;
 }
 
 /**
- * 站点服务实现类
+ * 站点服务实现�?
  */
 export class SiteService implements ISiteService {
   private static instance: SiteService | null = null;
@@ -132,7 +132,7 @@ export class SiteService implements ISiteService {
   private initialized: boolean = false;
   
   /**
-   * 私有构造函数
+   * 私有构造函�?
    */
   private constructor() {
     this.siteDao = new SiteDao();
@@ -150,7 +150,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 初始化站点服务
+   * 初始化站点服�?
    */
   public async initialize(): Promise<void> {
     if (this.initialized) {
@@ -158,7 +158,7 @@ export class SiteService implements ISiteService {
     }
     
     try {
-      // 预加载站点数据
+      // 预加载站点数�?
       const sites = await this.getAllSites();
       Logger.info(TAG, `Initialized with ${sites.length} sites`);
       this.initialized = true;
@@ -169,19 +169,19 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 获取所有站点
+   * 获取所有站�?
    */
   public async getAllSites(): Promise<Site[]> {
     try {
       return await this.siteDao.getAll();
     } catch (error) {
-      Logger.error(TAG, `Failed to get all sites: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error instanceof Error ? `Failed to get all sites: ${JSON.stringify(error : new Error(String(`Failed to get all sites: ${JSON.stringify(error)))))))}`);
       return [];
     }
   }
   
   /**
-   * 获取启用的站点
+   * 获取启用的站�?
    */
   public async getEnabledSites(): Promise<Site[]> {
     try {
@@ -199,7 +199,7 @@ export class SiteService implements ISiteService {
     try {
       return await this.siteDao.getByType(type);
     } catch (error) {
-      Logger.error(TAG, `Failed to get sites by type ${type}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error instanceof Error ? `Failed to get sites by type ${type}: ${JSON.stringify(error : new Error(String(`Failed to get sites by type ${type}: ${JSON.stringify(error)))))))}`);
       return [];
     }
   }
@@ -221,14 +221,14 @@ export class SiteService implements ISiteService {
    */
   public async saveSite(site: Site): Promise<void> {
     try {
-      // 确保时间戳正确设置
+      // 确保时间戳正确设�?
       const now = Date.now();
       if (!site.createdAt) {
         site.createdAt = now;
       }
       site.updatedAt = now;
       
-      // 确保必要的配置存在
+      // 确保必要的配置存�?
       if (!site.searchConfig) {
         site.searchConfig = { enabled: false };
       }
@@ -241,7 +241,59 @@ export class SiteService implements ISiteService {
       if (!site.stats) {
         site.stats = { queryCount: 0, errorCount: 0, avgResponseTime: 0 };
       }
-      if (!site.lifecycle) {
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle instanceof Error ? errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle : new Error(String(errorCount: 0, avgResponseTime: 0 };
+      }
+      if (!site.lifecycle))))))) {
         site.lifecycle = { initialized: false, loading: false, error: false };
       }
       
@@ -259,7 +311,7 @@ export class SiteService implements ISiteService {
   public async batchSaveSites(sites: Site[]): Promise<void> {
     try {
       await this.siteDao.batchSave(sites);
-      Logger.info(TAG, `Batch saved ${sites.length} sites`);
+      Logger.info(TAG, `Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites` instanceof Error ? `Batch saved ${sites.length} sites` : new Error(String(`Batch saved ${sites.length} sites`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to batch save sites: ${JSON.stringify(error)}`);
       throw error;
@@ -272,7 +324,7 @@ export class SiteService implements ISiteService {
   public async deleteSite(key: string): Promise<void> {
     try {
       await this.siteDao.delete(key);
-      Logger.info(TAG, `Deleted site: ${key}`);
+      Logger.info(TAG, `Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` : new Error(String(`Deleted site: ${key}` instanceof Error ? `Deleted site: ${key}` : new Error(String(`Deleted site: ${key}`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to delete site ${key}: ${JSON.stringify(error)}`);
       throw error;
@@ -280,9 +332,9 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 更新站点启用状态
+   * 更新站点启用状�?
    */
-  public async updateSiteEnabled(key: string, enabled: boolean): Promise<void> {
+  public async updateSiteEnabled(key: string, enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean))))))): Promise<void> {
     try {
       const site = await this.getSiteByKey(key);
       if (site) {
@@ -300,7 +352,7 @@ export class SiteService implements ISiteService {
   /**
    * 更新站点排序
    */
-  public async updateSiteOrder(key: string, order: number): Promise<void> {
+  public async updateSiteOrder(key: string, order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number))))))): Promise<void> {
     try {
       const site = await this.getSiteByKey(key);
       if (site) {
@@ -316,12 +368,12 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 更新站点最后使用时间
+   * 更新站点最后使用时�?
    */
   public async updateSiteLastUsed(key: string): Promise<void> {
     try {
       await this.siteDao.updateLastUsed(key);
-      Logger.info(TAG, `Updated site last used: ${key}`);
+      Logger.info(TAG, `Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}` instanceof Error ? `Updated site last used: ${key}` : new Error(String(`Updated site last used: ${key}`)))))));
     } catch (error) {
       Logger.error(TAG, `Failed to update site last used: ${JSON.stringify(error)}`);
     }
@@ -333,14 +385,169 @@ export class SiteService implements ISiteService {
   public async testSiteConnection(key: string): Promise<SiteTestResult> {
     const startTime = Date.now();
     const result: SiteTestResult = {
-      siteKey: key,
-      status: 'failed',
+      siteKey: key, status: 'failed',
       responseTime: 0,
       testTime: startTime
     };
     
     try {
-      const site = await this.getSiteByKey(key);
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key instanceof Error ? status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key : new Error(String(status: 'failed',
+      responseTime: 0,
+      testTime: startTime
+    };
+    
+    try {
+      const site = await this.getSiteByKey(key)))))));
       if (!site) {
         result.errorMessage = 'Site not found';
         return result;
@@ -386,7 +593,7 @@ export class SiteService implements ISiteService {
   /**
    * 导出站点配置
    */
-  public async exportSites(config?: SiteImportExportConfig, siteKeys?: string[]): Promise<string> {
+  public async exportSites(config?: SiteImportExportConfig, siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[] : new Error(String(siteKeys?: string[] instanceof Error ? siteKeys?: string[] : new Error(String(siteKeys?: string[]))))))): Promise<string> {
     try {
       let sites: Site[];
       
@@ -404,9 +611,9 @@ export class SiteService implements ISiteService {
       
       // 根据配置处理导出数据
       const exportData = sites.map(site => {
-        const exportSite = { ...site };
+        const exportSite: Record<string, string | number | boolean | null> = { ... };
         
-        // 不导出敏感信息
+        // 不导出敏感信�?
         if (!config?.includeCredentials) {
           exportSite.siteAuth = undefined;
           exportSite.headers = undefined;
@@ -417,7 +624,7 @@ export class SiteService implements ISiteService {
           exportSite.stats = { queryCount: 0, errorCount: 0, avgResponseTime: 0 };
         }
         
-        // 是否导出自定义配置
+        // 是否导出自定义配�?
         if (!config?.includeCustomConfig) {
           exportSite.customCode = undefined;
         }
@@ -425,13 +632,7 @@ export class SiteService implements ISiteService {
         return exportSite;
       });
       
-      const exportConfig = {
-        version: '1.0',
-        exportTime: Date.now(),
-        description: config?.description,
-        siteCount: exportData.length,
-        sites: exportData
-      };
+      const exportConfig: Record<string, string | number | boolean | null> = { ... };
       
       return JsonUtil.stringify(exportConfig, null, 2);
     } catch (error) {
@@ -443,8 +644,8 @@ export class SiteService implements ISiteService {
   /**
    * 导入站点配置
    */
-  public async importSites(data: string, config?: SiteImportExportConfig): Promise<{success: number, skipped: number, failed: number}> {
-    const stats = { success: 0, skipped: 0, failed: 0 };
+  public async importSites(data: string, config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig instanceof Error ? config?: SiteImportExportConfig : new Error(String(config?: SiteImportExportConfig))))))): Promise<{success: number, skipped: number, failed: number}> {
+    const stats: Record<string, string | number | boolean | null> = { ... };
     
     try {
       const importData = JsonUtil.parse(data);
@@ -456,7 +657,7 @@ export class SiteService implements ISiteService {
           const existing = await this.getSiteByKey(site.key);
           
           if (existing) {
-            // 根据导入配置决定是跳过还是覆盖
+            // 根据导入配置决定是跳过还是覆�?
             stats.skipped++;
             Logger.info(TAG, `Skipped existing site: ${site.key}`);
             continue;
@@ -477,7 +678,7 @@ export class SiteService implements ISiteService {
       }
       
     } catch (error) {
-      Logger.error(TAG, `Failed to parse import data: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error instanceof Error ? `Failed to parse import data: ${JSON.stringify(error : new Error(String(`Failed to parse import data: ${JSON.stringify(error)))))))}`);
       throw error;
     }
     
@@ -485,7 +686,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 清空所有站点
+   * 清空所有站�?
    */
   public async clearAllSites(): Promise<void> {
     try {
@@ -501,3 +702,5 @@ export class SiteService implements ISiteService {
     }
   }
 }
+
+

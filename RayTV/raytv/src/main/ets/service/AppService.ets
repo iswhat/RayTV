@@ -1,5 +1,4 @@
-// AppService - 应用服务类
-import Logger from '../../common/util/Logger';
+// AppService - 应用服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import JsonUtil from '../../common/util/JsonUtil';
 import ConfigService from './config/ConfigService';
@@ -21,10 +20,8 @@ import { getParserService } from './parser/index';
 const TAG = 'AppService';
 const APP_STATE_KEY = 'app_state';
 const APP_VERSION_KEY = 'app_version';
-const INITIALIZATION_TIMEOUT = 30000; // 30秒
-
-// 应用状态枚举
-export enum AppState {
+const INITIALIZATION_TIMEOUT = 30000; // 30�?
+// 应用状态枚�?export enum AppState {
   CREATED = 'created',
   INITIALIZING = 'initializing',
   READY = 'ready',
@@ -223,8 +220,7 @@ const DEFAULT_APP_CONFIG: AppConfig = {
 };
 
 /**
- * 应用服务类
- * 负责管理应用程序的全局状态、生命周期和通用功能
+ * 应用服务�? * 负责管理应用程序的全局状态、生命周期和通用功能
  */
 export default class AppService {
   private static instance: AppService;
@@ -239,13 +235,11 @@ export default class AppService {
   // 服务映射
   private services: Map<string, Object> = new Map();
   
-  // 初始化状态
-  private initializationPromise: Promise<void> | null = null;
+  // 初始化状�?  private initializationPromise: Promise<void> | null = null;
   private initializationStartTime: number = 0;
   private isInitialized: boolean = false;
   
-  // 监听器
-  private stateListeners: Array<(newState: AppState, oldState: AppState) => void> = [];
+  // 监听�?  private stateListeners: Array<(newState: AppState, oldState: AppState) => void> = [];
   private eventListeners: Array<(event: AppEvent) => void> = [];
   private errorListeners: Array<(error: AppError) => void> = [];
   
@@ -257,8 +251,7 @@ export default class AppService {
   private buildNumber: number = 1;
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     // 捕获全局错误
     this.setupGlobalErrorHandling();
@@ -316,7 +309,7 @@ export default class AppService {
         this.handleGlobalError(new Error(`${event.message || 'Unknown error'}`), AppErrorType.UNKNOWN_ERROR, event.error?.stack);
       });
     } catch (error) {
-      Logger.error(TAG, 'Failed to setup global error handling', error);
+      Logger.error(TAG, 'Failed to setup global error handling', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -336,8 +329,7 @@ export default class AppService {
       
       this.recordError(appError);
       
-      // 记录到日志
-      Logger.error(TAG, 'Global error occurred', error);
+      // 记录到日�?      Logger.error(TAG, 'Global error occurred', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     } catch (logError) {
       // 避免错误处理自身出错
       console.error('Failed to log global error', logError);
@@ -345,11 +337,9 @@ export default class AppService {
   }
 
   /**
-   * 初始化应用服务
-   */
+   * 初始化应用服�?   */
   public async initialize(): Promise<boolean> {
-    // 防止重复初始化
-    if (this.initializationPromise) {
+    // 防止重复初始�?    if (this.initializationPromise) {
       return this.initializationPromise.then(() => this.isInitialized);
     }
     
@@ -358,12 +348,10 @@ export default class AppService {
   }
 
   /**
-   * 执行初始化过程
-   */
+   * 执行初始化过�?   */
   private async doInitialize(): Promise<void> {
     try {
-      // 更新状态
-      this.setState(AppState.INITIALIZING);
+      // 更新状�?      this.setState(AppState.INITIALIZING);
       this.initializationStartTime = Date.now();
       
       Logger.info(TAG, 'Starting application initialization...');
@@ -377,53 +365,43 @@ export default class AppService {
       // 3. 加载应用统计
       await this.loadAppStatistics();
       
-      // 4. 初始化存储服务
-      const fileService = FileService.getInstance();
+      // 4. 初始化存储服�?      const fileService = FileService.getInstance();
       await fileService.initialize();
       this.services.set('fileService', fileService);
       
-      // 5. 初始化仓库工厂
-      const repositoryFactory = RepositoryFactory.getInstance();
+      // 5. 初始化仓库工�?      const repositoryFactory = RepositoryFactory.getInstance();
       await repositoryFactory.initialize();
       this.services.set('repositoryFactory', repositoryFactory);
       
-      // 6. 初始化配置服务
-      const configService = ConfigService.getInstance();
+      // 6. 初始化配置服�?      const configService = ConfigService.getInstance();
       await configService.initialize();
       this.services.set('configService', configService);
       
-      // 7. 初始化缓存服务
-      const cacheService = CacheService.getInstance();
+      // 7. 初始化缓存服�?      const cacheService = CacheService.getInstance();
       await cacheService.initialize();
       this.services.set('cacheService', cacheService);
       
-      // 8. 初始化网络服务
-      const httpService = HttpService.getInstance();
+      // 8. 初始化网络服�?      const httpService = HttpService.getInstance();
       await httpService.initialize();
       this.services.set('httpService', httpService);
       
-      // 9. 初始化认证服务
-      const authService = AuthService.getInstance();
+      // 9. 初始化认证服�?      const authService = AuthService.getInstance();
       await authService.initialize();
       this.services.set('authService', authService);
       
-      // 10. 初始化电影服务
-      const movieService = MovieService.getInstance();
+      // 10. 初始化电影服�?      const movieService = MovieService.getInstance();
       await movieService.initialize();
       this.services.set('movieService', movieService);
       
-      // 11. 初始化历史服务
-      const historyService = HistoryService.getInstance();
+      // 11. 初始化历史服�?      const historyService = HistoryService.getInstance();
       await historyService.initialize();
       this.services.set('historyService', historyService);
       
-      // 12. 初始化收藏服务
-      const collectionService = CollectionService.getInstance();
+      // 12. 初始化收藏服�?      const collectionService = CollectionService.getInstance();
       await collectionService.initialize();
       this.services.set('collectionService', collectionService);
       
-      // 13. 初始化下载服务
-      const downloadService = DownloadService.getInstance();
+      // 13. 初始化下载服�?      const downloadService = DownloadService.getInstance();
       await downloadService.initialize();
       this.services.set('downloadService', downloadService);
       
@@ -437,8 +415,7 @@ export default class AppService {
       await liveStreamService.initialize();
       this.services.set('liveStreamService', liveStreamService);
       
-      // 16. 初始化字幕服务
-      const subtitleService = SubtitleService.getInstance();
+      // 16. 初始化字幕服�?      const subtitleService = SubtitleService.getInstance();
       await subtitleService.initialize();
       this.services.set('subtitleService', subtitleService);
       
@@ -450,11 +427,9 @@ export default class AppService {
       // 18. 更新统计信息
       await this.updateLaunchStatistics();
       
-      // 19. 执行启动时清理
-      await this.performStartupCleanup();
+      // 19. 执行启动时清�?      await this.performStartupCleanup();
       
-      // 20. 检查更新
-      if (this.appConfig.enableAutoUpdate) {
+      // 20. 检查更�?      if (this.appConfig.enableAutoUpdate) {
         await this.checkForUpdates();
       }
       
@@ -465,11 +440,10 @@ export default class AppService {
       const initDuration = Date.now() - this.initializationStartTime;
       Logger.info(TAG, `Application initialized successfully in ${initDuration}ms`);
       
-      // 发布初始化完成事件
-      this.publishEvent(AppEventType.INITIALIZED, { duration: initDuration });
+      // 发布初始化完成事�?      this.publishEvent(AppEventType.INITIALIZED, { duration: initDuration });
       this.publishEvent(AppEventType.READY, { version: this.currentVersion });
     } catch (error) {
-      Logger.error(TAG, 'Application initialization failed', error);
+      Logger.error(TAG, 'Application initialization failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
       const appError: AppError = {
         type: AppErrorType.INITIALIZATION_FAILED,
@@ -522,7 +496,7 @@ export default class AppService {
       
       Logger.debug(TAG, `Loaded app info: ${this.appInfo.appName} v${this.appInfo.versionName}`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to load app info', error);
+      Logger.error(TAG, 'Failed to load app info', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       // 确保抛出的总是Error类型，并添加更有用的错误信息
       const finalError = error instanceof Error ? error : new Error(String(error));
       finalError.message = `Failed to load app info: ${finalError.message}`;
@@ -542,7 +516,7 @@ export default class AppService {
       
       Logger.debug(TAG, 'Loaded app configuration');
     } catch (error) {
-      Logger.error(TAG, 'Failed to load app config', error);
+      Logger.error(TAG, 'Failed to load app config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       // 使用默认配置
       this.appConfig = { ...DEFAULT_APP_CONFIG };
     }
@@ -556,7 +530,7 @@ export default class AppService {
       await StorageUtil.setObject('app_config', this.appConfig);
       Logger.debug(TAG, 'Saved app configuration');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save app config', error);
+      Logger.error(TAG, 'Failed to save app config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -572,7 +546,7 @@ export default class AppService {
       
       Logger.debug(TAG, 'Loaded app statistics');
     } catch (error) {
-      Logger.error(TAG, 'Failed to load app statistics', error);
+      Logger.error(TAG, 'Failed to load app statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       // 使用默认统计
       this.appStatistics = this.createDefaultStatistics();
     }
@@ -586,7 +560,7 @@ export default class AppService {
       await StorageUtil.setObject('app_statistics', this.appStatistics);
       Logger.debug(TAG, 'Saved app statistics');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save app statistics', error);
+      Logger.error(TAG, 'Failed to save app statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -600,8 +574,7 @@ export default class AppService {
       await StorageUtil.setNumber('launch_count', currentLaunchCount);
       this.appStatistics.totalLaunches = currentLaunchCount;
       
-      // 更新最后启动时间
-      await StorageUtil.setNumber('last_launch_time', Date.now());
+      // 更新最后启动时�?      await StorageUtil.setNumber('last_launch_time', Date.now());
       
       // 如果是首次启动，记录首次启动时间
       if (!await StorageUtil.contains('first_launch_time')) {
@@ -610,17 +583,15 @@ export default class AppService {
       
       Logger.info(TAG, `Launch count: ${currentLaunchCount}`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to update launch statistics', error);
+      Logger.error(TAG, 'Failed to update launch statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 执行启动时清理
-   */
+   * 执行启动时清�?   */
   private async performStartupCleanup(): Promise<void> {
     try {
-      // 清理过期的缓存
-      const cacheService = CacheService.getInstance();
+      // 清理过期的缓�?      const cacheService = CacheService.getInstance();
       await cacheService.clear({ expiredOnly: true });
       
       // 清理临时文件
@@ -632,7 +603,7 @@ export default class AppService {
       
       Logger.debug(TAG, 'Performed startup cleanup');
     } catch (error) {
-      Logger.error(TAG, 'Failed to perform startup cleanup', error);
+      Logger.error(TAG, 'Failed to perform startup cleanup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -647,8 +618,7 @@ export default class AppService {
       this.appStatistics.deviceStorageUsed = storageInfo.used;
       this.appStatistics.deviceStorageTotal = storageInfo.total;
       
-      // 检查存储空间警告
-      if (storageInfo.used > storageInfo.total * 0.9) {
+      // 检查存储空间警�?      if (storageInfo.used > storageInfo.total * 0.9) {
         this.publishEvent(AppEventType.STORAGE_WARNING, {
           used: storageInfo.used,
           total: storageInfo.total,
@@ -656,13 +626,12 @@ export default class AppService {
         });
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to update storage statistics', error);
+      Logger.error(TAG, 'Failed to update storage statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 检查更新
-   */
+   * 检查更�?   */
   private async checkForUpdates(): Promise<void> {
     try {
       // 在实际应用中，这里会调用更新检查API
@@ -678,19 +647,17 @@ export default class AppService {
         });
       }
       
-      // 更新检查时间
-      this.appStatistics.lastUpdateCheckTime = Date.now();
+      // 更新检查时�?      this.appStatistics.lastUpdateCheckTime = Date.now();
       await this.saveAppStatistics();
       
       Logger.debug(TAG, 'Checked for updates');
     } catch (error) {
-      Logger.error(TAG, 'Failed to check for updates', error);
+      Logger.error(TAG, 'Failed to check for updates', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 设置应用状态
-   */
+   * 设置应用状�?   */
   private setState(newState: AppState): void {
     const oldState = this.currentState;
     this.currentState = newState;
@@ -702,7 +669,7 @@ export default class AppService {
       try {
         listener(newState, oldState);
       } catch (error) {
-        Logger.error(TAG, 'Error in state listener', error);
+        Logger.error(TAG, 'Error in state listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -717,8 +684,7 @@ export default class AppService {
       timestamp: Date.now()
     };
     
-    // 添加到事件历史
-    this.eventHistory.push(event);
+    // 添加到事件历�?    this.eventHistory.push(event);
     // 限制历史记录大小
     if (this.eventHistory.length > 1000) {
       this.eventHistory.shift();
@@ -726,12 +692,11 @@ export default class AppService {
     
     Logger.debug(TAG, `Published event: ${type}`);
     
-    // 通知事件监听器
-    for (const listener of this.eventListeners) {
+    // 通知事件监听�?    for (const listener of this.eventListeners) {
       try {
         listener(event);
       } catch (error) {
-        Logger.error(TAG, 'Error in event listener', error);
+        Logger.error(TAG, 'Error in event listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -740,8 +705,7 @@ export default class AppService {
    * 记录错误
    */
   private recordError(error: AppError): void {
-    // 添加到错误历史
-    this.errorHistory.push(error);
+    // 添加到错误历�?    this.errorHistory.push(error);
     // 限制历史记录大小
     if (this.errorHistory.length > 100) {
       this.errorHistory.shift();
@@ -752,19 +716,17 @@ export default class AppService {
     
     Logger.error(TAG, `Recorded error: ${error.type} - ${error.message}`);
     
-    // 通知错误监听器
-    for (const listener of this.errorListeners) {
+    // 通知错误监听�?    for (const listener of this.errorListeners) {
       try {
         listener(error);
       } catch (listenerError) {
-        Logger.error(TAG, 'Error in error listener', listenerError);
+        Logger.error(TAG, 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError)))))));
       }
     }
   }
 
   /**
-   * 获取当前应用状态
-   */
+   * 获取当前应用状�?   */
   public getState(): AppState {
     return this.currentState;
   }
@@ -803,7 +765,7 @@ export default class AppService {
       Logger.info(TAG, 'Updated app configuration');
       return { ...this.appConfig };
     } catch (error) {
-      Logger.error(TAG, 'Failed to update app config', error);
+      Logger.error(TAG, 'Failed to update app config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.appConfig };
     }
   }
@@ -824,7 +786,7 @@ export default class AppService {
       Logger.info(TAG, 'Reset app configuration to default');
       return { ...this.appConfig };
     } catch (error) {
-      Logger.error(TAG, 'Failed to reset app config', error);
+      Logger.error(TAG, 'Failed to reset app config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.appConfig };
     }
   }
@@ -849,7 +811,7 @@ export default class AppService {
       await this.saveAppStatistics();
       Logger.debug(TAG, 'Updated app statistics');
     } catch (error) {
-      Logger.error(TAG, 'Failed to update app statistics', error);
+      Logger.error(TAG, 'Failed to update app statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -863,7 +825,7 @@ export default class AppService {
       await this.saveAppStatistics();
       Logger.info(TAG, 'Reset app statistics');
     } catch (error) {
-      Logger.error(TAG, 'Failed to reset app statistics', error);
+      Logger.error(TAG, 'Failed to reset app statistics', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -880,29 +842,27 @@ export default class AppService {
   }
 
   /**
-   * 注册自定义服务
-   */
+   * 注册自定义服�?   */
   public registerService(serviceName: string, serviceInstance: { initialize?: () => Promise<void>; close?: () => Promise<void> }): boolean {
     try {
       this.services.set(serviceName, serviceInstance);
       Logger.info(TAG, `Registered custom service: ${serviceName}`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to register service: ${serviceName}`, error);
+      Logger.error(TAG, `Failed to register service: ${serviceName}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
 
   /**
-   * 注销自定义服务
-   */
+   * 注销自定义服�?   */
   public unregisterService(serviceName: string): boolean {
     try {
       this.services.delete(serviceName);
       Logger.info(TAG, `Unregistered service: ${serviceName}`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to unregister service: ${serviceName}`, error);
+      Logger.error(TAG, `Failed to unregister service: ${serviceName}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
@@ -923,8 +883,7 @@ export default class AppService {
   }
 
   /**
-   * 添加事件监听器
-   */
+   * 添加事件监听�?   */
   public addEventListener(listener: (event: AppEvent) => void): () => void {
     this.eventListeners.push(listener);
     
@@ -938,8 +897,7 @@ export default class AppService {
   }
 
   /**
-   * 添加错误监听器
-   */
+   * 添加错误监听�?   */
   public addErrorListener(listener: (error: AppError) => void): () => void {
     this.errorListeners.push(listener);
     
@@ -961,13 +919,12 @@ export default class AppService {
         this.setState(AppState.FOREGROUND);
         this.publishEvent(AppEventType.FOREGROUND);
         
-        // 恢复必要的服务
-        this.resumeServices();
+        // 恢复必要的服�?        this.resumeServices();
       }
       
       Logger.info(TAG, 'Application moved to foreground');
     } catch (error) {
-      Logger.error(TAG, 'Failed to handle app foreground', error);
+      Logger.error(TAG, 'Failed to handle app foreground', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -983,13 +940,12 @@ export default class AppService {
         // 暂停非必要的服务
         this.pauseServices();
         
-        // 保存状态
-        this.saveAppState();
+        // 保存状�?        this.saveAppState();
       }
       
       Logger.info(TAG, 'Application moved to background');
     } catch (error) {
-      Logger.error(TAG, 'Failed to handle app background', error);
+      Logger.error(TAG, 'Failed to handle app background', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -1012,7 +968,7 @@ export default class AppService {
       
       Logger.debug(TAG, 'Resumed services');
     } catch (error) {
-      Logger.error(TAG, 'Failed to resume services', error);
+      Logger.error(TAG, 'Failed to resume services', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -1035,26 +991,19 @@ export default class AppService {
       
       Logger.debug(TAG, 'Paused services');
     } catch (error) {
-      Logger.error(TAG, 'Failed to pause services', error);
+      Logger.error(TAG, 'Failed to pause services', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 保存应用状态
-   */
+   * 保存应用状�?   */
   private async saveAppState(): Promise<void> {
     try {
-      const appState = {
-        version: this.currentVersion,
-        state: this.currentState,
-        timestamp: Date.now(),
-        lastActiveTime: Date.now()
-      };
+      const appState: Record<string, string | number | boolean | null> = { ... };
       
       await StorageUtil.setObject(APP_STATE_KEY, appState);
       
-      // 更新总运行时间
-      const currentRunningTime = await StorageUtil.getNumber('total_running_time', 0);
+      // 更新总运行时�?      const currentRunningTime = await StorageUtil.getNumber('total_running_time', 0);
       const thisSessionTime = Date.now() - this.startTime;
       await StorageUtil.setNumber('total_running_time', currentRunningTime + thisSessionTime);
       
@@ -1063,20 +1012,19 @@ export default class AppService {
       
       Logger.debug(TAG, 'Saved app state');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save app state', error);
+      Logger.error(TAG, 'Failed to save app state', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
   /**
-   * 加载应用状态
-   */
+   * 加载应用状�?   */
   private async loadAppState(): Promise<AppStatistics | null> {
     try {
       const appState = await StorageUtil.getObject(APP_STATE_KEY);
       Logger.debug(TAG, 'Loaded app state');
       return appState;
     } catch (error) {
-      Logger.error(TAG, 'Failed to load app state', error);
+      Logger.error(TAG, 'Failed to load app state', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1104,8 +1052,7 @@ export default class AppService {
       totalDeleted += tempResult.deletedCount;
       totalFreed += tempResult.freedSpace;
       
-      // 清理下载的临时文件
-      const downloadService = DownloadService.getInstance();
+      // 清理下载的临时文�?      const downloadService = DownloadService.getInstance();
       const downloadResult = await downloadService.cleanupFailedDownloads();
       totalDeleted += downloadResult.deletedCount;
       totalFreed += downloadResult.freedSpace;
@@ -1123,7 +1070,7 @@ export default class AppService {
       Logger.info(TAG, `Cleanup completed: ${totalDeleted} items deleted, ${this.formatSize(totalFreed)} freed`);
       return { deletedCount: totalDeleted, freedSpace: totalFreed };
     } catch (error) {
-      Logger.error(TAG, 'Failed to perform cleanup', error);
+      Logger.error(TAG, 'Failed to perform cleanup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { deletedCount: 0, freedSpace: 0 };
     }
   }
@@ -1141,8 +1088,7 @@ export default class AppService {
       const backupInfo: AppBackupInfo = {
         version: this.currentVersion,
         timestamp: backupTime,
-        size: 0, // 将在备份完成后更新
-        description: 'RayTV application backup',
+        size: 0, // 将在备份完成后更�?        description: 'RayTV application backup',
         deviceInfo: `${this.appInfo?.deviceManufacturer} ${this.appInfo?.deviceModel}`,
         includes: {
           userData: options.includeUserData,
@@ -1152,8 +1098,7 @@ export default class AppService {
           downloads: options.includeDownloads,
           cache: options.includeCache
         },
-        hash: '', // 将在备份完成后计算
-        encrypted: !!options.password
+        hash: '', // 将在备份完成后计�?        encrypted: !!options.password
       };
       
       // 在实际应用中，这里会执行真实的备份逻辑
@@ -1170,7 +1115,7 @@ export default class AppService {
       Logger.info(TAG, `Created backup: ${backupFileName}`);
       return backupFilePath;
     } catch (error) {
-      Logger.error(TAG, 'Failed to create backup', error);
+      Logger.error(TAG, 'Failed to create backup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1209,14 +1154,13 @@ export default class AppService {
       Logger.info(TAG, `Restored backup: ${backupFilePath}`);
       return true;
     } catch (error) {
-      Logger.error(TAG, 'Failed to restore backup', error);
+      Logger.error(TAG, 'Failed to restore backup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
 
   /**
-   * 格式化大小显示
-   */
+   * 格式化大小显�?   */
   private formatSize(bytes: number): string {
     if (bytes < 1024) {
       return `${bytes} B`;
@@ -1237,18 +1181,16 @@ export default class AppService {
       this.setState(AppState.SHUTTING_DOWN);
       Logger.info(TAG, 'Shutting down application...');
       
-      // 保存状态
-      await this.saveAppState();
+      // 保存状�?      await this.saveAppState();
       
-      // 关闭所有服务
-      const servicesToShutdown = [...this.services.values()];
+      // 关闭所有服�?      const servicesToShutdown = [...this.services.values()];
       for (const service of servicesToShutdown) {
         try {
           if (typeof service.shutdown === 'function') {
             await service.shutdown();
           }
         } catch (error) {
-          Logger.error(TAG, 'Failed to shutdown service', error);
+          Logger.error(TAG, 'Failed to shutdown service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
         }
       }
       
@@ -1260,7 +1202,7 @@ export default class AppService {
       
       Logger.info(TAG, 'Application shutdown completed');
     } catch (error) {
-      Logger.error(TAG, 'Failed to shutdown application', error);
+      Logger.error(TAG, 'Failed to shutdown application', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -1295,8 +1237,7 @@ export default class AppService {
   }
 
   /**
-   * 检查应用是否处于健康状态
-   */
+   * 检查应用是否处于健康状�?   */
   public isHealthy(): boolean {
     return this.currentState === AppState.READY || 
            this.currentState === AppState.FOREGROUND || 
@@ -1310,3 +1251,5 @@ export default class AppService {
     return Date.now() - this.startTime;
   }
 }
+
+

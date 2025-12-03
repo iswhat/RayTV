@@ -7,9 +7,7 @@ import { ConfigKey, ConfigValue, ConfigCategory } from '../model/ConfigModel';
 import DatabaseRepository from './DatabaseRepository';
 
 /**
- * 配置仓库类
- * 管理应用的所有配置项，支持多级存储策略
- */
+ * 配置仓库�? * 管理应用的所有配置项，支持多级存储策�? */
 class ConfigRepository {
   private static instance: ConfigRepository;
   private databaseRepository: DatabaseRepository;
@@ -17,8 +15,7 @@ class ConfigRepository {
   private defaultConfigs: Map<string, ConfigValue> = new Map();
   private initialized: boolean = false;
 
-  // 私有构造函数
-  private constructor() {
+  // 私有构造函�?  private constructor() {
     this.databaseRepository = DatabaseRepository.getInstance();
     this.initializeDefaultConfigs();
     this.initialize();
@@ -36,8 +33,7 @@ class ConfigRepository {
   }
 
   /**
-   * 初始化默认配置
-   */
+   * 初始化默认配�?   */
   private initializeDefaultConfigs(): void {
     // 应用基础配置
     this.defaultConfigs.set(ConfigKey.APP_VERSION, {
@@ -136,8 +132,7 @@ class ConfigRepository {
   }
 
   /**
-   * 初始化配置仓库
-   */
+   * 初始化配置仓�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info('Initializing config repository');
@@ -145,8 +140,7 @@ class ConfigRepository {
       // 从数据库加载配置
       await this.loadConfigsFromDatabase();
       
-      // 确保默认配置已设置
-      await this.ensureDefaultConfigs();
+      // 确保默认配置已设�?      await this.ensureDefaultConfigs();
       
       this.initialized = true;
       Logger.info('Config repository initialized successfully');
@@ -164,10 +158,13 @@ class ConfigRepository {
       const configs = await this.databaseRepository.getAll('configs');
       
       for (const config of configs) {
-        let parsedValue: unknown = config.value;
+        let parsedValue: Record<string, string | number | boolean | null> = config.value;
         
-        // 根据类型解析值
-        switch (config.type) {
+        // 根据类型解析�?        switch (config.type instanceof Error ? string | number | boolean | null> = config.value;
+        
+        // 根据类型解析�?        switch (config.type : new Error(String(string | number | boolean | null> = config.value;
+        
+        // 根据类型解析�?        switch (config.type))) {
           case 'number':
             parsedValue = Number(config.value);
             break;
@@ -187,7 +184,39 @@ class ConfigRepository {
           value: parsedValue,
           type: config.type,
           category: config.category || ConfigCategory.GENERAL
-        });
+        } instanceof Error ? {
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } : new Error(String({
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } instanceof Error ? {
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } instanceof Error ? {
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } : new Error(String({
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } : new Error(String({
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } instanceof Error ? {
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        } : new Error(String({
+          value: parsedValue,
+          type: config.type,
+          category: config.category || ConfigCategory.GENERAL
+        })))));
       }
       
       Logger.debug(`Loaded ${configs.length} configs from database`);
@@ -197,11 +226,10 @@ class ConfigRepository {
   }
 
   /**
-   * 确保默认配置已设置
-   */
+   * 确保默认配置已设�?   */
   private async ensureDefaultConfigs(): Promise<void> {
     try {
-      for (const [key, defaultConfig] of this.defaultConfigs.entries()) {
+      for (const [key, defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries( instanceof Error ? defaultConfig] of this.defaultConfigs.entries( : new Error(String(defaultConfig] of this.defaultConfigs.entries()))))))) {
         if (!this.configCache.has(key)) {
           await this.setConfig(key, defaultConfig.value, defaultConfig.type, defaultConfig.category);
         }
@@ -212,12 +240,8 @@ class ConfigRepository {
   }
 
   /**
-   * 获取配置值
-   * @param key 配置键
-   * @param defaultValue 默认值
-   * @returns 配置值或默认值
-   */
-  public async getConfig<T>(key: string, defaultValue?: T): Promise<T> {
+   * 获取配置�?   * @param key 配置�?   * @param defaultValue 默认�?   * @returns 配置值或默认�?   */
+  public async getConfig<T>(key: string, defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T))))))): Promise<T> {
     try {
       const config = this.configCache.get(key);
       
@@ -229,10 +253,9 @@ class ConfigRepository {
       const dbConfig = await this.databaseRepository.query('configs', [{ field: 'key', operator: '=', value: key }]);
       if (dbConfig.length > 0) {
         const configData = dbConfig[0];
-        let parsedValue: unknown = configData.value;
+        let parsedValue: Record<string, string | number | boolean | null> = configData.value;
         
-        // 解析值类型
-        switch (configData.type) {
+        // 解析值类�?        switch (configData.type) {
           case 'number':
             parsedValue = Number(configData.value);
             break;
@@ -257,8 +280,7 @@ class ConfigRepository {
         return parsedValue as T;
       }
       
-      // 如果数据库中也没有，返回默认值或默认配置中的值
-      const defaultConfig = this.defaultConfigs.get(key);
+      // 如果数据库中也没有，返回默认值或默认配置中的�?      const defaultConfig = this.defaultConfigs.get(key);
       return (defaultConfig ? defaultConfig.value : defaultValue) as T;
     } catch (error) {
       Logger.error(`Failed to get config: ${key}`, error);
@@ -267,13 +289,9 @@ class ConfigRepository {
   }
 
   /**
-   * 设置配置值
-   * @param key 配置键
-   * @param value 配置值
-   * @param type 值类型
-   * @param category 配置分类
+   * 设置配置�?   * @param key 配置�?   * @param value 配置�?   * @param type 值类�?   * @param category 配置分类
    */
-  public async setConfig(key: string, value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL): Promise<void> {
+  public async setConfig(key: string, value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL instanceof Error ? value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL : new Error(String(value: string | number | boolean | null, type: string = 'string', category: string = ConfigCategory.GENERAL))))))): Promise<void> {
     try {
       // 更新缓存
       this.configCache.set(key, {
@@ -282,8 +300,7 @@ class ConfigRepository {
         category
       });
       
-      // 准备存储值
-      let storageValue: string | unknown = value;
+      // 准备存储�?      let storageValue: string | unknown = value;
       if (type === 'object') {
         storageValue = JSON.stringify(value);
       } else if (type === 'boolean') {
@@ -302,8 +319,7 @@ class ConfigRepository {
           updated_at: Date.now()
         });
       } else {
-        // 插入新配置
-        await this.databaseRepository.insert('configs', {
+        // 插入新配�?        await this.databaseRepository.insert('configs', {
           key,
           value: storageValue,
           type,
@@ -322,16 +338,14 @@ class ConfigRepository {
 
   /**
    * 删除配置
-   * @param key 配置键
-   * @returns 是否删除成功
+   * @param key 配置�?   * @returns 是否删除成功
    */
   public async deleteConfig(key: string): Promise<boolean> {
     try {
       // 从缓存中删除
       this.configCache.delete(key);
       
-      // 从数据库中删除
-      const configs = await this.databaseRepository.query('configs', [{ field: 'key', operator: '=', value: key }]);
+      // 从数据库中删�?      const configs = await this.databaseRepository.query('configs', [{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }] instanceof Error ? [{ field: 'key', operator: '=', value: key }] : new Error(String([{ field: 'key', operator: '=', value: key }])))))));
       
       if (configs.length > 0) {
         await this.databaseRepository.delete('configs', configs[0].id);
@@ -350,7 +364,7 @@ class ConfigRepository {
    * 批量设置配置
    * @param configs 配置对象
    */
-  public async setConfigs(configs: Record<string, unknown>): Promise<void> {
+  public async setConfigs(configs: Record<string, unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown>))))))): Promise<void> {
     try {
       for (const [key, value] of this.getObjectEntries(configs)) {
         const type = this.getValueType(value);
@@ -366,11 +380,62 @@ class ConfigRepository {
   /**
    * 获取配置分类
    * @param category 配置分类
-   * @returns 该分类下的所有配置
-   */
+   * @returns 该分类下的所有配�?   */
   public async getConfigsByCategory(category: string): Promise<Map<string, ConfigValue>> {
     try {
-      const result = new Map<string, ConfigValue>();
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( instanceof Error ? ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>( : new Error(String(ConfigValue>> {
+    try {
+      const result = new Map<string, ConfigValue>()))))));
       
       for (const [key, config] of this.configCache.entries()) {
         if (config.category === category) {
@@ -386,8 +451,7 @@ class ConfigRepository {
   }
 
   /**
-   * 重置配置到默认值
-   * @param key 配置键（可选，不提供则重置所有）
+   * 重置配置到默认�?   * @param key 配置键（可选，不提供则重置所有）
    */
   public async resetToDefault(key?: string): Promise<void> {
     try {
@@ -395,12 +459,11 @@ class ConfigRepository {
         // 重置单个配置
         const defaultConfig = this.defaultConfigs.get(key);
         if (defaultConfig) {
-          await this.setConfig(key, defaultConfig.value, defaultConfig.type, defaultConfig.category);
+          await this.setConfig(key, defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category instanceof Error ? defaultConfig.value, defaultConfig.type, defaultConfig.category : new Error(String(defaultConfig.value, defaultConfig.type, defaultConfig.category)))))));
           Logger.debug(`Config reset to default: ${key}`);
         }
       } else {
-        // 重置所有配置
-        for (const [defaultKey, defaultConfig] of this.defaultConfigs.entries()) {
+        // 重置所有配�?        for (const [defaultKey, defaultConfig] of this.defaultConfigs.entries()) {
           await this.setConfig(defaultKey, defaultConfig.value, defaultConfig.type, defaultConfig.category);
         }
         Logger.debug('All configs reset to default');
@@ -412,14 +475,117 @@ class ConfigRepository {
   }
 
   /**
-   * 导出所有配置
-   * @returns 配置对象
+   * 导出所有配�?   * @returns 配置对象
    */
   public async exportConfigs(): Promise<Record<string, unknown>> {
     try {
       const exportData: Record<string, unknown> = {};
       
-      for (const [key, config] of this.configCache.entries()) {
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( instanceof Error ? unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries( : new Error(String(unknown>> {
+    try {
+      const exportData: Record<string, unknown> = {};
+      
+      for (const [key, config] of this.configCache.entries()))))))) {
         exportData[key] = {
           value: config.value,
           type: config.type,
@@ -439,14 +605,13 @@ class ConfigRepository {
    * 导入配置
    * @param configs 配置对象
    */
-  public async importConfigs(configs: Record<string, unknown>): Promise<void> {
+  public async importConfigs(configs: Record<string, unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown>))))))): Promise<void> {
     try {
       for (const [key, config] of Object.entries(configs)) {
         if (typeof config === 'object' && config !== null) {
           await this.setConfig(key, config.value, config.type, config.category);
         } else {
-          // 兼容旧格式
-          const type = this.getValueType(config);
+          // 兼容旧格�?          const type = this.getValueType(config);
           await this.setConfig(key, config, type);
         }
       }
@@ -460,9 +625,7 @@ class ConfigRepository {
 
   /**
    * 获取值的类型
-   * @param value 值
-   * @returns 类型字符串
-   */
+   * @param value �?   * @returns 类型字符�?   */
   private getValueType(value: string | number | boolean | null): string {
     if (value === null) return 'null';
     if (Array.isArray(value)) return 'array';
@@ -471,9 +634,7 @@ class ConfigRepository {
   }
 
   /**
-   * 检查配置是否存在
-   * @param key 配置键
-   * @returns 是否存在
+   * 检查配置是否存�?   * @param key 配置�?   * @returns 是否存在
    */
   public async hasConfig(key: string): Promise<boolean> {
     return this.configCache.has(key);
@@ -481,8 +642,7 @@ class ConfigRepository {
 
   /**
    * 获取所有配置键
-   * @returns 配置键数组
-   */
+   * @returns 配置键数�?   */
   public getAllConfigKeys(): string[] {
     return Array.from(this.configCache.keys());
   }
@@ -507,7 +667,59 @@ class ConfigRepository {
    */
   private getObjectEntries<T extends object>(obj: T): [string, string | number | boolean | null][] {
     const entries: [string, string | number | boolean | null][] = [];
-    for (const key in obj) {
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj instanceof Error ? string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj : new Error(String(string | number | boolean | null][] {
+    const entries: [string, string | number | boolean | null][] = [];
+    for (const key in obj))))))) {
       if (Object.keys(obj).includes(key)) {
         entries.push([key, obj[key]]);
       }
@@ -538,19 +750,20 @@ class ConfigRepository {
       // 清空缓存
       this.configCache.clear();
       
-      // 清空数据库中的配置
-      await this.databaseRepository.clearTable('configs');
+      // 清空数据库中的配�?      await this.databaseRepository.clearTable('configs');
       
-      // 重新初始化默认配置
-      await this.initializeDefaultConfigs();
+      // 重新初始化默认配�?      await this.initializeDefaultConfigs();
       await this.ensureDefaultConfigs();
       
       Logger.info('Config repository reset completed');
     } catch (error) {
-      Logger.error('Failed to reset config repository', error);
+      Logger.error('Failed to reset config repository', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       throw error;
     }
   }
 }
 
 export default ConfigRepository;
+
+
+

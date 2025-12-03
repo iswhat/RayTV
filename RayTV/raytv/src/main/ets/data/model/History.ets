@@ -253,32 +253,27 @@ export default class History {
    * @returns History实例
    */
   public static fromSerializable(data: HistorySerializable): History {
-    // 创建类型安全的部分对象
-    const historyData: Partial<History> = {};
-    
-    // 手动检查并赋值每个属性，确保类型安全
-    if (typeof data.id === 'string') historyData.id = data.id;
-    if (typeof data.userId === 'string') historyData.userId = data.userId;
-    if (typeof data.contentId === 'string') historyData.contentId = data.contentId;
-    if (typeof data.contentTitle === 'string') historyData.contentTitle = data.contentTitle;
-    // 修复类型不匹配问题，确保从number转换为VideoType
-    if (typeof data.contentType === 'number') historyData.contentType = data.contentType as VideoType;
-    if (typeof data.progress === 'number') historyData.progress = data.progress;
-    if (typeof data.totalDuration === 'number') historyData.totalDuration = data.totalDuration;
-    if (typeof data.lastWatchTime === 'string') historyData.lastWatchTime = data.lastWatchTime;
-    if (typeof data.playCount === 'number') historyData.playCount = data.playCount;
-    if (typeof data.isFinished === 'boolean') historyData.isFinished = data.isFinished;
-    
-    // 添加可选属性
-    if (data.coverUrl !== undefined) historyData.coverUrl = data.coverUrl;
-    if (data.episodeId !== undefined) historyData.episodeId = data.episodeId;
-    if (data.episodeTitle !== undefined) historyData.episodeTitle = data.episodeTitle;
-    if (data.season !== undefined) historyData.season = data.season;
-    if (data.episode !== undefined) historyData.episode = data.episode;
-    if (data.sourceId !== undefined) historyData.sourceId = data.sourceId;
-    if (data.quality !== undefined) historyData.quality = data.quality;
-    if (data.deviceId !== undefined) historyData.deviceId = data.deviceId;
-    
+    // 为对象字面量添加明确的类型注解
+    const historyData: Partial<History> = {
+      id: typeof data.id === 'string' ? data.id : `history_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId: typeof data.userId === 'string' ? data.userId : '',
+      contentId: typeof data.contentId === 'string' ? data.contentId : '',
+      contentTitle: typeof data.contentTitle === 'string' ? data.contentTitle : '未知内容',
+      contentType: typeof data.contentType === 'number' ? data.contentType as VideoType : VideoType.OTHER,
+      progress: typeof data.progress === 'number' ? data.progress : 0,
+      totalDuration: typeof data.totalDuration === 'number' ? data.totalDuration : 0,
+      lastWatchTime: typeof data.lastWatchTime === 'string' ? data.lastWatchTime : DateUtil.format(new Date()),
+      playCount: typeof data.playCount === 'number' ? data.playCount : 1,
+      isFinished: typeof data.isFinished === 'boolean' ? data.isFinished : false,
+      coverUrl: data.coverUrl,
+      episodeId: data.episodeId,
+      episodeTitle: data.episodeTitle,
+      season: data.season,
+      episode: data.episode,
+      sourceId: data.sourceId,
+      quality: data.quality,
+      deviceId: data.deviceId
+    };
     return new History(historyData);
   }
 

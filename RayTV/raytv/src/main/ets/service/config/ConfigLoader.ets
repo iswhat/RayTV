@@ -1,5 +1,4 @@
-// ConfigLoader - 配置加载器
-import Logger from '../../common/util/Logger';
+// ConfigLoader - 配置加载�?import Logger from '../../common/util/Logger';
 import http from '@ohos.net.http';
 import HttpMethod from '@ohos.net.http';
 import fs from '@ohos.file.fs';
@@ -13,8 +12,7 @@ interface ConfigObject {
   sites?: Site[];
   data?: Site[];
   appConfig?: AppConfig;
-  // 移除了any类型的索引签名，使用更具体的属性定义
-}
+  // 移除了any类型的索引签名，使用更具体的属性定�?}
 
 const TAG = 'ConfigLoader';
 
@@ -26,8 +24,7 @@ export class ConfigLoader {
   private cachePath: string;
   
   private constructor() {
-    // 初始化缓存路径
-    this.cachePath = this.getCachePath();
+    // 初始化缓存路�?    this.cachePath = this.getCachePath();
   }
   
   /**
@@ -43,8 +40,7 @@ export class ConfigLoader {
   /**
    * 从URL加载配置
    * @param url 配置URL
-   * @param cacheHours 缓存时间（小时），默认使用默认值
-   * @param forceRefresh 是否强制刷新（忽略缓存）
+   * @param cacheHours 缓存时间（小时），默认使用默认�?   * @param forceRefresh 是否强制刷新（忽略缓存）
    */
   public async loadFromUrl(url: string, cacheHours?: number, forceRefresh: boolean = false): Promise<string> {
     try {
@@ -53,8 +49,7 @@ export class ConfigLoader {
       // 验证缓存时间
       const normalizedCacheHours = this.normalizeCacheTime(cacheHours);
       
-      // 如果不是强制刷新，先尝试从缓存加载
-      if (!forceRefresh) {
+      // 如果不是强制刷新，先尝试从缓存加�?      if (!forceRefresh) {
         try {
           const cachedContent = await this.loadFromCache(url, normalizedCacheHours);
           if (cachedContent) {
@@ -65,7 +60,7 @@ export class ConfigLoader {
           Logger.error(TAG, `Failed to load cached config: ${cacheError}`);
         }
       } else {
-        Logger.info(TAG, `Force refresh enabled, bypassing cache`);
+        Logger.info(TAG, `Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache` instanceof Error ? `Force refresh enabled, bypassing cache` : new Error(String(`Force refresh enabled, bypassing cache`)))))));
       }
       
       // 创建HTTP请求
@@ -94,11 +89,10 @@ export class ConfigLoader {
     } catch (error) {
       Logger.error(TAG, `Failed to load config from URL: ${error}`);
       
-      // 尝试从缓存加载
-      try {
+      // 尝试从缓存加�?      try {
         const cachedContent = await this.loadFromCache(url);
         if (cachedContent) {
-          Logger.warn(TAG, `Using cached config since network failed`);
+          Logger.warn(TAG, `Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed` : new Error(String(`Using cached config since network failed` instanceof Error ? `Using cached config since network failed` : new Error(String(`Using cached config since network failed`)))))));
           return cachedContent;
         }
       } catch (cacheError) {
@@ -110,15 +104,13 @@ export class ConfigLoader {
   }
   
   /**
-   * 从本地文件加载配置
-   * @param filePath 文件路径
+   * 从本地文件加载配�?   * @param filePath 文件路径
    */
   public async loadFromFile(filePath: string): Promise<string> {
     try {
-      Logger.info(TAG, `Loading config from file: ${filePath}`);
+      Logger.info(TAG, `Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}` instanceof Error ? `Loading config from file: ${filePath}` : new Error(String(`Loading config from file: ${filePath}`)))))));
       
-      // 检查文件是否存在
-      const fileInfo = await fs.getFileStat(filePath);
+      // 检查文件是否存�?      const fileInfo = await fs.getFileStat(filePath);
       if (!fileInfo.isFile) {
         throw new Error('Path is not a file');
       }
@@ -142,7 +134,7 @@ export class ConfigLoader {
    */
   public parseConfig(content: string): { sites: Site[]; appConfig?: AppConfig } {
     try {
-      Logger.info(TAG, 'Parsing config content');
+      Logger.info(TAG, 'Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content' : new Error(String('Parsing config content' instanceof Error ? 'Parsing config content' : new Error(String('Parsing config content')))))));
       
       // 尝试解析为纯JSON
       try {
@@ -169,8 +161,7 @@ export class ConfigLoader {
     
     // 检查是否为Site数组
     if (Array.isArray(config)) {
-      // 直接是站点数组
-      sites.push(...config);
+      // 直接是站点数�?      sites.push(...config);
     } else {
       // 处理站点配置
       if (config.sites && Array.isArray(config.sites)) {
@@ -186,7 +177,7 @@ export class ConfigLoader {
       }
     }
     
-    Logger.info(TAG, `Processed ${sites.length} sites`);
+    Logger.info(TAG, `Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites` instanceof Error ? `Processed ${sites.length} sites` : new Error(String(`Processed ${sites.length} sites`)))))));
     return { sites, appConfig };
   }
   
@@ -222,10 +213,9 @@ export class ConfigLoader {
    * @param url 配置URL
    * @param content 配置内容
    */
-  private async cacheConfig(url: string, content: string): Promise<void> {
+  private async cacheConfig(url: string, content: string instanceof Error ? content: string : new Error(String(content: string instanceof Error ? content: string instanceof Error ? content: string : new Error(String(content: string : new Error(String(content: string instanceof Error ? content: string : new Error(String(content: string instanceof Error ? content: string instanceof Error ? content: string : new Error(String(content: string instanceof Error ? content: string instanceof Error ? content: string : new Error(String(content: string : new Error(String(content: string instanceof Error ? content: string : new Error(String(content: string : new Error(String(content: string instanceof Error ? content: string : new Error(String(content: string instanceof Error ? content: string instanceof Error ? content: string : new Error(String(content: string : new Error(String(content: string instanceof Error ? content: string : new Error(String(content: string))))))): Promise<void> {
     try {
-      // 生成缓存文件名
-      const cacheFileName = this.getCacheFileName(url);
+      // 生成缓存文件�?      const cacheFileName = this.getCacheFileName(url);
       const cacheFilePath = `${this.cachePath}/${cacheFileName}`;
       
       // 确保缓存目录存在
@@ -239,18 +229,16 @@ export class ConfigLoader {
       Logger.debug(TAG, `Config cached to ${cacheFilePath}`);
     } catch (error) {
       Logger.warn(TAG, `Failed to cache config: ${error}`);
-      // 缓存失败不影响主要功能
-    }
+      // 缓存失败不影响主要功�?    }
   }
   
   // 缓存过期时间配置（小时）
-  private minCacheHours: number = 24;     // 最小24小时
-  private maxCacheHours: number = 72;     // 最大72小时
+  private minCacheHours: number = 24;     // 最�?4小时
+  private maxCacheHours: number = 72;     // 最�?2小时
   private defaultCacheHours: number = 24; // 默认24小时
 
   /**
-   * 从缓存加载配置
-   * @param url 配置URL
+   * 从缓存加载配�?   * @param url 配置URL
    * @param cacheHours 缓存时间（小时）
    */
   private async loadFromCache(url: string, cacheHours: number = this.defaultCacheHours): Promise<string | null> {
@@ -258,8 +246,7 @@ export class ConfigLoader {
       const cacheFileName = this.getCacheFileName(url);
       const cacheFilePath = `${this.cachePath}/${cacheFileName}`;
       
-      // 检查缓存文件是否存在
-      try {
+      // 检查缓存文件是否存�?      try {
         await fs.getFileStat(cacheFilePath);
       } catch {
         return null;
@@ -270,12 +257,10 @@ export class ConfigLoader {
       const content = await fs.readText(file.fd);
       await fs.close(file.fd);
       
-      // 检查缓存是否过期
-      const cacheInfo = await fs.getFileStat(cacheFilePath);
+      // 检查缓存是否过�?      const cacheInfo = await fs.getFileStat(cacheFilePath);
       const cacheTime = cacheInfo.mtimeMs || cacheInfo.ctimeMs || Date.now();
       const now = Date.now();
-      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 转换为毫秒
-      
+      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 转换为毫�?      
       if (now - cacheTime > cacheExpiry) {
         Logger.debug(TAG, `Cache expired, ignoring`);
         return null;
@@ -290,8 +275,7 @@ export class ConfigLoader {
   }
   
   /**
-   * 保存站点配置为文件
-   * @param sites 站点配置
+   * 保存站点配置为文�?   * @param sites 站点配置
    * @param filePath 保存路径
    */
   public async saveConfigToFile(sites: Site[], filePath: string): Promise<void> {
@@ -299,11 +283,7 @@ export class ConfigLoader {
       Logger.info(TAG, `Saving config to file: ${filePath}`);
       
       // 创建配置对象
-      const config = {
-        sites: sites,
-        exportTime: new Date().toISOString(),
-        version: '1.0'
-      };
+      const config: Record<string, string | number | boolean | null> = { ... };
       
       // 转换为JSON
       const configJson = JSON.stringify(config, null, 2);
@@ -325,8 +305,7 @@ export class ConfigLoader {
    */
   private getCachePath(): string {
     // 在实际应用中，这里应该使用应用的缓存目录
-    // 这里简化处理
-    return '/data/storage/el2/base/cache/raytv/config';
+    // 这里简化处�?    return '/data/storage/el2/base/cache/raytv/config';
   }
   
   /**
@@ -334,15 +313,14 @@ export class ConfigLoader {
    */
   private async ensureCacheDir(): Promise<void> {
     try {
-      // 检查目录是否存在
-      try {
+      // 检查目录是否存�?      try {
         const dirInfo = await fs.getFileStat(this.cachePath);
         if (!dirInfo.isDir) {
           await fs.unlink(this.cachePath);
         }
       } catch {
         // 目录不存在，创建目录
-        await fs.mkdir(this.cachePath, true);
+        await fs.mkdir(this.cachePath, true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true)))))));
       }
     } catch (error) {
       Logger.error(TAG, `Failed to ensure cache directory: ${error}`);
@@ -351,19 +329,15 @@ export class ConfigLoader {
   }
   
   /**
-   * 生成缓存文件名
-   * @param url URL
+   * 生成缓存文件�?   * @param url URL
    */
   private getCacheFileName(url: string): string {
-    // 简单的URL哈希作为缓存文件名
-    const hash = this.simpleHash(url);
+    // 简单的URL哈希作为缓存文件�?    const hash = this.simpleHash(url);
     return `config_${hash}.json`;
   }
   
   /**
-   * 简单的字符串哈希函数
-   * @param str 输入字符串
-   */
+   * 简单的字符串哈希函�?   * @param str 输入字符�?   */
   private simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -379,13 +353,12 @@ export class ConfigLoader {
    */
   public async clearCache(): Promise<void> {
     try {
-      Logger.info(TAG, 'Clearing config cache');
+      Logger.info(TAG, 'Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache' : new Error(String('Clearing config cache' instanceof Error ? 'Clearing config cache' : new Error(String('Clearing config cache')))))));
       
       // 读取缓存目录
       const files = await fs.listFile(this.cachePath);
       
-      // 删除所有缓存文件
-      for (const file of files) {
+      // 删除所有缓存文�?      for (const file of files) {
         if (file.name.startsWith('config_') && file.name.endsWith('.json')) {
           const filePath = `${this.cachePath}/${file.name}`;
           await fs.unlink(filePath);
@@ -402,11 +375,10 @@ export class ConfigLoader {
   
   /**
    * 清理过期缓存
-   * @param cacheHours 使用的缓存时间阈值（小时），默认使用最小缓存时间
-   */
+   * @param cacheHours 使用的缓存时间阈值（小时），默认使用最小缓存时�?   */
   public async cleanExpiredCache(cacheHours: number = this.minCacheHours): Promise<void> {
     try {
-      Logger.info(TAG, `Cleaning expired cache (threshold: ${cacheHours}h)`);
+      Logger.info(TAG, `Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h instanceof Error ? `Cleaning expired cache (threshold: ${cacheHours}h : new Error(String(`Cleaning expired cache (threshold: ${cacheHours}h)))))))`);
       
       // 读取缓存目录
       const files = await fs.listFile(this.cachePath);
@@ -426,14 +398,14 @@ export class ConfigLoader {
               Logger.debug(TAG, `Deleted expired cache file: ${file.name}`);
             }
           } catch (fileError) {
-            Logger.error(TAG, `Failed to check/delete cache file ${file.name}: ${fileError}`);
+            Logger.error(TAG, `Failed to check/delete cache file ${file.name}`, fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError instanceof Error ? fileError instanceof Error ? fileError : new Error(String(fileError : new Error(String(fileError instanceof Error ? fileError : new Error(String(fileError)))))))));
           }
         }
       }
       
       Logger.info(TAG, 'Expired cache cleaned successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to clean expired cache: ${error}`);
+      Logger.error(TAG, 'Failed to clean expired cache', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
   
@@ -469,7 +441,7 @@ export class ConfigLoader {
         lastCacheTime: lastTime
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to get cache info: ${error}`);
+      Logger.error(TAG, 'Failed to get cache info', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return {
         cacheSize: 0,
         cacheFiles: 0,
@@ -479,8 +451,7 @@ export class ConfigLoader {
   }
   
   /**
-   * 规范化缓存时间
-   * @param hours 缓存时间（小时）
+   * 规范化缓存时�?   * @param hours 缓存时间（小时）
    */
   private normalizeCacheTime(hours?: number): number {
     if (hours === undefined) {
@@ -491,13 +462,12 @@ export class ConfigLoader {
   
   /**
    * 设置缓存时间范围
-   * @param minHours 最小缓存时间（小时）
-   * @param maxHours 最大缓存时间（小时）
-   */
+   * @param minHours 最小缓存时间（小时�?   * @param maxHours 最大缓存时间（小时�?   */
   public setCacheTimeRange(minHours: number, maxHours: number): void {
     this.minCacheHours = Math.max(24, minHours);
     this.maxCacheHours = Math.min(72, Math.max(this.minCacheHours, maxHours));
-    this.defaultCacheHours = this.minCacheHours; // 默认使用最小缓存时间
-    Logger.info(TAG, `Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
+    this.defaultCacheHours = this.minCacheHours; // 默认使用最小缓存时�?    Logger.info(TAG, `Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
   }
 }
+
+

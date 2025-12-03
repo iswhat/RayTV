@@ -1,6 +1,5 @@
 // SiteDao.ets - 站点数据访问对象
-// 负责站点数据的增删改查操作
-
+// 负责站点数据的增删改查操�?
 import relationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager, ValueType } from '../DatabaseManager';
 import { SITE_TABLE } from '../TableSchema';
@@ -16,8 +15,7 @@ export class SiteDao {
   private dbManager: DatabaseManager;
   
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor() {
     this.dbManager = DatabaseManager.getInstance();
   }
@@ -48,7 +46,7 @@ export class SiteDao {
       await this.dbManager.executeTransaction(async (connection) => {
         for (const site of sites) {
           const valuesBucket = this.createValuesBucket(site);
-          await connection.insert(SITE_TABLE.TABLE_NAME, valuesBucket);
+          await connection.insert(SITE_TABLE.TABLE_NAME, valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket)))))));
           Logger.debug(this.TAG, `Batch inserted site: ${site.name}`);
         }
       });
@@ -67,12 +65,115 @@ export class SiteDao {
   public async update(site: Site): Promise<void> {
     try {
       const valuesBucket: relationalStore.ValuesBucket = {
-        [SITE_TABLE.COLUMNS.NAME]: site.name,
-        [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.NAME]: site.name, [SITE_TABLE.COLUMNS.TYPE]: site.type,
         [SITE_TABLE.COLUMNS.API]: site.api,
         [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
         [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
-        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries())) : null,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( instanceof Error ? [SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries( : new Error(String([SITE_TABLE.COLUMNS.TYPE]: site.type,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.SEARCHABLE]: site.searchable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.FILTERABLE]: site.filterable ? 1 : 0,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries())))))))) : null,
         [SITE_TABLE.COLUMNS.COOKIE]: site.cookie || null,
         [SITE_TABLE.COLUMNS.EXT]: site.ext ? JsonUtil.stringify(site.ext) : null,
         [SITE_TABLE.COLUMNS.ENABLED]: site.enabled ? 1 : 0,
@@ -103,7 +204,7 @@ export class SiteDao {
   public async delete(key: string): Promise<void> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
+      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key)))))));
       
       const count = await this.dbManager.delete(predicates);
       if (count > 0) {
@@ -118,14 +219,13 @@ export class SiteDao {
   }
   
   /**
-   * 清空所有站点
-   * @returns Promise<void>
+   * 清空所有站�?   * @returns Promise<void>
    */
   public async clearAll(): Promise<void> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
       const count = await this.dbManager.delete(predicates);
-      Logger.info(this.TAG, `Cleared all ${count} sites`);
+      Logger.info(this.TAG, `Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites` instanceof Error ? `Cleared all ${count} sites` : new Error(String(`Cleared all ${count} sites`)))))));
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear all sites: ${error}`);
       throw error;
@@ -133,8 +233,7 @@ export class SiteDao {
   }
   
   /**
-   * 获取所有站点
-   * @returns Promise<Site[]> 站点列表
+   * 获取所有站�?   * @returns Promise<Site[]> 站点列表
    */
   public async getAll(): Promise<Site[]> {
     try {
@@ -144,15 +243,13 @@ export class SiteDao {
       const resultSet = await this.dbManager.query(predicates);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get all sites: ${error}`);
+      Logger.error(this.TAG, `Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}` instanceof Error ? `Failed to get all sites: ${error}` : new Error(String(`Failed to get all sites: ${error}`)))))));
       throw error;
     }
   }
   
   /**
-   * 获取启用的站点
-   * @returns Promise<Site[]> 启用的站点列表
-   */
+   * 获取启用的站�?   * @returns Promise<Site[]> 启用的站点列�?   */
   public async getEnabled(): Promise<Site[]> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
@@ -170,12 +267,11 @@ export class SiteDao {
   /**
    * 根据类型获取站点
    * @param type 站点类型
-   * @returns Promise<Site[]> 指定类型的站点列表
-   */
+   * @returns Promise<Site[]> 指定类型的站点列�?   */
   public async getByType(type: string): Promise<Site[]> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.TYPE, type);
+      predicates.equalTo(SITE_TABLE.COLUMNS.TYPE, type instanceof Error ? type : new Error(String(type instanceof Error ? type instanceof Error ? type : new Error(String(type : new Error(String(type instanceof Error ? type : new Error(String(type instanceof Error ? type instanceof Error ? type : new Error(String(type instanceof Error ? type instanceof Error ? type : new Error(String(type : new Error(String(type instanceof Error ? type : new Error(String(type : new Error(String(type instanceof Error ? type : new Error(String(type instanceof Error ? type instanceof Error ? type : new Error(String(type : new Error(String(type instanceof Error ? type : new Error(String(type)))))));
       predicates.equalTo(SITE_TABLE.COLUMNS.ENABLED, 1);
       predicates.orderByAsc(SITE_TABLE.COLUMNS.ORDER);
       
@@ -195,7 +291,7 @@ export class SiteDao {
   public async getByKey(key: string): Promise<Site | null> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
+      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key)))))));
       
       const resultSet = await this.dbManager.query(predicates);
       const sites = this.parseResultSet(resultSet);
@@ -207,12 +303,11 @@ export class SiteDao {
   }
   
   /**
-   * 批量更新站点启用状态
-   * @param keys 站点key列表
+   * 批量更新站点启用状�?   * @param keys 站点key列表
    * @param enabled 是否启用
    * @returns Promise<void>
    */
-  public async batchUpdateEnabled(keys: string[], enabled: boolean): Promise<void> {
+  public async batchUpdateEnabled(keys: string[], enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean))))))): Promise<void> {
     try {
       if (keys.length === 0) {
         return;
@@ -240,7 +335,7 @@ export class SiteDao {
    * @param order 新的顺序
    * @returns Promise<void>
    */
-  public async updateOrder(key: string, order: number): Promise<void> {
+  public async updateOrder(key: string, order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number instanceof Error ? order: number instanceof Error ? order: number : new Error(String(order: number : new Error(String(order: number instanceof Error ? order: number : new Error(String(order: number))))))): Promise<void> {
     try {
       const valuesBucket: relationalStore.ValuesBucket = {
         [SITE_TABLE.COLUMNS.ORDER]: order,
@@ -259,14 +354,13 @@ export class SiteDao {
   }
   
   /**
-   * 检查站点是否存在
-   * @param key 站点key
+   * 检查站点是否存�?   * @param key 站点key
    * @returns Promise<boolean> 是否存在
    */
   public async exists(key: string): Promise<boolean> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.TABLE_NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
+      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key instanceof Error ? key instanceof Error ? key : new Error(String(key : new Error(String(key instanceof Error ? key : new Error(String(key)))))));
       predicates.limit(1);
       
       const resultSet = await this.dbManager.query(predicates);
@@ -281,9 +375,7 @@ export class SiteDao {
   
   /**
    * 搜索站点
-   * @param keyword 搜索关键词
-   * @returns Promise<Site[]> 匹配的站点列表
-   */
+   * @param keyword 搜索关键�?   * @returns Promise<Site[]> 匹配的站点列�?   */
   public async search(keyword: string): Promise<Site[]> {
     try {
       const sql = `
@@ -293,7 +385,33 @@ export class SiteDao {
       `;
       
       const bindArgs: ValueType[] = [`%${keyword}%`, `%${keyword}%`];
-      const resultSet = await this.dbManager.getDatabase().querySql(sql, bindArgs);
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( instanceof Error ? `%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase( : new Error(String(`%${keyword}%`];
+      const resultSet = await this.dbManager.getDatabase())))))).querySql(sql, bindArgs);
       
       return this.parseResultSet(resultSet);
     } catch (error) {
@@ -320,15 +438,13 @@ export class SiteDao {
       resultSet.close();
       return count;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get site count: ${error}`);
+      Logger.error(this.TAG, `Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}` instanceof Error ? `Failed to get site count: ${error}` : new Error(String(`Failed to get site count: ${error}`)))))));
       return 0;
     }
   }
   
   /**
-   * 解析结果集
-   * @param resultSet 查询结果集
-   * @returns Site[] 站点列表
+   * 解析结果�?   * @param resultSet 查询结果�?   * @returns Site[] 站点列表
    * @private
    */
   private parseResultSet(resultSet: relationalStore.ResultSet): Site[] {
@@ -392,3 +508,5 @@ export class SiteDao {
     };
   }
 }
+
+

@@ -1,6 +1,5 @@
 // ConfigModel - 配置相关模型定义
-// 定义应用配置、用户设置等相关的数据模型
-
+// 定义应用配置、用户设置等相关的数据模�?
 /**
  * 配置类型枚举
  */
@@ -16,8 +15,7 @@ export enum ConfigType {
   USER = 'user',
   
   /**
-   * 播放器配置
-   */
+   * 播放器配�?   */
   PLAYER = 'player',
   
   /**
@@ -51,14 +49,12 @@ export enum ConfigType {
   ADVANCED = 'advanced',
   
   /**
-   * 开发配置
-   */
+   * 开发配�?   */
   DEV = 'dev'
 }
 
 /**
- * 配置项接口
- */
+ * 配置项接�? */
 export interface ConfigItem {
   /**
    * 配置键名
@@ -66,9 +62,8 @@ export interface ConfigItem {
   key: string;
   
   /**
-   * 配置值
-   */
-  value: unknown;
+   * 配置�?   */
+  value: Record<string, string | number | boolean | null>;
   
   /**
    * 配置类型
@@ -81,9 +76,8 @@ export interface ConfigItem {
   description?: string;
   
   /**
-   * 默认值
-   */
-  defaultValue: unknown;
+   * 默认�?   */
+  defaultValue: Record<string, string | number | boolean | null>;
   
   /**
    * 数据类型
@@ -91,8 +85,7 @@ export interface ConfigItem {
   dataType: 'string' | 'number' | 'boolean' | 'object' | 'array';
   
   /**
-   * 是否可编辑
-   */
+   * 是否可编�?   */
   editable: boolean;
   
   /**
@@ -101,8 +94,7 @@ export interface ConfigItem {
   encrypted: boolean;
   
   /**
-   * 最后更新时间
-   */
+   * 最后更新时�?   */
   lastUpdatedAt: number;
   
   /**
@@ -111,13 +103,11 @@ export interface ConfigItem {
   createdAt?: number;
   
   /**
-   * 版本号
-   */
+   * 版本�?   */
   version?: string;
   
   /**
-   * 是否需要重启应用生效
-   */
+   * 是否需要重启应用生�?   */
   requiresRestart: boolean;
 }
 
@@ -141,18 +131,15 @@ export interface ConfigGroup {
   description?: string;
   
   /**
-   * 配置项列表
-   */
+   * 配置项列�?   */
   items: ConfigItem[];
   
   /**
-   * 是否可折叠
-   */
+   * 是否可折�?   */
   collapsible: boolean;
   
   /**
-   * 优先级
-   */
+   * 优先�?   */
   priority: number;
   
   /**
@@ -162,8 +149,7 @@ export interface ConfigGroup {
 }
 
 /**
- * 配置元数据接口
- */
+ * 配置元数据接�? */
 export interface ConfigMetadata {
   /**
    * 配置版本
@@ -171,8 +157,7 @@ export interface ConfigMetadata {
   version: string;
   
   /**
-   * 最后同步时间
-   */
+   * 最后同步时�?   */
   lastSyncTime: number;
   
   /**
@@ -181,8 +166,7 @@ export interface ConfigMetadata {
   createdAt: number;
   
   /**
-   * 最后更新时间
-   */
+   * 最后更新时�?   */
   updatedAt: number;
   
   /**
@@ -191,8 +175,7 @@ export interface ConfigMetadata {
   autoBackupEnabled: boolean;
   
   /**
-   * 备份频率（天）
-   */
+   * 备份频率（天�?   */
   backupFrequencyDays: number;
   
   /**
@@ -231,13 +214,11 @@ export interface AppConfig {
   dataCollectionEnabled: boolean;
   
   /**
-   * 启动时恢复上次播放
-   */
+   * 启动时恢复上次播�?   */
   resumePlaybackOnStart: boolean;
   
   /**
-   * 自动检查更新
-   */
+   * 自动检查更�?   */
   autoCheckUpdates: boolean;
   
   /**
@@ -252,8 +233,7 @@ export interface AppConfig {
 }
 
 /**
- * 播放器配置接口
- */
+ * 播放器配置接�? */
 export interface PlayerConfig {
   /**
    * 默认播放引擎
@@ -261,8 +241,7 @@ export interface PlayerConfig {
   defaultEngine: 'system' | 'exo' | 'custom';
   
   /**
-   * 硬件加速
-   */
+   * 硬件加�?   */
   hardwareAcceleration: boolean;
   
   /**
@@ -276,8 +255,7 @@ export interface PlayerConfig {
   defaultBrightness: number;
   
   /**
-   * 自动播放下一集
-   */
+   * 自动播放下一�?   */
   autoPlayNextEpisode: boolean;
   
   /**
@@ -331,8 +309,7 @@ export interface NetworkConfig {
   proxySettings: ProxyConfig;
   
   /**
-   * 缓存大小（MB）
-   */
+   * 缓存大小（MB�?   */
   cacheSize: number;
   
   /**
@@ -386,13 +363,11 @@ export interface ProxyConfig {
   port?: number;
   
   /**
-   * 需要认证
-   */
+   * 需要认�?   */
   requiresAuth: boolean;
   
   /**
-   * 用户名
-   */
+   * 用户�?   */
   username?: string;
   
   /**
@@ -421,8 +396,7 @@ export interface DownloadConfig {
   maxConcurrentDownloads: number;
   
   /**
-   * 最大下载速度（KB/s，0表示不限）
-   */
+   * 最大下载速度（KB/s�?表示不限�?   */
   maxDownloadSpeed: number;
   
   /**
@@ -431,8 +405,7 @@ export interface DownloadConfig {
   allowMobileDownload: boolean;
   
   /**
-   * 下载前确认
-   */
+   * 下载前确�?   */
   confirmBeforeDownload: boolean;
   
   /**
@@ -446,8 +419,7 @@ export interface DownloadConfig {
   autoManageStorage: boolean;
   
   /**
-   * 最大存储空间（GB）
-   */
+   * 最大存储空间（GB�?   */
   maxStorageSize: number;
   
   /**
@@ -496,8 +468,7 @@ export interface SubtitleConfig {
   subtitleDir: string;
   
   /**
-   * 字幕扩展名映射
-   */
+   * 字幕扩展名映�?   */
   extensionMapping?: Record<string, string>;
 }
 
@@ -531,8 +502,7 @@ export interface SubtitleStyle {
   strokeWidth: number;
   
   /**
-   * 透明度
-   */
+   * 透明�?   */
   opacity: number;
   
   /**
@@ -586,13 +556,11 @@ export interface UiConfig {
   transitionDuration: number;
   
   /**
-   * 是否显示缩略图
-   */
+   * 是否显示缩略�?   */
   showThumbnails: boolean;
   
   /**
-   * 缩略图质量
-   */
+   * 缩略图质�?   */
   thumbnailQuality: 'low' | 'medium' | 'high';
   
   /**
@@ -636,8 +604,7 @@ export interface AdvancedConfig {
   customRendererEnabled: boolean;
   
   /**
-   * 渲染器路径
-   */
+   * 渲染器路�?   */
   rendererPath?: string;
   
   /**
@@ -666,18 +633,15 @@ export interface PresetConfig {
   description?: string;
   
   /**
-   * 预设配置项
-   */
+   * 预设配置�?   */
   config: Record<string, unknown>;
   
   /**
-   * 是否为默认预设
-   */
+   * 是否为默认预�?   */
   isDefault: boolean;
   
   /**
-   * 是否可编辑
-   */
+   * 是否可编�?   */
   editable: boolean;
   
   /**
@@ -691,8 +655,7 @@ export interface PresetConfig {
  */
 export interface ConfigImportExportOptions {
   /**
-   * 包含的配置类型
-   */
+   * 包含的配置类�?   */
   includeTypes: ConfigType[];
   
   /**
@@ -726,19 +689,16 @@ export interface ConfigImportExportOptions {
  */
 export interface ConfigChangeEvent {
   /**
-   * 配置键
-   */
+   * 配置�?   */
   key: string;
   
   /**
-   * 旧值
-   */
-  oldValue: unknown;
+   * 旧�?   */
+  oldValue: Record<string, string | number | boolean | null>;
   
   /**
-   * 新值
-   */
-  newValue: unknown;
+   * 新�?   */
+  newValue: Record<string, string | number | boolean | null>;
   
   /**
    * 变更时间
@@ -775,3 +735,4 @@ export interface ConfigValidationResult {
    */
   warnings: string[];
 }
+

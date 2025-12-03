@@ -10,7 +10,7 @@ import { LiveStreamRepository } from '../../data/repository/LiveStreamRepository
 const TAG = 'PlayLiveUseCase';
 
 /**
- * 播放直播内容的业务用例
+ * 播放直播内容的业务用�?
  */
 export class PlayLiveUseCase {
   private liveRepository: LiveRepository;
@@ -39,7 +39,7 @@ export class PlayLiveUseCase {
       Logger.info(TAG, 'Loading live channel groups');
       const groups = await this.liveRepository.getLiveGroups();
       
-      // 统计每个分组的频道数量
+      // 统计每个分组的频道数�?
       const groupStats = await Promise.all(
         groups.map(async (groupName) => {
           const channels = await this.liveRepository.getLiveChannelsByGroup(groupName);
@@ -58,16 +58,16 @@ export class PlayLiveUseCase {
   }
   
   /**
-   * 获取指定分组的直播频道
+   * 获取指定分组的直播频�?
    * @param groupName 分组名称
    * @returns 直播频道列表
    */
   public async getLiveChannelsByGroup(groupName: string): Promise<Live[]> {
     try {
-      Logger.info(TAG, `Loading live channels for group: ${groupName}`);
+      Logger.info(TAG, `Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}` instanceof Error ? `Loading live channels for group: ${groupName}` : new Error(String(`Loading live channels for group: ${groupName}`)))))));
       const channels = await this.liveRepository.getLiveChannelsByGroup(groupName);
       
-      // 并行检查每个频道的收藏状态
+      // 并行检查每个频道的收藏状�?
       const channelsWithCollectionStatus = await Promise.all(
         channels.map(async (channel) => {
           const isCollected = await this.collectionRepository.isCollected(
@@ -90,12 +90,12 @@ export class PlayLiveUseCase {
   
   /**
    * 搜索直播频道
-   * @param keyword 搜索关键词
-   * @returns 匹配的直播频道列表
+   * @param keyword 搜索关键�?
+   * @returns 匹配的直播频道列�?
    */
   public async searchLiveChannels(keyword: string): Promise<Live[]> {
     try {
-      Logger.info(TAG, `Searching live channels with keyword: ${keyword}`);
+      Logger.info(TAG, `Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}` instanceof Error ? `Searching live channels with keyword: ${keyword}` : new Error(String(`Searching live channels with keyword: ${keyword}`)))))));
       return await this.liveRepository.searchLiveChannels(keyword);
     } catch (error) {
     Logger.error(TAG, `Failed to search live channels: ${error}`);
@@ -110,7 +110,7 @@ export class PlayLiveUseCase {
    */
   public async prepareLivePlayback(liveChannel: Live): Promise<Live> {
     try {
-      Logger.info(TAG, `Preparing to play live channel: ${liveChannel.name}`);
+      Logger.info(TAG, `Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}` instanceof Error ? `Preparing to play live channel: ${liveChannel.name}` : new Error(String(`Preparing to play live channel: ${liveChannel.name}`)))))));
       
       // 检查并解析直播流URL
       let resolvedLive = { ...liveChannel };
@@ -132,7 +132,7 @@ export class PlayLiveUseCase {
         type: 'live',
         cover: liveChannel.logo,
         sourceKey: liveChannel.sourceKey,
-        position: Date.now(), // 对于直播，记录开始观看时间
+        position: Date.now(), // 对于直播，记录开始观看时�?
         duration: 0,
         lastPlayedAt: Date.now(),
         createdAt: Date.now()
@@ -140,7 +140,7 @@ export class PlayLiveUseCase {
       
       await this.historyRepository.saveHistory(history);
       
-      // 更新频道观看次数（如果有这个功能）
+      // 更新频道观看次数（如果有这个功能�?
       await this.liveRepository.incrementWatchCount(liveChannel.id, liveChannel.sourceKey);
       
       return resolvedLive;
@@ -151,14 +151,13 @@ export class PlayLiveUseCase {
   }
   
   /**
-   * 获取直播EPG（电子节目单）
+   * 获取直播EPG（电子节目单�?
    * @param channelId 频道ID
    * @param date 日期，默认为今天
-   * @returns 节目单信息
+   * @returns 节目单信�?
    */
   public async getEpgForChannel(
-    channelId: string,
-    date: Date = new Date()
+    channelId: string, date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date( : new Error(String(date: Date = new Date( instanceof Error ? date: Date = new Date( : new Error(String(date: Date = new Date()))))))
   ): Promise<Array<{ title: string; startTime: Date; endTime: Date; current?: boolean }>> {
     try {
       Logger.info(TAG, `Loading EPG for channel: ${channelId}, date: ${date.toDateString()}`);
@@ -172,14 +171,39 @@ export class PlayLiveUseCase {
   /**
    * 收藏/取消收藏直播频道
    * @param liveChannel 直播频道
-   * @returns 收藏状态
+   * @returns 收藏状�?
    */
   public async toggleCollection(liveChannel: Live): Promise<boolean> {
     try {
       const isCurrentlyCollected = await this.collectionRepository.isCollected(
-        liveChannel.id,
-        liveChannel.sourceKey
-      );
+        liveChannel.id, liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+       instanceof Error ? liveChannel.sourceKey
+       : new Error(String(liveChannel.sourceKey
+      )))))));
       
       if (isCurrentlyCollected) {
         await this.collectionRepository.removeCollection(
@@ -207,23 +231,20 @@ export class PlayLiveUseCase {
   }
   
   /**
-   * 刷新直播源
+   * 刷新直播�?
    * @param liveChannel 直播频道
    * @returns 刷新后的直播频道
    */
   public async refreshLiveSource(liveChannel: Live): Promise<Live> {
     try {
-      Logger.info(TAG, `Refreshing live source for: ${liveChannel.name}`);
+      Logger.info(TAG, `Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}` instanceof Error ? `Refreshing live source for: ${liveChannel.name}` : new Error(String(`Refreshing live source for: ${liveChannel.name}`)))))));
       
       const refreshedUrl = await this.liveStreamRepository.refreshLiveStreamUrl(
         liveChannel.url,
         liveChannel.headers
       );
       
-      const refreshedChannel = {
-        ...liveChannel,
-        url: refreshedUrl
-      };
+      const refreshedChannel: Record<string, string | number | boolean | null> = { ... };
       
       // 更新本地缓存
       await this.liveRepository.updateLiveChannel(refreshedChannel);
@@ -236,12 +257,14 @@ export class PlayLiveUseCase {
   }
   
   /**
-   * 检查URL是否需要解析
+   * 检查URL是否需要解�?
    * @param url 原始URL
-   * @returns 是否需要解析
+   * @returns 是否需要解�?
    */
   private needsUrlResolution(url: string): boolean {
-    // 简单判断逻辑，可以根据实际需求扩展
+    // 简单判断逻辑，可以根据实际需求扩�?
     return !url.startsWith('http') || url.includes('placeholder') || url.includes('resolve');
   }
 }
+
+

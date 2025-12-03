@@ -1,5 +1,4 @@
-// FileService - 文件服务类
-import Logger from '../../common/util/Logger';
+// FileService - 文件服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil, { FileInfo, FileStats } from '../../common/util/FileUtil';
 import ConfigService from '../../service/config/ConfigService';
@@ -178,8 +177,7 @@ export interface FileConfig {
   verifyFileIntegrity: boolean;
 }
 
-// 文件元数据接口
-export interface FileMetadata {
+// 文件元数据接�?export interface FileMetadata {
   metadata?: Record<string, string | number | boolean | null>;
 }
 
@@ -195,14 +193,9 @@ export interface ExtendedFileInfo extends FileInfo {
   width?: number; // 图像/视频宽度
   height?: number; // 图像/视频高度
   codec?: string; // 视频/音频编码
-  bitrate?: number; // 视频/音频比特率
-  frameRate?: number; // 视频帧率
-  resolution?: string; // 视频分辨率
-  aspectRatio?: number; // 视频宽高比
-  tags?: Record<string, string>; // 文件标签
-  checksum?: string; // 文件校验和
-  owner?: string; // 文件所有者
-  createdAt: number;
+  bitrate?: number; // 视频/音频比特�?  frameRate?: number; // 视频帧率
+  resolution?: string; // 视频分辨�?  aspectRatio?: number; // 视频宽高�?  tags?: Record<string, string>; // 文件标签
+  checksum?: string; // 文件校验�?  owner?: string; // 文件所有�?  createdAt: number;
   modifiedAt: number;
   accessedAt: number;
 }
@@ -232,8 +225,7 @@ export interface FileOperationResult {
   details?: { source?: string; format?: string; size?: number; duration?: number };
 }
 
-// 文件夹信息接口
-export interface FolderInfo {
+// 文件夹信息接�?export interface FolderInfo {
   path: string;
   name: string;
   parentPath?: string;
@@ -272,8 +264,7 @@ export interface FileTransferProgress {
   progress: number; // 0-100
   bytesTransferred: number;
   totalBytes: number;
-  speed: number; // 字节/秒
-  elapsedTime: number; // 毫秒
+  speed: number; // 字节/�?  elapsedTime: number; // 毫秒
   remainingTime?: number; // 预估剩余毫秒
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'canceled';
   error?: string;
@@ -334,8 +325,7 @@ const DEFAULT_FILE_CONFIG: FileConfig = {
 };
 
 /**
- * 文件服务类
- * 负责管理文件操作、存储路径、文件格式转换等功能
+ * 文件服务�? * 负责管理文件操作、存储路径、文件格式转换等功能
  */
 export default class FileService {
   private static instance: FileService;
@@ -346,8 +336,7 @@ export default class FileService {
   private activeOperations: Set<string> = new Set();
   private fileWatchers: Map<string, number> = new Map();
   
-  // 监听器
-  private transferListeners: Map<string, Array<(progress: FileTransferProgress) => void>> = new Map();
+  // 监听�?  private transferListeners: Map<string, Array<(progress: FileTransferProgress) => void>> = new Map();
   private storageListeners: Array<(devices: StorageDeviceInfo[]) => void> = [];
   private cleanupListeners: Array<(deletedCount: number, freedSpace: number) => void> = [];
   
@@ -355,8 +344,7 @@ export default class FileService {
   private isInitialized: boolean = false;
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.initialize();
   }
@@ -372,16 +360,14 @@ export default class FileService {
   }
   
   /**
-   * 检查对象是否包含指定属性
-   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
+   * 检查对象是否包含指定属�?   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
    */
   private hasOwnProperty<T extends object>(obj: T, key: string): boolean {
     return Object.getOwnPropertyNames(obj).includes(key);
   }
 
   /**
-   * 获取对象的所有值
-   * 替代Object.values，兼容ArkTS语法
+   * 获取对象的所有�?   * 替代Object.values，兼容ArkTS语法
    */
   private getObjectValues<T extends object>(obj: T): T[keyof T][] {
     const values: T[keyof T][] = [];
@@ -394,8 +380,7 @@ export default class FileService {
   }
 
   /**
-   * 初始化文件服务
-   */
+   * 初始化文件服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing file service...');
@@ -406,8 +391,7 @@ export default class FileService {
         this.fileConfig = { ...DEFAULT_FILE_CONFIG, ...savedConfig };
       }
       
-      // 创建必要的目录结构
-      await this.createDirectoryStructure();
+      // 创建必要的目录结�?      await this.createDirectoryStructure();
       
       // 扫描存储设备
       await this.scanStorageDevices();
@@ -425,7 +409,7 @@ export default class FileService {
       this.isInitialized = true;
       Logger.info(TAG, 'File service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize file service', error);
+      Logger.error(TAG, 'Failed to initialize file service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -451,7 +435,7 @@ export default class FileService {
         Logger.debug(TAG, `Created directory: ${dir}`);
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to create directory structure', error);
+      Logger.error(TAG, 'Failed to create directory structure', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -488,12 +472,11 @@ export default class FileService {
         this.storageDevices.set(device.id, device);
       }
       
-      // 通知监听器
-      this.notifyStorageDevicesChanged();
+      // 通知监听�?      this.notifyStorageDevicesChanged();
       
       Logger.info(TAG, `Scanned ${devices.length} storage devices`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to scan storage devices', error);
+      Logger.error(TAG, 'Failed to scan storage devices', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -505,7 +488,7 @@ export default class FileService {
       await StorageUtil.setObject(FILE_CONFIG_KEY, this.fileConfig);
       Logger.debug(TAG, 'Saved file config');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save file config', error);
+      Logger.error(TAG, 'Failed to save file config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -549,7 +532,7 @@ export default class FileService {
       Logger.info(TAG, 'Updated file config');
       return { ...this.fileConfig };
     } catch (error) {
-      Logger.error(TAG, 'Failed to update file config', error);
+      Logger.error(TAG, 'Failed to update file config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.fileConfig };
     }
   }
@@ -562,8 +545,7 @@ export default class FileService {
   }
 
   /**
-   * 重置文件配置为默认值
-   */
+   * 重置文件配置为默认�?   */
   public async resetFileConfig(): Promise<FileConfig> {
     try {
       this.fileConfig = { ...DEFAULT_FILE_CONFIG };
@@ -589,14 +571,13 @@ export default class FileService {
       Logger.info(TAG, 'Reset file config to default');
       return { ...this.fileConfig };
     } catch (error) {
-      Logger.error(TAG, 'Failed to reset file config', error);
+      Logger.error(TAG, 'Failed to reset file config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.fileConfig };
     }
   }
 
   /**
-   * 开始自动清理
-   */
+   * 开始自动清�?   */
   private startAutoCleanup(): void {
     try {
       this.stopAutoCleanup();
@@ -607,7 +588,7 @@ export default class FileService {
       
       Logger.debug(TAG, `Started auto cleanup, interval: ${this.fileConfig.cleanupInterval}ms`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to start auto cleanup', error);
+      Logger.error(TAG, 'Failed to start auto cleanup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -621,7 +602,7 @@ export default class FileService {
         this.cleanupTimer = undefined;
       }
     } catch (error) {
-      Logger.error(TAG, 'Failed to stop auto cleanup', error);
+      Logger.error(TAG, 'Failed to stop auto cleanup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -643,16 +624,14 @@ export default class FileService {
       deletedCount += tempCleanup.deletedCount;
       freedSpace += tempCleanup.freedSpace;
       
-      // 清理缩略图缓存
-      const thumbCleanup = await this.cleanupDirectory(
+      // 清理缩略图缓�?      const thumbCleanup = await this.cleanupDirectory(
         `${this.fileConfig.cacheDir}/thumbnails`,
         THUMBNAIL_CACHE_EXPIRY
       );
       deletedCount += thumbCleanup.deletedCount;
       freedSpace += thumbCleanup.freedSpace;
       
-      // 检查缓存目录大小
-      const cacheStats = await FileUtil.getDirectoryStats(this.fileConfig.cacheDir);
+      // 检查缓存目录大�?      const cacheStats = await FileUtil.getDirectoryStats(this.fileConfig.cacheDir);
       if (cacheStats && cacheStats.totalSize > this.fileConfig.maxCacheSize) {
         const toDelete = cacheStats.totalSize - this.fileConfig.maxCacheSize;
         const cacheCleanup = await this.cleanupDirectoryBySize(
@@ -663,8 +642,7 @@ export default class FileService {
         freedSpace += cacheCleanup.freedSpace;
       }
       
-      // 检查临时目录大小
-      const tempStats = await FileUtil.getDirectoryStats(this.fileConfig.tempDir);
+      // 检查临时目录大�?      const tempStats = await FileUtil.getDirectoryStats(this.fileConfig.tempDir);
       if (tempStats && tempStats.totalSize > this.fileConfig.maxTempFileSize) {
         const toDelete = tempStats.totalSize - this.fileConfig.maxTempFileSize;
         const tempSizeCleanup = await this.cleanupDirectoryBySize(
@@ -682,7 +660,7 @@ export default class FileService {
       
       Logger.info(TAG, `Auto cleanup completed: ${deletedCount} files deleted, ${this.formatSize(freedSpace)} freed`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to perform auto cleanup', error);
+      Logger.error(TAG, 'Failed to perform auto cleanup', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -715,14 +693,13 @@ export default class FileService {
       
       return { deletedCount, freedSpace };
     } catch (error) {
-      Logger.error(TAG, `Failed to cleanup directory: ${directory}`, error);
+      Logger.error(TAG, `Failed to cleanup directory: ${directory}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { deletedCount: 0, freedSpace: 0 };
     }
   }
 
   /**
-   * 按大小清理目录
-   */
+   * 按大小清理目�?   */
   private async cleanupDirectoryBySize(
     directory: string,
     bytesToDelete: number
@@ -754,20 +731,18 @@ export default class FileService {
       
       return { deletedCount, freedSpace };
     } catch (error) {
-      Logger.error(TAG, `Failed to cleanup directory by size: ${directory}`, error);
+      Logger.error(TAG, `Failed to cleanup directory by size: ${directory}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { deletedCount: 0, freedSpace: 0 };
     }
   }
 
   /**
-   * 开始文件监控
-   */
+   * 开始文件监�?   */
   private startFileWatchers(): void {
     try {
-      // 实际应用中，这里应该为重要目录添加文件监控
-      Logger.debug(TAG, 'Started file watchers');
+      // 实际应用中，这里应该为重要目录添加文件监�?      Logger.debug(TAG, 'Started file watchers');
     } catch (error) {
-      Logger.error(TAG, 'Failed to start file watchers', error);
+      Logger.error(TAG, 'Failed to start file watchers', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -782,7 +757,7 @@ export default class FileService {
       }
       this.fileWatchers.clear();
     } catch (error) {
-      Logger.error(TAG, 'Failed to stop file watchers', error);
+      Logger.error(TAG, 'Failed to stop file watchers', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -830,21 +805,17 @@ export default class FileService {
         accessedAt: fileInfo.accessedAt || Date.now()
       };
       
-      // 对于媒体文件，尝试获取更多信息
-      if (extendedInfo.type === FileType.VIDEO || extendedInfo.type === FileType.AUDIO) {
-        // 实际应用中，这里应该使用媒体解析库获取详细信息
-        // 这里简化为模拟数据
+      // 对于媒体文件，尝试获取更多信�?      if (extendedInfo.type === FileType.VIDEO || extendedInfo.type === FileType.AUDIO) {
+        // 实际应用中，这里应该使用媒体解析库获取详细信�?        // 这里简化为模拟数据
       }
       
-      // 对于图像文件，尝试获取尺寸信息
-      if (extendedInfo.type === FileType.IMAGE) {
-        // 实际应用中，这里应该使用图像解析库获取尺寸
-        // 这里简化为模拟数据
+      // 对于图像文件，尝试获取尺寸信�?      if (extendedInfo.type === FileType.IMAGE) {
+        // 实际应用中，这里应该使用图像解析库获取尺�?        // 这里简化为模拟数据
       }
       
       return extendedInfo;
     } catch (error) {
-      Logger.error(TAG, `Failed to get file info: ${filePath}`, error);
+      Logger.error(TAG, `Failed to get file info: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -899,8 +870,7 @@ export default class FileService {
       return FileType.ARCHIVE;
     }
     
-    // 可执行类型
-    if ([
+    // 可执行类�?    if ([
       'exe', 'dll', 'so', 'dylib', 'apk'
     ].includes(extension)) {
       return FileType.EXECUTABLE;
@@ -915,8 +885,7 @@ export default class FileService {
   public getFileFormat(filePath: string): FileFormat {
     const extension = FileUtil.getExtension(filePath).toLowerCase();
     
-    // 尝试将扩展名转换为枚举值
-    const format = this.getObjectValues(FileFormat).find(f => f.toLowerCase() === extension);
+    // 尝试将扩展名转换为枚举�?    const format = this.getObjectValues(FileFormat).find(f => f.toLowerCase() === extension);
     return format || FileFormat.UNKNOWN;
   }
 
@@ -956,14 +925,13 @@ export default class FileService {
       
       return permissions;
     } catch (error) {
-      Logger.error(TAG, `Failed to get file permissions: ${filePath}`, error);
+      Logger.error(TAG, `Failed to get file permissions: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return [FilePermission.NONE];
     }
   }
 
   /**
-   * 检查文件是否支持
-   */
+   * 检查文件是否支�?   */
   public isFileSupported(filePath: string): boolean {
     const type = this.getFileType(filePath);
     const format = this.getFileFormat(filePath);
@@ -994,8 +962,7 @@ export default class FileService {
       // 过滤文件
       let filteredFiles = files.filter(file => !file.isDirectory);
       
-      // 应用过滤器
-      if (params.types && params.types.length > 0) {
+      // 应用过滤�?      if (params.types && params.types.length > 0) {
         filteredFiles = filteredFiles.filter(file => 
           params.types!.includes(this.getFileType(file.path))
         );
@@ -1033,8 +1000,7 @@ export default class FileService {
       }
       
       if (params.pattern) {
-        // 不使用正则表达式，改用字符串方法实现大小写不敏感的匹配
-        const searchPattern = params.pattern.toLowerCase();
+        // 不使用正则表达式，改用字符串方法实现大小写不敏感的匹�?        const searchPattern = params.pattern.toLowerCase();
         filteredFiles = filteredFiles.filter(file => 
           file.name.toLowerCase().indexOf(searchPattern) !== -1
         );
@@ -1083,8 +1049,7 @@ export default class FileService {
         filteredFiles = filteredFiles.slice(0, params.limit);
       }
       
-      // 转换为扩展信息
-      const result: ExtendedFileInfo[] = [];
+      // 转换为扩展信�?      const result: ExtendedFileInfo[] = [];
       for (const file of filteredFiles) {
         const info = await this.getFileInfo(file.path);
         if (info) {
@@ -1095,7 +1060,7 @@ export default class FileService {
       Logger.info(TAG, `Found ${result.length} files matching search criteria`);
       return result;
     } catch (error) {
-      Logger.error(TAG, 'Failed to search files', error);
+      Logger.error(TAG, 'Failed to search files', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return [];
     }
   }
@@ -1114,7 +1079,7 @@ export default class FileService {
       Logger.debug(TAG, `Created temporary file: ${filePath}`);
       return filePath;
     } catch (error) {
-      Logger.error(TAG, 'Failed to create temporary file', error);
+      Logger.error(TAG, 'Failed to create temporary file', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1132,7 +1097,7 @@ export default class FileService {
         path
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to create directory: ${path}`, error);
+      Logger.error(TAG, `Failed to create directory: ${path}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1145,8 +1110,7 @@ export default class FileService {
    */
   public async deleteFile(filePath: string): Promise<FileOperationResult> {
     try {
-      // 检查文件是否存在
-      const exists = await FileUtil.fileExists(filePath);
+      // 检查文件是否存�?      const exists = await FileUtil.fileExists(filePath);
       if (!exists) {
         return {
           success: false,
@@ -1162,7 +1126,7 @@ export default class FileService {
         path: filePath
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to delete file: ${filePath}`, error);
+      Logger.error(TAG, `Failed to delete file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1175,8 +1139,7 @@ export default class FileService {
    */
   public async deleteDirectory(path: string, recursive: boolean = false): Promise<FileOperationResult> {
     try {
-      // 检查目录是否存在
-      const exists = await FileUtil.directoryExists(path);
+      // 检查目录是否存�?      const exists = await FileUtil.directoryExists(path);
       if (!exists) {
         return {
           success: false,
@@ -1192,7 +1155,7 @@ export default class FileService {
         path
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to delete directory: ${path}`, error);
+      Logger.error(TAG, `Failed to delete directory: ${path}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1227,7 +1190,7 @@ export default class FileService {
         path: destination
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to copy file from ${source} to ${destination}`, error);
+      Logger.error(TAG, `Failed to copy file from ${source} to ${destination}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1262,7 +1225,7 @@ export default class FileService {
         path: destination
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to move file from ${source} to ${destination}`, error);
+      Logger.error(TAG, `Failed to move file from ${source} to ${destination}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1271,12 +1234,10 @@ export default class FileService {
   }
 
   /**
-   * 重命名文件
-   */
+   * 重命名文�?   */
   public async renameFile(filePath: string, newName: string): Promise<FileOperationResult> {
     try {
-      // 检查文件是否存在
-      const exists = await FileUtil.fileExists(filePath);
+      // 检查文件是否存�?      const exists = await FileUtil.fileExists(filePath);
       if (!exists) {
         return {
           success: false,
@@ -1288,8 +1249,7 @@ export default class FileService {
       const directory = FileUtil.getDirectory(filePath);
       const newPath = `${directory}/${newName}`;
       
-      // 重命名文件
-      await FileUtil.moveFile(filePath, newPath);
+      // 重命名文�?      await FileUtil.moveFile(filePath, newPath);
       
       Logger.debug(TAG, `Renamed file from ${filePath} to ${newPath}`);
       return {
@@ -1297,7 +1257,7 @@ export default class FileService {
         path: newPath
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to rename file: ${filePath} to ${newName}`, error);
+      Logger.error(TAG, `Failed to rename file: ${filePath} to ${newName}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1313,7 +1273,7 @@ export default class FileService {
       const content = await FileUtil.readFile(filePath, encoding);
       return content;
     } catch (error) {
-      Logger.error(TAG, `Failed to read file: ${filePath}`, error);
+      Logger.error(TAG, `Failed to read file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1341,7 +1301,7 @@ export default class FileService {
         path: filePath
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to write to file: ${filePath}`, error);
+      Logger.error(TAG, `Failed to write to file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1350,8 +1310,7 @@ export default class FileService {
   }
 
   /**
-   * 格式化文件大小显示
-   */
+   * 格式化文件大小显�?   */
   private formatSize(bytes: number): string {
     if (bytes < 1024) {
       return `${bytes} B`;
@@ -1365,8 +1324,7 @@ export default class FileService {
   }
 
   /**
-   * 计算文件校验和
-   */
+   * 计算文件校验�?   */
   public async calculateChecksum(filePath: string, algorithm: 'md5' | 'sha1' | 'sha256' = 'md5'): Promise<string | null> {
     try {
       // 实际应用中，这里应该计算文件的校验和
@@ -1374,7 +1332,7 @@ export default class FileService {
       Logger.debug(TAG, `Calculating ${algorithm} checksum for: ${filePath}`);
       return 'mock_checksum_value';
     } catch (error) {
-      Logger.error(TAG, `Failed to calculate checksum for: ${filePath}`, error);
+      Logger.error(TAG, `Failed to calculate checksum for: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1403,7 +1361,7 @@ export default class FileService {
         }
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to compress ${source}`, error);
+      Logger.error(TAG, `Failed to compress ${source}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1433,7 +1391,7 @@ export default class FileService {
         }
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to decompress ${source}`, error);
+      Logger.error(TAG, `Failed to decompress ${source}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return {
         success: false,
         error: String(error)
@@ -1467,7 +1425,7 @@ export default class FileService {
       
       return folderInfo;
     } catch (error) {
-      Logger.error(TAG, `Failed to get directory info: ${path}`, error);
+      Logger.error(TAG, `Failed to get directory info: ${path}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -1483,8 +1441,7 @@ export default class FileService {
     try {
       const contents = await FileUtil.readDirectory(path, false);
       
-      // 分离文件和目录
-      const fileList = contents.filter(item => !item.isDirectory);
+      // 分离文件和目�?      const fileList = contents.filter(item => !item.isDirectory);
       const folderList = contents.filter(item => item.isDirectory);
       
       // 处理文件信息
@@ -1513,7 +1470,7 @@ export default class FileService {
       Logger.debug(TAG, `Retrieved ${files.length} files and ${folders.length} folders from ${path}`);
       return { files, folders };
     } catch (error) {
-      Logger.error(TAG, `Failed to get directory content: ${path}`, error);
+      Logger.error(TAG, `Failed to get directory content: ${path}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { files: [], folders: [] };
     }
   }
@@ -1534,8 +1491,7 @@ export default class FileService {
   }
 
   /**
-   * 添加存储设备变更监听器
-   */
+   * 添加存储设备变更监听�?   */
   public addStorageListener(listener: (devices: StorageDeviceInfo[]) => void): () => void {
     this.storageListeners.push(listener);
     
@@ -1552,8 +1508,7 @@ export default class FileService {
   }
 
   /**
-   * 添加传输进度监听器
-   */
+   * 添加传输进度监听�?   */
   public addTransferListener(
     taskId: string,
     listener: (progress: FileTransferProgress) => void
@@ -1586,8 +1541,7 @@ export default class FileService {
   }
 
   /**
-   * 添加清理监听器
-   */
+   * 添加清理监听�?   */
   public addCleanupListener(listener: (deletedCount: number, freedSpace: number) => void): () => void {
     this.cleanupListeners.push(listener);
     
@@ -1609,7 +1563,7 @@ export default class FileService {
       try {
         listener(devices);
       } catch (error) {
-        Logger.error(TAG, 'Error in storage listener', error);
+        Logger.error(TAG, 'Error in storage listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -1625,7 +1579,7 @@ export default class FileService {
       try {
         listener({ ...task });
       } catch (error) {
-        Logger.error(TAG, `Error in transfer listener for task ${task.id}`, error);
+        Logger.error(TAG, `Error in transfer listener for task ${task.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -1638,14 +1592,13 @@ export default class FileService {
       try {
         listener(deletedCount, freedSpace);
       } catch (error) {
-        Logger.error(TAG, 'Error in cleanup listener', error);
+        Logger.error(TAG, 'Error in cleanup listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
 
   /**
-   * 销毁文件服务
-   */
+   * 销毁文件服�?   */
   public async destroy(): Promise<void> {
     try {
       Logger.info(TAG, 'Destroying file service...');
@@ -1661,8 +1614,7 @@ export default class FileService {
         await this.cleanupTempFiles();
       }
       
-      // 清除监听器
-      this.storageListeners = [];
+      // 清除监听�?      this.storageListeners = [];
       this.transferListeners.clear();
       this.cleanupListeners = [];
       
@@ -1672,7 +1624,9 @@ export default class FileService {
       
       Logger.info(TAG, 'File service destroyed successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to destroy file service', error);
+      Logger.error(TAG, 'Failed to destroy file service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 }
+
+

@@ -66,8 +66,7 @@ export class SiteRepository {
         }];
         result = await this.sqliteHelper.update(SITE_TABLE.TABLE_NAME, siteData, conditions);
       } else {
-        // 插入新站点
-        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
+        // 插入新站�?        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
         if (result.success && result.lastInsertRowId) {
           site.id = result.lastInsertRowId.toString();
         }
@@ -90,8 +89,7 @@ export class SiteRepository {
   /**
    * 批量保存站点
    * @param sites 站点列表
-   * @returns 保存成功的站点数量
-   */
+   * @returns 保存成功的站点数�?   */
   public async saveSites(sites: Site[]): Promise<number> {
     if (!sites || sites.length === 0) {
       return 0;
@@ -108,7 +106,7 @@ export class SiteRepository {
       }
       
       await this.invalidateSiteListCache();
-      Logger.info(TAG, `Batch saved ${successCount}/${sites.length} sites`);
+      Logger.info(TAG, `Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites` instanceof Error ? `Batch saved ${successCount}/${sites.length} sites` : new Error(String(`Batch saved ${successCount}/${sites.length} sites`)))))));
       return successCount;
     } catch (error) {
       Logger.error(TAG, `Failed to batch save sites: ${JSON.stringify(error)}`);
@@ -117,16 +115,13 @@ export class SiteRepository {
   }
   
   /**
-   * 获取所有站点
-   * @param includeDisabled 是否包含禁用的站点
-   * @returns 站点列表
+   * 获取所有站�?   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
   public async getAllSites(includeDisabled: boolean = false): Promise<Site[]> {
     try {
-      // 尝试从缓存获取
-      const cachedList = await this.getCachedSiteList();
+      // 尝试从缓存获�?      const cachedList = await this.getCachedSiteList();
       if (cachedList && cachedList.length > 0 && includeDisabled === false) {
-        Logger.debug(TAG, 'Returning sites from cache');
+        Logger.debug(TAG, 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache')))))));
         return cachedList;
       }
       
@@ -148,8 +143,7 @@ export class SiteRepository {
         order: 'ASC'
       }];
       
-      // 查询数据库
-      const siteRecords = await this.sqliteHelper.query(
+      // 查询数据�?      const siteRecords = await this.sqliteHelper.query(
         SITE_TABLE.TABLE_NAME,
         ['*'],
         conditions,
@@ -159,8 +153,7 @@ export class SiteRepository {
       // 转换为Site对象
       const sites = this.convertToSiteObjects(siteRecords);
       
-      // 缓存启用的站点列表
-      if (!includeDisabled && sites.length > 0) {
+      // 缓存启用的站点列�?      if (!includeDisabled && sites.length > 0) {
         await this.cacheSiteList(sites);
       }
       
@@ -179,15 +172,13 @@ export class SiteRepository {
    */
   public async getSiteById(siteId: string): Promise<Site | null> {
     try {
-      // 尝试从缓存获取
-      const cachedSite = await this.getCachedSite(siteId);
+      // 尝试从缓存获�?      const cachedSite = await this.getCachedSite(siteId);
       if (cachedSite) {
-        Logger.debug(TAG, `Returning site ${siteId} from cache`);
+        Logger.debug(TAG, `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache`)))))));
         return cachedSite;
       }
       
-      // 查询数据库
-      const conditions: QueryCondition[] = [{
+      // 查询数据�?      const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
         value: siteId
       }];
@@ -219,10 +210,9 @@ export class SiteRepository {
   /**
    * 根据类型获取站点
    * @param type 站点类型
-   * @param includeDisabled 是否包含禁用的站点
-   * @returns 站点列表
+   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
-  public async getSitesByType(type: SiteType, includeDisabled: boolean = false): Promise<Site[]> {
+  public async getSitesByType(type: SiteType, includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false))))))): Promise<Site[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.TYPE,
@@ -263,10 +253,9 @@ export class SiteRepository {
   /**
    * 根据分组获取站点
    * @param groupId 分组ID
-   * @param includeDisabled 是否包含禁用的站点
-   * @returns 站点列表
+   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
-  public async getSitesByGroup(groupId: string, includeDisabled: boolean = false): Promise<Site[]> {
+  public async getSitesByGroup(groupId: string, includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false))))))): Promise<Site[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.GROUP_ID,
@@ -311,7 +300,7 @@ export class SiteRepository {
    */
   public async deleteSite(siteId: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Deleting site with ID: ${siteId}`);
+      Logger.debug(TAG, `Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}` instanceof Error ? `Deleting site with ID: ${siteId}` : new Error(String(`Deleting site with ID: ${siteId}`)))))));
       
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
@@ -337,15 +326,14 @@ export class SiteRepository {
   /**
    * 批量删除站点
    * @param siteIds 站点ID列表
-   * @returns 删除成功的站点数量
-   */
+   * @returns 删除成功的站点数�?   */
   public async deleteSites(siteIds: string[]): Promise<number> {
     if (!siteIds || siteIds.length === 0) {
       return 0;
     }
     
     try {
-      Logger.debug(TAG, `Deleting ${siteIds.length} sites`);
+      Logger.debug(TAG, `Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites` instanceof Error ? `Deleting ${siteIds.length} sites` : new Error(String(`Deleting ${siteIds.length} sites`)))))));
       
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
@@ -372,17 +360,13 @@ export class SiteRepository {
   }
   
   /**
-   * 更新站点启用状态
-   * @param siteId 站点ID
+   * 更新站点启用状�?   * @param siteId 站点ID
    * @param enabled 是否启用
    * @returns 是否更新成功
    */
-  public async updateSiteEnabled(siteId: string, enabled: boolean): Promise<boolean> {
+  public async updateSiteEnabled(siteId: string, enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean))))))): Promise<boolean> {
     try {
-      const data = {
-        [SITE_TABLE.COLUMNS.ENABLED]: enabled ? 1 : 0,
-        [SITE_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
-      };
+      const data: Record<string, string | number | boolean | null> = { ... };
       
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
@@ -411,12 +395,9 @@ export class SiteRepository {
    * @param sortOrder 排序顺序
    * @returns 是否更新成功
    */
-  public async updateSiteSortOrder(siteId: string, sortOrder: number): Promise<boolean> {
+  public async updateSiteSortOrder(siteId: string, sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number : new Error(String(sortOrder: number instanceof Error ? sortOrder: number : new Error(String(sortOrder: number))))))): Promise<boolean> {
     try {
-      const data = {
-        [SITE_TABLE.COLUMNS.SORT_ORDER]: sortOrder,
-        [SITE_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
-      };
+      const data: Record<string, string | number | boolean | null> = { ... };
       
       const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
@@ -446,16 +427,9 @@ export class SiteRepository {
    */
   public async saveSiteGroup(group: SiteGroup): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving site group: ${group.name}`);
+      Logger.debug(TAG, `Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}` instanceof Error ? `Saving site group: ${group.name}` : new Error(String(`Saving site group: ${group.name}`)))))));
       
-      const groupData = {
-        [SITE_GROUP_TABLE.COLUMNS.ID]: group.id || null,
-        [SITE_GROUP_TABLE.COLUMNS.NAME]: group.name,
-        [SITE_GROUP_TABLE.COLUMNS.DESCRIPTION]: group.description || '',
-        [SITE_GROUP_TABLE.COLUMNS.SORT_ORDER]: group.sortOrder || 0,
-        [SITE_GROUP_TABLE.COLUMNS.CREATE_TIME]: group.createTime || Date.now(),
-        [SITE_GROUP_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
-      };
+      const groupData: Record<string, string | number | boolean | null> = { ... };
       
       let result: number | undefined;
       if (group.id) {
@@ -466,8 +440,7 @@ export class SiteRepository {
         }];
         result = await this.sqliteHelper.update(SITE_GROUP_TABLE.TABLE_NAME, groupData, conditions);
       } else {
-        // 插入新分组
-        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
+        // 插入新分�?        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
         if (result.success && result.lastInsertRowId) {
           group.id = result.lastInsertRowId.toString();
         }
@@ -482,14 +455,12 @@ export class SiteRepository {
   }
   
   /**
-   * 获取所有站点分组
-   * @returns 站点分组列表
+   * 获取所有站点分�?   * @returns 站点分组列表
    */
   public async getAllSiteGroups(): Promise<SiteGroup[]> {
     try {
       const sortOptions = [{
-        column: SITE_GROUP_TABLE.COLUMNS.SORT_ORDER,
-        order: 'ASC'
+        column: SITE_GROUP_TABLE.COLUMNS.SORT_ORDER, order: 'ASC'
       }, {
         column: SITE_GROUP_TABLE.COLUMNS.NAME,
         order: 'ASC'
@@ -500,7 +471,293 @@ export class SiteRepository {
         ['*'],
         undefined,
         sortOptions
-      );
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: SITE_GROUP_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const groupRecords = await this.sqliteHelper.query(
+        SITE_GROUP_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+      )))))));
       
       const groups: SiteGroup[] = groupRecords.map(record => ({
         id: record[SITE_GROUP_TABLE.COLUMNS.ID]?.toString(),
@@ -524,15 +781,14 @@ export class SiteRepository {
    */
   private async cacheSiteData(site: Site): Promise<void> {
     try {
-      await this.storageUtil.setObject(`${SITE_CACHE_PREFIX}${site.id}`, site);
+      await this.storageUtil.setObject(`${SITE_CACHE_PREFIX}${site.id}`, site instanceof Error ? site : new Error(String(site instanceof Error ? site instanceof Error ? site : new Error(String(site : new Error(String(site instanceof Error ? site : new Error(String(site instanceof Error ? site instanceof Error ? site : new Error(String(site instanceof Error ? site instanceof Error ? site : new Error(String(site : new Error(String(site instanceof Error ? site : new Error(String(site : new Error(String(site instanceof Error ? site : new Error(String(site instanceof Error ? site instanceof Error ? site : new Error(String(site : new Error(String(site instanceof Error ? site : new Error(String(site)))))));
     } catch (error) {
       Logger.warn(TAG, `Failed to cache site ${site.id}: ${JSON.stringify(error)}`);
     }
   }
   
   /**
-   * 获取缓存的站点数据
-   */
+   * 获取缓存的站点数�?   */
   private async getCachedSite(siteId: string): Promise<Site | null> {
     try {
       return await this.storageUtil.getObject<Site>(`${SITE_CACHE_PREFIX}${siteId}`);
@@ -542,8 +798,7 @@ export class SiteRepository {
   }
   
   /**
-   * 移除缓存的站点数据
-   */
+   * 移除缓存的站点数�?   */
   private async removeCachedSite(siteId: string): Promise<void> {
     try {
       await this.storageUtil.remove(`${SITE_CACHE_PREFIX}${siteId}`);
@@ -564,8 +819,7 @@ export class SiteRepository {
   }
   
   /**
-   * 获取缓存的站点列表
-   */
+   * 获取缓存的站点列�?   */
   private async getCachedSiteList(): Promise<Site[] | null> {
     try {
       return await this.storageUtil.getObject<Site[]>(SITE_LIST_CACHE);
@@ -575,8 +829,7 @@ export class SiteRepository {
   }
   
   /**
-   * 使站点列表缓存失效
-   */
+   * 使站点列表缓存失�?   */
   private async invalidateSiteListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(SITE_LIST_CACHE);
@@ -610,7 +863,9 @@ export class SiteRepository {
   /**
    * 将数据库记录列表转换为Site对象列表
    */
-  private convertToSiteObjects(records: unknown[]): Site[] {
+  private convertToSiteObjects(records: Record<string, string | number | boolean | null>[]): Site[] {
     return records.map(record => this.convertToSiteObject(record));
   }
 }
+
+

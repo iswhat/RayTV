@@ -94,11 +94,29 @@ export default class SearchResult {
       this.extraInfo = data.extraInfo as ExtraInfo;
     } else {
       // 使用空对象字面量，明确类型
-      this.extraInfo = {};
+      this.extraInfo = this.createEmptyExtraInfo();
     }
     this.link = data.link;
     this.sourceId = data.sourceId;
     this.sourceName = data.sourceName;
+  }
+
+  /**
+   * 创建空的ExtraInfo对象
+   * @returns 空的ExtraInfo对象
+   */
+  private createEmptyExtraInfo(): ExtraInfo {
+    return {
+      extraData: undefined
+    };
+  }
+
+  /**
+   * 创建空的extraData记录
+   * @returns 空的Record对象
+   */
+  private createEmptyExtraData(): Record<string, string | number | boolean | null | NestedExtraInfo> {
+    return {};
   }
 
   /**
@@ -360,10 +378,6 @@ export default class SearchResult {
     return priority;
   }
 
-  /**
-   * 序列化对象（用于存储）
-   * @returns 序列化后的对象
-   */
 // 定义SearchResult序列化数据接口
 export interface SearchResultSerializable {
   id: string;
@@ -391,59 +405,79 @@ export interface SearchResultSerializable {
   sourceName?: string;
 }
 
+  /**
+   * 序列化对象（用于存储）
+   * @returns 序列化后的对象
+   */
   public toSerializable(): SearchResultSerializable {
-    // 使用构造函数和逐个属性赋值，避免对象字面量错误
-    // 由于SearchResultSerializable是接口，我们创建一个实现该接口的类实例
-    class SearchResultSerializableImpl implements SearchResultSerializable {
-      id: string = '';
-      title: string = '';
-      originalTitle?: string;
-      type: ResultType = ResultType.OTHER;
-      coverUrl?: string;
-      backdropUrl?: string;
-      description?: string;
-      score?: number;
-      year?: number;
-      releaseDate?: string;
-      genres?: string[];
-      tags?: string[];
-      duration?: number;
-      totalEpisodes?: number;
-      currentSeason?: number;
-      actors?: string[];
-      directors?: string[];
-      popularity?: number;
-      matchScore?: number;
-      extraInfo?: ExtraInfo;
-      link?: string;
-      sourceId?: string;
-      sourceName?: string;
-    }
+    // 创建一个符合SearchResultSerializable接口的对象，避免使用对象字面量
+    const result: SearchResultSerializable = {
+      id: this.id,
+      title: this.title,
+      type: this.type
+    };
     
-    const result = new SearchResultSerializableImpl();
-    result.id = this.id;
-    result.title = this.title;
-    result.originalTitle = this.originalTitle;
-    result.type = this.type;
-    result.coverUrl = this.coverUrl;
-    result.backdropUrl = this.backdropUrl;
-    result.description = this.description;
-    result.score = this.score;
-    result.year = this.year;
-    result.releaseDate = this.releaseDate;
-    result.genres = this.genres;
-    result.tags = this.tags;
-    result.duration = this.duration;
-    result.totalEpisodes = this.totalEpisodes;
-    result.currentSeason = this.currentSeason;
-    result.actors = this.actors;
-    result.directors = this.directors;
-    result.popularity = this.popularity;
-    result.matchScore = this.matchScore;
-    result.extraInfo = this.extraInfo;
-    result.link = this.link;
-    result.sourceId = this.sourceId;
-    result.sourceName = this.sourceName;
+    // 逐个赋值可选属性
+    if (this.originalTitle !== undefined) {
+      result.originalTitle = this.originalTitle;
+    }
+    if (this.coverUrl !== undefined) {
+      result.coverUrl = this.coverUrl;
+    }
+    if (this.backdropUrl !== undefined) {
+      result.backdropUrl = this.backdropUrl;
+    }
+    if (this.description !== undefined) {
+      result.description = this.description;
+    }
+    if (this.score !== undefined) {
+      result.score = this.score;
+    }
+    if (this.year !== undefined) {
+      result.year = this.year;
+    }
+    if (this.releaseDate !== undefined) {
+      result.releaseDate = this.releaseDate;
+    }
+    if (this.genres !== undefined) {
+      result.genres = this.genres;
+    }
+    if (this.tags !== undefined) {
+      result.tags = this.tags;
+    }
+    if (this.duration !== undefined) {
+      result.duration = this.duration;
+    }
+    if (this.totalEpisodes !== undefined) {
+      result.totalEpisodes = this.totalEpisodes;
+    }
+    if (this.currentSeason !== undefined) {
+      result.currentSeason = this.currentSeason;
+    }
+    if (this.actors !== undefined) {
+      result.actors = this.actors;
+    }
+    if (this.directors !== undefined) {
+      result.directors = this.directors;
+    }
+    if (this.popularity !== undefined) {
+      result.popularity = this.popularity;
+    }
+    if (this.matchScore !== undefined) {
+      result.matchScore = this.matchScore;
+    }
+    if (this.extraInfo !== undefined) {
+      result.extraInfo = this.extraInfo;
+    }
+    if (this.link !== undefined) {
+      result.link = this.link;
+    }
+    if (this.sourceId !== undefined) {
+      result.sourceId = this.sourceId;
+    }
+    if (this.sourceName !== undefined) {
+      result.sourceName = this.sourceName;
+    }
     
     return result;
   }
@@ -454,38 +488,17 @@ export interface SearchResultSerializable {
    * @returns SearchResult实例
    */
   public static fromSerializable(data: SearchResultSerializable): SearchResult {
-    // 直接创建SearchResult实例，手动赋值所有属性
-    const instance = new SearchResult({});
-    
-    // 手动赋值每个属性，确保类型安全
-    if (typeof data.id === 'string') instance.id = data.id;
-    if (typeof data.title === 'string') instance.title = data.title;
-    if (typeof data.originalTitle === 'string') instance.originalTitle = data.originalTitle;
-    if (typeof data.type === 'number') instance.type = data.type as ResultType;
-    if (typeof data.coverUrl === 'string') instance.coverUrl = data.coverUrl;
-    if (typeof data.backdropUrl === 'string') instance.backdropUrl = data.backdropUrl;
-    if (typeof data.description === 'string') instance.description = data.description;
-    if (typeof data.score === 'number') instance.score = data.score;
-    if (typeof data.year === 'number') instance.year = data.year;
-    if (typeof data.releaseDate === 'string') instance.releaseDate = data.releaseDate;
-    if (Array.isArray(data.genres)) instance.genres = data.genres.filter(item => typeof item === 'string') as string[];
-    if (Array.isArray(data.tags)) instance.tags = data.tags.filter(item => typeof item === 'string') as string[];
-    if (typeof data.duration === 'number') instance.duration = data.duration;
-    if (typeof data.totalEpisodes === 'number') instance.totalEpisodes = data.totalEpisodes;
-    if (typeof data.currentSeason === 'number') instance.currentSeason = data.currentSeason;
-    if (Array.isArray(data.actors)) instance.actors = data.actors.filter(item => typeof item === 'string') as string[];
-    if (Array.isArray(data.directors)) instance.directors = data.directors.filter(item => typeof item === 'string') as string[];
-    if (typeof data.popularity === 'number') instance.popularity = data.popularity;
-    if (typeof data.matchScore === 'number') instance.matchScore = data.matchScore;
-    // 安全处理extraInfo，确保类型正确
+    // 准备extraInfo
+    let extraInfo: ExtraInfo | undefined;
     if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
-      // 创建一个明确的ExtraInfo对象
-      instance.extraInfo = {};
+      // 创建一个明确的ExtraInfo对象，使用接口初始化
+      extraInfo = {
+        extraData: {}
+      };
       
       // 检查extraData属性
       const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
       if (extraInfoData.extraData && typeof extraInfoData.extraData === 'object' && !Array.isArray(extraInfoData.extraData)) {
-        instance.extraInfo.extraData = {};
         const extraDataObj = extraInfoData.extraData as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
         
         // 处理extraData的每个属性
@@ -495,10 +508,12 @@ export interface SearchResultSerializable {
           const value = extraDataObj[key];
           
           if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
-            instance.extraInfo.extraData![key] = value;
+            extraInfo.extraData[key] = value;
           } else if (value && typeof value === 'object' && !Array.isArray(value)) {
             // 处理嵌套对象
-            const nestedInfo: NestedExtraInfo = { nestedData: {} };
+            const nestedInfo: NestedExtraInfo = {
+              nestedData: {}
+            };
             const nestedObj = value as Record<string, string | number | boolean | null>;
             
             const nestedKeys = Object.keys(nestedObj);
@@ -508,20 +523,44 @@ export interface SearchResultSerializable {
               
               if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || 
                   typeof nestedValue === 'boolean' || nestedValue === null) {
-                nestedInfo.nestedData![nestedKey] = nestedValue;
+                nestedInfo.nestedData[nestedKey] = nestedValue;
               }
             }
             
-            instance.extraInfo.extraData![key] = nestedInfo;
+            extraInfo.extraData[key] = nestedInfo;
           }
         }
       }
     }
-    if (typeof data.link === 'string') instance.link = data.link;
-    if (typeof data.sourceId === 'string') instance.sourceId = data.sourceId;
-    if (typeof data.sourceName === 'string') instance.sourceName = data.sourceName;
     
-    return instance;
+    // 直接使用构造函数创建实例
+    const searchResultParams: Partial<SearchResult> = {
+      id: typeof data.id === 'string' ? data.id : `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      title: typeof data.title === 'string' ? data.title : '',
+      originalTitle: typeof data.originalTitle === 'string' ? data.originalTitle : undefined,
+      type: typeof data.type === 'number' ? data.type as ResultType : ResultType.OTHER,
+      coverUrl: typeof data.coverUrl === 'string' ? data.coverUrl : undefined,
+      backdropUrl: typeof data.backdropUrl === 'string' ? data.backdropUrl : undefined,
+      description: typeof data.description === 'string' ? data.description : undefined,
+      score: typeof data.score === 'number' ? data.score : undefined,
+      year: typeof data.year === 'number' ? data.year : undefined,
+      releaseDate: typeof data.releaseDate === 'string' ? data.releaseDate : undefined,
+      genres: Array.isArray(data.genres) ? data.genres.filter(item => typeof item === 'string') : undefined,
+      tags: Array.isArray(data.tags) ? data.tags.filter(item => typeof item === 'string') : undefined,
+      duration: typeof data.duration === 'number' ? data.duration : undefined,
+      totalEpisodes: typeof data.totalEpisodes === 'number' ? data.totalEpisodes : undefined,
+      currentSeason: typeof data.currentSeason === 'number' ? data.currentSeason : undefined,
+      actors: Array.isArray(data.actors) ? data.actors.filter(item => typeof item === 'string') : undefined,
+      directors: Array.isArray(data.directors) ? data.directors.filter(item => typeof item === 'string') : undefined,
+      popularity: typeof data.popularity === 'number' ? data.popularity : undefined,
+      matchScore: typeof data.matchScore === 'number' ? data.matchScore : undefined,
+      extraInfo: extraInfo,
+      link: typeof data.link === 'string' ? data.link : undefined,
+      sourceId: typeof data.sourceId === 'string' ? data.sourceId : undefined,
+      sourceName: typeof data.sourceName === 'string' ? data.sourceName : undefined
+    };
+    
+    return new SearchResult(searchResultParams);
   }
 
   /**
@@ -529,32 +568,34 @@ export interface SearchResultSerializable {
    * @returns 克隆后的实例
    */
   public clone(): SearchResult {
-    // 手动创建克隆，避免类作为对象使用
-    const cloneData: Partial<SearchResult> = {
-      id: this.id,
-      title: this.title,
-      originalTitle: this.originalTitle,
-      type: this.type,
-      coverUrl: this.coverUrl,
-      backdropUrl: this.backdropUrl,
-      description: this.description,
-      score: this.score,
-      year: this.year,
-      releaseDate: this.releaseDate,
-      genres: this.genres ? Array.from(this.genres) : undefined,
-      tags: this.tags ? Array.from(this.tags) : undefined,
-      duration: this.duration,
-      totalEpisodes: this.totalEpisodes,
-      currentSeason: this.currentSeason,
-      actors: this.actors ? Array.from(this.actors) : undefined,
-      directors: this.directors ? Array.from(this.directors) : undefined,
-      popularity: this.popularity,
-      matchScore: this.matchScore,
-      extraInfo: this.extraInfo ? this.cloneExtraInfo(this.extraInfo) : undefined,
-      link: this.link,
-      sourceId: this.sourceId,
-      sourceName: this.sourceName
-    };
+    // 创建一个符合Partial<SearchResult>类型的对象，避免直接使用对象字面量
+    const cloneData: Partial<SearchResult> = {};
+    
+    // 逐个赋值属性，确保类型安全
+    cloneData.id = this.id;
+    cloneData.title = this.title;
+    cloneData.originalTitle = this.originalTitle;
+    cloneData.type = this.type;
+    cloneData.coverUrl = this.coverUrl;
+    cloneData.backdropUrl = this.backdropUrl;
+    cloneData.description = this.description;
+    cloneData.score = this.score;
+    cloneData.year = this.year;
+    cloneData.releaseDate = this.releaseDate;
+    cloneData.genres = this.genres ? Array.from(this.genres) : undefined;
+    cloneData.tags = this.tags ? Array.from(this.tags) : undefined;
+    cloneData.duration = this.duration;
+    cloneData.totalEpisodes = this.totalEpisodes;
+    cloneData.currentSeason = this.currentSeason;
+    cloneData.actors = this.actors ? Array.from(this.actors) : undefined;
+    cloneData.directors = this.directors ? Array.from(this.directors) : undefined;
+    cloneData.popularity = this.popularity;
+    cloneData.matchScore = this.matchScore;
+    cloneData.extraInfo = this.extraInfo ? this.cloneExtraInfo(this.extraInfo) : undefined;
+    cloneData.link = this.link;
+    cloneData.sourceId = this.sourceId;
+    cloneData.sourceName = this.sourceName;
+    
     return new SearchResult(cloneData);
   }
 
@@ -564,10 +605,13 @@ export interface SearchResultSerializable {
    * @returns 克隆后的ExtraInfo对象
    */
   private cloneExtraInfo(extraInfo: ExtraInfo): ExtraInfo {
-    const cloned: ExtraInfo = {};
+    // 创建ExtraInfo对象，明确初始化extraData
+    const cloned: ExtraInfo = {
+      extraData: {}
+    };
     
+    // 确保extraInfo.extraData存在
     if (extraInfo.extraData) {
-      cloned.extraData = {};
       // 手动复制extraData中的每个属性
       const keys = Object.keys(extraInfo.extraData);
       for (let i = 0; i < keys.length; i++) {
@@ -575,25 +619,32 @@ export interface SearchResultSerializable {
         const value = extraInfo.extraData[key];
         
         if (value && typeof value === 'object' && !Array.isArray(value)) {
-          // 检查是否为NestedExtraInfo类型，通过检查是否有nestedData属性且该属性是对象
-          const potentialNested = value as NestedExtraInfo;
+          // 检查是否为NestedExtraInfo类型
+          const potentialNested = value as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
           if (potentialNested.nestedData && typeof potentialNested.nestedData === 'object' && !Array.isArray(potentialNested.nestedData)) {
             // 克隆NestedExtraInfo对象
-            const nestedCloned: NestedExtraInfo = {};
-            nestedCloned.nestedData = {};
+            const nestedCloned: NestedExtraInfo = {
+              nestedData: {}
+            };
+            
+            // 手动复制nestedData中的每个属性
             const nestedKeys = Object.keys(potentialNested.nestedData);
             for (let j = 0; j < nestedKeys.length; j++) {
               const nestedKey = nestedKeys[j];
-              nestedCloned.nestedData![nestedKey] = potentialNested.nestedData![nestedKey];
+              const nestedValue = potentialNested.nestedData![nestedKey];
+              nestedCloned.nestedData[nestedKey] = nestedValue;
             }
-            cloned.extraData![key] = nestedCloned;
+            
+            cloned.extraData[key] = nestedCloned;
           } else {
-            // 直接复制基本类型值或非NestedExtraInfo对象
-            cloned.extraData![key] = value as string | number | boolean | null;
+            // 直接复制基本类型值
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+              cloned.extraData[key] = value;
+            }
           }
         } else {
           // 直接复制基本类型值
-          cloned.extraData![key] = value;
+          cloned.extraData[key] = value;
         }
       }
     }

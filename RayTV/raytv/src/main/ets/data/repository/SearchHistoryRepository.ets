@@ -1,5 +1,4 @@
-// SearchHistoryRepository - 搜索历史仓库类
-// 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等
+// SearchHistoryRepository - 搜索历史仓库�?// 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -22,26 +21,20 @@ export enum SearchType {
  * 搜索历史记录接口
  */
 export interface SearchHistoryItem {
-  id: string; // 唯一标识符
-  query: string; // 搜索关键词
-  type: SearchType; // 搜索类型
-  timestamp: number; // 搜索时间戳
-  resultCount?: number; // 搜索结果数量
+  id: string; // 唯一标识�?  query: string; // 搜索关键�?  type: SearchType; // 搜索类型
+  timestamp: number; // 搜索时间�?  resultCount?: number; // 搜索结果数量
   selected?: boolean; // 是否被选中
-  isFavorite?: boolean; // 是否为收藏的搜索词
-  category?: string; // 搜索分类（可选）
+  isFavorite?: boolean; // 是否为收藏的搜索�?  category?: string; // 搜索分类（可选）
 }
 
 /**
  * 搜索历史配置接口
  */
 export interface SearchHistoryConfig {
-  maxHistoryItems: number; // 最大历史记录数量
-  maxFavoriteItems: number; // 最大收藏搜索词数量
+  maxHistoryItems: number; // 最大历史记录数�?  maxFavoriteItems: number; // 最大收藏搜索词数量
   autoClearDays?: number; // 自动清除天数（可选）
   enableAutoComplete: boolean; // 是否启用自动完成
-  enableRecentSearches: boolean; // 是否启用最近搜索
-  enableFavorites: boolean; // 是否启用收藏功能
+  enableRecentSearches: boolean; // 是否启用最近搜�?  enableFavorites: boolean; // 是否启用收藏功能
 }
 
 /**
@@ -62,21 +55,19 @@ export const SearchHistoryEventType = {
 export interface SearchHistoryEvent {
   type: string;
   timestamp: number;
-  data?: unknown;
+  data?: Record<string, string | number | boolean | null>;
   error?: Error;
 }
 
 /**
- * 搜索历史仓库类
- */
+ * 搜索历史仓库�? */
 export class SearchHistoryRepository {
   private static instance: SearchHistoryRepository;
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
   private eventBus = EventBusUtil.getInstance();
   
-  // 存储键配置
-  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     searchHistory: 'search:history',
     favoriteSearches: 'search:favorites',
     searchHistoryConfig: 'search:history:config',
@@ -93,18 +84,14 @@ export class SearchHistoryRepository {
     enableFavorites: true
   };
   
-  // 缓存的配置
-  private cachedConfig: SearchHistoryConfig | null = null;
+  // 缓存的配�?  private cachedConfig: SearchHistoryConfig | null = null;
   
-  // 缓存的历史记录
-  private cachedHistory: SearchHistoryItem[] | null = null;
+  // 缓存的历史记�?  private cachedHistory: SearchHistoryItem[] | null = null;
   
-  // 缓存的收藏搜索
-  private cachedFavorites: SearchHistoryItem[] | null = null;
+  // 缓存的收藏搜�?  private cachedFavorites: SearchHistoryItem[] | null = null;
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('SearchHistoryRepository initialized');
     this.setupEventListeners();
@@ -122,15 +109,13 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 初始化搜索历史仓库
-   */
+   * 初始化搜索历史仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载配置
       await this.loadConfig();
       
-      // 初始化缓存
-      await this.loadHistory();
+      // 初始化缓�?      await this.loadHistory();
       await this.loadFavorites();
       
       // 检查并清理过期历史记录
@@ -138,24 +123,22 @@ export class SearchHistoryRepository {
       
       this.logger.info('SearchHistoryRepository initialization completed');
     } catch (error) {
-      this.logger.error('Failed to initialize SearchHistoryRepository', error as Error);
+      this.Logger.error('Failed to initialize SearchHistoryRepository', error as Error);
     }
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
     // 监听用户登录/登出事件
-    this.eventBus.on('user:logout', async () => {
+    this.eventBus.on('user:logout', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
       // 登出时清除用户相关的搜索历史（如果配置允许）
       if (this.cachedConfig?.enableRecentSearches) {
         await this.clearRecentSearches();
       }
     });
     
-    // 监听应用退出事件
-    this.eventBus.on('app:exit', async () => {
+    // 监听应用退出事�?    this.eventBus.on('app:exit', async () => {
       // 应用退出时保存数据
       await this.saveData();
     });
@@ -163,8 +146,7 @@ export class SearchHistoryRepository {
 
   /**
    * 保存搜索记录
-   * @param query 搜索关键词
-   * @param type 搜索类型
+   * @param query 搜索关键�?   * @param type 搜索类型
    * @param resultCount 搜索结果数量
    * @param category 搜索分类
    */
@@ -191,8 +173,7 @@ export class SearchHistoryRepository {
       // 加载配置
       const config = await this.getConfig();
       
-      // 检查是否启用搜索历史
-      if (!config.enableRecentSearches) {
+      // 检查是否启用搜索历�?      if (!config.enableRecentSearches) {
         return {
           id: this.generateId(),
           query: trimmedQuery,
@@ -206,8 +187,7 @@ export class SearchHistoryRepository {
       // 加载现有历史记录
       let history = await this.getHistory();
       
-      // 检查是否已存在相同的搜索记录
-      const existingIndex = history.findIndex(
+      // 检查是否已存在相同的搜索记�?      const existingIndex = history.findIndex(
         item => item.query === trimmedQuery && item.type === type
       );
       
@@ -228,8 +208,7 @@ export class SearchHistoryRepository {
         history.splice(existingIndex, 1);
       }
       
-      // 添加到历史记录开头
-      history.unshift(newItem);
+      // 添加到历史记录开�?      history.unshift(newItem);
       
       // 限制历史记录数量
       if (history.length > config.maxHistoryItems) {
@@ -255,7 +234,7 @@ export class SearchHistoryRepository {
       
       return newItem;
     } catch (error) {
-      this.logger.error('Failed to save search history', error as Error);
+      this.Logger.error('Failed to save search history', error as Error);
       throw error;
     }
   }
@@ -265,17 +244,15 @@ export class SearchHistoryRepository {
    * @param type 可选的搜索类型过滤
    * @param limit 可选的返回数量限制
    */
-  public async getHistory(type?: SearchType, limit?: number): Promise<SearchHistoryItem[]> {
+  public async getHistory(type?: SearchType, limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number : new Error(String(limit?: number instanceof Error ? limit?: number : new Error(String(limit?: number))))))): Promise<SearchHistoryItem[]> {
     try {
-      // 如果缓存为空，加载数据
-      if (!this.cachedHistory) {
+      // 如果缓存为空，加载数�?      if (!this.cachedHistory) {
         await this.loadHistory();
       }
       
       let history = [...this.cachedHistory!];
       
-      // 按类型过滤
-      if (type && type !== SearchType.ALL) {
+      // 按类型过�?      if (type && type !== SearchType.ALL) {
         history = history.filter(item => item.type === type);
       }
       
@@ -286,7 +263,7 @@ export class SearchHistoryRepository {
       
       return history;
     } catch (error) {
-      this.logger.error('Failed to get search history', error as Error);
+      this.Logger.error('Failed to get search history', error as Error);
       return [];
     }
   }
@@ -297,7 +274,7 @@ export class SearchHistoryRepository {
    */
   public async getRecentSearches(count: number = 10): Promise<SearchHistoryItem[]> {
     try {
-      return await this.getHistory(SearchType.ALL, Math.max(1, Math.min(count, 50)));
+      return await this.getHistory(SearchType.ALL, Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50 instanceof Error ? Math.max(1, Math.min(count, 50 : new Error(String(Math.max(1, Math.min(count, 50)))))))));
     } catch (error) {
       this.logger.warn('Failed to get recent searches', error as Error);
       return [];
@@ -313,8 +290,7 @@ export class SearchHistoryRepository {
       // 加载历史记录
       let history = await this.getHistory();
       
-      // 查找并删除记录
-      const initialLength = history.length;
+      // 查找并删除记�?      const initialLength = history.length;
       history = history.filter(item => item.id !== id);
       
       // 检查是否删除了记录
@@ -342,21 +318,19 @@ export class SearchHistoryRepository {
       
       return true;
     } catch (error) {
-      this.logger.error(`Failed to delete search history item ${id}`, error as Error);
+      this.Logger.error(`Failed to delete search history item ${id}`, error as Error);
       return false;
     }
   }
 
   /**
-   * 清除所有搜索历史
-   * @param type 可选的搜索类型过滤
+   * 清除所有搜索历�?   * @param type 可选的搜索类型过滤
    */
   public async clearSearchHistory(type?: SearchType): Promise<boolean> {
     try {
       let history: SearchHistoryItem[] = [];
       
-      // 如果指定了类型，只清除该类型的记录
-      if (type && type !== SearchType.ALL) {
+      // 如果指定了类型，只清除该类型的记�?      if (type && type !== SearchType.ALL) {
         const allHistory = await this.getHistory();
         history = allHistory.filter(item => item.type !== type && item.isFavorite);
       }
@@ -364,13 +338,63 @@ export class SearchHistoryRepository {
       // 保存更新后的历史记录
       this.cachedHistory = history;
       await this.storageUtil.setObject(
-        this.storageKeys.searchHistory,
-        history,
+        this.storageKeys.searchHistory, history,
         LocalStorageType.DEFAULT
-      );
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+       instanceof Error ? history,
+        LocalStorageType.DEFAULT
+       : new Error(String(history,
+        LocalStorageType.DEFAULT
+      )))))));
       
-      // 清除最近搜索缓存
-      await this.clearRecentSearches();
+      // 清除最近搜索缓�?      await this.clearRecentSearches();
       
       // 发布搜索历史清除事件
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED, {
@@ -383,38 +407,34 @@ export class SearchHistoryRepository {
       
       return true;
     } catch (error) {
-      this.logger.error('Failed to clear search history', error as Error);
+      this.Logger.error('Failed to clear search history', error as Error);
       return false;
     }
   }
 
   /**
-   * 清除最近搜索记录
-   */
+   * 清除最近搜索记�?   */
   private async clearRecentSearches(): Promise<void> {
     try {
-      await this.storageUtil.remove(this.storageKeys.recentSearches, LocalStorageType.DEFAULT);
+      await this.storageUtil.remove(this.storageKeys.recentSearches, LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT instanceof Error ? LocalStorageType.DEFAULT : new Error(String(LocalStorageType.DEFAULT)))))));
     } catch (error) {
       this.logger.warn('Failed to clear recent searches', error as Error);
     }
   }
 
   /**
-   * 切换搜索收藏状态
-   * @param id 搜索记录ID
+   * 切换搜索收藏状�?   * @param id 搜索记录ID
    */
   public async toggleFavorite(id: string): Promise<SearchHistoryItem | null> {
     try {
       // 加载配置
       const config = await this.getConfig();
       
-      // 检查是否启用收藏功能
-      if (!config.enableFavorites) {
+      // 检查是否启用收藏功�?      if (!config.enableFavorites) {
         throw new Error('Favorites feature is disabled');
       }
       
-      // 加载历史记录和收藏
-      let history = await this.getHistory();
+      // 加载历史记录和收�?      let history = await this.getHistory();
       let favorites = await this.getFavorites();
       
       // 查找搜索记录
@@ -423,7 +443,7 @@ export class SearchHistoryRepository {
         throw new Error('Search history item not found');
       }
       
-      const item = { ...history[itemIndex] };
+      const item: Record<string, string | number | boolean | null> = { ... };
       const isCurrentlyFavorite = item.isFavorite || false;
       
       if (isCurrentlyFavorite) {
@@ -432,8 +452,7 @@ export class SearchHistoryRepository {
         favorites = favorites.filter(fav => fav.id !== id);
       } else {
         // 添加收藏
-        // 检查收藏数量限制
-        if (favorites.length >= config.maxFavoriteItems) {
+        // 检查收藏数量限�?        if (favorites.length >= config.maxFavoriteItems) {
           throw new Error(`Maximum number of favorite searches (${config.maxFavoriteItems}) reached`);
         }
         
@@ -460,8 +479,7 @@ export class SearchHistoryRepository {
         LocalStorageType.DEFAULT
       );
       
-      // 发布收藏状态变更事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED, {
+      // 发布收藏状态变更事�?      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED, {
         type: SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED,
         timestamp: Date.now(),
         data: {
@@ -474,38 +492,34 @@ export class SearchHistoryRepository {
       
       return item;
     } catch (error) {
-      this.logger.error(`Failed to toggle favorite for search history item ${id}`, error as Error);
+      this.Logger.error(`Failed to toggle favorite for search history item ${id}`, error as Error);
       throw error;
     }
   }
 
   /**
-   * 获取收藏的搜索记录
-   */
+   * 获取收藏的搜索记�?   */
   public async getFavorites(): Promise<SearchHistoryItem[]> {
     try {
-      // 如果缓存为空，加载数据
-      if (!this.cachedFavorites) {
+      // 如果缓存为空，加载数�?      if (!this.cachedFavorites) {
         await this.loadFavorites();
       }
       
       return [...this.cachedFavorites!];
     } catch (error) {
-      this.logger.error('Failed to get favorite searches', error as Error);
+      this.logger.error('Failed to get favorite searches', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return [];
     }
   }
 
   /**
-   * 清除所有收藏
-   */
+   * 清除所有收�?   */
   public async clearFavorites(): Promise<boolean> {
     try {
       // 加载历史记录
       const history = await this.getHistory();
       
-      // 移除所有收藏标记
-      const updatedHistory = history.map(item => ({
+      // 移除所有收藏标�?      const updatedHistory = history.map(item => ({
         ...item,
         isFavorite: false
       }));
@@ -530,7 +544,7 @@ export class SearchHistoryRepository {
       
       return true;
     } catch (error) {
-      this.logger.error('Failed to clear favorite searches', error as Error);
+      this.Logger.error('Failed to clear favorite searches', error as Error);
       return false;
     }
   }
@@ -542,10 +556,61 @@ export class SearchHistoryRepository {
    * @param limit 返回数量限制
    */
   public async getSuggestions(
-    query: string,
-    type?: SearchType,
+    query: string, type?: SearchType,
     limit: number = 10
-  ): Promise<string[]> {
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+   instanceof Error ? type?: SearchType,
+    limit: number = 10
+   : new Error(String(type?: SearchType,
+    limit: number = 10
+  ))))))): Promise<string[]> {
     try {
       // 验证输入
       if (!query || query.trim().length === 0) {
@@ -557,8 +622,7 @@ export class SearchHistoryRepository {
       // 加载配置
       const config = await this.getConfig();
       
-      // 检查是否启用自动完成
-      if (!config.enableAutoComplete) {
+      // 检查是否启用自动完�?      if (!config.enableAutoComplete) {
         return [];
       }
       
@@ -588,8 +652,7 @@ export class SearchHistoryRepository {
       // 获取当前配置
       const currentConfig = await this.getConfig();
       
-      // 合并新配置
-      const updatedConfig: SearchHistoryConfig = {
+      // 合并新配�?      const updatedConfig: SearchHistoryConfig = {
         ...currentConfig,
         ...config
       };
@@ -605,8 +668,7 @@ export class SearchHistoryRepository {
         LocalStorageType.DEFAULT
       );
       
-      // 根据新配置清理数据
-      await this.applyConfigChanges(currentConfig, updatedConfig);
+      // 根据新配置清理数�?      await this.applyConfigChanges(currentConfig, updatedConfig);
       
       // 发布配置变更事件
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED, {
@@ -619,7 +681,7 @@ export class SearchHistoryRepository {
       
       return updatedConfig;
     } catch (error) {
-      this.logger.error('Failed to set search history config', error as Error);
+      this.Logger.error('Failed to set search history config', error as Error);
       throw error;
     }
   }
@@ -629,21 +691,19 @@ export class SearchHistoryRepository {
    */
   public async getConfig(): Promise<SearchHistoryConfig> {
     try {
-      // 如果缓存为空，加载配置
-      if (!this.cachedConfig) {
+      // 如果缓存为空，加载配�?      if (!this.cachedConfig) {
         await this.loadConfig();
       }
       
       return { ...this.cachedConfig! };
     } catch (error) {
-      this.logger.error('Failed to get search history config', error as Error);
+      this.logger.error('Failed to get search history config', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       return { ...this.defaultConfig };
     }
   }
 
   /**
-   * 重置搜索历史配置到默认值
-   */
+   * 重置搜索历史配置到默认�?   */
   public async resetConfig(): Promise<SearchHistoryConfig> {
     try {
       // 保存默认配置
@@ -658,7 +718,7 @@ export class SearchHistoryRepository {
       
       return { ...this.defaultConfig };
     } catch (error) {
-      this.logger.error('Failed to reset search history config', error as Error);
+      this.Logger.error('Failed to reset search history config', error as Error);
       throw error;
     }
   }
@@ -669,14 +729,39 @@ export class SearchHistoryRepository {
   private async loadHistory(): Promise<void> {
     try {
       const history = await this.storageUtil.getObject<SearchHistoryItem[]>(
-        this.storageKeys.searchHistory,
-        LocalStorageType.DEFAULT
-      );
+        this.storageKeys.searchHistory, LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+      )))))));
       
       this.cachedHistory = history || [];
       this.logger.debug(`Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
-      this.logger.error('Failed to load search history', error as Error);
+      this.Logger.error('Failed to load search history', error as Error);
       this.cachedHistory = [];
     }
   }
@@ -687,14 +772,39 @@ export class SearchHistoryRepository {
   private async loadFavorites(): Promise<void> {
     try {
       const favorites = await this.storageUtil.getObject<SearchHistoryItem[]>(
-        this.storageKeys.favoriteSearches,
-        LocalStorageType.DEFAULT
-      );
+        this.storageKeys.favoriteSearches, LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+      )))))));
       
       this.cachedFavorites = favorites || [];
       this.logger.debug(`Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
-      this.logger.error('Failed to load favorite searches', error as Error);
+      this.Logger.error('Failed to load favorite searches', error as Error);
       this.cachedFavorites = [];
     }
   }
@@ -705,9 +815,34 @@ export class SearchHistoryRepository {
   private async loadConfig(): Promise<void> {
     try {
       const config = await this.storageUtil.getObject<SearchHistoryConfig>(
-        this.storageKeys.searchHistoryConfig,
-        LocalStorageType.DEFAULT
-      );
+        this.storageKeys.searchHistoryConfig, LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+       instanceof Error ? LocalStorageType.DEFAULT
+       : new Error(String(LocalStorageType.DEFAULT
+      )))))));
       
       this.cachedConfig = config ? { ...this.defaultConfig, ...config } : { ...this.defaultConfig };
       
@@ -716,22 +851,72 @@ export class SearchHistoryRepository {
       
       this.logger.debug('Search history configuration loaded');
     } catch (error) {
-      this.logger.error('Failed to load search history config', error as Error);
+      this.Logger.error('Failed to load search history config', error as Error);
       this.cachedConfig = { ...this.defaultConfig };
     }
   }
 
   /**
-   * 保存所有数据
-   */
+   * 保存所有数�?   */
   private async saveData(): Promise<void> {
     try {
       await Promise.all([
         this.storageUtil.setObject(
-          this.storageKeys.searchHistory,
-          this.cachedHistory || [],
+          this.storageKeys.searchHistory, this.cachedHistory || [],
           LocalStorageType.DEFAULT
-        ),
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         instanceof Error ? this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+         : new Error(String(this.cachedHistory || [],
+          LocalStorageType.DEFAULT
+        ))))))),
         this.storageUtil.setObject(
           this.storageKeys.favoriteSearches,
           this.cachedFavorites || [],
@@ -746,19 +931,17 @@ export class SearchHistoryRepository {
       
       this.logger.debug('Search history data saved');
     } catch (error) {
-      this.logger.error('Failed to save search history data', error as Error);
+      this.Logger.error('Failed to save search history data', error as Error);
     }
   }
 
   /**
-   * 清理过期的历史记录
-   */
+   * 清理过期的历史记�?   */
   private async cleanupExpiredHistory(): Promise<void> {
     try {
       const config = await this.getConfig();
       
-      // 检查是否启用自动清理
-      if (!config.autoClearDays || config.autoClearDays <= 0) {
+      // 检查是否启用自动清�?      if (!config.autoClearDays || config.autoClearDays <= 0) {
         return;
       }
       
@@ -774,10 +957,61 @@ export class SearchHistoryRepository {
       if (filteredHistory.length !== history.length) {
         this.cachedHistory = filteredHistory;
         await this.storageUtil.setObject(
-          this.storageKeys.searchHistory,
-          filteredHistory,
+          this.storageKeys.searchHistory, filteredHistory,
           LocalStorageType.DEFAULT
-        );
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+         instanceof Error ? filteredHistory,
+          LocalStorageType.DEFAULT
+         : new Error(String(filteredHistory,
+          LocalStorageType.DEFAULT
+        )))))));
         
         this.logger.info(`Cleaned up ${history.length - filteredHistory.length} expired search history items`);
       }
@@ -794,8 +1028,7 @@ export class SearchHistoryRepository {
     newConfig: SearchHistoryConfig
   ): Promise<void> {
     try {
-      // 检查历史记录数量限制是否改变
-      if (oldConfig.maxHistoryItems !== newConfig.maxHistoryItems) {
+      // 检查历史记录数量限制是否改�?      if (oldConfig.maxHistoryItems !== newConfig.maxHistoryItems) {
         const history = await this.getHistory();
         if (history.length > newConfig.maxHistoryItems) {
           const filteredHistory = history.slice(0, newConfig.maxHistoryItems);
@@ -808,15 +1041,13 @@ export class SearchHistoryRepository {
         }
       }
       
-      // 检查收藏数量限制是否改变
-      if (oldConfig.maxFavoriteItems !== newConfig.maxFavoriteItems) {
+      // 检查收藏数量限制是否改�?      if (oldConfig.maxFavoriteItems !== newConfig.maxFavoriteItems) {
         const favorites = await this.getFavorites();
         if (favorites.length > newConfig.maxFavoriteItems) {
           const filteredFavorites = favorites.slice(0, newConfig.maxFavoriteItems);
           this.cachedFavorites = filteredFavorites;
           
-          // 更新历史记录中的收藏状态
-          const history = await this.getHistory();
+          // 更新历史记录中的收藏状�?          const history = await this.getHistory();
           const updatedHistory = history.map(item => ({
             ...item,
             isFavorite: filteredFavorites.some(fav => fav.id === item.id)
@@ -880,35 +1111,53 @@ export class SearchHistoryRepository {
     exportTime: number;
   }> {
     try {
-      const data = {
-        history: await this.getHistory(),
-        favorites: await this.getFavorites(),
-        config: await this.getConfig(),
-        exportTime: Date.now()
-      };
+      const data: Record<string, string | number | boolean | null> = { ... };
       
       this.logger.info('Search history data exported');
       
       return data;
     } catch (error) {
-      this.logger.error('Failed to export search history data', error as Error);
+      this.Logger.error('Failed to export search history data', error as Error);
       throw error;
     }
   }
 
   /**
    * 导入搜索历史数据
-   * @param data 导入的数据
-   * @param merge 是否合并（true）或覆盖（false）
-   */
+   * @param data 导入的数�?   * @param merge 是否合并（true）或覆盖（false�?   */
   public async importData(
     data: {
       history?: SearchHistoryItem[];
       favorites?: SearchHistoryItem[];
       config?: Partial<SearchHistoryConfig>;
-    },
-    merge: boolean = true
-  ): Promise<void> {
+    }, merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+   : new Error(String(merge: boolean = true
+   instanceof Error ? merge: boolean = true
+   : new Error(String(merge: boolean = true
+  ))))))): Promise<void> {
     try {
       // 验证导入数据
       if (!data || (!data.history && !data.favorites && !data.config)) {
@@ -952,14 +1201,12 @@ export class SearchHistoryRepository {
             historyMap.set(`${item.query}-${item.type}`, item);
           });
           
-          // 合并新记录（新记录优先级更高）
-          processedHistory.forEach(item => {
+          // 合并新记录（新记录优先级更高�?          processedHistory.forEach(item => {
             const key = `${item.query}-${item.type}`;
             const existingItem = historyMap.get(key);
             
             if (existingItem) {
-              // 保留收藏状态
-              item.isFavorite = existingItem.isFavorite;
+              // 保留收藏状�?              item.isFavorite = existingItem.isFavorite;
             }
             
             historyMap.set(key, item);
@@ -1005,8 +1252,7 @@ export class SearchHistoryRepository {
             favoriteMap.set(`${item.query}-${item.type}`, item);
           });
           
-          // 合并新收藏
-          processedFavorites.forEach(item => {
+          // 合并新收�?          processedFavorites.forEach(item => {
             favoriteMap.set(`${item.query}-${item.type}`, item);
           });
           
@@ -1029,8 +1275,7 @@ export class SearchHistoryRepository {
         );
       }
       
-      // 更新历史记录中的收藏状态
-      if (data.favorites) {
+      // 更新历史记录中的收藏状�?      if (data.favorites) {
         const history = await this.getHistory();
         const updatedHistory = history.map(item => ({
           ...item,
@@ -1047,14 +1292,13 @@ export class SearchHistoryRepository {
       
       this.logger.info('Search history data imported successfully');
     } catch (error) {
-      this.logger.error('Failed to import search history data', error as Error);
+      this.Logger.error('Failed to import search history data', error as Error);
       throw error;
     }
   }
 
   /**
-   * 验证历史记录项
-   */
+   * 验证历史记录�?   */
   private isValidHistoryItem(item: SearchHistoryItem): boolean {
     return !!item && 
            typeof item.id === 'string' && 
@@ -1062,18 +1306,22 @@ export class SearchHistoryRepository {
            typeof item.timestamp === 'number' &&
            item.timestamp > 0 &&
            typeof item.type === 'string' &&
-           Object.values(SearchType).includes(item.type as SearchType);
+           (item.type === SearchType.ALL || item.type === SearchType.VIDEO || item.type === SearchType.LIVE || item.type === SearchType.USER || item.type === SearchType.CATEGORY || item.type === SearchType.TAG);
   }
 
   /**
    * 规范化历史记录项
    */
   private normalizeHistoryItem(item: SearchHistoryItem): SearchHistoryItem {
+    const normalizedType: SearchType = 
+      (item.type === SearchType.ALL || item.type === SearchType.VIDEO || item.type === SearchType.LIVE || item.type === SearchType.USER || item.type === SearchType.CATEGORY || item.type === SearchType.TAG) ? 
+      item.type : 
+      SearchType.ALL;
+    
     return {
-      id: item.id || this.generateId(),
-      query: item.query.trim(),
+      id: item.id || this.generateId(), query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim( : new Error(String(query: item.query.trim( instanceof Error ? query: item.query.trim( : new Error(String(query: item.query.trim())))))),
       timestamp: item.timestamp || Date.now(),
-      type: Object.values(SearchType).includes(item.type as SearchType) ? item.type : SearchType.ALL,
+      type: normalizedType,
       resultCount: item.resultCount || 0,
       selected: !!item.selected,
       isFavorite: !!item.isFavorite,
@@ -1099,8 +1347,7 @@ export class SearchHistoryRepository {
       const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
       const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-      // 计算最频繁的搜索
-      const frequencyMap = new Map<string, number>();
+      // 计算最频繁的搜�?      const frequencyMap = new Map<string, number>();
       history.forEach(item => {
         frequencyMap.set(item.query, (frequencyMap.get(item.query) || 0) + 1);
       });
@@ -1119,10 +1366,9 @@ export class SearchHistoryRepository {
         mostFrequent
       };
     } catch (error) {
-      this.logger.error('Failed to get search statistics', error as Error);
+      this.Logger.error('Failed to get search statistics', error as Error);
       return {
-        totalSearches: 0,
-        favoriteSearches: 0,
+        totalSearches: 0, favoriteSearches: 0,
         todaySearches: 0,
         weekSearches: 0,
         monthSearches: 0,
@@ -1133,5 +1379,294 @@ export class SearchHistoryRepository {
 }
 
 // 导出默认实例
-export default SearchHistoryRepository.getInstance();
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( instanceof Error ? favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance( : new Error(String(favoriteSearches: 0,
+        todaySearches: 0,
+        weekSearches: 0,
+        monthSearches: 0,
+        mostFrequent: []
+      };
+    }
+  }
+}
+
+// 导出默认实例
+export default SearchHistoryRepository.getInstance()))))));
         
+
+
+

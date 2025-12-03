@@ -5,15 +5,13 @@ import { MediaItem } from '../../data/bean/MediaItem';
 import { ValuesBucket, RdbPredicates as RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
 
 /**
- * 收藏项接口
- */
+ * 收藏项接�? */
 export interface FavoriteItem {
   id: string;           // 收藏ID
   mediaId: string;      // 媒体ID
   siteKey: string;      // 站点标识
   title: string;        // 标题
-  cover?: string;       // 封面图
-  desc?: string;        // 描述
+  cover?: string;       // 封面�?  desc?: string;        // 描述
   type: MediaType;      // 媒体类型
   year?: string;        // 年份
   score?: number;       // 评分
@@ -44,8 +42,7 @@ export class FavoriteService {
   }
 
   /**
-   * 构造函数
-   * 私有构造函数防止外部实例化
+   * 构造函�?   * 私有构造函数防止外部实例化
    */
   private constructor() {
     this.dbManager = DatabaseManager.getInstance();
@@ -54,8 +51,7 @@ export class FavoriteService {
   }
 
   /**
-   * 初始化收藏服务
-   * @private
+   * 初始化收藏服�?   * @private
    */
   public async initialize(): Promise<void> {
     try {
@@ -63,7 +59,7 @@ export class FavoriteService {
       // 这里只记录初始化日志
       Logger.info(this.TAG, 'FavoriteService initialized');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize favorite service: ${error}`);
+      Logger.error(this.TAG, 'Failed to initialize favorite service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
 
@@ -77,8 +73,7 @@ export class FavoriteService {
       const now = Date.now();
       const favoriteId = this.generateFavoriteId(media.siteKey, media.id);
 
-      // 构建收藏项
-      const favoriteItem: FavoriteItem = {
+      // 构建收藏�?      const favoriteItem: FavoriteItem = {
         id: favoriteId,
         mediaId: media.id,
         siteKey: media.siteKey,
@@ -125,18 +120,17 @@ export class FavoriteService {
           // 更新现有记录
           await db.update(this.favoriteTable, valuesBucket, predicates);
         } else {
-          // 插入新记录
-          await db.insert(this.favoriteTable, valuesBucket);
+          // 插入新记�?          await db.insert(this.favoriteTable, valuesBucket);
         }
 
         Logger.info(this.TAG, `Added favorite: ${media.siteKey}:${media.id}`);
         return favoriteItem;
       } catch (error) {
-        Logger.error(this.TAG, `Failed to insert favorite: ${error}`);
+        Logger.error(this.TAG, 'Failed to insert favorite', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
         throw error;
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to add favorite: ${error}`);
+      Logger.error(this.TAG, 'Failed to add favorite', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       throw new Error(`Failed to add favorite: ${error}`);
     }
   }
@@ -162,7 +156,7 @@ export class FavoriteService {
       }
       return success;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to remove favorite: ${error}`);
+      Logger.error(this.TAG, 'Failed to remove favorite', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -184,7 +178,7 @@ export class FavoriteService {
 
       return (result.rows as Record<string, unknown>[]).length > 0;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to check favorite status: ${error}`);
+      Logger.error(this.TAG, 'Failed to check favorite status', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -214,7 +208,7 @@ export class FavoriteService {
 
       // 构建查询条件
       let whereClause = '';
-      const whereParams: unknown[] = [];
+      const whereParams: Record<string, string | number | boolean | null>[] = [];
       
       if (type) {
         whereClause = 'WHERE type = ?';
@@ -246,14 +240,13 @@ export class FavoriteService {
       // 解析结果
       return this.parseFavoriteRows(result.rows as Record<string, unknown>[]);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get favorite list: ${error}`);
+      Logger.error(this.TAG, 'Failed to get favorite list', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return [];
     }
   }
 
   /**
-   * 根据ID获取收藏项
-   * @param mediaId 媒体ID
+   * 根据ID获取收藏�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @returns Promise<FavoriteItem | null>
    */
@@ -272,7 +265,7 @@ export class FavoriteService {
       }
       return null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get favorite by id: ${error}`);
+      Logger.error(this.TAG, 'Failed to get favorite by id', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return null;
     }
   }
@@ -292,15 +285,14 @@ export class FavoriteService {
     try {
       const favoriteId = this.generateFavoriteId(siteKey, mediaId);
       
-      // 检查是否存在
-      const exists = await this.isFavorite(mediaId, siteKey);
+      // 检查是否存�?      const exists = await this.isFavorite(mediaId, siteKey);
       if (!exists) {
         return false;
       }
 
       // 构建更新语句
       const fields: string[] = [];
-      const values: unknown[] = [];
+      const values: Record<string, string | number | boolean | null>[] = [];
 
       if (updateData.title !== undefined) {
         fields.push('title = ?');
@@ -353,7 +345,7 @@ export class FavoriteService {
       }
       return success;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update favorite: ${error}`);
+      Logger.error(this.TAG, 'Failed to update favorite', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -366,7 +358,7 @@ export class FavoriteService {
   public async getFavoriteCount(type?: MediaType): Promise<number> {
     try {
       let query = `SELECT COUNT(*) as count FROM ${this.favoriteTable}`;
-      const params: unknown[] = [];
+      const params: Record<string, string | number | boolean | null>[] = [];
 
       if (type) {
         query += ' WHERE type = ?';
@@ -376,14 +368,13 @@ export class FavoriteService {
       const result = await this.dbManager.executeSql(query, params);
       return ((result.rows as Record<string, unknown>[])[0] as Record<string, unknown>).count as number || 0;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get favorite count: ${error}`);
+      Logger.error(this.TAG, 'Failed to get favorite count', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return 0;
     }
   }
 
   /**
-   * 清空所有收藏
-   * @returns Promise<boolean>
+   * 清空所有收�?   * @returns Promise<boolean>
    */
   public async clearAllFavorites(): Promise<boolean> {
     try {
@@ -391,14 +382,13 @@ export class FavoriteService {
       Logger.info(this.TAG, 'Cleared all favorites');
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear all favorites: ${error}`);
+      Logger.error(this.TAG, 'Failed to clear all favorites', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
 
   /**
-   * 清空指定类型的收藏
-   * @param type 媒体类型
+   * 清空指定类型的收�?   * @param type 媒体类型
    * @returns Promise<boolean>
    */
   public async clearFavoritesByType(type: MediaType): Promise<boolean> {
@@ -410,7 +400,7 @@ export class FavoriteService {
       Logger.info(this.TAG, `Cleared favorites for type: ${type}`);
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear favorites by type: ${error}`);
+      Logger.error(this.TAG, 'Failed to clear favorites by type', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return false;
     }
   }
@@ -418,8 +408,7 @@ export class FavoriteService {
   /**
    * 批量添加收藏
    * @param mediaList 媒体列表
-   * @returns Promise<number> 成功添加的数量
-   */
+   * @returns Promise<number> 成功添加的数�?   */
   public async batchAddFavorites(mediaList: MediaItem[]): Promise<number> {
     let successCount = 0;
 
@@ -438,8 +427,7 @@ export class FavoriteService {
   /**
    * 批量移除收藏
    * @param favorites 收藏信息列表
-   * @returns Promise<number> 成功移除的数量
-   */
+   * @returns Promise<number> 成功移除的数�?   */
   public async batchRemoveFavorites(
     favorites: Array<{ mediaId: string; siteKey: string }>
   ): Promise<number> {
@@ -461,14 +449,13 @@ export class FavoriteService {
 
   /**
    * 搜索收藏
-   * @param keyword 搜索关键词
-   * @param type 媒体类型（可选）
+   * @param keyword 搜索关键�?   * @param type 媒体类型（可选）
    * @returns Promise<FavoriteItem[]>
    */
   public async searchFavorites(keyword: string, type?: MediaType): Promise<FavoriteItem[]> {
     try {
       let whereClause = 'WHERE title LIKE ?';
-      const params: unknown[] = [`%${keyword}%`];
+      const params: Record<string, string | number | boolean | null>[] = [`%${keyword}%`];
 
       if (type) {
         whereClause += ' AND type = ?';
@@ -484,7 +471,7 @@ export class FavoriteService {
 
       return this.parseFavoriteRows(result.rows as Record<string, unknown>[]);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to search favorites: ${error}`);
+      Logger.error(this.TAG, 'Failed to search favorites', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return [];
     }
   }
@@ -524,8 +511,7 @@ export class FavoriteService {
   }
 
   /**
-   * 解析多行数据库记录
-   * @param rows 数据库行数组
+   * 解析多行数据库记�?   * @param rows 数据库行数组
    * @returns FavoriteItem[]
    * @private
    */
@@ -536,3 +522,5 @@ export class FavoriteService {
 
 // 导出收藏服务单例
 export const favoriteService = FavoriteService.getInstance();
+
+

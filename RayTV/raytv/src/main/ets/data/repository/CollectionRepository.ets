@@ -62,15 +62,13 @@ export class CollectionRepository {
   
   /**
    * 添加收藏
-   * @param item 收藏项
-   * @returns 是否添加成功
+   * @param item 收藏�?   * @returns 是否添加成功
    */
   public async addCollection(item: CollectionItem): Promise<boolean> {
     try {
       Logger.debug(TAG, `Adding collection: ${item.title}`);
       
-      // 检查是否已存在相同内容的收藏
-      if (await this.isContentCollected(item.contentType, item.contentId)) {
+      // 检查是否已存在相同内容的收�?      if (await this.isContentCollected(item.contentType, item.contentId)) {
         Logger.warn(TAG, `Content already collected: ${item.contentId}`);
         return false;
       }
@@ -112,14 +110,12 @@ export class CollectionRepository {
   }
   
   /**
-   * 更新收藏项
-   * @param item 收藏项
-   * @returns 是否更新成功
+   * 更新收藏�?   * @param item 收藏�?   * @returns 是否更新成功
    */
   public async updateCollection(item: CollectionItem): Promise<boolean> {
     try {
       if (!item.id) {
-        Logger.error(TAG, 'Collection ID is required for update');
+        Logger.error(TAG, 'Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update' : new Error(String('Collection ID is required for update' instanceof Error ? 'Collection ID is required for update' : new Error(String('Collection ID is required for update')))))));
         return false;
       }
       
@@ -163,13 +159,12 @@ export class CollectionRepository {
   }
   
   /**
-   * 删除收藏项
-   * @param collectionId 收藏项ID
+   * 删除收藏�?   * @param collectionId 收藏项ID
    * @returns 是否删除成功
    */
   public async removeCollection(collectionId: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Removing collection: ${collectionId}`);
+      Logger.debug(TAG, `Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}` instanceof Error ? `Removing collection: ${collectionId}` : new Error(String(`Removing collection: ${collectionId}`)))))));
       
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.ID,
@@ -194,17 +189,15 @@ export class CollectionRepository {
   }
   
   /**
-   * 批量删除收藏项
-   * @param collectionIds 收藏项ID列表
-   * @returns 删除成功的数量
-   */
+   * 批量删除收藏�?   * @param collectionIds 收藏项ID列表
+   * @returns 删除成功的数�?   */
   public async batchRemoveCollections(collectionIds: string[]): Promise<number> {
     if (!collectionIds || collectionIds.length === 0) {
       return 0;
     }
     
     try {
-      Logger.debug(TAG, `Batch removing ${collectionIds.length} collections`);
+      Logger.debug(TAG, `Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections` instanceof Error ? `Batch removing ${collectionIds.length} collections` : new Error(String(`Batch removing ${collectionIds.length} collections`)))))));
       
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.ID,
@@ -235,20 +228,68 @@ export class CollectionRepository {
    * 获取所有收藏项
    * @param sortType 排序类型
    * @param limit 限制数量
-   * @param offset 偏移量
-   * @returns 收藏项列表
-   */
+   * @param offset 偏移�?   * @returns 收藏项列�?   */
   public async getAllCollections(
-    sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC,
-    limit: number = 50,
+    sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC, limit: number = 50,
     offset: number = 0
-  ): Promise<CollectionItem[]> {
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+   instanceof Error ? limit: number = 50,
+    offset: number = 0
+   : new Error(String(limit: number = 50,
+    offset: number = 0
+  ))))))): Promise<CollectionItem[]> {
     try {
       // 构建排序选项
       const sortOptions = this.buildSortOptions(sortType);
       
-      // 查询数据库
-      const collectionRecords = await this.sqliteHelper.query(
+      // 查询数据�?      const collectionRecords = await this.sqliteHelper.query(
         COLLECTION_TABLE.TABLE_NAME,
         ['*'],
         undefined,
@@ -269,21 +310,18 @@ export class CollectionRepository {
   }
   
   /**
-   * 根据ID获取收藏项
-   * @param collectionId 收藏项ID
+   * 根据ID获取收藏�?   * @param collectionId 收藏项ID
    * @returns 收藏项或null
    */
   public async getCollectionById(collectionId: string): Promise<CollectionItem | null> {
     try {
-      // 尝试从缓存获取
-      const cachedItem = await this.getCachedCollectionItem(collectionId);
+      // 尝试从缓存获�?      const cachedItem = await this.getCachedCollectionItem(collectionId);
       if (cachedItem) {
-        Logger.debug(TAG, `Returning collection ${collectionId} from cache`);
+        Logger.debug(TAG, `Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache` instanceof Error ? `Returning collection ${collectionId} from cache` : new Error(String(`Returning collection ${collectionId} from cache`)))))));
         return cachedItem;
       }
       
-      // 查询数据库
-      const conditions: QueryCondition[] = [{
+      // 查询数据�?      const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.ID,
         value: collectionId
       }];
@@ -315,9 +353,8 @@ export class CollectionRepository {
    * 根据内容ID检查是否已收藏
    * @param contentType 内容类型
    * @param contentId 内容ID
-   * @returns 是否已收藏
-   */
-  public async isContentCollected(contentType: string, contentId: string): Promise<boolean> {
+   * @returns 是否已收�?   */
+  public async isContentCollected(contentType: string, contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string))))))): Promise<boolean> {
     try {
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.CONTENT_TYPE,
@@ -335,12 +372,11 @@ export class CollectionRepository {
   }
   
   /**
-   * 根据内容ID获取收藏项
-   * @param contentType 内容类型
+   * 根据内容ID获取收藏�?   * @param contentType 内容类型
    * @param contentId 内容ID
    * @returns 收藏项或null
    */
-  public async getCollectionByContent(contentType: string, contentId: string): Promise<CollectionItem | null> {
+  public async getCollectionByContent(contentType: string, contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string))))))): Promise<CollectionItem | null> {
     try {
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.CONTENT_TYPE,
@@ -368,15 +404,38 @@ export class CollectionRepository {
   }
   
   /**
-   * 按文件夹获取收藏项
-   * @param folderId 文件夹ID
+   * 按文件夹获取收藏�?   * @param folderId 文件夹ID
    * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * @returns 收藏项列�?   */
   public async getCollectionsByFolder(
-    folderId: string,
-    sortType: CollectionSortType = CollectionSortType.TITLE_ASC
-  ): Promise<CollectionItem[]> {
+    folderId: string, sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+  ))))))): Promise<CollectionItem[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.FOLDER_ID,
@@ -405,12 +464,36 @@ export class CollectionRepository {
    * 按标签获取收藏项
    * @param tag 标签
    * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * @returns 收藏项列�?   */
   public async getCollectionsByTag(
-    tag: string,
-    sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
-  ): Promise<CollectionItem[]> {
+    tag: string, sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
+  ))))))): Promise<CollectionItem[]> {
     try {
       // 使用LIKE查询包含指定标签的收藏项
       const conditions: QueryCondition[] = [{
@@ -445,12 +528,36 @@ export class CollectionRepository {
    * 按类型获取收藏项
    * @param contentType 内容类型
    * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * @returns 收藏项列�?   */
   public async getCollectionsByContentType(
-    contentType: string,
-    sortType: CollectionSortType = CollectionSortType.TITLE_ASC
-  ): Promise<CollectionItem[]> {
+    contentType: string, sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   instanceof Error ? sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+   : new Error(String(sortType: CollectionSortType = CollectionSortType.TITLE_ASC
+  ))))))): Promise<CollectionItem[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.CONTENT_TYPE,
@@ -483,28 +590,19 @@ export class CollectionRepository {
     try {
       return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME);
     } catch (error) {
-      Logger.error(TAG, `Failed to get collection count: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error instanceof Error ? `Failed to get collection count: ${JSON.stringify(error : new Error(String(`Failed to get collection count: ${JSON.stringify(error)))))))}`);
       return 0;
     }
   }
   
   /**
-   * 创建收藏文件夹
-   * @param folder 文件夹信息
-   * @returns 是否创建成功
+   * 创建收藏文件�?   * @param folder 文件夹信�?   * @returns 是否创建成功
    */
   public async createFolder(folder: CollectionFolder): Promise<boolean> {
     try {
       Logger.debug(TAG, `Creating collection folder: ${folder.name}`);
       
-      const folderData = {
-        [COLLECTION_FOLDER_TABLE.COLUMNS.NAME]: folder.name,
-        [COLLECTION_FOLDER_TABLE.COLUMNS.DESCRIPTION]: folder.description || '',
-        [COLLECTION_FOLDER_TABLE.COLUMNS.COVER_URL]: folder.coverUrl || '',
-        [COLLECTION_FOLDER_TABLE.COLUMNS.SORT_ORDER]: folder.sortOrder || 0,
-        [COLLECTION_FOLDER_TABLE.COLUMNS.CREATE_TIME]: Date.now(),
-        [COLLECTION_FOLDER_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
-      };
+      const folderData: Record<string, string | number | boolean | null> = { ... };
       
       const result = await this.sqliteHelper.insert(COLLECTION_FOLDER_TABLE.TABLE_NAME, folderData);
       
@@ -521,26 +619,18 @@ export class CollectionRepository {
   }
   
   /**
-   * 更新收藏文件夹
-   * @param folder 文件夹信息
-   * @returns 是否更新成功
+   * 更新收藏文件�?   * @param folder 文件夹信�?   * @returns 是否更新成功
    */
   public async updateFolder(folder: CollectionFolder): Promise<boolean> {
     try {
       if (!folder.id) {
-        Logger.error(TAG, 'Folder ID is required for update');
+        Logger.error(TAG, 'Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update' : new Error(String('Folder ID is required for update' instanceof Error ? 'Folder ID is required for update' : new Error(String('Folder ID is required for update')))))));
         return false;
       }
       
       Logger.debug(TAG, `Updating collection folder: ${folder.id}`);
       
-      const folderData = {
-        [COLLECTION_FOLDER_TABLE.COLUMNS.NAME]: folder.name,
-        [COLLECTION_FOLDER_TABLE.COLUMNS.DESCRIPTION]: folder.description || '',
-        [COLLECTION_FOLDER_TABLE.COLUMNS.COVER_URL]: folder.coverUrl || '',
-        [COLLECTION_FOLDER_TABLE.COLUMNS.SORT_ORDER]: folder.sortOrder || 0,
-        [COLLECTION_FOLDER_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
-      };
+      const folderData: Record<string, string | number | boolean | null> = { ... };
       
       const conditions: QueryCondition[] = [{
         column: COLLECTION_FOLDER_TABLE.COLUMNS.ID,
@@ -561,16 +651,14 @@ export class CollectionRepository {
   }
   
   /**
-   * 删除收藏文件夹
-   * @param folderId 文件夹ID
+   * 删除收藏文件�?   * @param folderId 文件夹ID
    * @returns 是否删除成功
    */
   public async deleteFolder(folderId: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Deleting collection folder: ${folderId}`);
+      Logger.debug(TAG, `Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}` instanceof Error ? `Deleting collection folder: ${folderId}` : new Error(String(`Deleting collection folder: ${folderId}`)))))));
       
-      // 首先将该文件夹下的收藏项移到根目录
-      const updateResult = await this.sqliteHelper.update(
+      // 首先将该文件夹下的收藏项移到根目�?      const updateResult = await this.sqliteHelper.update(
         COLLECTION_TABLE.TABLE_NAME,
         { [COLLECTION_TABLE.COLUMNS.FOLDER_ID]: null },
         [{ column: COLLECTION_TABLE.COLUMNS.FOLDER_ID, value: folderId }]
@@ -581,13 +669,89 @@ export class CollectionRepository {
         return false;
       }
       
-      // 然后删除文件夹
-      const conditions: QueryCondition[] = [{
-        column: COLLECTION_FOLDER_TABLE.COLUMNS.ID,
-        value: folderId
+      // 然后删除文件�?      const conditions: QueryCondition[] = [{
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.ID, value: folderId
       }];
       
-      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions);
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+      }];
+      
+      const deleteResult = await this.sqliteHelper.delete(COLLECTION_FOLDER_TABLE.TABLE_NAME, conditions)))))));
       
       if (deleteResult.success) {
         await this.invalidateCollectionListCache();
@@ -603,13 +767,11 @@ export class CollectionRepository {
   
   /**
    * 获取所有收藏文件夹
-   * @returns 文件夹列表
-   */
+   * @returns 文件夹列�?   */
   public async getAllFolders(): Promise<CollectionFolder[]> {
     try {
       const sortOptions = [{
-        column: COLLECTION_FOLDER_TABLE.COLUMNS.SORT_ORDER,
-        order: 'ASC'
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.SORT_ORDER, order: 'ASC'
       }, {
         column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
         order: 'ASC'
@@ -620,7 +782,293 @@ export class CollectionRepository {
         ['*'],
         undefined,
         sortOptions
-      );
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       instanceof Error ? order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+       : new Error(String(order: 'ASC'
+      }, {
+        column: COLLECTION_FOLDER_TABLE.COLUMNS.NAME,
+        order: 'ASC'
+      }];
+      
+      const folderRecords = await this.sqliteHelper.query(
+        COLLECTION_FOLDER_TABLE.TABLE_NAME,
+        ['*'],
+        undefined,
+        sortOptions
+      )))))));
       
       // 获取每个文件夹的项目数量
       const folders: CollectionFolder[] = [];
@@ -651,15 +1099,91 @@ export class CollectionRepository {
   /**
    * 获取文件夹中的收藏项数量
    * @param folderId 文件夹ID
-   * @returns 收藏项数量
-   */
+   * @returns 收藏项数�?   */
   private async getCollectionCountByFolder(folderId: string): Promise<number> {
     const conditions: QueryCondition[] = [{
-      column: COLLECTION_TABLE.COLUMNS.FOLDER_ID,
-      value: folderId
+      column: COLLECTION_TABLE.COLUMNS.FOLDER_ID, value: folderId
     }];
     
-    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions);
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions instanceof Error ? value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions : new Error(String(value: folderId
+    }];
+    
+    return await this.sqliteHelper.count(COLLECTION_TABLE.TABLE_NAME, conditions)))))));
   }
   
   /**
@@ -698,8 +1222,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 缓存收藏项
-   */
+   * 缓存收藏�?   */
   private async cacheCollectionItem(item: CollectionItem): Promise<void> {
     try {
       if (item.id) {
@@ -733,8 +1256,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 使收藏列表缓存失效
-   */
+   * 使收藏列表缓存失�?   */
   private async invalidateCollectionListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(COLLECTION_LIST_CACHE);
@@ -773,3 +1295,5 @@ export class CollectionRepository {
     return records.map(record => this.convertToCollectionObject(record));
   }
 }
+
+

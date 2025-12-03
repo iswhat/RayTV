@@ -6,7 +6,7 @@ import { configService } from '../service/config/ConfigService';
 import { RecommendationRepository, RecommendationType, RecommendationItem } from '../data/repository/RecommendationRepository';
 
 /**
- * 应用主页面
+ * 应用主页�?
  * 作为应用的入口页面，显示主要功能区域
  */
 interface FeaturedMediaItem {
@@ -23,7 +23,7 @@ struct MainPage {
   private readonly TAG: string = 'MainPage';
   private scroller: Scroller = new Scroller();
   
-  // 状态管理
+  // 状态管�?
   @State featuredMedia: FeaturedMediaItem[] = [];
   @State isLoading: boolean = true;
   
@@ -31,7 +31,7 @@ struct MainPage {
   aboutToAppear() {
     Logger.info(`${this.TAG}: MainPage about to appear`);
     
-    // 初始化并检查配置
+    // 初始化并检查配�?
     this.initializeConfig();
   }
   
@@ -46,7 +46,7 @@ struct MainPage {
         Logger.info(`${this.TAG}: ConfigService initialized successfully`);
       }
       
-      // 检查是否应该显示推荐内容
+      // 检查是否应该显示推荐内�?
       const showRecommendations = configService.getConfig('showRecommendedContent') as boolean;
       
       if (showRecommendations) {
@@ -57,7 +57,7 @@ struct MainPage {
         this.isLoading = false;
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to initialize config', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Failed to initialize config', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       // 发生错误时仍尝试加载内容
       this.loadFeaturedMedia();
     }
@@ -71,7 +71,7 @@ struct MainPage {
       this.isLoading = true;
       const recommendationRepo = RecommendationRepository.getInstance();
       
-      // 获取精选推荐内容
+      // 获取精选推荐内�?
       const response = await recommendationRepo.getRecommendations({
         type: RecommendationType.FEATURED,
         limit: 10,
@@ -84,7 +84,7 @@ struct MainPage {
         const data = item.data || {};
         return {
           id: item.id,
-          title: data.title as string || '未命名内容',
+          title: data.title as string || '未命名内�?,
           cover: data.coverUrl as string || data.imageUrl as string || '/resources/images/default_cover.jpg',
           type: data.type as string || item.type,
           siteKey: data.siteKey as string
@@ -93,7 +93,7 @@ struct MainPage {
       
       Logger.info(`${this.TAG}: Loaded ${this.featuredMedia.length} featured media items`);
     } catch (error) {
-      Logger.error(`${this.TAG}: Failed to load featured media: ${error}`);
+      Logger.error(this.TAG, 'Failed to load featured media', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       
       // 尝试从MediaService获取数据作为后备
       try {
@@ -103,7 +103,7 @@ struct MainPage {
         if (fallbackData && fallbackData.length > 0) {
           this.featuredMedia = fallbackData.map((item: { id?: string; title?: string; coverUrl?: string; imageUrl?: string; type?: string; siteKey?: string }) => ({
             id: item.id || String(Math.random()),
-            title: item.title || '未命名内容',
+            title: item.title || '未命名内�?,
             cover: item.coverUrl || item.imageUrl || '/resources/images/default_cover.jpg',
             type: item.type || 'video',
             siteKey: item.siteKey
@@ -115,7 +115,7 @@ struct MainPage {
           Logger.warn(`${this.TAG}: No fallback content available`);
         }
       } catch (fallbackError) {
-        Logger.error(`${this.TAG}: Failed to load fallback data: ${fallbackError}`);
+        Logger.error(this.TAG, 'Failed to load fallback data', fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError : new Error(String(fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError)))))))));
         this.featuredMedia = [];
       }
     } finally {
@@ -123,22 +123,22 @@ struct MainPage {
     }
   }
   
-  // 跳转到分类页面
+  // 跳转到分类页�?
   private navigateToCategory() {
     AppNavigator.getInstance().navigateToCategory({ id: "", name: "", type: "" });
   }
   
-  // 跳转到搜索页面
+  // 跳转到搜索页�?
   private navigateToSearch() {
     AppNavigator.getInstance().navigateToSearch("");
   }
   
-  // 跳转到设置页面
+  // 跳转到设置页�?
   private navigateToSettings() {
     AppNavigator.getInstance().navigateToSettings();
   }
   
-  // 渲染媒体项
+  // 渲染媒体�?
   @Builder
   renderMediaItem(media: FeaturedMediaItem) {
     ListItem() {
@@ -162,7 +162,7 @@ struct MainPage {
       direction: FlexDirection.Column,
       padding: 20
     }) {
-      // 标题栏
+      // 标题�?
       Row({
         justifyContent: FlexAlign.SpaceBetween,
         alignItems: ItemAlign.Center,
@@ -197,7 +197,7 @@ struct MainPage {
         .marginBottom(15)
       
       if (this.isLoading) {
-        Text("加载中...")
+        Text("加载�?..")
       } else {
         List() {
           ForEach(this.featuredMedia, (item: FeaturedMediaItem) => {
@@ -210,7 +210,7 @@ struct MainPage {
       }
       
       // 底部提示
-      Text("请确保已配置视频源以获得最佳体验")
+      Text("请确保已配置视频源以获得最佳体�?)
         .fontSize(12)
         .fontColor("#888888")
         .marginTop(20)
@@ -218,3 +218,5 @@ struct MainPage {
     }
   }
 }
+
+

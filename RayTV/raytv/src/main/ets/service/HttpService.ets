@@ -16,7 +16,7 @@ export interface HttpRequestOptions extends HttpOptions {
 
 export class HttpService {
   private static instance: HttpService;
-  private httpConfig: Record<string, string | number>;
+  private httpConfig: { timeout: number; retryCount: number; userAgent: string };
   private adBlockManager: AdBlockManager;
   private context: common.Context | null = null;
 
@@ -297,6 +297,10 @@ export class HttpService {
       
       // 手动合并headers
       if (headers) {
+        // 确保requestConfig.header存在
+        if (!requestConfig.header) {
+          requestConfig.header = {};
+        }
         const headerKeys = this.getObjectKeys(headers);
         for (let i = 0; i < headerKeys.length; i++) {
           const key = headerKeys[i];
@@ -316,12 +320,18 @@ export class HttpService {
       }
       
       // 发送请求
+      // 确保所有属性都有正确的类型
+      const method: string = typeof requestConfig.method === 'string' ? requestConfig.method : 'GET';
+      const connectTimeout: number = typeof requestConfig.connectTimeout === 'number' ? requestConfig.connectTimeout : 30000;
+      const readTimeout: number = typeof requestConfig.readTimeout === 'number' ? requestConfig.readTimeout : 30000;
+      const header: Record<string, string> = requestConfig.header || {};
+      
       const downloadConfig: DownloadConfig = {
         filePath: filePath,
-        method: requestConfig.method || 'GET',
-        connectTimeout: requestConfig.connectTimeout || 30000,
-        readTimeout: requestConfig.readTimeout || 30000,
-        header: requestConfig.header || {},
+        method: method,
+        connectTimeout: connectTimeout,
+        readTimeout: readTimeout,
+        header: header,
         extraData: requestConfig.extraData,
         expectDataType: requestConfig.expectDataType
       };

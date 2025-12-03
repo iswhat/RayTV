@@ -1,5 +1,4 @@
-// LiveStreamRepository - 直播数据仓库类
-// 负责管理直播流相关数据，包括直播列表、直播详情、关注、观看统计等
+// LiveStreamRepository - 直播数据仓库�?// 负责管理直播流相关数据，包括直播列表、直播详情、关注、观看统计等
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -17,8 +16,7 @@ import { CacheType } from '../model/CacheModel';
 import { UserRepository } from './UserRepository';
 
 /**
- * 直播状态枚举
- */
+ * 直播状态枚�? */
 export enum LiveStatus {
   OFFLINE = 'offline',
   LIVE = 'live',
@@ -42,8 +40,7 @@ export enum LiveStreamType {
 }
 
 /**
- * 直播流信息接口
- */
+ * 直播流信息接�? */
 export interface LiveStreamInfo extends VideoInfo {
   liveStatus: LiveStatus;
   streamType: LiveStreamType;
@@ -171,8 +168,7 @@ export interface LiveStreamEvent {
 }
 
 /**
- * 关注状态变更事件数据
- */
+ * 关注状态变更事件数�? */
 export interface FollowChangeEvent extends LiveStreamEvent {
   followed: boolean;
   userId: string;
@@ -187,8 +183,7 @@ export interface ChatEvent extends LiveStreamEvent {
 }
 
 /**
- * 直播数据仓库类
- */
+ * 直播数据仓库�? */
 export class LiveStreamRepository {
   private static instance: LiveStreamRepository;
   private logger = Logger.getInstance();
@@ -226,24 +221,19 @@ export class LiveStreamRepository {
   
   // 直播配置
   private liveConfig = {
-    liveStreamDetailCacheDuration: 60, // 直播详情缓存时间（秒）- 较短以保持实时性
-    liveStreamListCacheDuration: 30, // 直播列表缓存时间（秒）
-    liveChatCacheDuration: 3600, // 直播聊天缓存时间（秒）
-    maxFollowedBroadcasters: 500, // 最大关注主播数
+    liveStreamDetailCacheDuration: 60, // 直播详情缓存时间（秒�? 较短以保持实时�?    liveStreamListCacheDuration: 30, // 直播列表缓存时间（秒�?    liveChatCacheDuration: 3600, // 直播聊天缓存时间（秒�?    maxFollowedBroadcasters: 500, // 最大关注主播数
     viewerCountUpdateInterval: 5000, // 观看人数更新间隔（毫秒）
     chatMessageBatchSize: 50, // 聊天消息批量获取数量
     featuredStreamsCacheDuration: 300 // 精选直播缓存时间（秒）
   };
   
-  // 当前活跃的直播观看会话
-  private activeWatchSessions: Map<string, {
+  // 当前活跃的直播观看会�?  private activeWatchSessions: Map<string, {
     startTime: number;
     lastHeartbeat: number;
   }> = new Map();
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('LiveStreamRepository initialized');
     this.setupEventListeners();
@@ -261,40 +251,34 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 初始化直播仓库
-   */
+   * 初始化直播仓�?   */
   public async initialize(): Promise<void> {
     try {
-      // 预加载精选直播（异步）
-      this.loadFeaturedStreams().catch(err => {
+      // 预加载精选直播（异步�?      this.loadFeaturedStreams().catch(err => {
         this.logger.warn('Failed to preload featured streams', err);
       });
       
-      // 预加载热门直播（异步）
-      this.loadTrendingStreams().catch(err => {
+      // 预加载热门直播（异步�?      this.loadTrendingStreams().catch(err => {
         this.logger.warn('Failed to preload trending streams', err);
       });
       
-      // 启动心跳检测
-      this.startHeartbeatCheck();
+      // 启动心跳检�?      this.startHeartbeatCheck();
       
       this.logger.info('LiveStreamRepository initialization completed');
     } catch (error) {
-      this.logger.error('Failed to initialize LiveStreamRepository', error as Error);
+      this.Logger.error('Failed to initialize LiveStreamRepository', error as Error);
     }
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
     // 监听应用退出事件，清理观看会话
-    this.eventBus.on('app:exit', async () => {
+    this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
       await this.cleanupWatchSessions();
     });
     
-    // 监听网络状态变化
-    this.eventBus.on('network:statusChanged', async (status?: { isOnline: boolean }) => {
+    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status?: { isOnline: boolean }) => {
       if (status?.isOnline) {
         // 在线时刷新精选和热门直播
         this.loadFeaturedStreams().catch(err => {
@@ -306,8 +290,7 @@ export class LiveStreamRepository {
       }
     });
     
-    // 监听用户登录状态变化
-    this.eventBus.on('user:login', async () => {
+    // 监听用户登录状态变�?    this.eventBus.on('user:login', async () => {
       // 用户登录后加载关注的直播
       this.loadFollowedStreams().catch(err => {
         this.logger.warn('Failed to load followed streams after login', err);
@@ -322,26 +305,22 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 启动心跳检测
-   */
+   * 启动心跳检�?   */
   private startHeartbeatCheck(): void {
-    // 每30秒检查一次观看会话的心跳
+    // �?0秒检查一次观看会话的心跳
     setInterval(() => {
       this.checkHeartbeats();
     }, 30000);
   }
 
   /**
-   * 检查观看会话心跳
-   */
+   * 检查观看会话心�?   */
   private checkHeartbeats(): void {
     const now = Date.now();
-    const timeoutThreshold = 60000; // 60秒超时
-    
+    const timeoutThreshold = 60000; // 60秒超�?    
     for (const [streamId, session] of this.activeWatchSessions) {
       if (now - session.lastHeartbeat > timeoutThreshold) {
-        // 心跳超时，清理会话
-        this.activeWatchSessions.delete(streamId);
+        // 心跳超时，清理会�?        this.activeWatchSessions.delete(streamId);
         this.logger.debug(`Watch session timeout for stream: ${streamId}`);
       }
     }
@@ -362,31 +341,25 @@ export class LiveStreamRepository {
       
       this.logger.info('Watch sessions cleaned up');
     } catch (error) {
-      this.logger.error('Failed to cleanup watch sessions', error as Error);
+      this.Logger.error('Failed to cleanup watch sessions', error as Error);
     }
   }
 
   /**
    * 保存观看历史
    */
-  private async saveWatchHistory(streamId: string, startTime: number, endTime: number): Promise<void> {
+  private async saveWatchHistory(streamId: string, startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number))))))): Promise<void> {
     try {
       const watchDuration = endTime - startTime;
       
-      // 只保存观看时间超过30秒的记录
+      // 只保存观看时间超�?0秒的记录
       if (watchDuration < 30000) {
         return;
       }
       
-      const watchHistory = {
-        streamId,
-        startTime,
-        endTime,
-        duration: watchDuration
-      };
+      const watchHistory: Record<string, string | number | boolean | null> = { ... };
       
-      // 保存到本地存储
-      await this.storageUtil.setItem(
+      // 保存到本地存�?      await this.storageUtil.setItem(
         LocalStorageType.WATCH_HISTORY,
         this.storageKeys.watchedStreams,
         watchHistory
@@ -394,7 +367,7 @@ export class LiveStreamRepository {
       
       this.logger.debug(`Watch history saved for stream: ${streamId}, duration: ${watchDuration}ms`);
     } catch (error) {
-      this.logger.error('Failed to save watch history', error as Error);
+      this.Logger.error('Failed to save watch history', error as Error);
     }
   }
 
@@ -403,14 +376,37 @@ export class LiveStreamRepository {
    */
   public async getLiveStreams(request: LiveStreamListRequest): Promise<LiveStreamListResponse> {
     try {
-      // 生成缓存键
-      const cacheKey = this.generateListCacheKey(request);
+      // 生成缓存�?      const cacheKey = this.generateListCacheKey(request);
       
-      // 尝试从缓存获取
-      const cachedData = await this.cacheService.get<LiveStreamListResponse>(
-        CacheType.LIVE_STREAM_LIST,
-        cacheKey
-      );
+      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamListResponse>(
+        CacheType.LIVE_STREAM_LIST, cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+      )))))));
       
       if (cachedData && !this.isCacheExpired(cachedData.timestamp, this.liveConfig.liveStreamListCacheDuration)) {
         this.logger.debug('Live streams loaded from cache');
@@ -439,12 +435,64 @@ export class LiveStreamRepository {
       
       return response;
     } catch (error) {
-      this.logger.error('Failed to get live streams', error as Error);
+      this.Logger.error('Failed to get live streams', error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -480,8 +528,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 生成列表缓存键
-   */
+   * 生成列表缓存�?   */
   private generateListCacheKey(request: LiveStreamListRequest): string {
     const keyParts = [
       request.status || 'all',
@@ -499,8 +546,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 检查缓存是否过期
-   */
+   * 检查缓存是否过�?   */
   private isCacheExpired(timestamp: number, duration: number): boolean {
     return Date.now() - timestamp > duration * 1000;
   }
@@ -510,11 +556,9 @@ export class LiveStreamRepository {
    */
   public async getLiveStreamDetail(streamId: string): Promise<LiveStreamInfo> {
     try {
-      // 生成缓存键
-      const cacheKey = `${this.storageKeys.liveStreamCache}${streamId}`;
+      // 生成缓存�?      const cacheKey = `${this.storageKeys.liveStreamCache}${streamId}`;
       
-      // 尝试从缓存获取
-      const cachedData = await this.cacheService.get<LiveStreamInfo>(
+      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo>(
         CacheType.LIVE_STREAM_DETAIL,
         cacheKey
       );
@@ -546,12 +590,64 @@ export class LiveStreamRepository {
       
       return stream;
     } catch (error) {
-      this.logger.error(`Failed to get live stream detail: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to get live stream detail: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -592,8 +688,7 @@ export class LiveStreamRepository {
         throw new Error(`Failed to ${follow ? 'follow' : 'unfollow'} live stream: ${response.error}`);
       }
       
-      // 更新本地关注状态
-      await this.updateLocalFollowStatus(streamId, follow, user.id);
+      // 更新本地关注状�?      await this.updateLocalFollowStatus(streamId, follow, user.id);
       
       // 发布事件
       this.eventBus.emit(follow ? LiveStreamEventType.LIVE_STREAM_FOLLOWED : LiveStreamEventType.LIVE_STREAM_UNFOLLOWED, {
@@ -608,12 +703,64 @@ export class LiveStreamRepository {
       
       this.logger.info(`Live stream ${follow ? 'followed' : 'unfollowed'}: ${streamId}`);
     } catch (error) {
-      this.logger.error(`Failed to ${follow ? 'follow' : 'unfollow'} live stream: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to ${follow ? 'follow' : 'unfollow'} live stream: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -622,12 +769,10 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 更新本地关注状态
-   */
+   * 更新本地关注状�?   */
   private async updateLocalFollowStatus(streamId: string, follow: boolean, userId: string): Promise<void> {
     try {
-      // 获取当前关注的直播列表
-      const followedStreams = await this.getFollowedStreams();
+      // 获取当前关注的直播列�?      const followedStreams = await this.getFollowedStreams();
       
       if (follow) {
         // 添加关注
@@ -642,8 +787,7 @@ export class LiveStreamRepository {
         }
       }
       
-      // 保存到本地存储
-      await this.storageUtil.setItem(
+      // 保存到本地存�?      await this.storageUtil.setItem(
         LocalStorageType.FOLLOWED_STREAMS,
         this.storageKeys.followedBroadcasters,
         followedStreams
@@ -651,31 +795,54 @@ export class LiveStreamRepository {
       
       this.logger.debug(`Local follow status updated: ${streamId} -> ${follow}`);
     } catch (error) {
-      this.logger.error('Failed to update local follow status', error as Error);
+      this.Logger.error('Failed to update local follow status', error as Error);
       throw error;
     }
   }
 
   /**
-   * 获取关注的直播列表
-   */
+   * 获取关注的直播列�?   */
   public async getFollowedStreams(): Promise<string[]> {
     try {
       const followedStreams = await this.storageUtil.getItem<string[]>(
-        LocalStorageType.FOLLOWED_STREAMS,
-        this.storageKeys.followedBroadcasters
-      );
+        LocalStorageType.FOLLOWED_STREAMS, this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+      )))))));
       
       return followedStreams || [];
     } catch (error) {
-      this.logger.error('Failed to get followed streams', error as Error);
+      this.Logger.error('Failed to get followed streams', error as Error);
       return [];
     }
   }
 
   /**
-   * 加载关注的直播
-   */
+   * 加载关注的直�?   */
   private async loadFollowedStreams(): Promise<void> {
     try {
       const followedStreams = await this.getFollowedStreams();
@@ -683,44 +850,143 @@ export class LiveStreamRepository {
       // 发布事件
       this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_LIST_LOADED, {
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
+        timestamp: Date.now())))))),
         data: { followedStreams }
       });
       
       this.logger.info(`Followed streams loaded: ${followedStreams.length} streams`);
     } catch (error) {
-      this.logger.error('Failed to load followed streams', error as Error);
+      this.Logger.error('Failed to load followed streams', error as Error);
     }
   }
 
   /**
-   * 清理关注的直播数据
-   */
+   * 清理关注的直播数�?   */
   private async clearFollowedStreams(): Promise<void> {
     try {
       await this.storageUtil.removeItem(
-        LocalStorageType.FOLLOWED_STREAMS,
-        this.storageKeys.followedBroadcasters
-      );
+        LocalStorageType.FOLLOWED_STREAMS, this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+       instanceof Error ? this.storageKeys.followedBroadcasters
+       : new Error(String(this.storageKeys.followedBroadcasters
+      )))))));
       
       this.logger.info('Followed streams cleared');
     } catch (error) {
-      this.logger.error('Failed to clear followed streams', error as Error);
+      this.Logger.error('Failed to clear followed streams', error as Error);
     }
   }
 
   /**
-   * 加载精选直播
-   */
+   * 加载精选直�?   */
   private async loadFeaturedStreams(): Promise<void> {
     try {
       const cacheKey = this.storageKeys.featuredStreams;
       
-      // 尝试从缓存获取
-      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
-        CacheType.FEATURED_STREAMS,
-        cacheKey
-      );
+      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
+        CacheType.FEATURED_STREAMS, cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+       : new Error(String(cacheKey
+       instanceof Error ? cacheKey
+       : new Error(String(cacheKey
+      )))))));
       
       if (cachedData && !this.isCacheExpired(cachedData.timestamp, this.liveConfig.featuredStreamsCacheDuration)) {
         this.logger.debug('Featured streams loaded from cache');
@@ -763,8 +1029,7 @@ export class LiveStreamRepository {
     try {
       const cacheKey = this.storageKeys.trendingStreams;
       
-      // 尝试从缓存获取
-      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
+      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
         CacheType.TRENDING_STREAMS,
         cacheKey
       );
@@ -810,11 +1075,9 @@ export class LiveStreamRepository {
     try {
       const actualLimit = limit || this.liveConfig.chatMessageBatchSize;
       
-      // 生成缓存键
-      const cacheKey = `${this.storageKeys.liveStreamChatCache}${streamId}:${actualLimit}`;
+      // 生成缓存�?      const cacheKey = `${this.storageKeys.liveStreamChatCache}${streamId}:${actualLimit}`;
       
-      // 尝试从缓存获取
-      const cachedData = await this.cacheService.get<LiveChat[]>(
+      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveChat[]>(
         CacheType.LIVE_CHAT,
         cacheKey
       );
@@ -853,12 +1116,64 @@ export class LiveStreamRepository {
       
       return chatMessages;
     } catch (error) {
-      this.logger.error(`Failed to get live chat: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to get live chat: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -867,8 +1182,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 发送聊天消息
-   */
+   * 发送聊天消�?   */
   public async sendChatMessage(streamId: string, message: string): Promise<void> {
     try {
       const user = this.userRepository.getCurrentUser();
@@ -890,12 +1204,64 @@ export class LiveStreamRepository {
       
       this.logger.info(`Chat message sent to stream: ${streamId}`);
     } catch (error) {
-      this.logger.error(`Failed to send chat message: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to send chat message: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -904,8 +1270,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 开始观看直播
-   */
+   * 开始观看直�?   */
   public startWatching(streamId: string): void {
     const now = Date.now();
     this.activeWatchSessions.set(streamId, {
@@ -954,12 +1319,64 @@ export class LiveStreamRepository {
       
       return response.data as LiveStreamStatistics;
     } catch (error) {
-      this.logger.error(`Failed to get live stream statistics: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to get live stream statistics: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -982,12 +1399,64 @@ export class LiveStreamRepository {
       
       return response.data as LiveAnnouncement[];
     } catch (error) {
-      this.logger.error(`Failed to get live announcements: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to get live announcements: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -1027,12 +1496,64 @@ export class LiveStreamRepository {
       
       return searchResult.streams;
     } catch (error) {
-      this.logger.error(`Failed to search live streams: "${query}"`, error as Error);
+      this.Logger.error(`Failed to search live streams: "${query}"`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -1041,14 +1562,12 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 检查直播状态
-   */
+   * 检查直播状�?   */
   public async checkLiveStreamStatus(streamId: string): Promise<LiveStatus> {
     try {
       const stream = await this.getLiveStreamDetail(streamId);
       
-      // 发布状态更新事件
-      this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED, {
+      // 发布状态更新事�?      this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED, {
         type: LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED,
         timestamp: Date.now(),
         data: { streamId, status: stream.liveStatus }
@@ -1056,12 +1575,64 @@ export class LiveStreamRepository {
       
       return stream.liveStatus;
     } catch (error) {
-      this.logger.error(`Failed to check live stream status: ${streamId}`, error as Error);
+      this.Logger.error(`Failed to check live stream status: ${streamId}`, error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -1084,12 +1655,64 @@ export class LiveStreamRepository {
       
       return response.data as { id: string; name: string; count: number }[];
     } catch (error) {
-      this.logger.error('Failed to get live stream categories', error as Error);
+      this.Logger.error('Failed to get live stream categories', error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -1098,8 +1721,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取推荐的直播
-   */
+   * 获取推荐的直�?   */
   public async getRecommendedLiveStreams(limit: number = 10): Promise<LiveStreamInfo[]> {
     try {
       // 基于用户观看历史和关注的主播推荐
@@ -1108,11 +1730,9 @@ export class LiveStreamRepository {
         return [];
       }
       
-      // 获取用户关注的直播
-      const followedStreams = await this.getFollowedStreams();
+      // 获取用户关注的直�?      const followedStreams = await this.getFollowedStreams();
       
-      // 获取热门直播作为备选
-      const trendingRequest: LiveStreamListRequest = {
+      // 获取热门直播作为备�?      const trendingRequest: LiveStreamListRequest = {
         page: 1,
         pageSize: limit * 2,
         sortBy: 'trending'
@@ -1120,8 +1740,7 @@ export class LiveStreamRepository {
       
       const trendingResponse = await this.getLiveStreams(trendingRequest);
       
-      // 优先推荐关注的直播
-      const recommended: LiveStreamInfo[] = [];
+      // 优先推荐关注的直�?      const recommended: LiveStreamInfo[] = [];
       
       for (const streamId of followedStreams) {
         if (recommended.length >= limit) break;
@@ -1132,8 +1751,7 @@ export class LiveStreamRepository {
             recommended.push(stream);
           }
         } catch (error) {
-          // 忽略获取失败的直播
-          this.logger.warn(`Failed to get recommended stream detail: ${streamId}`, error as Error);
+          // 忽略获取失败的直�?          this.logger.warn(`Failed to get recommended stream detail: ${streamId}`, error as Error);
         }
       }
       
@@ -1148,12 +1766,64 @@ export class LiveStreamRepository {
       
       return recommended;
     } catch (error) {
-      this.logger.error('Failed to get recommended live streams', error as Error);
+      this.Logger.error('Failed to get recommended live streams', error as Error);
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now(),
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( instanceof Error ? {
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now( : new Error(String({
+        type: LiveStreamEventType.LIVE_ERROR,
+        timestamp: Date.now())))))),
         error: error as Error
       });
       
@@ -1169,7 +1839,7 @@ export class LiveStreamRepository {
       await this.cacheService.cleanupExpired();
       this.logger.info('Live stream cache cleanup completed');
     } catch (error) {
-      this.logger.error('Failed to cleanup live stream cache', error as Error);
+      this.Logger.error('Failed to cleanup live stream cache', error as Error);
     }
   }
 
@@ -1184,13 +1854,10 @@ export class LiveStreamRepository {
       // 清理缓存
       await this.cleanupExpiredCache();
       
-      // 停止心跳检测
-      // 注意：在ArkTS中，setInterval返回的timer需要手动清理
-      // 这里需要根据实际实现来清理定时器
-      
+      // 停止心跳检�?      // 注意：在ArkTS中，setInterval返回的timer需要手动清�?      // 这里需要根据实际实现来清理定时�?      
       this.logger.info('LiveStreamRepository shutdown');
     } catch (error) {
-      this.logger.error('Failed to shutdown LiveStreamRepository', error as Error);
+      this.logger.error('Failed to shutdown LiveStreamRepository', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       
       // 发布错误事件
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
@@ -1203,3 +1870,6 @@ export class LiveStreamRepository {
     }
   }
 }
+
+
+

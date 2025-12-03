@@ -7,10 +7,9 @@ import { mediaService } from '../service/media/MediaService';
 import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
 import { siteManager } from '../service/spider/SiteManager';
 import { lineManager } from '../service/config/LineManager';
-import { Column, Row, Text, Image, Flex, Stack, Button, List, ListItem, ForEach, Scroller, ScrollView, Blank, TextInput, ImageFit, ScrollBarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign, FontWeight } from '@ohos.arkui';
+import { Column, Row, Text, Image, Flex, Stack, Button, List, ListItem, ForEach, Scroller, ScrollView, Blank, TextInput, ImageFit, ScrollBarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign, FontWeight, Visibility } from '@ohos.arkui';
 
-// 快速搜索结果接口
-interface QuickSearchResult {
+// 快速搜索结果接�?interface QuickSearchResult {
   id: string;
   title: string;
   quality: string;
@@ -82,8 +81,7 @@ interface ListStyle {
 struct SearchPage {
   private readonly TAG: string = 'SearchPage';
   
-  // 状态管理
-  @State searchQuery: string = '';
+  // 状态管�?  @State searchQuery: string = '';
   @State searchResults: MediaItem[] = [];
   @State hotKeywords: string[] = [];
   @State searchHistory: SearchHistoryItem[] = [];
@@ -94,31 +92,23 @@ struct SearchPage {
   @State hasMoreResults: boolean = true;
   @State showHistory: boolean = true;
   @State displayMode: 'list' | 'grid' = 'list'; // 显示模式：列表或网格
-  @State showFilterPanel: boolean = false; // 是否显示筛选面板
-  @State filters: SearchFilter = {}; // 当前筛选条件
-  @State filterTypes: string[] = []; // 媒体类型筛选
-  @State filterSort: string = 'default'; // 排序方式
-  @State showSourceList: boolean = false; // 是否显示快速搜索片源列表
-  @State quickSearchResults: QuickSearchResult[] = []; // 快速搜索结果
-  
+  @State showFilterPanel: boolean = false; // 是否显示筛选面�?  @State filters: SearchFilter = {}; // 当前筛选条�?  @State filterTypes: string[] = []; // 媒体类型筛�?  @State filterSort: string = 'default'; // 排序方式
+  @State showSourceList: boolean = false; // 是否显示快速搜索片源列�?  @State quickSearchResults: QuickSearchResult[] = []; // 快速搜索结�?  
   // 分页配置
   private pageSize: number = 20;
   private searchDebounceTimer: number | null = null;
   
   /**
-   * 页面加载时调用
-   */
+   * 页面加载时调�?   */
   async aboutToAppear(): Promise<void> {
     Logger.info(this.TAG, 'SearchPage appeared');
     
-    // 获取路由参数中的搜索词
-    const params = this.context.router.getParams();
+    // 获取路由参数中的搜索�?    const params = this.context.router.getParams();
     if (params?.query) {
       this.searchQuery = params.query as string;
       await this.performSearch();
     } else {
-      // 加载热门搜索词
-      this.loadHotKeywords();
+      // 加载热门搜索�?      this.loadHotKeywords();
     }
     
     // 加载搜索历史（异步）
@@ -126,20 +116,17 @@ struct SearchPage {
   }
   
   /**
-   * 页面卸载时调用
-   */
+   * 页面卸载时调�?   */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'SearchPage disappeared');
     
-    // 清理定时器
-    if (this.searchDebounceTimer) {
+    // 清理定时�?    if (this.searchDebounceTimer) {
       clearTimeout(this.searchDebounceTimer);
     }
   }
   
   /**
-   * 加载热门搜索词
-   */
+   * 加载热门搜索�?   */
   private loadHotKeywords(): void {
     try {
       mediaService.getHotSearchKeywords(10).then((data) => {
@@ -147,9 +134,8 @@ struct SearchPage {
         Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
       });
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load hot keywords', error instanceof Error ? error : undefined);
-      // 使用默认热门关键词
-      this.hotKeywords = ['热门电影', '最新剧集', '经典动漫', '科幻大片', '爱情喜剧'];
+      Logger.error(this.TAG, 'Failed to load hot keywords', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      // 使用默认热门关键�?      this.hotKeywords = ['热门电影', '最新剧�?, '经典动漫', '科幻大片', '爱情喜剧'];
     }
   }
   
@@ -162,8 +148,7 @@ struct SearchPage {
       const searchHistoryRepo = new SearchHistoryRepository();
       const history = await searchHistoryRepo.getHistory();
       
-      // 确保history是数组类型
-      if (Array.isArray(history)) {
+      // 确保history是数组类�?      if (Array.isArray(history)) {
         this.searchHistory = history;
         Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
       } else {
@@ -171,7 +156,7 @@ struct SearchPage {
         this.searchHistory = [];
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load search history', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Failed to load search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       this.searchHistory = [];
     }
   }
@@ -181,33 +166,28 @@ struct SearchPage {
    */
   private async saveSearchHistory(keyword: string): Promise<void> {
     try {
-      // 去重并限制数量
-      let history = this.searchHistory.filter(item => item !== keyword);
+      // 去重并限制数�?      let history = this.searchHistory.filter(item => item !== keyword);
       history.unshift(keyword);
-      history = history.slice(0, 10); // 最多保存10条
-      
+      history = history.slice(0, 10); // 最多保�?0�?      
       this.searchHistory = history;
       
-      // 使用SearchHistoryRepository保存到本地存储
-      const searchHistoryRepo = new SearchHistoryRepository();
+      // 使用SearchHistoryRepository保存到本地存�?      const searchHistoryRepo = new SearchHistoryRepository();
       await searchHistoryRepo.saveHistory(history);
       
       Logger.info(this.TAG, `Search history saved: ${keyword}`);
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to save search history', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Failed to save search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
   
   /**
-   * 快速搜索片源
-   */
+   * 快速搜索片�?   */
   private quickSearch(keyword: string): void {
     try {
       // 获取从线路配置文件加载的真实站点列表
       const sites = siteManager.getAllSites();
       
-      // 使用真实站点信息生成快速搜索结果
-      this.quickSearchResults = [];
+      // 使用真实站点信息生成快速搜索结�?      this.quickSearchResults = [];
       
       // 如果有站点，使用真实站点信息
       if (sites.length > 0) {
@@ -226,8 +206,7 @@ struct SearchPage {
           }
         });
         
-        // 如果从站点列表中没有获取到可搜索的站点，添加一些默认站点
-        if (this.quickSearchResults.length === 0) {
+        // 如果从站点列表中没有获取到可搜索的站点，添加一些默认站�?        if (this.quickSearchResults.length === 0) {
           this.addDefaultQuickSearchResults(keyword);
         }
       } else {
@@ -235,20 +214,17 @@ struct SearchPage {
         this.addDefaultQuickSearchResults(keyword);
       }
       
-      // 限制结果数量，避免显示过多
-      this.quickSearchResults = this.quickSearchResults.slice(0, 10);
+      // 限制结果数量，避免显示过�?      this.quickSearchResults = this.quickSearchResults.slice(0, 10);
       
-      // 显示快速搜索结果
-      this.showSourceList = true;
+      // 显示快速搜索结�?      this.showSourceList = true;
       Logger.info(this.TAG, `Quick search for: ${keyword}, results: ${this.quickSearchResults.length}`);
       
-      // 获取当前线路信息并记录日志
-      const currentLine = lineManager.getCurrentLine();
+      // 获取当前线路信息并记录日�?      const currentLine = lineManager.getCurrentLine();
       if (currentLine) {
         Logger.info(this.TAG, `Current line: ${currentLine.name || '未知名称'}, sources loaded from: ${currentLine.url}`);
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Quick search failed', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Quick search failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       // 即使出错，也添加一些默认站点供用户选择
       this.quickSearchResults = [];
       this.addDefaultQuickSearchResults(keyword);
@@ -257,11 +233,9 @@ struct SearchPage {
   }
   
   /**
-   * 添加默认的快速搜索结果
-   */
+   * 添加默认的快速搜索结�?   */
   private addDefaultQuickSearchResults(keyword: string): void {
-    // 从典型线路配置中提取的常见站点列表
-    const defaultSources = [
+    // 从典型线路配置中提取的常见站点列�?    const defaultSources = [
       {key: 'lebei', name: '乐贝视频'},
       {key: 'qimi', name: '奇米影视'},
       {key: 'jiumo', name: '九猫影视'},
@@ -287,17 +261,14 @@ struct SearchPage {
 
 
   /**
-   * 处理快速搜索结果点击事件
-   */
+   * 处理快速搜索结果点击事�?   */
   private async handleQuickSearchResultClick(result: QuickSearchResult): Promise<void> {
     try {
       Logger.info(this.TAG, `Quick search result clicked: ${JSON.stringify(result)}`);
       
-      // 隐藏快速搜索结果
-      this.showSourceList = false;
+      // 隐藏快速搜索结�?      this.showSourceList = false;
       
-      // 跳转到MediaDetailPage页面，携带相关参数
-      AppNavigator.getInstance().navigateToDetail({
+      // 跳转到MediaDetailPage页面，携带相关参�?      AppNavigator.getInstance().navigateToDetail({
           title: result.title,
           sourceId: result.id,
           sourceType: result.sourceType,
@@ -305,14 +276,13 @@ struct SearchPage {
           keyword: this.searchQuery,
           // 传递站点信息，以便在详情页能够使用正确的搜索源
           siteName: result.sourceType,
-          // 记录当前使用的线路信息
-          currentLine: lineManager.getCurrentLine() ? lineManager.getCurrentLine().name : 'Default'
+          // 记录当前使用的线路信�?          currentLine: lineManager.getCurrentLine() ? lineManager.getCurrentLine().name : 'Default'
         });
       
       // 记录搜索历史
       await this.saveSearchHistory(this.searchQuery);
     } catch (error) {
-      Logger.error(this.TAG, 'Error handling quick search result click', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Error handling quick search result click', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
 
@@ -328,7 +298,7 @@ struct SearchPage {
       
       Logger.info(this.TAG, 'Search history cleared');
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to clear search history', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Failed to clear search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
     }
   }
   
@@ -343,20 +313,16 @@ struct SearchPage {
       clearTimeout(this.searchDebounceTimer);
     }
     
-    // 输入为空时重置状态
-    if (value.trim().length === 0) {
+    // 输入为空时重置状�?    if (value.trim().length === 0) {
       this.resetSearchState();
       this.showSourceList = false;
       return;
     }
     
-    // 快速搜索片源（当输入达到一定长度时）
-    if (value.trim().length >= 2) {
-      // 立即执行快速搜索
-      this.quickSearch(value.trim());
+    // 快速搜索片源（当输入达到一定长度时�?    if (value.trim().length >= 2) {
+      // 立即执行快速搜�?      this.quickSearch(value.trim());
       
-      // 输入停止300ms后执行常规搜索
-      this.searchDebounceTimer = setTimeout(async () => {
+      // 输入停止300ms后执行常规搜�?      this.searchDebounceTimer = setTimeout(async () => {
         await this.performSearch();
       }, 300);
     }
@@ -369,8 +335,7 @@ struct SearchPage {
     const query = this.searchQuery.trim();
     if (!query) return;
     
-    // 隐藏快速搜索结果
-    this.showSourceList = false;
+    // 隐藏快速搜索结�?    this.showSourceList = false;
     
     this.isSearching = true;
     this.isLoading = true;
@@ -382,17 +347,9 @@ struct SearchPage {
       // 保存搜索历史（异步）
       await this.saveSearchHistory(query);
       
-      // 执行搜索，传递筛选条件
-      Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
+      // 执行搜索，传递筛选条�?      Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
       
-      // 构建搜索参数，包含筛选条件
-      const searchParams = {
-        keyword: query,
-        type: SearchType.All,
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        ...this.filters // 合并筛选条件
-      };
+      // 构建搜索参数，包含筛选条�?      const searchParams: Record<string, string | number | boolean | null> = { ... };
       
       // 使用await处理Promise
       const result = await mediaService.searchMedia(searchParams);
@@ -403,7 +360,7 @@ struct SearchPage {
       
       Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
     } catch (error) {
-      Logger.error(this.TAG, 'Search failed', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Search failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       this.errorMessage = '搜索失败，请稍后重试';
       this.searchResults = [];
       this.hasMoreResults = false;
@@ -426,14 +383,7 @@ struct SearchPage {
       const query = this.searchQuery.trim();
       Logger.info(this.TAG, `Loading more results for: ${query}, page ${this.currentPage}`);
       
-      // 构建搜索参数，包含筛选条件
-      const searchParams = {
-        keyword: query,
-        type: SearchType.All,
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        ...this.filters // 合并筛选条件
-      };
+      // 构建搜索参数，包含筛选条�?      const searchParams: Record<string, string | number | boolean | null> = { ... };
       
       mediaService.searchMedia(searchParams).then((result) => {
         if (result && result.items && result.items.length > 0) {
@@ -444,20 +394,19 @@ struct SearchPage {
         }
         this.isLoading = false;
       }).catch((error) => {
-        Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : undefined);
+        Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
         this.errorMessage = '加载更多结果失败';
         this.isLoading = false;
       });
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : undefined);
+      Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       this.errorMessage = '加载更多结果失败';
       this.isLoading = false;
     }
   }
   
   /**
-   * 重置搜索状态
-   */
+   * 重置搜索状�?   */
   private resetSearchState(): void {
     this.searchResults = [];
     this.showHistory = true;
@@ -467,19 +416,17 @@ struct SearchPage {
   }
   
   /**
-   * 处理关键词点击
-   */
+   * 处理关键词点�?   */
   private async handleKeywordClick(keyword: string): Promise<void> {
     this.searchQuery = keyword;
     await this.performSearch();
   }
   
   /**
-   * 处理搜索结果项点击
-   */
+   * 处理搜索结果项点�?   */
   private handleSearchResultClick(media: MediaItem): void {
     if (!media || !media.id) {
-      Logger.error(this.TAG, 'Invalid media item', undefined, { detail: { data: { media: JSON.stringify(media) } } });
+      Logger.error(this.TAG, 'Invalid media item', new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format'))))))), { detail: { data: { media: JSON.stringify(media) } } });
       return;
     }
     
@@ -509,18 +456,19 @@ struct SearchPage {
   }
   
   /**
-   * 渲染搜索输入框
-   */
+   * 渲染搜索输入�?   */
   @Builder
-  private renderSearchInput(): void {
+  private renderSearchInput() {
     Stack() {
       Flex()
       .direction(FlexDirection.Row)
       .alignItems(ItemAlign.Center)
       .padding({ left: 15, right: 15, top: 10, bottom: 10 }) {
         Button()
-        .onClick(() => this.handleBack()) {
-          Text("←")
+        .onClick(() => this.handleBack())
+        .width(40)
+        .height(40) {
+          Text("�?)
             .fontSize(24)
             .fontColor("#333333")
         }
@@ -536,25 +484,26 @@ struct SearchPage {
             .margin({ right: 10 })
           TextInput({
             value: this.searchQuery,
-            placeholder: "搜索电影、电视剧、动漫...",
-            enterKeyType: "search"
+            placeholder: "搜索电影、电视剧、动�?.."
           })
           .width("80%")
           .height(40)
           .fontSize(16)
           .onChange((value: string) => this.handleSearchInputChange(value))
           .onSubmit(() => this.performSearch())
-          if (this.searchQuery) {
-            Button()
-            .onClick(() => this.handleClearInput()) {
-              Text("✕")
-                .fontSize(20)
-                .fontColor("#999999")
-            }
+          Button()
+          .onClick(() => this.handleClearInput())
+          .width(30)
+          .height(30) {
+            Text("�?)
+              .fontSize(20)
+              .fontColor("#999999")
           }
         }
         Button()
-        .onClick(() => this.performSearch()) {
+        .onClick(() => this.performSearch())
+        .width(80)
+        .height(40) {
           Text("搜索")
             .fontSize(16)
             .fontColor("#333333")
@@ -567,7 +516,7 @@ struct SearchPage {
    * 渲染热门搜索
    */
   @Builder
-  private renderHotKeywords(): void {
+  private renderHotKeywords() {
     Stack() {
       // 标题
       Text("热门搜索")
@@ -575,8 +524,7 @@ struct SearchPage {
         .fontColor('#333333')
         .fontWeight(600)
         .margin({ left: 15, top: 15, bottom: 15 })
-      // 关键词列表
-      Flex({ wrap: FlexWrap.Wrap, padding: { left: 15, right: 15 }, gap: 10 })
+      // 关键词列�?      Flex({ wrap: FlexWrap.Wrap, padding: { left: 15, right: 15 }, gap: 10 })
       .alignItems(ItemAlign.Center) {
         ForEach(this.hotKeywords, (keyword, index) => {
           Button()
@@ -606,14 +554,13 @@ struct SearchPage {
    * 渲染搜索历史
    */
   @Builder
-  private renderSearchHistory(): void {
+  private renderSearchHistory() {
     Stack()
     .backgroundColor('#FFFFFF')
     .borderRadius(10)
     .padding(15)
     .margin({ bottom: 15 }) {
-      // 标题栏
-      Flex()
+      // 标题�?      Flex()
       .direction(FlexDirection.Row)
       .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(ItemAlign.Center)
@@ -658,8 +605,7 @@ struct SearchPage {
   }
   
   /**
-   * 渲染搜索结果项
-   */
+   * 渲染搜索结果�?   */
   @Builder
   private renderSearchResultItem(media: MediaItem) {
     // 简化版本，只保留最基本的UI组件，确保符合ArkTS语法
@@ -729,8 +675,7 @@ struct SearchPage {
   }
   
   /**
-   * 切换筛选面板显示
-   */
+   * 切换筛选面板显�?   */
   private toggleFilterPanel(): void {
     this.showFilterPanel = !this.showFilterPanel;
   }
@@ -756,8 +701,7 @@ struct SearchPage {
   }
   
   /**
-   * 渲染筛选按钮
-   */
+   * 渲染筛选按�?   */
   @Builder
   private renderFilterButton() {
     Column() {
@@ -767,7 +711,7 @@ struct SearchPage {
       .padding({ horizontal: 15, vertical: 8 })
       .onClick(() => this.toggleFilterPanel())
       .width('auto') {
-        Text("筛选")
+        Text("筛�?)
           .fontSize(16)
           .fontColor('#FFFFFF')
           .fontWeight(600)
@@ -776,8 +720,7 @@ struct SearchPage {
   }
   
   /**
-   * 渲染筛选面板
-   */
+   * 渲染筛选面�?   */
   @Builder
   private renderFilterPanel() {
     Stack() {
@@ -790,20 +733,18 @@ struct SearchPage {
       .alignItems(HorizontalAlign.Center)
       .visibility(this.showFilterPanel ? Visibility.Visible : Visibility.None)
       .zIndex(100) {
-        // 筛选面板内容
-        Column()
+        // 筛选面板内�?        Column()
         .width('100%')
         .backgroundColor('#4CAF50')
         .padding(20)
         .borderTopLeftRadius(20)
         .borderTopRightRadius(20) {
-          // 标题栏
-          Row()
+          // 标题�?          Row()
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
           .alignItems(VerticalAlign.Center)
           .margin({ bottom: 20 }) {
-            Text('筛选条件')
+            Text('筛选条�?)
               .fontSize(28)
               .fontColor('#FFFFFF')
               .fontWeight(700)
@@ -812,14 +753,13 @@ struct SearchPage {
             .onClick(() => {
               this.showFilterPanel = false;
             }) {
-              Text('✕')
+              Text('�?)
                 .fontSize(28)
                 .fontColor('#FFFFFF')
             }
           }
         
-        // 媒体类型筛选
-        Text('媒体类型:')
+        // 媒体类型筛�?        Text('媒体类型:')
           .fontSize(24)
           .fontColor('#FFFFFF')
           .margin({ bottom: 15 })
@@ -832,10 +772,10 @@ struct SearchPage {
         .margin({ bottom: 20 }) {
           ForEach([
             { label: '电影', value: 'movie' },
-            { label: '电视剧', value: 'tv' },
+            { label: '电视�?, value: 'tv' },
             { label: '动漫', value: 'anime' },
             { label: '综艺', value: 'variety' },
-            { label: '纪录片', value: 'documentary' }
+            { label: '纪录�?, value: 'documentary' }
           ], (type) => {
             Button()
             .backgroundColor(this.filterTypes.includes(type.value) ? '#FFEB3B' : '#FFFFFF')
@@ -866,9 +806,9 @@ struct SearchPage {
         .margin({ bottom: 20 }) {
           ForEach([
             { label: '默认排序', value: 'default' },
-            { label: '最新发布', value: 'latest' },
-            { label: '评分最高', value: 'rating' },
-            { label: '播放最多', value: 'popular' }
+            { label: '最新发�?, value: 'latest' },
+            { label: '评分最�?, value: 'rating' },
+            { label: '播放最�?, value: 'popular' }
           ], (option) => {
             Button()
             .backgroundColor(this.filterSort === option.value ? '#FFEB3B' : '#FFFFFF')
@@ -907,7 +847,7 @@ struct SearchPage {
           .padding({ horizontal: 20, vertical: 12 })
           .flex(1)
           .onClick(() => this.applyFilters()) {
-            Text('应用筛选')
+            Text('应用筛�?)
               .fontSize(22)
               .fontColor('#4CAF50')
               .fontWeight(600)
@@ -918,23 +858,38 @@ struct SearchPage {
   }
 
   /**
-   * 更新媒体类型筛选
-   */
+   * 更新媒体类型筛�?   */
   private updateMediaTypeFilter(type: string, checked: boolean): void {
-    if (!this.filters.types) {
-      this.filters.types = [];
-    }
-    
     if (checked) {
-      if (!this.filters.types.includes(type)) {
-        this.filters.types.push(type);
+      if (!this.filterTypes.includes(type)) {
+        this.filterTypes.push(type);
       }
     } else {
-      const index = this.filters.types.indexOf(type);
+      const index = this.filterTypes.indexOf(type);
       if (index > -1) {
-        this.filters.types.splice(index, 1);
+        this.filterTypes.splice(index, 1);
       }
     }
+  }
+
+  /**
+   * 重置筛选条�?   */
+  private resetFilters(): void {
+    // 重置筛选条�?    this.filters = {};
+    this.filterTypes = [];
+    this.filterSort = 'default';
+  }
+
+  /**
+   * 应用筛选条�?   */
+  private applyFilters(): void {
+    // 应用筛选条件并关闭面板
+    this.showFilterPanel = false;
+    
+    // 重置分页并重新搜�?    this.currentPage = 1;
+    this.searchResults = [];
+    this.hasMoreResults = true;
+    this.performSearch();
   }
 
   /**
@@ -992,68 +947,58 @@ struct SearchPage {
   @Builder
   private renderSearchResults() {
     Column() {
-      // 渲染分类筛选按钮
-      Scroller()
-      .scrollable(ScrollDirection.Horizontal)
-      .margin({ bottom: 20 }) {
+      // 渲染分类筛选按�?      Scroller()
+      .margin({ bottom: 20 })
+      .scrollable(ScrollDirection.Horizontal) {
         Row()
         .padding({ horizontal: 15 })
         .alignItems(VerticalAlign.Center)
         .gap(10) {
           // 全部显示按钮
-          Button()
+          Button("全部显示")
           .backgroundColor('#4CAF50')
           .borderRadius(20)
           .padding({ horizontal: 20, vertical: 8 })
           .margin({ right: 10 })
           .onClick(() => {})
-          .width('auto') {
-            Text("全部显示")
-              .fontSize(22)
-              .fontColor('#FFFFFF')
-              .fontWeight(600)
-          }
+          .width('auto')
+          .fontSize(22)
+          .fontColor('#FFFFFF')
+          .fontWeight(600)
           
           // 分类按钮
           ForEach(["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"], (category) => {
-            Button()
+            Button(category)
             .backgroundColor('#FFFFFF')
             .borderRadius(20)
             .padding({ horizontal: 20, vertical: 8 })
             .margin({ right: 10 })
             .onClick(() => {})
-            .width('auto') {
-              Text(category)
-                .fontSize(22)
-                .fontColor('#4CAF50')
-                .fontWeight(600)
-            }
+            .width('auto')
+            .fontSize(22)
+            .fontColor('#4CAF50')
+            .fontWeight(600)
           })
         }
       }
       
-      // 渲染网格结果 - 使用Flex布局替代Grid
+      // 渲染网格结果
       Row()
       .padding({ left: 15, right: 15 })
       .gap(15)
       .flexWrap(FlexWrap.Wrap)
       .justifyContent(FlexAlign.Start) {
         ForEach(this.searchResults, (item) => {
-          Column()
-          .width('18%')
-          .margin({ bottom: 15 }) {
-            this.renderGridItem(item)
-          }
+          this.renderGridItem(item)
         })
       }
     }
   }
   
   /**
-   * 渲染加载状态
-   */
+   * 渲染加载状�?   */
   @Builder
-  private renderLoading(): void {
+  private renderLoading() {
     Stack()
     .width('100%')
     .height('100%')
@@ -1065,7 +1010,7 @@ struct SearchPage {
       .borderRadius(20)
       .padding(20)
       .alignItems(HorizontalAlign.Center) {
-        Text("●")
+        Text("�?)
           .fontSize(40)
           .fontColor('#4CAF50')
           .animation({
@@ -1073,7 +1018,7 @@ struct SearchPage {
             iterations: -1,
             curve: 'easeInOut'
           })
-        Text("搜索中...")
+        Text("搜索�?..")
           .fontSize(18)
           .fontColor('#333333')
           .margin({ top: 10 })
@@ -1082,40 +1027,36 @@ struct SearchPage {
   }
   
   /**
-   * 渲染快速搜索结果（片源切换界面）
-   */
+   * 渲染快速搜索结果（片源切换界面�?   */
   @Builder
-  private renderQuickSearchResults(): void {
-    if (this.showSourceList && this.quickSearchResults.length > 0) {
-      Stack() {
-        // 标题栏
-        Flex() {
-          Text(`为您找到相关片源: ${this.quickSearchResults.length}个`)
+  private renderQuickSearchResults() {
+    Stack() {
+      // 标题�?      Flex() {
+        Text(`为您找到相关片源: ${this.quickSearchResults.length}个`)
+          .fontSize(28)
+          .fontColor('#FFFFFF')
+          .fontWeight(700)
+        Button() {
+          Text('�?)
             .fontSize(28)
             .fontColor('#FFFFFF')
-            .fontWeight(700)
-          Button() {
-            Text('✕')
-              .fontSize(28)
-              .fontColor('#FFFFFF')
-          }
-          .backgroundColor('transparent')
-          .onClick(() => {
-            this.showSourceList = false;
-          })
         }
-        .direction(FlexDirection.Row)
-        .justifyContent(FlexAlign.SpaceBetween)
-        .alignItems(ItemAlign.Center)
-        .margin({ bottom: 15 })
-        
+        .backgroundColor('transparent')
+        .onClick(() => {
+          this.showSourceList = false;
+        })
+      }
+      .direction(FlexDirection.Row)
+      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(ItemAlign.Center)
+      .margin({ bottom: 15 })
+      
         // 片源列表
         List() {
           ForEach(this.quickSearchResults, (item, index) => {
             ListItem() {
               Flex() {
-                // 标题和来源
-                Flex() {
+                // 标题和来�?                Flex() {
                   Text(item.title)
                     .fontSize(26)
                     .fontColor('#FFFFFF')
@@ -1129,17 +1070,16 @@ struct SearchPage {
                 .direction(FlexDirection.Column)
                 
                 // 质量标签
-                if (item.quality) {
-                  Flex() {
-                    Text(item.quality)
-                      .fontSize(22)
-                      .fontColor('#000000')
-                      .fontWeight(700)
-                  }
-                  .backgroundColor('#FFEB3B')
-                  .padding({ horizontal: 12, vertical: 6 })
-                  .borderRadius(12)
+                Flex() {
+                  Text(item.quality || '')
+                    .fontSize(22)
+                    .fontColor('#000000')
+                    .fontWeight(700)
                 }
+                .backgroundColor('#FFEB3B')
+                .padding({ horizontal: 12, vertical: 6 })
+                .borderRadius(12)
+                .visibility(item.quality ? Visibility.Visible : Visibility.Hidden)
               }
               .direction(FlexDirection.Row)
               .justifyContent(FlexAlign.SpaceBetween)
@@ -1169,15 +1109,10 @@ struct SearchPage {
   }
 
   /**
-   * 渲染错误状态
-   */
+   * 渲染错误状�?   */
   @Builder
-  private renderError(): void {
-    Stack({
-      alignItems: HorizontalAlign.Center,
-      justifyContent: FlexAlign.Center,
-      padding: 20
-    }) {
+  private renderError() {
+    Stack() {
       Text("⚠️")
         .fontSize(40)
         .fontColor('#FF6B6B')
@@ -1210,11 +1145,9 @@ struct SearchPage {
       // 搜索输入区域
       this.renderSearchInput();
       
-      // 快速搜索片源切换界面
-      this.renderQuickSearchResults();
+      // 快速搜索片源切换界�?      this.renderQuickSearchResults();
       
-      // 主内容区域
-      Scroller() {
+      // 主内容区�?      Scroller() {
         Column() {
           // 显示搜索结果数量
           if (!this.showHistory && this.searchResults.length > 0) {
@@ -1252,3 +1185,5 @@ struct SearchPage {
 }
 
 export default SearchPage;
+
+

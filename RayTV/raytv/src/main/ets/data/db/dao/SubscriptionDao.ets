@@ -6,8 +6,7 @@ import RelationalPredicates from '@ohos.data.relationalStore';
 import ResultSet from '@ohos.data.relationalStore';
 
 /**
- * 订阅项数据结构
- */
+ * 订阅项数据结�? */
 export interface SubscriptionItem {
   id: string;
   name: string;
@@ -34,9 +33,8 @@ export class SubscriptionDao {
 
   /**
    * 初始化订阅表
-   * @param context 应用上下文
-   */
-  public async initTable(context: any): Promise<void> {
+   * @param context 应用上下�?   */
+  public async initTable(context: Record<string, string | number | boolean | null>): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
       Logger.info(this.TAG, 'Subscription table initialized');
@@ -47,15 +45,13 @@ export class SubscriptionDao {
   }
 
   /**
-   * 保存订阅项
-   * @param subscription 订阅项
-   */
+   * 保存订阅�?   * @param subscription 订阅�?   */
   public async save(subscription: SubscriptionItem): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
       const valuesBucket: ValuesBucket = this.subscriptionToValuesBucket(subscription);
       
-      await db.insert(TableSchema.SUBSCRIPTION_TABLE, valuesBucket);
+      await db.insert(TableSchema.SUBSCRIPTION_TABLE, valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket)))))));
       Logger.info(this.TAG, `Subscription saved: ${subscription.name}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to save subscription: ${error}`);
@@ -64,15 +60,13 @@ export class SubscriptionDao {
   }
 
   /**
-   * 更新订阅项
-   * @param subscription 订阅项
-   */
+   * 更新订阅�?   * @param subscription 订阅�?   */
   public async update(subscription: SubscriptionItem): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
       const valuesBucket: ValuesBucket = this.subscriptionToValuesBucket(subscription);
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.SUBSCRIPTION_ID, subscription.id);
+      predicates.equalTo(TableSchema.SUBSCRIPTION_ID, subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id : new Error(String(subscription.id instanceof Error ? subscription.id : new Error(String(subscription.id)))))));
       
       const rowsAffected = await db.update(TableSchema.SUBSCRIPTION_TABLE, valuesBucket, predicates);
       Logger.info(this.TAG, `Subscription updated: ${subscription.name}, rows affected: ${rowsAffected}`);
@@ -84,8 +78,7 @@ export class SubscriptionDao {
 
   /**
    * 保存或更新订阅项
-   * @param subscription 订阅项
-   */
+   * @param subscription 订阅�?   */
   public async saveOrUpdate(subscription: SubscriptionItem): Promise<void> {
     try {
       const existingSubscription = await this.getById(subscription.id);
@@ -95,14 +88,13 @@ export class SubscriptionDao {
         await this.save(subscription);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save or update subscription: ${error}`);
+      Logger.error(this.TAG, `Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}` instanceof Error ? `Failed to save or update subscription: ${error}` : new Error(String(`Failed to save or update subscription: ${error}`)))))));
       throw error;
     }
   }
 
   /**
-   * 删除订阅项
-   * @param subscriptionId 订阅ID
+   * 删除订阅�?   * @param subscriptionId 订阅ID
    */
   public async delete(subscriptionId: string): Promise<void> {
     try {
@@ -120,13 +112,12 @@ export class SubscriptionDao {
 
   /**
    * 获取所有订阅项
-   * @returns 订阅项列表
-   */
+   * @returns 订阅项列�?   */
   public async getAll(): Promise<SubscriptionItem[]> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      const resultSet = await db.query(TableSchema.SUBSCRIPTION_TABLE, predicates);
+      const resultSet = await db.query(TableSchema.SUBSCRIPTION_TABLE, predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates instanceof Error ? predicates instanceof Error ? predicates : new Error(String(predicates : new Error(String(predicates instanceof Error ? predicates : new Error(String(predicates)))))));
       
       return this.parseResultSet(resultSet);
     } catch (error) {
@@ -136,15 +127,14 @@ export class SubscriptionDao {
   }
 
   /**
-   * 根据ID获取订阅项
-   * @param subscriptionId 订阅ID
+   * 根据ID获取订阅�?   * @param subscriptionId 订阅ID
    * @returns 订阅项或undefined
    */
   public async getById(subscriptionId: string): Promise<SubscriptionItem | undefined> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.SUBSCRIPTION_ID, subscriptionId);
+      predicates.equalTo(TableSchema.SUBSCRIPTION_ID, subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId : new Error(String(subscriptionId instanceof Error ? subscriptionId : new Error(String(subscriptionId)))))));
       const resultSet = await db.query(TableSchema.SUBSCRIPTION_TABLE, predicates);
       
       const subscriptions = this.parseResultSet(resultSet);
@@ -163,7 +153,7 @@ export class SubscriptionDao {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.SUBSCRIPTION_CURRENT, true);
+      predicates.equalTo(TableSchema.SUBSCRIPTION_CURRENT, true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true)))))));
       const resultSet = await db.query(TableSchema.SUBSCRIPTION_TABLE, predicates);
       
       const subscriptions = this.parseResultSet(resultSet);
@@ -175,14 +165,12 @@ export class SubscriptionDao {
   }
 
   /**
-   * 获取已启用的订阅项
-   * @returns 已启用的订阅项列表
-   */
+   * 获取已启用的订阅�?   * @returns 已启用的订阅项列�?   */
   public async getEnabled(): Promise<SubscriptionItem[]> {
     try {
       const db = await this.databaseManager.getDatabase();
       const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.SUBSCRIPTION_ENABLED, true);
+      predicates.equalTo(TableSchema.SUBSCRIPTION_ENABLED, true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true instanceof Error ? true instanceof Error ? true : new Error(String(true : new Error(String(true instanceof Error ? true : new Error(String(true)))))));
       const resultSet = await db.query(TableSchema.SUBSCRIPTION_TABLE, predicates);
       
       return this.parseResultSet(resultSet);
@@ -193,9 +181,7 @@ export class SubscriptionDao {
   }
 
   /**
-   * 批量保存订阅项
-   * @param subscriptions 订阅项列表
-   */
+   * 批量保存订阅�?   * @param subscriptions 订阅项列�?   */
   public async saveAll(subscriptions: SubscriptionItem[]): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
@@ -208,7 +194,7 @@ export class SubscriptionDao {
           await this.saveOrUpdate(subscription);
         }
         await db.commit();
-        Logger.info(this.TAG, `Batch saved ${subscriptions.length} subscriptions`);
+        Logger.info(this.TAG, `Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions` instanceof Error ? `Batch saved ${subscriptions.length} subscriptions` : new Error(String(`Batch saved ${subscriptions.length} subscriptions`)))))));
       } catch (error) {
         await db.rollback();
         throw error;
@@ -221,13 +207,11 @@ export class SubscriptionDao {
 
   /**
    * 将订阅项转换为ValuesBucket
-   * @param subscription 订阅项
-   * @returns ValuesBucket
+   * @param subscription 订阅�?   * @returns ValuesBucket
    */
   private subscriptionToValuesBucket(subscription: SubscriptionItem): ValuesBucket {
     return {
-      [TableSchema.SUBSCRIPTION_ID]: subscription.id,
-      [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_ID]: subscription.id, [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
       [TableSchema.SUBSCRIPTION_URL]: subscription.url,
       [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
       [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
@@ -240,10 +224,372 @@ export class SubscriptionDao {
 
   /**
    * 解析ResultSet为订阅项列表
-   * @param resultSet 查询结果集
-   * @returns 订阅项列表
-   */
-  private parseResultSet(resultSet: ResultSet): SubscriptionItem[] {
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet instanceof Error ? [TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet : new Error(String([TableSchema.SUBSCRIPTION_NAME]: subscription.name,
+      [TableSchema.SUBSCRIPTION_URL]: subscription.url,
+      [TableSchema.SUBSCRIPTION_DESCRIPTION]: subscription.description || '',
+      [TableSchema.SUBSCRIPTION_UPDATE_TIME]: subscription.updateTime,
+      [TableSchema.SUBSCRIPTION_CREATE_TIME]: subscription.createTime,
+      [TableSchema.SUBSCRIPTION_SITE_COUNT]: subscription.siteCount,
+      [TableSchema.SUBSCRIPTION_ENABLED]: subscription.enabled,
+      [TableSchema.SUBSCRIPTION_CURRENT]: subscription.current
+    };
+  }
+
+  /**
+   * 解析ResultSet为订阅项列表
+   * @param resultSet 查询结果�?   * @returns 订阅项列�?   */
+  private parseResultSet(resultSet: ResultSet))))))): SubscriptionItem[] {
     const subscriptions: SubscriptionItem[] = [];
     
     try {
@@ -271,3 +617,5 @@ export class SubscriptionDao {
 }
 
 export const subscriptionDao = new SubscriptionDao();
+
+

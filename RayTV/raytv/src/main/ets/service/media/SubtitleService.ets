@@ -1,13 +1,11 @@
-// SubtitleService - 字幕服务类
-import Logger from '../../common/util/Logger';
+// SubtitleService - 字幕服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import FileUtil from '../../common/util/FileUtil';
 import { SubtitleStyle, DEFAULT_SUBTITLE_STYLE } from '../player/PlayerService';
 import { ResponseCode } from '../../common/constant/ResponseCode';
 
-// API响应类
-export class ApiResponse<T> {
+// API响应�?export class ApiResponse<T> {
   code: number;
   message: string;
   data?: T;
@@ -48,8 +46,7 @@ export enum SubtitleType {
   DFXP = 'dfxp',     // Distribution Format Exchange Profile格式
   SBV = 'sbv',       // YouTube SBV格式
   LRC = 'lrc',       // 歌词格式（用于音频）
-  CAP = 'cap',       // 自定义字幕格式
-  UNKNOWN = 'unknown' // 未知格式
+  CAP = 'cap',       // 自定义字幕格�?  UNKNOWN = 'unknown' // 未知格式
 }
 
 // 字幕语言信息接口
@@ -74,8 +71,7 @@ export interface SubtitleTrack {
   isDefault: boolean; // 是否默认轨道
   isForced?: boolean; // 是否强制字幕
   encoding?: string; // 文件编码
-  downloadUrl?: string; // 下载链接（如果与播放URL不同）
-  score?: number;    // 匹配分数
+  downloadUrl?: string; // 下载链接（如果与播放URL不同�?  score?: number;    // 匹配分数
   source?: string;   // 来源
   size?: number;     // 文件大小（字节）
 }
@@ -83,12 +79,9 @@ export interface SubtitleTrack {
 // 字幕条目接口
 export interface SubtitleItem {
   startTime: number; // 开始时间（秒）
-  endTime: number;   // 结束时间（秒）
-  text: string;      // 字幕文本
+  endTime: number;   // 结束时间（秒�?  text: string;      // 字幕文本
   htmlText?: string; // 格式化后的HTML文本
-  styles?: Record<string, string>; // 样式属性
-  speaker?: string;  // 说话者（ASS/SSA格式）
-  index: number;     // 字幕索引
+  styles?: Record<string, string>; // 样式属�?  speaker?: string;  // 说话者（ASS/SSA格式�?  index: number;     // 字幕索引
 }
 
 // 字幕搜索参数接口
@@ -96,19 +89,15 @@ export interface SubtitleSearchParams {
   movieId?: string;  // 电影/视频ID
   title: string;     // 标题
   year?: string;     // 年份
-  season?: number;   // 季数（电视剧）
-  episode?: number;  // 集数（电视剧）
-  languages?: string[]; // 语言代码列表
+  season?: number;   // 季数（电视剧�?  episode?: number;  // 集数（电视剧�?  languages?: string[]; // 语言代码列表
   hearingImpaired?: boolean; // 是否包含听力障碍支持
-  hash?: string;     // 视频文件哈希值
-  fileSize?: number; // 文件大小（字节）
+  hash?: string;     // 视频文件哈希�?  fileSize?: number; // 文件大小（字节）
   limit?: number;    // 限制结果数量
   page?: number;     // 页码
   pageSize?: number; // 每页数量
 }
 
-// 字幕提供商枚举
-export enum SubtitleProvider {
+// 字幕提供商枚�?export enum SubtitleProvider {
   OPENSUBTITLES = 'opensubtitles',
   SUBHD = 'subhd',
   ZIMU = 'zimu',
@@ -121,15 +110,11 @@ export enum SubtitleProvider {
 // 字幕评分接口
 export interface SubtitleRating {
   provider: SubtitleProvider;
-  rating: number;    // 评分（0-10）
-  voteCount: number; // 投票数
-  downloadCount: number; // 下载次数
+  rating: number;    // 评分�?-10�?  voteCount: number; // 投票�?  downloadCount: number; // 下载次数
   uploadDate: number; // 上传时间
-  uploader?: string; // 上传者
-}
+  uploader?: string; // 上传�?}
 
-// 字幕下载状态枚举
-export enum SubtitleDownloadStatus {
+// 字幕下载状态枚�?export enum SubtitleDownloadStatus {
   IDLE = 'idle',
   DOWNLOADING = 'downloading',
   COMPLETED = 'completed',
@@ -141,10 +126,7 @@ export enum SubtitleDownloadStatus {
 export interface SubtitleDownloadTask {
   id: string;        // 任务ID
   track: SubtitleTrack; // 字幕轨道
-  status: SubtitleDownloadStatus; // 下载状态
-  progress: number;  // 下载进度（0-100）
-  startTime: number; // 开始时间
-  endTime?: number;  // 结束时间
+  status: SubtitleDownloadStatus; // 下载状�?  progress: number;  // 下载进度�?-100�?  startTime: number; // 开始时�?  endTime?: number;  // 结束时间
   error?: string;    // 错误信息
   localPath?: string; // 下载后的本地路径
 }
@@ -161,8 +143,7 @@ export interface SubtitleHistory {
 }
 
 /**
- * 字幕服务类
- * 负责管理视频字幕相关功能
+ * 字幕服务�? * 负责管理视频字幕相关功能
  */
 export default class SubtitleService {
   private static instance: SubtitleService;
@@ -179,8 +160,8 @@ export default class SubtitleService {
   private supportedLanguages: SubtitleLanguage[] = [
     { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
     { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧', isDefault: true },
-    { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-    { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+    { code: 'ja', name: 'Japanese', nativeName: '日本�?, flag: '🇯🇵' },
+    { code: 'ko', name: 'Korean', nativeName: '한국�?, flag: '🇰🇷' },
     { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
     { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
     { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
@@ -189,21 +170,19 @@ export default class SubtitleService {
     { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
     { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
     { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
-    { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+    { code: 'th', name: 'Thai', nativeName: 'ไท�?, flag: '🇹🇭' },
     { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
     { code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾' },
     { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
     { code: 'tl', name: 'Tagalog', nativeName: 'Tagalog', flag: '🇵🇭' }
   ];
   
-  // 监听器
-  private styleListeners: Array<(style: SubtitleStyle) => void> = [];
+  // 监听�?  private styleListeners: Array<(style: SubtitleStyle) => void> = [];
   private downloadListeners: Map<string, Array<(task: SubtitleDownloadTask) => void>> = new Map();
   private parseListeners: Map<string, Array<(subtitles: SubtitleItem[], error?: string) => void>> = new Map();
 
   /**
-   * 构造函数（私有，防止外部实例化）
-   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.initialize();
   }
@@ -219,8 +198,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 初始化字幕服务
-   */
+   * 初始化字幕服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing subtitle service...');
@@ -239,8 +217,7 @@ export default class SubtitleService {
       const savedHistory = await StorageUtil.getObject<SubtitleHistory[]>(SUBTITLE_HISTORY_KEY);
       if (savedHistory) {
         this.subtitleHistory = savedHistory;
-        // 只保留最近100条历史记录
-        if (this.subtitleHistory.length > 100) {
+        // 只保留最�?00条历史记�?        if (this.subtitleHistory.length > 100) {
           this.subtitleHistory = this.subtitleHistory.slice(-100);
         }
       }
@@ -248,7 +225,7 @@ export default class SubtitleService {
       this.isInitialized = true;
       Logger.info(TAG, 'Subtitle service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize subtitle service', error);
+      Logger.error(TAG, 'Failed to initialize subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -260,7 +237,7 @@ export default class SubtitleService {
       await StorageUtil.setObject(SUBTITLE_STYLE_KEY, this.subtitleStyle);
       Logger.debug(TAG, 'Saved subtitle style settings');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save subtitle style settings', error);
+      Logger.error(TAG, 'Failed to save subtitle style settings', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -272,7 +249,7 @@ export default class SubtitleService {
       await StorageUtil.setObject(SUBTITLE_HISTORY_KEY, this.subtitleHistory);
       Logger.debug(TAG, 'Saved subtitle history');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save subtitle history', error);
+      Logger.error(TAG, 'Failed to save subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -290,13 +267,12 @@ export default class SubtitleService {
       // 保存样式
       await this.saveSubtitleStyle();
       
-      // 通知监听器
-      this.notifyStyleChanged();
+      // 通知监听�?      this.notifyStyleChanged();
       
       Logger.info(TAG, 'Updated subtitle style');
       return { ...this.subtitleStyle };
     } catch (error) {
-      Logger.error(TAG, 'Failed to update subtitle style', error);
+      Logger.error(TAG, 'Failed to update subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.subtitleStyle };
     }
   }
@@ -309,8 +285,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 重置字幕样式为默认值
-   */
+   * 重置字幕样式为默认�?   */
   public async resetSubtitleStyle(): Promise<SubtitleStyle> {
     try {
       this.subtitleStyle = { ...DEFAULT_SUBTITLE_STYLE };
@@ -318,13 +293,12 @@ export default class SubtitleService {
       // 保存样式
       await this.saveSubtitleStyle();
       
-      // 通知监听器
-      this.notifyStyleChanged();
+      // 通知监听�?      this.notifyStyleChanged();
       
       Logger.info(TAG, 'Reset subtitle style to default');
       return { ...this.subtitleStyle };
     } catch (error) {
-      Logger.error(TAG, 'Failed to reset subtitle style', error);
+      Logger.error(TAG, 'Failed to reset subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { ...this.subtitleStyle };
     }
   }
@@ -337,22 +311,19 @@ export default class SubtitleService {
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<SubtitleItem[]>> {
     try {
-      // 检查缓存
-      const cacheKey = track.url || track.localPath || track.id;
+      // 检查缓�?      const cacheKey = track.url || track.localPath || track.id;
       if (cacheKey && this.loadedSubtitles.has(cacheKey)) {
         Logger.debug(TAG, `Returning parsed subtitles from cache: ${cacheKey}`);
         return ApiResponse.success(this.loadedSubtitles.get(cacheKey)!, '字幕解析成功（缓存）');
       }
       
-      // 通知解析开始
-      this.notifyParseStart(track.id);
+      // 通知解析开�?      this.notifyParseStart(track.id);
       
       let subtitleContent: string;
       
       // 获取字幕内容
       if (track.localPath) {
-        // 从本地文件读取
-        Logger.debug(TAG, `Reading subtitle from local file: ${track.localPath}`);
+        // 从本地文件读�?        Logger.debug(TAG, `Reading subtitle from local file: ${track.localPath}`);
         subtitleContent = await FileUtil.readFile(track.localPath, track.encoding || 'utf-8');
       } else if (track.url) {
         // 从URL下载
@@ -400,8 +371,7 @@ export default class SubtitleService {
           subtitles = this.parseLRC(subtitleContent);
           break;
         default:
-          // 尝试自动检测格式
-          if (subtitleContent.includes('WEBVTT')) {
+          // 尝试自动检测格�?          if (subtitleContent.includes('WEBVTT')) {
             subtitles = this.parseVTT(subtitleContent);
           } else if (/\d+\s*\r?\n\d{2}:\d{2}:\d{2},\d{3}\s*-->\s*\d{2}:\d{2}:\d{2},\d{3}/.test(subtitleContent)) {
             subtitles = this.parseSRT(subtitleContent);
@@ -421,7 +391,7 @@ export default class SubtitleService {
       Logger.info(TAG, `Successfully parsed ${subtitles.length} subtitles`);
       return ApiResponse.success(subtitles, '字幕解析成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to parse subtitle track: ${track.id}`, error);
+      Logger.error(TAG, `Failed to parse subtitle track: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
       // 通知解析失败
       this.notifyParseError(track.id, String(error));
@@ -436,8 +406,7 @@ export default class SubtitleService {
   private parseSRT(content: string): SubtitleItem[] {
     const subtitles: SubtitleItem[] = [];
     
-    // 分割字幕块
-    const blocks = content.trim().split(/\r?\n\s*\r?\n/);
+    // 分割字幕�?    const blocks = content.trim().split(/\r?\n\s*\r?\n/);
     
     blocks.forEach(block => {
       try {
@@ -445,14 +414,11 @@ export default class SubtitleService {
         const match = block.match(/(\d+)\s*\r?\n(\d{2}):(\d{2}):(\d{2}),(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2}),(\d{3})\s*\r?\n([\s\S]*)/);
         
         if (match) {
-          // 解析时间戳
-          const startTime = this.parseTime(match[2], match[3], match[4], match[5]);
+          // 解析时间�?          const startTime = this.parseTime(match[2], match[3], match[4], match[5]);
           const endTime = this.parseTime(match[6], match[7], match[8], match[9]);
           
-          // 解析文本（移除格式标签并处理换行）
-          let text = match[10].trim();
-          // 替换HTML标签（保留简单的格式）
-          text = text.replace(/<\/?[ibu]>/g, '');
+          // 解析文本（移除格式标签并处理换行�?          let text = match[10].trim();
+          // 替换HTML标签（保留简单的格式�?          text = text.replace(/<\/?[ibu]>/g, '');
           text = text.replace(/<font[^>]*>/g, '');
           text = text.replace(/<\/font>/g, '');
           
@@ -473,8 +439,7 @@ export default class SubtitleService {
       }
     });
     
-    // 按索引排序
-    return subtitles.sort((a, b) => a.index - b.index);
+    // 按索引排�?    return subtitles.sort((a, b) => a.index - b.index);
   }
 
   /**
@@ -486,8 +451,7 @@ export default class SubtitleService {
     // 移除WEBVTT头部
     let cleanContent = content.replace(/^WEBVTT[\s\S]*?(?:\r?\n\r?\n|\Z)/, '');
     
-    // 分割字幕块
-    const blocks = cleanContent.trim().split(/\r?\n\s*\r?\n/);
+    // 分割字幕�?    const blocks = cleanContent.trim().split(/\r?\n\s*\r?\n/);
     
     blocks.forEach((block, index) => {
       try {
@@ -495,14 +459,12 @@ export default class SubtitleService {
         const match = block.match(/^(?:[^\r\n]*\r?\n)?(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})(?:[^\r\n]*)\r?\n([\s\S]*)/);
         
         if (match) {
-          // 解析时间戳
-          const startTime = this.parseTime(match[1], match[2], match[3], match[4]);
+          // 解析时间�?          const startTime = this.parseTime(match[1], match[2], match[3], match[4]);
           const endTime = this.parseTime(match[5], match[6], match[7], match[8]);
           
           // 解析文本
           let text = match[9].trim();
-          // 移除注释和格式标签
-          text = text.replace(/<c[^>]*>/g, '');
+          // 移除注释和格式标�?          text = text.replace(/<c[^>]*>/g, '');
           text = text.replace(/<\/c>/g, '');
           text = text.replace(/<\/?[ibu]>/g, '');
           text = text.replace(/<font[^>]*>/g, '');
@@ -537,18 +499,15 @@ export default class SubtitleService {
   private parseASS(content: string, type: SubtitleType): SubtitleItem[] {
     const subtitles: SubtitleItem[] = [];
     
-    // 提取脚本信息和样式
-    const eventsMatch = content.match(/\[Events\][\s\S]*?(?=\[|$)/);
+    // 提取脚本信息和样�?    const eventsMatch = content.match(/\[Events\][\s\S]*?(?=\[|$)/);
     
     if (eventsMatch) {
       const events = eventsMatch[0];
-      // 提取对话行
-      const dialogueLines = events.match(/^Dialogue:\s*.*/gm) || [];
+      // 提取对话�?      const dialogueLines = events.match(/^Dialogue:\s*.*/gm) || [];
       
       dialogueLines.forEach((line, index) => {
         try {
-          // 分割对话行
-          const parts = line.split(',');
+          // 分割对话�?          const parts = line.split(',');
           
           if (parts.length >= 10) {
             // 解析时间
@@ -558,11 +517,9 @@ export default class SubtitleService {
             const startTime = this.parseASSTime(startTimeText);
             const endTime = this.parseASSTime(endTimeText);
             
-            // 获取说话者
-            const speaker = parts[3];
+            // 获取说话�?            const speaker = parts[3];
             
-            // 合并文本部分（ASS格式的文本可能包含逗号）
-            const textParts = parts.slice(9);
+            // 合并文本部分（ASS格式的文本可能包含逗号�?            const textParts = parts.slice(9);
             let text = textParts.join(',');
             
             // 移除ASS样式标签
@@ -595,8 +552,7 @@ export default class SubtitleService {
     const subtitles: SubtitleItem[] = [];
     
     try {
-      // 使用正则表达式提取字幕信息
-      const textElements = content.match(/<p\s[^>]*begin="([^"]*)"[^>]*end="([^"]*)"[^>]*>([\s\S]*?)<\/p>/g) || [];
+      // 使用正则表达式提取字幕信�?      const textElements = content.match(/<p\s[^>]*begin="([^"]*)"[^>]*end="([^"]*)"[^>]*>([\s\S]*?)<\/p>/g) || [];
       
       textElements.forEach((element, index) => {
         try {
@@ -608,8 +564,7 @@ export default class SubtitleService {
             const startTime = this.parseTTMLTime(beginMatch[1]);
             const endTime = this.parseTTMLTime(endMatch[1]);
             
-            // 提取文本并移除标签
-            let text = textMatch[1];
+            // 提取文本并移除标�?            let text = textMatch[1];
             text = text.replace(/<[^>]*>/g, '');
             text = text.replace(/&lt;/g, '<');
             text = text.replace(/&gt;/g, '>');
@@ -633,7 +588,7 @@ export default class SubtitleService {
         }
       });
     } catch (error) {
-      Logger.error(TAG, 'Failed to parse TTML content', error);
+      Logger.error(TAG, 'Failed to parse TTML content', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
     
     return subtitles;
@@ -645,8 +600,7 @@ export default class SubtitleService {
   private parseSBV(content: string): SubtitleItem[] {
     const subtitles: SubtitleItem[] = [];
     
-    // 分割字幕块
-    const blocks = content.trim().split(/\r?\n\s*\r?\n/);
+    // 分割字幕�?    const blocks = content.trim().split(/\r?\n\s*\r?\n/);
     
     blocks.forEach((block, index) => {
       try {
@@ -654,8 +608,7 @@ export default class SubtitleService {
         const match = block.match(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*,\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*\r?\n([\s\S]*)/);
         
         if (match) {
-          // 解析时间戳
-          const startTime = this.parseTime(match[1], match[2], match[3], match[4]);
+          // 解析时间�?          const startTime = this.parseTime(match[1], match[2], match[3], match[4]);
           const endTime = this.parseTime(match[5], match[6], match[7], match[8]);
           
           // 解析文本
@@ -685,13 +638,11 @@ export default class SubtitleService {
   private parseLRC(content: string): SubtitleItem[] {
     const subtitles: SubtitleItem[] = [];
     
-    // 提取时间标签行
-    const timeLines = content.match(/\[\d{2}:\d{2}\.\d{2}\].*/g) || [];
+    // 提取时间标签�?    const timeLines = content.match(/\[\d{2}:\d{2}\.\d{2}\].*/g) || [];
     
     timeLines.forEach((line, index) => {
       try {
-        // 提取所有时间标签
-        const timeTags = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\]/g) || [];
+        // 提取所有时间标�?        const timeTags = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\]/g) || [];
         const text = line.replace(/\[(\d{2}:\d{2}\.\d{2})\]/g, '').trim();
         
         timeTags.forEach(tag => {
@@ -703,8 +654,7 @@ export default class SubtitleService {
             
             const startTime = minutes * 60 + seconds + milliseconds / 1000;
             
-            // LRC没有结束时间，估算为2秒
-            const endTime = startTime + 2;
+            // LRC没有结束时间，估算为2�?            const endTime = startTime + 2;
             
             if (text) {
               subtitles.push({
@@ -722,13 +672,11 @@ export default class SubtitleService {
       }
     });
     
-    // 按时间排序
-    return subtitles.sort((a, b) => a.startTime - b.startTime);
+    // 按时间排�?    return subtitles.sort((a, b) => a.startTime - b.startTime);
   }
 
   /**
-   * 解析时间格式（HH:MM:SS,mmm 或 HH:MM:SS.mmm）
-   */
+   * 解析时间格式（HH:MM:SS,mmm �?HH:MM:SS.mmm�?   */
   private parseTime(hours: string, minutes: string, seconds: string, milliseconds: string): number {
     const h = parseInt(hours);
     const m = parseInt(minutes);
@@ -739,8 +687,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 解析ASS/SSA时间格式（HH:MM:SS.cc）
-   */
+   * 解析ASS/SSA时间格式（HH:MM:SS.cc�?   */
   private parseASSTime(timeText: string): number {
     const match = timeText.match(/(\d+):(\d+):(\d+)\.(\d+)/);
     if (match) {
@@ -758,7 +705,7 @@ export default class SubtitleService {
    * 解析TTML时间格式
    */
   private parseTTMLTime(timeText: string): number {
-    // 处理小时:分钟:秒.毫秒 格式
+    // 处理小时:分钟:�?毫秒 格式
     const fullMatch = timeText.match(/^(\d+):(\d+):(\d+(?:\.\d+)?)$/);
     if (fullMatch) {
       const h = parseInt(fullMatch[1]);
@@ -768,7 +715,7 @@ export default class SubtitleService {
       return h * 3600 + m * 60 + s;
     }
     
-    // 处理分钟:秒.毫秒 格式
+    // 处理分钟:�?毫秒 格式
     const shortMatch = timeText.match(/^(\d+):(\d+(?:\.\d+)?)$/);
     if (shortMatch) {
       const m = parseInt(shortMatch[1]);
@@ -801,15 +748,13 @@ export default class SubtitleService {
         startTime: Date.now()
       };
       
-      // 添加到任务列表
-      this.downloadTasks.set(task.id, task);
+      // 添加到任务列�?      this.downloadTasks.set(task.id, task);
       
       // 生成保存路径
       const fileName = `${track.id}_${Date.now()}.${track.type}`;
       const savePath = `${SUBTITLE_CACHE_DIR}/${fileName}`;
       
-      // 更新任务状态
-      task.status = SubtitleDownloadStatus.DOWNLOADING;
+      // 更新任务状�?      task.status = SubtitleDownloadStatus.DOWNLOADING;
       this.updateDownloadTask(task);
       if (onProgress) {
         onProgress({ ...task });
@@ -828,8 +773,7 @@ export default class SubtitleService {
       });
       
       if (response.success) {
-        // 更新任务状态
-        task.status = SubtitleDownloadStatus.COMPLETED;
+        // 更新任务状�?        task.status = SubtitleDownloadStatus.COMPLETED;
         task.progress = 100;
         task.endTime = Date.now();
         task.localPath = savePath;
@@ -839,13 +783,11 @@ export default class SubtitleService {
         // 移除任务（可选，保留短时间以便查询）
         setTimeout(() => {
           this.downloadTasks.delete(task.id);
-        }, 300000); // 5分钟后移除
-        
+        }, 300000); // 5分钟后移�?        
         Logger.info(TAG, `Successfully downloaded subtitle: ${track.name} to ${savePath}`);
         return ApiResponse.success({ ...task }, '字幕下载成功');
       } else {
-        // 更新任务状态
-        task.status = SubtitleDownloadStatus.FAILED;
+        // 更新任务状�?        task.status = SubtitleDownloadStatus.FAILED;
         task.error = response.error;
         task.endTime = Date.now();
         
@@ -854,10 +796,9 @@ export default class SubtitleService {
         return ApiResponse.error(ResponseCode.NETWORK_ERROR, `字幕下载失败: ${response.error}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to download subtitle: ${track.name}`, error);
+      Logger.error(TAG, `Failed to download subtitle: ${track.name}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       
-      // 如果有任务，更新状态
-      for (const [, task] of this.downloadTasks) {
+      // 如果有任务，更新状�?      for (const [, task] of this.downloadTasks) {
         if (task.track.id === track.id && task.status === SubtitleDownloadStatus.DOWNLOADING) {
           task.status = SubtitleDownloadStatus.FAILED;
           task.error = String(error);
@@ -878,15 +819,14 @@ export default class SubtitleService {
     try {
       const task = this.downloadTasks.get(taskId);
       if (!task) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存在');
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       if (task.status !== SubtitleDownloadStatus.DOWNLOADING) {
-        return ApiResponse.error(ResponseCode.INVALID_OPERATION, '任务不在下载中');
+        return ApiResponse.error(ResponseCode.INVALID_OPERATION, '任务不在下载�?);
       }
       
-      // 更新任务状态
-      task.status = SubtitleDownloadStatus.CANCELED;
+      // 更新任务状�?      task.status = SubtitleDownloadStatus.CANCELED;
       task.endTime = Date.now();
       
       this.updateDownloadTask(task);
@@ -899,14 +839,13 @@ export default class SubtitleService {
       Logger.info(TAG, `Canceled subtitle download task: ${taskId}`);
       return ApiResponse.success(true, '取消下载成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to cancel download task: ${taskId}`, error);
+      Logger.error(TAG, `Failed to cancel download task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '取消下载失败');
     }
   }
 
   /**
-   * 获取所有下载任务
-   */
+   * 获取所有下载任�?   */
   public getDownloadTasks(): SubtitleDownloadTask[] {
     return Array.from(this.downloadTasks.values());
   }
@@ -919,8 +858,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 更新下载任务状态
-   */
+   * 更新下载任务状�?   */
   private updateDownloadTask(task: SubtitleDownloadTask): void {
     this.downloadTasks.set(task.id, { ...task });
     this.notifyDownloadTaskChanged(task);
@@ -937,8 +875,7 @@ export default class SubtitleService {
       const results = new Map<SubtitleProvider, SubtitleTrack[]>();
       
       // 这里应该调用各个字幕提供商的API
-      // 为了演示，我们返回模拟数据
-      
+      // 为了演示，我们返回模拟数�?      
       // 模拟OpenSubtitles结果
       results.set(SubtitleProvider.OPENSUBTITLES, [
         {
@@ -952,7 +889,7 @@ export default class SubtitleService {
         },
         {
           id: 'opensub_2',
-          name: '简体中文',
+          name: '简体中�?,
           language: 'zh',
           type: SubtitleType.SRT,
           url: 'https://example.com/subtitles/zh.srt',
@@ -965,7 +902,7 @@ export default class SubtitleService {
       results.set(SubtitleProvider.SUBHD, [
         {
           id: 'subhd_1',
-          name: '简体中文字幕',
+          name: '简体中文字�?,
           language: 'zh',
           type: SubtitleType.ASS,
           url: 'https://example.com/subtitles/subhd.ass',
@@ -977,14 +914,13 @@ export default class SubtitleService {
       Logger.info(TAG, `Search subtitles completed for: ${params.title}`);
       return ApiResponse.success(results, '字幕搜索成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to search subtitles', error);
+      Logger.error(TAG, 'Failed to search subtitles', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '字幕搜索失败');
     }
   }
 
   /**
-   * 添加字幕到历史记录
-   */
+   * 添加字幕到历史记�?   */
   public async addToHistory(
     contentId: string,
     track: SubtitleTrack,
@@ -1001,13 +937,11 @@ export default class SubtitleService {
         type: track.type
       };
       
-      // 添加到历史记录（移除旧的相同条目）
-      this.subtitleHistory = this.subtitleHistory.filter(
+      // 添加到历史记录（移除旧的相同条目�?      this.subtitleHistory = this.subtitleHistory.filter(
         item => !(item.contentId === contentId && item.subtitleId === track.id)
       );
       
-      // 添加到开头
-      this.subtitleHistory.unshift(historyItem);
+      // 添加到开�?      this.subtitleHistory.unshift(historyItem);
       
       // 限制历史记录数量
       if (this.subtitleHistory.length > 100) {
@@ -1019,7 +953,7 @@ export default class SubtitleService {
       
       Logger.debug(TAG, `Added subtitle to history: ${track.name}`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to add subtitle to history', error);
+      Logger.error(TAG, 'Failed to add subtitle to history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -1031,8 +965,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 获取内容的字幕历史
-   */
+   * 获取内容的字幕历�?   */
   public getContentHistory(contentId: string): SubtitleHistory[] {
     return this.subtitleHistory.filter(item => item.contentId === contentId);
   }
@@ -1046,7 +979,7 @@ export default class SubtitleService {
       await this.saveSubtitleHistory();
       Logger.info(TAG, 'Cleared subtitle history');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear subtitle history', error);
+      Logger.error(TAG, 'Failed to clear subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 
@@ -1069,14 +1002,12 @@ export default class SubtitleService {
    */
   public async loadLocalSubtitle(filePath: string): Promise<ApiResponse<SubtitleTrack>> {
     try {
-      // 检查文件是否存在
-      const exists = await FileUtil.fileExists(filePath);
+      // 检查文件是否存�?      const exists = await FileUtil.fileExists(filePath);
       if (!exists) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '字幕文件不存在');
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '字幕文件不存�?);
       }
       
-      // 获取文件扩展名
-      const extension = FileUtil.getExtension(filePath).toLowerCase();
+      // 获取文件扩展�?      const extension = FileUtil.getExtension(filePath).toLowerCase();
       
       // 确定字幕类型
       let type: SubtitleType;
@@ -1109,8 +1040,7 @@ export default class SubtitleService {
           type = SubtitleType.UNKNOWN;
       }
       
-      // 获取文件名作为标题
-      const fileName = FileUtil.getFileName(filePath);
+      // 获取文件名作为标�?      const fileName = FileUtil.getFileName(filePath);
       
       // 创建字幕轨道
       const track: SubtitleTrack = {
@@ -1123,8 +1053,7 @@ export default class SubtitleService {
         isDefault: false
       };
       
-      // 尝试解析字幕以验证
-      const parseResult = await this.parseSubtitle(track);
+      // 尝试解析字幕以验�?      const parseResult = await this.parseSubtitle(track);
       if (!parseResult.isSuccess()) {
         return ApiResponse.error(parseResult.code, `字幕文件格式无效: ${parseResult.message}`);
       }
@@ -1132,14 +1061,13 @@ export default class SubtitleService {
       Logger.info(TAG, `Loaded local subtitle file: ${filePath}`);
       return ApiResponse.success(track, '加载本地字幕成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to load local subtitle file: ${filePath}`, error);
+      Logger.error(TAG, `Failed to load local subtitle file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, `加载本地字幕失败: ${String(error)}`);
     }
   }
 
   /**
-   * 生成字幕预览（用于选择字幕）
-   */
+   * 生成字幕预览（用于选择字幕�?   */
   public async generateSubtitlePreview(
     track: SubtitleTrack,
     time: number,
@@ -1155,8 +1083,7 @@ export default class SubtitleService {
       // 获取指定时间范围内的字幕
       const previewSubtitles = parseResult.data.filter(
         sub => sub.startTime >= time && sub.startTime <= time + duration
-      ).slice(0, 10); // 最多10条
-      
+      ).slice(0, 10); // 最�?0�?      
       // 生成预览文本
       const preview = previewSubtitles.map(sub => {
         const startTimeFormatted = this.formatTime(sub.startTime);
@@ -1165,7 +1092,7 @@ export default class SubtitleService {
       
       return ApiResponse.success(preview, '生成字幕预览成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to generate subtitle preview: ${track.id}`, error);
+      Logger.error(TAG, `Failed to generate subtitle preview: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '生成字幕预览失败');
     }
   }
@@ -1200,7 +1127,7 @@ export default class SubtitleService {
       Logger.info(TAG, 'Cleared subtitle cache');
       return ApiResponse.success(true, '清除字幕缓存成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear subtitle cache', error);
+      Logger.error(TAG, 'Failed to clear subtitle cache', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '清除字幕缓存失败');
     }
   }
@@ -1213,7 +1140,7 @@ export default class SubtitleService {
       try {
         listener({ ...this.subtitleStyle });
       } catch (error) {
-        Logger.error(TAG, 'Error in style listener', error);
+        Logger.error(TAG, 'Error in style listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -1229,14 +1156,13 @@ export default class SubtitleService {
       try {
         listener({ ...task });
       } catch (error) {
-        Logger.error(TAG, `Error in download listener for task ${task.id}`, error);
+        Logger.error(TAG, `Error in download listener for task ${task.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
 
   /**
-   * 通知解析开始
-   */
+   * 通知解析开�?   */
   private notifyParseStart(trackId: string): void {
     if (!this.parseListeners.has(trackId)) return;
     
@@ -1245,7 +1171,7 @@ export default class SubtitleService {
       try {
         listener([]);
       } catch (error) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error);
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -1261,7 +1187,7 @@ export default class SubtitleService {
       try {
         listener(subtitles);
       } catch (error) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error);
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }
   }
@@ -1277,14 +1203,13 @@ export default class SubtitleService {
       try {
         listener([], error);
       } catch (err) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, err);
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err)))))));
       }
     }
   }
 
   /**
-   * 添加样式变更监听器
-   */
+   * 添加样式变更监听�?   */
   public addStyleListener(listener: (style: SubtitleStyle) => void): () => void {
     this.styleListeners.push(listener);
     
@@ -1301,8 +1226,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 添加下载任务监听器
-   */
+   * 添加下载任务监听�?   */
   public addDownloadListener(
     taskId: string,
     listener: (task: SubtitleDownloadTask) => void
@@ -1314,8 +1238,7 @@ export default class SubtitleService {
     const listeners = this.downloadListeners.get(taskId)!;
     listeners.push(listener);
     
-    // 立即回调当前任务状态
-    const task = this.downloadTasks.get(taskId);
+    // 立即回调当前任务状�?    const task = this.downloadTasks.get(taskId);
     if (task) {
       listener({ ...task });
     }
@@ -1335,8 +1258,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 添加解析监听器
-   */
+   * 添加解析监听�?   */
   public addParseListener(
     trackId: string,
     listener: (subtitles: SubtitleItem[], error?: string) => void
@@ -1363,8 +1285,7 @@ export default class SubtitleService {
   }
 
   /**
-   * 销毁字幕服务
-   */
+   * 销毁字幕服�?   */
   public async destroy(): Promise<void> {
     try {
       Logger.info(TAG, 'Destroying subtitle service...');
@@ -1372,8 +1293,7 @@ export default class SubtitleService {
       // 清除缓存
       await this.clearCache();
       
-      // 清除监听器
-      this.styleListeners = [];
+      // 清除监听�?      this.styleListeners = [];
       this.downloadListeners.clear();
       this.parseListeners.clear();
       
@@ -1383,8 +1303,11 @@ export default class SubtitleService {
       
       Logger.info(TAG, 'Subtitle service destroyed successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to destroy subtitle service', error);
+      Logger.error(TAG, 'Failed to destroy subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
   }
 }
+
+
+
 

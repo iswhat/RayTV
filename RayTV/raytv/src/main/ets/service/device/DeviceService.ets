@@ -1,5 +1,4 @@
-// DeviceService - 设备服务类
-import Logger from '../../common/util/Logger';
+// DeviceService - 设备服务�?import Logger from '../../common/util/Logger';
 import { DeviceInfo, DeviceType, DeviceCapability } from '../../data/bean/DeviceInfo';
 import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
 import ConfigService from '../../service/config/ConfigService';
@@ -11,8 +10,7 @@ import display from '@ohos.display';
 
 const TAG = 'DeviceService';
 
-// 设备功能检测详情接口
-export interface CapabilityDetails {
+// 设备功能检测详情接�?export interface CapabilityDetails {
   capabilityType?: string;
   version?: string;
   maxValue?: number;
@@ -21,8 +19,7 @@ export interface CapabilityDetails {
   properties?: Record<string, string | number | boolean>;
 }
 
-// 设备功能检测结果
-export interface CapabilityCheckResult {
+// 设备功能检测结�?export interface CapabilityCheckResult {
   supported: boolean;
   details?: CapabilityDetails;
   error?: string;
@@ -51,8 +48,7 @@ export default class DeviceService {
   }
 
   /**
-   * 初始化设备服务
-   */
+   * 初始化设备服�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载设备信息
@@ -70,9 +66,8 @@ export default class DeviceService {
       this.isInitialized = true;
       Logger.info(TAG, 'Device service initialized');
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize device service', error);
-      // 创建基本的设备信息作为后备
-      this.cachedDeviceInfo = this.createDefaultDeviceInfo();
+      Logger.error(TAG, 'Failed to initialize device service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      // 创建基本的设备信息作为后�?      this.cachedDeviceInfo = this.createDefaultDeviceInfo();
       this.isInitialized = true;
     }
   }
@@ -125,8 +120,7 @@ export default class DeviceService {
    */
   private createDefaultDeviceInfo(): DeviceInfo {
     return {
-      deviceId: 'unknown-device-' + Date.now(),
-      deviceName: 'Unknown Device',
+      deviceId: 'unknown-device-' + Date.now(), deviceName: 'Unknown Device',
       deviceType: DeviceType.UNKNOWN,
       manufacturer: 'Unknown',
       model: 'Unknown',
@@ -136,7 +130,267 @@ export default class DeviceService {
       deviceLanguage: 'zh-CN',
       timezone: 'Asia/Shanghai',
       capabilities: [],
-      lastActiveTime: Date.now(),
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( instanceof Error ? deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now( : new Error(String(deviceName: 'Unknown Device',
+      deviceType: DeviceType.UNKNOWN,
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      osVersion: 'Unknown',
+      appVersion: '1.0.0',
+      screenResolution: { width: 1920, height: 1080 },
+      deviceLanguage: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      capabilities: [],
+      lastActiveTime: Date.now())))))),
       firstActiveTime: Date.now(),
       usageCount: 1,
       storageInfo: { total: 0, available: 0 },
@@ -169,27 +423,22 @@ export default class DeviceService {
       await this.deviceInfoRepository.saveDeviceId(deviceId);
       return deviceId;
     } catch (error) {
-      Logger.error(TAG, 'Failed to generate device ID', error);
+      Logger.error(TAG, 'Failed to generate device ID', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'fallback-device-' + Date.now();
     }
   }
 
   /**
-   * 检测设备类型
-   */
+   * 检测设备类�?   */
   private detectDeviceType(): DeviceType {
-    // 使用HarmonyOS设备信息API检测设备类型
-    try {
+    // 使用HarmonyOS设备信息API检测设备类�?    try {
       // 根据productModel或deviceType判断设备类型
       // 这里简化处理，实际应用中可根据具体的设备标识进行更精确判断
       const deviceModel = deviceInfo.productModel.toLowerCase();
       
-      // 常见电视设备标识关键词
-      const tvKeywords = ['smarttv', 'tizen', 'webos', 'tv', 'smart-tv'];
-      // 常见平板设备标识关键词
-      const tabletKeywords = ['tablet', 'pad', 'tab'];
-      // 常见移动设备标识关键词
-      const mobileKeywords = ['phone', 'mobile', 'cell'];
+      // 常见电视设备标识关键�?      const tvKeywords = ['smarttv', 'tizen', 'webos', 'tv', 'smart-tv'];
+      // 常见平板设备标识关键�?      const tabletKeywords = ['tablet', 'pad', 'tab'];
+      // 常见移动设备标识关键�?      const mobileKeywords = ['phone', 'mobile', 'cell'];
       
       if (tvKeywords.some(keyword => deviceModel.includes(keyword))) {
         return DeviceType.TV;
@@ -204,7 +453,7 @@ export default class DeviceService {
       // 默认返回TV类型，因为这是TV应用
       return DeviceType.TV;
     } catch (error) {
-      Logger.error(TAG, 'Failed to detect device type', error);
+      Logger.error(TAG, 'Failed to detect device type', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return DeviceType.TV;
     }
   }
@@ -217,7 +466,7 @@ export default class DeviceService {
       // 使用HarmonyOS设备信息API获取设备名称
       return `${deviceInfo.manufacture} ${deviceInfo.productModel}` || 'RayTV Device';
     } catch (error) {
-      Logger.error(TAG, 'Failed to get device name', error);
+      Logger.error(TAG, 'Failed to get device name', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'RayTV Device';
     }
   }
@@ -230,7 +479,7 @@ export default class DeviceService {
       // 使用HarmonyOS设备信息API获取制造商
       return deviceInfo.manufacture || 'Unknown Manufacturer';
     } catch (error) {
-      Logger.error(TAG, 'Failed to get manufacturer', error);
+      Logger.error(TAG, 'Failed to get manufacturer', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'Unknown';
     }
   }
@@ -243,7 +492,7 @@ export default class DeviceService {
       // 使用HarmonyOS设备信息API获取设备型号
       return deviceInfo.productModel || 'Unknown Model';
     } catch (error) {
-      Logger.error(TAG, 'Failed to get device model', error);
+      Logger.error(TAG, 'Failed to get device model', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'Unknown';
     }
   }
@@ -256,7 +505,7 @@ export default class DeviceService {
       // 使用HarmonyOS设备信息API获取系统版本
       return deviceInfo.osFullName || deviceInfo.sdkApiVersion.toString() || 'Unknown';
     } catch (error) {
-      Logger.error(TAG, 'Failed to get OS version', error);
+      Logger.error(TAG, 'Failed to get OS version', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'Unknown';
     }
   }
@@ -266,20 +515,17 @@ export default class DeviceService {
    */
   private getAppVersion(): string {
     try {
-      // 实际应用中从配置或清单文件获取
-      return '1.0.0';
+      // 实际应用中从配置或清单文件获�?      return '1.0.0';
     } catch {
       return '1.0.0';
     }
   }
 
   /**
-   * 获取屏幕分辨率
-   */
+   * 获取屏幕分辨�?   */
   private getScreenResolution(): { width: number; height: number } {
     try {
-      // 使用HarmonyOS display API获取屏幕分辨率
-      const displays = display.getAllDisplays();
+      // 使用HarmonyOS display API获取屏幕分辨�?      const displays = display.getAllDisplays();
       if (displays && displays.length > 0) {
         const defaultDisplay = displays[0];
         return {
@@ -289,7 +535,7 @@ export default class DeviceService {
       }
       return { width: 1920, height: 1080 };
     } catch (error) {
-      Logger.error(TAG, 'Failed to get screen resolution', error);
+      Logger.error(TAG, 'Failed to get screen resolution', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { width: 1920, height: 1080 };
     }
   }
@@ -302,7 +548,7 @@ export default class DeviceService {
       // 使用HarmonyOS i18n模块获取设备语言
       return i18n.System.getSystemLanguageSync() || 'zh-CN';
     } catch (error) {
-      Logger.error(TAG, 'Failed to get device language', error);
+      Logger.error(TAG, 'Failed to get device language', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return 'zh-CN';
     }
   }
@@ -319,8 +565,7 @@ export default class DeviceService {
   }
 
   /**
-   * 检测设备能力
-   */
+   * 检测设备能�?   */
   private async detectDeviceCapabilities(): Promise<DeviceCapability[]> {
     const capabilities: DeviceCapability[] = [];
     
@@ -340,26 +585,21 @@ export default class DeviceService {
     // 存储能力
     capabilities.push(DeviceCapability.FILE_SHARING);
     
-    // 触摸能力检测
-    if (await this.checkTouchCapability()) {
+    // 触摸能力检�?    if (await this.checkTouchCapability()) {
       capabilities.push(DeviceCapability.TOUCH_SCREEN);
     }
     
-    // 键盘能力检测
-    if (await this.checkKeyboardCapability()) {
+    // 键盘能力检�?    if (await this.checkKeyboardCapability()) {
       capabilities.push(DeviceCapability.KEYBOARD_INPUT);
     }
     
-    // 遥控器能力检测
-    capabilities.push(DeviceCapability.REMOTE_CONTROL);
+    // 遥控器能力检�?    capabilities.push(DeviceCapability.REMOTE_CONTROL);
     
-    // 硬件解码能力检测
-    if (await this.checkHardwareDecoding()) {
+    // 硬件解码能力检�?    if (await this.checkHardwareDecoding()) {
       capabilities.push(DeviceCapability.HIGHER_RESOLUTION);
     }
     
-    // HDR能力检测
-    if (await this.checkHDRCapability()) {
+    // HDR能力检�?    if (await this.checkHDRCapability()) {
       capabilities.push(DeviceCapability.HDR_SUPPORT);
     }
     
@@ -367,62 +607,51 @@ export default class DeviceService {
   }
 
   /**
-   * 检查音频能力
-   */
+   * 检查音频能�?   */
   private async checkAudioCapability(): Promise<boolean> {
     try {
-      // 简化实现
-      return true;
+      // 简化实�?      return true;
     } catch {
       return false;
     }
   }
 
   /**
-   * 检查视频能力
-   */
+   * 检查视频能�?   */
   private async checkVideoCapability(): Promise<boolean> {
     try {
-      // 简化实现
-      return true;
+      // 简化实�?      return true;
     } catch {
       return false;
     }
   }
 
   /**
-   * 检查触摸能力
-   */
+   * 检查触摸能�?   */
   private async checkTouchCapability(): Promise<boolean> {
     try {
-      // HarmonyOS设备通常支持触摸，这里简化处理
-      // 实际应用中可以通过多模态输入API进行更精确的检测
-      return true;
+      // HarmonyOS设备通常支持触摸，这里简化处�?      // 实际应用中可以通过多模态输入API进行更精确的检�?      return true;
     } catch (error) {
-      Logger.error(TAG, 'Failed to check touch capability', error);
+      Logger.error(TAG, 'Failed to check touch capability', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
 
   /**
-   * 检查键盘能力
-   */
+   * 检查键盘能�?   */
   private async checkKeyboardCapability(): Promise<boolean> {
     try {
-      // 简化实现
-      return true;
+      // 简化实�?      return true;
     } catch {
       return false;
     }
   }
 
   /**
-   * 检查硬件解码能力
-   */
+   * 检查硬件解码能�?   */
   private async checkHardwareDecoding(): Promise<boolean> {
     try {
-      // 简化实现
-      return true;
+      // 简化实�?      return true;
     } catch {
       return false;
     }
@@ -433,8 +662,7 @@ export default class DeviceService {
    */
   private async checkHDRCapability(): Promise<boolean> {
     try {
-      // 简化实现
-      return false;
+      // 简化实�?      return false;
     } catch {
       return false;
     }
@@ -445,8 +673,7 @@ export default class DeviceService {
    */
   private async getStorageInfo(): Promise<{ total: number; available: number }> {
     try {
-      // 简化实现
-      return { total: 0, available: 0 };
+      // 简化实�?      return { total: 0, available: 0 };
     } catch {
       return { total: 0, available: 0 };
     }
@@ -457,8 +684,7 @@ export default class DeviceService {
    */
   private async getMemoryInfo(): Promise<{ total: number; available: number }> {
     try {
-      // 简化实现
-      return { total: 0, available: 0 };
+      // 简化实�?      return { total: 0, available: 0 };
     } catch {
       return { total: 0, available: 0 };
     }
@@ -475,8 +701,7 @@ export default class DeviceService {
         const netCapabilities = connection.getNetCapabilitiesSync(netInfo);
         const bearerTypes = netCapabilities.bearerTypes || [];
         
-        // 将网络类型转换为可读字符串
-        let typeStr = 'unknown';
+        // 将网络类型转换为可读字符�?        let typeStr = 'unknown';
         if (bearerTypes.includes(connection.NetBearType.WIFI)) {
           typeStr = 'wifi';
         } else if (bearerTypes.includes(connection.NetBearType.CELLULAR)) {
@@ -492,7 +717,7 @@ export default class DeviceService {
       }
       return { type: 'unknown', isConnected: false };
     } catch (error) {
-      Logger.error(TAG, 'Failed to get network info', error);
+      Logger.error(TAG, 'Failed to get network info', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return { type: 'unknown', isConnected: false };
     }
   }
@@ -502,8 +727,7 @@ export default class DeviceService {
    */
   private async getAudioDevices(): Promise<Array<{ id: string; name: string; type: string }>> {
     try {
-      // 简化实现
-      return [];
+      // 简化实�?      return [];
     } catch {
       return [];
     }
@@ -514,29 +738,26 @@ export default class DeviceService {
    */
   private async getVideoOutputs(): Promise<Array<{ id: string; name: string; resolution: string }>> {
     try {
-      // 简化实现
-      return [];
+      // 简化实�?      return [];
     } catch {
       return [];
     }
   }
 
   /**
-   * 获取系统属性
-   */
+   * 获取系统属�?   */
   private getSystemProperties(): Record<string, string> {
     const properties: Record<string, string> = {};
     
     try {
-      // 使用HarmonyOS设备信息API获取系统属性
-      properties.manufacturer = deviceInfo.manufacture || '';
+      // 使用HarmonyOS设备信息API获取系统属�?      properties.manufacturer = deviceInfo.manufacture || '';
       properties.model = deviceInfo.productModel || '';
       properties.osFullName = deviceInfo.osFullName || '';
       properties.apiVersion = deviceInfo.sdkApiVersion.toString() || '';
       properties.deviceType = deviceInfo.deviceType || '';
       properties.language = i18n.System.getSystemLanguageSync() || '';
     } catch (error) {
-      Logger.error(TAG, 'Error getting system properties', error);
+      Logger.error(TAG, 'Error getting system properties', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     }
     
     return properties;
@@ -546,12 +767,11 @@ export default class DeviceService {
    * 计划设备信息更新
    */
   private scheduleDeviceInfoUpdate(): void {
-    // 每小时更新一次设备信息
-    setInterval(async () => {
+    // 每小时更新一次设备信�?    setInterval(async () => {
       try {
         await this.updateDeviceInfo();
       } catch (error) {
-        Logger.error(TAG, 'Failed to update device info scheduled', error);
+        Logger.error(TAG, 'Failed to update device info scheduled', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     }, 3600000);
   }
@@ -582,12 +802,11 @@ export default class DeviceService {
       // 保存更新后的信息
       await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
       
-      // 通知监听器
-      this.notifyDeviceInfoChanged();
+      // 通知监听�?      this.notifyDeviceInfoChanged();
       
       return this.cachedDeviceInfo;
     } catch (error) {
-      Logger.error(TAG, 'Failed to update device information', error);
+      Logger.error(TAG, 'Failed to update device information', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       throw error;
     }
   }
@@ -618,8 +837,7 @@ export default class DeviceService {
   }
 
   /**
-   * 检查设备是否支持特定能力
-   */
+   * 检查设备是否支持特定能�?   */
   public async hasCapability(capability: DeviceCapability): Promise<boolean> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -640,24 +858,21 @@ export default class DeviceService {
   }
 
   /**
-   * 设置自定义设备属性
-   */
+   * 设置自定义设备属�?   */
   public async setCustomProperty<T extends string | number | boolean | object>(key: string, value: T): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
     
     if (this.cachedDeviceInfo) {
-      // 使用类型安全的方式存储自定义属性
-      this.cachedDeviceInfo.customProperties[key] = TypeSafetyUtil.safeStringify(value);
+      // 使用类型安全的方式存储自定义属�?      this.cachedDeviceInfo.customProperties[key] = TypeSafetyUtil.safeStringify(value);
       await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
       this.notifyDeviceInfoChanged();
     }
   }
 
   /**
-   * 获取自定义设备属性
-   */
+   * 获取自定义设备属�?   */
   public async getCustomProperty<T>(key: string, defaultValue?: T): Promise<T | undefined> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -671,15 +886,13 @@ export default class DeviceService {
   }
 
   /**
-   * 注册设备信息变更监听器
-   */
+   * 注册设备信息变更监听�?   */
   public addDeviceInfoListener(listener: (info: DeviceInfo) => void): void {
     this.deviceListeners.push(listener);
   }
 
   /**
-   * 移除设备信息变更监听器
-   */
+   * 移除设备信息变更监听�?   */
   public removeDeviceInfoListener(listener: (info: DeviceInfo) => void): void {
     this.deviceListeners = this.deviceListeners.filter(l => l !== listener);
   }
@@ -690,19 +903,18 @@ export default class DeviceService {
   private notifyDeviceInfoChanged(): void {
     if (!this.cachedDeviceInfo) return;
     
-    const infoCopy = { ...this.cachedDeviceInfo };
+    const infoCopy: Record<string, string | number | boolean | null> = { ... };
     this.deviceListeners.forEach(listener => {
       try {
         listener(infoCopy);
       } catch (error) {
-        Logger.error(TAG, 'Error in device info listener', error);
+        Logger.error(TAG, 'Error in device info listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       }
     });
   }
 
   /**
-   * 检查设备存储空间是否充足
-   */
+   * 检查设备存储空间是否充�?   */
   public async isStorageSufficient(minRequiredMB: number): Promise<boolean> {
     try {
       const storageInfo = await this.getStorageInfo();
@@ -710,7 +922,7 @@ export default class DeviceService {
       const availableMB = storageInfo.available / (1024 * 1024);
       return availableMB >= minRequiredMB;
     } catch (error) {
-      Logger.error(TAG, 'Failed to check storage', error);
+      Logger.error(TAG, 'Failed to check storage', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return false;
     }
   }
@@ -731,3 +943,5 @@ export default class DeviceService {
     };
   }
 }
+
+

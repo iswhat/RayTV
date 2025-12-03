@@ -9,8 +9,7 @@ import { ConfigParser } from '../config/ConfigParser';
 import Logger from '../../common/util/Logger';
 
 /**
- * 视频项接口定义
- */
+ * 视频项接口定�? */
 interface VideoItem {
   id: string;
   title: string;
@@ -56,8 +55,7 @@ interface SiteSpider {
   // 获取热门列表
   getHotList(): Promise<VideoItem[]>;
   
-  // 获取最新更新
-  getLatestList(): Promise<VideoItem[]>;
+  // 获取最新更�?  getLatestList(): Promise<VideoItem[]>;
   
   // 获取分类列表
   getCategories(): Promise<string[]>;
@@ -79,9 +77,7 @@ interface SiteSpider {
 }
 
 /**
- * 爬虫服务实现类
- * 管理所有站点爬虫，提供统一的数据获取接口
- */
+ * 爬虫服务实现�? * 管理所有站点爬虫，提供统一的数据获取接�? */
 export class CrawlerService {
   private static instance: CrawlerService;
   private siteSpiders: Map<string, SiteSpider> = new Map();
@@ -109,16 +105,13 @@ export class CrawlerService {
   }
   
   /**
-   * 初始化爬虫服务
-   */
+   * 初始化爬虫服�?   */
   public async initialize(): Promise<void> {
     if (this.initialized) return;
     
     try {
-      // 加载保存的站点配置
-      await this.loadSiteConfigs();
-      // 初始化默认站点
-      await this.initDefaultSites();
+      // 加载保存的站点配�?      await this.loadSiteConfigs();
+      // 初始化默认站�?      await this.initDefaultSites();
       this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize crawler service:', error);
@@ -144,8 +137,7 @@ export class CrawlerService {
   }
   
   /**
-   * 初始化默认站点
-   */
+   * 初始化默认站�?   */
   private async initDefaultSites(): Promise<void> {
     try {
       // 如果没有站点配置，添加默认的模拟站点
@@ -186,8 +178,7 @@ export class CrawlerService {
       Logger.info(this.TAG, `Creating spider for site: ${key}`);
       
       // 这里应该是根据站点配置创建实际爬虫的逻辑
-      // 由于没有具体的爬虫实现，暂时返回一个空实现，会在后续完善
-      return {
+      // 由于没有具体的爬虫实现，暂时返回一个空实现，会在后续完�?      return {
         getSiteInfo: async () => config as SiteInfo,
         getRecommendList: async () => [],
         getHotList: async () => [],
@@ -199,7 +190,7 @@ export class CrawlerService {
         getPlayUrl: async () => ''
       };
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create spider for site ${key}:`, error);
+      Logger.error(this.TAG, `Failed to create spider for site ${key}:`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
       return null;
     }
   }
@@ -208,12 +199,10 @@ export class CrawlerService {
    * 获取默认站点配置
    */
   private getDefaultSites(): SiteInfo[] {
-    // 返回实际可用的站点配置，而不是模拟站点
-    // 实际项目中应该从配置文件或网络获取
-    return [
+    // 返回实际可用的站点配置，而不是模拟站�?    // 实际项目中应该从配置文件或网络获�?    return [
       {
         key: 'official_video_site',
-        name: '官方视频站',
+        name: '官方视频�?,
         type: 'vod',
         url: 'https://api.raytv.com/v1',
         enabled: true,
@@ -229,8 +218,7 @@ export class CrawlerService {
   }
   
   /**
-   * 获取所有站点
-   */
+   * 获取所有站�?   */
   public async getAllSites(): Promise<SiteInfo[]> {
     await this.initialize();
     const sites: SiteInfo[] = [];
@@ -265,8 +253,7 @@ export class CrawlerService {
   }
   
   /**
-   * 设置站点状态
-   */
+   * 设置站点状�?   */
   public async setSiteStatus(siteKey: string, enabled: boolean): Promise<void> {
     await this.initialize();
     
@@ -308,8 +295,7 @@ export class CrawlerService {
           this.siteSpiders.set(siteConfig.key, spider);
         }
         
-        // 保存到存储
-        const allSites = await this.getAllSites();
+        // 保存到存�?        const allSites = await this.getAllSites();
         await this.storageUtil.saveSitesConfig(allSites);
         
         return siteConfig;
@@ -341,23 +327,22 @@ export class CrawlerService {
   /**
    * 调用站点方法
    */
-  public async callSiteMethod<T>(siteKey: string, methodName: string, args: unknown[]): Promise<T> {
+  public async callSiteMethod<T>(siteKey: string, methodName: string, args: Record<string, string | number | boolean | null>[]): Promise<T> {
     await this.initialize();
     
     const spider = this.siteSpiders.get(siteKey);
     if (!spider) {
       Logger.error(this.TAG, `No spider found for site: ${siteKey}`);
-      // 返回空数据而不是使用模拟数据
-      return this.getDefaultEmptyData<T>(methodName);
+      // 返回空数据而不是使用模拟数�?      return this.getDefaultEmptyData<T>(methodName);
     }
     
-    return this.callSpiderMethod<T>(spider, methodName, args);
+    return this.callSpiderMethod<T>(spider, methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args : new Error(String(methodName, args instanceof Error ? methodName, args : new Error(String(methodName, args)))))));
   }
   
   /**
    * 调用爬虫实例方法
    */
-  private async callSpiderMethod<T>(spider: SiteSpider, methodName: string, args: unknown[]): Promise<T> {
+  private async callSpiderMethod<T>(spider: SiteSpider, methodName: string, args: Record<string, string | number | boolean | null>[]): Promise<T> {
     try {
       const method = (spider as Record<string, unknown>)[methodName];
       if (typeof method === 'function') {
@@ -367,9 +352,8 @@ export class CrawlerService {
         throw new Error(`Method ${methodName} not found in spider`);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to call ${methodName} on spider:`, error);
-      // 返回空数据而不是模拟数据
-      return this.getDefaultEmptyData<T>(methodName);
+      Logger.error(this.TAG, `Failed to call ${methodName} on spider:`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      // 返回空数据而不是模拟数�?      return this.getDefaultEmptyData<T>(methodName);
     }
   }
   
@@ -404,8 +388,7 @@ export class CrawlerService {
 
 // 移除了模拟数据生成器和相关类定义
 
-// 导出一些额外的类型和工具函数
-export interface CrawlerOptions {
+// 导出一些额外的类型和工具函�?export interface CrawlerOptions {
   timeout?: number;
   retryCount?: number;
   userAgent?: string;
@@ -417,3 +400,5 @@ export class CrawlerError extends Error {
     this.name = 'CrawlerError';
   }
 }
+
+

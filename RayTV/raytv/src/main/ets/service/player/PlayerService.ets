@@ -1,11 +1,9 @@
-// PlayerService.ets - 播放器服务
-// 基于HarmonyOS AVPlayer API实现媒体播放功能，提供统一的播放器接口
+// PlayerService.ets - 播放器服�?// 基于HarmonyOS AVPlayer API实现媒体播放功能，提供统一的播放器接口
 
 import Logger from '../../common/util/Logger';
 import { AVPlayerService, AVPlayerServiceInstance } from '../playback/AVPlayerService';
 
-// 播放器状态枚举
-export enum PlayerStatus {
+// 播放器状态枚�?export enum PlayerStatus {
   IDLE = 'IDLE',
   INITIALIZED = 'INITIALIZED',
   PREPARING = 'PREPARING',
@@ -17,8 +15,7 @@ export enum PlayerStatus {
   ERROR = 'ERROR'
 }
 
-// 播放器事件枚举
-export enum PlayerEvent {
+// 播放器事件枚�?export enum PlayerEvent {
   STATUS_CHANGED = 'status_changed',
   TIME_UPDATE = 'time_update',
   BUFFER_UPDATE = 'buffer_update',
@@ -26,8 +23,7 @@ export enum PlayerEvent {
   COMPLETED = 'completed'
 }
 
-// 播放器配置接口
-export interface PlayerConfig {
+// 播放器配置接�?export interface PlayerConfig {
   autoPlay: boolean;
   loop: boolean;
   muted: boolean;
@@ -36,8 +32,7 @@ export interface PlayerConfig {
   startPosition: number;
 }
 
-// 默认播放器配置
-export const DEFAULT_PLAYER_CONFIG: PlayerConfig = {
+// 默认播放器配�?export const DEFAULT_PLAYER_CONFIG: PlayerConfig = {
   autoPlay: false,
   loop: false,
   muted: false,
@@ -46,8 +41,7 @@ export const DEFAULT_PLAYER_CONFIG: PlayerConfig = {
   startPosition: 0
 };
 
-// 播放器事件数据类型映射
-interface PlayerEventDataMap {
+// 播放器事件数据类型映�?interface PlayerEventDataMap {
   [PlayerEvent.STATUS_CHANGED]: PlayerStatus;
   [PlayerEvent.TIME_UPDATE]: number;
   [PlayerEvent.BUFFER_UPDATE]: number;
@@ -100,8 +94,7 @@ export default class PlayerService {
   }
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   private constructor() {
     this.avPlayerService = AVPlayerServiceInstance;
   }
@@ -127,12 +120,10 @@ export default class PlayerService {
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 设置状态变化监听
-    this.avPlayerService.onStatusChange((status) => {
-      this.emitEvent(PlayerEvent.STATUS_CHANGED, status);
+    // 设置状态变化监�?    this.avPlayerService.onStatusChange((status) => {
+      this.emitEvent(PlayerEvent.STATUS_CHANGED, status instanceof Error ? status : new Error(String(status instanceof Error ? status instanceof Error ? status : new Error(String(status : new Error(String(status instanceof Error ? status : new Error(String(status instanceof Error ? status instanceof Error ? status : new Error(String(status instanceof Error ? status instanceof Error ? status : new Error(String(status : new Error(String(status instanceof Error ? status : new Error(String(status : new Error(String(status instanceof Error ? status : new Error(String(status instanceof Error ? status instanceof Error ? status : new Error(String(status : new Error(String(status instanceof Error ? status : new Error(String(status)))))));
     });
 
     // 设置错误监听
@@ -158,8 +149,7 @@ export default class PlayerService {
       this.currentMediaId = mediaId;
       this.config = { ...DEFAULT_PLAYER_CONFIG, ...options };
 
-      // 设置播放源
-      await this.avPlayerService.setSource(sourceUrl);
+      // 设置播放�?      await this.avPlayerService.setSource(sourceUrl);
 
       // 准备播放
       await this.avPlayerService.prepare();
@@ -168,8 +158,7 @@ export default class PlayerService {
       await this.avPlayerService.setVolume(this.config.volume);
       await this.avPlayerService.setMute(this.config.muted);
 
-      // 跳转到指定位置
-      if (this.config.startPosition > 0) {
+      // 跳转到指定位�?      if (this.config.startPosition > 0) {
         await this.avPlayerService.seekTo(this.config.startPosition);
       }
 
@@ -191,7 +180,7 @@ export default class PlayerService {
   public async pause(): Promise<void> {
     try {
       await this.avPlayerService.pause();
-      Logger.info('PlayerService', 'Playback paused');
+      Logger.info('PlayerService', 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused' : new Error(String('Playback paused' instanceof Error ? 'Playback paused' : new Error(String('Playback paused')))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to pause: ${error}`);
       throw error;
@@ -204,7 +193,7 @@ export default class PlayerService {
   public async resume(): Promise<void> {
     try {
       await this.avPlayerService.play();
-      Logger.info('PlayerService', 'Playback resumed');
+      Logger.info('PlayerService', 'Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed' : new Error(String('Playback resumed' instanceof Error ? 'Playback resumed' : new Error(String('Playback resumed')))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to resume: ${error}`);
       throw error;
@@ -219,7 +208,7 @@ export default class PlayerService {
       await this.avPlayerService.stop();
       this.currentMediaId = '';
       this.currentEpisodeId = '';
-      Logger.info('PlayerService', 'Playback stopped');
+      Logger.info('PlayerService', 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped' : new Error(String('Playback stopped' instanceof Error ? 'Playback stopped' : new Error(String('Playback stopped')))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to stop: ${error}`);
       throw error;
@@ -227,12 +216,11 @@ export default class PlayerService {
   }
 
   /**
-   * 跳转到指定位置
-   */
+   * 跳转到指定位�?   */
   public async seekTo(position: number): Promise<void> {
     try {
       await this.avPlayerService.seekTo(position);
-      Logger.debug('PlayerService', `Seek to position: ${position}`);
+      Logger.debug('PlayerService', `Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` : new Error(String(`Seek to position: ${position}` instanceof Error ? `Seek to position: ${position}` : new Error(String(`Seek to position: ${position}`)))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to seek: ${error}`);
       throw error;
@@ -246,14 +234,13 @@ export default class PlayerService {
     try {
       return await this.avPlayerService.getCurrentTime();
     } catch (error) {
-      Logger.error('PlayerService', `Failed to get current position: ${error}`);
+      Logger.error('PlayerService', `Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}` instanceof Error ? `Failed to get current position: ${error}` : new Error(String(`Failed to get current position: ${error}`)))))));
       return 0;
     }
   }
 
   /**
-   * 获取总时长
-   */
+   * 获取总时�?   */
   public async getDuration(): Promise<number> {
     try {
       return await this.avPlayerService.getDuration();
@@ -285,8 +272,7 @@ export default class PlayerService {
   }
 
   /**
-   * 检查是否正在播放
-   */
+   * 检查是否正在播�?   */
   public isPlaying(): boolean {
     return this.avPlayerService.getStatus() === PlayerStatus.PLAYING;
   }
@@ -299,7 +285,7 @@ export default class PlayerService {
       await this.avPlayerService.setVolume(volume);
       this.config.volume = volume;
     } catch (error) {
-      Logger.error('PlayerService', `Failed to set volume: ${error}`);
+      Logger.error('PlayerService', `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}`)))))));
       throw error;
     }
   }
@@ -322,10 +308,9 @@ export default class PlayerService {
    */
   public async setPlaybackRate(rate: number): Promise<void> {
     try {
-      // 这里需要根据实际的播放器API来实现
-      // 暂时记录配置
+      // 这里需要根据实际的播放器API来实�?      // 暂时记录配置
       this.config.playbackRate = rate;
-      Logger.info('PlayerService', `Playback rate set to: ${rate}`);
+      Logger.info('PlayerService', `Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}` instanceof Error ? `Playback rate set to: ${rate}` : new Error(String(`Playback rate set to: ${rate}`)))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to set playback rate: ${error}`);
       throw error;
@@ -333,9 +318,8 @@ export default class PlayerService {
   }
 
   /**
-   * 添加事件监听器
-   */
-  public addEventListener(event: PlayerEvent, listener: PlayerEventListener): void {
+   * 添加事件监听�?   */
+  public addEventListener(event: PlayerEvent, listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener : new Error(String(listener: PlayerEventListener instanceof Error ? listener: PlayerEventListener : new Error(String(listener: PlayerEventListener))))))): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
@@ -346,8 +330,7 @@ export default class PlayerService {
   }
 
   /**
-   * 移除事件监听器
-   */
+   * 移除事件监听�?   */
   public removeEventListener(event: PlayerEvent, listener: PlayerEventListener): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
@@ -375,8 +358,7 @@ export default class PlayerService {
   }
 
   /**
-   * 释放播放器资源
-   */
+   * 释放播放器资�?   */
   public async release(): Promise<void> {
     try {
       await this.avPlayerService.release();
@@ -384,10 +366,13 @@ export default class PlayerService {
       this.currentMediaId = '';
       this.currentEpisodeId = '';
       this.eventListeners.clear();
-      Logger.info('PlayerService', 'Player service released');
+      Logger.info('PlayerService', 'Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released' : new Error(String('Player service released' instanceof Error ? 'Player service released' : new Error(String('Player service released')))))));
     } catch (error) {
       Logger.error('PlayerService', `Failed to release player service: ${error}`);
       throw error;
     }
   }
 }
+
+
+
