@@ -15,6 +15,6 @@
   },
   "devDependencies": {
     // @ohos前缀的系统API不需要在此声明，会在编译时自动从SDK加载
-  },
+    "@ohos/hvigor-ohos-plugin": "6.0.6"
+  }
 }
-

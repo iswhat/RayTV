@@ -1,4 +1,4 @@
-// CacheService - 缓存服务�?import Logger from '../../common/util/Logger';
+// CacheService - 缓存服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil from '../../common/util/FileUtil';
 import JsonUtil from '../../common/util/JsonUtil';
@@ -30,11 +30,11 @@ export enum CacheStorageLocation {
 
 // 缓存策略枚举
 export enum CacheStrategy {
-  LRU = 'lru', // 最近最少使�?  LFU = 'lfu', // 最少使用频�?  FIFO = 'fifo', // 先进先出
+  LRU = 'lru', // 最近最少使�?  LFU = 'lfu', // 最少使用频�?  FIFO = 'fifo', // 先进先出
   FILO = 'filo' // 后进先出
 }
 
-// 缓存优先级枚�?export enum CachePriority {
+// 缓存优先级枚�?export enum CachePriority {
   LOW = 'low',
   NORMAL = 'normal',
   HIGH = 'high',
@@ -53,7 +53,7 @@ export interface CacheConfig {
   maxCacheItems: number;
   enableAutoCleanup: boolean;
   cleanupInterval: number; // 毫秒
-  cleanupThreshold: number; // 百分�?(0-100)
+  cleanupThreshold: number; // 百分�?(0-100)
   cacheKeyPrefix: string;
   cacheVersion: string;
   compressCacheItems: boolean;
@@ -61,7 +61,7 @@ export interface CacheConfig {
   enableStatistics: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error' | 'none';
   allowedCacheTypes: CacheType[];
-  maxItemSize: number; // 单个缓存项最大大小（字节�?}
+  maxItemSize: number; // 单个缓存项最大大小（字节�?}
 
 // 缓存项元数据接口
 export interface CacheMetadata {
@@ -82,7 +82,7 @@ export interface CacheMetadata {
   source?: string; // 缓存来源
 }
 
-// 缓存项接�?export interface CacheItem<T = any> {
+// 缓存项接�?export interface CacheItem<T = unknown> {
   data: T;
   metadata: CacheMetadata;
 }
@@ -100,7 +100,7 @@ export interface CacheStatistics {
   errorCount: number;
   lastCleanupTime: number;
   totalCleanupTime: number;
-  cacheRatio: number; // 缓存命中�?  averageGetTime: number; // 平均获取时间（毫秒）
+  cacheRatio: number; // 缓存命中�?  averageGetTime: number; // 平均获取时间（毫秒）
   averageSetTime: number; // 平均设置时间（毫秒）
   largestItemSize: number;
   smallestItemSize: number;
@@ -167,7 +167,7 @@ const DEFAULT_CACHE_CONFIG: CacheConfig = {
 };
 
 /**
- * 缓存服务�? * 负责管理应用程序的缓存机制，提供缓存的设置、获取、清除等功能
+ * 缓存服务�? * 负责管理应用程序的缓存机制，提供缓存的设置、获取、清除等功能
  */
 export default class CacheService {
   private static instance: CacheService;
@@ -203,7 +203,7 @@ export default class CacheService {
   private getTimes: number[] = [];
   private setTimes: number[] = [];
   
-  // 监听�?  private cleanupListeners: Array<(deletedCount: number, freedSpace: number) => void> = [];
+  // 监听�?  private cleanupListeners: Array<(deletedCount: number, freedSpace: number) => void> = [];
   private evictionListeners: Array<(key: string, metadata: CacheMetadata) => void> = [];
   private errorListeners: Array<(error: Error, operation: string, key?: string) => void> = [];
   
@@ -211,7 +211,7 @@ export default class CacheService {
   private isInitialized: boolean = false;
 
   /**
-   * 构造函数（私有，防止外部实例化�?   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.initialize();
   }
@@ -241,7 +241,7 @@ export default class CacheService {
   }
 
   /**
-   * 初始化缓存服�?   */
+   * 初始化缓存服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing cache service...');
@@ -315,7 +315,7 @@ export default class CacheService {
    */
   private async loadCacheIndex(): Promise<void> {
     try {
-      // 检查索引文件是否存�?      const indexExists = await FileUtil.fileExists(this.indexFile);
+      // 检查索引文件是否存�?      const indexExists = await FileUtil.fileExists(this.indexFile);
       if (!indexExists) {
         return;
       }
@@ -340,7 +340,7 @@ export default class CacheService {
       Logger.debug(TAG, `Loaded cache index with ${this.cacheIndex.size} entries`);
     } catch (error) {
       Logger.error(TAG, 'Failed to load cache index', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
-      // 索引文件损坏，重新创�?      await FileUtil.writeFile(this.indexFile, '{}', { create: true });
+      // 索引文件损坏，重新创�?      await FileUtil.writeFile(this.indexFile, '{}', { create: true });
     }
   }
 
@@ -351,7 +351,7 @@ export default class CacheService {
     try {
       const indexData: Record<string, CacheMetadata> = {};
       
-      // 过滤掉过期的缓存�?      const now = Date.now();
+      // 过滤掉过期的缓存�?      const now = Date.now();
       for (const [key, metadata] of this.cacheIndex.entries()) {
         if (metadata.expiry === 0 || now < metadata.expiry) {
           indexData[key] = metadata;
@@ -419,7 +419,7 @@ export default class CacheService {
         this.statistics.diskCacheItems = itemCount;
       }
       
-      // 计算缓存命中�?      const total = this.statistics.hitCount + this.statistics.missCount;
+      // 计算缓存命中�?      const total = this.statistics.hitCount + this.statistics.missCount;
       if (total > 0) {
         this.statistics.cacheRatio = this.statistics.hitCount / total;
       }
@@ -447,7 +447,7 @@ export default class CacheService {
    */
   private calculateObjectSize(obj: Record<string, string | number | boolean | null>): number {
     try {
-      // 简单估算，实际应用中可以使用更精确的方�?      const str = typeof obj === 'string' ? obj : JsonUtil.stringify(obj);
+      // 简单估算，实际应用中可以使用更精确的方�?      const str = typeof obj === 'string' ? obj : JsonUtil.stringify(obj);
       return new Blob([str]).size;
     } catch (error) {
       Logger.error(TAG, 'Failed to calculate object size', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
@@ -461,7 +461,7 @@ export default class CacheService {
   private recordError(error: Error, operation: string, key?: string): void {
     this.statistics.errorCount++;
     
-    // 通知错误监听�?    for (const listener of this.errorListeners) {
+    // 通知错误监听�?    for (const listener of this.errorListeners) {
       try {
         listener(error, operation, key);
       } catch (listenerError) {
@@ -484,7 +484,7 @@ export default class CacheService {
       // 保存配置
       await StorageUtil.setObject(CACHE_CONFIG_KEY, this.cacheConfig);
       
-      // 如果存储位置变更，重新设置缓存目�?      if (config.storageLocation !== undefined) {
+      // 如果存储位置变更，重新设置缓存目�?      if (config.storageLocation !== undefined) {
         await this.setCacheDirectory();
       }
       
@@ -496,7 +496,7 @@ export default class CacheService {
         }
       }
       
-      // 如果内存缓存大小变更，清理内存缓�?      if (config.memoryCacheSize !== undefined && this.cacheConfig.enableMemoryCache) {
+      // 如果内存缓存大小变更，清理内存缓�?      if (config.memoryCacheSize !== undefined && this.cacheConfig.enableMemoryCache) {
         await this.evictMemoryCacheBySize();
       }
       
@@ -520,7 +520,7 @@ export default class CacheService {
   }
 
   /**
-   * 重置缓存配置为默认�?   */
+   * 重置缓存配置为默认�?   */
   public async resetCacheConfig(): Promise<CacheConfig> {
     try {
       this.cacheConfig = { ...DEFAULT_CACHE_CONFIG };
@@ -550,7 +550,7 @@ export default class CacheService {
   }
 
   /**
-   * 开始自动清�?   */
+   * 开始自动清�?   */
   private startAutoCleanup(): void {
     try {
       this.stopAutoCleanup();
@@ -589,7 +589,7 @@ export default class CacheService {
       // 清理过期的缓存项
       await this.cleanupExpiredItems();
       
-      // 检查缓存大小是否超过阈�?      const cachePercentage = (this.statistics.diskCacheSize / this.cacheConfig.diskCacheSize) * 100;
+      // 检查缓存大小是否超过阈�?      const cachePercentage = (this.statistics.diskCacheSize / this.cacheConfig.diskCacheSize) * 100;
       if (cachePercentage > this.cacheConfig.cleanupThreshold) {
         await this.cleanupCacheBySize();
       }
@@ -615,7 +615,7 @@ export default class CacheService {
       deletedCount += expiredCleanup.deletedCount;
       freedSpace += expiredCleanup.freedSpace;
       
-      // 检查缓存大小是否超过阈�?      const cachePercentage = (this.statistics.diskCacheSize / this.cacheConfig.diskCacheSize) * 100;
+      // 检查缓存大小是否超过阈�?      const cachePercentage = (this.statistics.diskCacheSize / this.cacheConfig.diskCacheSize) * 100;
       if (cachePercentage > this.cacheConfig.cleanupThreshold) {
         const sizeCleanup = await this.cleanupCacheBySize();
         deletedCount += sizeCleanup.deletedCount;
@@ -694,7 +694,7 @@ export default class CacheService {
   }
 
   /**
-   * 按大小清理缓�?   */
+   * 按大小清理缓�?   */
   private async cleanupCacheBySize(): Promise<{ deletedCount: number; freedSpace: number }> {
     try {
       // 计算需要释放的空间
@@ -705,7 +705,7 @@ export default class CacheService {
         return { deletedCount: 0, freedSpace: 0 };
       }
       
-      // 获取所有缓存项并根据策略排�?      const cacheItems = Array.from(this.cacheIndex.entries());
+      // 获取所有缓存项并根据策略排�?      const cacheItems = Array.from(this.cacheIndex.entries());
       let sortedItems: [string, CacheMetadata][];
       
       switch (this.cacheConfig.cacheStrategy) {
@@ -777,16 +777,16 @@ export default class CacheService {
   }
 
   /**
-   * 按数量清理缓�?   */
+   * 按数量清理缓�?   */
   private async cleanupCacheByCount(): Promise<{ deletedCount: number; freedSpace: number }> {
     try {
-      // 计算需要删除的项目�?      const itemsToDelete = this.statistics.diskCacheItems - this.cacheConfig.maxCacheItems;
+      // 计算需要删除的项目�?      const itemsToDelete = this.statistics.diskCacheItems - this.cacheConfig.maxCacheItems;
       
       if (itemsToDelete <= 0) {
         return { deletedCount: 0, freedSpace: 0 };
       }
       
-      // 获取所有缓存项并根据策略排�?      const cacheItems = Array.from(this.cacheIndex.entries());
+      // 获取所有缓存项并根据策略排�?      const cacheItems = Array.from(this.cacheIndex.entries());
       let sortedItems: [string, CacheMetadata][];
       
       switch (this.cacheConfig.cacheStrategy) {
@@ -828,7 +828,7 @@ export default class CacheService {
       let deletedCount = 0;
       let freedSpace = 0;
       
-      // 删除缓存�?      for (const [key, metadata] of sortedItems.slice(0, itemsToDelete)) {
+      // 删除缓存�?      for (const [key, metadata] of sortedItems.slice(0, itemsToDelete)) {
         await this.removeItemFromDisk(key);
         deletedCount++;
         freedSpace += metadata.size;
@@ -849,7 +849,7 @@ export default class CacheService {
   }
 
   /**
-   * 根据时间驱逐内存缓�?   */
+   * 根据时间驱逐内存缓�?   */
   private async evictMemoryCacheByTime(): Promise<void> {
     try {
       const now = Date.now();
@@ -876,7 +876,7 @@ export default class CacheService {
   }
 
   /**
-   * 根据大小驱逐内存缓�?   */
+   * 根据大小驱逐内存缓�?   */
   private async evictMemoryCacheBySize(): Promise<void> {
     try {
       // 计算当前内存缓存大小
@@ -889,14 +889,14 @@ export default class CacheService {
         cacheItems.push([key, item, itemSize]);
       }
       
-      // 如果大小在限制范围内，不需要驱�?      if (currentSize <= this.cacheConfig.memoryCacheSize) {
+      // 如果大小在限制范围内，不需要驱�?      if (currentSize <= this.cacheConfig.memoryCacheSize) {
         return;
       }
       
       // 按时间戳排序（最旧的先删除）
       cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
       
-      // 驱逐项目直到大小在限制范围�?      let evictedCount = 0;
+      // 驱逐项目直到大小在限制范围�?      let evictedCount = 0;
       
       for (const [key, item, size] of cacheItems) {
         if (currentSize <= this.cacheConfig.memoryCacheSize) {
@@ -956,7 +956,7 @@ export default class CacheService {
   }
 
   /**
-   * 设置缓存�?   */
+   * 设置缓存�?   */
   public async set<T>(
     key: string,
     data: T,
@@ -984,7 +984,7 @@ export default class CacheService {
         throw new Error(`Data size ${this.formatSize(dataSize)} exceeds maximum allowed size ${this.formatSize(this.cacheConfig.maxItemSize)}`);
       }
       
-      // 创建元数�?      const metadata: CacheMetadata = {
+      // 创建元数�?      const metadata: CacheMetadata = {
         key: fullKey,
         type: typeof data,
         size: dataSize,
@@ -1001,7 +1001,7 @@ export default class CacheService {
         source: options?.source
       };
       
-      // 保存到内存缓�?      if (this.cacheConfig.enableMemoryCache && 
+      // 保存到内存缓�?      if (this.cacheConfig.enableMemoryCache && 
           (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK)) {
         this.memoryCache.set(fullKey, {
           data: TypeSafetyHelper.asObject(data) || {},
@@ -1009,12 +1009,12 @@ export default class CacheService {
           timestamp: Date.now()
         });
         
-        // 检查内存缓存大小限�?        await this.evictMemoryCacheBySize();
+        // 检查内存缓存大小限�?        await this.evictMemoryCacheBySize();
       }
       
-      // 保存到磁盘缓�?      if (this.cacheConfig.enableDiskCache && 
+      // 保存到磁盘缓�?      if (this.cacheConfig.enableDiskCache && 
           (cacheType === CacheType.DISK || cacheType === CacheType.MEMORY_DISK)) {
-        // 序列化数�?        let serializedData: string | ArrayBuffer;
+        // 序列化数�?        let serializedData: string | ArrayBuffer;
         
         try {
           serializedData = typeof data === 'string' ? data : JsonUtil.stringify(data);
@@ -1033,7 +1033,7 @@ export default class CacheService {
         this.cacheIndex.set(fullKey, metadata);
         await this.saveCacheIndex();
         
-        // 检查磁盘缓存大小限�?        await this.updateStatistics();
+        // 检查磁盘缓存大小限�?        await this.updateStatistics();
         const cachePercentage = (this.statistics.diskCacheSize / this.cacheConfig.diskCacheSize) * 100;
         if (cachePercentage > this.cacheConfig.cleanupThreshold) {
           await this.cleanupCacheBySize();
@@ -1071,7 +1071,7 @@ export default class CacheService {
   }
 
   /**
-   * 获取缓存�?   */
+   * 获取缓存�?   */
   public async get<T>(key: string): Promise<T | null> {
     const startTime = Date.now();
     const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
@@ -1079,10 +1079,10 @@ export default class CacheService {
     try {
       let data: T | null = null;
       
-      // 首先尝试从内存缓存获�?      if (this.cacheConfig.enableMemoryCache) {
+      // 首先尝试从内存缓存获�?      if (this.cacheConfig.enableMemoryCache) {
         const cachedItem = this.memoryCache.get(fullKey);
         if (cachedItem) {
-          // 检查是否过�?          if (cachedItem.expiry === 0 || Date.now() < cachedItem.expiry) {
+          // 检查是否过�?          if (cachedItem.expiry === 0 || Date.now() < cachedItem.expiry) {
             data = cachedItem.data;
             
             // 更新访问时间
@@ -1100,22 +1100,22 @@ export default class CacheService {
             this.statistics.hitCount++;
             Logger.debug(TAG, `Cache hit (memory): ${key}`);
           } else {
-            // 过期，删�?            this.memoryCache.delete(fullKey);
+            // 过期，删�?            this.memoryCache.delete(fullKey);
             Logger.debug(TAG, `Cache expired (memory): ${key}`);
           }
         }
       }
       
-      // 如果内存缓存未命中，尝试从磁盘获�?      if (data === null && this.cacheConfig.enableDiskCache) {
+      // 如果内存缓存未命中，尝试从磁盘获�?      if (data === null && this.cacheConfig.enableDiskCache) {
         const metadata = this.cacheIndex.get(fullKey);
         if (metadata) {
-          // 检查是否过�?          if (metadata.expiry === 0 || Date.now() < metadata.expiry) {
+          // 检查是否过�?          if (metadata.expiry === 0 || Date.now() < metadata.expiry) {
             const filePath = this.getCacheFilePath(fullKey);
             
             // 读取文件
             const fileContent = await FileUtil.readFile(filePath, 'utf-8');
             if (fileContent) {
-              // 如果需要解密或解压缩，在这里处�?              // ...
+              // 如果需要解密或解压缩，在这里处�?              // ...
               
               // 反序列化数据
               try {
@@ -1138,7 +1138,7 @@ export default class CacheService {
               Logger.debug(TAG, `Cache hit (disk): ${key}`);
             }
           } else {
-            // 过期，删�?            await this.removeItemFromDisk(fullKey);
+            // 过期，删�?            await this.removeItemFromDisk(fullKey);
             Logger.debug(TAG, `Cache expired (disk): ${key}`);
           }
         }
@@ -1175,14 +1175,14 @@ export default class CacheService {
     const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
     
     try {
-      // 检查内存缓�?      if (this.cacheConfig.enableMemoryCache) {
+      // 检查内存缓�?      if (this.cacheConfig.enableMemoryCache) {
         const cachedItem = this.memoryCache.get(fullKey);
         if (cachedItem && (cachedItem.expiry === 0 || Date.now() < cachedItem.expiry)) {
           return true;
         }
       }
       
-      // 检查磁盘缓�?      if (this.cacheConfig.enableDiskCache) {
+      // 检查磁盘缓�?      if (this.cacheConfig.enableDiskCache) {
         const metadata = this.cacheIndex.get(fullKey);
         if (metadata && (metadata.expiry === 0 || Date.now() < metadata.expiry)) {
           const filePath = this.getCacheFilePath(fullKey);
@@ -1210,7 +1210,7 @@ export default class CacheService {
         return null;
       }
       
-      // 检查是否过�?      if (metadata.expiry > 0 && Date.now() > metadata.expiry) {
+      // 检查是否过�?      if (metadata.expiry > 0 && Date.now() > metadata.expiry) {
         await this.removeItemFromDisk(fullKey);
         return null;
       }
@@ -1224,16 +1224,16 @@ export default class CacheService {
   }
 
   /**
-   * 删除缓存�?   */
+   * 删除缓存�?   */
   public async remove(key: string): Promise<CacheOperationResult> {
     const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
     
     try {
-      // 从内存缓存删�?      if (this.cacheConfig.enableMemoryCache) {
+      // 从内存缓存删�?      if (this.cacheConfig.enableMemoryCache) {
         this.memoryCache.delete(fullKey);
       }
       
-      // 从磁盘缓存删�?      if (this.cacheConfig.enableDiskCache) {
+      // 从磁盘缓存删�?      if (this.cacheConfig.enableDiskCache) {
         await this.removeItemFromDisk(fullKey);
         await this.saveCacheIndex();
       }
@@ -1257,7 +1257,7 @@ export default class CacheService {
   }
 
   /**
-   * 批量设置缓存�?   */
+   * 批量设置缓存�?   */
   public async setMultiple(
     items: Array<{
       key: string;
@@ -1288,7 +1288,7 @@ export default class CacheService {
   }
 
   /**
-   * 批量获取缓存�?   */
+   * 批量获取缓存�?   */
   public async getMultiple<T>(keys: string[]): Promise<Map<string, T | null>> {
     const results = new Map<string, T | null>();
     
@@ -1307,7 +1307,7 @@ export default class CacheService {
   }
 
   /**
-   * 批量删除缓存�?   */
+   * 批量删除缓存�?   */
   public async removeMultiple(keys: string[]): Promise<Array<CacheOperationResult>> {
     const results: Array<CacheOperationResult> = [];
     
@@ -1333,7 +1333,7 @@ export default class CacheService {
       let deletedCount = 0;
       let freedSpace = 0;
       
-      // 如果强制清理，清空所有缓�?      if (options?.force) {
+      // 如果强制清理，清空所有缓�?      if (options?.force) {
         // 清空内存缓存
         if (this.cacheConfig.enableMemoryCache) {
           deletedCount += this.memoryCache.size;
@@ -1342,7 +1342,7 @@ export default class CacheService {
         
         // 清空磁盘缓存
         if (this.cacheConfig.enableDiskCache) {
-          // 删除所有缓存文�?          for (const [key, metadata] of this.cacheIndex.entries()) {
+          // 删除所有缓存文�?          for (const [key, metadata] of this.cacheIndex.entries()) {
             await this.removeItemFromDisk(key);
             deletedCount++;
             freedSpace += metadata.size;
@@ -1357,27 +1357,27 @@ export default class CacheService {
         const keysToDelete: string[] = [];
         const now = Date.now();
         
-        // 收集需要删除的�?        for (const [key, metadata] of this.cacheIndex.entries()) {
-          // 检查是否包含在排除列表�?          if (options?.excludeKeys?.includes(key)) {
+        // 收集需要删除的�?        for (const [key, metadata] of this.cacheIndex.entries()) {
+          // 检查是否包含在排除列表�?          if (options?.excludeKeys?.includes(key)) {
             continue;
           }
           
-          // 检查是否包含在包含列表�?          if (options?.includeKeys && !options.includeKeys.includes(key)) {
+          // 检查是否包含在包含列表�?          if (options?.includeKeys && !options.includeKeys.includes(key)) {
             continue;
           }
           
-          // 检查是否只清理过期�?          if (options?.expiredOnly && (metadata.expiry === 0 || now < metadata.expiry)) {
+          // 检查是否只清理过期�?          if (options?.expiredOnly && (metadata.expiry === 0 || now < metadata.expiry)) {
             continue;
           }
           
-          // 检查标�?          if (options?.tags && options.tags.length > 0) {
+          // 检查标�?          if (options?.tags && options.tags.length > 0) {
             const hasMatchingTag = options.tags.some(tag => metadata.tags.includes(tag));
             if (!hasMatchingTag) {
               continue;
             }
           }
           
-          // 检查年�?          if (options?.olderThan) {
+          // 检查年�?          if (options?.olderThan) {
             const age = now - metadata.createdAt;
             if (age < options.olderThan) {
               continue;
@@ -1438,11 +1438,11 @@ export default class CacheService {
         
         // 删除选中的缓存项
         for (const key of keysToDelete) {
-          // 从内存缓存删�?          if (this.cacheConfig.enableMemoryCache) {
+          // 从内存缓存删�?          if (this.cacheConfig.enableMemoryCache) {
             this.memoryCache.delete(key);
           }
           
-          // 从磁盘缓存删�?          if (this.cacheConfig.enableDiskCache) {
+          // 从磁盘缓存删�?          if (this.cacheConfig.enableDiskCache) {
             await this.removeItemFromDisk(key);
           }
           
@@ -1476,7 +1476,7 @@ export default class CacheService {
   }
 
   /**
-   * 搜索缓存�?   */
+   * 搜索缓存�?   */
   public async search(params: CacheSearchParams): Promise<Array<{ key: string; metadata: CacheMetadata }>> {
     try {
       const results: Array<{ key: string; metadata: CacheMetadata }> = [];
@@ -1484,19 +1484,19 @@ export default class CacheService {
       
       // 遍历所有缓存项
       for (const [key, metadata] of this.cacheIndex.entries()) {
-        // 检查是否过�?        const isExpired = metadata.expiry > 0 && now > metadata.expiry;
+        // 检查是否过�?        const isExpired = metadata.expiry > 0 && now > metadata.expiry;
         if (params.expired !== undefined && params.expired !== isExpired) {
           continue;
         }
         
-        // 检查标�?        if (params.tags && params.tags.length > 0) {
+        // 检查标�?        if (params.tags && params.tags.length > 0) {
           const hasMatchingTag = params.tags.some(tag => metadata.tags.includes(tag));
           if (!hasMatchingTag) {
             continue;
           }
         }
         
-        // 检查年�?        const age = now - metadata.createdAt;
+        // 检查年�?        const age = now - metadata.createdAt;
         if (params.minAge !== undefined && age < params.minAge) {
           continue;
         }
@@ -1504,7 +1504,7 @@ export default class CacheService {
           continue;
         }
         
-        // 检查大�?        if (params.minSize !== undefined && metadata.size < params.minSize) {
+        // 检查大�?        if (params.minSize !== undefined && metadata.size < params.minSize) {
           continue;
         }
         if (params.maxSize !== undefined && metadata.size > params.maxSize) {
@@ -1516,13 +1516,13 @@ export default class CacheService {
           continue;
         }
         
-        // 检查类�?        if (params.type && params.type.length > 0 && !params.type.includes(metadata.type)) {
+        // 检查类�?        if (params.type && params.type.length > 0 && !params.type.includes(metadata.type)) {
           continue;
         }
         
         // 检查键模式
         if (params.keyPattern) {
-          // 不使用正则表达式，改用字符串方法实现大小写不敏感的匹�?          const searchPattern = params.keyPattern.toLowerCase();
+          // 不使用正则表达式，改用字符串方法实现大小写不敏感的匹�?          const searchPattern = params.keyPattern.toLowerCase();
           if (key.toLowerCase().indexOf(searchPattern) === -1) {
             continue;
           }
@@ -1593,7 +1593,7 @@ export default class CacheService {
   }
 
   /**
-   * 添加清理监听�?   */
+   * 添加清理监听�?   */
   public addCleanupListener(listener: (deletedCount: number, freedSpace: number) => void): () => void {
     this.cleanupListeners.push(listener);
     
@@ -1622,7 +1622,7 @@ export default class CacheService {
   }
 
   /**
-   * 添加错误监听�?   */
+   * 添加错误监听�?   */
   public addErrorListener(listener: (error: Error, operation: string, key?: string) => void): () => void {
     this.errorListeners.push(listener);
     
@@ -1649,7 +1649,7 @@ export default class CacheService {
   }
 
   /**
-   * 通知缓存项被驱�?   */
+   * 通知缓存项被驱�?   */
   private notifyEviction(key: string, metadata: CacheMetadata): void {
     for (const listener of this.evictionListeners) {
       try {
@@ -1661,7 +1661,7 @@ export default class CacheService {
   }
 
   /**
-   * 格式化大小显�?   */
+   * 格式化大小显�?   */
   private formatSize(bytes: number): string {
     if (bytes < 1024) {
       return `${bytes} B`;
@@ -1675,7 +1675,7 @@ export default class CacheService {
   }
 
   /**
-   * 销毁缓存服�?   */
+   * 销毁缓存服�?   */
   public async destroy(): Promise<void> {
     try {
       Logger.info(TAG, 'Destroying cache service...');
@@ -1691,7 +1691,7 @@ export default class CacheService {
       // 清除内存缓存
       this.memoryCache.clear();
       
-      // 清除监听�?      this.cleanupListeners = [];
+      // 清除监听�?      this.cleanupListeners = [];
       this.evictionListeners = [];
       this.errorListeners = [];
       

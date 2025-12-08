@@ -1,0 +1,17 @@
+// raytv模块hvigor配置
+// 使用DevEco Studio内置的hvigor-ohos-plugin，不通过ohpm安装
+
+// 修复：使用正确的方式引用内置插件，添加HAP构建任务
+import { hapTasks } from '@ohos/hvigor-ohos-plugin';
+
+const config: any = {
+  system: [
+    {
+      name: 'hap',
+      apply: hapTasks
+    }
+  ],
+  plugins: []
+};
+
+export default config;

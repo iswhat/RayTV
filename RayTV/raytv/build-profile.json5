@@ -7,7 +7,6 @@
       }
     }
   },
-  "entryModules": ["raytv"],
   "buildOptionSet": [
     {
       "name": "debug",
@@ -33,12 +32,18 @@
       }
     }
   ],
-  "targets": [
+  "modules": [
     {
-      "name": "default"
-    },
-    {
-      "name": "ohosTest"
+      "name": "raytv",
+      "srcPath": "./",
+      "targets": [
+        {
+          "name": "default"
+        },
+        {
+          "name": "ohosTest"
+        }
+      ]
     }
   ]
 }

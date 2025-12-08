@@ -29,7 +29,7 @@
   "modules": [
     {
       "name": "raytv",
-      "srcPath": "./src",
+      "srcPath": "./",
       "targets": [
         {
           "name": "default",

@@ -1,0 +1,8 @@
+{
+  "name": "RayTV",
+  "version": "1.0.0",
+  "description": "RayTV Application",
+  "scripts": {
+    "build": "hvigor build --mode debug"
+  }
+}

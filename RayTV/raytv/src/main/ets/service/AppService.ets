@@ -1,4 +1,4 @@
-// AppService - 应用服务�?import Logger from '../../common/util/Logger';
+// AppService - 应用服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import JsonUtil from '../../common/util/JsonUtil';
 import ConfigService from './config/ConfigService';
@@ -20,8 +20,8 @@ import { getParserService } from './parser/index';
 const TAG = 'AppService';
 const APP_STATE_KEY = 'app_state';
 const APP_VERSION_KEY = 'app_version';
-const INITIALIZATION_TIMEOUT = 30000; // 30�?
-// 应用状态枚�?export enum AppState {
+const INITIALIZATION_TIMEOUT = 30000; // 30�?
+// 应用状态枚�?export enum AppState {
   CREATED = 'created',
   INITIALIZING = 'initializing',
   READY = 'ready',
@@ -142,7 +142,7 @@ export enum AppEventType {
 }
 
 // 应用事件接口
-export interface AppEvent<T = any> {
+export interface AppEvent<T = unknown> {
   type: AppEventType;
   data?: T;
   timestamp: number;
@@ -220,7 +220,7 @@ const DEFAULT_APP_CONFIG: AppConfig = {
 };
 
 /**
- * 应用服务�? * 负责管理应用程序的全局状态、生命周期和通用功能
+ * 应用服务�? * 负责管理应用程序的全局状态、生命周期和通用功能
  */
 export default class AppService {
   private static instance: AppService;
@@ -235,11 +235,11 @@ export default class AppService {
   // 服务映射
   private services: Map<string, Object> = new Map();
   
-  // 初始化状�?  private initializationPromise: Promise<void> | null = null;
+  // 初始化状�?  private initializationPromise: Promise<void> | null = null;
   private initializationStartTime: number = 0;
   private isInitialized: boolean = false;
   
-  // 监听�?  private stateListeners: Array<(newState: AppState, oldState: AppState) => void> = [];
+  // 监听�?  private stateListeners: Array<(newState: AppState, oldState: AppState) => void> = [];
   private eventListeners: Array<(event: AppEvent) => void> = [];
   private errorListeners: Array<(error: AppError) => void> = [];
   
@@ -251,7 +251,7 @@ export default class AppService {
   private buildNumber: number = 1;
 
   /**
-   * 构造函数（私有，防止外部实例化�?   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     // 捕获全局错误
     this.setupGlobalErrorHandling();
@@ -329,7 +329,7 @@ export default class AppService {
       
       this.recordError(appError);
       
-      // 记录到日�?      Logger.error(TAG, 'Global error occurred', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      // 记录到日�?      Logger.error(TAG, 'Global error occurred', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
     } catch (logError) {
       // 避免错误处理自身出错
       console.error('Failed to log global error', logError);
@@ -337,9 +337,9 @@ export default class AppService {
   }
 
   /**
-   * 初始化应用服�?   */
+   * 初始化应用服�?   */
   public async initialize(): Promise<boolean> {
-    // 防止重复初始�?    if (this.initializationPromise) {
+    // 防止重复初始�?    if (this.initializationPromise) {
       return this.initializationPromise.then(() => this.isInitialized);
     }
     
@@ -348,10 +348,10 @@ export default class AppService {
   }
 
   /**
-   * 执行初始化过�?   */
+   * 执行初始化过�?   */
   private async doInitialize(): Promise<void> {
     try {
-      // 更新状�?      this.setState(AppState.INITIALIZING);
+      // 更新状�?      this.setState(AppState.INITIALIZING);
       this.initializationStartTime = Date.now();
       
       Logger.info(TAG, 'Starting application initialization...');
@@ -365,43 +365,43 @@ export default class AppService {
       // 3. 加载应用统计
       await this.loadAppStatistics();
       
-      // 4. 初始化存储服�?      const fileService = FileService.getInstance();
+      // 4. 初始化存储服�?      const fileService = FileService.getInstance();
       await fileService.initialize();
       this.services.set('fileService', fileService);
       
-      // 5. 初始化仓库工�?      const repositoryFactory = RepositoryFactory.getInstance();
+      // 5. 初始化仓库工�?      const repositoryFactory = RepositoryFactory.getInstance();
       await repositoryFactory.initialize();
       this.services.set('repositoryFactory', repositoryFactory);
       
-      // 6. 初始化配置服�?      const configService = ConfigService.getInstance();
+      // 6. 初始化配置服�?      const configService = ConfigService.getInstance();
       await configService.initialize();
       this.services.set('configService', configService);
       
-      // 7. 初始化缓存服�?      const cacheService = CacheService.getInstance();
+      // 7. 初始化缓存服�?      const cacheService = CacheService.getInstance();
       await cacheService.initialize();
       this.services.set('cacheService', cacheService);
       
-      // 8. 初始化网络服�?      const httpService = HttpService.getInstance();
+      // 8. 初始化网络服�?      const httpService = HttpService.getInstance();
       await httpService.initialize();
       this.services.set('httpService', httpService);
       
-      // 9. 初始化认证服�?      const authService = AuthService.getInstance();
+      // 9. 初始化认证服�?      const authService = AuthService.getInstance();
       await authService.initialize();
       this.services.set('authService', authService);
       
-      // 10. 初始化电影服�?      const movieService = MovieService.getInstance();
+      // 10. 初始化电影服�?      const movieService = MovieService.getInstance();
       await movieService.initialize();
       this.services.set('movieService', movieService);
       
-      // 11. 初始化历史服�?      const historyService = HistoryService.getInstance();
+      // 11. 初始化历史服�?      const historyService = HistoryService.getInstance();
       await historyService.initialize();
       this.services.set('historyService', historyService);
       
-      // 12. 初始化收藏服�?      const collectionService = CollectionService.getInstance();
+      // 12. 初始化收藏服�?      const collectionService = CollectionService.getInstance();
       await collectionService.initialize();
       this.services.set('collectionService', collectionService);
       
-      // 13. 初始化下载服�?      const downloadService = DownloadService.getInstance();
+      // 13. 初始化下载服�?      const downloadService = DownloadService.getInstance();
       await downloadService.initialize();
       this.services.set('downloadService', downloadService);
       
@@ -415,7 +415,7 @@ export default class AppService {
       await liveStreamService.initialize();
       this.services.set('liveStreamService', liveStreamService);
       
-      // 16. 初始化字幕服�?      const subtitleService = SubtitleService.getInstance();
+      // 16. 初始化字幕服�?      const subtitleService = SubtitleService.getInstance();
       await subtitleService.initialize();
       this.services.set('subtitleService', subtitleService);
       
@@ -427,9 +427,9 @@ export default class AppService {
       // 18. 更新统计信息
       await this.updateLaunchStatistics();
       
-      // 19. 执行启动时清�?      await this.performStartupCleanup();
+      // 19. 执行启动时清�?      await this.performStartupCleanup();
       
-      // 20. 检查更�?      if (this.appConfig.enableAutoUpdate) {
+      // 20. 检查更�?      if (this.appConfig.enableAutoUpdate) {
         await this.checkForUpdates();
       }
       
@@ -440,7 +440,7 @@ export default class AppService {
       const initDuration = Date.now() - this.initializationStartTime;
       Logger.info(TAG, `Application initialized successfully in ${initDuration}ms`);
       
-      // 发布初始化完成事�?      this.publishEvent(AppEventType.INITIALIZED, { duration: initDuration });
+      // 发布初始化完成事�?      this.publishEvent(AppEventType.INITIALIZED, { duration: initDuration });
       this.publishEvent(AppEventType.READY, { version: this.currentVersion });
     } catch (error) {
       Logger.error(TAG, 'Application initialization failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
@@ -574,7 +574,7 @@ export default class AppService {
       await StorageUtil.setNumber('launch_count', currentLaunchCount);
       this.appStatistics.totalLaunches = currentLaunchCount;
       
-      // 更新最后启动时�?      await StorageUtil.setNumber('last_launch_time', Date.now());
+      // 更新最后启动时�?      await StorageUtil.setNumber('last_launch_time', Date.now());
       
       // 如果是首次启动，记录首次启动时间
       if (!await StorageUtil.contains('first_launch_time')) {
@@ -588,10 +588,10 @@ export default class AppService {
   }
 
   /**
-   * 执行启动时清�?   */
+   * 执行启动时清�?   */
   private async performStartupCleanup(): Promise<void> {
     try {
-      // 清理过期的缓�?      const cacheService = CacheService.getInstance();
+      // 清理过期的缓�?      const cacheService = CacheService.getInstance();
       await cacheService.clear({ expiredOnly: true });
       
       // 清理临时文件
@@ -618,7 +618,7 @@ export default class AppService {
       this.appStatistics.deviceStorageUsed = storageInfo.used;
       this.appStatistics.deviceStorageTotal = storageInfo.total;
       
-      // 检查存储空间警�?      if (storageInfo.used > storageInfo.total * 0.9) {
+      // 检查存储空间警�?      if (storageInfo.used > storageInfo.total * 0.9) {
         this.publishEvent(AppEventType.STORAGE_WARNING, {
           used: storageInfo.used,
           total: storageInfo.total,
@@ -631,7 +631,7 @@ export default class AppService {
   }
 
   /**
-   * 检查更�?   */
+   * 检查更�?   */
   private async checkForUpdates(): Promise<void> {
     try {
       // 在实际应用中，这里会调用更新检查API
@@ -647,7 +647,7 @@ export default class AppService {
         });
       }
       
-      // 更新检查时�?      this.appStatistics.lastUpdateCheckTime = Date.now();
+      // 更新检查时�?      this.appStatistics.lastUpdateCheckTime = Date.now();
       await this.saveAppStatistics();
       
       Logger.debug(TAG, 'Checked for updates');
@@ -657,7 +657,7 @@ export default class AppService {
   }
 
   /**
-   * 设置应用状�?   */
+   * 设置应用状�?   */
   private setState(newState: AppState): void {
     const oldState = this.currentState;
     this.currentState = newState;
@@ -684,7 +684,7 @@ export default class AppService {
       timestamp: Date.now()
     };
     
-    // 添加到事件历�?    this.eventHistory.push(event);
+    // 添加到事件历�?    this.eventHistory.push(event);
     // 限制历史记录大小
     if (this.eventHistory.length > 1000) {
       this.eventHistory.shift();
@@ -692,7 +692,7 @@ export default class AppService {
     
     Logger.debug(TAG, `Published event: ${type}`);
     
-    // 通知事件监听�?    for (const listener of this.eventListeners) {
+    // 通知事件监听�?    for (const listener of this.eventListeners) {
       try {
         listener(event);
       } catch (error) {
@@ -705,7 +705,7 @@ export default class AppService {
    * 记录错误
    */
   private recordError(error: AppError): void {
-    // 添加到错误历�?    this.errorHistory.push(error);
+    // 添加到错误历�?    this.errorHistory.push(error);
     // 限制历史记录大小
     if (this.errorHistory.length > 100) {
       this.errorHistory.shift();
@@ -716,7 +716,7 @@ export default class AppService {
     
     Logger.error(TAG, `Recorded error: ${error.type} - ${error.message}`);
     
-    // 通知错误监听�?    for (const listener of this.errorListeners) {
+    // 通知错误监听�?    for (const listener of this.errorListeners) {
       try {
         listener(error);
       } catch (listenerError) {
@@ -726,7 +726,7 @@ export default class AppService {
   }
 
   /**
-   * 获取当前应用状�?   */
+   * 获取当前应用状�?   */
   public getState(): AppState {
     return this.currentState;
   }
@@ -842,7 +842,7 @@ export default class AppService {
   }
 
   /**
-   * 注册自定义服�?   */
+   * 注册自定义服�?   */
   public registerService(serviceName: string, serviceInstance: { initialize?: () => Promise<void>; close?: () => Promise<void> }): boolean {
     try {
       this.services.set(serviceName, serviceInstance);
@@ -855,7 +855,7 @@ export default class AppService {
   }
 
   /**
-   * 注销自定义服�?   */
+   * 注销自定义服�?   */
   public unregisterService(serviceName: string): boolean {
     try {
       this.services.delete(serviceName);
@@ -883,7 +883,7 @@ export default class AppService {
   }
 
   /**
-   * 添加事件监听�?   */
+   * 添加事件监听�?   */
   public addEventListener(listener: (event: AppEvent) => void): () => void {
     this.eventListeners.push(listener);
     
@@ -897,7 +897,7 @@ export default class AppService {
   }
 
   /**
-   * 添加错误监听�?   */
+   * 添加错误监听�?   */
   public addErrorListener(listener: (error: AppError) => void): () => void {
     this.errorListeners.push(listener);
     
@@ -919,7 +919,7 @@ export default class AppService {
         this.setState(AppState.FOREGROUND);
         this.publishEvent(AppEventType.FOREGROUND);
         
-        // 恢复必要的服�?        this.resumeServices();
+        // 恢复必要的服�?        this.resumeServices();
       }
       
       Logger.info(TAG, 'Application moved to foreground');
@@ -940,7 +940,7 @@ export default class AppService {
         // 暂停非必要的服务
         this.pauseServices();
         
-        // 保存状�?        this.saveAppState();
+        // 保存状�?        this.saveAppState();
       }
       
       Logger.info(TAG, 'Application moved to background');
@@ -996,14 +996,14 @@ export default class AppService {
   }
 
   /**
-   * 保存应用状�?   */
+   * 保存应用状�?   */
   private async saveAppState(): Promise<void> {
     try {
       const appState: Record<string, string | number | boolean | null> = { ... };
       
       await StorageUtil.setObject(APP_STATE_KEY, appState);
       
-      // 更新总运行时�?      const currentRunningTime = await StorageUtil.getNumber('total_running_time', 0);
+      // 更新总运行时�?      const currentRunningTime = await StorageUtil.getNumber('total_running_time', 0);
       const thisSessionTime = Date.now() - this.startTime;
       await StorageUtil.setNumber('total_running_time', currentRunningTime + thisSessionTime);
       
@@ -1017,7 +1017,7 @@ export default class AppService {
   }
 
   /**
-   * 加载应用状�?   */
+   * 加载应用状�?   */
   private async loadAppState(): Promise<AppStatistics | null> {
     try {
       const appState = await StorageUtil.getObject(APP_STATE_KEY);
@@ -1052,7 +1052,7 @@ export default class AppService {
       totalDeleted += tempResult.deletedCount;
       totalFreed += tempResult.freedSpace;
       
-      // 清理下载的临时文�?      const downloadService = DownloadService.getInstance();
+      // 清理下载的临时文�?      const downloadService = DownloadService.getInstance();
       const downloadResult = await downloadService.cleanupFailedDownloads();
       totalDeleted += downloadResult.deletedCount;
       totalFreed += downloadResult.freedSpace;
@@ -1088,7 +1088,7 @@ export default class AppService {
       const backupInfo: AppBackupInfo = {
         version: this.currentVersion,
         timestamp: backupTime,
-        size: 0, // 将在备份完成后更�?        description: 'RayTV application backup',
+        size: 0, // 将在备份完成后更�?        description: 'RayTV application backup',
         deviceInfo: `${this.appInfo?.deviceManufacturer} ${this.appInfo?.deviceModel}`,
         includes: {
           userData: options.includeUserData,
@@ -1098,7 +1098,7 @@ export default class AppService {
           downloads: options.includeDownloads,
           cache: options.includeCache
         },
-        hash: '', // 将在备份完成后计�?        encrypted: !!options.password
+        hash: '', // 将在备份完成后计�?        encrypted: !!options.password
       };
       
       // 在实际应用中，这里会执行真实的备份逻辑
@@ -1160,7 +1160,7 @@ export default class AppService {
   }
 
   /**
-   * 格式化大小显�?   */
+   * 格式化大小显�?   */
   private formatSize(bytes: number): string {
     if (bytes < 1024) {
       return `${bytes} B`;
@@ -1181,9 +1181,9 @@ export default class AppService {
       this.setState(AppState.SHUTTING_DOWN);
       Logger.info(TAG, 'Shutting down application...');
       
-      // 保存状�?      await this.saveAppState();
+      // 保存状�?      await this.saveAppState();
       
-      // 关闭所有服�?      const servicesToShutdown = [...this.services.values()];
+      // 关闭所有服�?      const servicesToShutdown = [...this.services.values()];
       for (const service of servicesToShutdown) {
         try {
           if (typeof service.shutdown === 'function') {
@@ -1237,7 +1237,7 @@ export default class AppService {
   }
 
   /**
-   * 检查应用是否处于健康状�?   */
+   * 检查应用是否处于健康状�?   */
   public isHealthy(): boolean {
     return this.currentState === AppState.READY || 
            this.currentState === AppState.FOREGROUND || 

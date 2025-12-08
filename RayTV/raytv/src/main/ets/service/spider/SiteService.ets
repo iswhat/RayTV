@@ -18,6 +18,7 @@ export interface SiteImportExportConfig {
   includeStats?: boolean;
   includeCustomConfig?: boolean;
   description?: string;
+}
 
 const TAG = 'SiteService';
 
@@ -26,19 +27,19 @@ const TAG = 'SiteService';
  */
 export interface ISiteService {
   /**
-   * 初始化站点服�?
+   * 初始化站点服�?
    */
   initialize(): Promise<void>;
   
   /**
-   * 获取所有站�?
+   * 获取所有站�?
    * @returns 站点列表
    */
   getAllSites(): Promise<Site[]>;
   
   /**
-   * 获取启用的站�?
-   * @returns 启用的站点列�?
+   * 获取启用的站�?
+   * @returns 启用的站点列�?
    */
   getEnabledSites(): Promise<Site[]>;
   
@@ -57,7 +58,7 @@ export interface ISiteService {
   getSiteByKey(key: string): Promise<Site | null>;
   
   /**
-   * 保存站点（新增或更新�?
+   * 保存站点（新增或更新�?
    * @param site 站点信息
    */
   saveSite(site: Site): Promise<void>;
@@ -75,7 +76,7 @@ export interface ISiteService {
   deleteSite(key: string): Promise<void>;
   
   /**
-   * 更新站点启用状�?
+   * 更新站点启用状�?
    * @param key 站点唯一标识
    * @param enabled 是否启用
    */
@@ -89,7 +90,7 @@ export interface ISiteService {
   updateSiteOrder(key: string, order: number): Promise<void>;
   
   /**
-   * 更新站点最后使用时�?
+   * 更新站点最后使用时�?
    * @param key 站点唯一标识
    */
   updateSiteLastUsed(key: string): Promise<void>;
@@ -104,7 +105,7 @@ export interface ISiteService {
   /**
    * 导出站点配置
    * @param config 导出配置
-   * @param siteKeys 可选的站点key列表，不提供则导出所�?
+   * @param siteKeys 可选的站点key列表，不提供则导出所�?
    * @returns 导出的配置字符串
    */
   exportSites(config?: SiteImportExportConfig, siteKeys?: string[]): Promise<string>;
@@ -118,13 +119,13 @@ export interface ISiteService {
   importSites(data: string, config?: SiteImportExportConfig): Promise<{success: number, skipped: number, failed: number}>;
   
   /**
-   * 清空所有站�?
+   * 清空所有站�?
    */
   clearAllSites(): Promise<void>;
 }
 
 /**
- * 站点服务实现�?
+ * 站点服务实现�?
  */
 export class SiteService implements ISiteService {
   private static instance: SiteService | null = null;
@@ -132,7 +133,7 @@ export class SiteService implements ISiteService {
   private initialized: boolean = false;
   
   /**
-   * 私有构造函�?
+   * 私有构造函�?
    */
   private constructor() {
     this.siteDao = new SiteDao();
@@ -150,7 +151,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 初始化站点服�?
+   * 初始化站点服�?
    */
   public async initialize(): Promise<void> {
     if (this.initialized) {
@@ -158,7 +159,7 @@ export class SiteService implements ISiteService {
     }
     
     try {
-      // 预加载站点数�?
+      // 预加载站点数�?
       const sites = await this.getAllSites();
       Logger.info(TAG, `Initialized with ${sites.length} sites`);
       this.initialized = true;
@@ -169,7 +170,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 获取所有站�?
+   * 获取所有站�?
    */
   public async getAllSites(): Promise<Site[]> {
     try {
@@ -181,7 +182,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 获取启用的站�?
+   * 获取启用的站�?
    */
   public async getEnabledSites(): Promise<Site[]> {
     try {
@@ -221,14 +222,14 @@ export class SiteService implements ISiteService {
    */
   public async saveSite(site: Site): Promise<void> {
     try {
-      // 确保时间戳正确设�?
+      // 确保时间戳正确设�?
       const now = Date.now();
       if (!site.createdAt) {
         site.createdAt = now;
       }
       site.updatedAt = now;
       
-      // 确保必要的配置存�?
+      // 确保必要的配置存�?
       if (!site.searchConfig) {
         site.searchConfig = { enabled: false };
       }
@@ -332,7 +333,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 更新站点启用状�?
+   * 更新站点启用状�?
    */
   public async updateSiteEnabled(key: string, enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean : new Error(String(enabled: boolean instanceof Error ? enabled: boolean : new Error(String(enabled: boolean))))))): Promise<void> {
     try {
@@ -368,7 +369,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 更新站点最后使用时�?
+   * 更新站点最后使用时�?
    */
   public async updateSiteLastUsed(key: string): Promise<void> {
     try {
@@ -613,7 +614,7 @@ export class SiteService implements ISiteService {
       const exportData = sites.map(site => {
         const exportSite: Record<string, string | number | boolean | null> = { ... };
         
-        // 不导出敏感信�?
+        // 不导出敏感信�?
         if (!config?.includeCredentials) {
           exportSite.siteAuth = undefined;
           exportSite.headers = undefined;
@@ -624,7 +625,7 @@ export class SiteService implements ISiteService {
           exportSite.stats = { queryCount: 0, errorCount: 0, avgResponseTime: 0 };
         }
         
-        // 是否导出自定义配�?
+        // 是否导出自定义配�?
         if (!config?.includeCustomConfig) {
           exportSite.customCode = undefined;
         }
@@ -657,7 +658,7 @@ export class SiteService implements ISiteService {
           const existing = await this.getSiteByKey(site.key);
           
           if (existing) {
-            // 根据导入配置决定是跳过还是覆�?
+            // 根据导入配置决定是跳过还是覆�?
             stats.skipped++;
             Logger.info(TAG, `Skipped existing site: ${site.key}`);
             continue;
@@ -686,7 +687,7 @@ export class SiteService implements ISiteService {
   }
   
   /**
-   * 清空所有站�?
+   * 清空所有站�?
    */
   public async clearAllSites(): Promise<void> {
     try {

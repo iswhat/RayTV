@@ -1,4 +1,4 @@
-// DefaultNetworkRepository - 网络服务默认实现�?import Logger from '../../common/util/Logger';
+﻿// DefaultNetworkRepository - 缃戠粶鏈嶅姟榛樿瀹炵幇绫?import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -20,18 +20,18 @@ import { getParserService } from '../../service/parser';
 
 const TAG = 'DefaultNetworkRepository';
 const DEFAULT_CACHE_KEY_PREFIX = 'network_cache_';
-const DEFAULT_CACHE_EXPIRY = 3600000; // 默认缓存1小时
+const DEFAULT_CACHE_EXPIRY = 3600000; // 榛樿缂撳瓨1灏忔椂
 
 /**
- * 网络仓库默认实现�? * 实现了NetworkRepository接口，提供基于HTTP请求的网络服务功�? */
+ * 缃戠粶浠撳簱榛樿瀹炵幇绫? * 瀹炵幇浜哊etworkRepository鎺ュ彛锛屾彁渚涘熀浜嶩TTP璇锋眰鐨勭綉缁滄湇鍔″姛鑳? */
 export default class DefaultNetworkRepository implements NetworkRepository {
   private config: NetworkConfig;
   private requestMap: Map<string, http.HttpRequest> = new Map();
 
   /**
-   * 构造函�?   */
+   * 鏋勯€犲嚱鏁?   */
   constructor() {
-    // 默认配置
+    // 榛樿閰嶇疆
     this.config = {
       baseUrl: '',
       timeout: 30000,
@@ -46,13 +46,13 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
- * 初始化网络服�? * @param config 网络配置对象，包含基础URL、超时时间、重试次数等
- * @returns 初始化结果，成功或失败信�? */
+ * 鍒濆鍖栫綉缁滄湇鍔? * @param config 缃戠粶閰嶇疆瀵硅薄锛屽寘鍚熀纭€URL銆佽秴鏃舵椂闂淬€侀噸璇曟鏁扮瓑
+ * @returns 鍒濆鍖栫粨鏋滐紝鎴愬姛鎴栧け璐ヤ俊鎭? */
 async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
     try {
       Logger.info(TAG, 'Initializing network repository...');
       
-      // 合并配置
+      // 鍚堝苟閰嶇疆
       this.config = {
         baseUrl: config.baseUrl !== undefined ? config.baseUrl : this.config.baseUrl,
         timeout: config.timeout !== undefined ? config.timeout : this.config.timeout,
@@ -62,12 +62,12 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
         cacheExpiry: config.cacheExpiry !== undefined ? config.cacheExpiry : this.config.cacheExpiry
       };
       
-      // 验证必要配置
+      // 楠岃瘉蹇呰閰嶇疆
       if (!this.config.baseUrl) {
         throw new Error('Base URL is required');
       }
 
-      // 测试连接
+      // 娴嬭瘯杩炴帴
       await this.testConnection();
       
       Logger.info(TAG, 'Network repository initialized successfully');
@@ -75,7 +75,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
         success: true
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize network repository`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(TAG, `Failed to initialize network repository`, error instanceof Error ? error : new Error(String(error)));
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -85,7 +85,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
   }
 
   /**
-   * 设置网络配置
+   * 璁剧疆缃戠粶閰嶇疆
    */
   setConfig(config: Partial<NetworkConfig>): void {
     this.config = {
@@ -100,7 +100,7 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
   }
 
   /**
-   * 获取当前网络配置
+   * 鑾峰彇褰撳墠缃戠粶閰嶇疆
    */
   getConfig(): NetworkConfig {
     return {
@@ -114,40 +114,40 @@ async initialize(config: NetworkConfig): Promise<NetworkResult<void>> {
   }
 
   /**
-   * 测试连接
+   * 娴嬭瘯杩炴帴
    */
   private async testConnection(): Promise<void> {
     try {
-      // 发送一个简单的GET请求来测试连�?      const testUrl = `${this.config.baseUrl}/api/test`;
+      // 鍙戦€佷竴涓畝鍗曠殑GET璇锋眰鏉ユ祴璇曡繛鎺?      const testUrl = `${this.config.baseUrl}/api/test`;
       const response = await NetworkUtil.request<Record<string, string | number | boolean | null>>({ 
         url: testUrl,
         method: 'GET',
         timeout: this.config.timeout
       });
       
-      // 检查响应状态码
+      // 妫€鏌ュ搷搴旂姸鎬佺爜
       if (response.status < 200 || response.status >= 300) {
         throw new Error(`Connection test failed: HTTP ${response.status}`);
       }
     } catch (error) {
       Logger.warn(TAG, `Connection test failed, continuing anyway: ${error instanceof Error ? error.message : String(error)}`);
-      // 即使测试失败也继续初始化，因为某些API可能不提供测试端�?    }
+      // 鍗充娇娴嬭瘯澶辫触涔熺户缁垵濮嬪寲锛屽洜涓烘煇浜汚PI鍙兘涓嶆彁渚涙祴璇曠鐐?    }
   }
 
   /**
-   * 生成请求ID
+   * 鐢熸垚璇锋眰ID
    */
   private generateRequestId(url: string, method: string): string {
     return `${method}_${url}_${Date.now()}`;
   }
 
   /**
- * 创建请求配置
- * @param url 请求URL，可以是相对路径或绝对URL
- * @param method HTTP方法 (GET, POST, PUT, DELETE�?
- * @param data 请求体数�? * @param params URL查询参数
- * @param customHeaders 自定义请求头
- * @returns 构建好的请求配置对象
+ * 鍒涘缓璇锋眰閰嶇疆
+ * @param url 璇锋眰URL锛屽彲浠ユ槸鐩稿璺緞鎴栫粷瀵筓RL
+ * @param method HTTP鏂规硶 (GET, POST, PUT, DELETE绛?
+ * @param data 璇锋眰浣撴暟鎹? * @param params URL鏌ヨ鍙傛暟
+ * @param customHeaders 鑷畾涔夎姹傚ご
+ * @returns 鏋勫缓濂界殑璇锋眰閰嶇疆瀵硅薄
  */
 private createRequestConfig(
     url: string,
@@ -157,28 +157,28 @@ private createRequestConfig(
     customHeaders?: Record<string, string>
   ): RequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
-    // 合并headers
+    // 鍚堝苟headers
     const headers: Record<string, string> = {};
     
-    // 复制默认headers
+    // 澶嶅埗榛樿headers
     if (this.config.headers) {
       for (const [key, value] of Object.entries(this.config.headers)) {
         headers[key] = value;
       }
     }
     
-    // 复制自定义headers（覆盖默认值）
+    // 澶嶅埗鑷畾涔塰eaders锛堣鐩栭粯璁ゅ€硷級
     if (customHeaders) {
       for (const [key, value] of Object.entries(customHeaders)) {
         headers[key] = value;
       }
     }
     
-    // 处理请求体类�?    if (data && headers['Content-Type'] === 'application/json') {
+    // 澶勭悊璇锋眰浣撶被鍨?    if (data && headers['Content-Type'] === 'application/json') {
       data = JsonUtil.stringify(data);
     }
 
-    // 过滤掉params中的null值，确保符合RequestConfig的类型要�?    const filteredParams: Record<string, string | number | boolean | string[]> = {};
+    // 杩囨护鎺塸arams涓殑null鍊硷紝纭繚绗﹀悎RequestConfig鐨勭被鍨嬭姹?    const filteredParams: Record<string, string | number | boolean | string[]> = {};
     if (params) {
       for (const [key, value] of Object.entries(params)) {
         if (value !== null) {
@@ -199,7 +199,7 @@ private createRequestConfig(
   }
 
   /**
-   * 处理网络响应
+   * 澶勭悊缃戠粶鍝嶅簲
    */
   private processNetworkResponse<T>(response: Response<T>): NetworkResult<T> {
     return {
@@ -211,14 +211,14 @@ private createRequestConfig(
   }
 
   /**
-   * 生成缓存�?   */
+   * 鐢熸垚缂撳瓨閿?   */
   private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
     const paramsStr = params ? JsonUtil.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
   }
 
   /**
-   * 获取缓存数据
+   * 鑾峰彇缂撳瓨鏁版嵁
    */
   private async getCachedData<T>(key: string): Promise<T | null> {
     if (!this.config.cacheEnabled) {
@@ -228,7 +228,7 @@ private createRequestConfig(
     try {
       const cached = await StorageUtil.get(key);
       if (cached && typeof cached === 'object') {
-        // 使用Object.keys检查属性存在性，替代in操作�?        const cacheKeys = Object.keys(cached);
+        // 浣跨敤Object.keys妫€鏌ュ睘鎬у瓨鍦ㄦ€э紝鏇夸唬in鎿嶄綔绗?        const cacheKeys = Object.keys(cached);
         if (cacheKeys.includes('data') && cacheKeys.includes('timestamp')) {
           const cacheItem = cached as { data: T; timestamp: number };
           const now = Date.now();
@@ -251,7 +251,7 @@ private createRequestConfig(
   }
 
   /**
-   * 设置缓存数据
+   * 璁剧疆缂撳瓨鏁版嵁
    */
   private async setCachedData<T>(key: string, data: T): Promise<void> {
     if (!this.config.cacheEnabled) {
@@ -267,7 +267,7 @@ private createRequestConfig(
     }
   }
 
-  // ========== 搜索相关实现 ==========
+  // ========== 鎼滅储鐩稿叧瀹炵幇 ==========
 
   async searchContent(params: SearchParams): Promise<NetworkResult<PaginatedResponse<SearchResult>>> {
     try {
@@ -275,7 +275,7 @@ private createRequestConfig(
       const requestId = this.generateRequestId(requestUrl, 'GET');
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获�?      const cachedData = await this.getCachedData<PaginatedResponse<SearchResult>>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.getCachedData<PaginatedResponse<SearchResult>>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -283,20 +283,20 @@ private createRequestConfig(
         };
       }
 
-      // 创建AbortController
+      // 鍒涘缓AbortController
       const controller = new AbortController();
       this.requestMap.set(requestId, controller);
 
-      // 发送请�?      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
-      // 手动添加signal属性，不使用展开运算�?      (requestConfig as any).signal = controller.signal;
+      // 鍙戦€佽姹?      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
+      // 鎵嬪姩娣诲姞signal灞炴€э紝涓嶄娇鐢ㄥ睍寮€杩愮畻绗?      (requestConfig as any).signal = controller.signal;
       const response = await NetworkUtil.request(requestUrl, requestConfig);
 
-      // 从请求映射中移除
+      // 浠庤姹傛槧灏勪腑绉婚櫎
       this.requestMap.delete(requestId);
 
       const result = this.processNetworkResponse<PaginatedResponse<SearchResult>>(response);
       
-      // 缓存成功的响�?      if (result.success && result.data) {
+      // 缂撳瓨鎴愬姛鐨勫搷搴?      if (result.success && result.data) {
         await this.setCachedData(cacheKey, result.data);
       }
 
@@ -317,7 +317,7 @@ private createRequestConfig(
       const params: Record<string, string | number | boolean | null> = { ... };
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获�?      const cachedData = await this.getCachedData<string[]>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.getCachedData<string[]>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -328,7 +328,7 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, this.createRequestConfig(requestUrl, 'GET', undefined, params));
       const result = this.processNetworkResponse<string[]>(response);
       
-      // 缓存成功的响�?      if (result.success && result.data) {
+      // 缂撳瓨鎴愬姛鐨勫搷搴?      if (result.success && result.data) {
         await this.setCachedData(cacheKey, result.data);
       }
 
@@ -361,14 +361,14 @@ private createRequestConfig(
     }
   }
 
-  // ========== 电影/视频相关实现 ==========
+  // ========== 鐢靛奖/瑙嗛鐩稿叧瀹炵幇 ==========
 
   async getMovieDetail(movieId: string): Promise<NetworkResult<Movie>> {
     try {
       const requestUrl = `/api/movies/${movieId}`;
       const cacheKey = this.generateCacheKey(requestUrl, 'GET');
       
-      // 尝试从缓存获�?      const cachedData = await this.getCachedData<Movie>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.getCachedData<Movie>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -380,8 +380,8 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, requestConfig);
       const result = this.processNetworkResponse<Movie>(response);
       
-      // 缓存成功的响�?      if (result.success && result.data) {
-        // 转换API响应数据为Movie对象
+      // 缂撳瓨鎴愬姛鐨勫搷搴?      if (result.success && result.data) {
+        // 杞崲API鍝嶅簲鏁版嵁涓篗ovie瀵硅薄
         const movie = new Movie(result.data);
         result.data = movie;
         await this.setCachedData(cacheKey, movie);
@@ -403,7 +403,7 @@ private createRequestConfig(
       const requestUrl = '/api/movies';
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
-      // 尝试从缓存获�?      const cachedData = await this.getCachedData<PaginatedResponse<Movie>>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.getCachedData<PaginatedResponse<Movie>>(cacheKey);
       if (cachedData) {
         return {
           success: true,
@@ -415,9 +415,9 @@ private createRequestConfig(
       const response = await NetworkUtil.request(requestUrl, requestConfig);
       const result = this.processNetworkResponse<PaginatedResponse<Movie>>(response);
       
-      // 缓存成功的响应并转换数据
+      // 缂撳瓨鎴愬姛鐨勫搷搴斿苟杞崲鏁版嵁
       if (result.success && result.data) {
-        // 转换API响应数据为Movie对象数组
+        // 杞崲API鍝嶅簲鏁版嵁涓篗ovie瀵硅薄鏁扮粍
         result.data.items = result.data.items.map(item => new Movie(item));
         await this.setCachedData(cacheKey, result.data);
       }
@@ -433,7 +433,7 @@ private createRequestConfig(
     }
   }
 
-  // ========== 通用网络方法实现 ==========
+  // ========== 閫氱敤缃戠粶鏂规硶瀹炵幇 ==========
 
   async get<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
@@ -497,10 +497,10 @@ private createRequestConfig(
 
   async upload<T>(url: string, file: File, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      // 上传文件时需要特殊处理Content-Type
+      // 涓婁紶鏂囦欢鏃堕渶瑕佺壒娈婂鐞咰ontent-Type
       const uploadHeaders: Record<string, string> = {};
       
-      // 手动复制headers，排除Content-Type
+      // 鎵嬪姩澶嶅埗headers锛屾帓闄ontent-Type
       if (headers) {
         for (const [key, value] of Object.entries(headers)) {
           if (key.toLowerCase() !== 'content-type') {
@@ -513,7 +513,7 @@ private createRequestConfig(
       formData.append('file', file);
       
       if (params) {
-        // 使用for循环替代forEach
+        // 浣跨敤for寰幆鏇夸唬forEach
         const entries = Object.entries(params);
         for (let i = 0; i < entries.length; i++) {
           const [key, value] = entries[i];
@@ -521,9 +521,9 @@ private createRequestConfig(
         }
       }
 
-      // 创建请求配置
+      // 鍒涘缓璇锋眰閰嶇疆
       const requestConfig = this.createRequestConfig(url, 'POST', undefined, undefined, uploadHeaders);
-      // 设置请求数据
+      // 璁剧疆璇锋眰鏁版嵁
       requestConfig.data = formData;
       
       const response = await NetworkUtil.request(url, requestConfig);
@@ -541,17 +541,17 @@ private createRequestConfig(
 
   async download(url: string, savePath: string, headers?: Record<string, string>): Promise<NetworkResult<boolean>> {
     try {
-      // 手动合并headers
+      // 鎵嬪姩鍚堝苟headers
       const mergedHeaders: Record<string, string> = {};
       
-      // 复制默认headers
+      // 澶嶅埗榛樿headers
       if (this.config.headers) {
         for (const [key, value] of Object.entries(this.config.headers)) {
           mergedHeaders[key] = value;
         }
       }
       
-      // 复制自定义headers（覆盖默认值）
+      // 澶嶅埗鑷畾涔塰eaders锛堣鐩栭粯璁ゅ€硷級
       if (headers) {
         for (const [key, value] of Object.entries(headers)) {
           mergedHeaders[key] = value;
@@ -610,8 +610,8 @@ private createRequestConfig(
     }
   }
 
-  // ========== 占位实现 ==========
-  // 为了代码能编译通过，提供基础的占位实�?  async getRecommendedMovies(movieId: string, limit: number = 20): Promise<NetworkResult<Movie[]>> { 
+  // ========== 鍗犱綅瀹炵幇 ==========
+  // 涓轰簡浠ｇ爜鑳界紪璇戦€氳繃锛屾彁渚涘熀纭€鐨勫崰浣嶅疄鐜?  async getRecommendedMovies(movieId: string, limit: number = 20): Promise<NetworkResult<Movie[]>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
@@ -627,7 +627,7 @@ private createRequestConfig(
     try {
       Logger.info(TAG, `Getting video sources for contentId: ${contentId}, contentType: ${contentType}`);
       
-      // 使用解析器服务获取视频源
+      // 浣跨敤瑙ｆ瀽鍣ㄦ湇鍔¤幏鍙栬棰戞簮
       return await getParserService().getVideoSources(contentId, contentType);
     } catch (error) {
       Logger.error(TAG, `Failed to get video sources`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
@@ -643,7 +643,7 @@ private createRequestConfig(
     try {
       Logger.info(TAG, `Parsing video source: ${sourceUrl}, parserId: ${parserId}`);
       
-      // 使用解析器服务解析视频源
+      // 浣跨敤瑙ｆ瀽鍣ㄦ湇鍔¤В鏋愯棰戞簮
       return await getParserService().parseVideoSource(sourceUrl, parserId);
     } catch (error) {
       Logger.error(TAG, `Failed to parse video source`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
@@ -711,7 +711,7 @@ private createRequestConfig(
     try {
       Logger.info(TAG, 'Getting available parsers');
       
-      // 使用解析器服务获取所有解析器
+      // 浣跨敤瑙ｆ瀽鍣ㄦ湇鍔¤幏鍙栨墍鏈夎В鏋愬櫒
       return await getParserService().getParsers();
     } catch (error) {
       Logger.error(TAG, `Failed to get parsers`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
@@ -727,7 +727,7 @@ private createRequestConfig(
     try {
       Logger.info(TAG, `Checking parser availability: ${parserId}`);
       
-      // 使用解析器服务检查解析器可用�?      return await getParserService().checkParserAvailability(parserId);
+      // 浣跨敤瑙ｆ瀽鍣ㄦ湇鍔℃鏌ヨВ鏋愬櫒鍙敤鎬?      return await getParserService().checkParserAvailability(parserId);
     } catch (error) {
       Logger.error(TAG, `Failed to check parser availability`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
       return { 
@@ -754,5 +754,6 @@ private createRequestConfig(
     return { success: false, message: 'Not implemented' }; 
   }
 }
+
 
 

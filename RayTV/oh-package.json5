@@ -1,6 +1,11 @@
 {
   "modelVersion": "6.0.0",
+  "name": "RayTV",
+  "version": "1.0.0",
   "description": "RayTV Application",
+  "scripts": {
+    "build": "hvigor build --mode debug"
+  },
   "dependencies": {},
   "devDependencies": {
     "@ohos/hypium": "1.0.24",

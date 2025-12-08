@@ -1,5 +1,5 @@
 // ModernDistributedDataService.ets - 现代化分布式数据服务
-// 基于HarmonyOS 5.0+分布式KVStore API实现多设备数据同�?
+// 基于HarmonyOS 5.0+分布式KVStore API实现多设备数据同�?
 import Logger from '../../common/util/Logger';
 import distributedKVStore from '@ohos.data.distributedKVStore';
 import deviceManager from '@ohos.distributedDeviceManager';
@@ -28,7 +28,7 @@ export enum ConflictResolutionStrategy {
   MERGE = 'merge'            // 合并数据
 }
 
-// 同步状态枚�?export enum SyncStatus {
+// 同步状态枚�?export enum SyncStatus {
   IDLE = 'idle',
   SYNCHRONIZING = 'synchronizing',
   COMPLETED = 'completed',
@@ -40,7 +40,7 @@ export enum ConflictResolutionStrategy {
 export interface SyncConfig {
   enabled: boolean;
   autoSync: boolean;
-  syncInterval: number; // �?  conflictStrategy: ConflictResolutionStrategy;
+  syncInterval: number; // �?  conflictStrategy: ConflictResolutionStrategy;
   syncTypes: SyncDataType[];
   allowCellularSync: boolean;
   showSyncNotifications: boolean;
@@ -57,7 +57,7 @@ const DEFAULT_SYNC_CONFIG: SyncConfig = {
   showSyncNotifications: true
 };
 
-// 同步状态接�?export interface SyncState {
+// 同步状态接�?export interface SyncState {
   status: SyncStatus;
   lastSyncTime?: number;
   lastSyncResult?: boolean;
@@ -68,13 +68,13 @@ const DEFAULT_SYNC_CONFIG: SyncConfig = {
 }
 
 // 同步数据接口
-export interface SyncData<T = any> {
+export interface SyncData<T = unknown> {
   data: T;
   timestamp: number;
   deviceId: string;
 }
 
-// 分布式数据监听回调类�?type DataChangeListener = <T = any>(key: string, data: T, deviceId: string) => void;
+// 分布式数据监听回调类�?type DataChangeListener = <T = unknown>(key: string, data: T, deviceId: string) => void;
 
 export default class ModernDistributedDataService {
   static instance: ModernDistributedDataService;
@@ -100,19 +100,19 @@ export default class ModernDistributedDataService {
   }
 
   /**
-   * 构造函�?   */
+   * 构造函�?   */
   constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
-   * 设置应用上下�?   * @param ctx 应用上下�?   */
+   * 设置应用上下�?   * @param ctx 应用上下�?   */
   public setContext(ctx: common.Context): void {
     this.context = ctx;
   }
 
   /**
-   * 获取应用上下�?   * @returns 应用上下�?   */
+   * 获取应用上下�?   * @returns 应用上下�?   */
   private getContext(): common.Context {
     if (!this.context) {
       throw new Error('ModernDistributedDataService context not set. Please call setContext() first.');
@@ -262,7 +262,7 @@ export default class ModernDistributedDataService {
             const key = entry.key.toString();
             const deviceId = entry.deviceId || 'local';
             
-            // 获取数据并通知监听�?            if (this.kvStore !== null && this.kvStore !== undefined) {
+            // 获取数据并通知监听�?            if (this.kvStore !== null && this.kvStore !== undefined) {
               this.kvStore.get(key).then((value) => {
                 if (this.dataListeners.has(key)) {
                   const listeners = this.dataListeners.get(key)!;
@@ -287,7 +287,7 @@ export default class ModernDistributedDataService {
   }
 
   /**
-   * 监听特定类型的数据变�?   * @param dataType 数据类型
+   * 监听特定类型的数据变�?   * @param dataType 数据类型
    * @param listener 监听回调
    */
   addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener : new Error(String(listener: DataChangeListener instanceof Error ? listener: DataChangeListener : new Error(String(listener: DataChangeListener))))))): void {
@@ -322,9 +322,9 @@ export default class ModernDistributedDataService {
   /**
    * 保存同步数据
    * @param dataType 数据类型
-   * @param key 数据�?   * @param data 数据内容
+   * @param key 数据�?   * @param data 数据内容
    */
-  async saveSyncData<T = any>(dataType: SyncDataType, key: string, data: T): Promise<void> {
+  async saveSyncData<T = unknown>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -336,7 +336,7 @@ export default class ModernDistributedDataService {
       await this.kvStore.put(fullKey, syncData);
       Logger.debug(TAG, `Saved sync data: ${fullKey}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to save sync data: ${error}`);
+      Logger.error(TAG, `Failed to save sync data`, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -344,8 +344,8 @@ export default class ModernDistributedDataService {
   /**
    * 获取同步数据
    * @param dataType 数据类型
-   * @param key 数据�?   */
-  async getSyncData<T = any>(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<T | null> {
+   * @param key 数据�?   */
+  async getSyncData<T = unknown>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }
@@ -361,7 +361,7 @@ export default class ModernDistributedDataService {
       
       return null;
     } catch (error) {
-      Logger.error(TAG, `Failed to get sync data: ${error}`);
+      Logger.error(TAG, `Failed to get sync data`, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
@@ -369,7 +369,7 @@ export default class ModernDistributedDataService {
   /**
    * 删除同步数据
    * @param dataType 数据类型
-   * @param key 数据�?   */
+   * @param key 数据�?   */
   async deleteSyncData(dataType: SyncDataType, key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string instanceof Error ? key: string instanceof Error ? key: string : new Error(String(key: string : new Error(String(key: string instanceof Error ? key: string : new Error(String(key: string))))))): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
@@ -416,7 +416,7 @@ export default class ModernDistributedDataService {
    * 启动自动同步
    */
   private startAutoSync(): void {
-    this.stopAutoSync(); // 先停止现有的定时�?    
+    this.stopAutoSync(); // 先停止现有的定时�?    
     this.syncTimerId = setInterval(async () => {
       try {
         await this.synchronizeData();
@@ -531,17 +531,17 @@ export default class ModernDistributedDataService {
   }
 
   /**
-   * 获取同步状�?   */
+   * 获取同步状�?   */
   getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
-   * 关闭分布式数据服�?   */
+   * 关闭分布式数据服�?   */
   close(): void {
     this.stopAutoSync();
     if (this.kvManager) {
-      // KVStore会由系统自动管理生命周期，不需要手动关�?    }
+      // KVStore会由系统自动管理生命周期，不需要手动关�?    }
     Logger.info(TAG, 'Modern distributed data service closed');
   }
 }

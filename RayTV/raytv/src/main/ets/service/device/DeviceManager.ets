@@ -22,7 +22,7 @@ export enum DeviceType {
   OTHER = 'other'
 }
 
-// 设备状态枚�?
+// 设备状态枚�?
 export enum DeviceStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
@@ -31,7 +31,7 @@ export enum DeviceStatus {
   UNAUTHORIZED = 'unauthorized'
 }
 
-// 设备认证状态枚�?
+// 设备认证状态枚�?
 export enum AuthStatus {
   UNKNOWN = 'unknown',
   UNAUTHENTICATED = 'unauthenticated',
@@ -40,7 +40,7 @@ export enum AuthStatus {
   AUTHENTICATION_FAILED = 'authentication_failed'
 }
 
-// 原始设备信息接口（来自系统API�?
+// 原始设备信息接口（来自系统API�?
 interface RawDeviceInfo {
   deviceId: string;          // 设备唯一标识
   deviceName: string;        // 设备名称
@@ -60,18 +60,18 @@ export interface DeviceInfo {
   ip?: string;               // IP地址
   mac?: string;              // MAC地址
   version?: string;          // 版本信息
-  status: DeviceStatus;      // 设备状�?
-  authStatus: AuthStatus;    // 认证状�?
-  isLocalDevice: boolean;    // 是否为本�?
-  batteryLevel?: number;     // 电池电量�?-100�?
+  status: DeviceStatus;      // 设备状�?
+  authStatus: AuthStatus;    // 认证状�?
+  isLocalDevice: boolean;    // 是否为本�?
+  batteryLevel?: number;     // 电池电量�?-100�?
   screenOn?: boolean;        // 屏幕是否点亮
   connectedTime?: number;    // 连接时间
-  lastActiveTime?: number;   // 最后活跃时�?
-  deviceLabel?: string;      // 自定义标�?
+  lastActiveTime?: number;   // 最后活跃时�?
+  deviceLabel?: string;      // 自定义标�?
 }
 
 // 同步数据接口 - 支持具体数据类型
-export interface SyncData<T = any> {
+export interface SyncData<T = unknown> {
   deviceId: string;          // 目标设备ID
   dataType: string;          // 数据类型
   data: T;                   // 要同步的数据
@@ -92,18 +92,18 @@ export interface PlaybackControlParams {
 // 设备选择条件接口
 export interface DeviceFilter {
   deviceTypes?: DeviceType[];     // 设备类型过滤
-  onlineOnly?: boolean;           // 仅在线设�?
+  onlineOnly?: boolean;           // 仅在线设�?
   authenticatedOnly?: boolean;    // 仅已认证设备
-  nameKeyword?: string;           // 设备名称关键�?
+  nameKeyword?: string;           // 设备名称关键�?
 }
 
 // 设备管理配置接口
 export interface DeviceManagerConfig {
   enableAutoConnect: boolean;     // 启用自动连接
   enableDeviceDiscovery: boolean; // 启用设备发现
-  requireAuthentication: boolean; // 需要认�?
+  requireAuthentication: boolean; // 需要认�?
   autoAuthorizeDevices: boolean;  // 自动授权设备
-  rememberAuthorizedDevices: boolean; // 记住已授权设�?
+  rememberAuthorizedDevices: boolean; // 记住已授权设�?
 }
 
 // 默认设备管理配置
@@ -152,7 +152,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 构造函�?
+   * 构造函�?
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
@@ -161,7 +161,7 @@ export default class DeviceManager {
 
   /**
    * 初始化设备管理器
-   * @param context 应用上下�?
+   * @param context 应用上下�?
    */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
@@ -178,10 +178,10 @@ export default class DeviceManager {
       // 加载配置
       await this.loadConfig();
       
-      // 加载已授权设备列�?
+      // 加载已授权设备列�?
       await this.loadAuthorizedDevices();
       
-      // 注册设备状态回�?
+      // 注册设备状态回�?
       await this.registerDeviceStateCallback();
       
       // 注册认证回调
@@ -190,7 +190,7 @@ export default class DeviceManager {
       // 获取本地设备信息
       await this.updateLocalDeviceInfo();
       
-      // 如果启用了设备发现，开始发现设�?
+      // 如果启用了设备发现，开始发现设�?
       if (this.config.enableDeviceDiscovery) {
         await this.startDeviceDiscovery();
       }
@@ -267,7 +267,7 @@ export default class DeviceManager {
       await this.configService.setConfig('deviceManagerConfig', this.config : new Error(String(...config };
       await this.configService.setConfig('deviceManagerConfig', this.config)))))));
       
-      // 根据配置调整设备发现状�?
+      // 根据配置调整设备发现状�?
       if (this.config.enableDeviceDiscovery && this.isInitialized) {
         await this.startDeviceDiscovery();
       } else {
@@ -287,7 +287,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 加载已授权设备列�?
+   * 加载已授权设备列�?
    */
   private async loadAuthorizedDevices(): Promise<void> {
     try {
@@ -299,7 +299,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 保存已授权设备列�?
+   * 保存已授权设备列�?
    */
   private async saveAuthorizedDevices(): Promise<void> {
     try {
@@ -311,7 +311,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 注册设备状态回�?
+   * 注册设备状态回�?
    */
   private async registerDeviceStateCallback(): Promise<void> {
     if (!this.deviceManagerInstance) {
@@ -326,7 +326,7 @@ export default class DeviceManager {
         let deviceInfo = this.devices.get(deviceId);
         
         if (!deviceInfo) {
-          // 如果是新设备，尝试获取完整信�?
+          // 如果是新设备，尝试获取完整信�?
           try {
             const device = await this.getDeviceInfo(deviceId);
             deviceInfo = this.convertToDeviceInfo(device);
@@ -337,7 +337,7 @@ export default class DeviceManager {
           }
         }
         
-        // 更新设备状�?
+        // 更新设备状�?
         switch (data.action) {
           case deviceManager.DeviceStateChangeAction.ONLINE:
             deviceInfo.status = DeviceStatus.ONLINE;
@@ -456,7 +456,7 @@ export default class DeviceManager {
    */
   private getDeviceTypeByModel(): DeviceType {
     try {
-      // 使用系统API获取设备信息来判断设备类�?
+      // 使用系统API获取设备信息来判断设备类�?
       // 1. 获取屏幕信息
       const screenDpi = this.getScreenDpi();
       const screenWidth = this.getScreenWidth();
@@ -485,7 +485,7 @@ export default class DeviceManager {
         return DeviceType.TV;
       }
       
-      // 平板判断：中等屏�?7-12英寸)，特定分辨率
+      // 平板判断：中等屏�?7-12英寸)，特定分辨率
       if (screenDiagonal >= 7 && screenDiagonal <= 12) {
         return DeviceType.TABLET;
       }
@@ -502,7 +502,7 @@ export default class DeviceManager {
         return DeviceType.WEARABLE;
       }
       
-      // 智能座舱判断：特定品牌或型号关键�?
+      // 智能座舱判断：特定品牌或型号关键�?
       if (deviceModel.toLowerCase().includes('car') ||
           deviceBrand.toLowerCase().includes('car')) {
         return DeviceType.CAR;
@@ -529,7 +529,7 @@ export default class DeviceManager {
   private getScreenDpi(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕DPI
-      // 这里使用默认值作为后�?
+      // 这里使用默认值作为后�?
       return 160;
     } catch {
       return 160;
@@ -542,7 +542,7 @@ export default class DeviceManager {
   private getScreenWidth(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕宽度
-      // 这里使用默认值作为后�?
+      // 这里使用默认值作为后�?
       return 1920;
     } catch {
       return 1920;
@@ -555,7 +555,7 @@ export default class DeviceManager {
   private getScreenHeight(): number {
     try {
       // 在HarmonyOS中，可以通过display API获取屏幕高度
-      // 这里使用默认值作为后�?
+      // 这里使用默认值作为后�?
       return 1080;
     } catch {
       return 1080;
@@ -568,7 +568,7 @@ export default class DeviceManager {
   private getDeviceModel(): string {
     try {
       // 在HarmonyOS中，可以通过systemParameter API获取设备型号
-      // 这里返回默认值作为后�?
+      // 这里返回默认值作为后�?
       return 'DefaultDevice';
     } catch {
       return 'DefaultDevice';
@@ -581,7 +581,7 @@ export default class DeviceManager {
   private getDeviceBrand(): string {
     try {
       // 在HarmonyOS中，可以通过systemParameter API获取设备品牌
-      // 这里返回默认值作为后�?
+      // 这里返回默认值作为后�?
       return 'DefaultBrand';
     } catch {
       return 'DefaultBrand';
@@ -589,7 +589,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 开始设备发�?
+   * 开始设备发�?
    */
   public async startDeviceDiscovery(): Promise<void> {
     if (!this.deviceManagerInstance || !this.config.enableDeviceDiscovery) {
@@ -638,7 +638,7 @@ export default class DeviceManager {
   }
 
   /**
-   * 转换为统一的设备信息格�?
+   * 转换为统一的设备信息格�?
    */
   private convertToDeviceInfo(device: RawDeviceInfo): DeviceInfo {
     // 转换设备类型
@@ -664,7 +664,7 @@ export default class DeviceManager {
         break;
     }
 
-    // 转换认证状�?
+    // 转换认证状�?
     let authStatus = AuthStatus.UNAUTHENTICATED;
     if (this.authorizedDevices.has(device.deviceId)) {
       authStatus = AuthStatus.AUTHENTICATED;
@@ -746,7 +746,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 向目标设备发起认证请�?
+   * 向目标设备发起认证请�?
    * @param deviceId 目标设备ID
    * @param authCode 认证码（可选）
    */
@@ -763,7 +763,7 @@ export default class DeviceManager {
         throw new Error(`Device not found: ${deviceId}`);
       }
       
-      // 更新设备认证状态为认证�?
+      // 更新设备认证状态为认证�?
       deviceInfo.authStatus = AuthStatus.AUTHENTICATING;
       this.notifyEvent(DeviceEvent.AUTH_STATE_CHANGED, deviceInfo);
       
@@ -776,8 +776,8 @@ export default class DeviceManager {
       // 发起认证
       await this.deviceManagerInstance.authenticateDevice(deviceId, authParams);
       
-      // 等待认证结果（这里会通过认证回调处理�?
-      // 给认证过程一个超时时�?
+      // 等待认证结果（这里会通过认证回调处理�?
+      // 给认证过程一个超时时�?
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => reject(new Error('Authentication timeout')), 30000);
         
@@ -790,7 +790,7 @@ export default class DeviceManager {
             clearTimeout(timeout);
             reject(new Error('Authentication failed'));
           } else {
-            // 继续检�?
+            // 继续检�?
             setTimeout(checkAuthStatus, 1000);
           }
         };
@@ -814,7 +814,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 同步数据到目标设�?
+   * 同步数据到目标设�?
    * @param deviceId 目标设备ID
    * @param dataType 数据类型
    * @param data 要同步的数据
@@ -848,7 +848,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 控制跨设备媒体播�?
+   * 控制跨设备媒体播�?
    * @param deviceId 目标设备ID
    * @param action 播放动作（play/pause/stop/seek等）
    * @param params 动作参数
@@ -874,7 +874,7 @@ export default class DeviceManager {
         timestamp: Date.now()
       };
       
-      // 通过DistributedDataService发送播放控制命�?
+      // 通过DistributedDataService发送播放控制命�?
       const controlResult = await this.distributedDataService.syncData({
         deviceId: deviceId,
         dataType: 'playback_control',
@@ -897,11 +897,11 @@ export default class DeviceManager {
     }
 
     try {
-      // 先从缓存中查�?
+      // 先从缓存中查�?
       let deviceInfo = this.devices.get(deviceId);
       
       if (!deviceInfo && !deviceInfo?.isLocalDevice) {
-        // 如果缓存中没有且不是本地设备，尝试获�?
+        // 如果缓存中没有且不是本地设备，尝试获�?
         const device = await this.getDeviceInfo(deviceId);
         deviceInfo = this.convertToDeviceInfo(device);
         this.devices.set(deviceId, deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo : new Error(String(deviceInfo instanceof Error ? deviceInfo : new Error(String(deviceInfo)))))));
@@ -915,7 +915,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 注册设备事件监听�?
+   * 注册设备事件监听�?
    */
   public on(event: DeviceEvent, listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener : new Error(String(listener: DeviceEventListener instanceof Error ? listener: DeviceEventListener : new Error(String(listener: DeviceEventListener))))))): void {
     if (!this.eventListeners.has(event)) {
@@ -925,7 +925,7 @@ export default class DeviceManager {
   }
   
   /**
-   * 取消注册设备事件监听�?
+   * 取消注册设备事件监听�?
    */
   public off(event: DeviceEvent, listener: DeviceEventListener): void {
     if (this.eventListeners.has(event)) {
