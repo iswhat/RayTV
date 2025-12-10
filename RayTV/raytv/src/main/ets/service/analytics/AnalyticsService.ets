@@ -31,8 +31,7 @@ export class AnalyticsService {
   }
 
   /**
-   * 初始化分析服务
-   */
+   * 初始化分析服�?   */
   public async initialize(): Promise<void> {
     // 加载配置
     const config = await this.storageUtil.get<{ enabled: boolean }>('analyticsConfig', { enabled: true });
@@ -42,16 +41,13 @@ export class AnalyticsService {
     this.userId = await this.storageUtil.get<string>('userId', this.generateId());
     await this.storageUtil.save('userId', this.userId);
 
-    // 创建新会话
-    this.createNewSession();
+    // 创建新会�?    this.createNewSession();
 
-    // 开始自动上报
-    this.startAutoReport();
+    // 开始自动上�?    this.startAutoReport();
   }
 
   /**
-   * 创建新会话
-   */
+   * 创建新会�?   */
   private createNewSession(): void {
     this.sessionId = this.generateId();
     this.sessionStartTime = Date.now();
@@ -65,16 +61,13 @@ export class AnalyticsService {
   }
 
   /**
-   * 开始自动上报
-   */
+   * 开始自动上�?   */
   private startAutoReport(): void {
-    // 每30秒上报一次事件队列
-    setInterval(() => {
+    // �?0秒上报一次事件队�?    setInterval(() => {
       this.reportEvents();
     }, 30000);
 
-    // 应用进入后台时上报
-    // 在鸿蒙系统中监听应用生命周期事件
+    // 应用进入后台时上�?    // 在鸿蒙系统中监听应用生命周期事件
     // 这里需要注册到应用的生命周期监听中
   }
 
@@ -103,8 +96,7 @@ export class AnalyticsService {
   /**
    * 记录视频播放
    * @param videoId 视频ID
-   * @param siteKey 站点键
-   * @param params 播放参数
+   * @param siteKey 站点�?   * @param params 播放参数
    */
   public trackVideoPlay(videoId: string, siteKey: string, params?: VideoPlayParams): void {
     if (!this.isEnabled) return;
@@ -150,9 +142,7 @@ export class AnalyticsService {
 
   /**
    * 记录搜索事件
-   * @param keyword 搜索关键词
-   * @param siteKey 站点键
-   * @param resultCount 结果数量
+   * @param keyword 搜索关键�?   * @param siteKey 站点�?   * @param resultCount 结果数量
    */
   public trackSearch(keyword: string, siteKey?: string, resultCount: number = 0): void {
     if (!this.isEnabled) return;
@@ -175,8 +165,7 @@ export class AnalyticsService {
   /**
    * 记录收藏事件
    * @param itemId 收藏项ID
-   * @param itemType 收藏项类型
-   */
+   * @param itemType 收藏项类�?   */
   public trackFavorite(itemId: string, itemType: 'vod' | 'live'): void {
     if (!this.isEnabled) return;
 
@@ -198,8 +187,7 @@ export class AnalyticsService {
    * 记录错误事件
    * @param errorType 错误类型
    * @param message 错误消息
-   * @param context 错误上下文
-   */
+   * @param context 错误上下�?   */
   public trackError(errorType: string, message: string, context?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
@@ -219,8 +207,7 @@ export class AnalyticsService {
   }
 
   /**
-   * 添加事件到队列
-   * @param event 分析事件
+   * 添加事件到队�?   * @param event 分析事件
    */
   private addToQueue(event: AnalyticsEvent): void {
     this.eventQueue.push(event);
@@ -241,15 +228,13 @@ export class AnalyticsService {
     this.eventQueue = [];
 
     try {
-      // 这里应该发送到分析服务器
-      // 由于是本地实现，可以保存到本地存储或日志文件
+      // 这里应该发送到分析服务�?      // 由于是本地实现，可以保存到本地存储或日志文件
       // 模拟上报
       // await this.httpService.post('https://analytics-api.example.com/events', {
       //   events: eventsToReport
       // });
 
-      // 保存到本地日志
-      await this.saveEventsToLog(eventsToReport);
+      // 保存到本地日�?      await this.saveEventsToLog(eventsToReport);
     } catch (error: Error) {
       // 上报失败，将事件重新加入队列
       // 上报失败，将事件重新加入队列
@@ -258,8 +243,7 @@ export class AnalyticsService {
   }
 
   /**
-   * 保存事件到本地日志
-   * @param events 事件列表
+   * 保存事件到本地日�?   * @param events 事件列表
    */
   private async saveEventsToLog(events: AnalyticsEvent[]): Promise<void> {
     try {
@@ -282,15 +266,13 @@ export class AnalyticsService {
   }
 
   /**
-   * 获取分析状态
-   */
+   * 获取分析状�?   */
   public getEnabled(): boolean {
     return this.isEnabled;
   }
 
   /**
-   * 清除所有数据
-   */
+   * 清除所有数�?   */
   public async clearData(): Promise<void> {
     this.eventQueue = [];
     this.createNewSession();

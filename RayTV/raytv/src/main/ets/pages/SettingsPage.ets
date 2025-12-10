@@ -1,4 +1,4 @@
-import { Column, Row, Text, Image, Button, Switch, List, ListItem, Scroller, ScrollView, Blank, Flex, FlexDirection, FlexAlign, ItemAlign, TextAlign, ImageFit, Divider, Toggle, FontWeight, Dialog, DialogAlignment, ButtonType, ScrollBarState } from '@ohos.arkui';
+import { Column, Row, Text, Image, Button, Switch, List, ListItem, Scroller, ScrollView, Blank, Flex, FlexDirection, FlexAlign, ItemAlign, TextAlign, ImageFit, Divider, Toggle, FontWeight, Dialog, DialogAlignment, ButtonType, ScrollBarState } from '@ohos/arkui';
 import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { configService } from '../service/config/ConfigService';
@@ -13,7 +13,7 @@ import { mediaService } from '../service/media/MediaService';
 struct SettingsPage {
   private readonly TAG: string = 'SettingsPage';
   
-  // 状态管�?  @State themeMode: 'light' | 'dark' | 'auto' = 'auto';
+  // 状态管�?  @State themeMode: 'light' | 'dark' | 'auto' = 'auto';
   @State language: 'zh' | 'en' = 'zh';
   @State autoPlay: boolean = true;
   @State autoNextEpisode: boolean = true;
@@ -39,11 +39,11 @@ struct SettingsPage {
   @State enableVoiceAssistant: boolean = true;
   @State enableDeviceFlow: boolean = true;
   
-  // 对话框状�?  @State showClearCacheDialog: boolean = false;
+  // 对话框状�?  @State showClearCacheDialog: boolean = false;
   @State showAboutDialog: boolean = false;
   
-  // 初始�?  /**
-   * 页面加载时调�?   */
+  // 初始�?  /**
+   * 页面加载时调�?   */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'SettingsPage appeared');
     this.loadSettings();
@@ -51,7 +51,7 @@ struct SettingsPage {
   }
 
   /**
-   * 页面卸载时调�?   */
+   * 页面卸载时调�?   */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'SettingsPage disappeared');
   }
@@ -61,7 +61,7 @@ struct SettingsPage {
    */
   private loadSettings(): void {
     try {
-      // 从配置服务加载设�?      // 使用Promise链来加载所有设�?      configService.getConfig('themeMode', 'auto')
+      // 从配置服务加载设�?      // 使用Promise链来加载所有设�?      configService.getConfig('themeMode', 'auto')
         .then(themeMode => {
           this.themeMode = themeMode;
           return configService.getConfig('language', 'zh');
@@ -136,12 +136,10 @@ struct SettingsPage {
           Logger.info(this.TAG, 'Settings loaded successfully');
         })
         .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          Logger.error(this.TAG, 'Failed to load settings', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+          Logger.error(this.TAG, 'Failed to load settings', error as Error);
         });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to load settings', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to load settings', error as Error);
     }
   }
   
@@ -155,13 +153,11 @@ struct SettingsPage {
           Logger.info(this.TAG, `Setting saved: ${key} = ${value}`);
         })
         .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          Logger.error(this.TAG, `Failed to save setting ${key}`, new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+          Logger.error(this.TAG, `Failed to save setting ${key}`, error as Error);
           // 保存设置失败提示
         });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to save setting ${key}`, new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, `Failed to save setting ${key}`, error as Error);
       // 保存设置失败提示
     }
   }
@@ -176,8 +172,7 @@ struct SettingsPage {
       this.currentCacheSize = 235; // MB
       Logger.info(this.TAG, `Cache size calculated: ${this.currentCacheSize} MB`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to calculate cache size', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to calculate cache size', error as Error);
     }
   }
   
@@ -194,15 +189,13 @@ struct SettingsPage {
           this.showClearCacheDialog = false;
           
           Logger.info(this.TAG, 'Cache cleared successfully');
-          // 缓存已清除提�?        })
+          // 缓存已清除提�?        })
         .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          Logger.error(this.TAG, 'Failed to clear cache', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+          Logger.error(this.TAG, 'Failed to clear cache', error as Error);
           // 清除缓存失败提示
         });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to clear cache', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to clear cache', error as Error);
       // 清除缓存失败提示
     }
   }
@@ -212,24 +205,22 @@ struct SettingsPage {
    */
   private getAppVersion(): string {
     try {
-      // 这里应该从应用配置中获取版本�?      // 暂时返回固定版本
+      // 这里应该从应用配置中获取版本�?      // 暂时返回固定版本
       return '1.0.0';
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to get app version', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to get app version', error as Error);
       return '1.0.0';
     }
   }
   
   /**
-   * 检查更�?   */
+   * 检查更�?   */
   private checkForUpdates(): void {
     try {
-      // 调用更新检查服�?      Logger.info(this.TAG, 'Checking for updates...');
+      // 调用更新检查服�?      Logger.info(this.TAG, 'Checking for updates...');
       
-      // 模拟检查更�?      // 当前已是最新版本提�?    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to check for updates', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      // 模拟检查更�?      // 当前已是最新版本提�?    } catch (error) {
+      Logger.error(this.TAG, 'Failed to check for updates', error as Error);
       // 检查更新失败提�?    }
   }
   
@@ -246,13 +237,11 @@ struct SettingsPage {
           // 已重置为默认设置提示
         })
         .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          Logger.error(this.TAG, 'Failed to reset settings', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+          Logger.error(this.TAG, 'Failed to reset settings', error as Error);
           // 重置设置失败提示
         });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to reset settings', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to reset settings', error as Error);
       // 重置设置失败提示
     }
   }
@@ -291,7 +280,7 @@ struct SettingsPage {
       .backgroundColor('transparent')
       .justifyContent(FlexAlign.Center)
       .alignItems(FlexAlign.Center) {
-        Text("�?)
+        Text("�?)
           .fontSize('30vp')
           .fontColor('#FFFFFF')
       }
@@ -362,7 +351,7 @@ struct SettingsPage {
   }
   
   /**
-   * 渲染选项设置�?   */
+   * 渲染选项设置�?   */
   @Builder
   private renderOptionItem(label: string, value: string, onClick: () => void, icon?: string): void {
     Stack({
@@ -415,12 +404,12 @@ struct SettingsPage {
               .margin({ right: '10vp' })
           }
           
-          Text("�?)
+          Text(">")
             .fontSize('20vp')
             .fontColor('#999999')
         }
       }
-    }
+    })
     .onClick(onClick)
   }
   
@@ -493,7 +482,7 @@ struct SettingsPage {
     
     this.renderOptionItem(
       '语言', 
-      this.language === 'zh' ? '简体中�? : 'English', 
+      this.language === 'zh' ? '简体中�? : 'English', 
       () => {}
     );
   }
@@ -511,13 +500,13 @@ struct SettingsPage {
           this.autoPlay = value;
           this.saveSetting('autoPlay', value);
         },
-        '进入播放页后自动开始播�?
+        '进入播放页后自动开始播�?
       );
       
       Divider();
       
       this.renderSwitchItem(
-        '自动播放下一�?,
+        '自动播放下一�?,
         this.autoNextEpisode, 
         (value) => {
           this.autoNextEpisode = value;
@@ -539,7 +528,7 @@ struct SettingsPage {
       Divider();
       
       this.renderSwitchItem(
-        '硬件加�?, 
+        '硬件加�?, 
         this.enableHardwareAcceleration, 
         (value) => {
           this.enableHardwareAcceleration = value;
@@ -592,7 +581,7 @@ struct SettingsPage {
         '清除缓存', 
         `${this.currentCacheSize} MB`, 
         () => { this.showClearCacheDialog = true; },
-        '🗑�?
+        '🗑'
       );
     });
   }
@@ -711,7 +700,7 @@ struct SettingsPage {
         '选择壁纸', 
         '', 
         this.selectWallpaper,
-        '🖼�?
+        '🖼'
       );
     });
   }
@@ -755,8 +744,7 @@ struct SettingsPage {
       // 这里应该调用广告屏蔽服务更新规则
       // 广告规则更新成功提示
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to update ad block rules', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to update ad block rules', error as Error);
       // 更新广告规则失败提示
     }
   }
@@ -771,7 +759,7 @@ struct SettingsPage {
       // 请选择壁纸提示
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, 'Failed to select wallpaper', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage))))))));
+      Logger.error(this.TAG, 'Failed to select wallpaper', new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage instanceof Error ? new Error(errorMessage : new Error(String(new Error(errorMessage : new Error(String(new Error(errorMessage  as Error))));
       // 选择壁纸失败提示
     }
   }
@@ -867,26 +855,26 @@ struct SettingsPage {
   private getCacheStrategyText(): string {
     switch (this.cacheStrategy) {
       case 'memory':
-        return '仅内�?;
+        return '仅内�?;
       case 'disk':
         return '磁盘';
       case 'none':
-        return '无缓�?;
+        return '无缓�?;
       default:
         return '磁盘';
     }
   }
   
   /**
-   * 渲染清除缓存对话�?   */
+   * 渲染清除缓存对话�?   */
   private renderClearCacheDialog(): void {
-    // 在ArkTS中，Dialog组件应该在build方法中使用条件渲�?    // 这里只返回对话框内容，不包含Dialog组件
+    // 在ArkTS中，Dialog组件应该在build方法中使用条件渲�?    // 这里只返回对话框内容，不包含Dialog组件
   }
   
   /**
-   * 渲染关于对话�?   */
+   * 渲染关于对话�?   */
   private renderAboutDialog(): void {
-    // 在ArkTS中，Dialog组件应该在build方法中使用条件渲�?    // 这里只返回对话框内容，不包含Dialog组件
+    // 在ArkTS中，Dialog组件应该在build方法中使用条件渲�?    // 这里只返回对话框内容，不包含Dialog组件
   }
   
   /**
@@ -929,11 +917,11 @@ struct SettingsPage {
       }
       }
       
-      // 对话�?- 使用条件渲染
+      // 对话�?- 使用条件渲染
       if (this.showClearCacheDialog) {
         Dialog({
           title: '清除缓存',
-          message: '确定要清除所有缓存吗？这将删除所有离线内容�?,
+          message: '确定要清除所有缓存吗？这将删除所有离线内容�?,
           autoCancel: true,
           alignment: DialogAlignment.Center,
           offset: { dx: 0, dy: 0 },
@@ -960,7 +948,7 @@ struct SettingsPage {
           })
           .width('100%')
           .backgroundColor('#00AA00')
-          .onClick(this.clearCache) {
+          .onClick(() => { this.clearCache(); }) {
             Text('确定')
               .fontSize('18vp')
               .fontColor('#FFFFFF')
@@ -971,7 +959,7 @@ struct SettingsPage {
       if (this.showAboutDialog) {
         Dialog({
           title: '关于应用',
-          message: `RayTV\n版本 v${this.version}\n一款功能强大的媒体播放器应用，为您提供优质的观影体验。\n© 2024 RayTV Team`,
+          message: `RayTV\n版本 v${this.version || '1.0.0'}\n一款功能强大的媒体播放器应用，为您提供优质的观影体验。\n© 2024 RayTV Team`,
           autoCancel: true,
           alignment: DialogAlignment.Center,
           offset: { dx: 0, dy: 0 },

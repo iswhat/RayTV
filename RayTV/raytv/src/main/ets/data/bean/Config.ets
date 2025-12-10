@@ -1,31 +1,22 @@
 // Config.ets - 配置信息数据模型
-// 定义应用全局配置的数据结构
-
+// 定义应用全局配置的数据结�?
 /**
- * 播放器配置接口
- */
+ * 播放器配置接�? */
 export interface PlayerConfig {
-  defaultPlayer: 'system' | 'custom'; // 默认播放器
-  enableHardwareDecode: boolean;     // 启用硬件解码
+  defaultPlayer: 'system' | 'custom'; // 默认播放�?  enableHardwareDecode: boolean;     // 启用硬件解码
   autoContinuePlay: boolean;         // 自动续播
   rememberPosition: boolean;         // 记住播放位置
   speedList: number[];               // 播放速度列表
   defaultSpeed: number;              // 默认播放速度
   enableHDR: boolean;                // 启用HDR
   enableDolby: boolean;              // 启用杜比音效
-  autoPlayNext: boolean;             // 自动播放下一集
-  defaultResolution?: string;        // 默认分辨率
-  aspectRatio: 'auto' | '16:9' | '4:3' | 'custom'; // 画面比例
+  autoPlayNext: boolean;             // 自动播放下一�?  defaultResolution?: string;        // 默认分辨�?  aspectRatio: 'auto' | '16:9' | '4:3' | 'custom'; // 画面比例
   subtitlesEnabled: boolean;         // 启用字幕
   defaultSubtitleLanguage?: string;  // 默认字幕语言
   defaultAudioTrack?: string;        // 默认音轨
   backgroundPlay: boolean;           // 后台播放
   playMode: 'single' | 'loop' | 'shuffle'; // 播放模式
-  networkBufferSize?: number;        // 网络缓冲大小（MB）
-  localBufferSize?: number;          // 本地缓冲大小（MB）
-  seekStepForward: number;           // 快进步长（秒）
-  seekStepBackward: number;          // 快退步长（秒）
-}
+  networkBufferSize?: number;        // 网络缓冲大小（MB�?  localBufferSize?: number;          // 本地缓冲大小（MB�?  seekStepForward: number;           // 快进步长（秒�?  seekStepBackward: number;          // 快退步长（秒�?}
 
 /**
  * 显示配置接口
@@ -38,16 +29,10 @@ export interface DisplayConfig {
   animationEnabled: boolean;         // 启用动画
   transitionSpeed: 'slow' | 'normal' | 'fast'; // 过渡速度
   showFPS: boolean;                  // 显示FPS
-  showNetworkSpeed: boolean;         // 显示网速
-  showTimeCode: boolean;             // 显示时间码
-  maxColumns: number;                // 最大列数
-  posterAspectRatio: 'auto' | '2:3' | '3:4' | '16:9'; // 海报比例
+  showNetworkSpeed: boolean;         // 显示网�?  showTimeCode: boolean;             // 显示时间�?  maxColumns: number;                // 最大列�?  posterAspectRatio: 'auto' | '2:3' | '3:4' | '16:9'; // 海报比例
   hideNavOnPlay: boolean;            // 播放时隐藏导航栏
   screenSaverDelay?: number;         // 屏幕保护延迟（分钟）
-  colorPrimary?: string;             // 主题色
-  colorAccent?: string;              // 强调色
-  customStyles?: Map<string, string | number | boolean>;   // 自定义样式
-  tvMode: boolean;                   // TV模式
+  colorPrimary?: string;             // 主题�?  colorAccent?: string;              // 强调�?  customStyles?: Map<string, string | number | boolean>;   // 自定义样�?  tvMode: boolean;                   // TV模式
   tabletMode: boolean;               // 平板模式
   phoneMode: boolean;                // 手机模式
 }
@@ -56,25 +41,17 @@ export interface DisplayConfig {
  * 网络配置接口
  */
 export interface NetworkConfig {
-  timeout: number;                   // 超时时间（秒）
-  retryCount: number;                // 重试次数
+  timeout: number;                   // 超时时间（秒�?  retryCount: number;                // 重试次数
   enableCache: boolean;              // 启用缓存
-  cacheSize: number;                 // 缓存大小（MB）
-  maxConcurrentRequests: number;     // 最大并发请求数
-  connectionTimeout: number;         // 连接超时（秒）
-  readTimeout: number;               // 读取超时（秒）
-  writeTimeout: number;              // 写入超时（秒）
-  enableProxy: boolean;              // 启用代理
-  proxyServer?: string;              // 代理服务器
-  proxyPort?: number;                // 代理端口
+  cacheSize: number;                 // 缓存大小（MB�?  maxConcurrentRequests: number;     // 最大并发请求数
+  connectionTimeout: number;         // 连接超时（秒�?  readTimeout: number;               // 读取超时（秒�?  writeTimeout: number;              // 写入超时（秒�?  enableProxy: boolean;              // 启用代理
+  proxyServer?: string;              // 代理服务�?  proxyPort?: number;                // 代理端口
   userAgent?: string;                // 自定义User-Agent
   enableDNSCache: boolean;           // 启用DNS缓存
   dnsCacheTime?: number;             // DNS缓存时间（分钟）
   enableHttp2: boolean;              // 启用HTTP/2
   enableCompression: boolean;        // 启用压缩
-  allowInsecureConnections: boolean; // 允许不安全连接
-  certificate?: string;              // 自定义证书
-}
+  allowInsecureConnections: boolean; // 允许不安全连�?  certificate?: string;              // 自定义证�?}
 
 /**
  * 内容限制配置接口
@@ -93,13 +70,10 @@ export interface SecurityConfig {
   allowThirdParty: boolean;          // 允许第三方JAR加载
   dataEncryption: boolean;           // 数据加密
   requireBiometricAuth: boolean;     // 生物识别认证
-  appLockEnabled: boolean;           // 应用锁
-  appLockTimeout?: number;           // 应用锁超时（分钟）
-  autoClearCacheOnExit: boolean;     // 退出时自动清除缓存
+  appLockEnabled: boolean;           // 应用�?  appLockTimeout?: number;           // 应用锁超时（分钟�?  autoClearCacheOnExit: boolean;     // 退出时自动清除缓存
   privateMode: boolean;              // 隐私模式
   hideSensitiveInfo: boolean;        // 隐藏敏感信息
-  enableAntiCheat: boolean;          // 启用反作弊
-  safeBrowsingEnabled: boolean;      // 安全浏览
+  enableAntiCheat: boolean;          // 启用反作�?  safeBrowsingEnabled: boolean;      // 安全浏览
   contentRestrictions?: ContentRestrictions;
 }
 
@@ -112,11 +86,8 @@ export interface AdBlockConfig {
   updateInterval: number;            // 更新间隔（小时）
   blockVideoAds: boolean;            // 屏蔽视频广告
   blockPopupAds: boolean;            // 屏蔽弹窗广告
-  customFilters?: string[];          // 自定义过滤规则
-  filterLists?: string[];            // 过滤规则列表URL
-  whitelist?: string[];              // 白名单
-  lastUpdateTime?: number;           // 最后更新时间
-}
+  customFilters?: string[];          // 自定义过滤规�?  filterLists?: string[];            // 过滤规则列表URL
+  whitelist?: string[];              // 白名�?  lastUpdateTime?: number;           // 最后更新时�?}
 
 /**
  * 鸿蒙特有配置接口
@@ -125,13 +96,9 @@ export interface HarmonyConfig {
   enableVoiceAssistant: boolean;     // 启用语音助手
   enableDeviceFlow: boolean;         // 启用设备流转
   enableGestureControl: boolean;     // 启用手势控制
-  enableWidget: boolean;             // 启用桌面小组件
-  enableNotification: boolean;       // 启用通知
-  enableAutoStart: boolean;          // 启用自启动
-  enableBackgroundSync: boolean;     // 启用后台同步
-  enableMultiWindow: boolean;        // 启用多窗口
-  enableHiAI: boolean;               // 启用HiAI加速
-  enableSuperDevice: boolean;        // 启用超级终端
+  enableWidget: boolean;             // 启用桌面小组�?  enableNotification: boolean;       // 启用通知
+  enableAutoStart: boolean;          // 启用自启�?  enableBackgroundSync: boolean;     // 启用后台同步
+  enableMultiWindow: boolean;        // 启用多窗�?  enableHiAI: boolean;               // 启用HiAI加�?  enableSuperDevice: boolean;        // 启用超级终端
   deviceSharingEnabled: boolean;     // 设备共享
   notificationChannels?: string[];   // 通知渠道
   quickActions?: string[];           // 快捷操作
@@ -144,10 +111,8 @@ export interface SearchConfig {
   enableAutoSuggest: boolean;        // 启用自动建议
   searchHistoryLimit: number;        // 搜索历史限制
   enableGlobalSearch: boolean;       // 启用全局搜索
-  searchTimeout: number;             // 搜索超时（秒）
-  searchDelay: number;               // 搜索延迟（毫秒）
-  defaultSearchFilter?: string;      // 默认搜索筛选
-  searchHighlight: boolean;          // 搜索结果高亮
+  searchTimeout: number;             // 搜索超时（秒�?  searchDelay: number;               // 搜索延迟（毫秒）
+  defaultSearchFilter?: string;      // 默认搜索筛�?  searchHighlight: boolean;          // 搜索结果高亮
   enableSearchAnalytics: boolean;    // 启用搜索分析
 }
 
@@ -158,17 +123,14 @@ export interface DownloadConfig {
   enableDownload: boolean;           // 启用下载
   maxConcurrentDownloads: number;    // 最大并发下载数
   downloadPath?: string;             // 下载路径
-  autoDownloadNextEpisode: boolean;  // 自动下载下一集
-  downloadOnWifiOnly: boolean;       // 仅WiFi下载
+  autoDownloadNextEpisode: boolean;  // 自动下载下一�?  downloadOnWifiOnly: boolean;       // 仅WiFi下载
   downloadQuality?: string;          // 下载质量
   enableDownloadQueue: boolean;      // 启用下载队列
-  downloadTimeout: number;           // 下载超时（秒）
-  enableBackgroundDownload: boolean; // 启用后台下载
+  downloadTimeout: number;           // 下载超时（秒�?  enableBackgroundDownload: boolean; // 启用后台下载
 }
 
 /**
- * 云账户配置接口
- */
+ * 云账户配置接�? */
 export interface CloudAccount {
   type: string;
   username?: string;
@@ -180,15 +142,13 @@ export interface CloudAccount {
  * 同步配置接口
  */
 export interface SyncConfig {
-  enableCloudSync: boolean;          // 启用云同步
-  syncInterval: number;              // 同步间隔（分钟）
+  enableCloudSync: boolean;          // 启用云同�?  syncInterval: number;              // 同步间隔（分钟）
   syncOnWifiOnly: boolean;           // 仅WiFi同步
   syncHistory: boolean;              // 同步历史记录
   syncFavorites: boolean;            // 同步收藏
   syncSettings: boolean;             // 同步设置
   autoBackup: boolean;               // 自动备份
-  backupInterval?: number;           // 备份间隔（天）
-  cloudAccount?: CloudAccount;
+  backupInterval?: number;           // 备份间隔（天�?  cloudAccount?: CloudAccount;
 }
 
 /**
@@ -197,19 +157,15 @@ export interface SyncConfig {
 export interface LogConfig {
   enableLogging: boolean;            // 启用日志
   logLevel: 'debug' | 'info' | 'warn' | 'error'; // 日志级别
-  logToFile: boolean;                // 记录到文件
-  maxLogSize?: number;               // 最大日志大小（MB）
-  logRetentionDays?: number;         // 日志保留天数
+  logToFile: boolean;                // 记录到文�?  maxLogSize?: number;               // 最大日志大小（MB�?  logRetentionDays?: number;         // 日志保留天数
   enableAnalytics: boolean;          // 启用分析
   crashReporting: boolean;           // 崩溃报告
 }
 
 /**
- * 应用配置主接口
- */
+ * 应用配置主接�? */
 export interface AppConfig {
-  player: PlayerConfig;              // 播放器配置
-  display: DisplayConfig;            // 显示配置
+  player: PlayerConfig;              // 播放器配�?  display: DisplayConfig;            // 显示配置
   network: NetworkConfig;            // 网络配置
   security: SecurityConfig;          // 安全配置
   adBlock: AdBlockConfig;            // 广告屏蔽配置
@@ -219,19 +175,15 @@ export interface AppConfig {
   sync: SyncConfig;                  // 同步配置
   log: LogConfig;                    // 日志配置
   version: string;                   // 配置版本
-  lastUpdated: number;               // 最后更新时间
-  migrationVersion?: string;         // 迁移版本
-  customSettings?: Map<string, string | number | boolean>; // 自定义设置
-}
+  lastUpdated: number;               // 最后更新时�?  migrationVersion?: string;         // 迁移版本
+  customSettings?: Map<string, string | number | boolean>; // 自定义设�?}
 
 /**
  * 配置版本信息接口
  */
 export interface ConfigVersion {
-  version: string;                   // 版本号
-  buildTime: number;                 // 构建时间
-  minAppVersion: string;             // 最低应用版本
-  changelog?: string;                // 更新日志
+  version: string;                   // 版本�?  buildTime: number;                 // 构建时间
+  minAppVersion: string;             // 最低应用版�?  changelog?: string;                // 更新日志
 }
 
 /**
@@ -239,9 +191,7 @@ export interface ConfigVersion {
  */
 export interface ConfigChange {
   keyPath: string;                   // 配置路径
-  oldValue: string | number | boolean | null; // 旧值
-  newValue: string | number | boolean | null; // 新值
-  changedAt: number;                 // 变更时间
+  oldValue: string | number | boolean | null; // 旧�?  newValue: string | number | boolean | null; // 新�?  changedAt: number;                 // 变更时间
   changedBy: 'user' | 'system' | 'sync'; // 变更来源
 }
 
@@ -275,8 +225,7 @@ export interface ConfigImportExportOptions {
  */
 export interface SiteCollection {
   sites: SiteInfo[];           // 站点列表
-  version: string;             // 版本号
-  updatedAt: number;           // 更新时间
+  version: string;             // 版本�?  updatedAt: number;           // 更新时间
 }
 
 /**
@@ -307,21 +256,17 @@ export interface SiteInfo {
   logo?: string;               // 站点Logo
   description?: string;        // 站点描述
   type: SiteType;              // 站点类型
-  status: SiteStatus;          // 站点状态
-  url: string;                 // 站点URL
+  status: SiteStatus;          // 站点状�?  url: string;                 // 站点URL
   scriptUrl?: string;          // 脚本URL
   jarPath?: string;            // JAR文件路径
   pyPath?: string;             // Python脚本路径
   requestConfig: RequestConfig; // 请求配置
   searchRule: SearchRule;      // 搜索规则
-  detailRule: DetailRule;      // 详情页规则
-  playRule: PlayRule;          // 播放规则
+  detailRule: DetailRule;      // 详情页规�?  playRule: PlayRule;          // 播放规则
   categories?: string[];       // 分类列表
   userAgent?: string;          // 用户代理
-  referer?: string;            // 引用页
-  homepage?: string;           // 首页URL
-  supportedFeatures?: string[]; // 支持的特性
-  updatedAt: number;           // 更新时间
+  referer?: string;            // 引用�?  homepage?: string;           // 首页URL
+  supportedFeatures?: string[]; // 支持的特�?  updatedAt: number;           // 更新时间
   lastTestResult?: TestResult;
   errorCount: number;          // 错误计数
   isFavorite: boolean;         // 是否收藏
@@ -337,8 +282,7 @@ export enum SiteType {
 }
 
 /**
- * 站点状态枚举
- */
+ * 站点状态枚�? */
 export enum SiteStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
@@ -350,10 +294,8 @@ export enum SiteStatus {
  * 请求配置
  */
 export interface RequestConfig {
-  timeout: number;             // 超时时间（秒）
-  retryCount: number;          // 重试次数
-  headers: Record<string, string>; // 请求头
-  userAgent: string;           // User-Agent
+  timeout: number;             // 超时时间（秒�?  retryCount: number;          // 重试次数
+  headers: Record<string, string>; // 请求�?  userAgent: string;           // User-Agent
   referer?: string;            // Referer
   cookies?: string;            // Cookies
 }
@@ -369,24 +311,17 @@ export interface SearchRule {
 }
 
 /**
- * 详情页规则
- */
+ * 详情页规�? */
 export interface DetailRule {
   urlPattern: string;          // URL模式
-  titleSelector?: string;      // 标题选择器
-  coverSelector?: string;      // 封面选择器
-  descSelector?: string;       // 描述选择器
-  playListSelector?: string;   // 播放列表选择器
-}
+  titleSelector?: string;      // 标题选择�?  coverSelector?: string;      // 封面选择�?  descSelector?: string;       // 描述选择�?  playListSelector?: string;   // 播放列表选择�?}
 
 /**
  * 播放规则
  */
 export interface PlayRule {
   urlPattern: string;          // URL模式
-  playUrlExtractor?: string;   // 播放地址提取器
-  headers?: Record<string, string>; // 播放请求头
-}
+  playUrlExtractor?: string;   // 播放地址提取�?  headers?: Record<string, string>; // 播放请求�?}
 
 /**
  * 配置错误信息接口

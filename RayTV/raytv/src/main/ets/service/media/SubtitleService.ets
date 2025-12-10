@@ -225,7 +225,7 @@ export default class SubtitleService {
       this.isInitialized = true;
       Logger.info(TAG, 'Subtitle service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to initialize subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to initialize subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 
@@ -237,7 +237,7 @@ export default class SubtitleService {
       await StorageUtil.setObject(SUBTITLE_STYLE_KEY, this.subtitleStyle);
       Logger.debug(TAG, 'Saved subtitle style settings');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save subtitle style settings', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to save subtitle style settings', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 
@@ -249,7 +249,7 @@ export default class SubtitleService {
       await StorageUtil.setObject(SUBTITLE_HISTORY_KEY, this.subtitleHistory);
       Logger.debug(TAG, 'Saved subtitle history');
     } catch (error) {
-      Logger.error(TAG, 'Failed to save subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to save subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 
@@ -272,7 +272,7 @@ export default class SubtitleService {
       Logger.info(TAG, 'Updated subtitle style');
       return { ...this.subtitleStyle };
     } catch (error) {
-      Logger.error(TAG, 'Failed to update subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to update subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return { ...this.subtitleStyle };
     }
   }
@@ -298,7 +298,7 @@ export default class SubtitleService {
       Logger.info(TAG, 'Reset subtitle style to default');
       return { ...this.subtitleStyle };
     } catch (error) {
-      Logger.error(TAG, 'Failed to reset subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to reset subtitle style', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return { ...this.subtitleStyle };
     }
   }
@@ -391,7 +391,7 @@ export default class SubtitleService {
       Logger.info(TAG, `Successfully parsed ${subtitles.length} subtitles`);
       return ApiResponse.success(subtitles, '字幕解析成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to parse subtitle track: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to parse subtitle track: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       
       // 通知解析失败
       this.notifyParseError(track.id, String(error));
@@ -588,7 +588,7 @@ export default class SubtitleService {
         }
       });
     } catch (error) {
-      Logger.error(TAG, 'Failed to parse TTML content', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to parse TTML content', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
     
     return subtitles;
@@ -796,7 +796,7 @@ export default class SubtitleService {
         return ApiResponse.error(ResponseCode.NETWORK_ERROR, `字幕下载失败: ${response.error}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to download subtitle: ${track.name}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to download subtitle: ${track.name}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       
       // 如果有任务，更新状�?      for (const [, task] of this.downloadTasks) {
         if (task.track.id === track.id && task.status === SubtitleDownloadStatus.DOWNLOADING) {
@@ -839,7 +839,7 @@ export default class SubtitleService {
       Logger.info(TAG, `Canceled subtitle download task: ${taskId}`);
       return ApiResponse.success(true, '取消下载成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to cancel download task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to cancel download task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '取消下载失败');
     }
   }
@@ -914,7 +914,7 @@ export default class SubtitleService {
       Logger.info(TAG, `Search subtitles completed for: ${params.title}`);
       return ApiResponse.success(results, '字幕搜索成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to search subtitles', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to search subtitles', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '字幕搜索失败');
     }
   }
@@ -953,7 +953,7 @@ export default class SubtitleService {
       
       Logger.debug(TAG, `Added subtitle to history: ${track.name}`);
     } catch (error) {
-      Logger.error(TAG, 'Failed to add subtitle to history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to add subtitle to history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 
@@ -979,7 +979,7 @@ export default class SubtitleService {
       await this.saveSubtitleHistory();
       Logger.info(TAG, 'Cleared subtitle history');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to clear subtitle history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 
@@ -1061,7 +1061,7 @@ export default class SubtitleService {
       Logger.info(TAG, `Loaded local subtitle file: ${filePath}`);
       return ApiResponse.success(track, '加载本地字幕成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to load local subtitle file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to load local subtitle file: ${filePath}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, `加载本地字幕失败: ${String(error)}`);
     }
   }
@@ -1092,7 +1092,7 @@ export default class SubtitleService {
       
       return ApiResponse.success(preview, '生成字幕预览成功');
     } catch (error) {
-      Logger.error(TAG, `Failed to generate subtitle preview: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to generate subtitle preview: ${track.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '生成字幕预览失败');
     }
   }
@@ -1127,7 +1127,7 @@ export default class SubtitleService {
       Logger.info(TAG, 'Cleared subtitle cache');
       return ApiResponse.success(true, '清除字幕缓存成功');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear subtitle cache', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to clear subtitle cache', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '清除字幕缓存失败');
     }
   }
@@ -1140,7 +1140,7 @@ export default class SubtitleService {
       try {
         listener({ ...this.subtitleStyle });
       } catch (error) {
-        Logger.error(TAG, 'Error in style listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+        Logger.error(TAG, 'Error in style listener', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       }
     }
   }
@@ -1156,7 +1156,7 @@ export default class SubtitleService {
       try {
         listener({ ...task });
       } catch (error) {
-        Logger.error(TAG, `Error in download listener for task ${task.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+        Logger.error(TAG, `Error in download listener for task ${task.id}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       }
     }
   }
@@ -1171,7 +1171,7 @@ export default class SubtitleService {
       try {
         listener([]);
       } catch (error) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       }
     }
   }
@@ -1187,7 +1187,7 @@ export default class SubtitleService {
       try {
         listener(subtitles);
       } catch (error) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       }
     }
   }
@@ -1203,7 +1203,7 @@ export default class SubtitleService {
       try {
         listener([], error);
       } catch (err) {
-        Logger.error(TAG, `Error in parse listener for track ${trackId}`, err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err)))))));
+        Logger.error(TAG, `Error in parse listener for track ${trackId}`, err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err instanceof Error ? err instanceof Error ? err : new Error(String(err : new Error(String(err instanceof Error ? err : new Error(String(err : new Error(String(err  as Error)));
       }
     }
   }
@@ -1303,7 +1303,7 @@ export default class SubtitleService {
       
       Logger.info(TAG, 'Subtitle service destroyed successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to destroy subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, 'Failed to destroy subtitle service', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     }
   }
 }

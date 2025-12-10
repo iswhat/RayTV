@@ -1,5 +1,4 @@
-// User - 用户实体类
-import Logger from '../../common/util/Logger';
+// User - 用户实体�?import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 
 const TAG = 'User';
@@ -9,10 +8,8 @@ const TAG = 'User';
  */
 export enum UserRole {
   GUEST,      // 访客
-  REGULAR,    // 普通用户
-  VIP,        // VIP用户
-  ADMIN       // 管理员
-}
+  REGULAR,    // 普通用�?  VIP,        // VIP用户
+  ADMIN       // 管理�?}
 
 /**
  * 用户偏好设置接口
@@ -40,19 +37,16 @@ export interface DeviceInfo {
   deviceId: string;         // 设备唯一标识
   deviceName: string;       // 设备名称
   deviceType: string;       // 设备类型
-  lastActiveTime: string;   // 最后活跃时间
-  osVersion?: string;       // 操作系统版本
+  lastActiveTime: string;   // 最后活跃时�?  osVersion?: string;       // 操作系统版本
   appVersion?: string;      // 应用版本
-  ipAddress?: string;       // IP地址（可选，用于显示）
-}
+  ipAddress?: string;       // IP地址（可选，用于显示�?}
 
 /**
  * 用户设置类型定义
  * 替换索引签名为具体属性，符合ArkTS规范
  */
 export interface UserSettings {
-  // 预定义常见设置项，避免使用索引签名
-  notificationsEnabled?: boolean;
+  // 预定义常见设置项，避免使用索引签�?  notificationsEnabled?: boolean;
   autoPlayEnabled?: boolean;
   defaultLanguage?: string;
   themePreference?: string;
@@ -61,9 +55,7 @@ export interface UserSettings {
 }
 
 /**
- * 用户序列化数据接口
- * 定义toSerializable方法返回的对象结构
- */
+ * 用户序列化数据接�? * 定义toSerializable方法返回的对象结�? */
 export interface UserSerializableData {
   id: string | null;
   username: string | null;
@@ -85,34 +77,26 @@ export interface UserSerializableData {
 }
 
 /**
- * 用户实体类
- * 定义用户的基本信息和相关操作
+ * 用户实体�? * 定义用户的基本信息和相关操作
  */
 export default class User {
   id: string;                    // 用户唯一标识
-  username: string;              // 用户名
-  nickname?: string;             // 昵称
+  username: string;              // 用户�?  nickname?: string;             // 昵称
   email?: string;                // 邮箱
   avatarUrl?: string;            // 头像URL
   role: UserRole;                // 用户角色
   preferences?: UserPreferences; // 用户偏好设置
-  lastLoginTime?: string;        // 最后登录时间
-  registrationDate?: string;     // 注册日期
+  lastLoginTime?: string;        // 最后登录时�?  registrationDate?: string;     // 注册日期
   activeDevices?: DeviceInfo[];  // 活跃设备列表
-  isVerified?: boolean;          // 是否已验证
-  status?: 'active' | 'inactive' | 'suspended'; // 账户状态
-  subscriptionEndDate?: string;  // 订阅到期日期
+  isVerified?: boolean;          // 是否已验�?  status?: 'active' | 'inactive' | 'suspended'; // 账户状�?  subscriptionEndDate?: string;  // 订阅到期日期
   watchHistoryEnabled?: boolean; // 是否启用观看历史
   favoritesEnabled?: boolean;    // 是否启用收藏
-  totalWatchTime?: number;       // 总观看时长（分钟）
-  settings?: UserSettings; // 其他设置
+  totalWatchTime?: number;       // 总观看时长（分钟�?  settings?: UserSettings; // 其他设置
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor(data: Partial<User>) {
-    // 创建局部变量存储ID和用户名，避免直接使用User类作为对象
-    const defaultId = `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 创建局部变量存储ID和用户名，避免直接使用User类作为对�?    const defaultId = `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
     const defaultUsername = `user_${Math.random().toString(36).substr(2, 8)}`;
     
     // 修复undefined赋值问题，使用??运算符替代||
@@ -135,8 +119,7 @@ export default class User {
     
     // 安全处理settings对象，避免类作为对象使用和直接类型断言
     if (data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings)) {
-      // 创建一个新的符合UserSettings接口的对象
-      this.settings = this.createSafeUserSettings(data.settings);
+      // 创建一个新的符合UserSettings接口的对�?      this.settings = this.createSafeUserSettings(data.settings);
     } else {
       // 使用明确的空对象，不进行类型断言
       this.settings = {};
@@ -165,16 +148,13 @@ export default class User {
   }
 
   /**
-   * 合并偏好设置（替代Object.assign）
-   * @param base 基础偏好设置
+   * 合并偏好设置（替代Object.assign�?   * @param base 基础偏好设置
    * @param updates 要更新的偏好设置
    * @returns 合并后的偏好设置
    */
   private mergePreferences(base: UserPreferences, updates: Partial<UserPreferences> | null | undefined): UserPreferences {
-    // 安全检查更新对象
-    if (!updates || typeof updates !== 'object') {
-      // 手动复制属性，替代展开操作符
-      return {
+    // 安全检查更新对�?    if (!updates || typeof updates !== 'object') {
+      // 手动复制属性，替代展开操作�?      return {
         theme: base.theme,
         language: base.language,
         playerDefaultQuality: base.playerDefaultQuality,
@@ -195,8 +175,7 @@ export default class User {
       return this.getDefaultPreferences();
     }
     
-    // 不使用展开操作符，手动创建并复制属性
-    const result: UserPreferences = {
+    // 不使用展开操作符，手动创建并复制属�?    const result: UserPreferences = {
       theme: base.theme,
       language: base.language,
       playerDefaultQuality: base.playerDefaultQuality,
@@ -211,8 +190,7 @@ export default class User {
       playbackSpeed: base.playbackSpeed
     };
     
-    // 手动合并每个属性
-    if (updates.theme !== undefined) result.theme = updates.theme;
+    // 手动合并每个属�?    if (updates.theme !== undefined) result.theme = updates.theme;
     if (updates.language !== undefined) result.language = updates.language;
     if (updates.playerDefaultQuality !== undefined) result.playerDefaultQuality = updates.playerDefaultQuality;
     if (updates.autoplay !== undefined) result.autoplay = updates.autoplay;
@@ -244,7 +222,7 @@ export default class User {
    * @returns 显示名称
    */
   public getDisplayName(): string {
-    return this.nickname || this.username || '未命名用户';
+    return this.nickname || this.username || '未命名用�?;
   }
 
   /**
@@ -253,8 +231,7 @@ export default class User {
    */
   public isVip(): boolean {
     if (this.role === UserRole.ADMIN || this.role === UserRole.VIP) {
-      // 如果是VIP或管理员角色，进一步检查订阅是否过期
-      if (!this.subscriptionEndDate) {
+      // 如果是VIP或管理员角色，进一步检查订阅是否过�?      if (!this.subscriptionEndDate) {
         return true; // 没有订阅期限的VIP永久有效
       }
       
@@ -266,17 +243,16 @@ export default class User {
   }
 
   /**
-   * 获取用户角色的文本描述
-   * @returns 角色描述
+   * 获取用户角色的文本描�?   * @returns 角色描述
    */
   public getRoleDescription(): string {
     switch (this.role) {
       case UserRole.ADMIN:
-        return '管理员';
+        return '管理�?;
       case UserRole.VIP:
-        return this.isVip() ? 'VIP用户' : 'VIP已过期';
+        return this.isVip() ? 'VIP用户' : 'VIP已过�?;
       case UserRole.REGULAR:
-        return '普通用户';
+        return '普通用�?;
       case UserRole.GUEST:
         return '访客';
       default:
@@ -304,8 +280,7 @@ export default class User {
     const existingIndex = this.activeDevices.findIndex(device => device.deviceId === deviceInfo.deviceId);
     
     if (existingIndex >= 0) {
-      // 更新现有设备的信息
-      const existingDevice = this.activeDevices[existingIndex];
+      // 更新现有设备的信�?      const existingDevice = this.activeDevices[existingIndex];
       this.activeDevices[existingIndex] = {
         deviceId: deviceInfo.deviceId || existingDevice.deviceId,
         deviceName: deviceInfo.deviceName || existingDevice.deviceName,
@@ -316,8 +291,7 @@ export default class User {
         ipAddress: deviceInfo.ipAddress || existingDevice.ipAddress
       };
     } else {
-      // 添加新设备
-      const newDevice: DeviceInfo = {
+      // 添加新设�?      const newDevice: DeviceInfo = {
         deviceId: deviceInfo.deviceId,
         deviceName: deviceInfo.deviceName,
         deviceType: deviceInfo.deviceType,
@@ -346,17 +320,14 @@ export default class User {
   }
 
   /**
-   * 更新总观看时长
-   * @param minutes 增加的分钟数
+   * 更新总观看时�?   * @param minutes 增加的分钟数
    */
   public updateWatchTime(minutes: number): void {
     this.totalWatchTime = (this.totalWatchTime || 0) + minutes;
   }
 
   /**
-   * 获取格式化的总观看时长
-   * @returns 格式化的时长字符串
-   */
+   * 获取格式化的总观看时�?   * @returns 格式化的时长字符�?   */
   public getFormattedWatchTime(): string {
     const totalMinutes = this.totalWatchTime || 0;
     const hours = Math.floor(totalMinutes / 60);
@@ -371,8 +342,7 @@ export default class User {
   /**
    * 检查用户是否有权限访问特定功能
    * @param permission 权限标识
-   * @returns 是否有权限
-   */
+   * @returns 是否有权�?   */
   public hasPermission(permission: string): boolean {
     // 基础权限映射 - 使用switch语句替代索引访问
     let userPermissions: string[] = [];
@@ -394,13 +364,11 @@ export default class User {
         userPermissions = [];
     }
     
-    // 管理员拥有所有权限
-    if (userPermissions.includes('*')) {
+    // 管理员拥有所有权�?    if (userPermissions.includes('*')) {
       return true;
     }
 
-    // VIP权限检查：如果是VIP但订阅已过期，降级为普通用户权限
-    if (this.role === UserRole.VIP && !this.isVip()) {
+    // VIP权限检查：如果是VIP但订阅已过期，降级为普通用户权�?    if (this.role === UserRole.VIP && !this.isVip()) {
       const regularPermissions = ['basic_view', 'full_search', 'watch_history', 'favorites', 'download_basic'];
       return regularPermissions.includes(permission);
     }
@@ -409,16 +377,13 @@ export default class User {
   }
 
   /**
-   * 设置用户状态
-   * @param status 新状态
-   */
+   * 设置用户状�?   * @param status 新状�?   */
   public setStatus(status: 'active' | 'inactive' | 'suspended'): void {
     this.status = status;
   }
 
   /**
-   * 检查用户账户是否有效
-   * @returns 是否有效
+   * 检查用户账户是否有�?   * @returns 是否有效
    */
   public isAccountActive(): boolean {
     return this.status === 'active' && 
@@ -426,9 +391,7 @@ export default class User {
   }
 
   /**
-   * 序列化对象（用于存储）
-   * @returns 序列化后的对象
-   */
+   * 序列化对象（用于存储�?   * @returns 序列化后的对�?   */
   public toSerializable(): UserSerializableData {
     // 确保所有属性都不是undefined，使用null替代undefined
     const result: UserSerializableData = {
@@ -455,16 +418,13 @@ export default class User {
 
   /**
    * 从序列化数据创建对象
-   * @param data 序列化数据
-   * @returns User对象
+   * @param data 序列化数�?   * @returns User对象
    */
   public static fromSerializable(data: UserSerializableData): User {
-    // 准备构造函数参数
-    const userId = typeof data.id === 'string' ? data.id : `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 准备构造函数参�?    const userId = typeof data.id === 'string' ? data.id : `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
     const userName = typeof data.username === 'string' ? data.username : `user_${Math.random().toString(36).substr(2, 8)}`;
     
-    // 使用构造函数直接创建实例
-    const instance = new User({
+    // 使用构造函数直接创建实�?    const instance = new User({
       id: userId,
       username: userName,
       nickname: typeof data.nickname === 'string' ? data.nickname : undefined,
@@ -544,11 +504,9 @@ export default class User {
    * @returns 转换后的UserPreferences对象
    */
   private static safeCastToUserPreferences(obj: Record<string, string | number | boolean | null>): UserPreferences {
-    // 创建符合UserPreferences接口的对象
-    const result: UserPreferences = {} as UserPreferences;
+    // 创建符合UserPreferences接口的对�?    const result: UserPreferences = {} as UserPreferences;
     
-    // 安全地设置每个属性
-    if (typeof obj.theme === 'string' && ['light', 'dark', 'system'].includes(obj.theme)) {
+    // 安全地设置每个属�?    if (typeof obj.theme === 'string' && ['light', 'dark', 'system'].includes(obj.theme)) {
       result.theme = obj.theme as 'light' | 'dark' | 'system';
     }
     if (typeof obj.language === 'string') {
@@ -650,8 +608,7 @@ export default class User {
   }
   
   /**
-   * 安全地创建符合UserSettings接口的对象
-   * 避免类作为对象使用的警告
+   * 安全地创建符合UserSettings接口的对�?   * 避免类作为对象使用的警告
    * @param settingsObj 输入的settings对象
    * @returns 安全的UserSettings对象
    */
@@ -664,8 +621,7 @@ export default class User {
       subtitleSize: undefined
     };
     
-    // 只复制UserSettings接口中定义的有效属性
-    if (typeof settingsObj.notificationsEnabled === 'boolean') {
+    // 只复制UserSettings接口中定义的有效属�?    if (typeof settingsObj.notificationsEnabled === 'boolean') {
       result.notificationsEnabled = settingsObj.notificationsEnabled;
     }
     if (typeof settingsObj.autoPlayEnabled === 'boolean') {
@@ -707,8 +663,7 @@ export default class User {
       totalWatchTime: this.totalWatchTime
     });
     
-    // 手动处理复杂类型属性
-    instance.preferences = this.preferences ? User.cloneUserPreferences(this.preferences) : undefined;
+    // 手动处理复杂类型属�?    instance.preferences = this.preferences ? User.cloneUserPreferences(this.preferences) : undefined;
     instance.activeDevices = this.activeDevices ? User.cloneActiveDevices(this.activeDevices) : undefined;
     instance.settings = this.settings ? User.cloneUserSettings(this.settings) : undefined;
     

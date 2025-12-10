@@ -1,5 +1,5 @@
 /**
- * 事件总线工具�? * 提供统一的事件发�?订阅机制，支持命名空间、防抖、批量操作等功能
+ * 事件总线工具�? * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能
  */
 
 import Logger from './Logger';
@@ -252,7 +252,7 @@ export class EventBusUtil {
       }
       this.debounceTimers = {};
     } catch (error) {
-      this.Logger.error('Failed to clear debounce timers', error as Error);
+      this.logger.error('Failed to clear debounce timers', error as Error);
     }
   }
 
@@ -273,7 +273,7 @@ export class EventBusUtil {
    * @param predicate 断言函数
    * @returns 索引，未找到返回-1
    */
-  private findIndex<T>(array: T[], predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T : new Error(String(predicate: (item: T instanceof Error ? predicate: (item: T : new Error(String(predicate: (item: T))))))) => boolean): number {
+  private findIndex<T>(array: T[], predicate: (item: T) => boolean): number {
     for (let i = 0; i < array.length; i++) {
       if (predicate(array[i])) {
         return i;
@@ -377,7 +377,7 @@ export class EventNamespace {
     const namespaceEvents = allEvents.filter(event => event.indexOf(`${this.namespace}:`) === 0);
     
     namespaceEvents.forEach(event => {
-      this.eventBus.clearEvent(event);
+      this.eventBus.off(event);
     });
   }
 }
@@ -418,5 +418,3 @@ export enum GlobalEventType {
 
 // 导出默认实例
 export default EventBusUtil.getInstance();
-
-

@@ -1,5 +1,5 @@
 // 应用导航服务
-// 管理页面路由、导航栈和页面跳转
+// 管理页面路由、导航栈和页面跳�?
 
 import router from '@ohos.router';
 import StorageUtil from '../common/util/StorageUtil';
@@ -48,7 +48,7 @@ export interface RouteMapping {
   equals(other: RouteMapping): boolean;
 }
 
-// 路由映射实现类
+// 路由映射实现�?
 export class RouteMappingImpl implements RouteMapping {
   url: string = '';
   route: string = '';
@@ -67,7 +67,7 @@ export class RouteMappingImpl implements RouteMapping {
   }
 }
 
-// 导航历史项接口
+// 导航历史项接�?
 export interface NavigationHistoryItem {
   route: string;
   url: string;
@@ -124,7 +124,7 @@ export interface NavigationParams {
   clone(): NavigationParams;
 }
 
-// 导航参数实现类
+// 导航参数实现�?
 export class NavigationParamsImpl implements NavigationParams {
   private _data: Record<string, string | number | boolean | null> = {};
   
@@ -146,7 +146,7 @@ export class NavigationParamsImpl implements NavigationParams {
     return clone;
   }
   
-  // 转换为普通对象以便在router中使用
+  // 转换为普通对象以便在router中使�?
   toObject(): Record<string, string | number | boolean | null> {
     // 手动构建对象，避免使用Object.fromEntries
     const result: Record<string, string | number | boolean | null> = {};
@@ -183,7 +183,7 @@ export class AppNavigator {
   }
 
   /**
-   * 导航到首页
+   * 导航到首�?
    */
   async navigateToHome(): Promise<void> {
     await this.navigateTo(PageRoute.HOME);
@@ -225,10 +225,10 @@ export class AppNavigator {
 
   /**
    * 导航到搜索页
-   * @param prefilledKeyword 预填关键词
+   * @param prefilledKeyword 预填关键�?
    */
   async navigateToSearch(prefilledKeyword: string): Promise<void> {
-    // 确保关键词始终是字符串 - 使用类型化对象
+    // 确保关键词始终是字符�?- 使用类型化对�?
     const searchParams: NavigationParams = new NavigationParamsImpl();
     searchParams.keyword = prefilledKeyword || '';
     await this.navigateTo(PageRoute.SEARCH, searchParams);
@@ -282,7 +282,7 @@ export class AppNavigator {
   }
 
   /**
-   * 导航到页面
+   * 导航到页�?
    * @param route 页面路由
    * @param params 路由参数
    */
@@ -293,7 +293,7 @@ export class AppNavigator {
       const state = router.getState();
       const currentUrl = state.path || '';
       
-      // 记录导航历史 - 创建符合接口定义的对象
+      // 记录导航历史 - 创建符合接口定义的对�?
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
       historyItem.route = route;
       historyItem.url = url;
@@ -319,7 +319,7 @@ export class AppNavigator {
   }
 
   /**
-   * 返回上一页
+   * 返回上一�?
    */
   async navigateToBack(): Promise<void> {
     try {
@@ -335,7 +335,7 @@ export class AppNavigator {
   }
 
   /**
-   * 返回首页（清空导航栈）
+   * 返回首页（清空导航栈�?
    */
   async backToHome(): Promise<void> {
     try {
@@ -391,7 +391,7 @@ export class AppNavigator {
    * @param route 页面路由
    */
   getPageUrl(route: string): string {
-    // 使用switch语句替代索引签名，提高类型安全性
+    // 使用switch语句替代索引签名，提高类型安全�?
     switch (route) {
       case PageRoute.HOME:
         return 'pages/HomePage';
@@ -419,8 +419,8 @@ export class AppNavigator {
   }
 
   /**
-   * 添加到导航历史
-   * @param item 历史记录项
+   * 添加到导航历�?
+   * @param item 历史记录�?
    */
   addToHistory(item: NavigationHistoryItem): void {
     this.navigationHistory.push(item);
@@ -432,7 +432,7 @@ export class AppNavigator {
   }
 
   /**
-   * 从历史记录中移除最后一项
+   * 从历史记录中移除最后一�?
    */
   removeLastFromHistory(): void {
     if (this.navigationHistory.length > 0) {
@@ -442,8 +442,8 @@ export class AppNavigator {
   }
 
   /**
-   * 替换历史记录中的最后一项
-   * @param item 新的历史记录项
+   * 替换历史记录中的最后一�?
+   * @param item 新的历史记录�?
    */
   replaceLastInHistory(item: NavigationHistoryItem): void {
     if (this.navigationHistory.length > 0) {
@@ -453,7 +453,7 @@ export class AppNavigator {
   }
 
   /**
-   * 保存导航历史到存储
+   * 保存导航历史到存�?
    */
   async saveNavigationHistory(): Promise<void> {
     try {
@@ -466,7 +466,7 @@ export class AppNavigator {
         serializableItem.url = item.url;
         if (item.params) {
           const validatedParams: NavigationParams = new NavigationParamsImpl();
-          // 复制基本属性
+          // 复制基本属�?
           if (item.params.id) validatedParams.id = item.params.id;
           if (item.params.name) validatedParams.name = item.params.name;
           if (item.params.title) validatedParams.title = item.params.title;
@@ -474,7 +474,7 @@ export class AppNavigator {
           if (item.params.page !== undefined) validatedParams.page = item.params.page;
           if (item.params.keyword) validatedParams.keyword = item.params.keyword;
           if (item.params.isFavorite !== undefined) validatedParams.isFavorite = item.params.isFavorite;
-          // 处理其他可能的参数 - 使用Object.keys替代in操作符
+          // 处理其他可能的参�?- 使用Object.keys替代in操作�?
           const keys = Object.keys(item.params);
           for (let j = 0; j < keys.length; j++) {
             const key = keys[j];
@@ -499,22 +499,22 @@ export class AppNavigator {
   }
 
   /**
-   * 从存储加载导航历史
+   * 从存储加载导航历�?
    */
   async loadNavigationHistory(): Promise<void> {
     try {
-      // 修复any/unknown类型错误：明确指定返回类型
+      // 修复any/unknown类型错误：明确指定返回类�?
       const history: Array<NavigationHistoryItem> = await StorageUtil.get('navigationHistory', []);
       // 确保类型安全
       if (Array.isArray(history)) {
-        // 避免直接类型断言，进行基本的类型检查
+        // 避免直接类型断言，进行基本的类型检�?
         this.navigationHistory = history.filter(item => 
           item && typeof item === 'object' && 
           typeof item.route === 'string' && 
           typeof item.url === 'string' && 
           typeof item.timestamp === 'number'
         ).map(item => {
-          // 手动复制属性，避免使用扩展运算符
+          // 手动复制属性，避免使用扩展运算�?
           const newItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
           newItem.route = item.route;
           newItem.url = item.url;
@@ -535,12 +535,12 @@ export class AppNavigator {
    * 获取当前页面路由
    */
   getCurrentRoute(): string {
-    // 获取当前路由状态 - 虽然标记为已弃用，但目前没有直接替代方案
+    // 获取当前路由状�?- 虽然标记为已弃用，但目前没有直接替代方案
     try {
       const state = router.getState();
       const url = state.path || '';
       
-      // 从URL映射回路由 - 使用数组避免索引签名问题，使用构造函数避免structural typing
+      // 从URL映射回路�?- 使用数组避免索引签名问题，使用构造函数避免structural typing
       const routeMap = new Array<RouteMapping>();
       
       routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));

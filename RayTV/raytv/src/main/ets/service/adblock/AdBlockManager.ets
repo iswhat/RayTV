@@ -210,7 +210,7 @@ export class AdBlockManager {
             this.urlFilter.addRule(new AdRule(ruleStr, 'keyword', 'Custom keyword rule'));
           }
         } catch (e) {
-          Logger.error(AdBlockManager.TAG, `Invalid custom rule: ${ruleStr}`, e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e)))))));
+          Logger.error(AdBlockManager.TAG, `Invalid custom rule: ${ruleStr}`, e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e instanceof Error ? e instanceof Error ? e : new Error(String(e : new Error(String(e instanceof Error ? e : new Error(String(e : new Error(String(e  as Error)));
         }
       });
     }

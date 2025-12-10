@@ -1,5 +1,4 @@
-// ArrayUtils.ets - ArkTS兼容的数组工具函数
-
+// ArrayUtils.ets - ArkTS兼容的数组工具函�?
 /**
  * 数组工具函数
  * 提供ArkTS环境中安全的数组操作功能
@@ -30,15 +29,13 @@ export const ArrayUtils = {
   },
 
   /**
-   * 检查数组是否为空
-   */
+   * 检查数组是否为�?   */
   isEmpty(array: Optional<ArrayLike<SafeAny>>): boolean {
     return ArrayUtils.length(array) === 0;
   },
 
   /**
-   * 安全地访问数组元素
-   */
+   * 安全地访问数组元�?   */
   get<T>(array: Optional<T[]>, index: number, defaultValue: T): T {
     if (!Array.isArray(array) || index < 0 || index >= array.length) {
       return defaultValue;
@@ -48,8 +45,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 安全地设置数组元素
-   */
+   * 安全地设置数组元�?   */
   set<T>(array: Optional<T[]>, index: number, value: T): boolean {
     if (!Array.isArray(array) || index < 0 || index >= array.length) {
       return false;
@@ -82,8 +78,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 安全地在数组开头添加元素
-   */
+   * 安全地在数组开头添加元�?   */
   unshift<T>(array: Optional<T[]>, ...elements: T[]): number {
     if (!Array.isArray(array)) {
       return 0;
@@ -93,8 +88,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 安全地从数组开头移除元素
-   */
+   * 安全地从数组开头移除元�?   */
   shift<T>(array: Optional<T[]>): T | undefined {
     if (!Array.isArray(array) || array.length === 0) {
       return undefined;
@@ -200,8 +194,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 数组包含检查函数
-   * 替代Array.prototype.includes
+   * 数组包含检查函�?   * 替代Array.prototype.includes
    */
   includes<T>(array: Optional<T[]>, searchElement: T): boolean {
     if (!Array.isArray(array)) {
@@ -218,8 +211,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 数组索引检查函数
-   * 替代Array.prototype.indexOf
+   * 数组索引检查函�?   * 替代Array.prototype.indexOf
    */
   indexOf<T>(array: Optional<T[]>, searchElement: T): number {
     if (!Array.isArray(array)) {
@@ -236,8 +228,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 数组最后索引检查函数
-   * 替代Array.prototype.lastIndexOf
+   * 数组最后索引检查函�?   * 替代Array.prototype.lastIndexOf
    */
   lastIndexOf<T>(array: Optional<T[]>, searchElement: T): number {
     if (!Array.isArray(array)) {
@@ -305,12 +296,10 @@ export const ArrayUtils = {
       return [];
     }
     
-    // 创建副本以避免修改原始数组
-    const result = [...array];
+    // 创建副本以避免修改原始数�?    const result = [...array];
     
     if (compareFn) {
-      // 使用冒泡排序实现自定义排序
-      for (let i = 0; i < result.length - 1; i++) {
+      // 使用冒泡排序实现自定义排�?      for (let i = 0; i < result.length - 1; i++) {
         for (let j = 0; j < result.length - 1 - i; j++) {
           if (compareFn(result[j], result[j + 1]) > 0) {
             // 交换元素
@@ -360,8 +349,7 @@ export const ArrayUtils = {
   },
 
   /**
-   * 数组扁平化函数
-   */
+   * 数组扁平化函�?   */
   flatten<T>(array: Optional<(T | T[])[]>): T[] {
     if (!Array.isArray(array)) {
       return [];

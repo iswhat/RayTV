@@ -1,5 +1,4 @@
-// Movie - 电影/视频实体类
-import Logger from '../../common/util/Logger';
+// Movie - 电影/视频实体�?import Logger from '../../common/util/Logger';
 import DateUtil from '../../common/util/DateUtil';
 
 const TAG = 'Movie';
@@ -10,9 +9,7 @@ const TAG = 'Movie';
 export enum VideoQuality {
   SD,     // 标清
   HD,     // 高清
-  FHD,    // 全高清
-  UHD,    // 4K超高清
-  HDR     // HDR
+  FHD,    // 全高�?  UHD,    // 4K超高�?  HDR     // HDR
 }
 
 /**
@@ -20,17 +17,14 @@ export enum VideoQuality {
  */
 export enum VideoType {
   MOVIE,      // 电影
-  TV_SERIES,  // 电视剧
-  ANIME,      // 动漫
-  DOCUMENTARY,// 纪录片
-  VARIETY,    // 综艺
+  TV_SERIES,  // 电视�?  ANIME,      // 动漫
+  DOCUMENTARY,// 纪录�?  VARIETY,    // 综艺
   LIVE,       // 直播
   OTHER       // 其他
 }
 
 /**
- * Movie序列化接口
- */
+ * Movie序列化接�? */
 export interface MovieSerializable {
   id?: string;
   title?: string;
@@ -90,18 +84,14 @@ export interface SubtitleTrack {
 }
 
 /**
- * 视频播放源接口
- */
+ * 视频播放源接�? */
 export interface VideoSource {
   id: string;          // 播放源ID
-  name: string;        // 播放源名称
-  url: string;         // 播放地址
+  name: string;        // 播放源名�?  url: string;         // 播放地址
   quality: VideoQuality; // 视频质量
   format: string;      // 视频格式
   size?: number;       // 文件大小（字节）
-  duration?: number;   // 时长（秒）
-  resolution?: string; // 分辨率
-  audioTracks?: Array<AudioTrack>; // 音轨列表
+  duration?: number;   // 时长（秒�?  resolution?: string; // 分辨�?  audioTracks?: Array<AudioTrack>; // 音轨列表
   subtitleTracks?: Array<SubtitleTrack>; // 字幕列表
 }
 
@@ -113,27 +103,19 @@ export interface Episode {
   season: number;       // 季数
   episode: number;      // 集数
   title: string;        // 剧集标题
-  duration?: number;    // 时长（秒）
-  airDate?: string;     // 播出日期
-  overview?: string;    // 剧集简介
-  sources: VideoSource[]; // 播放源列表
-  watchedProgress?: number; // 观看进度（秒）
-  isWatched?: boolean;   // 是否已观看
-}
+  duration?: number;    // 时长（秒�?  airDate?: string;     // 播出日期
+  overview?: string;    // 剧集简�?  sources: VideoSource[]; // 播放源列�?  watchedProgress?: number; // 观看进度（秒�?  isWatched?: boolean;   // 是否已观�?}
 
 /**
- * 电影/视频实体类
- * 定义视频内容的基本属性和相关操作
+ * 电影/视频实体�? * 定义视频内容的基本属性和相关操作
  */
 export default class Movie {
-  id: string;                  // 唯一标识符
-  title: string;               // 标题
+  id: string;                  // 唯一标识�?  title: string;               // 标题
   originalTitle?: string;      // 原始标题
   type: VideoType;             // 视频类型
   coverUrl?: string;           // 封面图URL
   backdropUrl?: string;        // 背景图URL
-  overview?: string;           // 简介
-  releaseDate?: string;        // 上映日期
+  overview?: string;           // 简�?  releaseDate?: string;        // 上映日期
   genres?: string[];           // 类型标签
   tags?: string[];             // 标签
   ratings?: RatingInfo[];      // 评分信息
@@ -142,21 +124,17 @@ export default class Movie {
   countries?: string[];        // 制片国家/地区
   languages?: string[];        // 语言
   duration?: number;           // 总时长（秒）
-  totalEpisodes?: number;      // 总集数
-  currentSeason?: number;      // 当前季数
+  totalEpisodes?: number;      // 总集�?  currentSeason?: number;      // 当前季数
   episodes?: Episode[];        // 剧集列表
   recommended?: boolean;       // 是否推荐
   favorite?: boolean;          // 是否收藏
-  watchedProgress?: number;    // 观看进度（秒）
-  playCount?: number;          // 播放次数
+  watchedProgress?: number;    // 观看进度（秒�?  playCount?: number;          // 播放次数
   updateTime?: string;         // 更新时间
-  sources?: VideoSource[];     // 播放源列表
-  score?: number;              // 综合评分（用于排序）
+  sources?: VideoSource[];     // 播放源列�?  score?: number;              // 综合评分（用于排序）
   year?: number;               // 年份
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor(data: Partial<Movie>) {
     this.id = data.id || `movie_${DateUtil.getTimestamp()}_${Math.random().toString(36).substring(2, 11)}`;
     this.title = data.title || '';
@@ -217,8 +195,7 @@ export default class Movie {
 
   /**
    * 获取格式化的时长
-   * @returns 格式化的时长字符串
-   */
+   * @returns 格式化的时长字符�?   */
   public getFormattedDuration(): string {
     if (!this.duration) {
       return '未知';
@@ -228,8 +205,7 @@ export default class Movie {
 
   /**
    * 获取格式化的上映日期
-   * @returns 格式化的日期字符串
-   */
+   * @returns 格式化的日期字符�?   */
   public getFormattedReleaseDate(): string {
     if (!this.releaseDate) {
       return '未知';
@@ -238,9 +214,7 @@ export default class Movie {
   }
 
   /**
-   * 获取类型字符串
-   * @returns 类型字符串
-   */
+   * 获取类型字符�?   * @returns 类型字符�?   */
   public getGenresString(): string {
     if (!this.genres || this.genres.length === 0) {
       return '未知';
@@ -249,50 +223,42 @@ export default class Movie {
   }
 
   /**
-   * 获取导演字符串
-   * @returns 导演字符串
-   */
+   * 获取导演字符�?   * @returns 导演字符�?   */
   public getDirectorsString(): string {
     if (!this.directors || this.directors.length === 0) {
       return '未知';
     }
-    return this.directors.join('、');
+    return this.directors.join('�?);
   }
 
   /**
-   * 获取演员字符串（限制显示数量）
-   * @param maxCount 最大显示数量
-   * @returns 演员字符串
-   */
+   * 获取演员字符串（限制显示数量�?   * @param maxCount 最大显示数�?   * @returns 演员字符�?   */
   public getActorsString(maxCount: number = 5): string {
     if (!this.actors || this.actors.length === 0) {
       return '未知';
     }
 
     if (this.actors.length <= maxCount) {
-      return this.actors.join('、');
+      return this.actors.join('�?);
     }
 
-    return `${this.actors.slice(0, maxCount).join('、')}...等${this.actors.length}人`;
+    return `${this.actors.slice(0, maxCount).join('�?)}...�?{this.actors.length}人`;
   }
 
   /**
    * 更新观看进度
-   * @param progress 进度（秒）
-   * @param episodeId 剧集ID（可选）
+   * @param progress 进度（秒�?   * @param episodeId 剧集ID（可选）
    */
   public updateWatchedProgress(progress: number, episodeId?: string): void {
     this.watchedProgress = progress;
     this.playCount = (this.playCount || 0) + 1;
     this.updateTime = DateUtil.format(new Date());
 
-    // 更新对应剧集的进度
-    if (episodeId && this.episodes && this.episodes.length > 0) {
+    // 更新对应剧集的进�?    if (episodeId && this.episodes && this.episodes.length > 0) {
       const episode = this.episodes.find(e => e.id === episodeId);
       if (episode != null) {
         episode.watchedProgress = progress;
-        // 如果观看进度超过总时长的90%，标记为已观看
-        if (episode.duration && progress >= episode.duration * 0.9) {
+        // 如果观看进度超过总时长的90%，标记为已观�?        if (episode.duration && progress >= episode.duration * 0.9) {
           episode.isWatched = true;
         }
       }
@@ -300,28 +266,25 @@ export default class Movie {
   }
 
   /**
-   * 切换收藏状态
-   * @returns 新的收藏状态
-   */
+   * 切换收藏状�?   * @returns 新的收藏状�?   */
   public toggleFavorite(): boolean {
     this.favorite = !this.favorite;
     return this.favorite;
   }
 
   /**
-   * 获取视频类型的文本描述
-   * @returns 类型描述
+   * 获取视频类型的文本描�?   * @returns 类型描述
    */
   public getTypeDescription(): string {
     switch (this.type) {
       case VideoType.MOVIE:
         return '电影';
       case VideoType.TV_SERIES:
-        return '电视剧';
+        return '电视�?;
       case VideoType.ANIME:
         return '动漫';
       case VideoType.DOCUMENTARY:
-        return '纪录片';
+        return '纪录�?;
       case VideoType.VARIETY:
         return '综艺';
       case VideoType.LIVE:
@@ -332,9 +295,7 @@ export default class Movie {
   }
 
   /**
-   * 获取观看进度百分比
-   * @returns 进度百分比
-   */
+   * 获取观看进度百分�?   * @returns 进度百分�?   */
   public getProgressPercentage(): number {
     const watchedProgress = this.watchedProgress || 0;
     const duration = this.duration || 1;
@@ -343,8 +304,7 @@ export default class Movie {
 
   /**
    * 检查是否为多集内容
-   * @returns 是否为多集
-   */
+   * @returns 是否为多�?   */
   public isMultiEpisode(): boolean {
     return this.type === VideoType.TV_SERIES || 
            this.type === VideoType.ANIME || 
@@ -353,8 +313,7 @@ export default class Movie {
 
   /**
    * 获取已观看的集数
-   * @returns 已观看集数
-   */
+   * @returns 已观看集�?   */
   public getWatchedEpisodeCount(): number {
     if (!this.episodes || this.episodes.length === 0) {
       return 0;
@@ -367,9 +326,7 @@ export default class Movie {
   }
 
   /**
-   * 序列化对象（用于存储）
-   * @returns 序列化后的对象
-   */
+   * 序列化对象（用于存储�?   * @returns 序列化后的对�?   */
   public toSerializable(): MovieSerializable {
     // 使用专用的序列化接口，符合ArkTS规范
     const result: MovieSerializable = {

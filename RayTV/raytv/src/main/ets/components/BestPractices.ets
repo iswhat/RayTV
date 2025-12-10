@@ -1,14 +1,12 @@
 /*
- * ArkTS组件最佳实践示例
- * 提供标准化的组件使用模板
+ * ArkTS组件最佳实践示�? * 提供标准化的组件使用模板
  */
 
 import { ListItem, Text, Button, ProgressBar, Flex, Image } from '@kit.ArkUI';
 import { MediaItem, HistoryItem } from '../model/DataModel';
 
 /**
- * ListItem组件最佳实践示例
- */
+ * ListItem组件最佳实践示�? */
 @Component
 export struct ListItemBestPractice {
   @Prop item: MediaItem;
@@ -57,8 +55,7 @@ export struct ListItemBestPractice {
 }
 
 /**
- * ProgressBar组件最佳实践示例
- */
+ * ProgressBar组件最佳实践示�? */
 @Component
 export struct ProgressBarBestPractice {
   @Prop currentTime: number = 0;
@@ -105,8 +102,7 @@ export struct ProgressBarBestPractice {
 }
 
 /**
- * 媒体卡片组件最佳实践
- */
+ * 媒体卡片组件最佳实�? */
 @Component
 export struct MediaCardBestPractice {
   @Prop mediaItem: MediaItem;
@@ -170,11 +166,10 @@ export struct MediaCardBestPractice {
 }
 
 /**
- * 加载状态组件最佳实践
- */
+ * 加载状态组件最佳实�? */
 @Component
 export struct LoadingBestPractice {
-  @Prop message: string = '加载中...';
+  @Prop message: string = '加载�?..';
   @Prop size: number = 32;
 
   build() {
@@ -198,8 +193,7 @@ export struct LoadingBestPractice {
 }
 
 /**
- * 空状态组件最佳实践
- */
+ * 空状态组件最佳实�? */
 @Component
 export struct EmptyStateBestPractice {
   @Prop title: string = '暂无数据';

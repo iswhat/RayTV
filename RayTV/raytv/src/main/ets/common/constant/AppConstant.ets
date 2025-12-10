@@ -1,8 +1,7 @@
 // AppConstant - 应用基本常量定义
 
 /**
- * 应用常量类
- * 定义应用级别的常量值，包括版本号、包名、路径等
+ * 应用常量�? * 定义应用级别的常量值，包括版本号、包名、路径等
  */
 export class AppConstant {
   // 应用基本信息
@@ -20,20 +19,17 @@ export class AppConstant {
   public static readonly COOKIES_DIR: string = 'cookies';
 
   // 网络相关
-  public static readonly DEFAULT_TIMEOUT: number = 30000; // 30秒
-  public static readonly MAX_RETRY_COUNT: number = 3;
+  public static readonly DEFAULT_TIMEOUT: number = 30000; // 30�?  public static readonly MAX_RETRY_COUNT: number = 3;
   public static readonly USER_AGENT: string = `${AppConstant.APP_NAME}/${AppConstant.VERSION_NAME} HarmonyOS/2.0`;
   public static readonly NETWORK_CHECK_URL: string = 'https://www.baidu.com';
 
-  // 数据库相关
-  public static readonly DATABASE_NAME: string = 'raytv.db';
+  // 数据库相�?  public static readonly DATABASE_NAME: string = 'raytv.db';
   public static readonly DATABASE_VERSION: number = 1;
 
   // 沙箱相关
   public static readonly SANDBOX_PREFIX: string = 'raytv_sandbox_';
 
-  // 配置文件名
-  public static readonly CONFIG_FILE_NAME: string = 'app_config.json';
+  // 配置文件�?  public static readonly CONFIG_FILE_NAME: string = 'app_config.json';
   public static readonly CUSTOM_CONFIG_FILE_NAME: string = 'custom_config.json';
 
   // 播放相关
@@ -44,11 +40,9 @@ export class AppConstant {
   public static readonly ENCRYPTION_KEY_LENGTH: number = 256;
   public static readonly SECURE_STORAGE_ALIAS: string = 'raytv_secure';
 
-  // 线程池配置
-  public static readonly CORE_POOL_SIZE: number = 2;
+  // 线程池配�?  public static readonly CORE_POOL_SIZE: number = 2;
   public static readonly MAX_POOL_SIZE: number = 4;
-  public static readonly KEEP_ALIVE_TIME: number = 60; // 秒
-
+  public static readonly KEEP_ALIVE_TIME: number = 60; // �?
   // 缓存配置
   public static readonly MAX_CACHE_SIZE: number = 50 * 1024 * 1024; // 50MB
   public static readonly CACHE_EXPIRE_TIME: number = 24 * 60 * 60 * 1000; // 24小时

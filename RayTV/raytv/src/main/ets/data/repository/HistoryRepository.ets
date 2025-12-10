@@ -10,7 +10,8 @@ import StorageUtil from '../../common/util/StorageUtil';
 const TAG = 'HistoryRepository';
 const HISTORY_CACHE_PREFIX = 'history_item_';
 const HISTORY_LIST_CACHE = 'history_list_cache';
-const MAX_HISTORY_ITEMS = 1000; // 最大历史记录数�?
+const MAX_HISTORY_ITEMS = 1000; // 最大历史记录数
+
 export class HistoryRepository {
   private static instance: HistoryRepository;
   private sqliteHelper: SQLiteHelper;
@@ -107,189 +108,7 @@ export class HistoryRepository {
     }];
     
     // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE instanceof Error ? value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE : new Error(String(value: history.contentType
-    }, {
-      column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
-      value: history.contentId
-    }];
-    
-    // 对于剧集内容，还需要匹配集数ID
-    if (history.episodeId && history.contentType === ContentType.EPISODE))))))) {
+    if (history.episodeId && history.contentType === ContentType.EPISODE) {
       conditions.push({
         column: HISTORY_TABLE.COLUMNS.EPISODE_ID,
         value: history.episodeId
@@ -336,7 +155,7 @@ export class HistoryRepository {
    * @param limit 限制数量
    * @returns 历史记录列表
    */
-  public async getHistoryByContentType(contentType: ContentType, limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50))))))): Promise<History[]> {
+  public async getHistoryByContentType(contentType: ContentType, limit: number = 50): Promise<History[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE,
@@ -370,7 +189,7 @@ export class HistoryRepository {
    * @param limit 限制数量
    * @returns 历史记录列表
    */
-  public async getHistoryBySite(siteId: string, limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50 : new Error(String(limit: number = 50 instanceof Error ? limit: number = 50 : new Error(String(limit: number = 50))))))): Promise<History[]> {
+  public async getHistoryBySite(siteId: string, limit: number = 50): Promise<History[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.SITE_ID,
@@ -408,7 +227,7 @@ export class HistoryRepository {
     try {
       // 尝试从缓存获�?      const cachedHistory = await this.getCachedHistoryItem(historyId);
       if (cachedHistory) {
-        Logger.debug(TAG, `Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache` instanceof Error ? `Returning history ${historyId} from cache` : new Error(String(`Returning history ${historyId} from cache`)))))));
+        Logger.debug(TAG, `Returning history ${historyId} from cache`);
         return cachedHistory;
       }
       
@@ -447,7 +266,7 @@ export class HistoryRepository {
    * @param episodeId 集数ID（可选）
    * @returns 历史记录或null
    */
-  public async getHistoryByContent(contentType: ContentType, contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string instanceof Error ? contentId: string, episodeId?: string : new Error(String(contentId: string, episodeId?: string))))))): Promise<History | null> {
+  public async getHistoryByContent(contentType: ContentType, contentId: string, episodeId?: string): Promise<History | null> {
     try {
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE,
@@ -488,7 +307,7 @@ export class HistoryRepository {
    */
   public async deleteHistory(historyId: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}` instanceof Error ? `Deleting history with ID: ${historyId}` : new Error(String(`Deleting history with ID: ${historyId}`)))))));
+      Logger.debug(TAG, `Deleting history with ID: ${historyId}`);
       
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.ID,
@@ -521,7 +340,7 @@ export class HistoryRepository {
     }
     
     try {
-      Logger.debug(TAG, `Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items` instanceof Error ? `Deleting ${historyIds.length} history items` : new Error(String(`Deleting ${historyIds.length} history items`)))))));
+      Logger.debug(TAG, `Deleting ${historyIds.length} history items`);
       
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.ID,
@@ -552,7 +371,7 @@ export class HistoryRepository {
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
-      Logger.warning(TAG, 'Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records' : new Error(String('Clearing all history records' instanceof Error ? 'Clearing all history records' : new Error(String('Clearing all history records')))))));
+      Logger.warning(TAG, 'Clearing all history records');
       
       const result = await this.sqliteHelper.delete(HISTORY_TABLE.TABLE_NAME);
       
@@ -573,7 +392,7 @@ export class HistoryRepository {
    * @returns 删除成功的数�?   */
   public async clearHistoryByType(contentType: ContentType): Promise<number> {
     try {
-      Logger.debug(TAG, `Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}` instanceof Error ? `Clearing history for type: ${contentType}` : new Error(String(`Clearing history for type: ${contentType}`)))))));
+      Logger.debug(TAG, `Clearing history for type: ${contentType}`);
       
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE,
@@ -602,7 +421,7 @@ export class HistoryRepository {
     try {
       return await this.sqliteHelper.count(HISTORY_TABLE.TABLE_NAME);
     } catch (error) {
-      Logger.error(TAG, `Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error instanceof Error ? `Failed to get history count: ${JSON.stringify(error : new Error(String(`Failed to get history count: ${JSON.stringify(error)))))))}`);
+      Logger.error(TAG, `Failed to get history count: ${JSON.stringify(error)}`);
       return 0;
     }
   }
@@ -632,11 +451,16 @@ export class HistoryRepository {
    * @param playPosition 播放位置（毫秒）
    * @param totalDuration 总时长（毫秒�?   * @returns 是否更新成功
    */
-  public async updatePlayProgress(historyId: string, playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number instanceof Error ? playPosition: number, totalDuration: number : new Error(String(playPosition: number, totalDuration: number))))))): Promise<boolean> {
+  public async updatePlayProgress(historyId: string, playPosition: number, totalDuration: number): Promise<boolean> {
     try {
       const progress = totalDuration > 0 ? (playPosition / totalDuration) * 100 : 0;
       
-      const data: Record<string, string | number | boolean | null> = { ... };
+      const data: Record<string, string | number | boolean | null> = {
+        [HISTORY_TABLE.COLUMNS.PLAY_POSITION]: playPosition,
+        [HISTORY_TABLE.COLUMNS.TOTAL_DURATION]: totalDuration,
+        [HISTORY_TABLE.COLUMNS.PROGRESS]: progress,
+        [HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME]: Date.now()
+      };
       
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.ID,
@@ -669,59 +493,7 @@ export class HistoryRepository {
       
       // 按内容类型分组获�?      const contentTypes = [ContentType.MOVIE, ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
       
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes instanceof Error ? ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes : new Error(String(ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
-      
-      for (const type of contentTypes))))))) {
+      for (const type of contentTypes) {
         const histories = await this.getHistoryByContentType(type, limit);
         if (histories.length > 0) {
           groups.push({
@@ -752,202 +524,22 @@ export class HistoryRepository {
         
         // 获取需要删除的旧记录ID
         const oldestRecords = await this.sqliteHelper.query(
-          HISTORY_TABLE.TABLE_NAME, [HISTORY_TABLE.COLUMNS.ID],
+          HISTORY_TABLE.TABLE_NAME, 
+          [HISTORY_TABLE.COLUMNS.ID],
           undefined,
           [{
             column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
             order: 'ASC'
           }],
           excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         instanceof Error ? [HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-         : new Error(String([HISTORY_TABLE.COLUMNS.ID],
-          undefined,
-          [{
-            column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
-            order: 'ASC'
-          }],
-          excessCount
-        )))))));
+        );
         
-        const oldestIds = oldestRecords.map(record => record[HISTORY_TABLE.COLUMNS.ID].toString());
-        
-        if (oldestIds.length > 0) {
-          await this.deleteHistories(oldestIds);
-          Logger.info(TAG, `Cleaned up ${oldestIds.length} old history records`);
+        if (oldestRecords && oldestRecords.length > 0) {
+          // 构建删除条件
+          const idsToDelete = oldestRecords.map(record => record[HISTORY_TABLE.COLUMNS.ID].toString());
+          
+          // 删除旧记�?          await this.deleteHistories(idsToDelete);
+          Logger.info(TAG, `Cleaned up ${idsToDelete.length} old history records`);
         }
       }
     } catch (error) {
@@ -959,7 +551,7 @@ export class HistoryRepository {
    * 缓存历史记录�?   */
   private async cacheHistoryItem(history: History): Promise<void> {
     try {
-      await this.storageUtil.setObject(`${HISTORY_CACHE_PREFIX}${history.id}`, history instanceof Error ? history : new Error(String(history instanceof Error ? history instanceof Error ? history : new Error(String(history : new Error(String(history instanceof Error ? history : new Error(String(history instanceof Error ? history instanceof Error ? history : new Error(String(history instanceof Error ? history instanceof Error ? history : new Error(String(history : new Error(String(history instanceof Error ? history : new Error(String(history : new Error(String(history instanceof Error ? history : new Error(String(history instanceof Error ? history instanceof Error ? history : new Error(String(history : new Error(String(history instanceof Error ? history : new Error(String(history)))))));
+      await this.storageUtil.setObject(`${HISTORY_CACHE_PREFIX}${history.id}`, history);
     } catch (error) {
       Logger.warn(TAG, `Failed to cache history item: ${JSON.stringify(error)}`);
     }
@@ -1011,7 +603,12 @@ export class HistoryRepository {
   /**
    * 获取内容类型的标�?   */
   private getContentTypeTitle(contentType: ContentType): string {
-    const titles: Record<string, string | number | boolean | null> = { ... };
+    const titles: Record<string, string | number | boolean | null> = {
+      [ContentType.MOVIE]: '电影',
+      [ContentType.SERIES]: '电视�?,
+      [ContentType.LIVE]: '直播',
+      [ContentType.EPISODE]: '剧集'
+    };
     return titles[contentType] || '其他';
   }
   
@@ -1040,11 +637,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 将数据库记录列表转换为History对象列表
+   * 将数据库记录数组转换为History对象数组
    */
   private convertToHistoryObjects(records: Record<string, string | number | boolean | null>[]): History[] {
     return records.map(record => this.convertToHistoryObject(record));
   }
 }
-
-

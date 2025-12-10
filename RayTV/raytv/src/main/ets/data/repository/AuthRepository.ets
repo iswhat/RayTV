@@ -1,4 +1,4 @@
-// AuthRepository - 认证授权仓库�?// 负责处理用户认证、授权和会话管理相关的业务逻辑
+// AuthRepository - 认证授权仓库�?// 负责处理用户认证、授权和会话管理相关的业务逻辑
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -10,7 +10,7 @@ import { CacheType } from '../model/CacheModel';
 import { UserInfo, UserCredentials, UserRegisterInfo } from '../../service/user/UserService';
 
 /**
- * 认证状态枚�? */
+ * 认证状态枚�? */
 export enum AuthStatus {
   UNAUTHENTICATED = 'unauthenticated',
   AUTHENTICATING = 'authenticating',
@@ -26,9 +26,9 @@ export enum AuthStatus {
 export interface AuthToken {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number; // 过期时间（秒�?  tokenType: string;
+  expiresIn: number; // 过期时间（秒�?  tokenType: string;
   scope: string;
-  issuedAt: number; // 签发时间�?}
+  issuedAt: number; // 签发时间�?}
 
 /**
  * 认证响应接口
@@ -67,7 +67,7 @@ export interface AuthConfig {
   enableAutoLogin: boolean;
   autoLoginTimeout: number; // 自动登录超时时间（毫秒）
   tokenRefreshThreshold: number; // 令牌刷新阈值（秒）
-  sessionTimeout: number; // 会话超时时间（秒�?  rememberMeDuration: number; // 记住我持续时间（秒）
+  sessionTimeout: number; // 会话超时时间（秒�?  rememberMeDuration: number; // 记住我持续时间（秒）
   enableTokenRotation: boolean; // 是否启用令牌轮换
   secureTokenStorage: boolean; // 是否使用安全存储
 }
@@ -114,7 +114,7 @@ export interface Permission {
   name: string;
   description: string;
   category: string;
-  level: number; // 权限级别�?-最低，10-最�?  isEnabled: boolean;
+  level: number; // 权限级别�?-最低，10-最�?  isEnabled: boolean;
 }
 
 /**
@@ -142,7 +142,7 @@ export interface UserPermissions {
 }
 
 /**
- * 权限检查请�? */
+ * 权限检查请�? */
 export interface PermissionCheckRequest {
   permissionId: string;
   userId?: string;
@@ -150,7 +150,7 @@ export interface PermissionCheckRequest {
 }
 
 /**
- * 认证仓库�? */
+ * 认证仓库�? */
 export class AuthRepository {
   private static instance: AuthRepository | null = null;
 
@@ -177,7 +177,7 @@ export class AuthRepository {
     biometricAuth: '/auth/biometric'
   };
   
-  // 存储键配�?  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     authToken: 'auth:token',
     currentUser: 'auth:currentUser',
     authConfig: 'auth:config',
@@ -196,21 +196,21 @@ export class AuthRepository {
     autoLoginTimeout: 1800000, // 30分钟
     tokenRefreshThreshold: 300, // 5分钟
     sessionTimeout: 3600, // 1小时
-    rememberMeDuration: 604800, // 7�?    enableTokenRotation: true,
+    rememberMeDuration: 604800, // 7�?    enableTokenRotation: true,
     secureTokenStorage: true
   };
   
-  // 缓存的配�?  private cachedConfig: AuthConfig | null = null;
+  // 缓存的配�?  private cachedConfig: AuthConfig | null = null;
   
   // 当前认证状�?  private currentStatus: AuthStatus = AuthStatus.UNAUTHENTICATED;
   
-  // 缓存的认证令�?  private cachedToken: AuthToken | null = null;
+  // 缓存的认证令�?  private cachedToken: AuthToken | null = null;
   
-  // 缓存的用户信�?  private cachedUser: UserInfo | null = null;
+  // 缓存的用户信�?  private cachedUser: UserInfo | null = null;
   
-  // 缓存的用户权�?  private cachedUserPermissions: UserPermissions | null = null;
+  // 缓存的用户权�?  private cachedUserPermissions: UserPermissions | null = null;
   
-  // 令牌刷新中标�?  private isRefreshingToken: boolean = false;
+  // 令牌刷新中标�?  private isRefreshingToken: boolean = false;
   
   // 登录尝试次数
   private loginAttempts: number = 0;
@@ -219,7 +219,7 @@ export class AuthRepository {
   private lastLoginAttempt: number = 0;
 
   /**
-   * 私有构造函�?   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('AuthRepository initialized');
     this.setupEventListeners();
@@ -237,7 +237,7 @@ export class AuthRepository {
   }
 
   /**
-   * 初始化认证仓�?   */
+   * 初始化认证仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载配置
@@ -248,16 +248,16 @@ export class AuthRepository {
       this.logger.info('AuthRepository initialization completed');
     } catch (error) {
       this.Logger.error('Failed to initialize AuthRepository', error as Error);
-      // 出错时重置认证状�?      await this.resetAuthState();
+      // 出错时重置认证状�?      await this.resetAuthState();
     }
   }
 
   /**
-   * 设置事件监听�?   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean }))))))) => {
+    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean } instanceof Error ? async (status: { isOnline: boolean } : new Error(String(async (status: { isOnline: boolean }))))))) => {
       if (status.isOnline && this.cachedToken && this.isTokenExpiredSoon()) {
-        // 网络恢复且令牌即将过期时，尝试刷新令�?        this.refreshTokenIfNeeded().catch(err => {
+        // 网络恢复且令牌即将过期时，尝试刷新令�?        this.refreshTokenIfNeeded().catch(err => {
           this.logger.warn('Failed to refresh token after network recovery', err);
         });
       }
@@ -266,12 +266,12 @@ export class AuthRepository {
     // 监听应用前台/后台切换
     this.eventBus.on('app:stateChanged', async (state: { isActive: boolean }) => {
       if (state.isActive && this.cachedToken) {
-        // 应用切换到前台时，检查令牌是否过�?        if (this.isTokenExpired()) {
+        // 应用切换到前台时，检查令牌是否过�?        if (this.isTokenExpired()) {
           this.handleTokenExpiry().catch(err => {
             this.logger.warn('Failed to handle token expiry when app becomes active', err);
           });
         } else if (this.isTokenExpiredSoon()) {
-          // 令牌即将过期，尝试刷�?          this.refreshTokenIfNeeded().catch(err => {
+          // 令牌即将过期，尝试刷�?          this.refreshTokenIfNeeded().catch(err => {
             this.logger.warn('Failed to refresh token when app becomes active', err);
           });
         }
@@ -312,7 +312,7 @@ export class AuthRepository {
       // 获取当前配置
       const currentConfig = await this.getConfig();
       
-      // 合并新配�?      const updatedConfig: AuthConfig = {
+      // 合并新配�?      const updatedConfig: AuthConfig = {
         ...currentConfig, ...config
       };
       
@@ -452,7 +452,7 @@ export class AuthRepository {
    */
   public async getConfig(): Promise<AuthConfig> {
     try {
-      // 如果缓存为空，加载配�?      if (!this.cachedConfig) {
+      // 如果缓存为空，加载配�?      if (!this.cachedConfig) {
         await this.loadConfig();
       }
       
@@ -525,7 +525,7 @@ export class AuthRepository {
             
             this.logger.info('Auth state restored successfully');
             
-            // 发布认证状态变更事�?            this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
+            // 发布认证状态变更事�?            this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
           } else {
             // 只有令牌但没有用户信息，清除令牌
             this.logger.warn('Token exists but user info is missing, clearing auth state');
@@ -550,7 +550,7 @@ export class AuthRepository {
   }
 
   /**
-   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法�?   */
+   * 获取AuthStatus枚举的所有有效值（ArkTS兼容方法�?   */
   private getAuthStatusValues(): string[] {
     return [
       AuthStatus.UNAUTHENTICATED, AuthStatus.AUTHENTICATING,
@@ -943,19 +943,19 @@ export class AuthRepository {
    */
   public async login(credentials: UserCredentials, rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false : new Error(String(rememberMe: boolean = false instanceof Error ? rememberMe: boolean = false : new Error(String(rememberMe: boolean = false))))))): Promise<AuthResponse> {
     try {
-      // 检查登录频率限�?      this.checkLoginRateLimit();
+      // 检查登录频率限�?      this.checkLoginRateLimit();
       
       // 记录登录尝试
       this.loginAttempts++;
       this.lastLoginAttempt = Date.now();
       
-      // 发布登录开始事�?      this.eventBus.emit(AuthEventType.LOGIN_START, {
+      // 发布登录开始事�?      this.eventBus.emit(AuthEventType.LOGIN_START, {
         type: AuthEventType.LOGIN_START,
         timestamp: Date.now(),
         data: { username: credentials.username, rememberMe }
       } as AuthEvent);
       
-      // 更新状态为认证�?      this.updateAuthStatus(AuthStatus.AUTHENTICATING);
+      // 更新状态为认证�?      this.updateAuthStatus(AuthStatus.AUTHENTICATING);
       
       // 调用登录API
       const response = await this.networkUtil.post<AuthResponse>(
@@ -979,7 +979,7 @@ export class AuthRepository {
       // 重置登录尝试计数
       this.loginAttempts = 0;
       
-      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
+      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
       
       // 发布登录成功事件
       this.eventBus.emit(AuthEventType.LOGIN_SUCCESS, {
@@ -988,7 +988,7 @@ export class AuthRepository {
         data: authResponse
       } as AuthEvent);
       
-      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
+      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.AUTHENTICATED);
       
       this.logger.info(`User ${authResponse.user.username} logged in successfully`);
       
@@ -996,7 +996,7 @@ export class AuthRepository {
     } catch (error) {
       this.Logger.error('Login failed', error as Error);
       
-      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
+      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
       
       // 构建认证错误
       const authError: AuthError = {
@@ -1043,9 +1043,9 @@ export class AuthRepository {
   }
 
   /**
-   * 检查登录频率限�?   */
+   * 检查登录频率限�?   */
   private checkLoginRateLimit(): void {
-    // 如果登录尝试次数过多，应用临时锁�?    const MAX_ATTEMPTS = 5;
+    // 如果登录尝试次数过多，应用临时锁�?    const MAX_ATTEMPTS = 5;
     const LOCK_DURATION = 300000; // 5分钟
     
     if (this.loginAttempts >= MAX_ATTEMPTS) {
@@ -1055,7 +1055,7 @@ export class AuthRepository {
         const remainingTime = Math.ceil((LOCK_DURATION - timeSinceLastAttempt) / 1000);
         throw new Error(`Too many login attempts. Please try again in ${remainingTime} seconds.`);
       } else {
-        // 锁定时间已过，重置尝试计�?        this.loginAttempts = 0;
+        // 锁定时间已过，重置尝试计�?        this.loginAttempts = 0;
       }
     }
   }
@@ -1065,7 +1065,7 @@ export class AuthRepository {
    */
   public async logout(): Promise<void> {
     try {
-      // 发布登出开始事�?      this.eventBus.emit(AuthEventType.LOGOUT_START, {
+      // 发布登出开始事�?      this.eventBus.emit(AuthEventType.LOGOUT_START, {
         type: AuthEventType.LOGOUT_START,
         timestamp: Date.now()
       } as AuthEvent);
@@ -1078,13 +1078,13 @@ export class AuthRepository {
             { token: this.cachedToken.accessToken }
           );
         } catch (error) {
-          // 登出API调用失败不影响本地登�?          this.logger.warn('Logout API call failed, proceeding with local logout', error);
+          // 登出API调用失败不影响本地登�?          this.logger.warn('Logout API call failed, proceeding with local logout', error);
         }
       }
       
       // 重置认证状�?      await this.resetAuthState();
       
-      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
+      // 更新状态为未认�?      this.updateAuthStatus(AuthStatus.UNAUTHENTICATED);
       
       // 发布登出成功事件
       this.eventBus.emit(AuthEventType.LOGOUT_SUCCESS, {
@@ -1092,7 +1092,7 @@ export class AuthRepository {
         timestamp: Date.now()
       } as AuthEvent);
       
-      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
+      // 更新认证状态变更事�?      this.emitAuthStatusChange(AuthStatus.UNAUTHENTICATED);
       
       this.logger.info('User logged out successfully');
     } catch (error) {
@@ -1195,7 +1195,7 @@ export class AuthRepository {
   }
 
   /**
-   * 检查令牌是否过�?   */
+   * 检查令牌是否过�?   */
   public isTokenExpired(): boolean {
     if (!this.cachedToken) {
       return true;
@@ -1207,7 +1207,7 @@ export class AuthRepository {
   }
 
   /**
-   * 检查令牌是否即将过�?   */
+   * 检查令牌是否即将过�?   */
   public isTokenExpiredSoon(): boolean {
     if (!this.cachedToken) {
       return true;
@@ -1235,12 +1235,12 @@ export class AuthRepository {
     this.isRefreshingToken = true;
     
     try {
-      // 发布令牌刷新开始事�?      this.eventBus.emit(AuthEventType.TOKEN_REFRESH_START, {
+      // 发布令牌刷新开始事�?      this.eventBus.emit(AuthEventType.TOKEN_REFRESH_START, {
         type: AuthEventType.TOKEN_REFRESH_START,
         timestamp: Date.now()
       } as AuthEvent);
       
-      // 更新状态为刷新�?      this.updateAuthStatus(AuthStatus.REFRESHING);
+      // 更新状态为刷新�?      this.updateAuthStatus(AuthStatus.REFRESHING);
       
       // 调用刷新令牌API
       const response = await this.networkUtil.post<RefreshTokenResponse>(
@@ -1260,7 +1260,7 @@ export class AuthRepository {
         this.cachedConfig?.secureTokenStorage ? LocalStorageType.SECURE : LocalStorageType.DEFAULT
       );
       
-      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
+      // 更新状态为已认�?      this.updateAuthStatus(AuthStatus.AUTHENTICATED);
       
       // 发布令牌刷新成功事件
       this.eventBus.emit(AuthEventType.TOKEN_REFRESH_SUCCESS, {
@@ -1371,7 +1371,7 @@ export class AuthRepository {
       // 尝试刷新令牌
       await this.refreshToken();
     } catch (error) {
-      // 刷新失败，发布会话过期事�?      this.eventBus.emit(AuthEventType.SESSION_EXPIRED, {
+      // 刷新失败，发布会话过期事�?      this.eventBus.emit(AuthEventType.SESSION_EXPIRED, {
         type: AuthEventType.SESSION_EXPIRED,
         timestamp: Date.now(),
         error: {
@@ -1407,7 +1407,7 @@ export class AuthRepository {
   }
 
   /**
-   * 发布认证状态变更事�?   */
+   * 发布认证状态变更事�?   */
   private emitAuthStatusChange(status: AuthStatus): void {
     this.eventBus.emit(AuthEventType.AUTH_STATUS_CHANGED, {
       type: AuthEventType.AUTH_STATUS_CHANGED,
@@ -1566,7 +1566,7 @@ export class AuthRepository {
   }
 
   /**
-   * 重新发送验证邮�?   */
+   * 重新发送验证邮�?   */
   public async resendVerification(email: string): Promise<void> {
     try {
       // 调用重新发送验证邮件API
@@ -1608,7 +1608,7 @@ export class AuthRepository {
   }
 
   /**
-   * 检查权�?   */
+   * 检查权�?   */
   public async checkPermission(request: PermissionCheckRequest): Promise<boolean> {
     try {
       // 调用权限检查API
@@ -1654,7 +1654,7 @@ export class AuthRepository {
    */
   public async getUserPermissions(userId: string): Promise<UserPermissions | null> {
     try {
-      // 如果缓存中有权限信息，直接返�?      if (this.cachedUserPermissions && this.cachedUserPermissions.userId === userId) {
+      // 如果缓存中有权限信息，直接返�?      if (this.cachedUserPermissions && this.cachedUserPermissions.userId === userId) {
         return this.cachedUserPermissions;
       }
       
@@ -1665,7 +1665,7 @@ export class AuthRepository {
       
       this.cachedUserPermissions = response.data;
       
-      // 保存到存�?      await this.storageUtil.setObject(
+      // 保存到存�?      await this.storageUtil.setObject(
         this.storageKeys.userPermissions, this.cachedUserPermissions,
         LocalStorageType.DEFAULT
        instanceof Error ? this.cachedUserPermissions,
@@ -1734,7 +1734,7 @@ export class AuthRepository {
    */
   private async loadUserPermissions(userId: string): Promise<void> {
     try {
-      // 从存储加载权限信�?      const savedPermissions = await this.storageUtil.getObject<UserPermissions>(
+      // 从存储加载权限信�?      const savedPermissions = await this.storageUtil.getObject<UserPermissions>(
         this.storageKeys.userPermissions, LocalStorageType.DEFAULT
        instanceof Error ? LocalStorageType.DEFAULT
        : new Error(String(LocalStorageType.DEFAULT
@@ -1776,7 +1776,7 @@ export class AuthRepository {
   }
 
   /**
-   * 获取所有角�?   */
+   * 获取所有角�?   */
   public async getRoles(): Promise<Role[]> {
     try {
       // 调用获取角色API
@@ -1796,7 +1796,7 @@ export class AuthRepository {
    */
   public async authenticateWithBiometric(): Promise<AuthResponse> {
     try {
-      // 检查是否启用生物认�?      const config = await this.getConfig();
+      // 检查是否启用生物认�?      const config = await this.getConfig();
       if (!config.enableBiometricAuth) {
         throw new Error('Biometric authentication is not enabled');
       }
@@ -1827,7 +1827,7 @@ export class AuthRepository {
    */
   public async cleanup(): Promise<void> {
     try {
-      // 移除事件监听�?      this.eventBus.removeAllListeners('network:statusChanged');
+      // 移除事件监听�?      this.eventBus.removeAllListeners('network:statusChanged');
       this.eventBus.removeAllListeners('app:stateChanged');
       
       // 重置实例

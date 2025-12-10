@@ -15,8 +15,7 @@ export default class MainAbility extends UIAbility {
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
     try {
-      // 设置WindowStage的事件监听回调
-      windowStage.on('windowStageEvent', () => {
+      // 设置WindowStage的事件监听回�?      windowStage.on('windowStageEvent', () => {
         hilog.info(0x0000, 'MainAbility', 'WindowStage event occurred');
       });
 
@@ -31,8 +30,7 @@ export default class MainAbility extends UIAbility {
     } catch (error) {
       hilog.error(0x0000, 'MainAbility', 'WindowStage creation failed: %{public}s', 
         error instanceof Error ? error.message : String(error));
-      // 可以添加恢复逻辑或错误处理
-    }
+      // 可以添加恢复逻辑或错误处�?    }
   }
 
   onWindowStageDestroy(): void {

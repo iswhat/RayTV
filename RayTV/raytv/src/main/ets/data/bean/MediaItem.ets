@@ -1,8 +1,6 @@
-// MediaItem.ets - 媒体项数据模型
-
+// MediaItem.ets - 媒体项数据模�?
 /**
- * 媒体项接口定义
- */
+ * 媒体项接口定�? */
 export interface MediaItem {
   id: string;
   title: string;

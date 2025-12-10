@@ -1,5 +1,5 @@
 // HomePage样式文件
-// 定义首页UI布局所需的所有样式
+// 定义首页UI布局所需的所有样�?
 
 // 定义样式对象类型
 export interface HomePageStylesType {
@@ -146,15 +146,15 @@ export interface HomePageStylesType {
   };
 }
 
-// 使用ArkTS支持的样式定义方式
+// 使用ArkTS支持的样式定义方�?
 export const homePageStyles: HomePageStylesType = {
-  // 主页面容器
+  // 主页面容�?
   homePage: {
     flexDirection: 'column',
     backgroundColor: '#F5F5F5'
   },
   
-  // 绿色顶部导航栏 - 使用固定的绿色背景色
+  // 绿色顶部导航�?- 使用固定的绿色背景色
   greenHeader: {
     backgroundColor: '#4CAF50',
     paddingTop: 20,
@@ -162,7 +162,7 @@ export const homePageStyles: HomePageStylesType = {
     minHeight: 160
   },
   
-  // 分类导航栏
+  // 分类导航�?
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -171,7 +171,7 @@ export const homePageStyles: HomePageStylesType = {
     flexWrap: true
   },
   
-  // 导航项 - 未选中状态
+  // 导航�?- 未选中状�?
   navItem: {
     fontSize: 24,
     color: '#FFFFFF',
@@ -183,7 +183,7 @@ export const homePageStyles: HomePageStylesType = {
     marginBottom: 5
   },
   
-  // 激活状态的导航项（通过代码直接设置）
+  // 激活状态的导航项（通过代码直接设置�?
   navItemActive: {
     color: '#4CAF50',
     backgroundColor: '#FFFFFF',
@@ -198,7 +198,7 @@ export const homePageStyles: HomePageStylesType = {
     marginBottom: 10
   },
   
-  // 功能按钮 - 绿色背景，白色文字
+  // 功能按钮 - 绿色背景，白色文�?
   functionButton: {
     fontSize: 24,
     color: '#FFFFFF',
@@ -233,14 +233,14 @@ export const homePageStyles: HomePageStylesType = {
     width: '100%'
   },
   
-  // 媒体卡片 - 调整宽高比
+  // 媒体卡片 - 调整宽高�?
   mediaCard: {
     flexDirection: 'column',
     width: '100%',
     aspectRatio: 0.66 // 接近标准电影海报比例
   },
   
-  // 媒体封面图 - 圆角优化
+  // 媒体封面�?- 圆角优化
   mediaCover: {
     width: '100%',
     aspectRatio: 0.66,
@@ -255,7 +255,7 @@ export const homePageStyles: HomePageStylesType = {
     alignItems: 'center'
   },
   
-  // 媒体标题 - 调整字号和行高
+  // 媒体标题 - 调整字号和行�?
   mediaTitle: {
     fontSize: 22,
     color: '#333333',

@@ -14,8 +14,7 @@ export interface Actor {
   country?: string;               // 国家/地区
   birthYear?: number;             // 出生年份
   gender?: 'male' | 'female' | 'other'; // 性别
-  description?: string;           // 演员简介
-}
+  description?: string;           // 演员简�?}
 
 /**
  * 导演信息接口
@@ -27,8 +26,7 @@ export interface Director {
   avatarUrl?: string;             // 导演头像URL
   country?: string;               // 国家/地区
   birthYear?: number;             // 出生年份
-  description?: string;           // 导演简介
-}
+  description?: string;           // 导演简�?}
 
 /**
  * 编剧信息接口
@@ -40,8 +38,7 @@ export interface Writer {
   avatarUrl?: string;             // 编剧头像URL
   country?: string;               // 国家/地区
   birthYear?: number;             // 出生年份
-  description?: string;           // 编剧简介
-}
+  description?: string;           // 编剧简�?}
 
 /**
  * 影视制作公司接口
@@ -50,7 +47,7 @@ export interface ProductionCompany {
   id: string;                     // 公司ID
   name: string;                   // 公司名称
   logoUrl?: string;               // 公司Logo URL
-  country?: string;               // 公司所在国家/地区
+  country?: string;               // 公司所在国�?地区
 }
 
 /**
@@ -69,8 +66,7 @@ export interface LanguageInfo {
   id: string;                     // 语言ID
   name: string;                   // 语言名称
   code: string;                   // 语言代码
-  isOriginal?: boolean;           // 是否为原声
-}
+  isOriginal?: boolean;           // 是否为原�?}
 
 /**
  * 图片资源接口
@@ -81,8 +77,7 @@ export interface ImageAsset {
   type: 'poster' | 'backdrop' | 'still' | 'clip' | 'logo' | 'banner' | 'other'; // 图片类型
   width?: number;                 // 图片宽度
   height?: number;                // 图片高度
-  aspectRatio?: number;           // 宽高比
-  language?: string;              // 图片语言
+  aspectRatio?: number;           // 宽高�?  language?: string;              // 图片语言
   caption?: string;               // 图片说明
   fileSize?: number;              // 文件大小
 }
@@ -96,14 +91,12 @@ export interface VideoAsset {
   type: 'trailer' | 'teaser' | 'clip' | 'featurette' | 'behind_the_scenes' | 'other'; // 视频类型
   name?: string;                  // 视频名称
   description?: string;           // 视频描述
-  duration?: number;              // 视频时长（秒）
-  thumbnailUrl?: string;          // 缩略图URL
+  duration?: number;              // 视频时长（秒�?  thumbnailUrl?: string;          // 缩略图URL
   quality?: VideoQuality;         // 视频质量
   width?: number;                 // 视频宽度
   height?: number;                // 视频高度
   language?: string;              // 视频语言
-  publishedAt?: number;           // 发布时间戳
-  viewCount?: number;             // 观看次数
+  publishedAt?: number;           // 发布时间�?  viewCount?: number;             // 观看次数
 }
 
 /**
@@ -112,17 +105,9 @@ export interface VideoAsset {
 export interface Review {
   id: string;                     // 评论ID
   userId: string;                 // 用户ID
-  userName: string;               // 用户名
-  userAvatar?: string;            // 用户头像
-  rating: number;                 // 评分（1-10）
-  content: string;                // 评论内容
-  timestamp: number;              // 评论时间戳
-  likes: number;                  // 点赞数
-  dislikes: number;               // 点踩数
-  replyCount?: number;            // 回复数
-  isSpoiler?: boolean;            // 是否包含剧透
-  isVerified?: boolean;           // 是否已验证
-}
+  userName: string;               // 用户�?  userAvatar?: string;            // 用户头像
+  rating: number;                 // 评分�?-10�?  content: string;                // 评论内容
+  timestamp: number;              // 评论时间�?  likes: number;                  // 点赞�?  dislikes: number;               // 点踩�?  replyCount?: number;            // 回复�?  isSpoiler?: boolean;            // 是否包含剧�?  isVerified?: boolean;           // 是否已验�?}
 
 /**
  * 相关推荐接口
@@ -136,8 +121,7 @@ export interface RelatedItem {
   releaseYear?: number;           // 发行年份
   genres?: string[];              // 类型标签
   reason?: string;                // 推荐理由
-  similarityScore?: number;       // 相似度分数
-}
+  similarityScore?: number;       // 相似度分�?}
 
 /**
  * 电影/视频详情数据接口
@@ -147,10 +131,8 @@ export interface MovieDetailData {
   id: string;                     // 内容ID
   title: string;                  // 标题
   originalTitle?: string;         // 原始标题
-  subtitle?: string;              // 副标题
-  type: VideoType;                // 视频类型
-  description: string;            // 简介
-  longDescription?: string;       // 详细介绍
+  subtitle?: string;              // 副标�?  type: VideoType;                // 视频类型
+  description: string;            // 简�?  longDescription?: string;       // 详细介绍
   
   // 时间信息
   releaseYear: number;            // 发行年份
@@ -181,21 +163,13 @@ export interface MovieDetailData {
   stills?: ImageAsset[];          // 剧照
   videos: VideoAsset[];           // 视频资源（预告片等）
   
-  // 内容可用性
-  isVip?: boolean;                // 是否VIP内容
-  isNew?: boolean;                // 是否新内容
-  isHot?: boolean;                // 是否热门
+  // 内容可用�?  isVip?: boolean;                // 是否VIP内容
+  isNew?: boolean;                // 是否新内�?  isHot?: boolean;                // 是否热门
   isExclusive?: boolean;          // 是否独家
   
-  // 系列信息（电视剧、动漫等）
-  totalEpisodes?: number;         // 总集数
-  airedEpisodes?: number;         // 已更新集数
-  status?: 'ongoing' | 'completed' | 'upcoming'; // 连载状态
-  seasons?: number;               // 季数
-  currentSeason?: number;         // 当前季
-  
-  // 技术信息
-  aspectRatio?: number;           // 画面比例
+  // 系列信息（电视剧、动漫等�?  totalEpisodes?: number;         // 总集�?  airedEpisodes?: number;         // 已更新集�?  status?: 'ongoing' | 'completed' | 'upcoming'; // 连载状�?  seasons?: number;               // 季数
+  currentSeason?: number;         // 当前�?  
+  // 技术信�?  aspectRatio?: number;           // 画面比例
   colorInfo?: string;             // 色彩信息
   soundMix?: string;              // 音效混音
   
@@ -205,8 +179,7 @@ export interface MovieDetailData {
   doubanId?: string;              // 豆瓣 ID
   
   // 来源信息
-  provider?: string;              // 内容提供商
-  providerId?: string;            // 提供商ID
+  provider?: string;              // 内容提供�?  providerId?: string;            // 提供商ID
   sourceUpdatedAt?: number;       // 来源更新时间
   
   // 观看统计
@@ -215,15 +188,10 @@ export interface MovieDetailData {
   commentCount?: number;          // 评论次数
   
   // 附加信息
-  isFavorite?: boolean;           // 当前用户是否已收藏
-  watchProgress?: number;         // 观看进度
-  lastWatchTime?: number;         // 最后观看时间
-  
-  // 播放源信息
-  sources: VideoSource[];         // 播放源列表
-  
-  // 剧集信息（针对电视剧、动漫等）
-  episodes?: Episode[];           // 剧集列表
+  isFavorite?: boolean;           // 当前用户是否已收�?  watchProgress?: number;         // 观看进度
+  lastWatchTime?: number;         // 最后观看时�?  
+  // 播放源信�?  sources: VideoSource[];         // 播放源列�?  
+  // 剧集信息（针对电视剧、动漫等�?  episodes?: Episode[];           // 剧集列表
   
   // 相关内容
   related?: RelatedItem[];        // 相关推荐
@@ -233,9 +201,7 @@ export interface MovieDetailData {
   // 评论信息
   reviews?: Review[];             // 评论列表
   
-  // 附加元数据
-  metadata?: Record<string, string | number | boolean | null>; // 额外元数据
-}
+  // 附加元数�?  metadata?: Record<string, string | number | boolean | null>; // 额外元数�?}
 
 /**
  * 电影/视频详情API响应
@@ -249,12 +215,8 @@ export interface EpisodesResponseData {
   id: string;                     // 内容ID
   title: string;                  // 标题
   season: number;                 // 季数
-  totalEpisodes: number;          // 总集数
-  airedEpisodes: number;          // 已更新集数
-  episodes: Episode[];            // 剧集列表
-  hasMore: boolean;               // 是否有更多
-  nextPage?: number;              // 下一页页码
-}
+  totalEpisodes: number;          // 总集�?  airedEpisodes: number;          // 已更新集�?  episodes: Episode[];            // 剧集列表
+  hasMore: boolean;               // 是否有更�?  nextPage?: number;              // 下一页页�?}
 
 /**
  * 剧集列表API响应
@@ -262,25 +224,20 @@ export interface EpisodesResponseData {
 export type EpisodesApiResponse = ApiResponse<EpisodesResponseData>;
 
 /**
- * 视频源请求参数接口
- */
+ * 视频源请求参数接�? */
 export interface VideoSourceRequest {
   contentId: string;              // 内容ID
-  episodeId?: string;             // 剧集ID（可选，针对电视剧等）
-  season?: number;                // 季数（可选）
+  episodeId?: string;             // 剧集ID（可选，针对电视剧等�?  season?: number;                // 季数（可选）
   episode?: number;               // 集数（可选）
-  preferredQuality?: VideoQuality; // 首选画质
-  preferredLanguage?: string;     // 首选语言
+  preferredQuality?: VideoQuality; // 首选画�?  preferredLanguage?: string;     // 首选语言
   providerId?: string;            // 提供商ID
 }
 
 /**
- * 视频源响应接口
- */
+ * 视频源响应接�? */
 export interface VideoSourcesResponseData {
   contentId: string;              // 内容ID
-  sources: VideoSource[];         // 视频源列表
-  defaultSource?: string;         // 默认视频源ID
+  sources: VideoSource[];         // 视频源列�?  defaultSource?: string;         // 默认视频源ID
   fallbackSource?: string;        // 备用视频源ID
   availableQualities: VideoQuality[]; // 可用画质列表
   availableLanguages: string[];   // 可用语言列表
@@ -292,20 +249,17 @@ export interface VideoSourcesResponseData {
 export type VideoSourcesApiResponse = ApiResponse<VideoSourcesResponseData>;
 
 /**
- * 视频播放状态接口
- */
+ * 视频播放状态接�? */
 export interface PlaybackState {
   contentId: string;              // 内容ID
   episodeId?: string;             // 剧集ID
   position: number;               // 播放位置（毫秒）
-  duration: number;               // 总时长（毫秒）
-  completed: boolean;             // 是否播放完成
+  duration: number;               // 总时长（毫秒�?  completed: boolean;             // 是否播放完成
   quality?: VideoQuality;         // 播放画质
   language?: string;              // 播放语言
   volume?: number;                // 音量
   muted?: boolean;                // 是否静音
-  timestamp: number;              // 更新时间戳
-  sourceId?: string;              // 播放源ID
+  timestamp: number;              // 更新时间�?  sourceId?: string;              // 播放源ID
 }
 
 /**
@@ -314,13 +268,11 @@ export interface PlaybackState {
 export type PlaybackStateApiResponse = ApiResponse<PlaybackState>;
 
 /**
- * 收藏状态接口
- */
+ * 收藏状态接�? */
 export interface FavoriteState {
   contentId: string;              // 内容ID
   isFavorite: boolean;            // 是否收藏
-  favoriteAt?: number;            // 收藏时间戳
-  note?: string;                  // 收藏备注
+  favoriteAt?: number;            // 收藏时间�?  note?: string;                  // 收藏备注
   tags?: string[];                // 收藏标签
   rating?: number;                // 用户评分
 }
@@ -338,10 +290,7 @@ export interface ReviewsRequest {
   page: number;                   // 页码
   pageSize: number;               // 每页大小
   sort?: 'newest' | 'highest' | 'lowest' | 'most_liked'; // 排序方式
-  minRating?: number;             // 最低评分
-  maxRating?: number;             // 最高评分
-  includeSpoilers?: boolean;      // 是否包含剧透
-}
+  minRating?: number;             // 最低评�?  maxRating?: number;             // 最高评�?  includeSpoilers?: boolean;      // 是否包含剧�?}
 
 /**
  * 评论列表响应接口
@@ -352,9 +301,7 @@ export interface ReviewsResponseData {
   total: number;                  // 总评论数
   page: number;                   // 当前页码
   pageSize: number;               // 每页大小
-  totalPages: number;             // 总页数
-  hasMore: boolean;               // 是否有更多
-  averageRating?: number;         // 平均评分
+  totalPages: number;             // 总页�?  hasMore: boolean;               // 是否有更�?  averageRating?: number;         // 平均评分
 }
 
 /**
@@ -363,12 +310,10 @@ export interface ReviewsResponseData {
 export type ReviewsApiResponse = ApiResponse<ReviewsResponseData>;
 
 /**
- * 电影详情相关的工具方法
- */
+ * 电影详情相关的工具方�? */
 export class MovieDetailUtils {
   /**
-   * 获取电影/视频的显示标题
-   */
+   * 获取电影/视频的显示标�?   */
   static getDisplayName(movie: Partial<MovieDetailData>): string {
     if (movie.title && movie.originalTitle && movie.title !== movie.originalTitle) {
       return `${movie.title} / ${movie.originalTitle}`;
@@ -377,8 +322,7 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 获取发布年份的显示文本
-   */
+   * 获取发布年份的显示文�?   */
   static getReleaseYearText(movie: Partial<MovieDetailData>): string {
     if (movie.releaseDate) {
       const date = new Date(movie.releaseDate);
@@ -388,8 +332,7 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 获取时长的显示文本
-   */
+   * 获取时长的显示文�?   */
   static getDurationText(movie: Partial<MovieDetailData>): string {
     if (movie.runtime) {
       const hours = Math.floor(movie.runtime / 60);
@@ -403,8 +346,7 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 获取评分的显示文本
-   */
+   * 获取评分的显示文�?   */
   static getRatingText(rating: RatingInfo): string {
     if (rating.score !== null && rating.score !== undefined) {
       return rating.score.toFixed(1);
@@ -413,32 +355,29 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 获取演员列表的显示文本
-   */
+   * 获取演员列表的显示文�?   */
   static getActorsText(actors: Actor[], maxCount: number = 5): string {
     if (!actors || actors.length === 0) {
       return '未知';
     }
     const displayNames = actors.slice(0, maxCount).map(actor => actor.name);
     if (actors.length > maxCount) {
-      displayNames.push('等');
+      displayNames.push('�?);
     }
-    return displayNames.join('、');
+    return displayNames.join('�?);
   }
 
   /**
-   * 获取导演列表的显示文本
-   */
+   * 获取导演列表的显示文�?   */
   static getDirectorsText(directors: Director[]): string {
     if (!directors || directors.length === 0) {
       return '未知';
     }
-    return directors.map(director => director.name).join('、');
+    return directors.map(director => director.name).join('�?);
   }
 
   /**
-   * 获取类型标签的显示文本
-   */
+   * 获取类型标签的显示文�?   */
   static getGenresText(genres: string[]): string {
     return genres?.join(' / ') || '未知类型';
   }
@@ -469,8 +408,7 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 获取观看进度百分比
-   */
+   * 获取观看进度百分�?   */
   static getWatchProgressPercentage(state: PlaybackState): number {
     if (!state || !state.duration || state.duration <= 0) {
       return 0;
@@ -479,8 +417,7 @@ export class MovieDetailUtils {
   }
 
   /**
-   * 检查是否有未观看完的进度
-   */
+   * 检查是否有未观看完的进�?   */
   static hasUnwatchedProgress(state: PlaybackState | undefined): boolean {
     if (!state || state.completed) {
       return false;

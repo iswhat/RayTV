@@ -1,5 +1,4 @@
-// Logger - 日志工具类
-// 提供统一的日志记录功能，支持不同级别、格式化输出和持久化存储
+// Logger - 日志工具�?// 提供统一的日志记录功能，支持不同级别、格式化输出和持久化存储
 
 /**
  * 日志级别枚举
@@ -46,8 +45,7 @@ export interface LoggerConfig {
   level: LogLevel;
   
   /**
-   * 是否启用控制台日志
-   */
+   * 是否启用控制台日�?   */
   consoleEnabled: boolean;
   
   /**
@@ -61,23 +59,19 @@ export interface LoggerConfig {
   logFilePath?: string;
   
   /**
-   * 日志文件最大大小（字节）
-   */
+   * 日志文件最大大小（字节�?   */
   maxFileSize?: number;
   
   /**
-   * 日志文件最大数量
-   */
+   * 日志文件最大数�?   */
   maxFileCount?: number;
   
   /**
-   * 是否启用格式化
-   */
+   * 是否启用格式�?   */
   formatEnabled: boolean;
   
   /**
-   * 是否显示时间戳
-   */
+   * 是否显示时间�?   */
   showTimestamp: boolean;
   
   /**
@@ -86,8 +80,7 @@ export interface LoggerConfig {
   showLevel: boolean;
   
   /**
-   * 是否显示调用者信息
-   */
+   * 是否显示调用者信�?   */
   showCaller: boolean;
   
   /**
@@ -155,13 +148,11 @@ export interface LogEntry {
   message: string;
   
   /**
-   * 时间戳
-   */
+   * 时间�?   */
   timestamp: number;
   
   /**
-   * 调用者信息
-   */
+   * 调用者信�?   */
   caller?: string;
   
   /**
@@ -186,11 +177,9 @@ export interface LogEntry {
 }
 
 /**
- * 日志工具类
- */
+ * 日志工具�? */
 class Logger {
-  // 使用局部变量存储单例实例，避免使用类作为对象
-  private static _instance: Logger | null = null;
+  // 使用局部变量存储单例实例，避免使用类作为对�?  private static _instance: Logger | null = null;
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
   private logFile?: string;
@@ -199,8 +188,7 @@ class Logger {
   private isWriting: boolean = false;
 
   /**
-   * 私有构造函数
-   */
+   * 私有构造函�?   */
   private constructor() {
     this.config = {
       level: LogLevel.INFO,
@@ -221,8 +209,7 @@ class Logger {
    */
   public static getInstance(): Logger {
     if (!Logger._instance) {
-      const instance = new Logger(); // 使用局部变量
-      Logger._instance = instance;
+      const instance = new Logger(); // 使用局部变�?      Logger._instance = instance;
     }
     return Logger._instance!
   }
@@ -232,8 +219,7 @@ class Logger {
    * @param config 日志配置
    */
   public initialize(config: LoggerConfig): void {
-    // 手动合并对象属性，避免使用Object.assign（ArkTS限制）
-    this.config = this.mergeConfig(this.config, config);
+    // 手动合并对象属性，避免使用Object.assign（ArkTS限制�?    this.config = this.mergeConfig(this.config, config);
     
     if (this.config.fileEnabled && this.config.logFilePath) {
       this.logFile = this.config.logFilePath;
@@ -260,8 +246,7 @@ class Logger {
   }
 
   /**
-   * 调试日志 - 兼容静态调用方式
-   * @param tag 日志标签
+   * 调试日志 - 兼容静态调用方�?   * @param tag 日志标签
    * @param message 日志消息
    * @param extra 额外数据
    */
@@ -272,8 +257,7 @@ class Logger {
   }
 
   /**
-   * 信息日志 - 兼容静态调用方式
-   * @param tag 日志标签
+   * 信息日志 - 兼容静态调用方�?   * @param tag 日志标签
    * @param message 日志消息
    * @param extra 额外数据
    */
@@ -284,8 +268,7 @@ class Logger {
   }
 
   /**
-   * 警告日志 - 兼容静态调用方式
-   * @param tag 日志标签
+   * 警告日志 - 兼容静态调用方�?   * @param tag 日志标签
    * @param message 日志消息
    * @param extra 额外数据
    */
@@ -296,8 +279,7 @@ class Logger {
   }
 
   /**
-   * 错误日志 - 兼容静态调用方式
-   * @param tag 日志标签
+   * 错误日志 - 兼容静态调用方�?   * @param tag 日志标签
    * @param message 日志消息
    * @param error 错误对象
    * @param extra 额外数据
@@ -309,10 +291,8 @@ class Logger {
   }
 
   /**
-   * 输出异常信息 - 兼容静态调用方式
-   * @param tag 日志标签
-   * @param error 错误对象或错误消息
-   * @param extra 额外数据
+   * 输出异常信息 - 兼容静态调用方�?   * @param tag 日志标签
+   * @param error 错误对象或错误消�?   * @param extra 额外数据
    */
   public static exception(tag: string, error: string | Error, extra?: LoggerExtraData): void {
     const instance = Logger.getInstance();
@@ -321,11 +301,9 @@ class Logger {
   }
 
   /**
-   * 输出带格式化参数的日志 - 兼容静态调用方式
-   * @param tag 日志标签
+   * 输出带格式化参数的日�?- 兼容静态调用方�?   * @param tag 日志标签
    * @param format 格式化字符串
-   * @param args 格式化参数
-   */
+   * @param args 格式化参�?   */
   public static format(tag: string, format: string, ...args: Array<string | number | boolean | object | undefined | null>): void {
     // 使用formatMessage方法进行字符串格式化
     const formattedMessage = Logger.formatMessage(format, args);
@@ -341,8 +319,7 @@ class Logger {
    * 格式化日志消息（手动实现字符串替换，避免使用正则表达式）
    * @param message 原始消息
    * @param args 替换参数
-   * @returns 格式化后的消息
-   */
+   * @returns 格式化后的消�?   */
   private static formatMessage(message: string, args: Array<string | number | boolean | object | undefined | null>): string {
     if (!args || args.length === 0) {
       return message;
@@ -353,8 +330,7 @@ class Logger {
       const placeholder = `{${i}}`;
       const value = String(args[i]);
       
-      // 手动替换占位符，避免使用正则表达式
-      let startIndex = 0;
+      // 手动替换占位符，避免使用正则表达�?      let startIndex = 0;
       while (true) {
         const index = result.indexOf(placeholder, startIndex);
         if (index === -1) {
@@ -483,13 +459,11 @@ class Logger {
   }
 
   /**
-   * 导出日志到文件
-   * @param filePath 导出文件路径
+   * 导出日志到文�?   * @param filePath 导出文件路径
    */
   public async exportLogs(filePath: string): Promise<boolean> {
     try {
-      // 这里需要实现文件写入功能
-      this.info(`Logs exported to: ${filePath}`);
+      // 这里需要实现文件写入功�?      this.info(`Logs exported to: ${filePath}`);
       return true;
     } catch (error) {
       this.error('Failed to export logs', error as Error);
@@ -498,8 +472,7 @@ class Logger {
   }
 
   /**
-   * 刷新日志到文件
-   */
+   * 刷新日志到文�?   */
   public async flushLogs(): Promise<void> {
     if (this.config.fileEnabled && this.logQueue.length > 0) {
       await this.writeLogsToFile();
@@ -519,8 +492,7 @@ class Logger {
   }
 
   /**
-   * 内部日志记录方法 - 用于兼容静态调用
-   * 注意：此方法当前未被使用，保留是为了向后兼容
+   * 内部日志记录方法 - 用于兼容静态调�?   * 注意：此方法当前未被使用，保留是为了向后兼容
    */
   private logInternal(level: LogLevel, message: string): void {
     if (this.shouldLog(level)) {
@@ -584,11 +556,9 @@ class Logger {
       this.outputToConsole(entry);
     }
     
-    // 添加到文件写入队列
-    if (this.config.fileEnabled) {
+    // 添加到文件写入队�?    if (this.config.fileEnabled) {
       this.logQueue.push(entry);
-      // 异步刷新日志到文件
-      this.flushLogs().catch((err: Error) => {
+      // 异步刷新日志到文�?      this.flushLogs().catch((err: Error) => {
         console.error('Failed to flush logs:', err);
       });
     }
@@ -622,8 +592,7 @@ class Logger {
   }
 
   /**
-   * 格式化日志条目
-   * @param entry 日志条目
+   * 格式化日志条�?   * @param entry 日志条目
    */
   private formatLogEntry(entry: LogEntry): string {
     if (!this.config.formatEnabled) {
@@ -678,21 +647,18 @@ class Logger {
   }
 
   /**
-   * 获取调用者信息
-   */
+   * 获取调用者信�?   */
   private getCallerInfo(): string {
     try {
       const stack = new Error().stack?.split('\n') || [];
-      // 查找调用Logger方法的位置
-      for (let i = 3; i < stack.length; i++) {
+      // 查找调用Logger方法的位�?      for (let i = 3; i < stack.length; i++) {
         const line = stack[i];
         if (line && !line.includes('Logger.ets')) {
           // 使用字符串操作替代正则表达式
           const atIndex = line.indexOf('at ');
           if (atIndex !== -1) {
             const start = atIndex + 3;
-            // 查找空格或换行
-            let end = line.indexOf(' ', start);
+            // 查找空格或换�?            let end = line.indexOf(' ', start);
             if (end === -1) {
               end = line.length;
             }
@@ -722,8 +688,7 @@ class Logger {
    * 获取进程ID
    */
   private getProcessId(): string {
-    // 在不同环境中获取进程ID的方式可能不同
-    return 'process-' + Math.random().toString(36).substr(2, 9);
+    // 在不同环境中获取进程ID的方式可能不�?    return 'process-' + Math.random().toString(36).substr(2, 9);
   }
 
   /**
@@ -735,9 +700,7 @@ class Logger {
   }
 
   /**
-   * 序列化对象
-   * @param obj 要序列化的对象
-   */
+   * 序列化对�?   * @param obj 要序列化的对�?   */
   private serializeObject(obj: object): string {
     try {
       return JSON.stringify(obj, null, 2);
@@ -750,33 +713,28 @@ class Logger {
    * 确保日志文件存在
    */
   private ensureLogFileExists(): void {
-    // 这里需要实现文件系统操作
-    this.info(`Log file configured: ${this.logFile}`);
+    // 这里需要实现文件系统操�?    this.info(`Log file configured: ${this.logFile}`);
   }
 
   /**
-   * 写入日志到文件
-   */
+   * 写入日志到文�?   */
   private async writeLogsToFile(): Promise<void> {
     if (this.isWriting || this.logQueue.length === 0) {
       return;
     }
     
     this.isWriting = true;
-    // 使用slice替代spread操作符获取要写入的条目
-    const entriesToWrite = this.logQueue.slice(0);
+    // 使用slice替代spread操作符获取要写入的条�?    const entriesToWrite = this.logQueue.slice(0);
     this.logQueue = [];
     
     try {
-      // 这里需要实现异步文件写入
-      for (const entry of entriesToWrite) {
+      // 这里需要实现异步文件写�?      for (const entry of entriesToWrite) {
         const formattedLine = this.formatLogEntry(entry) + '\n';
-        // 写入到文件 - 实际实现需要使用文件系统API
+        // 写入到文�?- 实际实现需要使用文件系统API
         console.log('Log would be written:', formattedLine);
       }
       
-      // 检查日志文件大小
-      this.checkLogFileSize();
+      // 检查日志文件大�?      this.checkLogFileSize();
     } catch (error) {
       console.error('Failed to write logs to file:', error);
       // 不使用展开运算符，而是使用循环添加元素
@@ -789,8 +747,7 @@ class Logger {
   }
 
   /**
-   * 检查日志文件大小
-   */
+   * 检查日志文件大�?   */
   private checkLogFileSize(): void {
     // 这里需要实现文件大小检查和日志轮转
   }
@@ -798,8 +755,7 @@ class Logger {
   /**
    * 手动合并配置对象，避免使用Object.assign
    * @param target 目标配置
-   * @param source 源配置
-   */
+   * @param source 源配�?   */
   private mergeConfig(target: LoggerConfig, source: LoggerConfig): LoggerConfig {
     const result: LoggerConfig = {
       level: source.level !== undefined ? source.level : target.level,
@@ -814,8 +770,7 @@ class Logger {
       enableStackTrace: source.enableStackTrace !== undefined ? source.enableStackTrace : target.enableStackTrace,
     };
 
-    // 处理可选属性
-    if (source.logFilePath !== undefined) {
+    // 处理可选属�?    if (source.logFilePath !== undefined) {
       result.logFilePath = source.logFilePath;
     } else if (target.logFilePath !== undefined) {
       result.logFilePath = target.logFilePath;
@@ -839,5 +794,4 @@ class Logger {
 
 // 导出默认实例
 export default Logger.getInstance();
-// 导出Logger类，供需要创建自定义实例的场景使用
-export { Logger };
+// 导出Logger类，供需要创建自定义实例的场景使�?export { Logger };

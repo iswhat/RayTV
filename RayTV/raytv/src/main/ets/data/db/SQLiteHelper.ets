@@ -8,15 +8,15 @@ import Logger from '../../common/util/Logger';
 const TAG = 'SQLiteHelper';
 
 /**
- * 数据库支持的值类�? */
+ * 数据库支持的值类�?*/
 export type ValueType = string | number | boolean | null;
 
 /**
- * 数据库记录类�? */
+ * 数据库记录类�?*/
 export type DatabaseRecord = Record<string, ValueType>;
 
 /**
- * SQLiteHelper类定义开�? */
+ * SQLiteHelper类定义开�?*/
 
 
 /**
@@ -37,7 +37,7 @@ export interface SortOption {
 }
 
 /**
- * 数据库操作结果接�? */
+ * 数据库操作结果接�?*/
 export interface DatabaseResult {
   success: boolean;
   message?: string;
@@ -50,7 +50,7 @@ export class SQLiteHelper {
   private dbManager: DatabaseManager;
   
   /**
-   * 获取对象的键数组（ArkTS兼容方法�?   */
+   * 获取对象的键数组（ArkTS兼容方法�?*/
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
@@ -62,7 +62,7 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取对象的值数组（ArkTS兼容方法�?   */
+   * 获取对象的值数组（ArkTS兼容方法�?*/
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
     const values: ValueType[] = [];
     for (const key in obj) {
@@ -125,7 +125,8 @@ export class SQLiteHelper {
     } catch (error) {
       Logger.error(TAG, `Failed to insert into ${tableName}: ${JSON.stringify(error)}`);
       return {
-        success: false, message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error)))))))
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -164,7 +165,8 @@ export class SQLiteHelper {
     } catch (error) {
       Logger.error(TAG, `Failed to batch insert into ${tableName}: ${JSON.stringify(error)}`);
       return {
-        success: false, message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error)))))))
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -208,7 +210,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -232,7 +234,8 @@ export class SQLiteHelper {
     } catch (error) {
       Logger.error(TAG, `Failed to update ${tableName}: ${JSON.stringify(error)}`);
       return {
-        success: false, message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error)))))))
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -268,7 +271,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -292,27 +295,28 @@ export class SQLiteHelper {
     } catch (error) {
       Logger.error(TAG, `Failed to delete from ${tableName}: ${JSON.stringify(error)}`);
       return {
-        success: false, message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error : new Error(String(message: JSON.stringify(error instanceof Error ? message: JSON.stringify(error : new Error(String(message: JSON.stringify(error)))))))
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
   
   /**
- * 查询数据
- * @param tableName 表名
- * @param columns 要查询的�? * @param conditions 查询条件
- * @param sortOptions 排序选项
- * @param limit 限制数量
- * @param offset 偏移�? * @returns 查询结果列表
- */
-public async query<T extends DatabaseRecord>(
-  tableName: string,
-  columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>,
-  sortOptions?: Array<SortOption>,
-  limit?: number,
-  offset: number = 0
-): Promise<T[]> {
+   * 查询数据
+   * @param tableName 表名
+   * @param columns 要查询的�?   * @param conditions 查询条件
+   * @param sortOptions 排序选项
+   * @param limit 限制数量
+   * @param offset 偏移�?   * @returns 查询结果列表
+   */
+  public async query<T extends DatabaseRecord>(
+    tableName: string,
+    columns: string[] = ['*'],
+    conditions?: Array<QueryCondition>,
+    sortOptions?: Array<SortOption>,
+    limit?: number,
+    offset: number = 0
+  ): Promise<T[]> {
     try {
       const database = this.dbManager.getDatabase();
       
@@ -335,7 +339,7 @@ public async query<T extends DatabaseRecord>(
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -391,67 +395,16 @@ public async query<T extends DatabaseRecord>(
   }
   
   /**
- * 获取单条记录
- * @param tableName 表名
- * @param columns 要查询的�? * @param conditions 查询条件
- * @returns 单条记录或null
- */
-public async getFirst<T extends DatabaseRecord>(
-  tableName: string, columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- instanceof Error ? columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
- : new Error(String(columns: string[] = ['*'],
-  conditions?: Array<QueryCondition>
-))))))): Promise<T | null> {
+   * 获取单条记录
+   * @param tableName 表名
+   * @param columns 要查询的�?   * @param conditions 查询条件
+   * @returns 单条记录或null
+   */
+  public async getFirst<T extends DatabaseRecord>(
+    tableName: string, 
+    columns: string[] = ['*'],
+    conditions?: Array<QueryCondition>
+  ): Promise<T | null> {
     const results = await this.query<T>(tableName, columns, conditions, undefined, 1);
     return results.length > 0 ? results[0] : null;
   }
@@ -484,7 +437,7 @@ public async getFirst<T extends DatabaseRecord>(
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -510,7 +463,7 @@ public async getFirst<T extends DatabaseRecord>(
    * @param conditions 查询条件
    * @returns 是否存在
    */
-  public async exists(tableName: string, conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition> instanceof Error ? conditions?: Array<QueryCondition> : new Error(String(conditions?: Array<QueryCondition>))))))): Promise<boolean> {
+  public async exists(tableName: string, conditions?: Array<QueryCondition>): Promise<boolean> {
     const count = await this.count(tableName, conditions);
     return count > 0;
   }
@@ -555,5 +508,3 @@ public async getFirst<T extends DatabaseRecord>(
     }
   }
 }
-
-

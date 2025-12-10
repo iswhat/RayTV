@@ -4,7 +4,10 @@
 
 import { hapTasks } from '@ohos/hvigor-ohos-plugin';
 
-export default {
+// 明确的类型注解
+const config: any = {
   system: hapTasks,
   plugins: []  /* Custom plugin list. This module uses the built-in plugin of DevEco Studio, so the configuration is empty. */
-}
+};
+
+export default config;

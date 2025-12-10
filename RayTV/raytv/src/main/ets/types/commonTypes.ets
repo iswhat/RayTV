@@ -1,8 +1,6 @@
 // 通用类型定义文件
-// 为项目中常见的数据结构提供明确的类型定义，减少对any类型的依赖
-
-// 引入ArkTS兼容的工具类型
-import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
+// 为项目中常见的数据结构提供明确的类型定义，减少对any类型的依�?
+// 引入ArkTS兼容的工具类�?import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
 import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
 
 /**
@@ -105,8 +103,7 @@ export interface AuthInfo {
 }
 
 /**
- * 配置项类型
- */
+ * 配置项类�? */
 export interface ConfigItem {
   key: string;
   value: string | number | boolean;
@@ -122,8 +119,7 @@ export interface CacheOptions<T> {
   key: string;
   value: T;
   ttl?: number; // 过期时间（毫秒）
-  tags?: string[]; // 标签，用于批量删除
-}
+  tags?: string[]; // 标签，用于批量删�?}
 
 /**
  * 搜索参数类型
@@ -138,8 +134,7 @@ export interface SearchParams {
 }
 
 /**
- * 历史记录项类型
- */
+ * 历史记录项类�? */
 export interface HistoryItem {
   id: string;
   userId: string;
@@ -152,8 +147,7 @@ export interface HistoryItem {
 }
 
 /**
- * 收藏项类型
- */
+ * 收藏项类�? */
 export interface FavoriteItem {
   id: string;
   userId: string;
@@ -213,8 +207,7 @@ export interface ErrorInfo {
 }
 
 /**
- * 事件监听器类型
- */
+ * 事件监听器类�? */
 export interface EventListenerOptions {
   once?: boolean;
   priority?: number;
@@ -245,13 +238,11 @@ export interface CancellablePromise<T> extends Promise<T> {
 export type ID = string | number;
 
 /**
- * 空值类型
- */
+ * 空值类�? */
 export type Empty = null | undefined | void;
 
 /**
- * 可序列化的对象接口
- */
+ * 可序列化的对象接�? */
 export interface SerializableObject {
   // ArkTS兼容：不使用索引签名，使用明确的接口定义
   getSerializable(key: string): Serializable;
@@ -261,8 +252,7 @@ export interface SerializableObject {
 }
 
 /**
- * 可序列化的值类型
- */
+ * 可序列化的值类�? */
 export type Serializable = 
   | string
   | number
@@ -273,17 +263,14 @@ export type Serializable =
   | SerializableObject;
 
 /**
- * 深只读类型
- */
-// ArkTS兼容的深只读实现 - 简化版本
-export interface DeepReadonlyObject {
+ * 深只读类�? */
+// ArkTS兼容的深只读实现 - 简化版�?export interface DeepReadonlyObject {
   // ArkTS兼容：不使用索引签名
   getReadonly(key: string): DeepReadonlyValue;
   hasReadonly(key: string): boolean;
 }
 
-// 简化版：直接返回对象类型，不使用条件类型
-export type DeepReadonlyValue = 
+// 简化版：直接返回对象类型，不使用条件类�?export type DeepReadonlyValue = 
   | string
   | number
   | boolean
@@ -295,18 +282,15 @@ export type DeepReadonlyValue =
 /**
  * 可选键类型
  */
-// ArkTS兼容的可选属性实现
-export interface OptionalBase<T> {
+// ArkTS兼容的可选属性实�?export interface OptionalBase<T> {
   // ArkTS兼容：不使用索引签名
   getOptional(key: string): T;
   hasOptional(key: string): boolean;
 }
 
 /**
- * 必需键类型
- */
-// ArkTS兼容的必需属性实现
-export interface RequiredBase<T> {
+ * 必需键类�? */
+// ArkTS兼容的必需属性实�?export interface RequiredBase<T> {
   // ArkTS兼容：不使用索引签名
   getRequired(key: string): T;
   hasRequired(key: string): boolean;
@@ -318,14 +302,11 @@ export interface RequiredBase<T> {
 export type NonEmptyObject<T extends object> = T;
 
 /**
- * 排除null和undefined的类型
- */
-// ArkTS兼容的非空类型实现
-export type NonNullableValue<T> = T;
+ * 排除null和undefined的类�? */
+// ArkTS兼容的非空类型实�?export type NonNullableValue<T> = T;
 
 /**
- * 通用函数类型 - 接受任意参数，返回任意值
- */
+ * 通用函数类型 - 接受任意参数，返回任意�? */
 export interface AnyFunction {
   (...args: never[]): never;
 }
@@ -338,8 +319,7 @@ export interface AsyncFunction<T> {
 }
 
 /**
- * 延迟执行的返回类型
- */
+ * 延迟执行的返回类�? */
 export interface DelayResult {
   clear: () => void;
   promise: Promise<void>;

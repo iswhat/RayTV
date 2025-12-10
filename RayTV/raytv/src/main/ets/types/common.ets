@@ -7,11 +7,9 @@ export interface SyncData<T = string | number | boolean | null | Record<string, 
   deviceId: string;
 }
 
-// 数据变更监听器类型
-export type DataChangeListener<T = string | number | boolean | null | Record<string, string | number | boolean | null>> = (key: string, data: T, deviceId: string) => void;
+// 数据变更监听器类�?export type DataChangeListener<T = string | number | boolean | null | Record<string, string | number | boolean | null>> = (key: string, data: T, deviceId: string) => void;
 
-// 通用事件监听器类型
-export type EventListener<T = string | number | boolean | null | Record<string, string | number | boolean | null>> = (event: string, data?: T) => void;
+// 通用事件监听器类�?export type EventListener<T = string | number | boolean | null | Record<string, string | number | boolean | null>> = (event: string, data?: T) => void;
 
 // 通用API响应接口
 export interface ApiResponse<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
@@ -21,16 +19,14 @@ export interface ApiResponse<T = string | number | boolean | null | Record<strin
   code?: number;
 }
 
-// 通用缓存项接口
-export interface CacheItem<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
+// 通用缓存项接�?export interface CacheItem<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
   data: T;
   expiry: number;
   timestamp: number;
   metadata?: Record<string, string | number | boolean | null>;
 }
 
-// 通用配置项接口
-export interface ConfigItem<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
+// 通用配置项接�?export interface ConfigItem<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
   key: string;
   value: T;
   defaultValue: T;

@@ -5,7 +5,6 @@ import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';
 import BusinessError from '@ohos.base';
 import fs from '@ohos.file.fs';
-import fileIO from '@ohos.file.fileIO';
 import { CacheManager } from '../../service/spider/CacheManager';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
@@ -63,19 +62,6 @@ export default class NetworkUtil {
   private static context: common.Context | null = null;
 
   /**
-   * 获取对象的所有键
-   * 替代Object.keys，兼容ArkTS语法
-   */
-  private static getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    // 直接使用Object.keys获取键，避免for-in循环中的原型链问�?    const objectKeys = Object.keys(obj);
-    for (let i = 0; i < objectKeys.length; i++) {
-      keys.push(objectKeys[i]);
-    }
-    return keys;
-  }
-
-  /**
    * 设置应用上下�?   * @param ctx 应用上下�?   */
   public static setContext(ctx: common.Context): void {
     NetworkUtil.context = ctx;
@@ -98,17 +84,9 @@ export default class NetworkUtil {
       const atManager = abilityAccessCtrl.createAtManager();
       const context = NetworkUtil.getContext();
       
-      // 先检查权限状态，避免重复申请
-      const permissionResult: abilityAccessCtrl.GrantStatus = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
-      
-      // 只有当权限未授权时才请求
-      if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
-        await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
-      }
+      // 在HarmonyOS SDK 5.1.1中，直接请求权限，不先检�?      await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Failed to check or request INTERNET permission', error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage))))))));
-      // 确保传递给Logger.error的是Error对象
+      Logger.error(TAG, 'Failed to request INTERNET permission', error as Error);
       // 不抛出错误，允许应用继续尝试网络操作
     }
   }
@@ -119,6 +97,7 @@ export default class NetworkUtil {
   public static async initialize(): Promise<void> {
     if (!NetworkUtil.isInitialized) {
       // 初始化时检查权�?      await NetworkUtil.checkAndRequestNetworkPermission();
+      // 初始化网络状态监�?      await NetworkUtil.initializeNetworkListener();
       NetworkUtil.isInitialized = true;
     }
   }
@@ -130,19 +109,11 @@ export default class NetworkUtil {
    * @returns Promise<Response<T>>
    */
   public static async get<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>> {
-    const requestConfig: RequestConfig = {
+    return NetworkUtil.request<T>({
       url,
-      method: 'GET'
-    };
-    
-    // 手动复制配置属性，避免使用扩展运算�?    if (config) {
-      if (config.headers) requestConfig.headers = config.headers;
-      if (config.params) requestConfig.params = config.params;
-      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
-      if (config.responseType) requestConfig.responseType = config.responseType;
-    }
-    
-    return NetworkUtil.request<T>(requestConfig);
+      method: 'GET',
+      ...config
+    });
   }
 
   /**
@@ -153,20 +124,12 @@ export default class NetworkUtil {
    * @returns Promise<Response<T>>
    */
   public static async post<T>(url: string, data?: string | number | boolean | object, config?: Partial<RequestConfig>): Promise<Response<T>> {
-    const requestConfig: RequestConfig = {
+    return NetworkUtil.request<T>({
       url,
       method: 'POST',
-      data
-    };
-    
-    // 手动复制配置属性，避免使用扩展运算�?    if (config) {
-      if (config.headers) requestConfig.headers = config.headers;
-      if (config.params) requestConfig.params = config.params;
-      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
-      if (config.responseType) requestConfig.responseType = config.responseType;
-    }
-    
-    return NetworkUtil.request<T>(requestConfig);
+      data,
+      ...config
+    });
   }
 
   /**
@@ -177,20 +140,12 @@ export default class NetworkUtil {
    * @returns Promise<Response<T>>
    */
   public static async put<T>(url: string, data?: string | number | boolean | object, config?: Partial<RequestConfig>): Promise<Response<T>> {
-    const requestConfig: RequestConfig = {
+    return NetworkUtil.request<T>({
       url,
       method: 'PUT',
-      data
-    };
-    
-    // 手动复制配置属性，避免使用扩展运算�?    if (config) {
-      if (config.headers) requestConfig.headers = config.headers;
-      if (config.params) requestConfig.params = config.params;
-      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
-      if (config.responseType) requestConfig.responseType = config.responseType;
-    }
-    
-    return NetworkUtil.request<T>(requestConfig);
+      data,
+      ...config
+    });
   }
 
   /**
@@ -200,19 +155,11 @@ export default class NetworkUtil {
    * @returns Promise<Response<T>>
    */
   public static async delete<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>> {
-    const requestConfig: RequestConfig = {
+    return NetworkUtil.request<T>({
       url,
-      method: 'DELETE'
-    };
-    
-    // 手动复制配置属性，避免使用扩展运算�?    if (config) {
-      if (config.headers) requestConfig.headers = config.headers;
-      if (config.params) requestConfig.params = config.params;
-      if (config.timeout !== undefined) requestConfig.timeout = config.timeout;
-      if (config.responseType) requestConfig.responseType = config.responseType;
-    }
-    
-    return NetworkUtil.request<T>(requestConfig);
+      method: 'DELETE',
+      ...config
+    });
   }
 
   /**
@@ -238,9 +185,17 @@ export default class NetworkUtil {
 
       // 构建完整URL（添加查询参数）
       let fullUrl = url;
-      if (NetworkUtil.getObjectKeys(params).length > 0) {
-        const queryString = NetworkUtil.buildQueryString(params);
-        fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
+      const queryParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (Array.isArray(value)) {
+          value.forEach(item => queryParams.append(key, String(item)));
+        } else {
+          queryParams.append(key, String(value));
+        }
+      }
+      const queryString = queryParams.toString();
+      if (queryString) {
+        fullUrl += `${fullUrl.includes('?') ? '&' : '?'}${queryString}`;
       }
 
       Logger.info(TAG, `Sending ${method} request to ${fullUrl}`);
@@ -252,25 +207,15 @@ export default class NetworkUtil {
       const httpOptions: http.HttpRequestOptions = {
         method,
         header: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...headers
         },
         connectTimeout: timeout,
         readTimeout: timeout
       };
-      
-      // 手动合并headers，避免数组展开操作
-      if (headers) {
-        const headerKeys = NetworkUtil.getObjectKeys(headers);
-        if (!httpOptions.header) {
-          httpOptions.header = {};
-        }
-        for (let i = 0; i < headerKeys.length; i++) {
-          const key = headerKeys[i];
-          httpOptions.header[key] = headers[key];
-        }
-      }
 
-      // 添加请求�?      if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      // 添加请求数据
+      if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
         httpOptions.extraData = typeof data === 'string' ? data : JSON.stringify(data);
       }
 
@@ -285,23 +230,16 @@ export default class NetworkUtil {
           try {
             responseData = JSON.parse(responseData);
           } catch (parseError) {
-            const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-            Logger.error(TAG, 'Failed to parse JSON response', parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error : new Error(String(parseError as Error instanceof Error ? parseError as Error : new Error(String(parseError as Error)))))));
+            Logger.error(TAG, 'Failed to parse JSON response', parseError as Error);
           }
         }
 
-        // 构建响应�?        const responseHeaders: Record<string, string> = {};
+        // 构建响应对象
+        const responseHeaders: Record<string, string> = {};
         if (response.header) {
-          const headerKeys = Object.keys(response.header);
-          for (let i = 0; i < headerKeys.length; i++) {
-            const key = headerKeys[i];
-            responseHeaders[key] = String(response.header[key]);
+          for (const [key, value] of Object.entries(response.header)) {
+            responseHeaders[key] = String(value);
           }
-        }
-
-        // 检查状态码
-        if (response.responseCode < 200 || response.responseCode >= 300) {
-          throw new Error(`HTTP error! status: ${response.responseCode}`);
         }
 
         return {
@@ -319,16 +257,15 @@ export default class NetworkUtil {
           await NetworkUtil.sleep(delay);
           return NetworkUtil.request(config, retryCount + 1);
         }
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error(TAG, 'Request error', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
-        throw error instanceof Error ? error : new Error(errorMessage);
+        Logger.error(TAG, 'Request error', error as Error);
+        throw error instanceof Error ? error : new Error(String(error));
       } finally {
         // 销毁HTTP请求
         httpRequest.destroy();
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Request failed with error', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+      Logger.error(TAG, 'Request failed with error', error as Error);
       throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
@@ -420,26 +357,18 @@ export default class NetworkUtil {
       
       // 获取文件总大�?      const totalSize = response.result.byteLength;
       
-      // 写入文件
-      const file: fileIO.File = await fileIO.open(savePath, fileIO.OpenMode.READ_WRITE | fileIO.OpenMode.CREATE);
+      // 使用fs模块写入文件
+      await fs.writeFileSync(savePath, response.result);
       
-      try {
-        // 将ArrayBuffer写入文件
-        const writeResult: fileIO.WriteResult = await fileIO.write(file.fd, response.result);
-        
-        // 通知进度完成
-        if (options?.onProgress) {
-          options.onProgress(totalSize, totalSize);
-        }
-        
-        Logger.info(TAG, `File downloaded successfully: ${savePath}, size: ${writeResult.bytesWritten} bytes`);
-      } finally {
-        // 关闭文件
-        await fileIO.close(file.fd);
+      // 通知进度完成
+      if (options?.onProgress) {
+        options.onProgress(totalSize, totalSize);
       }
+      
+      Logger.info(TAG, `File downloaded successfully: ${savePath}, size: ${totalSize} bytes`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Failed to download file', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+      Logger.error(TAG, 'Failed to download file', error as Error);
       throw error instanceof Error ? error : new Error(errorMessage);
     }
   }
@@ -469,7 +398,7 @@ export default class NetworkUtil {
       NetworkUtil.isInitialized = true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Failed to initialize network listener', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+      Logger.error(TAG, 'Failed to initialize network listener', error as Error);
     }
   }
 
@@ -483,7 +412,7 @@ export default class NetworkUtil {
         listener(isOnline, networkType);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        Logger.error(TAG, 'Error in network status listener', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+        Logger.error(TAG, 'Error in network status listener', error as Error);
       }
     });
   }
@@ -494,8 +423,9 @@ export default class NetworkUtil {
   public static addNetworkStatusListener(listener: (isOnline: boolean, networkType: string) => void): () => void {
     NetworkUtil.networkStatusListeners.add(listener);
     
-    // 自动初始化监�?    NetworkUtil.initializeNetworkListener().catch((error) => {
-      Logger.error(TAG, 'Failed to initialize network listener after adding', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+    // 自动初始化监听器
+    NetworkUtil.initializeNetworkListener().catch((error) => {
+      Logger.error(TAG, 'Failed to initialize network listener after adding', error as Error);
     });
     
     // 返回取消监听的函�?    return () => {
@@ -556,35 +486,9 @@ export default class NetworkUtil {
       return response.result as string;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Failed to download text', error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage instanceof Error ? error instanceof Error ? error : new Error(errorMessage : new Error(String(error instanceof Error ? error : new Error(errorMessage))))))));
+      Logger.error(TAG, 'Failed to download text', error as Error);
       throw error instanceof Error ? error : new Error(errorMessage);
     }
-  }
-
-  /**
-   * 构建查询字符�?   * @param params 查询参数对象
-   * @returns 构建好的查询字符�?   */
-  private static buildQueryString(params: Record<string, string | number | boolean | string[]>): string {
-    const parts: string[] = [];
-    const keys = NetworkUtil.getObjectKeys(params);
-    
-    for (const key of keys) {
-      const value = params[key];
-      if (Array.isArray(value)) {
-        // 处理数组参数
-        for (const item of value) {
-          const encodedKey = encodeURIComponent(key);
-          const encodedValue = encodeURIComponent(String(item));
-          parts.push(`${encodedKey}=${encodedValue}`);
-        }
-      } else {
-        const encodedKey = encodeURIComponent(key);
-        const encodedValue = encodeURIComponent(String(value));
-        parts.push(`${encodedKey}=${encodedValue}`);
-      }
-    }
-    
-    return parts.join('&');
   }
 
   /**
@@ -651,12 +555,6 @@ export default class NetworkUtil {
    * @param cacheTime 缓存时间（毫秒）
    * @returns Promise<T>
    */
-// 缓存响应数据结构
-export interface CachedResponse<T> {
-  data: T;
-  timestamp: number;
-}
-
   public static async cachedRequest<T>(url: string, cacheTime: number = 5 * 60 * 1000): Promise<T> {
     try {
       const cacheKey = `network_cache_${url.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -666,7 +564,7 @@ export interface CachedResponse<T> {
       try {
         const cachedData = cacheManager.get(cacheKey);
         if (cachedData && typeof cachedData === 'string') {
-          const parsedData: CachedResponse<T> = JSON.parse(cachedData);
+          const parsedData = JSON.parse(cachedData) as { data: T; timestamp: number };
           const cacheData: T = parsedData.data;
           const timestamp: number = parsedData.timestamp;
           const now: number = Date.now();
@@ -688,13 +586,12 @@ export interface CachedResponse<T> {
           const oldCachedData = cacheManager.get(cacheKey);
           if (oldCachedData && typeof oldCachedData === 'string') {
             Logger.warn(TAG, `Offline mode: using expired cache for ${url}`);
-            const parsedData: CachedResponse<T> = JSON.parse(oldCachedData);
-            const cacheData: T = parsedData.data;
-            return cacheData;
+            const parsedData = JSON.parse(oldCachedData) as { data: T; timestamp: number };
+            return parsedData.data;
           }
         } catch (offlineCacheError) {
           const errorMessage = offlineCacheError instanceof Error ? offlineCacheError.message : String(offlineCacheError);
-          Logger.error(TAG, 'Offline cache error', offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error : new Error(String(offlineCacheError as Error instanceof Error ? offlineCacheError as Error : new Error(String(offlineCacheError as Error)))))));
+          Logger.error(TAG, 'Offline cache error', offlineCacheError as Error);
         }
         throw new Error('Network unavailable and no cached data available');
       }
@@ -702,10 +599,10 @@ export interface CachedResponse<T> {
       // 缓存无效或不存在，发送新请求
       const response = await NetworkUtil.get<T>(url);
       
-      // 保存新缓�?      // 使用Object.create和属性赋值替代对象字面量
-      const cacheData: CachedResponse<T> = Object.create(null) as CachedResponse<T>;
-      cacheData.data = response.data;
-      cacheData.timestamp = Date.now();
+      // 保存新缓�?      const cacheData = {
+        data: response.data,
+        timestamp: Date.now()
+      };
       
       // 尝试保存到缓�?      if (cacheManager) {
         try {
@@ -720,7 +617,7 @@ export interface CachedResponse<T> {
       return response.data;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, 'Cached request failed', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+      Logger.error(TAG, 'Cached request failed', error as Error);
       // 确保错误是Error类型
       throw error instanceof Error ? error : new Error(errorMessage);
     }
@@ -744,14 +641,7 @@ export interface NetworkCacheItem {
 // 修复throw语句不能接受任意类型的问�?export function createNetworkError(message: string, code?: number): Error {
   const error = new Error(message);
   // 避免使用Object.assign，直接设置属�?  if (code) {
-    // 使用类型断言为Error添加code属�?    Object.defineProperty(error, 'code', {
-      value: code,
-      writable: false,
-      enumerable: true,
-      configurable: true
-    });
+    // 使用类型断言为Error添加code属�?    (error as any).code = code;
   }
   return error;
 }
-
-

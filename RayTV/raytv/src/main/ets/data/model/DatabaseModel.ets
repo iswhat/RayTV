@@ -1,28 +1,22 @@
-// DatabaseModel - 数据库相关模型定义
-// 定义数据库表结构、查询条件等数据模型
+// DatabaseModel - 数据库相关模型定�?// 定义数据库表结构、查询条件等数据模型
 
 /**
- * 数据库配置接口
- */
+ * 数据库配置接�? */
 export interface DatabaseConfig {
   /**
-   * 数据库名称
-   */
+   * 数据库名�?   */
   name: string;
   
   /**
-   * 数据库版本
-   */
+   * 数据库版�?   */
   version: number;
   
   /**
-   * 数据库描述
-   */
+   * 数据库描�?   */
   description?: string;
   
   /**
-   * 数据库大小限制（字节）
-   */
+   * 数据库大小限制（字节�?   */
   size?: number;
 }
 
@@ -30,8 +24,7 @@ export interface DatabaseConfig {
  * 数据库列定义接口
  */
 /**
- * 数据库支持的值类型
- */
+ * 数据库支持的值类�? */
 export type DatabaseValueType = string | number | boolean | null;
 
 export interface DatabaseColumn {
@@ -46,8 +39,7 @@ export interface DatabaseColumn {
   type: string;
   
   /**
-   * 是否为主键
-   */
+   * 是否为主�?   */
   primaryKey?: boolean;
   
   /**
@@ -66,8 +58,7 @@ export interface DatabaseColumn {
   notNull?: boolean;
   
   /**
-   * 默认值
-   */
+   * 默认�?   */
   defaultValue?: DatabaseValueType;
   
   /**
@@ -86,8 +77,7 @@ export interface DatabaseTable {
   name: string;
   
   /**
-   * 列定义
-   */
+   * 列定�?   */
   columns: DatabaseColumn[];
   
   /**
@@ -101,14 +91,12 @@ export interface DatabaseTable {
   foreignKeys?: DatabaseForeignKey[];
   
   /**
-   * 表注释
-   */
+   * 表注�?   */
   comment?: string;
 }
 
 /**
- * 数据库索引定义接口
- */
+ * 数据库索引定义接�? */
 export interface DatabaseIndex {
   /**
    * 索引名称
@@ -125,8 +113,7 @@ export interface DatabaseIndex {
 }
 
 /**
- * 数据库外键定义接口
- */
+ * 数据库外键定义接�? */
 export interface DatabaseForeignKey {
   /**
    * 外键名称
@@ -141,16 +128,13 @@ export interface DatabaseForeignKey {
    */
   targetTable: string;
   /**
-   * 目标表字段
-   */
+   * 目标表字�?   */
   targetColumns: string[];
   /**
-   * 删除时行为
-   */
+   * 删除时行�?   */
   onDelete?: ForeignKeyAction;
   /**
-   * 更新时行为
-   */
+   * 更新时行�?   */
   onUpdate?: ForeignKeyAction;
 }
 
@@ -167,30 +151,26 @@ export enum ForeignKeyAction {
    */
   SET_NULL = 'SET NULL',
   /**
-   * 设置默认值
-   */
+   * 设置默认�?   */
   SET_DEFAULT = 'SET DEFAULT',
   /**
    * 限制操作
    */
   RESTRICT = 'RESTRICT',
   /**
-   * 无操作
-   */
+   * 无操�?   */
   NO_ACTION = 'NO ACTION'
 }
 
 /**
- * 查询操作符枚举
- */
+ * 查询操作符枚�? */
 export enum QueryOperator {
   /**
    * 等于
    */
   EQUAL = '=',
   /**
-   * 不等于
-   */
+   * 不等�?   */
   NOT_EQUAL = '!=',
   /**
    * 大于
@@ -213,24 +193,21 @@ export enum QueryOperator {
    */
   LIKE = 'LIKE',
   /**
-   * 不包含
-   */
+   * 不包�?   */
   NOT_LIKE = 'NOT LIKE',
   /**
    * 为空
    */
   IS_NULL = 'IS NULL',
   /**
-   * 不为空
-   */
+   * 不为�?   */
   IS_NOT_NULL = 'IS NOT NULL',
   /**
    * 在范围内
    */
   IN = 'IN',
   /**
-   * 不在范围内
-   */
+   * 不在范围�?   */
   NOT_IN = 'NOT IN',
   /**
    * 介于
@@ -243,24 +220,19 @@ export enum QueryOperator {
  */
 export interface QueryCondition {
   /**
-   * 字段名
-   */
+   * 字段�?   */
   field: string;
   /**
-   * 操作符
-   */
+   * 操作�?   */
   operator: QueryOperator | string;
   /**
-   * 值
-   */
+   * �?   */
   value?: DatabaseValueType | string[] | number[];
   /**
-   * 值2（用于BETWEEN等操作符）
-   */
+   * �?（用于BETWEEN等操作符�?   */
   value2?: DatabaseValueType;
   /**
-   * 是否忽略大小写
-   */
+   * 是否忽略大小�?   */
   ignoreCase?: boolean;
 }
 
@@ -315,8 +287,7 @@ export interface PaginationResult<T> {
    */
   list: T[];
   /**
-   * 总条数
-   */
+   * 总条�?   */
   total: number;
   /**
    * 页码
@@ -327,8 +298,7 @@ export interface PaginationResult<T> {
    */
   pageSize: number;
   /**
-   * 总页数
-   */
+   * 总页�?   */
   totalPages: number;
 }
 
@@ -345,8 +315,7 @@ export interface BatchOperationResult {
    */
   failedCount: number;
   /**
-   * 失败项索引
-   */
+   * 失败项索�?   */
   failedIndexes: number[];
   /**
    * 失败原因
@@ -355,12 +324,10 @@ export interface BatchOperationResult {
 }
 
 /**
- * 数据库迁移定义接口
- */
+ * 数据库迁移定义接�? */
 export interface Migration {
   /**
-   * 源版本
-   */
+   * 源版�?   */
   fromVersion: number;
   /**
    * 目标版本
@@ -373,8 +340,7 @@ export interface Migration {
 }
 
 /**
- * 数据库事务类型枚举
- */
+ * 数据库事务类型枚�? */
 export enum TransactionType {
   /**
    * 只读事务
@@ -387,8 +353,7 @@ export enum TransactionType {
 }
 
 /**
- * 数据库事务接口
- */
+ * 数据库事务接�? */
 export interface Transaction {
   /**
    * 执行SQL语句
@@ -408,8 +373,7 @@ export interface Transaction {
 }
 
 /**
- * 数据模型接口（所有实体模型的基类）
- */
+ * 数据模型接口（所有实体模型的基类�? */
 export interface BaseModel {
   /**
    * 唯一标识
@@ -430,8 +394,7 @@ export interface BaseModel {
  */
 export interface UserModel extends BaseModel {
   /**
-   * 用户名
-   */
+   * 用户�?   */
   username: string;
   /**
    * 邮箱
@@ -442,18 +405,15 @@ export interface UserModel extends BaseModel {
    */
   avatar?: string;
   /**
-   * 最后登录时间
-   */
+   * 最后登录时�?   */
   lastLoginAt?: number;
   /**
-   * 用户状态
-   */
+   * 用户状�?   */
   status?: UserStatus;
 }
 
 /**
- * 用户状态枚举
- */
+ * 用户状态枚�? */
 export enum UserStatus {
   /**
    * 活跃
@@ -464,8 +424,7 @@ export enum UserStatus {
    */
   DISABLED = 'DISABLED',
   /**
-   * 待验证
-   */
+   * 待验�?   */
   PENDING = 'PENDING'
 }
 
@@ -490,8 +449,7 @@ export interface HistoryModel extends BaseModel {
    */
   progress: number;
   /**
-   * 总时长
-   */
+   * 总时�?   */
   duration: number;
   /**
    * 媒体类型
@@ -516,8 +474,7 @@ export enum MediaType {
    */
   MOVIE = 'MOVIE',
   /**
-   * 电视剧
-   */
+   * 电视�?   */
   TV_SERIES = 'TV_SERIES',
   /**
    * 综艺
@@ -528,8 +485,7 @@ export enum MediaType {
    */
   ANIME = 'ANIME',
   /**
-   * 纪录片
-   */
+   * 纪录�?   */
   DOCUMENTARY = 'DOCUMENTARY',
   /**
    * 直播
@@ -600,16 +556,13 @@ export interface DownloadTaskModel extends BaseModel {
    */
   savePath: string;
   /**
-   * 总大小
-   */
+   * 总大�?   */
   totalSize: number;
   /**
-   * 已下载大小
-   */
+   * 已下载大�?   */
   downloadedSize: number;
   /**
-   * 状态
-   */
+   * 状�?   */
   status: DownloadStatus;
   /**
    * 错误信息
@@ -620,22 +573,18 @@ export interface DownloadTaskModel extends BaseModel {
    */
   mediaType?: MediaType;
   /**
-   * 优先级
-   */
+   * 优先�?   */
   priority: number;
 }
 
 /**
- * 下载状态枚举
- */
+ * 下载状态枚�? */
 export enum DownloadStatus {
   /**
-   * 等待中
-   */
+   * 等待�?   */
   WAITING = 'WAITING',
   /**
-   * 下载中
-   */
+   * 下载�?   */
   DOWNLOADING = 'DOWNLOADING',
   /**
    * 暂停
@@ -698,20 +647,16 @@ export interface LiveChannelModel extends BaseModel {
 }
 
 /**
- * 配置项模型接口
- */
+ * 配置项模型接�? */
 export interface ConfigItemModel extends BaseModel {
   /**
-   * 配置键
-   */
+   * 配置�?   */
   key: string;
   /**
-   * 配置值
-   */
+   * 配置�?   */
   value: string;
   /**
-   * 值类型
-   */
+   * 值类�?   */
   type: string;
   /**
    * 分类

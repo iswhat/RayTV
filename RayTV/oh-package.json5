@@ -1,15 +1,13 @@
 {
-  "modelVersion": "6.0.0",
+  "modelVersion": "5.1.1",
   "name": "RayTV",
   "version": "1.0.0",
-  "description": "RayTV Application",
   "scripts": {
-    "build": "hvigor build --mode debug"
+    "build": "hvigor assembleHap"
   },
   "dependencies": {},
   "devDependencies": {
     "@ohos/hypium": "1.0.24",
     "@ohos/hamock": "1.0.0"
-    // @ohos前缀的系统API不需要在此声明，会在编译时自动从SDK加载
   }
 }

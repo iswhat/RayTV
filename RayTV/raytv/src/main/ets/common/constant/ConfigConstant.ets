@@ -1,8 +1,7 @@
 // ConfigConstant - 配置相关常量定义
 
 /**
- * 配置常量类
- * 定义应用配置相关的常量，包括默认配置、配置键名等
+ * 配置常量�? * 定义应用配置相关的常量，包括默认配置、配置键名等
  */
 export class ConfigConstant {
   // 配置分组键名
@@ -13,8 +12,7 @@ export class ConfigConstant {
   public static readonly GROUP_ADBLOCK: string = 'adBlock';
   public static readonly GROUP_HARMONY: string = 'harmony';
 
-  // 播放器配置键名
-  public static readonly PLAYER_DEFAULT_PLAYER: string = 'defaultPlayer';
+  // 播放器配置键�?  public static readonly PLAYER_DEFAULT_PLAYER: string = 'defaultPlayer';
   public static readonly PLAYER_ENABLE_HARDWARE_DECODE: string = 'enableHardwareDecode';
   public static readonly PLAYER_AUTO_CONTINUE_PLAY: string = 'autoContinuePlay';
   public static readonly PLAYER_REMEMBER_POSITION: string = 'rememberPosition';
@@ -62,8 +60,7 @@ export class ConfigConstant {
   public static readonly HARMONY_ENABLE_PUSH_NOTIFICATION: string = 'enablePushNotification';
   public static readonly HARMONY_SMART_REMOTE_ENABLED: string = 'smartRemoteEnabled';
 
-  // 默认值
-  public static readonly DEFAULT_THEME: string = 'dark';
+  // 默认�?  public static readonly DEFAULT_THEME: string = 'dark';
   public static readonly DEFAULT_FONT_SIZE: number = 16;
   public static readonly DEFAULT_TIMEOUT: number = 30000;
   public static readonly DEFAULT_RETRY_COUNT: number = 3;
@@ -75,8 +72,7 @@ export class ConfigConstant {
   public static readonly THEME_DARK: string = 'dark';
   public static readonly THEME_SYSTEM: string = 'system';
 
-  // 播放器类型
-  public static readonly PLAYER_TYPE_NATIVE: string = 'native';
+  // 播放器类�?  public static readonly PLAYER_TYPE_NATIVE: string = 'native';
   public static readonly PLAYER_TYPE_EXTERNAL: string = 'external';
 
   // 配置版本

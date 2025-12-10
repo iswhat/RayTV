@@ -56,7 +56,7 @@ export default class RepositoryFactory {
         return false;
       }
       
-      this.repositoryMap.set(RepositoryType.DATABASE, databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository : new Error(String(databaseRepository instanceof Error ? databaseRepository : new Error(String(databaseRepository)))))));
+      this.repositoryMap.set(RepositoryType.DATABASE, databaseRepository);
       Logger.info(TAG, 'Database repository initialized successfully');
 
       // 初始化网络仓库（这里使用默认配置，实际使用时需要提供具体配置）
@@ -83,7 +83,7 @@ export default class RepositoryFactory {
     if (!repository) {
       throw new Error('Database repository not initialized. Call initialize() first.');
     }
-    return repository;
+    return repository as DatabaseRepository;
   }
 
   /**
@@ -95,14 +95,14 @@ export default class RepositoryFactory {
     if (!repository) {
       throw new Error('Network repository not initialized. Call initialize() first.');
     }
-    return repository;
+    return repository as NetworkRepository;
   }
 
   /**
    * 设置自定义仓库实�?   * @param type 仓库类型
    * @param repository 仓库实例
    */
-  public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository instanceof Error ? repository: DatabaseRepository | NetworkRepository : new Error(String(repository: DatabaseRepository | NetworkRepository))))))): void {
+  public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository): void {
     this.repositoryMap.set(type, repository);
     Logger.info(TAG, `Custom repository set for type: ${type}`);
   }
@@ -143,12 +143,10 @@ export default class RepositoryFactory {
   public static reset(): void {
     if (RepositoryFactory.instance) {
       RepositoryFactory.instance.close().catch(error => {
-        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error)))))))}`);
+        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
       });
       RepositoryFactory.instance = null;
     }
     Logger.info(TAG, 'Repository factory reset');
   }
 }
-
-

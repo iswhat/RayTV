@@ -4,17 +4,14 @@ import Logger from '../common/util/Logger';
 
 /**
  * 首页组件
- * 展示推荐媒体内容和功能入口
- */
+ * 展示推荐媒体内容和功能入�? */
 @Component
 struct HomePage {
   private readonly TAG: string = 'HomePage';
   
-  // 状态管理
-  @State isLoading: boolean = false;
+  // 状态管�?  @State isLoading: boolean = false;
   
-  // 初始化页面
-  aboutToAppear(): void {
+  // 初始化页�?  aboutToAppear(): void {
     Logger.info('HomePage mounted');
   }
     
@@ -29,8 +26,7 @@ struct HomePage {
   private handleSearch(): void {
     Logger.info('Search button clicked');
     try {
-      // 跳转到搜索页面
-      AppNavigator.getInstance().navigateToSearch();
+      // 跳转到搜索页�?      AppNavigator.getInstance().navigateToSearch();
     } catch (error) {
       Logger.error(this.TAG, `Failed to navigate to search page: ${error}`);
     }

@@ -1,8 +1,8 @@
-// StorageUtils.ets - ArkTS兼容的存储工具函数
+// StorageUtils.ets - ArkTS兼容的存储工具函�?
 
 /**
  * 存储工具函数
- * 提供ArkTS环境中安全的数据持久化操作功能
+ * 提供ArkTS环境中安全的数据持久化操作功�?
  */
 import { Optional, SafeAny } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
@@ -13,7 +13,7 @@ import StringUtils from './StringUtils';
  */
 export const StorageUtils = {
   /**
-   * 检查是否支持本地存储
+   * 检查是否支持本地存�?
    */
   isSupported(): boolean {
     try {
@@ -25,7 +25,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 设置存储项
+   * 设置存储�?
    */
   setItem(key: string, value: SafeAny): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -43,7 +43,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取存储项
+   * 获取存储�?
    */
   getItem<T = string>(key: string): T | null {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -57,11 +57,11 @@ export const StorageUtils = {
         return null;
       }
       
-      // 尝试解析JSON，如果失败则返回原始字符串
+      // 尝试解析JSON，如果失败则返回原始字符�?
       try {
         return JSON.parse(value) as T;
       } catch {
-        // 当JSON解析失败时，返回null而不是进行不安全的类型转换
+        // 当JSON解析失败时，返回null而不是进行不安全的类型转�?
         return null as unknown as T;
       }
     } catch (e) {
@@ -78,7 +78,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取数字类型存储项
+   * 获取数字类型存储�?
    */
   getNumber(key: string): number | null {
     const value = StorageUtils.getItem(key);
@@ -86,7 +86,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取布尔类型存储项
+   * 获取布尔类型存储�?
    */
   getBoolean(key: string): boolean | null {
     const value = StorageUtils.getItem(key);
@@ -94,7 +94,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取对象类型存储项
+   * 获取对象类型存储�?
    */
   getObject<T>(key: string): T | null {
     const value = StorageUtils.getItem<T>(key);
@@ -102,7 +102,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取数组类型存储项
+   * 获取数组类型存储�?
    */
   getArray<T>(key: string): T[] | null {
     const value = StorageUtils.getItem<T[]>(key);
@@ -110,7 +110,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 移除存储项
+   * 移除存储�?
    */
   removeItem(key: string): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -144,7 +144,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 检查是否存在指定的存储项
+   * 检查是否存在指定的存储�?
    */
   hasItem(key: string): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -160,7 +160,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取存储项数量
+   * 获取存储项数�?
    */
   getLength(): number {
     if (!StorageUtils.isSupported()) {
@@ -192,7 +192,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取所有存储项的键名列表
+   * 获取所有存储项的键名列�?
    */
   getAllKeys(): string[] {
     const keys: string[] = [];
@@ -242,7 +242,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量设置存储项
+   * 批量设置存储�?
    */
   setMultiple(items: Record<string, SafeAny>): boolean {
     if (!StorageUtils.isSupported() || !TypeUtils.isObject(items)) {
@@ -270,7 +270,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量获取存储项
+   * 批量获取存储�?
    */
   getMultiple(keys: string[]): Record<string, SafeAny> {
     const items: Record<string, SafeAny> = {};
@@ -294,7 +294,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量移除存储项
+   * 批量移除存储�?
    */
   removeMultiple(keys: string[]): boolean {
     if (!StorageUtils.isSupported() || !Array.isArray(keys)) {
@@ -335,12 +335,12 @@ export const StorageUtils = {
         const value = localStorage.getItem(key);
         
         if (value) {
-          // 估算字符串大小（UTF-16编码，每个字符2字节）
+          // 估算字符串大小（UTF-16编码，每个字�?字节�?
           size += (key.length + value.length) * 2;
         }
       }
       
-      return size; // 返回字节数
+      return size; // 返回字节�?
     } catch (e) {
       console.error('StorageUtils.getStorageUsage error:', e);
       return 0;
@@ -348,7 +348,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 创建带命名空间的存储键
+   * 创建带命名空间的存储�?
    */
   createNamespacedKey(namespace: string, key: string): string {
     if (StringUtils.isEmpty(namespace)) {
@@ -368,7 +368,7 @@ export const StorageUtils = {
     
     const createNamespacedMethod = (originalMethod: Function) => {
       return function(this: typeof StorageUtils, ...args: SafeAny[]) {
-        // 如果第一个参数是字符串键名，则添加命名空间
+        // 如果第一个参数是字符串键名，则添加命名空�?
         if (args.length > 0 && TypeUtils.isString(args[0])) {
           args[0] = StorageUtils.createNamespacedKey(namespace, args[0]);
         }

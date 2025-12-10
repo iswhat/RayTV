@@ -342,7 +342,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
    * 从错误创建响�?   */
   static fromError<T = unknown>(error: Error): ApiResponse<T> {
     // 可以根据不同类型的错误返回不同的响应
-    Logger.error(TAG, `Creating response from error: ${error.message}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+    Logger.error(TAG, `Creating response from error: ${error.message}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
     
     return this.error<T>(ResponseCode.UNKNOWN_ERROR, error.message);
   }

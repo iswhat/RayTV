@@ -5,25 +5,25 @@ export class JsonData {
   private data: Record<string, string | number | boolean | null> = {};
 
   /**
-   * 设置属性值
+   * 设置属性�?
    * @param key - 属性名
-   * @param value - 属性值
+   * @param value - 属性�?
    */
   set(key: string, value: string | number | boolean | null): void {
     this.data[key] = value;
   }
 
   /**
-   * 获取属性值
+   * 获取属性�?
    * @param key - 属性名
-   * @returns 属性值
+   * @returns 属性�?
    */
   get(key: string): string | number | boolean | null | undefined {
     return this.data[key];
   }
 
   /**
-   * 检查属性是否存在
+   * 检查属性是否存�?
    * @param key - 属性名
    * @returns 是否存在
    */
@@ -41,7 +41,7 @@ export class JsonData {
   }
 
   /**
-   * 转换为普通对象
+   * 转换为普通对�?
    * @returns 转换后的对象
    */
   toObject(): Record<string, string | number | boolean | null> {
@@ -57,12 +57,12 @@ export class JsonData {
 }
 
 /**
- * JSON工具类 - 全功能版本
+ * JSON工具�?- 全功能版�?
  * 提供安全的JSON序列化和反序列化功能
  */
 export default class JsonUtil {
   /**
-   * 检查对象是否包含指定属性
+   * 检查对象是否包含指定属�?
    * 使用Object.keys和includes替代Object.prototype.hasOwnProperty.call
    */
   private static hasOwnProperty<T extends object>(obj: T, key: string | number): boolean {
@@ -78,14 +78,14 @@ export default class JsonUtil {
    * 安全地获取对象属性值，避免字段索引访问错误
    * @param obj - 要访问的对象
    * @param key - 属性名
-   * @returns 属性值
+   * @returns 属性�?
    */
   private static getPropertyValue<T extends object>(obj: T, key: string): string | number | boolean | null | undefined {
     if (typeof obj !== 'object' || obj === null) {
       return undefined;
     }
     
-    // 使用类型安全的属性访问方式
+    // 使用类型安全的属性访问方�?
     const recordObj = obj as Record<string, string | number | boolean | null>;
     if (JsonUtil.hasOwnProperty(recordObj, key)) {
       return recordObj[key];
@@ -94,9 +94,9 @@ export default class JsonUtil {
     return undefined;
   }
   /**
-   * 将对象序列化为JSON字符串
-   * @param value - 要序列化的对象
-   * @returns JSON字符串
+   * 将对象序列化为JSON字符�?
+   * @param value - 要序列化的对�?
+   * @returns JSON字符�?
    */
   static stringify<T>(value: T): string {
     try {
@@ -109,13 +109,13 @@ export default class JsonUtil {
 
   /**
    * 将JSON字符串解析为对象
-   * @param jsonStr JSON字符串
+   * @param jsonStr JSON字符�?
    * @returns 解析后的对象
    */
   static parse<T>(jsonStr: string): T {
     try {
       if (typeof jsonStr !== 'string') {
-        // 参数类型不匹配时抛出明确的类型错误
+        // 参数类型不匹配时抛出明确的类型错�?
         throw new TypeError('Expected string as input to parse method');
       }
       // 使用明确的类型断言以兼容ArkTS
@@ -130,10 +130,10 @@ export default class JsonUtil {
   }
 
   /**
-   * 安全地解析JSON字符串，出错时返回默认值
-   * @param jsonStr JSON字符串
-   * @param defaultValue 默认值
-   * @returns 解析后的对象或默认值
+   * 安全地解析JSON字符串，出错时返回默认�?
+   * @param jsonStr JSON字符�?
+   * @param defaultValue 默认�?
+   * @returns 解析后的对象或默认�?
    */
   static safeParse<T>(jsonStr: string, defaultValue?: T): T | null {
     try {
@@ -152,12 +152,12 @@ export default class JsonUtil {
   /**
    * 深度克隆对象
    * @param obj - 要克隆的对象
-   * @returns 克隆后的新对象
+   * @returns 克隆后的新对�?
    */
   /**
    * 深度克隆对象
    * @param obj - 要克隆的对象
-   * @returns 克隆后的新对象
+   * @returns 克隆后的新对�?
    */
   static deepClone<T>(obj: T): T {
     try {
@@ -176,7 +176,7 @@ export default class JsonUtil {
         // 使用具体的数组类型替代unknown[]
         const clonedArray: (string | number | boolean | null)[] = [];
         for (let i = 0; i < obj.length; i++) {
-          // 确保索引有效，安全访问数组元素
+          // 确保索引有效，安全访问数组元�?
           if (i >= 0 && i < obj.length) {
             // 使用类型安全的数组访问方式，避免any/unknown类型
             const arrayItem = (obj as (string | number | boolean | null)[])[i];
@@ -186,7 +186,7 @@ export default class JsonUtil {
         return clonedArray as T;
       }
       
-      // 处理对象字面量
+      // 处理对象字面�?
       const clone: Record<string, string | number | boolean | null> = {};
       
       // 使用Object.getOwnPropertyNames获取属性名
@@ -196,7 +196,7 @@ export default class JsonUtil {
         const safeKey = String(key);
         // 使用类型安全的属性访问方式，避免字段索引访问
         const propertyValue = JsonUtil.getPropertyValue(obj, safeKey);
-        // 修复类型错误：确保deepClone返回正确的类型
+        // 修复类型错误：确保deepClone返回正确的类�?
         const clonedValue = JsonUtil.deepClone<string | number | boolean | null>(propertyValue as string | number | boolean | null);
         if (clonedValue !== undefined) {
           clone[safeKey] = clonedValue as string | number | boolean | null;
@@ -206,11 +206,11 @@ export default class JsonUtil {
       return clone as T;
     } catch (error) {
       console.error('Deep clone failed:', error instanceof Error ? error.message : String(error));
-      // 在克隆失败时，尝试使用JSON序列化作为备选方案
+      // 在克隆失败时，尝试使用JSON序列化作为备选方�?
       try {
         return JSON.parse(JSON.stringify(obj)) as T;
       } catch {
-        // 最后回退到返回原始对象
+        // 最后回退到返回原始对�?
         return obj;
       }
     }
@@ -218,7 +218,7 @@ export default class JsonUtil {
 
   /**
    * 检查字符串是否为有效的JSON
-   * @param str - 要检查的字符串
+   * @param str - 要检查的字符�?
    * @returns 是否为有效JSON
    */
   static isValidJSON(str: string): boolean {
@@ -231,14 +231,14 @@ export default class JsonUtil {
   }
 
   /**
-   * 美化JSON字符串
-   * @param jsonStr - JSON字符串
+   * 美化JSON字符�?
+   * @param jsonStr - JSON字符�?
    * @param indent - 缩进空格数，默认2
-   * @returns 美化后的JSON字符串
+   * @returns 美化后的JSON字符�?
    */
   static prettyPrint(jsonStr: string, indent: number = 2): string {
     try {
-      // 使用明确的序列化值类型进行解析
+      // 使用明确的序列化值类型进行解�?
       const parsed: Record<string, string | number | boolean | null> = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
       
       // 检查是否为有效的对象或数组
@@ -275,7 +275,7 @@ export default class JsonUtil {
         if (JsonUtil.hasOwnProperty(current, key)) {
           // 使用类型安全的属性访问方式，避免字段索引访问
           const propertyValue = JsonUtil.getPropertyValue(current, key);
-          // 修复类型错误：确保属性值类型正确
+          // 修复类型错误：确保属性值类型正�?
           if (propertyValue !== undefined) {
             jsonData.set(key, propertyValue as string | number | boolean | null);
           }
@@ -287,14 +287,14 @@ export default class JsonUtil {
   }
 
   /**
-   * 过滤对象中的null和undefined值
+   * 过滤对象中的null和undefined�?
    * @param obj - 要过滤的对象
    * @returns 过滤后的对象
    */
   static filterNullUndefined<T extends Record<string, string | number | boolean | null>>(
     obj: T
   ): Record<string, string | number | boolean | null> {
-    // 类型安全检查
+    // 类型安全检�?
     if (!obj || typeof obj !== 'object') {
       const emptyResult: Record<string, string | number | boolean | null> = {};
       return emptyResult;
@@ -312,29 +312,29 @@ export default class JsonUtil {
         const value = JsonUtil.getPropertyValue(obj, key);
         // 确保值不为null且不为undefined
         if (value !== null && value !== undefined) {
-          // 修复类型错误：确保值类型正确
+          // 修复类型错误：确保值类型正�?
           jsonData.set(key, value as string | number | boolean | null);
         }
       }
     }
     
-    // 直接返回明确的类型
+    // 直接返回明确的类�?
     return jsonData.toObject();
   }
 }
 
 /**
- * 安全的JSON序列化函数
- * @param value - 要序列化的对象
- * @returns JSON字符串
+ * 安全的JSON序列化函�?
+ * @param value - 要序列化的对�?
+ * @returns JSON字符�?
  */
 export function safeStringify(value: Record<string, string | number | boolean | null>): string {
   return JsonUtil.stringify(value);
 }
 
 /**
- * 快速解析JSON字符串（别名）
- * @param jsonStr - JSON字符串
+ * 快速解析JSON字符串（别名�?
+ * @param jsonStr - JSON字符�?
  * @returns 解析后的对象
  */
 export function quickParse(jsonStr: string): Record<string, string | number | boolean | null> {
@@ -342,8 +342,8 @@ export function quickParse(jsonStr: string): Record<string, string | number | bo
 }
 
 /**
- * 检查JSON字符串是否有效
- * @param str - 要检查的字符串
+ * 检查JSON字符串是否有�?
+ * @param str - 要检查的字符�?
  * @returns 是否为有效JSON
  */
 export function isValidJSON(str: string): boolean {

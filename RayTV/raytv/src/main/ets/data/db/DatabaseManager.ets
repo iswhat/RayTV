@@ -1,6 +1,5 @@
 // DatabaseManager.ets - 数据库管理器
-// 实现基于HarmonyOS RelationalStore的数据库连接和管�?
-import relationalStore from '@ohos.data.relationalStore';
+// 实现基于HarmonyOS RelationalStore的数据库连接和管�?import relationalStore from '@ohos.data.relationalStore';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
 import Logger from '../../common/util/Logger';
 
@@ -84,7 +83,7 @@ export class DatabaseManager {
     
     try {
       const tables = getAllTables();
-      Logger.info(TAG, `Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables` instanceof Error ? `Creating ${tables.length} tables` : new Error(String(`Creating ${tables.length} tables`)))))));
+      Logger.info(TAG, `Creating ${tables.length} tables`);
       
       for (const sql of tables) {
         await this.database.executeSql(sql);
@@ -107,7 +106,7 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.info(TAG, `Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes` instanceof Error ? `Creating ${INDEXES.CREATE_INDEXES.length} indexes` : new Error(String(`Creating ${INDEXES.CREATE_INDEXES.length} indexes`)))))));
+      Logger.info(TAG, `Creating ${INDEXES.CREATE_INDEXES.length} indexes`);
       
       for (const indexSql of INDEXES.CREATE_INDEXES) {
         await this.database.executeSql(indexSql);
@@ -125,7 +124,7 @@ export class DatabaseManager {
    * 检查数据库版本并执行迁�?   */
   private async checkDatabaseVersion(): Promise<void> {
     try {
-      Logger.info(TAG, `Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}` instanceof Error ? `Checking database version: ${DATABASE_INFO.VERSION}` : new Error(String(`Checking database version: ${DATABASE_INFO.VERSION}`)))))));
+      Logger.info(TAG, `Checking database version: ${DATABASE_INFO.VERSION}`);
       
       // 从数据库元数据表中获取当前版�?      let currentVersion = 0;
       const resultSet = await this.database.querySql(
@@ -160,7 +159,7 @@ export class DatabaseManager {
   /**
    * 执行数据库迁�?   * @param fromVersion 源版�?   * @param toVersion 目标版本
    */
-  private async migrateDatabase(fromVersion: number, toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number : new Error(String(toVersion: number instanceof Error ? toVersion: number : new Error(String(toVersion: number))))))): Promise<void> {
+  private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
     try {
       Logger.info(TAG, `Migrating database from version ${fromVersion} to ${toVersion}`);
       
@@ -174,11 +173,8 @@ export class DatabaseManager {
           // 示例：如果需要创建元数据表（首次迁移时）
           if (version === 1) {
             await db.executeSql(
-              'CREATE TABLE IF NOT EXISTS database_meta (' +
-              'id INTEGER PRIMARY KEY, ' +
-              'version INTEGER NOT NULL, ' +
-              'last_updated INTEGER NOT NULL)' +
-              '', []
+              'CREATE TABLE IF NOT EXISTS database_meta (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, last_updated INTEGER NOT NULL)',
+              []
             );
           }
           
@@ -208,7 +204,7 @@ export class DatabaseManager {
    * @param sql SQL语句
    * @param bindArgs 绑定参数
    */
-  public async executeSql(sql: string, bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType> instanceof Error ? bindArgs?: Array<ValueType> : new Error(String(bindArgs?: Array<ValueType>))))))): Promise<void> {
+  public async executeSql(sql: string, bindArgs?: Array<ValueType>): Promise<void> {
     if (!this.database) {
       throw new Error('Database not initialized');
     }
@@ -217,7 +213,7 @@ export class DatabaseManager {
       Logger.debug(TAG, `Executing SQL: ${sql} with args: ${bindArgs?.toString()}`);
       await this.database.executeSql(sql, bindArgs);
     } catch (error) {
-      Logger.error(TAG, `Failed to execute SQL: ${sql}, error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error instanceof Error ? error: ${JSON.stringify(error : new Error(String(error: ${JSON.stringify(error)))))))}`);
+      Logger.error(TAG, `Failed to execute SQL: ${sql}, error: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -247,7 +243,7 @@ export class DatabaseManager {
     if (this.database) {
       // 在HarmonyOS中，RdbStore会自动管理连接关�?      // 这里主要是重置状�?      this.database = null;
       this.isInitialized = false;
-      Logger.info(TAG, 'Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed' : new Error(String('Database connection closed' instanceof Error ? 'Database connection closed' : new Error(String('Database connection closed')))))));
+      Logger.info(TAG, 'Database connection closed');
     }
   }
   
@@ -290,10 +286,11 @@ export class DatabaseManager {
   }
   
   /**
-   * 获取数据库大小信�?   * @returns 数据库大小（字节�?   */
+   * 获取数据库大小信�?   * @returns 数据库大小（字节数）
+   */
   public async getDatabaseSize(): Promise<number> {
     try {
-      Logger.debug(TAG, 'Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size' : new Error(String('Getting database size' instanceof Error ? 'Getting database size' : new Error(String('Getting database size')))))));
+      Logger.debug(TAG, 'Getting database size');
       
       // 使用PRAGMA page_count和page_size查询数据库大�?      const pageCountResult = await this.database.querySql('PRAGMA page_count', []);
       let pageCount = 0;
@@ -324,11 +321,9 @@ export class DatabaseManager {
   public async optimizeDatabase(): Promise<void> {
     try {
       // 在SQLite中，VACUUM命令可以优化数据�?      await this.executeSql('VACUUM');
-      Logger.info(TAG, 'Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully' : new Error(String('Database optimized successfully' instanceof Error ? 'Database optimized successfully' : new Error(String('Database optimized successfully')))))));
+      Logger.info(TAG, 'Database optimized successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to optimize database: ${JSON.stringify(error)}`);
     }
   }
 }
-
-

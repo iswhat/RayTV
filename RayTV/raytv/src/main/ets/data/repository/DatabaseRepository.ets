@@ -1,5 +1,4 @@
-// DatabaseRepository - 数据库访问接口
-import Logger from '../../common/util/Logger';
+// DatabaseRepository - 数据库访问接�?import Logger from '../../common/util/Logger';
 import Movie from '../model/Movie';
 import User from '../model/User';
 import History from '../model/History';
@@ -8,8 +7,7 @@ import SearchResult from '../model/SearchResult';
 const TAG = 'DatabaseRepository';
 
 /**
- * 数据库操作结果接口
- */
+ * 数据库操作结果接�? */
 export interface DatabaseResult<T> {
   success: boolean;
   data?: T;
@@ -21,8 +19,7 @@ export interface DatabaseResult<T> {
  * 分页参数接口
  */
 export interface PaginationParams {
-  page: number;           // 页码，从1开始
-  pageSize: number;       // 每页数量
+  page: number;           // 页码，从1开�?  pageSize: number;       // 每页数量
   sortBy?: string;        // 排序字段
   sortOrder?: 'asc' | 'desc'; // 排序顺序
 }
@@ -32,45 +29,35 @@ export interface PaginationParams {
  */
 export interface PaginatedResult<T> {
   items: T[];             // 当前页数据项
-  totalCount: number;     // 总数量
-  page: number;           // 当前页码
+  totalCount: number;     // 总数�?  page: number;           // 当前页码
   pageSize: number;       // 每页数量
-  totalPages: number;     // 总页数
-  hasNextPage: boolean;   // 是否有下一页
-  hasPrevPage: boolean;   // 是否有上一页
-}
+  totalPages: number;     // 总页�?  hasNextPage: boolean;   // 是否有下一�?  hasPrevPage: boolean;   // 是否有上一�?}
 
 /**
- * 范围筛选接口
- */
+ * 范围筛选接�? */
 export interface RangeFilter {
   min?: number;
   max?: number;
 }
 
 /**
- * 电影筛选条件接口
- */
+ * 电影筛选条件接�? */
 export interface MovieFilter {
-  genres?: string[];      // 类型筛选
-  yearRange?: RangeFilter; // 年份范围
+  genres?: string[];      // 类型筛�?  yearRange?: RangeFilter; // 年份范围
   ratingRange?: RangeFilter; // 评分范围
   country?: string[];     // 国家/地区
   language?: string[];    // 语言
   isVip?: boolean;       // 是否VIP内容
-  hasSubtitle?: boolean; // 是否有字幕
-  sortBy?: 'year' | 'rating' | 'popularity' | 'releaseDate'; // 排序字段
+  hasSubtitle?: boolean; // 是否有字�?  sortBy?: 'year' | 'rating' | 'popularity' | 'releaseDate'; // 排序字段
   sortOrder?: 'asc' | 'desc'; // 排序顺序
 }
 
 /**
- * 配置值类型
- */
+ * 配置值类�? */
 export type ConfigValue = string | number | boolean | Record<string, string | number | boolean | string[] | number[] | boolean[]> | string[] | number[] | boolean[];
 
 /**
- * 数据库操作状态枚举
- */
+ * 数据库操作状态枚�? */
 export enum DatabaseStatus {
   INITIALIZING = 'initializing',
   READY = 'ready',
@@ -80,25 +67,20 @@ export enum DatabaseStatus {
 }
 
 /**
- * 数据库仓库接口
- * 定义数据持久化操作的抽象方法
+ * 数据库仓库接�? * 定义数据持久化操作的抽象方法
  */
 export default interface DatabaseRepository {
   /**
    * 初始化数据库
-   * @returns 初始化结果
-   */
+   * @returns 初始化结�?   */
   initialize(): Promise<DatabaseResult<void>>;
 
   /**
-   * 获取数据库状态
-   * @returns 数据库状态
-   */
+   * 获取数据库状�?   * @returns 数据库状�?   */
   getStatus(): DatabaseStatus;
 
   /**
-   * 关闭数据库
-   * @returns 关闭结果
+   * 关闭数据�?   * @returns 关闭结果
    */
   close(): Promise<DatabaseResult<void>>;
 
@@ -142,8 +124,7 @@ export default interface DatabaseRepository {
   /**
    * 分页获取电影列表
    * @param params 分页参数
-   * @param filters 筛选条件
-   * @returns 分页结果
+   * @param filters 筛选条�?   * @returns 分页结果
    */
   getMoviesPaginated(
     params: PaginationParams,
@@ -152,10 +133,8 @@ export default interface DatabaseRepository {
 
   /**
    * 搜索电影
-   * @param keyword 搜索关键词
-   * @param params 分页参数
-   * @param filters 筛选条件
-   * @returns 分页搜索结果
+   * @param keyword 搜索关键�?   * @param params 分页参数
+   * @param filters 筛选条�?   * @returns 分页搜索结果
    */
   searchMovies(
     keyword: string,
@@ -194,23 +173,19 @@ export default interface DatabaseRepository {
   getUserById(userId: string): Promise<DatabaseResult<User | null>>;
 
   /**
-   * 获取所有用户
-   * @returns 用户列表
+   * 获取所有用�?   * @returns 用户列表
    */
   getAllUsers(): Promise<DatabaseResult<User[]>>;
 
   /**
-   * 根据用户名获取用户
-   * @param username 用户名
-   * @returns 用户对象或null
+   * 根据用户名获取用�?   * @param username 用户�?   * @returns 用户对象或null
    */
   getUserByUsername(username: string): Promise<DatabaseResult<User | null>>;
 
   // ========== 观看历史相关操作 ==========
   
   /**
-   * 添加或更新观看历史
-   * @param history 历史记录对象
+   * 添加或更新观看历�?   * @param history 历史记录对象
    * @returns 操作结果
    */
   saveHistory(history: History): Promise<DatabaseResult<boolean>>;
@@ -223,8 +198,7 @@ export default interface DatabaseRepository {
   deleteHistory(historyId: string): Promise<DatabaseResult<boolean>>;
 
   /**
-   * 根据用户ID删除所有历史记录
-   * @param userId 用户ID
+   * 根据用户ID删除所有历史记�?   * @param userId 用户ID
    * @returns 操作结果
    */
   deleteAllHistoryByUserId(userId: string): Promise<DatabaseResult<boolean>>;
@@ -237,8 +211,7 @@ export default interface DatabaseRepository {
   getHistoryById(historyId: string): Promise<DatabaseResult<History | null>>;
 
   /**
-   * 获取用户的观看历史
-   * @param userId 用户ID
+   * 获取用户的观看历�?   * @param userId 用户ID
    * @param params 分页参数
    * @returns 分页历史记录结果
    */
@@ -277,8 +250,7 @@ export default interface DatabaseRepository {
    * 添加收藏
    * @param userId 用户ID
    * @param movieId 电影ID
-   * @param collectionName 收藏集名称
-   * @returns 操作结果
+   * @param collectionName 收藏集名�?   * @returns 操作结果
    */
   addFavorite(
     userId: string,
@@ -301,16 +273,14 @@ export default interface DatabaseRepository {
    * 检查是否已收藏
    * @param userId 用户ID
    * @param movieId 电影ID
-   * @returns 是否已收藏
-   */
+   * @returns 是否已收�?   */
   isFavorited(
     userId: string,
     movieId: string
   ): Promise<DatabaseResult<boolean>>;
 
   /**
-   * 获取用户的收藏列表
-   * @param userId 用户ID
+   * 获取用户的收藏列�?   * @param userId 用户ID
    * @param params 分页参数
    * @param collectionName 收藏集名称（可选）
    * @returns 分页收藏结果
@@ -324,8 +294,7 @@ export default interface DatabaseRepository {
   /**
    * 获取用户的收藏集列表
    * @param userId 用户ID
-   * @returns 收藏集名称列表
-   */
+   * @returns 收藏集名称列�?   */
   getUserCollections(
     userId: string
   ): Promise<DatabaseResult<string[]>>;
@@ -335,8 +304,7 @@ export default interface DatabaseRepository {
   /**
    * 添加搜索历史
    * @param userId 用户ID
-   * @param keyword 搜索关键词
-   * @returns 操作结果
+   * @param keyword 搜索关键�?   * @returns 操作结果
    */
   addSearchHistory(
     userId: string,
@@ -346,8 +314,7 @@ export default interface DatabaseRepository {
   /**
    * 删除搜索历史
    * @param userId 用户ID
-   * @param keyword 搜索关键词
-   * @returns 操作结果
+   * @param keyword 搜索关键�?   * @returns 操作结果
    */
   deleteSearchHistory(
     userId: string,
@@ -367,8 +334,7 @@ export default interface DatabaseRepository {
    * 获取用户搜索历史
    * @param userId 用户ID
    * @param limit 限制数量
-   * @returns 搜索关键词列表
-   */
+   * @returns 搜索关键词列�?   */
   getUserSearchHistory(
     userId: string,
     limit: number = 50
@@ -378,8 +344,7 @@ export default interface DatabaseRepository {
   
   /**
    * 缓存搜索结果
-   * @param keyword 搜索关键词
-   * @param results 搜索结果
+   * @param keyword 搜索关键�?   * @param results 搜索结果
    * @param expirationTime 过期时间（毫秒）
    * @returns 操作结果
    */
@@ -390,9 +355,7 @@ export default interface DatabaseRepository {
   ): Promise<DatabaseResult<boolean>>;
 
   /**
-   * 获取缓存的搜索结果
-   * @param keyword 搜索关键词
-   * @returns 缓存的搜索结果或null
+   * 获取缓存的搜索结�?   * @param keyword 搜索关键�?   * @returns 缓存的搜索结果或null
    */
   getCachedSearchResults(
     keyword: string
@@ -411,18 +374,14 @@ export default interface DatabaseRepository {
   getCacheSize(): Promise<DatabaseResult<number>>;
 
   /**
-   * 清空所有缓存
-   * @returns 操作结果
+   * 清空所有缓�?   * @returns 操作结果
    */
   clearAllCache(): Promise<DatabaseResult<boolean>>;
 
   // ========== 配置相关操作 ==========
   
   /**
-   * 保存配置项
-   * @param key 配置键
-   * @param value 配置值
-   * @param group 配置分组
+   * 保存配置�?   * @param key 配置�?   * @param value 配置�?   * @param group 配置分组
    * @returns 操作结果
    */
   saveConfig(
@@ -432,20 +391,15 @@ export default interface DatabaseRepository {
   ): Promise<DatabaseResult<boolean>>;
 
   /**
-   * 获取配置项
-   * @param key 配置键
-   * @param group 配置分组
-   * @returns 配置值
-   */
+   * 获取配置�?   * @param key 配置�?   * @param group 配置分组
+   * @returns 配置�?   */
   getConfig(
     key: string,
     group?: string
   ): Promise<DatabaseResult<ConfigValue | null>>;
 
   /**
-   * 删除配置项
-   * @param key 配置键
-   * @param group 配置分组
+   * 删除配置�?   * @param key 配置�?   * @param group 配置分组
    * @returns 操作结果
    */
   deleteConfig(

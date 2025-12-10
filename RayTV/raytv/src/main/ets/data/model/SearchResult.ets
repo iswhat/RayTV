@@ -1,5 +1,4 @@
-// SearchResult - 搜索结果实体类
-import Logger from '../../common/util/Logger';
+// SearchResult - 搜索结果实体�?import Logger from '../../common/util/Logger';
 import { VideoType } from './Movie';
 
 const TAG = 'SearchResult';
@@ -9,10 +8,8 @@ const TAG = 'SearchResult';
  */
 export enum ResultType {
   MOVIE,          // 电影
-  TV_SERIES,      // 电视剧
-  ANIME,          // 动漫
-  DOCUMENTARY,    // 纪录片
-  VARIETY,        // 综艺
+  TV_SERIES,      // 电视�?  ANIME,          // 动漫
+  DOCUMENTARY,    // 纪录�?  VARIETY,        // 综艺
   ACTOR,          // 演员
   DIRECTOR,       // 导演
   GENRE,          // 类型
@@ -38,8 +35,7 @@ export interface NestedExtraInfo {
 }
 
 /**
- * 搜索结果实体类
- * 定义搜索结果的数据结构和相关操作
+ * 搜索结果实体�? * 定义搜索结果的数据结构和相关操作
  */
 export default class SearchResult {
   id: string;              // 结果唯一标识
@@ -48,27 +44,21 @@ export default class SearchResult {
   type: ResultType;        // 结果类型
   coverUrl?: string;       // 封面图片URL
   backdropUrl?: string;    // 背景图片URL
-  description?: string;    // 描述/简介
-  score?: number;          // 评分
+  description?: string;    // 描述/简�?  score?: number;          // 评分
   year?: number;           // 年份
   releaseDate?: string;    // 发布日期
   genres?: string[];       // 类型标签
   tags?: string[];         // 标签
-  duration?: number;       // 时长（秒）
-  totalEpisodes?: number;  // 总集数
-  currentSeason?: number;  // 当前季数
+  duration?: number;       // 时长（秒�?  totalEpisodes?: number;  // 总集�?  currentSeason?: number;  // 当前季数
   actors?: string[];       // 演员列表（针对内容类型）
   directors?: string[];    // 导演列表（针对内容类型）
-  popularity?: number;     // 热度/流行度
-  matchScore?: number;     // 匹配分数（搜索相关性）
-  extraInfo?: ExtraInfo; // 额外信息，使用更明确的类型定义
-  link?: string;           // 关联链接
+  popularity?: number;     // 热度/流行�?  matchScore?: number;     // 匹配分数（搜索相关性）
+  extraInfo?: ExtraInfo; // 额外信息，使用更明确的类型定�?  link?: string;           // 关联链接
   sourceId?: string;       // 来源ID
   sourceName?: string;     // 来源名称
 
   /**
-   * 构造函数
-   */
+   * 构造函�?   */
   constructor(data: Partial<SearchResult>) {
     this.id = data.id ?? `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     this.title = data.title ?? '';
@@ -89,12 +79,10 @@ export default class SearchResult {
     this.directors = data.directors ?? [];
     this.popularity = data.popularity;
     this.matchScore = data.matchScore;
-    // 确保extraInfo是有效的对象类型，使用明确的类型初始化
-    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
+    // 确保extraInfo是有效的对象类型，使用明确的类型初始�?    if (data.extraInfo && typeof data.extraInfo === 'object' && !Array.isArray(data.extraInfo)) {
       this.extraInfo = data.extraInfo as ExtraInfo;
     } else {
-      // 使用空对象字面量，明确类型
-      this.extraInfo = this.createEmptyExtraInfo();
+      // 使用空对象字面量，明确类�?      this.extraInfo = this.createEmptyExtraInfo();
     }
     this.link = data.link;
     this.sourceId = data.sourceId;
@@ -120,19 +108,18 @@ export default class SearchResult {
   }
 
   /**
-   * 获取类型的文本描述
-   * @returns 类型描述
+   * 获取类型的文本描�?   * @returns 类型描述
    */
   public getTypeDescription(): string {
     switch (this.type) {
       case ResultType.MOVIE:
         return '电影';
       case ResultType.TV_SERIES:
-        return '电视剧';
+        return '电视�?;
       case ResultType.ANIME:
         return '动漫';
       case ResultType.DOCUMENTARY:
-        return '纪录片';
+        return '纪录�?;
       case ResultType.VARIETY:
         return '综艺';
       case ResultType.ACTOR:
@@ -155,8 +142,7 @@ export default class SearchResult {
   }
 
   /**
-   * 获取类型对应的VideoType（如果适用）
-   * @returns VideoType或undefined
+   * 获取类型对应的VideoType（如果适用�?   * @returns VideoType或undefined
    */
   public getVideoType(): VideoType | undefined {
     switch (this.type) {
@@ -179,8 +165,7 @@ export default class SearchResult {
 
   /**
    * 获取格式化的评分
-   * @returns 格式化的评分字符串
-   */
+   * @returns 格式化的评分字符�?   */
   public getFormattedScore(): string {
     if (this.score === undefined || this.score === null) {
       return '--';
@@ -190,8 +175,7 @@ export default class SearchResult {
 
   /**
    * 获取格式化的年份
-   * @returns 年份字符串
-   */
+   * @returns 年份字符�?   */
   public getFormattedYear(): string {
     if (this.year) {
       return this.year.toString();
@@ -204,8 +188,7 @@ export default class SearchResult {
 
   /**
    * 获取格式化的时长
-   * @returns 时长字符串
-   */
+   * @returns 时长字符�?   */
   public getFormattedDuration(): string {
     if (!this.duration) {
       return '';
@@ -215,58 +198,48 @@ export default class SearchResult {
     const minutes = Math.floor((this.duration % 3600) / 60);
     
     if (hours > 0) {
-      return `${hours}时${minutes > 0 ? `${minutes}分` : ''}`;
+      return `${hours}�?{minutes > 0 ? `${minutes}分` : ''}`;
     }
     return `${minutes}分钟`;
   }
 
   /**
-   * 获取类型标签字符串
-   * @returns 类型标签字符串
-   */
+   * 获取类型标签字符�?   * @returns 类型标签字符�?   */
   public getGenresString(): string {
     return this.genres?.join(' / ') || '';
   }
 
   /**
-   * 获取演员列表字符串
-   * @param maxCount 最大显示数量
-   * @returns 演员字符串
-   */
+   * 获取演员列表字符�?   * @param maxCount 最大显示数�?   * @returns 演员字符�?   */
   public getActorsString(maxCount: number = 3): string {
     if (!this.actors || this.actors.length === 0) {
       return '';
     }
     
     if (this.actors.length <= maxCount) {
-      return this.actors.join('、');
+      return this.actors.join('�?);
     }
     
-    return `${this.actors.slice(0, maxCount).join('、')}...`;
+    return `${this.actors.slice(0, maxCount).join('�?)}...`;
   }
 
   /**
-   * 获取导演列表字符串
-   * @param maxCount 最大显示数量
-   * @returns 导演字符串
-   */
+   * 获取导演列表字符�?   * @param maxCount 最大显示数�?   * @returns 导演字符�?   */
   public getDirectorsString(maxCount: number = 2): string {
     if (!this.directors || this.directors.length === 0) {
       return '';
     }
     
     if (this.directors.length <= maxCount) {
-      return this.directors.join('、');
+      return this.directors.join('�?);
     }
     
-    return `${this.directors.slice(0, maxCount).join('、')}...`;
+    return `${this.directors.slice(0, maxCount).join('�?)}...`;
   }
 
   /**
    * 获取简洁的描述（限制长度）
-   * @param maxLength 最大长度
-   * @returns 简洁描述
-   */
+   * @param maxLength 最大长�?   * @returns 简洁描�?   */
   public getShortDescription(maxLength: number = 100): string {
     if (!this.description) {
       return '';
@@ -281,8 +254,7 @@ export default class SearchResult {
 
   /**
    * 检查是否为媒体内容类型（电影、电视剧等）
-   * @returns 是否为媒体内容
-   */
+   * @returns 是否为媒体内�?   */
   public isMediaContent(): boolean {
     const mediaTypes = [
       ResultType.MOVIE,
@@ -297,26 +269,22 @@ export default class SearchResult {
 
   /**
    * 检查是否为人物类型（演员、导演）
-   * @returns 是否为人物
-   */
+   * @returns 是否为人�?   */
   public isPersonType(): boolean {
     return this.type === ResultType.ACTOR || this.type === ResultType.DIRECTOR;
   }
 
   /**
    * 检查是否为分类类型（类型、标签）
-   * @returns 是否为分类
-   */
+   * @returns 是否为分�?   */
   public isCategoryType(): boolean {
     return this.type === ResultType.GENRE || this.type === ResultType.TAG || this.type === ResultType.CHANNEL;
   }
 
   /**
-   * 获取显示优先级（用于搜索结果排序）
-   * @returns 优先级数值
-   */
+   * 获取显示优先级（用于搜索结果排序�?   * @returns 优先级数�?   */
   public getDisplayPriority(): number {
-    // 定义类型优先级 - 使用switch语句替代对象字面量，避免非标识符属性名
+    // 定义类型优先�?- 使用switch语句替代对象字面量，避免非标识符属性名
     let basePriority = 0;
     switch (this.type) {
       case ResultType.MOVIE:
@@ -357,8 +325,7 @@ export default class SearchResult {
         break;
     }
 
-    // 基础优先级
-    let priority = basePriority;
+    // 基础优先�?    let priority = basePriority;
     
     // 结合匹配分数
     if (this.matchScore) {
@@ -378,8 +345,7 @@ export default class SearchResult {
     return priority;
   }
 
-// 定义SearchResult序列化数据接口
-export interface SearchResultSerializable {
+// 定义SearchResult序列化数据接�?export interface SearchResultSerializable {
   id: string;
   title: string;
   originalTitle?: string;
@@ -406,19 +372,15 @@ export interface SearchResultSerializable {
 }
 
   /**
-   * 序列化对象（用于存储）
-   * @returns 序列化后的对象
-   */
+   * 序列化对象（用于存储�?   * @returns 序列化后的对�?   */
   public toSerializable(): SearchResultSerializable {
-    // 创建一个符合SearchResultSerializable接口的对象，避免使用对象字面量
-    const result: SearchResultSerializable = {
+    // 创建一个符合SearchResultSerializable接口的对象，避免使用对象字面�?    const result: SearchResultSerializable = {
       id: this.id,
       title: this.title,
       type: this.type
     };
     
-    // 逐个赋值可选属性
-    if (this.originalTitle !== undefined) {
+    // 逐个赋值可选属�?    if (this.originalTitle !== undefined) {
       result.originalTitle = this.originalTitle;
     }
     if (this.coverUrl !== undefined) {
@@ -496,13 +458,11 @@ export interface SearchResultSerializable {
         extraData: {}
       };
       
-      // 检查extraData属性
-      const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
+      // 检查extraData属�?      const extraInfoData = data.extraInfo as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
       if (extraInfoData.extraData && typeof extraInfoData.extraData === 'object' && !Array.isArray(extraInfoData.extraData)) {
         const extraDataObj = extraInfoData.extraData as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
         
-        // 处理extraData的每个属性
-        const extraDataKeys = Object.keys(extraDataObj);
+        // 处理extraData的每个属�?        const extraDataKeys = Object.keys(extraDataObj);
         for (let i = 0; i < extraDataKeys.length; i++) {
           const key = extraDataKeys[i];
           const value = extraDataObj[key];
@@ -533,8 +493,7 @@ export interface SearchResultSerializable {
       }
     }
     
-    // 直接使用构造函数创建实例
-    const searchResultParams: Partial<SearchResult> = {
+    // 直接使用构造函数创建实�?    const searchResultParams: Partial<SearchResult> = {
       id: typeof data.id === 'string' ? data.id : `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title: typeof data.title === 'string' ? data.title : '',
       originalTitle: typeof data.originalTitle === 'string' ? data.originalTitle : undefined,
@@ -568,8 +527,7 @@ export interface SearchResultSerializable {
    * @returns 克隆后的实例
    */
   public clone(): SearchResult {
-    // 创建一个符合Partial<SearchResult>类型的对象，避免直接使用对象字面量
-    const cloneData: Partial<SearchResult> = {};
+    // 创建一个符合Partial<SearchResult>类型的对象，避免直接使用对象字面�?    const cloneData: Partial<SearchResult> = {};
     
     // 逐个赋值属性，确保类型安全
     cloneData.id = this.id;
@@ -612,8 +570,7 @@ export interface SearchResultSerializable {
     
     // 确保extraInfo.extraData存在
     if (extraInfo.extraData) {
-      // 手动复制extraData中的每个属性
-      const keys = Object.keys(extraInfo.extraData);
+      // 手动复制extraData中的每个属�?      const keys = Object.keys(extraInfo.extraData);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const value = extraInfo.extraData[key];
@@ -627,8 +584,7 @@ export interface SearchResultSerializable {
               nestedData: {}
             };
             
-            // 手动复制nestedData中的每个属性
-            const nestedKeys = Object.keys(potentialNested.nestedData);
+            // 手动复制nestedData中的每个属�?            const nestedKeys = Object.keys(potentialNested.nestedData);
             for (let j = 0; j < nestedKeys.length; j++) {
               const nestedKey = nestedKeys[j];
               const nestedValue = potentialNested.nestedData![nestedKey];
@@ -637,14 +593,12 @@ export interface SearchResultSerializable {
             
             cloned.extraData[key] = nestedCloned;
           } else {
-            // 直接复制基本类型值
-            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+            // 直接复制基本类型�?            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
               cloned.extraData[key] = value;
             }
           }
         } else {
-          // 直接复制基本类型值
-          cloned.extraData[key] = value;
+          // 直接复制基本类型�?          cloned.extraData[key] = value;
         }
       }
     }
@@ -653,8 +607,7 @@ export interface SearchResultSerializable {
   }
 
   /**
-   * 创建搜索结果的比较函数（用于排序）
-   * @param order 排序顺序 'desc'（默认）或 'asc'
+   * 创建搜索结果的比较函数（用于排序�?   * @param order 排序顺序 'desc'（默认）�?'asc'
    * @returns 比较函数
    */
   public static getSortComparator(order: 'desc' | 'asc' = 'desc'): (a: SearchResult, b: SearchResult) => number {

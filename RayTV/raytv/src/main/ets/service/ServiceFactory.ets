@@ -67,7 +67,7 @@ export default class ServiceFactory {
 
       // 初始化配置服�?      const configService = ConfigService.getInstance();
       await configService.initializeConfig();
-      this.serviceMap.set(ServiceType.CONFIG, configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService instanceof Error ? configService instanceof Error ? configService : new Error(String(configService : new Error(String(configService instanceof Error ? configService : new Error(String(configService)))))));
+      this.serviceMap.set(ServiceType.CONFIG, configService);
       Logger.info(TAG, 'ConfigService initialized successfully');
 
       // 初始化历史服�?      const historyService = HistoryService.getInstance();
@@ -154,7 +154,7 @@ export default class ServiceFactory {
    * 设置自定义服务实�?   * @param type 服务类型
    * @param service 服务实例
    */
-  public setService(type: ServiceType, service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance : new Error(String(service: ServiceInstance instanceof Error ? service: ServiceInstance : new Error(String(service: ServiceInstance))))))): void {
+  public setService(type: ServiceType, service: ServiceInstance): void {
     this.serviceMap.set(type, service);
     Logger.info(TAG, `Custom service set for type: ${type}`);
   }
@@ -192,12 +192,10 @@ export default class ServiceFactory {
   public static reset(): void {
     if (ServiceFactory.instance) {
       ServiceFactory.instance.close().catch(error => {
-        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error instanceof Error ? `Error during factory reset: ${error instanceof Error ? error.message : String(error : new Error(String(`Error during factory reset: ${error instanceof Error ? error.message : String(error)))))))}`);
+        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
       });
       ServiceFactory.instance = null;
     }
     Logger.info(TAG, 'Service factory reset');
   }
 }
-
-

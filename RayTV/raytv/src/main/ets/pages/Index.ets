@@ -1,5 +1,4 @@
-// Index.ets - 应用主入口页面
-import HomePage from './HomePage';
+// Index.ets - 应用主入口页�?import HomePage from './HomePage';
 
 @Entry
 @Component

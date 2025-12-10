@@ -473,8 +473,8 @@ export default class AppService {
         versionName: this.currentVersion,
         versionCode: this.buildNumber,
         buildType: 'debug',
-        targetSdkVersion: 34,
-        minSdkVersion: 28,
+        targetSdkVersion: 9,
+        minSdkVersion: 9,
         deviceId: 'device-123456',
         deviceModel: 'Device Model',
         deviceManufacturer: 'Device Manufacturer',
@@ -720,7 +720,7 @@ export default class AppService {
       try {
         listener(error);
       } catch (listenerError) {
-        Logger.error(TAG, 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError : new Error(String('Error in error listener', listenerError instanceof Error ? 'Error in error listener', listenerError : new Error(String('Error in error listener', listenerError)))))));
+        Logger.error(TAG, 'Error in error listener', listenerError as Error);
       }
     }
   }

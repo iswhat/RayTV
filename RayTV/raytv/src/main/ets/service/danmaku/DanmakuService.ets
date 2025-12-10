@@ -30,8 +30,7 @@ export class DanmakuService {
   }
 
   /**
-   * 初始化弹幕服务
-   */
+   * 初始化弹幕服�?   */
   async initialize(): Promise<void> {
     // 加载配置
     this.danmakuConfig = await this.storageUtil.get<DanmakuConfig>('danmakuConfig', {
@@ -46,8 +45,7 @@ export class DanmakuService {
       maxDisplayCount: 50
     });
 
-    // 加载自定义弹幕
-    this.customDanmakus = await this.storageUtil.get<DanmakuItem[]>('customDanmakus', []);
+    // 加载自定义弹�?    this.customDanmakus = await this.storageUtil.get<DanmakuItem[]>('customDanmakus', []);
   }
 
   /**
@@ -70,26 +68,22 @@ export class DanmakuService {
   /**
    * 加载视频弹幕
    * @param videoId 视频ID
-   * @param siteKey 站点键
-   * @param episodeIndex 剧集索引
+   * @param siteKey 站点�?   * @param episodeIndex 剧集索引
    */
   async loadDanmakus(videoId: string, siteKey: string, episodeIndex?: number): Promise<DanmakuItem[]> {
     try {
-      // 首先从本地历史加载
-      const cacheKey = this.getCacheKey(videoId, siteKey, episodeIndex);
+      // 首先从本地历史加�?      const cacheKey = this.getCacheKey(videoId, siteKey, episodeIndex);
       const cachedDanmakus = await this.storageUtil.get<DanmakuItem[]>(cacheKey, []);
       
       // 这里可以添加从远程服务器加载弹幕的逻辑
       // const remoteDanmakus = await this.fetchRemoteDanmakus(videoId, siteKey, episodeIndex);
       
-      // 合并本地和远程弹幕
-      const allDanmakus = [...cachedDanmakus];
+      // 合并本地和远程弹�?      const allDanmakus = [...cachedDanmakus];
       
       // 应用过滤规则
       const filteredDanmakus = this.applyFilters(allDanmakus);
       
-      // 按时间排序
-      filteredDanmakus.sort((a, b) => a.time - b.time);
+      // 按时间排�?      filteredDanmakus.sort((a, b) => a.time - b.time);
       
       return filteredDanmakus;
     } catch (error) {
@@ -99,8 +93,7 @@ export class DanmakuService {
   }
 
   /**
-   * 发送弹幕
-   * @param danmaku 弹幕内容
+   * 发送弹�?   * @param danmaku 弹幕内容
    */
   async sendDanmaku(danmaku: Omit<DanmakuItem, 'id' | 'timestamp'>): Promise<boolean> {
     try {
@@ -117,8 +110,7 @@ export class DanmakuService {
       // 这里可以添加发送到远程服务器的逻辑
       // await this.sendToRemoteServer(newDanmaku);
 
-      // 通知监听器
-      this.notifyDanmakuAdded(newDanmaku);
+      // 通知监听�?      this.notifyDanmakuAdded(newDanmaku);
 
       return true;
     } catch (error) {
@@ -128,18 +120,15 @@ export class DanmakuService {
   }
 
   /**
-   * 保存弹幕到历史记录
-   * @param videoId 视频ID
-   * @param siteKey 站点键
-   * @param danmakus 弹幕列表
+   * 保存弹幕到历史记�?   * @param videoId 视频ID
+   * @param siteKey 站点�?   * @param danmakus 弹幕列表
    * @param episodeIndex 剧集索引
    */
   async saveDanmakusToHistory(videoId: string, siteKey: string, danmakus: DanmakuItem[], episodeIndex?: number): Promise<void> {
     try {
       const cacheKey = this.getCacheKey(videoId, siteKey, episodeIndex);
       
-      // 合并并去重
-      const existingDanmakus = await this.storageUtil.get<DanmakuItem[]>(cacheKey, []);
+      // 合并并去�?      const existingDanmakus = await this.storageUtil.get<DanmakuItem[]>(cacheKey, []);
       const mergedDanmakus = this.mergeDanmakus(existingDanmakus, danmakus);
       
       await this.storageUtil.save(cacheKey, mergedDanmakus);
@@ -160,9 +149,7 @@ export class DanmakuService {
   }
 
   /**
-   * 添加弹幕过滤关键词
-   * @param keyword 关键词
-   */
+   * 添加弹幕过滤关键�?   * @param keyword 关键�?   */
   async addFilterKeyword(keyword: string): Promise<void> {
     if (!this.danmakuConfig.filterKeywords.includes(keyword)) {
       this.danmakuConfig.filterKeywords.push(keyword);
@@ -171,18 +158,14 @@ export class DanmakuService {
   }
 
   /**
-   * 移除弹幕过滤关键词
-   * @param keyword 关键词
-   */
+   * 移除弹幕过滤关键�?   * @param keyword 关键�?   */
   async removeFilterKeyword(keyword: string): Promise<void> {
     this.danmakuConfig.filterKeywords = this.danmakuConfig.filterKeywords.filter(k => k !== keyword);
     await this.setConfig(this.danmakuConfig);
   }
 
   /**
-   * 添加弹幕监听器
-   * @param listener 监听器
-   */
+   * 添加弹幕监听�?   * @param listener 监听�?   */
   addListener(listener: DanmakuListener): void {
     if (!this.listeners.includes(listener)) {
       this.listeners.push(listener);
@@ -190,9 +173,7 @@ export class DanmakuService {
   }
 
   /**
-   * 移除弹幕监听器
-   * @param listener 监听器
-   */
+   * 移除弹幕监听�?   * @param listener 监听�?   */
   removeListener(listener: DanmakuListener): void {
     this.listeners = this.listeners.filter(l => l !== listener);
   }
@@ -219,8 +200,7 @@ export class DanmakuService {
    */
   private applyFilters(danmakus: DanmakuItem[]): DanmakuItem[] {
     return danmakus.filter(danmaku => {
-      // 检查类型过滤
-      switch (danmaku.type) {
+      // 检查类型过�?      switch (danmaku.type) {
         case DanmakuType.TOP:
           if (!this.danmakuConfig.showTop) return false;
           break;
@@ -241,10 +221,8 @@ export class DanmakuService {
   }
 
   /**
-   * 合并弹幕列表并去重
-   * @param existingDanmakus 已存在的弹幕
-   * @param newDanmakus 新弹幕
-   */
+   * 合并弹幕列表并去�?   * @param existingDanmakus 已存在的弹幕
+   * @param newDanmakus 新弹�?   */
   private mergeDanmakus(existingDanmakus: DanmakuItem[], newDanmakus: DanmakuItem[]): DanmakuItem[] {
     const idSet = new Set(existingDanmakus.map(d => d.id));
     const merged = [...existingDanmakus];
@@ -260,9 +238,7 @@ export class DanmakuService {
   }
 
   /**
-   * 更新历史记录项
-   * @param item 历史记录项
-   */
+   * 更新历史记录�?   * @param item 历史记录�?   */
   private updateHistoryItem(item: DanmakuHistoryItem): void {
     const index = this.danmakuHistory.findIndex(
       h => h.videoId === item.videoId && h.siteKey === item.siteKey && h.episodeIndex === item.episodeIndex
@@ -307,8 +283,7 @@ export class DanmakuService {
   }
 
   /**
-   * 生成缓存键
-   */
+   * 生成缓存�?   */
   private getCacheKey(videoId: string, siteKey: string, episodeIndex?: number): string {
     return `danmaku_${siteKey}_${videoId}${episodeIndex !== undefined ? `_${episodeIndex}` : ''}`;
   }
@@ -364,22 +339,18 @@ export interface DanmakuConfig {
 }
 
 /**
- * 弹幕项
- */
+ * 弹幕�? */
 export interface DanmakuItem {
   id: string;
   content: string;
-  time: number; // 时间（秒）
-  type: DanmakuType;
+  time: number; // 时间（秒�?  type: DanmakuType;
   color?: string;
   fontSize?: number;
-  timestamp: number; // 创建时间戳
-  user?: string;
+  timestamp: number; // 创建时间�?  user?: string;
 }
 
 /**
- * 弹幕历史记录项
- */
+ * 弹幕历史记录�? */
 export interface DanmakuHistoryItem {
   videoId: string;
   siteKey: string;
@@ -389,8 +360,7 @@ export interface DanmakuHistoryItem {
 }
 
 /**
- * 弹幕监听器
- */
+ * 弹幕监听�? */
 export interface DanmakuListener {
   onDanmakuAdded?: (danmaku: DanmakuItem) => void;
   onConfigChanged?: (config: DanmakuConfig) => void;

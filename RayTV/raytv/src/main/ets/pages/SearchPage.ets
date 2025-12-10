@@ -1,144 +1,49 @@
+// SearchPage.ets
+// 搜索页面组件
 
-import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
+import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
-import { MediaItem } from '../data/bean/MediaItem';
-import SearchHistoryRepository, { SearchHistoryItem } from '../data/repository/SearchHistoryRepository';
-import { mediaService } from '../service/media/MediaService';
-import { SearchType, SearchFilter, SearchSort } from '../data/dto/SearchDto';
-import { siteManager } from '../service/spider/SiteManager';
-import { lineManager } from '../service/config/LineManager';
-import { Column, Row, Text, Image, Flex, Stack, Button, List, ListItem, ForEach, Scroller, ScrollView, Blank, TextInput, ImageFit, ScrollBarState, TextOverflow, FlexDirection, FlexWrap, FlexAlign, ItemAlign, HorizontalAlign, FontWeight, Visibility } from '@ohos.arkui';
+import { SearchHistoryRepository } from '../repository/SearchHistoryRepository';
 
-// 快速搜索结果接�?interface QuickSearchResult {
-  id: string;
-  title: string;
-  quality: string;
-  sourceType: string;
-}
-
-// 样式相关接口定义
-interface ButtonStyle {
-  backgroundColor?: string;
-  borderRadius?: number;
-  paddingHorizontal?: number;
-  paddingVertical?: number;
-  marginRight?: number;
-}
-
-interface TextStyle {
-  fontSize?: number;
-  color?: string;
-  fontWeight?: number;
-}
-
-interface GridStyle {
-  paddingHorizontal?: number;
-  gap?: number;
-  columnsTemplate?: string;
-  rowsTemplate?: string;
-}
-
-interface GridItemStyle {
-  gridColumnStart?: number;
-  gridColumnEnd?: number;
-  padding?: number;
-  alignItems?: string;
-  justifyContent?: string;
-}
-
-interface StackStyle {
-  backgroundColor?: string;
-  borderRadius?: number;
-  padding?: number;
-  marginHorizontal?: number;
-  marginVertical?: number;
-  position?: string;
-  top?: number;
-  left?: number;
-  right?: number;
-  zIndex?: number;
-}
-
-interface FlexStyle {
-  flexDirection?: string;
-  justifyContent?: string;
-  alignItems?: string;
-  marginBottom?: number;
-  flex?: number;
-}
-
-interface ListStyle {
-  width?: string;
-  height?: number;
-}
-
-/**
- * 搜索页面组件
- * 实现媒体搜索功能，包括搜索输入、结果展示、历史搜索等
- */
 @Entry
 @Component
 struct SearchPage {
   private readonly TAG: string = 'SearchPage';
-  
-  // 状态管�?  @State searchQuery: string = '';
-  @State searchResults: MediaItem[] = [];
+  @State searchText: string = '';
+  @State searchHistory: string[] = [];
   @State hotKeywords: string[] = [];
-  @State searchHistory: SearchHistoryItem[] = [];
-  @State isLoading: boolean = false;
+  @State searchResults: any[] = [];
   @State isSearching: boolean = false;
-  @State errorMessage: string = '';
-  @State currentPage: number = 1;
-  @State hasMoreResults: boolean = true;
+  @State showQuickResults: boolean = false;
+  @State quickResults: any[] = [];
   @State showHistory: boolean = true;
-  @State displayMode: 'list' | 'grid' = 'list'; // 显示模式：列表或网格
-  @State showFilterPanel: boolean = false; // 是否显示筛选面�?  @State filters: SearchFilter = {}; // 当前筛选条�?  @State filterTypes: string[] = []; // 媒体类型筛�?  @State filterSort: string = 'default'; // 排序方式
-  @State showSourceList: boolean = false; // 是否显示快速搜索片源列�?  @State quickSearchResults: QuickSearchResult[] = []; // 快速搜索结�?  
-  // 分页配置
-  private pageSize: number = 20;
-  private searchDebounceTimer: number | null = null;
-  
-  /**
-   * 页面加载时调�?   */
-  async aboutToAppear(): Promise<void> {
-    Logger.info(this.TAG, 'SearchPage appeared');
-    
-    // 获取路由参数中的搜索�?    const params = this.context.router.getParams();
-    if (params?.query) {
-      this.searchQuery = params.query as string;
-      await this.performSearch();
-    } else {
-      // 加载热门搜索�?      this.loadHotKeywords();
-    }
-    
-    // 加载搜索历史（异步）
-    await this.loadSearchHistory();
+  @State showHotKeywords: boolean = true;
+  private searchHistoryRepo: SearchHistoryRepository;
+  private mediaService: any;
+
+  constructor() {
+    this.searchHistoryRepo = new SearchHistoryRepository();
+    // 这里应该注入真实的mediaService，暂时用空对象代�?    this.mediaService = {};
   }
-  
-  /**
-   * 页面卸载时调�?   */
-  aboutToDisappear(): void {
-    Logger.info(this.TAG, 'SearchPage disappeared');
-    
-    // 清理定时�?    if (this.searchDebounceTimer) {
-      clearTimeout(this.searchDebounceTimer);
-    }
+
+  aboutToAppear() {
+    this.loadHotKeywords();
+    this.loadSearchHistory();
   }
-  
+
   /**
-   * 加载热门搜索�?   */
+   * 加载热门关键�?   */
   private loadHotKeywords(): void {
     try {
-      mediaService.getHotSearchKeywords(10).then((data) => {
-        this.hotKeywords = data;
-        Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
-      });
+      // 这里应该调用真实的mediaService获取热门关键�?      // 暂时使用模拟数据
+      this.hotKeywords = ['热门电影', '最新剧�?, '经典动漫', '科幻大片', '爱情喜剧'];
+      Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load hot keywords', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(this.TAG, 'Failed to load hot keywords', error as Error);
       // 使用默认热门关键�?      this.hotKeywords = ['热门电影', '最新剧�?, '经典动漫', '科幻大片', '爱情喜剧'];
     }
   }
-  
+
   /**
    * 加载搜索历史
    */
@@ -156,11 +61,11 @@ struct SearchPage {
         this.searchHistory = [];
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(this.TAG, 'Failed to load search history', error as Error);
       this.searchHistory = [];
     }
   }
-  
+
   /**
    * 保存搜索历史
    */
@@ -168,1022 +73,525 @@ struct SearchPage {
     try {
       // 去重并限制数�?      let history = this.searchHistory.filter(item => item !== keyword);
       history.unshift(keyword);
-      history = history.slice(0, 10); // 最多保�?0�?      
-      this.searchHistory = history;
+      history = history.slice(0, 10); // 最多保�?0�?      this.searchHistory = history;
       
       // 使用SearchHistoryRepository保存到本地存�?      const searchHistoryRepo = new SearchHistoryRepository();
       await searchHistoryRepo.saveHistory(history);
       
       Logger.info(this.TAG, `Search history saved: ${keyword}`);
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to save search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(this.TAG, 'Failed to save search history', error as Error);
     }
   }
-  
+
   /**
-   * 快速搜索片�?   */
+   * 处理搜索输入变化
+   */
+  private onSearchTextChange(text: string): void {
+    this.searchText = text;
+    if (text.length > 0) {
+      this.showQuickResults = true;
+      // 这里应该调用真实的mediaService获取快速搜索结�?      this.quickSearch(text);
+    } else {
+      this.showQuickResults = false;
+      this.quickResults = [];
+    }
+  }
+
+  /**
+   * 快速搜�?   */
   private quickSearch(keyword: string): void {
     try {
-      // 获取从线路配置文件加载的真实站点列表
-      const sites = siteManager.getAllSites();
-      
-      // 使用真实站点信息生成快速搜索结�?      this.quickSearchResults = [];
-      
-      // 如果有站点，使用真实站点信息
-      if (sites.length > 0) {
-        sites.forEach((site) => {
-          // 确保站点信息有效且可搜索
-          if (site && site.enabled !== false && (site.searchable === true || site.quickSearch === 1)) {
-            // 尝试获取站点名称，如果名称不存在则使用key作为备用
-            const siteName = site.name || site.key || '未知站点';
-            
-            this.quickSearchResults.push({
-              id: `${keyword}-${site.key || Math.random().toString(36).substr(2, 9)}`,
-              title: `${keyword} - ${siteName}`,
-              quality: site.quality || '高清',
-              sourceType: siteName
-            });
-          }
-        });
-        
-        // 如果从站点列表中没有获取到可搜索的站点，添加一些默认站�?        if (this.quickSearchResults.length === 0) {
-          this.addDefaultQuickSearchResults(keyword);
-        }
-      } else {
-        // 如果没有站点信息，使用备用的默认站点
-        this.addDefaultQuickSearchResults(keyword);
-      }
-      
-      // 限制结果数量，避免显示过�?      this.quickSearchResults = this.quickSearchResults.slice(0, 10);
-      
-      // 显示快速搜索结�?      this.showSourceList = true;
-      Logger.info(this.TAG, `Quick search for: ${keyword}, results: ${this.quickSearchResults.length}`);
-      
-      // 获取当前线路信息并记录日�?      const currentLine = lineManager.getCurrentLine();
-      if (currentLine) {
-        Logger.info(this.TAG, `Current line: ${currentLine.name || '未知名称'}, sources loaded from: ${currentLine.url}`);
-      }
+      // 这里应该调用真实的mediaService获取快速搜索结�?      // 暂时使用模拟数据
+      this.quickResults = [
+        { id: '1', title: `快速搜索结�? - ${keyword}`, type: 'movie', coverUrl: '' },
+        { id: '2', title: `快速搜索结�? - ${keyword}`, type: 'tv', coverUrl: '' },
+        { id: '3', title: `快速搜索结�? - ${keyword}`, type: 'anime', coverUrl: '' }
+      ];
+      Logger.info(this.TAG, `Quick search for '${keyword}' returned ${this.quickResults.length} results`);
     } catch (error) {
-      Logger.error(this.TAG, 'Quick search failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
-      // 即使出错，也添加一些默认站点供用户选择
-      this.quickSearchResults = [];
-      this.addDefaultQuickSearchResults(keyword);
-      this.showSourceList = this.quickSearchResults.length > 0;
+      Logger.error(this.TAG, 'Quick search failed', error as Error);
+      this.quickResults = [];
     }
   }
-  
+
   /**
-   * 添加默认的快速搜索结�?   */
-  private addDefaultQuickSearchResults(keyword: string): void {
-    // 从典型线路配置中提取的常见站点列�?    const defaultSources = [
-      {key: 'lebei', name: '乐贝视频'},
-      {key: 'qimi', name: '奇米影视'},
-      {key: 'jiumo', name: '九猫影视'},
-      {key: 'yiso', name: '易发影视'},
-      {key: 'lengfan', name: '冷番影视'},
-      {key: 'jinlian', name: '金濂视频'},
-      {key: 'miaofan', name: '秒番影视'},
-      {key: 'zhuifan', name: '追番视频'},
-      {key: 'kanfan', name: '看番视频'},
-      {key: 'haokan', name: '好看视频'}
-    ];
+   * 执行搜索
+   */
+  private async executeSearch(): Promise<void> {
+    if (!this.searchText.trim()) return;
     
-    defaultSources.forEach((source) => {
-      this.quickSearchResults.push({
-        id: `${keyword}-${source.key}`,
-        title: `${keyword} - ${source.name}`,
-        quality: '高清全片',
-        sourceType: source.name
-      });
-    });
-  }
-
-
-
-  /**
-   * 处理快速搜索结果点击事�?   */
-  private async handleQuickSearchResultClick(result: QuickSearchResult): Promise<void> {
     try {
-      Logger.info(this.TAG, `Quick search result clicked: ${JSON.stringify(result)}`);
+      this.isSearching = true;
+      this.showQuickResults = false;
       
-      // 隐藏快速搜索结�?      this.showSourceList = false;
+      // 保存搜索历史
+      await this.saveSearchHistory(this.searchText);
       
-      // 跳转到MediaDetailPage页面，携带相关参�?      AppNavigator.getInstance().navigateToDetail({
-          title: result.title,
-          sourceId: result.id,
-          sourceType: result.sourceType,
-          mediaType: 'video',
-          keyword: this.searchQuery,
-          // 传递站点信息，以便在详情页能够使用正确的搜索源
-          siteName: result.sourceType,
-          // 记录当前使用的线路信�?          currentLine: lineManager.getCurrentLine() ? lineManager.getCurrentLine().name : 'Default'
-        });
+      // 这里应该调用真实的mediaService执行搜索
+      // 暂时使用模拟数据
+      this.searchResults = [
+        { id: '1', title: `搜索结果1 - ${this.searchText}`, type: 'movie', coverUrl: '' },
+        { id: '2', title: `搜索结果2 - ${this.searchText}`, type: 'tv', coverUrl: '' },
+        { id: '3', title: `搜索结果3 - ${this.searchText}`, type: 'anime', coverUrl: '' },
+        { id: '4', title: `搜索结果4 - ${this.searchText}`, type: 'movie', coverUrl: '' },
+        { id: '5', title: `搜索结果5 - ${this.searchText}`, type: 'tv', coverUrl: '' }
+      ];
       
-      // 记录搜索历史
-      await this.saveSearchHistory(this.searchQuery);
+      Logger.info(this.TAG, `Search for '${this.searchText}' returned ${this.searchResults.length} results`);
     } catch (error) {
-      Logger.error(this.TAG, 'Error handling quick search result click', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(this.TAG, 'Search failed', error as Error);
+      this.searchResults = [];
+    } finally {
+      this.isSearching = false;
     }
   }
 
   /**
-   * 清除搜索历史
+   * 处理快速搜索结果点�?   */
+  private async handleQuickResultClick(result: any): Promise<void> {
+    try {
+      // 保存搜索历史
+      await this.saveSearchHistory(this.searchText);
+      
+      // 跳转到详情页
+      await AppNavigator.getInstance().navigateToDetail({
+        id: result.id,
+        siteKey: 'default',
+        type: result.type
+      });
+      
+      Logger.info(this.TAG, `Navigating to detail for ${result.title}`);
+    } catch (error) {
+      Logger.error(this.TAG, 'Error handling quick search result click', error as Error);
+    }
+  }
+
+  /**
+   * 处理搜索结果点击
+   */
+  private async handleSearchResultClick(result: any): Promise<void> {
+    try {
+      // 跳转到详情页
+      await AppNavigator.getInstance().navigateToDetail({
+        id: result.id,
+        siteKey: 'default',
+        type: result.type
+      });
+      
+      Logger.info(this.TAG, `Navigating to detail for ${result.title}`);
+    } catch (error) {
+      Logger.error(this.TAG, 'Error handling search result click', error as Error);
+    }
+  }
+
+  /**
+   * 处理热门关键词点�?   */
+  private async handleHotKeywordClick(keyword: string): Promise<void> {
+    try {
+      this.searchText = keyword;
+      await this.executeSearch();
+      Logger.info(this.TAG, `Searching for hot keyword: ${keyword}`);
+    } catch (error) {
+      Logger.error(this.TAG, 'Error handling hot keyword click', error as Error);
+    }
+  }
+
+  /**
+   * 处理搜索历史点击
+   */
+  private async handleHistoryClick(keyword: string): Promise<void> {
+    try {
+      this.searchText = keyword;
+      await this.executeSearch();
+      Logger.info(this.TAG, `Searching for history keyword: ${keyword}`);
+    } catch (error) {
+      Logger.error(this.TAG, 'Error handling history click', error as Error);
+    }
+  }
+
+  /**
+   * 清空搜索历史
    */
   private async clearSearchHistory(): Promise<void> {
     try {
       this.searchHistory = [];
-      // 使用SearchHistoryRepository清除本地存储中的搜索历史
+      // 使用SearchHistoryRepository清空本地存储
       const searchHistoryRepo = new SearchHistoryRepository();
       await searchHistoryRepo.clearHistory();
-      
       Logger.info(this.TAG, 'Search history cleared');
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to clear search history', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
+      Logger.error(this.TAG, 'Failed to clear search history', error as Error);
     }
   }
-  
+
   /**
-   * 处理搜索输入变化
-   */
-  private handleSearchInputChange(value: string): void {
-    this.searchQuery = value;
-    
-    // 防抖处理
-    if (this.searchDebounceTimer) {
-      clearTimeout(this.searchDebounceTimer);
-    }
-    
-    // 输入为空时重置状�?    if (value.trim().length === 0) {
-      this.resetSearchState();
-      this.showSourceList = false;
-      return;
-    }
-    
-    // 快速搜索片源（当输入达到一定长度时�?    if (value.trim().length >= 2) {
-      // 立即执行快速搜�?      this.quickSearch(value.trim());
-      
-      // 输入停止300ms后执行常规搜�?      this.searchDebounceTimer = setTimeout(async () => {
-        await this.performSearch();
-      }, 300);
-    }
-  }
-  
-  /**
-   * 执行搜索
-   */
-  private async performSearch(): Promise<void> {
-    const query = this.searchQuery.trim();
-    if (!query) return;
-    
-    // 隐藏快速搜索结�?    this.showSourceList = false;
-    
-    this.isSearching = true;
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.showHistory = false;
-    this.currentPage = 1;
-    
+   * 返回上一�?   */
+  private async handleBack(): Promise<void> {
     try {
-      // 保存搜索历史（异步）
-      await this.saveSearchHistory(query);
-      
-      // 执行搜索，传递筛选条�?      Logger.info(this.TAG, `Searching for: ${query} with filters:`, JSON.stringify(this.filters));
-      
-      // 构建搜索参数，包含筛选条�?      const searchParams: Record<string, string | number | boolean | null> = { ... };
-      
-      // 使用await处理Promise
-      const result = await mediaService.searchMedia(searchParams);
-      
-      // 处理搜索结果
-      this.searchResults = result.items || [];
-      this.hasMoreResults = result.hasMore || false;
-      
-      Logger.info(this.TAG, `Search completed, found ${this.searchResults.length} results`);
+      await AppNavigator.getInstance().navigateToBack();
+      Logger.info(this.TAG, 'Navigating back');
     } catch (error) {
-      Logger.error(this.TAG, 'Search failed', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
-      this.errorMessage = '搜索失败，请稍后重试';
-      this.searchResults = [];
-      this.hasMoreResults = false;
-    } finally {
-      this.isLoading = false;
-      this.isSearching = false;
+      Logger.error(this.TAG, 'Failed to navigate back', error as Error);
     }
   }
-  
+
   /**
-   * 加载更多搜索结果
-   */
-  private loadMoreResults(): void {
-    if (!this.hasMoreResults || this.isLoading || !this.searchQuery.trim()) return;
-    
-    this.isLoading = true;
-    this.currentPage++;
-    
-    try {
-      const query = this.searchQuery.trim();
-      Logger.info(this.TAG, `Loading more results for: ${query}, page ${this.currentPage}`);
-      
-      // 构建搜索参数，包含筛选条�?      const searchParams: Record<string, string | number | boolean | null> = { ... };
-      
-      mediaService.searchMedia(searchParams).then((result) => {
-        if (result && result.items && result.items.length > 0) {
-          this.searchResults = [...this.searchResults, ...result.items];
-          this.hasMoreResults = result.hasMore || false;
-        } else {
-          this.hasMoreResults = false;
-        }
-        this.isLoading = false;
-      }).catch((error) => {
-        Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
-        this.errorMessage = '加载更多结果失败';
-        this.isLoading = false;
-      });
-    } catch (error) {
-      Logger.error(this.TAG, 'Failed to load more results', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))))));
-      this.errorMessage = '加载更多结果失败';
-      this.isLoading = false;
-    }
-  }
-  
-  /**
-   * 重置搜索状�?   */
-  private resetSearchState(): void {
-    this.searchResults = [];
-    this.showHistory = true;
-    this.errorMessage = '';
-    this.currentPage = 1;
-    this.hasMoreResults = true;
-  }
-  
-  /**
-   * 处理关键词点�?   */
-  private async handleKeywordClick(keyword: string): Promise<void> {
-    this.searchQuery = keyword;
-    await this.performSearch();
-  }
-  
-  /**
-   * 处理搜索结果项点�?   */
-  private handleSearchResultClick(media: MediaItem): void {
-    if (!media || !media.id) {
-      Logger.error(this.TAG, 'Invalid media item', new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format' instanceof Error ? new Error('Invalid media item format' : new Error(String(new Error('Invalid media item format'))))))), { detail: { data: { media: JSON.stringify(media) } } });
-      return;
-    }
-    
-    Logger.info(this.TAG, `Search result clicked: ${media.title}`);
-    
-    // 跳转到详情页
-    AppNavigator.getInstance().navigateToDetail({
-      id: media.id,
-      siteKey: media.siteKey || '',
-      type: 'vod'
-    });
-  }
-  
-  /**
-   * 处理清除按钮点击
-   */
-  private handleClearInput(): void {
-    this.searchQuery = '';
-    this.resetSearchState();
-  }
-  
-  /**
-   * 处理返回
-   */
-  private handleBack(): void {
-    this.context.router.back();
-  }
-  
-  /**
-   * 渲染搜索输入�?   */
+   * 构建搜索�?   */
   @Builder
-  private renderSearchInput() {
-    Stack() {
-      Flex()
-      .direction(FlexDirection.Row)
-      .alignItems(ItemAlign.Center)
-      .padding({ left: 15, right: 15, top: 10, bottom: 10 }) {
-        Button()
-        .onClick(() => this.handleBack())
-        .width(40)
-        .height(40) {
-          Text("�?)
-            .fontSize(24)
-            .fontColor("#333333")
+  buildSearchBar(): void {
+    Row({
+      style: {
+        alignItems: 'center',
+        padding: { left: 20, right: 20, top: 10, bottom: 10 },
+        backgroundColor: '#4CAF50'
+      }
+    }) {
+      // 返回按钮
+      Button({
+        style: {
+          backgroundColor: 'transparent',
+          width: 40,
+          height: 40,
+          justifyContent: 'center',
+          alignItems: 'center'
+        },
+        onClick: () => this.handleBack()
+      }) {
+        Text('�?)
+          .fontSize(24)
+          .fontColor('#FFFFFF')
+      }
+
+      // 搜索输入�?      Column({
+        style: {
+          flex: 1,
+          marginLeft: 10,
+          marginRight: 10
         }
-        Flex()
-        .flex(1)
-        .backgroundColor("#FFFFFF")
-        .borderRadius(20)
-        .alignItems(ItemAlign.Center)
-        .padding({ left: 15, right: 15, top: 10, bottom: 10 })
-        .margin({ left: 15, right: 15 }) {
-          Text("🔍")
-            .fontSize(20)
-            .margin({ right: 10 })
-          TextInput({
-            value: this.searchQuery,
-            placeholder: "搜索电影、电视剧、动�?.."
-          })
-          .width("80%")
-          .height(40)
-          .fontSize(16)
-          .onChange((value: string) => this.handleSearchInputChange(value))
-          .onSubmit(() => this.performSearch())
-          Button()
-          .onClick(() => this.handleClearInput())
-          .width(30)
-          .height(30) {
-            Text("�?)
-              .fontSize(20)
-              .fontColor("#999999")
+      }) {
+        SearchInput({
+          placeholder: '搜索电影、剧集、动�?..',
+          style: {
+            backgroundColor: '#FFFFFF',
+            borderRadius: 20,
+            paddingHorizontal: 20,
+            height: 40,
+            fontSize: 16
+          },
+          value: this.searchText,
+          onSubmit: () => this.executeSearch(),
+          onChange: (text) => this.onSearchTextChange(text),
+          onClear: () => this.searchText = ''
+        })
+
+        // 快速搜索结�?        if (this.showQuickResults && this.quickResults.length > 0) {
+          Column({
+            style: {
+              backgroundColor: '#FFFFFF',
+              borderRadius: 10,
+              marginTop: 5,
+              padding: 10,
+              shadowColor: '#000000',
+              shadowOffsetX: 0,
+              shadowOffsetY: 2,
+              shadowBlurRadius: 5
+            }
+          }) {
+            ForEach(this.quickResults, (result) => {
+              Row({
+                style: {
+                  padding: 10,
+                  borderRadius: 8,
+                  backgroundColor: '#F5F5F5',
+                  marginBottom: 5,
+                  alignItems: 'center'
+                },
+                onClick: () => this.handleQuickResultClick(result)
+              }) {
+                Column({
+                  style: {
+                    marginLeft: 10,
+                    flex: 1
+                  }
+                }) {
+                  Text(result.title)
+                    .fontSize(16)
+                    .fontColor('#333333')
+                  Text(result.type)
+                    .fontSize(14)
+                    .fontColor('#666666')
+                    .marginTop(2)
+                }
+                Text('�?)
+                  .fontSize(18)
+                  .fontColor('#999999')
+              }
+            })
           }
         }
-        Button()
-        .onClick(() => this.performSearch())
-        .width(80)
-        .height(40) {
-          Text("搜索")
-            .fontSize(16)
-            .fontColor("#333333")
-        }
+      }
+
+      // 搜索按钮
+      Button({
+        style: {
+          backgroundColor: '#FFFFFF',
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          borderRadius: 20
+        },
+        onClick: () => this.executeSearch()
+      }) {
+        Text('搜索')
+          .fontSize(16)
+          .fontColor('#4CAF50')
+          .fontWeight(600)
       }
     }
   }
-  
+
   /**
-   * 渲染热门搜索
+   * 构建搜索历史
    */
   @Builder
-  private renderHotKeywords() {
-    Stack() {
-      // 标题
-      Text("热门搜索")
-        .fontSize(24)
-        .fontColor('#333333')
-        .fontWeight(600)
-        .margin({ left: 15, top: 15, bottom: 15 })
-      // 关键词列�?      Flex({ wrap: FlexWrap.Wrap, padding: { left: 15, right: 15 }, gap: 10 })
-      .alignItems(ItemAlign.Center) {
-        ForEach(this.hotKeywords, (keyword, index) => {
-          Button()
-          .key(`hot-${index}`)
-          .backgroundColor(index < 3 ? '#FFEB3B' : '#E0E0E0')
-          .borderRadius(15)
-          .padding({ horizontal: 15, vertical: 8 })
-          .onClick(() => this.handleKeywordClick(keyword)) {
-            Flex()
-            .direction(FlexDirection.Row)
-            .alignItems(ItemAlign.Center)
-            .gap(5) {
-              Text((index + 1).toString())
-                .fontSize(14)
-                .fontWeight(600)
+  buildSearchHistory(): void {
+    if (this.searchHistory.length > 0 && this.showHistory) {
+      Column({
+        style: {
+          padding: 20
+        }
+      }) {
+        Row({
+          style: {
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 15
+          }
+        }) {
+          Text('搜索历史')
+            .fontSize(18)
+            .fontColor('#333333')
+            .fontWeight(600)
+          Button({
+            style: {
+              backgroundColor: '#FFFFFF',
+              paddingHorizontal: 15,
+              paddingVertical: 5,
+              borderRadius: 15
+            },
+            onClick: () => this.clearSearchHistory()
+          }) {
+            Text('清空')
+              .fontSize(14)
+              .fontColor('#666666')
+          }
+        }
+
+        Wrap({
+          style: {
+            gap: 10
+          }
+        }) {
+          ForEach(this.searchHistory, (keyword) => {
+            Button({
+              style: {
+                backgroundColor: '#FFFFFF',
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                borderRadius: 20
+              },
+              onClick: () => this.handleHistoryClick(keyword)
+            }) {
               Text(keyword)
                 .fontSize(14)
                 .fontColor('#333333')
             }
-          }
-        }, (keyword, index) => `hot-${index}`)
-      }
-    }
-  }
-  
-  /**
-   * 渲染搜索历史
-   */
-  @Builder
-  private renderSearchHistory() {
-    Stack()
-    .backgroundColor('#FFFFFF')
-    .borderRadius(10)
-    .padding(15)
-    .margin({ bottom: 15 }) {
-      // 标题�?      Flex()
-      .direction(FlexDirection.Row)
-      .justifyContent(FlexAlign.SpaceBetween)
-      .alignItems(ItemAlign.Center)
-      .margin({ bottom: 10 }) {
-        Text("搜索历史")
-          .fontSize(20)
-          .fontColor('#333333')
-          .fontWeight(600)
-        Button()
-        .backgroundColor('transparent')
-        .onClick(this.clearSearchHistory) {
-          Text("清除")
-            .fontSize(16)
-            .fontColor('#666666')
+          })
         }
       }
-      // 历史记录列表
-      Flex()
-      .direction(FlexDirection.Row)
-      .flexWrap(FlexWrap.Wrap)
-      .gap(10) {
-        ForEach(this.searchHistory, (keyword, index) => {
-          Button()
-          .key(`history-${index}`)
-          .backgroundColor('#E0E0E0')
-          .borderRadius(15)
-          .padding({ horizontal: 15, vertical: 8 })
-          .onClick(() => this.handleKeywordClick(keyword)) {
-            Flex()
-            .direction(FlexDirection.Row)
-            .alignItems(ItemAlign.Center)
-            .gap(5) {
-              Text("🕐")
-                .fontSize(16)
-              Text(keyword)
-                .fontSize(16)
-            }
-          }
-        }, (keyword, index) => `history-${index}`)
-      }
     }
   }
-  
+
   /**
-   * 渲染搜索结果�?   */
+   * 构建热门关键�?   */
   @Builder
-  private renderSearchResultItem(media: MediaItem) {
-    // 简化版本，只保留最基本的UI组件，确保符合ArkTS语法
-    Column() {
-      // 封面
-      Column() {
-        Text("封面")
-          .fontSize(14)
-          .fontColor('#666666')
-      }
-      .width(100)
-      .height(150)
-      .backgroundColor('#E0E0E0')
-      .borderRadius(8)
-      .margin({ right: 15 })
-
-      // 内容
-      Column() {
-        Text(media.title || '')
-          .fontSize(20)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .numberOfLines(2)
-
-        Row() {
-          Text(media.year?.toString() || '')
-            .fontSize(14)
-            .fontColor('#666666')
-            .backgroundColor('#E0E0E0')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 })
-            .margin({ right: 8 })
-
-          Text(media.type || '')
-            .fontSize(14)
-            .fontColor('#666666')
-            .backgroundColor('#E0E0E0')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 })
-            .margin({ right: 8 })
-
-          Text(media.score?.toString() || '')
-            .fontSize(14)
-            .fontColor('#000000')
-            .backgroundColor('#FFEB3B')
-            .borderRadius(10)
-            .padding({ horizontal: 10, vertical: 4 })
+  buildHotKeywords(): void {
+    if (this.hotKeywords.length > 0 && this.showHotKeywords) {
+      Column({
+        style: {
+          padding: 20
         }
-      }
-      .flex(1)
-    }
-    .width('100%')
-    .flexDirection(FlexDirection.Row)
-    .alignItems(ItemAlign.Center)
-    .padding(15)
-    .backgroundColor('#FFFFFF')
-    .borderRadius(10)
-    .margin({ bottom: 10 })
-    .onClick(() => this.handleSearchResultClick(media))
-  }
-  
-  /**
-   * 切换显示模式
-   */
-  private toggleDisplayMode(): void {
-    this.displayMode = this.displayMode === 'list' ? 'grid' : 'list';
-  }
-  
-  /**
-   * 切换筛选面板显�?   */
-  private toggleFilterPanel(): void {
-    this.showFilterPanel = !this.showFilterPanel;
-  }
-  
-  /**
-   * 渲染显示模式切换按钮
-   */
-  @Builder
-  private renderDisplayModeToggle() {
-    Column() {
-      Button()
-      .backgroundColor('#4CAF50')
-      .borderRadius(20)
-      .padding({ horizontal: 15, vertical: 8 })
-      .onClick(() => this.toggleDisplayMode())
-      .width('auto') {
-        Text(this.displayMode === 'list' ? '网格' : '列表')
-          .fontSize(16)
-          .fontColor('#FFFFFF')
-          .fontWeight(600)
-      }
-    }
-  }
-  
-  /**
-   * 渲染筛选按�?   */
-  @Builder
-  private renderFilterButton() {
-    Column() {
-      Button()
-      .backgroundColor('#4CAF50')
-      .borderRadius(20)
-      .padding({ horizontal: 15, vertical: 8 })
-      .onClick(() => this.toggleFilterPanel())
-      .width('auto') {
-        Text("筛�?)
-          .fontSize(16)
-          .fontColor('#FFFFFF')
-          .fontWeight(600)
-      }
-    }
-  }
-  
-  /**
-   * 渲染筛选面�?   */
-  @Builder
-  private renderFilterPanel() {
-    Stack() {
-      // 背景遮罩
-      Column()
-      .width('100%')
-      .height('100%')
-      .backgroundColor('rgba(0, 0, 0, 0.85)')
-      .justifyContent(FlexAlign.Start)
-      .alignItems(HorizontalAlign.Center)
-      .visibility(this.showFilterPanel ? Visibility.Visible : Visibility.None)
-      .zIndex(100) {
-        // 筛选面板内�?        Column()
-        .width('100%')
-        .backgroundColor('#4CAF50')
-        .padding(20)
-        .borderTopLeftRadius(20)
-        .borderTopRightRadius(20) {
-          // 标题�?          Row()
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-          .alignItems(VerticalAlign.Center)
-          .margin({ bottom: 20 }) {
-            Text('筛选条�?)
-              .fontSize(28)
-              .fontColor('#FFFFFF')
-              .fontWeight(700)
-            Button()
-            .backgroundColor('transparent')
-            .onClick(() => {
-              this.showFilterPanel = false;
+      }) {
+        Row({
+          style: {
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 15
+          }
+        }) {
+          Text('热门搜索')
+            .fontSize(18)
+            .fontColor('#333333')
+            .fontWeight(600)
+        }
+
+        Wrap({
+          style: {
+            gap: 10
+          }
+        }) {
+          ForEach(this.hotKeywords, (keyword) => {
+            Button({
+              style: {
+                backgroundColor: '#66BB6A',
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                borderRadius: 20
+              },
+              onClick: () => this.handleHotKeywordClick(keyword)
             }) {
-              Text('�?)
-                .fontSize(28)
+              Text(keyword)
+                .fontSize(14)
                 .fontColor('#FFFFFF')
             }
-          }
-        
-        // 媒体类型筛�?        Text('媒体类型:')
-          .fontSize(24)
-          .fontColor('#FFFFFF')
-          .margin({ bottom: 15 })
-          .fontWeight(600)
-        
-        Row()
-        .width('100%')
-        .flexWrap(FlexWrap.Wrap)
-        .gap(10)
-        .margin({ bottom: 20 }) {
-          ForEach([
-            { label: '电影', value: 'movie' },
-            { label: '电视�?, value: 'tv' },
-            { label: '动漫', value: 'anime' },
-            { label: '综艺', value: 'variety' },
-            { label: '纪录�?, value: 'documentary' }
-          ], (type) => {
-            Button()
-            .backgroundColor(this.filterTypes.includes(type.value) ? '#FFEB3B' : '#FFFFFF')
-            .borderRadius(15)
-            .padding({ horizontal: 15, vertical: 8 })
-            .onClick(() => {
-              this.updateMediaTypeFilter(type.value, !this.filterTypes.includes(type.value));
-            }) {
-              Text(type.label)
-                .fontSize(22)
-                .fontColor(this.filterTypes.includes(type.value) ? '#000000' : '#4CAF50')
-                .fontWeight(600)
-            }
           })
-        }
-        
-        // 排序方式
-        Text('排序方式:')
-          .fontSize(24)
-          .fontColor('#FFFFFF')
-          .margin({ bottom: 15 })
-          .fontWeight(600)
-        
-        Row()
-        .width('100%')
-        .flexWrap(FlexWrap.Wrap)
-        .gap(10)
-        .margin({ bottom: 20 }) {
-          ForEach([
-            { label: '默认排序', value: 'default' },
-            { label: '最新发�?, value: 'latest' },
-            { label: '评分最�?, value: 'rating' },
-            { label: '播放最�?, value: 'popular' }
-          ], (option) => {
-            Button()
-            .backgroundColor(this.filterSort === option.value ? '#FFEB3B' : '#FFFFFF')
-            .borderRadius(15)
-            .padding({ horizontal: 15, vertical: 8 })
-            .onClick(() => {
-              this.filterSort = option.value;
-            }) {
-              Text(option.label)
-                .fontSize(22)
-                .fontColor(this.filterSort === option.value ? '#000000' : '#4CAF50')
-                .fontWeight(600)
-            }
-          })
-        }
-        
-        // 操作按钮
-        Row()
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .gap(15) {
-          Button()
-          .backgroundColor('#FFFFFF')
-          .borderRadius(15)
-          .padding({ horizontal: 20, vertical: 12 })
-          .flex(1)
-          .onClick(() => this.resetFilters()) {
-            Text('重置')
-              .fontSize(22)
-              .fontColor('#4CAF50')
-              .fontWeight(600)
-          }
-          Button()
-          .backgroundColor('#FFFFFF')
-          .borderRadius(15)
-          .padding({ horizontal: 20, vertical: 12 })
-          .flex(1)
-          .onClick(() => this.applyFilters()) {
-            Text('应用筛�?)
-              .fontSize(22)
-              .fontColor('#4CAF50')
-              .fontWeight(600)
-          }
         }
       }
     }
   }
 
   /**
-   * 更新媒体类型筛�?   */
-  private updateMediaTypeFilter(type: string, checked: boolean): void {
-    if (checked) {
-      if (!this.filterTypes.includes(type)) {
-        this.filterTypes.push(type);
-      }
-    } else {
-      const index = this.filterTypes.indexOf(type);
-      if (index > -1) {
-        this.filterTypes.splice(index, 1);
-      }
-    }
-  }
-
-  /**
-   * 重置筛选条�?   */
-  private resetFilters(): void {
-    // 重置筛选条�?    this.filters = {};
-    this.filterTypes = [];
-    this.filterSort = 'default';
-  }
-
-  /**
-   * 应用筛选条�?   */
-  private applyFilters(): void {
-    // 应用筛选条件并关闭面板
-    this.showFilterPanel = false;
-    
-    // 重置分页并重新搜�?    this.currentPage = 1;
-    this.searchResults = [];
-    this.hasMoreResults = true;
-    this.performSearch();
-  }
-
-  /**
-   * 渲染网格模式的搜索结果项
+   * 构建搜索结果
    */
   @Builder
-  private renderGridItem(item: MediaItem) {
-    // 使用Column替代GridItem
-    Column()
-    .width('100%')
-    .margin({ bottom: 15 })
-    .onClick(() => this.handleSearchResultClick(item)) {
-      Column() {
-        // 图片 - 使用占位符替代Image组件
-        Column()
-        .width('100%')
-        .aspectRatio(2/3)
-        .backgroundColor('#E0E0E0')
-        .borderRadius(8)
-        .justifyContent(FlexAlign.Center)
-        .alignItems(HorizontalAlign.Center) {
-          Text("封面")
-            .fontSize(16)
-            .fontColor('#666666')
+  buildSearchResults(): void {
+    if (this.isSearching) {
+      Column({
+        style: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center'
         }
-        
-        // 标题
-        Text(item.title || '未知标题')
-          .fontSize(20)
-          .fontColor('#FFFFFF')
-          .margin({ top: 8 })
-          .fontWeight(600)
-          .textShadow(
-            { radius: 3, color: 'rgba(0, 0, 0, 0.8)', offset: { x: 1, y: 1 } }
-          )
-          .numberOfLines(2)
-        
-        // 评分标签
-        Text(`${item.score || 0}分`)
-          .backgroundColor('#FFEB3B')
-          .fontColor('#000000')
-          .fontSize(16)
-          .padding({ horizontal: 8, vertical: 2 })
-          .borderRadius(4)
-          .margin({ top: 4 })
-          .fontWeight(700)
-          .visibility(item.score ? Visibility.Visible : Visibility.None)
+      }) {
+        Text('搜索�?..')
+          .fontSize(18)
+          .fontColor('#666666')
       }
-    }
-  }
-
-  /**
-   * 渲染搜索结果
-   */
-  @Builder
-  private renderSearchResults() {
-    Column() {
-      // 渲染分类筛选按�?      Scroller()
-      .margin({ bottom: 20 })
-      .scrollable(ScrollDirection.Horizontal) {
-        Row()
-        .padding({ horizontal: 15 })
-        .alignItems(VerticalAlign.Center)
-        .gap(10) {
-          // 全部显示按钮
-          Button("全部显示")
-          .backgroundColor('#4CAF50')
-          .borderRadius(20)
-          .padding({ horizontal: 20, vertical: 8 })
-          .margin({ right: 10 })
-          .onClick(() => {})
-          .width('auto')
-          .fontSize(22)
-          .fontColor('#FFFFFF')
-          .fontWeight(600)
-          
-          // 分类按钮
-          ForEach(["热播 | APP", "浪酷 | APP", "秒看 | APP", "星空 | APP", "爱看 | APP", "冷心 | APP"], (category) => {
-            Button(category)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(20)
-            .padding({ horizontal: 20, vertical: 8 })
-            .margin({ right: 10 })
-            .onClick(() => {})
-            .width('auto')
-            .fontSize(22)
-            .fontColor('#4CAF50')
-            .fontWeight(600)
-          })
+    } else if (this.searchResults.length > 0) {
+      Column({
+        style: {
+          flex: 1,
+          padding: 20
         }
-      }
-      
-      // 渲染网格结果
-      Row()
-      .padding({ left: 15, right: 15 })
-      .gap(15)
-      .flexWrap(FlexWrap.Wrap)
-      .justifyContent(FlexAlign.Start) {
-        ForEach(this.searchResults, (item) => {
-          this.renderGridItem(item)
-        })
-      }
-    }
-  }
-  
-  /**
-   * 渲染加载状�?   */
-  @Builder
-  private renderLoading() {
-    Stack()
-    .width('100%')
-    .height('100%')
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Center) {
-      // 自定义加载指示器
-      Column()
-      .backgroundColor('#FFFFFF')
-      .borderRadius(20)
-      .padding(20)
-      .alignItems(HorizontalAlign.Center) {
-        Text("�?)
-          .fontSize(40)
-          .fontColor('#4CAF50')
-          .animation({
-            duration: 1000,
-            iterations: -1,
-            curve: 'easeInOut'
-          })
-        Text("搜索�?..")
+      }) {
+        Text(`搜索结果 (${this.searchResults.length})`)
           .fontSize(18)
           .fontColor('#333333')
-          .margin({ top: 10 })
-      }
-    }
-  }
-  
-  /**
-   * 渲染快速搜索结果（片源切换界面�?   */
-  @Builder
-  private renderQuickSearchResults() {
-    Stack() {
-      // 标题�?      Flex() {
-        Text(`为您找到相关片源: ${this.quickSearchResults.length}个`)
-          .fontSize(28)
-          .fontColor('#FFFFFF')
-          .fontWeight(700)
-        Button() {
-          Text('�?)
-            .fontSize(28)
-            .fontColor('#FFFFFF')
-        }
-        .backgroundColor('transparent')
-        .onClick(() => {
-          this.showSourceList = false;
+          .fontWeight(600)
+          .marginBottom(15)
+
+        ForEach(this.searchResults, (result) => {
+          Row({
+            style: {
+              padding: 15,
+              backgroundColor: '#FFFFFF',
+              borderRadius: 10,
+              marginBottom: 15,
+              alignItems: 'center',
+              shadowColor: '#000000',
+              shadowOffsetX: 0,
+              shadowOffsetY: 2,
+              shadowBlurRadius: 5
+            },
+            onClick: () => this.handleSearchResultClick(result)
+          }) {
+            // 占位封面
+            Column({
+              style: {
+                width: 80,
+                height: 120,
+                backgroundColor: '#E0E0E0',
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center'
+              }
+            }) {
+              Text('封面')
+                .fontSize(14)
+                .fontColor('#999999')
+            }
+
+            Column({
+              style: {
+                marginLeft: 15,
+                flex: 1
+              }
+            }) {
+              Text(result.title)
+                .fontSize(16)
+                .fontColor('#333333')
+                .fontWeight(600)
+              Text(result.type)
+                .fontSize(14)
+                .fontColor('#666666')
+                .marginTop(5)
+            }
+            Text('�?)
+              .fontSize(20)
+              .fontColor('#999999')
+          }
         })
       }
-      .direction(FlexDirection.Row)
-      .justifyContent(FlexAlign.SpaceBetween)
-      .alignItems(ItemAlign.Center)
-      .margin({ bottom: 15 })
-      
-        // 片源列表
-        List() {
-          ForEach(this.quickSearchResults, (item, index) => {
-            ListItem() {
-              Flex() {
-                // 标题和来�?                Flex() {
-                  Text(item.title)
-                    .fontSize(26)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(700)
-                    .margin({ bottom: 5 })
-                  Text(item.sourceType)
-                    .fontSize(20)
-                    .fontColor('#E0E0E0')
-                }
-                .flex(1)
-                .direction(FlexDirection.Column)
-                
-                // 质量标签
-                Flex() {
-                  Text(item.quality || '')
-                    .fontSize(22)
-                    .fontColor('#000000')
-                    .fontWeight(700)
-                }
-                .backgroundColor('#FFEB3B')
-                .padding({ horizontal: 12, vertical: 6 })
-                .borderRadius(12)
-                .visibility(item.quality ? Visibility.Visible : Visibility.Hidden)
-              }
-              .direction(FlexDirection.Row)
-              .justifyContent(FlexAlign.SpaceBetween)
-              .alignItems(ItemAlign.Center)
-            }
-            .key(`${item.id || index}`)
-            .backgroundColor('#66BB6A')
-            .margin({ bottom: 10 })
-            .padding(15)
-            .borderRadius(10)
-            .onClick(() => {
-              this.handleQuickSearchResultClick(item);
-            })
-          })
+    } else if (this.searchText.trim()) {
+      Column({
+        style: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20
         }
-        .width('100%')
-        .height(500)
-      }
-      .backgroundColor('rgba(0, 0, 0, 0.85)')
-      .borderRadius(15)
-      .padding(20)
-      .margin({ left: 20, right: 20, top: 10, bottom: 10 })
-      .position({ x: 0, y: 120 })
-      .width('100%')
-      .zIndex(100)
-    }
-  }
-
-  /**
-   * 渲染错误状�?   */
-  @Builder
-  private renderError() {
-    Stack() {
-      Text("⚠️")
-        .fontSize(40)
-        .fontColor('#FF6B6B')
-        .margin({ bottom: 10 })
-      Text(this.errorMessage)
-        .fontSize(18)
-        .fontColor('#FFFFFF')
-        .textAlign(TextAlign.Center)
-        .margin({ bottom: 20 })
-      Button({
-        backgroundColor: '#4CAF50',
-        borderRadius: 20,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        onClick: this.performSearch
       }) {
-        Text("重试")
+        Text('未找到相关结�?)
+          .fontSize(18)
+          .fontColor('#666666')
+        Text('请尝试其他关键词')
           .fontSize(16)
-          .fontColor('#FFFFFF')
-          .fontWeight(600)
+          .fontColor('#999999')
+          .marginTop(10)
       }
     }
   }
 
-  /**
-   * 组件渲染
-   */
   build() {
-    Stack() {
-      // 搜索输入区域
-      this.renderSearchInput();
-      
-      // 快速搜索片源切换界�?      this.renderQuickSearchResults();
-      
-      // 主内容区�?      Scroller() {
-        Column() {
-          // 显示搜索结果数量
-          if (!this.showHistory && this.searchResults.length > 0) {
-            Text(`搜索(${this.searchResults.length}/${this.searchResults.length})`)
-              .fontSize(22)
-              .fontColor('#FFFFFF')
-              .padding({ left: 15, right: 15, top: 10, bottom: 10 })
-              .fontWeight(FontWeight.SemiBold)
-          }
-          
-          if (this.isSearching && this.isLoading && this.currentPage === 1) {
-            this.renderLoading();
-          } else if (this.errorMessage) {
-            this.renderError();
-          } else if (this.showHistory) {
-            Stack() {
-              this.renderHotKeywords();
-              this.renderSearchHistory();
-            }
-            .padding({ left: 15, right: 15 })
-          } else {
-            this.renderSearchResults();
-          }
-          
-          Blank()
-            .height(50)
-        }
-        .flexGrow(1)
+    Column({
+      style: {
+        flex: 1,
+        backgroundColor: '#F5F5F5'
       }
-      .scrollBar(ScrollBarState.Auto)
+    }) {
+      // 搜索�?      this.buildSearchBar();
+
+      // 主体内容
+      if (this.searchText.trim()) {
+        // 显示搜索结果
+        this.buildSearchResults();
+      } else {
+        // 显示搜索历史和热门关键词
+        Scroll({
+          style: {
+            flex: 1
+          }
+        }) {
+          Column({
+            style: {
+              backgroundColor: '#F5F5F5'
+            }
+          }) {
+            this.buildSearchHistory();
+            this.buildHotKeywords();
+          }
+        }
+      }
     }
-    .backgroundColor('#2E7D32')
-    .flexGrow(1)
   }
 }
-
-export default SearchPage;
-
-

@@ -326,7 +326,7 @@ export default class MediaService {
       }
       return vod;
     } catch (error) {
-      Logger.error(TAG, `Failed to get VOD detail for ID: ${vodId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to get VOD detail for ID: ${vodId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return null;
     }
   }
@@ -343,7 +343,7 @@ export default class MediaService {
       }
       return channel;
     } catch (error) {
-      Logger.error(TAG, `Failed to get live channel detail for ID: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error)))))));
+      Logger.error(TAG, `Failed to get live channel detail for ID: ${channelId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       return null;
     }
   }
@@ -1408,6 +1408,7 @@ export default class MediaService {
     this.isInitialized = false;
     Logger.info(TAG, 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed' : new Error(String('Media service closed' instanceof Error ? 'Media service closed' : new Error(String('Media service closed')))))));
   }
-}
+}
+
 
 

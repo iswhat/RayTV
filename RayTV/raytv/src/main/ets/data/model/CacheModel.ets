@@ -1,18 +1,18 @@
 // CacheModel - 缓存相关模型定义
-// 定义应用缓存、数据缓存等相关的数据模型
+// 定义应用缓存、数据缓存等相关的数据模�?
 
 /**
- * 缓存值类型别名 - 支持的具体缓存数据类型
+ * 缓存值类型别�?- 支持的具体缓存数据类�?
  */
 export type CacheValue =
-  | string              // 字符串
+  | string              // 字符�?
   | number              // 数字
-  | boolean             // 布尔值
-  | ArrayBuffer         // 二进制数据
+  | boolean             // 布尔�?
+  | ArrayBuffer         // 二进制数�?
   | Object              // 对象类型 (使用Object替代Record<string, unknown>符合ArkTS规范)
-  | string[]            // 字符串数组
+  | string[]            // 字符串数�?
   | number[]            // 数字数组
-  | boolean[];          // 布尔值数组
+  | boolean[];          // 布尔值数�?
 
 /**
  * 缓存类型枚举
@@ -79,12 +79,12 @@ export enum CacheType {
  */
 export enum CacheStrategy {
   /**
-   * 仅内存
+   * 仅内�?
    */
   MEMORY_ONLY = 'memory_only',
   
   /**
-   * 仅磁盘
+   * 仅磁�?
    */
   DISK_ONLY = 'disk_only',
   
@@ -104,13 +104,13 @@ export enum CacheStrategy {
   BOTH = 'both',
   
   /**
-   * 自定义
+   * 自定�?
    */
   CUSTOM = 'custom'
 }
 
 /**
- * 缓存优先级枚举
+ * 缓存优先级枚�?
  */
 export enum CachePriority {
   /**
@@ -134,22 +134,22 @@ export enum CachePriority {
   HIGHEST = 'highest',
   
   /**
-   * 持久化（永不自动清除）
+   * 持久化（永不自动清除�?
    */
   PERSISTENT = 'persistent'
 }
 
 /**
- * 缓存项接口
+ * 缓存项接�?
  */
 export interface CacheItem {
   /**
-   * 缓存键
+   * 缓存�?
    */
   key: string;
   
   /**
-   * 缓存值
+   * 缓存�?
    */
   value: CacheValue;
   
@@ -164,7 +164,7 @@ export interface CacheItem {
   createdAt: number;
   
   /**
-   * 最后访问时间
+   * 最后访问时�?
    */
   lastAccessedAt: number;
   
@@ -179,7 +179,7 @@ export interface CacheItem {
   size: number;
   
   /**
-   * 优先级
+   * 优先�?
    */
   priority: CachePriority;
   
@@ -205,11 +205,11 @@ export interface CacheItem {
 }
 
 /**
- * 缓存元数据接口
+ * 缓存元数据接�?
  */
 export interface CacheMetadata {
   /**
-   * 缓存键
+   * 缓存�?
    */
   key: string;
   
@@ -224,7 +224,7 @@ export interface CacheMetadata {
   createdAt: number;
   
   /**
-   * 最后访问时间
+   * 最后访问时�?
    */
   lastAccessedAt: number;
   
@@ -239,7 +239,7 @@ export interface CacheMetadata {
   size: number;
   
   /**
-   * 优先级
+   * 优先�?
    */
   priority: CachePriority;
   
@@ -284,7 +284,7 @@ export interface CacheConfig {
   path: string;
   
   /**
-   * 最大缓存大小（字节）
+   * 最大缓存大小（字节�?
    */
   maxSize: number;
   
@@ -344,12 +344,12 @@ export interface CacheStats {
   currentSize: number;
   
   /**
-   * 最大缓存大小（字节）
+   * 最大缓存大小（字节�?
    */
   maxSize: number;
   
   /**
-   * 缓存条目数
+   * 缓存条目�?
    */
   itemCount: number;
   
@@ -364,7 +364,7 @@ export interface CacheStats {
   diskCacheSize: number;
   
   /**
-   * 命中率
+   * 命中�?
    */
   hitRate: number;
   
@@ -374,17 +374,17 @@ export interface CacheStats {
   missRate: number;
   
   /**
-   * 过期条目数
+   * 过期条目�?
    */
   expiredCount: number;
   
   /**
-   * 最后清理时间
+   * 最后清理时�?
    */
   lastCleanupTime: number;
   
   /**
-   * 按类型统计
+   * 按类型统�?
    */
   byType: {
     [key in CacheType]: {
@@ -404,7 +404,7 @@ export interface CacheCleanupOptions {
   types?: CacheType[];
   
   /**
-   * 清理过期项
+   * 清理过期�?
    */
   expired?: boolean;
   
@@ -429,7 +429,7 @@ export interface CacheCleanupOptions {
   excludeKeys?: string[];
   
   /**
-   * 排除的标签
+   * 排除的标�?
    */
   excludeTags?: string[];
   
@@ -454,7 +454,7 @@ export interface CacheCleanupResult {
   removedCount: number;
   
   /**
-   * 释放的空间（字节）
+   * 释放的空间（字节�?
    */
   freedSpace: number;
   
@@ -464,12 +464,12 @@ export interface CacheCleanupResult {
   cleanupTime: number;
   
   /**
-   * 是否为模拟运行
+   * 是否为模拟运�?
    */
   isDryRun: boolean;
   
   /**
-   * 按类型清理统计
+   * 按类型清理统�?
    */
   byType: {
     [key in CacheType]?: {
@@ -484,7 +484,7 @@ export interface CacheCleanupResult {
  */
 export interface CacheSearchParams {
   /**
-   * 搜索键模式
+   * 搜索键模�?
    */
   keyPattern?: string;
   
@@ -509,7 +509,7 @@ export interface CacheSearchParams {
   createdBefore?: number;
   
   /**
-   * 是否包含过期项
+   * 是否包含过期�?
    */
   includeExpired?: boolean;
   
@@ -569,17 +569,17 @@ export interface CacheSearchResult {
  */
 export interface PreloadCacheOptions {
   /**
-   * 缓存键
+   * 缓存�?
    */
   keys: string[];
   
   /**
-   * 预加载类型
+   * 预加载类�?
    */
   type: CacheType;
   
   /**
-   * 优先级
+   * 优先�?
    */
   priority?: CachePriority;
   
@@ -589,7 +589,7 @@ export interface PreloadCacheOptions {
   expireTime?: number;
   
   /**
-   * 预加载回调
+   * 预加载回�?
    */
   onProgress?: (progress: number) => void;
 }
@@ -634,7 +634,7 @@ export enum CacheEventType {
   SIZE_CHANGED = 'size_changed',
   
   /**
-   * 命中率变化
+   * 命中率变�?
    */
   HIT_RATE_CHANGED = 'hit_rate_changed'
 }
@@ -644,7 +644,7 @@ export enum CacheEventType {
  */
 export interface CacheEventData {
   /**
-   * 清理统计（针对CLEANED事件）
+   * 清理统计（针对CLEANED事件�?
    */
   cleanupStats?: {
     removedCount: number;
@@ -652,7 +652,7 @@ export interface CacheEventData {
   };
   
   /**
-   * 命中率数据（针对HIT_RATE_CHANGED事件）
+   * 命中率数据（针对HIT_RATE_CHANGED事件�?
    */
   hitRateData?: {
     hitRate: number;
@@ -662,7 +662,7 @@ export interface CacheEventData {
   };
   
   /**
-   * 大小变化数据（针对SIZE_CHANGED事件）
+   * 大小变化数据（针对SIZE_CHANGED事件�?
    */
   sizeChangeData?: {
     previousSize: number;
@@ -671,7 +671,7 @@ export interface CacheEventData {
   };
   
   /**
-   * 自定义数据
+   * 自定义数�?
    */
   customData?: Record<string, string | number | boolean>;
 }
@@ -686,7 +686,7 @@ export interface CacheEvent {
   type: CacheEventType;
   
   /**
-   * 缓存键
+   * 缓存�?
    */
   key?: string;
   
@@ -696,7 +696,7 @@ export interface CacheEvent {
   size?: number;
   
   /**
-   * 时间戳
+   * 时间�?
    */
   timestamp: number;
   
@@ -721,7 +721,7 @@ export interface CacheCompressionConfig {
   level: number;
   
   /**
-   * 压缩阈值（字节）
+   * 压缩阈值（字节�?
    */
   threshold: number;
   
@@ -766,7 +766,7 @@ export interface CacheEncryptionConfig {
  */
 export interface CacheVersion {
   /**
-   * 版本号
+   * 版本�?
    */
   version: string;
   
@@ -776,7 +776,7 @@ export interface CacheVersion {
   lastUpdated: number;
   
   /**
-   * 缓存条目数
+   * 缓存条目�?
    */
   itemCount: number;
   
@@ -806,7 +806,7 @@ export interface BatchCacheResult {
   failures: Record<string, string>;
   
   /**
-   * 总操作时间
+   * 总操作时�?
    */
   operationTime: number;
   
