@@ -1,4 +1,4 @@
-import { Stack, Video, Image, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction } from '@kit.ArkUI';
+import { Stack, Video, Image, Button, Slider, List, ListItem, LoadingProgress, Toast, PromptAction, VideoFit } from '@kit.ArkUI';
 import Router from '@ohos.router';
 import Logger from '../common/util/Logger';
 import { playbackService } from '../service/media/PlaybackService';
@@ -9,7 +9,7 @@ import { PlaybackState, PlaybackSpeed, PlaySource, Subtitle } from '../service/m
 
 /**
  * 播放页面组件
- * 实现视频播放控制界面，包含播�?暂停、进度控制、音量控制、速度调整等功�? */
+ * 实现视频播放控制界面，包含播放暂停、进度控制、音量控制、速度调整等功能 */
 @Component
 struct PlaybackPage {
   private readonly TAG: string = 'PlaybackPage';
@@ -23,8 +23,8 @@ struct PlaybackPage {
   private episodeName: string = '';
   private playSource?: PlaySource;
   private playSourceIndex: number = 0;
-  
-  // 状态管�?  @State playbackState: PlaybackState = PlaybackState.IDLE;
+  // 状态管理
+  @State playbackState: PlaybackState = PlaybackState.IDLE;
   @State currentTime: number = 0;
   @State duration: number = 0;
   @State isPlaying: boolean = false;
@@ -47,19 +47,20 @@ struct PlaybackPage {
   @State isLoading: boolean = true;
   @State controlsTimeout: number | null = null;
   @State lastProgressSaveTime: number = 0;
-  @State saveProgressInterval: number = 30000; // 30秒保存一次进�?  @State searchFocused: boolean = false;
+  @State saveProgressInterval: number = 30000; // 30秒保存一次进度
+  @State searchFocused: boolean = false;
   private autoSwitchSourceOnError: boolean = true; // 是否自动切换片源
-  private lastSaveTime: number = 0; // 上次保存进度的时�?毫秒)
+  private lastSaveTime: number = 0; // 上次保存进度的时�?毫秒)
   private currentPosition: number = 0; // 当前播放位置
   private totalTime: number = 0;
   
-  // 初始�?  /**
-   * 页面加载时调�?   */
+  // 初始�?  /**
+   * 页面加载时调�?   */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'PlaybackPage appeared');
     
     // 获取路由参数
-    const params = this.context.router.getParams();
+    const params = Router.getParams();
     this.mediaId = (params?.mediaId as string) || '';
     this.siteKey = (params?.siteKey as string) || '';
     this.episodeId = params?.episodeId;
@@ -68,38 +69,38 @@ struct PlaybackPage {
     this.episodeName = (params?.episodeName as string) || '';
     this.playSource = params?.playSource;
     this.playSourceIndex = (params?.playSourceIndex as number) || 0;
-    this.autoSwitchSourceOnError = params?.autoSwitchSourceOnError !== false; // 默认开�?    
-    Logger.info(this.TAG, `Starting playback for: ${this.siteKey}:${this.mediaId}${this.episodeId ? ` episode: ${this.episodeId}` : ''}, startPosition=${this.initialPosition}`);
+    this.autoSwitchSourceOnError = params?.autoSwitchSourceOnError !== false; // 默认开�?    
+    Logger.info(this.TAG, `Starting playback for: ${this.siteKey}:${this.mediaId}`, `${this.episodeId ? ` episode: ${this.episodeId}` : ''}, startPosition=${this.initialPosition}`);
     
     // 初始化播放器
     this.initializePlayback();
     
-    // 设置控制栏自动隐�?    this.startControlsTimeout();
+    // 设置控制栏自动隐�?    this.startControlsTimeout();
   }
   
   /**
-     * 页面卸载时调�?     */
+     * 页面卸载时调�?     */
     aboutToDisappear(): void {
       Logger.info(this.TAG, 'PlaybackPage disappeared');
       this.cleanupPlayer();
     }
 
     /**
-     * 清理播放器资�?     */
+     * 清理播放器资�?     */
     private cleanupPlayer(): void {
-      // 移除播放监听�?      playbackService.removeAllListeners();
+      // 移除播放监听�?      playbackService.removeAllListeners();
       
-      // 保存最终播放进�?    this.savePlayProgress(this.currentPosition);
+      // 保存最终播放进�?    this.savePlayProgress(this.currentPosition);
     
-    // 停止控制栏超�?    this.stopControlsTimeout();
+    // 停止控制栏超�?    this.stopControlsTimeout();
     
-    // 释放播放器资�?    this.releasePlayer();
+    // 释放播放器资�?    this.releasePlayer();
     playbackService.stop();
     playbackService.destroy();
   }
   
   /**
-   * 初始化播�?   */
+   * 初始化播�?   */
   private initializePlayback(): void {
     if (!this.mediaId || !this.siteKey) {
       this.errorMessage = '缺少必要参数';
@@ -109,10 +110,10 @@ struct PlaybackPage {
     }
     
     try {
-      // 加载播放�?      this.loadPlaySources().then(() => {
-        // 初始化过滤后的片源列�?        this.filteredSources = [...this.playSources];
+      // 加载播放�?      this.loadPlaySources().then(() => {
+        // 初始化过滤后的片源列�?        this.filteredSources = [...this.playSources];
         
-        // 设置播放源并开始播�?        if (this.playSource) {
+        // 设置播放源并开始播�?        if (this.playSource) {
           this.setupPlayback(this.playSource);
         } else if (this.playSources.length > 0 && this.playSourceIndex < this.playSources.length) {
           this.setupPlayback(this.playSources[this.playSourceIndex]);
@@ -122,23 +123,23 @@ struct PlaybackPage {
           this.playbackState = PlaybackState.ERROR;
         }
       }).catch((error) => {
-        Logger.error(this.TAG, 'Failed to initialize playback', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)))));
-        this.errorMessage = '播放初始化失�?;
+        Logger.error(this.TAG, 'Failed to initialize playback', error as Error);
+        this.errorMessage = '播放初始化失�?;
         this.isLoading = false;
         this.playbackState = PlaybackState.ERROR;
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize playback: ${error}`);
-      this.errorMessage = '播放初始化失�?;
+      Logger.error(this.TAG, `Failed to initialize playback`, `${error}`);
+      this.errorMessage = '播放初始化失�?;
       this.isLoading = false;
       this.playbackState = PlaybackState.ERROR;
     }
   }
   
   /**
-   * 加载播放�?   */
+   * 加载播放�?   */
   private loadPlaySources(): Promise<void> {
-    return new Promise<void>((resolve, reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject instanceof Error ? reject instanceof Error ? reject : new Error(String(reject : new Error(String(reject instanceof Error ? reject : new Error(String(reject))))))) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         // 如果没有传入播放源，则从服务获取
         if (!this.playSource || this.playSources.length === 0) {
@@ -150,19 +151,19 @@ struct PlaybackPage {
             this.playSources = sources;
             Logger.info(this.TAG, `Loaded ${this.playSources.length} play sources`);
             
-            // 如果只有一个播放源，则使用�?            if (this.playSources.length === 1 && !this.playSource) {
+            // 如果只有一个播放源，则使用�?            if (this.playSources.length === 1 && !this.playSource) {
               this.playSource = this.playSources[0];
             }
             resolve();
           }).catch((error) => {
-            Logger.error(this.TAG, `Failed to load play sources: ${error}`);
+            Logger.error(this.TAG, `Failed to load play sources`, `${error}`);
             reject(error);
           });
         } else {
           resolve();
         }
       } catch (error) {
-        Logger.error(this.TAG, `Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}` instanceof Error ? `Failed to load play sources: ${error}` : new Error(String(`Failed to load play sources: ${error}`)))))));
+        Logger.error(this.TAG, `Failed to load play sources`, `${error}`);
         reject(error);
       }
     });
@@ -173,9 +174,9 @@ struct PlaybackPage {
    */
   private setupPlayback(source: PlaySource): void {
     try {
-      // 添加播放监听�?      this.addPlaybackListeners();
+      // 添加播放监听�?      this.addPlaybackListeners();
       
-      // 设置播放�?      playbackService.setSource(source, {
+      // 设置播放�?      playbackService.setSource(source, {
         autoPlay: true,
         startPosition: this.initialPosition,
         volume: this.volume,
@@ -185,9 +186,9 @@ struct PlaybackPage {
         this.playSource = source;
         this.isLoading = false;
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to setup playback: ${error}`);
+        Logger.error(this.TAG, `Failed to setup playback`, `${error}`);
         
-        // 尝试自动切换到下一个片�?        if (this.autoSwitchSourceOnError) {
+        // 尝试自动切换到下一个片�?        if (this.autoSwitchSourceOnError) {
           this.handlePlaybackError(error);
         } else {
           this.errorMessage = '播放设置失败';
@@ -196,9 +197,9 @@ struct PlaybackPage {
         }
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}` instanceof Error ? `Failed to setup playback: ${error}` : new Error(String(`Failed to setup playback: ${error}`)))))));
+      Logger.error(this.TAG, `Failed to setup playback`, `${error}`);
       
-      // 尝试自动切换到下一个片�?      if (this.autoSwitchSourceOnError) {
+      // 尝试自动切换到下一个片�?      if (this.autoSwitchSourceOnError) {
         this.handlePlaybackError(error);
       } else {
         this.errorMessage = '播放设置失败';
@@ -209,7 +210,7 @@ struct PlaybackPage {
   }
   
   /**
-   * 添加播放监听�?   */
+   * 添加播放监听�?   */
   private addPlaybackListeners(): void {
     playbackService.addListener({
       onStateChanged: (state) => {
@@ -227,7 +228,7 @@ struct PlaybackPage {
       },
       
       onError: (error: Error) => {
-        Logger.error(this.TAG, `Playback error: ${error}`);
+        Logger.error(this.TAG, `Playback error`, `${error}`);
         
         // 尝试自动切换片源
         if (this.autoSwitchSourceOnError) {
@@ -235,40 +236,16 @@ struct PlaybackPage {
         } else {
           this.errorMessage = `播放错误: ${error.message || '未知错误'}`;
         }
-      }, // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration instanceof Error ? // 定期保存播放进度
-      onTimeUpdate: (currentTime, duration : new Error(String(// 定期保存播放进度
-      onTimeUpdate: (currentTime, duration))))))) => {
+      },
+      
+      // 定期保存播放进度
+      onTimeUpdate: (currentTime, duration) => {
         this.currentTime = currentTime;
         this.currentPosition = currentTime;
         this.duration = duration;
         this.totalTime = duration || this.totalTime;
         
-        // �?0秒保存一次播放进�?        if (this.lastSaveTime === 0 || currentTime - this.lastSaveTime > 10000) {
+        // �?0秒保存一次播放进�?        if (this.lastSaveTime === 0 || currentTime - this.lastSaveTime > 10000) {
           this.savePlayProgress(currentTime);
           this.lastSaveTime = currentTime;
         }
@@ -293,7 +270,7 @@ struct PlaybackPage {
    */
   private handlePlaybackCompleted(): void {
     try {
-      // 保存完成的播放状�?      historyService.updateProgress(
+      // 保存完成的播放状�?      historyService.updateProgress(
         this.mediaId,
         this.siteKey,
         this.duration, // 标记为已完成
@@ -302,11 +279,11 @@ struct PlaybackPage {
       ).then(() => {
         Toast.show('播放完成');
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to handle playback completed: ${error}`);
+        Logger.error(this.TAG, `Failed to handle playback completed`, `${error}`);
         Toast.show('播放完成');
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}` instanceof Error ? `Failed to handle playback completed: ${error}` : new Error(String(`Failed to handle playback completed: ${error}`)))))));
+      Logger.error(this.TAG, `Failed to handle playback completed`, `${error}`);
       Toast.show('播放完成');
     }
   }
@@ -314,17 +291,26 @@ struct PlaybackPage {
   /**
    * 保存播放进度
    */
-  private savePlaybackProgress(): void {
+  private savePlayProgress(position: number): void {
+    if (!this.mediaId || !this.siteKey || !this.episodeId) return;
+    
     try {
-      playbackService.savePlaybackPosition(
-        this.mediaId,
+      const duration = this.totalTime || this.duration;
+      
+      // 保存播放进度到历史记录
+      historyService.saveWatchProgress(
+        this.mediaId, 
         this.siteKey,
-        this.episodeId
-      ).catch((error) => {
-        Logger.error(this.TAG, `Failed to save playback progress: ${error}`);
+        this.episodeId,
+        position,
+        duration
+      ).then(() => {
+        Logger.info(this.TAG, `Saved playback progress: ${position}ms of ${duration}ms`);
+      }).catch((error) => {
+        Logger.error(this.TAG, `Failed to save play progress`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}` instanceof Error ? `Failed to save playback progress: ${error}` : new Error(String(`Failed to save playback progress: ${error}`)))))));
+      Logger.error(this.TAG, `Failed to save play progress`, `${error}`);
     }
   }
   
@@ -342,12 +328,12 @@ struct PlaybackPage {
         (source.description && source.description.toLowerCase().includes(searchLower))
       );
     } else {
-      // 如果搜索文本为空，显示所有片�?      this.filteredSources = [...this.playSources];
+      // 如果搜索文本为空，显示所有片�?      this.filteredSources = [...this.playSources];
     }
   }
   
   /**
-   * 处理搜索框焦点变�?   */
+   * 处理搜索框焦点变�?   */
   private handleSearchFocusChange(focused: boolean) {
     this.searchFocused = focused;
   }
@@ -367,34 +353,31 @@ struct PlaybackPage {
     try {
       if (this.isPlaying) {
         playbackService.pause().catch((error) => {
-          Logger.error(this.TAG, `Failed to pause playback: ${error}`);
+          Logger.error(this.TAG, `Failed to pause playback`, `${error}`);
         });
       } else {
         playbackService.play().catch((error) => {
-          Logger.error(this.TAG, `Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` : new Error(String(`Failed to play: ${error}` instanceof Error ? `Failed to play: ${error}` : new Error(String(`Failed to play: ${error}`)))))));
+          Logger.error(this.TAG, `Failed to play`, `${error}`);
         });
       }
       
       this.showControls = true;
       this.restartControlsTimeout();
     } catch (error) {
-      Logger.error(this.TAG, `Failed to toggle play/pause: ${error}`);
+      Logger.error(this.TAG, `Failed to toggle play/pause`, `${error}`);
     }
   }
   
   /**
-   * 处理进度条变�?   */
+   * 处理进度条变�?   */
   private handleProgressChange(value: number): void {
     try {
       const seekTime = (value / 100) * this.duration;
-      playbackService.seekTo(seekTime).then(() => {
-        this.showControls = true;
-        this.restartControlsTimeout();
-      }).catch((error) => {
-        Logger.error(this.TAG, `Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}` instanceof Error ? `Failed to seek: ${error}` : new Error(String(`Failed to seek: ${error}`)))))));
+      playbackService.seekTo(seekTime).catch((error) => {
+        Logger.error(this.TAG, `Failed to seek`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to seek: ${error}`);
+      Logger.error(this.TAG, `Failed to seek`, `${error}`);
     }
   }
   
@@ -408,10 +391,10 @@ struct PlaybackPage {
         this.isMuted = false;
       }
       playbackService.setVolume(value).catch((error) => {
-        Logger.error(this.TAG, `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}` instanceof Error ? `Failed to set volume: ${error}` : new Error(String(`Failed to set volume: ${error}`)))))));
+        Logger.error(this.TAG, `Failed to set volume`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to set volume: ${error}`);
+      Logger.error(this.TAG, `Failed to set volume`, `${error}`);
     }
   }
   
@@ -424,10 +407,10 @@ struct PlaybackPage {
       playbackService.setMuted(newMuteState).then(() => {
         this.isMuted = newMuteState;
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}` instanceof Error ? `Failed to toggle mute: ${error}` : new Error(String(`Failed to toggle mute: ${error}`)))))));
+        Logger.error(this.TAG, `Failed to toggle mute`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to toggle mute: ${error}`);
+      Logger.error(this.TAG, `Failed to toggle mute`, `${error}`);
     }
   }
   
@@ -440,151 +423,23 @@ struct PlaybackPage {
       playbackService.setPlaybackSpeed(speed).then(() => {
         this.showSpeedMenu = false;
       }).catch((error) => {
-        Logger.error(this.TAG, `Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}` instanceof Error ? `Failed to set playback speed: ${error}` : new Error(String(`Failed to set playback speed: ${error}`)))))));
+        Logger.error(this.TAG, `Failed to set playback speed`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to set playback speed: ${error}`);
+      Logger.error(this.TAG, `Failed to set playback speed`, `${error}`);
     }
   }
   
   /**
-   * 保存播放进度
-   */
-  private savePlayProgress(position: number): void {
-    if (!this.mediaId || !this.siteKey || !this.episodeId) return;
-    
-    try {
-      const duration = this.totalTime || this.duration;
-      
-      // 保存播放进度到历史记�?      historyService.saveWatchProgress(
-        this.mediaId, this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       instanceof Error ? this.siteKey,
-        this.episodeId,
-        position,
-        duration
-       : new Error(String(this.siteKey,
-        this.episodeId,
-        position,
-        duration
-      ))))))).then(() => {
-        Logger.info(this.TAG, `Saved playback progress: ${position}ms of ${duration}ms`);
-      }).catch((error) => {
-        Logger.error(this.TAG, `Failed to save play progress: ${error}`);
-      });
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}` instanceof Error ? `Failed to save play progress: ${error}` : new Error(String(`Failed to save play progress: ${error}`)))))));
-    }
-  }
-  
-  /**
-   * 处理播放错误，尝试切换到下一个可用片�?   */
+   * 处理播放错误，尝试切换到下一个可用片�?   */
   private handlePlaybackError(error: Error): void {
     if (!this.playSources || this.playSources.length <= 1) {
-      this.errorMessage = '播放失败，暂无可用备用片�?;
+      this.errorMessage = '播放失败，暂无可用备用片�?;
       this.isLoading = false;
       return;
     }
     
-    // 查找当前片源的索�?    const currentIndex = this.playSources.findIndex(s => 
+    // 查找当前片源的索�?    const currentIndex = this.playSources.findIndex(s => 
       s.id === this.playSource?.id || 
       (s.name === this.playSource?.name && s.url === this.playSource?.url)
     );
@@ -593,7 +448,7 @@ struct PlaybackPage {
     let nextIndex = (currentIndex + 1) % this.playSources.length;
     
     if (currentIndex !== -1) {
-      Logger.info(this.TAG, `尝试切换到下一个片�? ${nextIndex}，原片源: ${currentIndex}`);
+      Logger.info(this.TAG, `尝试切换到下一个片源 ${nextIndex}，原片源: ${currentIndex}`);
       
       // 显示切换提示
       this.errorMessage = `当前片源播放失败，正在尝试切换到备用片源(${nextIndex + 1}/${this.playSources.length})...`;
@@ -601,16 +456,16 @@ struct PlaybackPage {
       // 保存当前播放位置
       const currentPosition = this.currentPosition;
       
-      // 切换到下一个片�?      this.initialPosition = currentPosition; // 保持相同的播放位�?      this.setupPlayback(this.playSources[nextIndex]);
+      // 切换到下一个片�?      this.initialPosition = currentPosition; // 保持相同的播放位�?      this.setupPlayback(this.playSources[nextIndex]);
       this.errorMessage = '';
     } else {
-      this.errorMessage = '播放失败，无法识别当前片�?;
+      this.errorMessage = '播放失败，无法识别当前片�?;
       this.isLoading = false;
     }
   }
   
   /**
-   * 切换播放�?   */
+   * 切换播放�?   */
   private switchPlaySource(source: PlaySource): void {
     try {
       this.isLoading = true;
@@ -619,11 +474,11 @@ struct PlaybackPage {
       // 保存当前播放位置
       const currentPosition = this.currentPosition;
       
-      // 设置新的播放�?      this.setupPlayback(source);
+      // 设置新的播放�?      this.setupPlayback(source);
       
       // 恢复播放位置
       if (currentPosition > 0) {
-        playbackService.seek(currentPosition).catch((error) => {
+        playbackService.seekTo(currentPosition).catch((error) => {
           Logger.error(this.TAG, `Failed to seek to position after switching source: ${error}`);
         });
       }
@@ -634,8 +489,8 @@ struct PlaybackPage {
       // 显示切换成功提示
       Toast.show('片源切换成功');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}` instanceof Error ? `Failed to switch play source: ${error}` : new Error(String(`Failed to switch play source: ${error}`)))))));
-      this.errorMessage = '切换播放源失�?;
+      Logger.error(this.TAG, `Failed to switch play source`, `${error}`);
+      this.errorMessage = '切换播放源失�?;
       this.isLoading = false;
       this.playbackState = PlaybackState.ERROR;
     }
@@ -654,8 +509,8 @@ struct PlaybackPage {
    * 处理返回
    */
   private handleBack(): void {
-    // 先保存进�?    this.savePlaybackProgress();
-    this.context.router.back();
+    // 先保存进�?    this.savePlayProgress(this.currentPosition);
+    Router.back();
   }
   
   /**
@@ -690,7 +545,7 @@ struct PlaybackPage {
   }
   
   /**
-   * 停止控制栏超�?   */
+   * 停止控制栏超�?   */
   private stopControlsTimeout(): void {
     if (this.controlsTimeout) {
       clearTimeout(this.controlsTimeout);
@@ -699,24 +554,24 @@ struct PlaybackPage {
   }
   
   /**
-   * 释放播放器资�?   */
+   * 释放播放器资�?   */
   private releasePlayer(): void {
     try {
       // 保存当前播放进度
-      this.savePlaybackProgress();
+      this.savePlayProgress(this.currentPosition);
       
-      // 移除播放监听�?      playbackService.removeAllListeners();
+      // 移除播放监听�?      playbackService.removeAllListeners();
       
-      // 释放播放器资�?      playbackService.release().catch((error) => {
-        Logger.error(this.TAG, `Failed to release player: ${error}`);
+      // 释放播放器资�?      playbackService.release().catch((error) => {
+        Logger.error(this.TAG, `Failed to release player`, `${error}`);
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}` instanceof Error ? `Failed to release player: ${error}` : new Error(String(`Failed to release player: ${error}`)))))));
+      Logger.error(this.TAG, `Failed to release player`, `${error}`);
     }
   }
   
   /**
-   * 格式化时�?   */
+   * 格式化时�?   */
   private formatTime(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -729,81 +584,88 @@ struct PlaybackPage {
   }
   
   /**
-   * 渲染加载状�?   */
+   * 渲染加载状态
+   */
   @Builder
   private renderLoading(): void {
-    Stack({ className: "loading-overlay" }) {
-      LoadingProgress({ className: "loading-progress", color: "#FF4500" })
-      Text("正在加载...").className("loading-text")
+    Stack() {
+      LoadingProgress({ color: "#FF4500" })
+      Text("正在加载...")
       if (this.bufferPercentage > 0) {
-        Text(`已缓�?${this.bufferPercentage}%`).className("buffer-text")
+        Text(`已缓存${this.bufferPercentage}%`)
       }
     }
   }
   
   /**
-   * 渲染错误状�?   */
+   * 渲染错误状态
+   */
   @Builder
   private renderError(): void {
-    Stack({ className: "error-overlay" }) {
-      Text("⚠️").className("error-icon")
-      Text(this.errorMessage).className("error-message")
-      Button({ className: "retry-button", onClick: () => this.initializePlayback() }) {
+    Stack() {
+      Text("⚠️")
+      Text(this.errorMessage)
+      Button() {
         Text("重试")
       }
+      .onClick(() => this.initializePlayback())
     }
   }
   
   /**
-   * 渲染顶部控制�?   */
+   * 渲染顶部控制栏
+   */
   @Builder
   private renderTopControls(): void {
-    Stack({ className: "top-controls" }) {
-      Button({ className: "back-button", onClick: this.handleBack }) {
-        Text("�?返回")
+    Stack() {
+      Button() {
+        Text("返回")
       }
-      Stack({ className: "title-container" }) {
-        Text(this.mediaTitle).className("media-title").numberOfLines(1)
+      .onClick(this.handleBack)
+      Stack() {
+        Text(this.mediaTitle).numberOfLines(1)
         if (this.episodeName) {
-          Text(this.episodeName).className("episode-name").numberOfLines(1)
+          Text(this.episodeName).numberOfLines(1)
         }
       }
-      Button({ className: "settings-button", onClick: () => this.showSpeedMenu = !this.showSpeedMenu }) {
+      Button() {
         Text(`${this.playbackSpeed}x`)
       }
+      .onClick(() => this.showSpeedMenu = !this.showSpeedMenu)
     }
   }
   
   /**
-   * 渲染底部控制�?   */
+   * 渲染底部控制栏
+   */
   @Builder
   private renderBottomControls(): void {
-    Stack({ className: "bottom-controls" }) {
-      Button({ className: "play-pause-button", onClick: this.togglePlayPause }) {
-        Text(this.isPlaying ? '�? : '�?)
+    Stack() {
+      Button() {
+        Text(this.isPlaying ? '暂停' : '播放')
       }
+      .onClick(this.togglePlayPause)
       
-      Stack({ className: "progress-container" }) {
+      Stack() {
         Slider({ 
-          className: "progress-slider",
           value: (this.currentTime / this.duration) * 100 || 0,
           min: 0,
           max: 100,
           onChange: this.handleProgressChange 
         })
-        Flex({ className: "time-display" }) {
-          Text(this.formatTime(this.currentTime)).className("current-time")
-          Text(this.formatTime(this.duration)).className("duration")
+        Flex() {
+          Text(this.formatTime(this.currentTime))
+          Text(this.formatTime(this.duration))
         }
       }
       
-      Button({ className: "mute-button", onClick: this.toggleMute }) {
+      Button() {
         Text(this.isMuted ? '🔇' : '🔊')
       }
+      .onClick(this.toggleMute)
       
-      Stack({ className: "volume-container" }) {
+      Stack() {
         Slider({ 
-          className: "volume-slider",
           value: this.volume * 100,
           min: 0,
           max: 100,
@@ -811,13 +673,15 @@ struct PlaybackPage {
         })
       }
       
-      Button({ className: "source-button", onClick: () => this.showSourceMenu = !this.showSourceMenu }) {
-        Text("�?)
+      Button() {
+        Text("切换源")
       }
+      .onClick(() => this.showSourceMenu = !this.showSourceMenu)
       
-      Button({ className: "fullscreen-button", onClick: this.toggleFullscreen }) {
-        Text(this.isFullscreen ? '�? : '�?)
+      Button() {
+        Text(this.isFullscreen ? '退出全屏' : '全屏')
       }
+      .onClick(this.toggleFullscreen)
     }
   }
   
@@ -828,227 +692,166 @@ struct PlaybackPage {
   private renderSpeedMenu(): void {
     if (!this.showSpeedMenu) return;
     
-    Stack({ className: "speed-menu" }) {
+    Stack() {
       playbackService.getSupportedPlaybackSpeeds().forEach((speed) => {
-        Button({ 
-          key: speed.toString(),
-          className: `speed-option ${this.playbackSpeed === speed ? 'selected' : ''}`,
-          onClick: () => this.setPlaybackSpeed(speed) 
-        }) {
+        Button() {
           Text(playbackService.getPlaybackSpeedText(speed))
         }
+        .onClick(() => this.setPlaybackSpeed(speed))
       })
     }
   }
   
   /**
-   * 渲染播放源菜�?   */
+   * 渲染播放源菜单
+   */
   @Builder
   private renderSourceMenu(): void {
     if (!this.showSourceMenu) return;
     
-    Stack({
-      style: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#4CAF50',
-        height: '80%',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        padding: 20,
-        zIndex: 1000
-      }
-    }) {
+    Stack() {
       // 菜单标题
-      Flex({
-        style: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 20
-        }
-      }) {
+      Flex() {
         Text('切换片源')
           .fontSize(28)
           .fontColor('#FFFFFF')
           .fontWeight(700)
-        Button({
-          style: {
-            backgroundColor: 'transparent'
-          },
-          onClick: () => this.showSourceMenu = false
-        }) {
-          Text('�?)
+        Button() {
+          Text('关闭')
             .fontSize(24)
             .fontColor('#FFFFFF')
         }
+        .onClick(() => this.showSourceMenu = false)
       }
     
-      // 搜索�?      Stack({
-        style: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#FFFFFF',
-          borderRadius: 25,
-          paddingHorizontal: 20,
-          marginBottom: 20,
-          height: 50
-        }
-      }) {
+      // 搜索框
+      Stack() {
         Text('🔍')
           .fontSize(24)
           .fontColor('#999999')
           .margin({ right: 10 })
         TextInput({
-          style: {
-            flex: 1,
-            fontSize: 24,
-            color: '#333333'
-          },
           value: this.searchText,
-          onChange: (text) => this.handleSearchChange(text),
-          onFocusChange: (focused) => this.handleSearchFocusChange(focused),
           placeholder: '搜索片源...',
           placeholderColor: '#999999'
         })
+        .onChange((text) => this.handleSearchChange(text))
+        .onFocusChange((focused) => this.handleSearchFocusChange(focused))
         if (this.searchText.length > 0) {
-          Button({
-            style: {
-              backgroundColor: 'transparent'
-            },
-            onClick: () => this.clearSearchText()
-          }) {
-            Text('�?)
-          .fontSize(24)
-          .fontColor('#999999')
+          Button() {
+            Text('清除')
+            .fontSize(24)
+            .fontColor('#999999')
           }
+          .onClick(() => this.clearSearchText())
         }
       }
       
       // 搜索结果数量提示
-      Text(`共找�?${this.filteredSources.length} 个片源`)
+      Text(`共找到${this.filteredSources.length} 个片源`)
         .fontSize(24)
         .fontColor('#FFFFFF')
         .fontWeight(600)
         .margin({ bottom: 10 })
     
       // 片源列表
-      List({
-        style: {
-          flex: 1,
-          backgroundColor: 'transparent'
-        },
-        divider: {
-          strokeWidth: 1,
-          color: '#FFFFFF',
-          startMargin: 0,
-          endMargin: 0
-        }
-      }) {
-        this.filteredSources.forEach((source, index) => {
-          ListItem({
-            key: source.id,
-            style: {
-              backgroundColor: this.playSource?.id === source.id ? '#FFFFFF' : 'transparent',
-              borderRadius: 10,
-              marginBottom: 10,
-              padding: 15
-            },
-            onClick: () => this.switchPlaySource(source)
-          }) {
-            Flex({
-              style: {
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }
-            }) {
+      List() {
+        ForEach(this.filteredSources, (source, index) => {
+          ListItem() {
+            Flex() {
               // 片源信息
-              Flex({
-                style: {
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  flex: 1
-                }
-              }) {
-                Text(source.name || `播放�?{index + 1}`)
-                  .fontSize(26)
-                  .fontColor(this.playSource?.id === source.id ? '#4CAF50' : '#FFFFFF')
-                  .fontWeight(600)
-                  .margin({ bottom: 5 })
-                Text(source.url)
-                  .fontSize(22)
-                  .fontColor(this.playSource?.id === source.id ? '#666666' : '#CCCCCC')
-              }
-              
-              // 质量标签
-              if (source.quality) {
-                Flex({
-                  style: {
-                    backgroundColor: '#FFEB3B',
-                    paddingHorizontal: 12,
-                    paddingVertical: 4,
-                    borderRadius: 12
-                  }
-                }) {
-                  Text(source.quality)
-                    .fontSize(20)
-                    .fontColor('#000000')
-                    .fontWeight(700)
-                }
-              }
-              
-              // 选中标记
-              if (this.playSource?.id === source.id) {
-                Text('�?)
+              Flex() {
+                Text(source.name || `片源 ${index + 1}`)
                   .fontSize(24)
-                  .fontColor('#4CAF50')
+                  .fontColor(this.playSource?.id === source.id ? '#333333' : '#FFFFFF')
+                  .fontWeight(700)
+                if (source.description) {
+                  Text(source.description)
+                    .fontSize(18)
+                    .fontColor(this.playSource?.id === source.id ? '#666666' : '#CCCCCC')
+                    .margin({ top: 5 })
+                    .numberOfLines(2)
+                }
+              }
+              
+              // 当前播放标记
+              if (this.playSource?.id === source.id) {
+                Text('正在播放')
+                  .fontSize(18)
+                  .fontColor('#FF4500')
+                  .fontWeight(700)
+                  .backgroundColor('#FFFF00')
+                  .padding({ left: 10, right: 10, top: 5, bottom: 5 })
+                  .borderRadius(15)
               }
             }
           }
-        }
+          .onClick(() => this.switchPlaySource(source))
+        })
+      }
     }
   }
   
   /**
-   * 组件渲染
+   * 渲染字幕菜单
+   */
+  @Builder
+  private renderSubtitleMenu(): void {
+    if (!this.showSubtitleMenu) return;
+    
+    Stack() {
+      Text("字幕菜单")
+        .fontSize(24)
+        .fontColor("#FFFFFF")
+        .margin({ bottom: 20 })
+      
+      Button() {
+        Text("关闭菜单")
+      }
+      .onClick(() => this.showSubtitleMenu = false)
+    }
+  }
+  
+  /**
+   * 渲染播放控制界面
    */
   build() {
-    Stack({ className: `playback-page ${this.isFullscreen ? 'fullscreen' : ''}`, onClick: this.handleScreenTap }) {
+    Stack()
+    .onClick(this.handleScreenTap) {
       // 视频播放区域
-      Stack({ className: "video-container" }) {
-        // 这里应该使用实际的视频播放器组件
-        // 由于HarmonyOS的Video组件具体API可能不同，这里用占位符表�?        Image("https://via.placeholder.com/1920x1080?text=Video+Player")
-          .className("video-placeholder")
-          .objectFit("cover")
-        
-        // 加载状�?        if (this.isLoading) {
-          this.renderLoading();
-        }
-        
-        // 错误状�?        if (this.errorMessage) {
-          this.renderError();
-        }
-        
-        // 播放控制界面
-        if (this.showControls) {
-          Stack({ className: "controls-overlay" }) {
-            this.renderTopControls();
-            this.renderBottomControls();
-          }
-        }
-        
-        // 播放速度菜单
-        this.renderSpeedMenu();
-        
-        // 播放源菜�?        this.renderSourceMenu();
+      Video({
+        src: this.playSource?.url || "",
+        autoPlay: true,
+        objectFit: VideoFit.COVER
+      })
+      
+      // 加载状态
+      if (this.isLoading && this.playbackState !== PlaybackState.ERROR) {
+        this.renderLoading();
       }
+      
+      // 错误状态
+      if (this.playbackState === PlaybackState.ERROR) {
+        this.renderError();
+      }
+      
+      // 控制栏
+      if (this.showControls) {
+        // 顶部控制栏
+        this.renderTopControls();
+        
+        // 底部控制栏
+        this.renderBottomControls();
+      }
+      
+      // 速度菜单
+      this.renderSpeedMenu();
+      
+      // 播放源菜单
+      this.renderSourceMenu();
+      
+      // 字幕菜单
+      this.renderSubtitleMenu();
     }
   }
 }
-
-export default PlaybackPage;
-
-

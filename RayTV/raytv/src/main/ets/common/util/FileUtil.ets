@@ -1,4 +1,5 @@
-// FileUtil - 文件操作工具�?import fs from '@ohos.file.fs';
+// FileUtil - 文件操作工具
+import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import Logger from './Logger';
 import UIAbilityContext from '@ohos.app.ability.UIAbilityContext';
@@ -7,13 +8,13 @@ import JsonUtil, { safeStringify } from './JsonUtil';
 const TAG = 'FileUtil';
 
 /**
- * 文件操作工具�? * 提供文件的读写、创建、删除等基本操作
+ * 文件操作工具�? * 提供文件的读写、创建、删除等基本操作
  */
 export default class FileUtil {
   /**
    * 读取文件内容
    * @param filePath 文件路径
-   * @returns 文件内容字符�?   */
+   * @returns 文件内容字符�?   */
   public static async readFile(filePath: string): Promise<string> {
     try {
       const file = await fs.open(filePath, fs.OpenMode.READ_ONLY);
@@ -63,8 +64,8 @@ export default class FileUtil {
   }
 
   /**
-   * 追加内容到文�?   * @param filePath 文件路径
-   * @param content 追加的内�?   */
+   * 追加内容到文�?   * @param filePath 文件路径
+   * @param content 追加的内�?   */
   public static async appendFile(filePath: string, content: string): Promise<void> {
     try {
       // 确保目录存在
@@ -128,7 +129,7 @@ export default class FileUtil {
   }
 
   /**
-   * 确保目录存在，如果不存在则创�?   * @param dirPath 目录路径
+   * 确保目录存在，如果不存在则创�?   * @param dirPath 目录路径
    */
   public static async ensureDirExists(dirPath: string): Promise<void> {
     try {
@@ -141,7 +142,7 @@ export default class FileUtil {
   }
 
   /**
-   * 判断文件或目录是否存�?   * @param path 路径
+   * 判断文件或目录是否存�?   * @param path 路径
    * @returns 是否存在
    */
   public static async exists(path: string): Promise<boolean> {
@@ -185,7 +186,7 @@ export default class FileUtil {
 
   /**
    * 复制文件
-   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
+   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
    */
   public static async copyFile(srcPath: string, destPath: string): Promise<void> {
     try {
@@ -201,7 +202,7 @@ export default class FileUtil {
 
   /**
    * 移动文件
-   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
+   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
    */
   public static async moveFile(srcPath: string, destPath: string): Promise<void> {
     try {
@@ -216,7 +217,7 @@ export default class FileUtil {
   }
 
   /**
-   * 获取文件扩展�?   * @param filename 文件�?   * @returns 文件扩展�?   */
+   * 获取文件扩展�?   * @param filename 文件�?   * @returns 文件扩展�?   */
   public static getFileExtension(filename: string): string {
     const lastDotIndex = filename.lastIndexOf('.');
     return lastDotIndex > 0 ? filename.slice(lastDotIndex + 1).toLowerCase() : '';
@@ -224,7 +225,7 @@ export default class FileUtil {
 
   /**
    * 获取文件名（不含扩展名）
-   * @param filename 文件�?   * @returns 文件名（不含扩展名）
+   * @param filename 文件�?   * @returns 文件名（不含扩展名）
    */
   public static getFileNameWithoutExtension(filename: string): string {
     const lastDotIndex = filename.lastIndexOf('.');
@@ -232,7 +233,7 @@ export default class FileUtil {
   }
 
   /**
-   * 获取父目录路�?   * @param path 文件或目录路�?   * @returns 父目录路�?   */
+   * 获取父目录路�?   * @param path 文件或目录路�?   * @returns 父目录路�?   */
   public static getParentPath(path: string): string {
     const parts = path.split('/').filter(Boolean);
     parts.pop();
@@ -240,8 +241,8 @@ export default class FileUtil {
   }
 
   /**
-   * 获取文件�?   * @param path 文件路径
-   * @returns 文件�?   */
+   * 获取文件�?   * @param path 文件路径
+   * @returns 文件�?   */
   public static getFileName(path: string): string {
     const parts = path.split('/').filter(Boolean);
     return parts.length > 0 ? parts[parts.length - 1] : '';
@@ -281,17 +282,17 @@ export default class FileUtil {
    */
   public static async getApplicationDataDir(): Promise<string> {
     try {
-      // 使用新的API方式获取应用上下�?      // 获取应用程序上下�?      const context = common.getApplicationContext() as UIAbilityContext;
+      // 使用新的API方式获取应用上下�?      // 获取应用程序上下�?      const context = common.getApplicationContext() as UIAbilityContext;
       return context.filesDir;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.getInstance().error(`${TAG} - Failed to get application data directory: ${errorMessage}`);
-      // 如果获取失败，返回一个默认路�?      return '/data/app/';
+      // 如果获取失败，返回一个默认路�?      return '/data/app/';
     }
   }
 
   /**
-   * 检查文件是否存�?   * @param filePath 文件路径
+   * 检查文件是否存�?   * @param filePath 文件路径
    * @returns 文件是否存在
    */
   public static async isFileExists(filePath: string): Promise<boolean> {

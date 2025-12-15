@@ -1,20 +1,17 @@
-// TypeSafeUtil - 类型安全工具�?
+// TypeSafeUtil - 类型安全工具类
 // 提供统一的类型检查、转换和错误处理方法
 
-/**
- * 类型安全工具�?
- */
 export default class TypeSafeUtil {
   /**
    * 安全地将值转换为对象
-   * @param value 要转换的�?
-   * @returns 转换后的对象，失败时返回空对�?
+   * @param value 要转换的值
+   * @returns 转换后的对象，失败时返回空对象
    */
-  public static asObject(value: Record<string, string | number | boolean | null>): Record<string, unknown> {
+  public static asObject(value: unknown): Record<string, unknown> {
     if (value === null || value === undefined) {
       return {};
     }
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && !Array.isArray(value)) {
       return value as Record<string, unknown>;
     }
     try {
@@ -26,10 +23,10 @@ export default class TypeSafeUtil {
 
   /**
    * 安全地将值转换为数组
-   * @param value 要转换的�?
-   * @returns 转换后的数组，失败时返回空数�?
+   * @param value 要转换的值
+   * @returns 转换后的数组，失败时返回空数组
    */
-  public static asArray<T>(value: Record<string, string | number | boolean | null>): T[] {
+  public static asArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) {
       return value as T[];
     }
@@ -40,12 +37,12 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地将值转换为字符�?
-   * @param value 要转换的�?
-   * @param defaultValue 默认�?
-   * @returns 转换后的字符�?
+   * 安全地将值转换为字符串
+   * @param value 要转换的值
+   * @param defaultValue 默认值
+   * @returns 转换后的字符串
    */
-  public static asString(value: Record<string, string | number | boolean | null>, defaultValue: string = ''): string {
+  public static asString(value: unknown, defaultValue: string = ''): string {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -54,11 +51,11 @@ export default class TypeSafeUtil {
 
   /**
    * 安全地将值转换为数字
-   * @param value 要转换的�?
-   * @param defaultValue 默认�?
+   * @param value 要转换的值
+   * @param defaultValue 默认值
    * @returns 转换后的数字
    */
-  public static asNumber(value: Record<string, string | number | boolean | null>, defaultValue: number = 0): number {
+  public static asNumber(value: unknown, defaultValue: number = 0): number {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -67,11 +64,11 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地将值转换为布尔�?
-   * @param value 要转换的�?
-   * @returns 转换后的布尔�?
+   * 安全地将值转换为布尔值
+   * @param value 要转换的值
+   * @returns 转换后的布尔值
    */
-  public static asBoolean(value: Record<string, string | number | boolean | null>): boolean {
+  public static asBoolean(value: unknown): boolean {
     if (value === null || value === undefined) {
       return false;
     }
@@ -85,14 +82,14 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地访问对象属�?
+   * 安全地访问对象属性
    * @param obj 对象
    * @param key 属性名
-   * @param defaultValue 默认�?
-   * @returns 属性值或默认�?
+   * @param defaultValue 默认值
+   * @returns 属性值或默认值
    */
   public static safeGet<T>(
-    obj: Record<string, string | number | boolean | null>,
+    obj: unknown,
     key: string | number,
     defaultValue: T
   ): T {
@@ -102,16 +99,16 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地设置对象属�?
+   * 安全地设置对象属性
    * @param obj 对象
    * @param key 属性名
-   * @param value 属性�?
+   * @param value 属性值
    * @returns 更新后的对象
    */
   public static safeSet<T>(
     obj: T,
     key: string | number,
-    value: Record<string, string | number | boolean | null>
+    value: unknown
   ): T {
     const safeObj = TypeSafeUtil.asObject(obj);
     safeObj[key] = value;
@@ -119,27 +116,27 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 创建安全的错误对�?
+   * 创建安全的错误对象
    * @param message 错误消息
    * @param cause 错误原因
    * @returns Error对象
    */
-  public static safeError(message: string, cause?: Record<string, string | number | boolean | null>): Error {
+  public static safeError(message: string, cause?: unknown): Error {
     const error = new Error(message);
     if (cause) {
-      // 使用对象展开操作符安全地设置cause属性，避免使用any类型
+      // 使用对象展开操作符安全地设置cause属性
       Object.assign(error, { cause });
     }
     return error;
   }
 
   /**
-   * 安全地检查对象是否有指定属�?
+   * 安全地检查对象是否有指定属性
    * @param obj 对象
    * @param key 属性名
-   * @returns 是否有该属�?
+   * @returns 是否有该属性
    */
-  public static hasProperty(obj: Record<string, string | number | boolean | null>, key: string | number): boolean {
+  public static hasProperty(obj: unknown, key: string | number): boolean {
     if (obj === null || obj === undefined) {
       return false;
     }
@@ -152,22 +149,22 @@ export default class TypeSafeUtil {
   /**
    * 获取对象的所有键
    * @param obj 对象
-   * @returns 键数�?
+   * @returns 键数组
    */
-  public static getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
-    if (obj === null || obj === undefined || typeof obj !== 'object') {
+  public static getObjectKeys(obj: unknown): string[] {
+    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
       return [];
     }
     return Object.keys(obj);
   }
 
   /**
-   * 获取对象的所有�?
+   * 获取对象的所有值
    * @param obj 对象
-   * @returns 值数�?
+   * @returns 值数组
    */
-  public static getObjectValues<T>(obj: Record<string, string | number | boolean | null>): T[] {
-    if (obj === null || obj === undefined || typeof obj !== 'object') {
+  public static getObjectValues<T>(obj: unknown): T[] {
+    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
       return [];
     }
     return Object.values(obj) as T[];
@@ -179,25 +176,25 @@ export default class TypeSafeUtil {
    * @returns 键值对数组
    */
   public static getObjectEntries<T>(
-    obj: Record<string, string | number | boolean | null>
+    obj: unknown
   ): [string, T][] {
-    if (obj === null || obj === undefined || typeof obj !== 'object') {
+    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
       return [];
     }
     return Object.entries(obj) as [string, T][];
   }
 
   /**
-   * 安全地合并多个对�?
+   * 安全地合并多个对象
    * @param target 目标对象
-   * @param sources 源对�?
+   * @param sources 源对象
    * @returns 合并后的对象
    */
   public static mergeObjects<T extends Record<string, unknown>>(
     target: T,
     ...sources: Record<string, unknown>[]
   ): T {
-    const result: Record<string, string | number | boolean | null> = { ... };
+    const result: Record<string, unknown> = { ...target };
     
     sources.forEach(source => {
       const safeSource = TypeSafeUtil.asObject(source);
@@ -227,8 +224,8 @@ export default class TypeSafeUtil {
 
   /**
    * 安全地深拷贝对象
-   * @param value 要拷贝的�?
-   * @returns 拷贝后的新�?
+   * @param value 要拷贝的值
+   * @returns 拷贝后的新值
    */
   public static deepClone<T>(value: T): T {
     if (value === null || value === undefined) {
@@ -263,57 +260,93 @@ export default class TypeSafeUtil {
 
   /**
    * 类型守卫：检查值是否为对象
-   * @param value 要检查的�?
-   * @returns 是否为对�?
+   * @param value 要检查的值
+   * @returns 是否为对象
    */
-  public static isObject(value: Record<string, string | number | boolean | null>): value is Record<string, unknown> {
+  public static isObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
 
   /**
    * 类型守卫：检查值是否为数组
-   * @param value 要检查的�?
-   * @returns 是否为数�?
+   * @param value 要检查的值
+   * @returns 是否为数组
    */
-  public static isArray<T>(value: Record<string, string | number | boolean | null>): value is T[] {
+  public static isArray<T>(value: unknown): value is T[] {
     return Array.isArray(value);
   }
 
   /**
    * 类型守卫：检查值是否为函数
-   * @param value 要检查的�?
-   * @returns 是否为函�?
+   * @param value 要检查的值
+   * @returns 是否为函数
    */
-  public static isFunction(value: Record<string, string | number | boolean | null>): value is Function {
+  public static isFunction(value: unknown): value is Function {
     return typeof value === 'function';
   }
 
   /**
+   * 类型守卫：检查值是否为字符串
+   * @param value 要检查的值
+   * @returns 是否为字符串
+   */
+  public static isString(value: unknown): value is string {
+    return typeof value === 'string';
+  }
+
+  /**
+   * 类型守卫：检查值是否为数字
+   * @param value 要检查的值
+   * @returns 是否为数字
+   */
+  public static isNumber(value: unknown): value is number {
+    return typeof value === 'number';
+  }
+
+  /**
+   * 类型守卫：检查值是否为布尔值
+   * @param value 要检查的值
+   * @returns 是否为布尔值
+   */
+  public static isBoolean(value: unknown): value is boolean {
+    return typeof value === 'boolean';
+  }
+
+  /**
+   * 类型守卫：检查值是否为null或undefined
+   * @param value 要检查的值
+   * @returns 是否为null或undefined
+   */
+  public static isNullOrUndefined(value: unknown): value is null | undefined {
+    return value === null || value === undefined;
+  }
+
+  /**
    * 安全地进行类型断言
-   * @param value 要断言的�?
+   * @param value 要断言的值
    * @param typeGuard 类型守卫函数
-   * @param defaultValue 默认�?
-   * @returns 断言后的值或默认�?
+   * @param defaultValue 默认值
+   * @returns 断言后的值或默认值
    */
   public static safeAssert<T>(
-    value: Record<string, string | number | boolean | null>,
-    typeGuard: (v: Record<string, string | number | boolean | null>) => v is T,
+    value: unknown,
+    typeGuard: (v: unknown) => v is T,
     defaultValue: T
   ): T {
     return typeGuard(value) ? value : defaultValue;
   }
 
   /**
-   * 安全地执行函�?
+   * 安全地执行函数
    * @param fn 要执行的函数
-   * @param defaultValue 默认�?
+   * @param defaultValue 默认值
    * @param args 函数参数
-   * @returns 函数执行结果或默认�?
+   * @returns 函数执行结果或默认值
    */
   public static safeExecute<T>(
-    fn: (...args: Array<string | number | boolean | object | null>) => T,
+    fn: (...args: Array<unknown>) => T,
     defaultValue: T,
-    ...args: Array<string | number | boolean | object | null>
+    ...args: Array<unknown>
   ): T {
     try {
       return TypeSafeUtil.isFunction(fn) ? fn(...args) : defaultValue;
@@ -322,5 +355,3 @@ export default class TypeSafeUtil {
     }
   }
 }
-
-

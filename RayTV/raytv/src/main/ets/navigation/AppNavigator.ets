@@ -1,5 +1,5 @@
 // 应用导航服务
-// 管理页面路由、导航栈和页面跳�?
+// 管理页面路由、导航栈和页面跳转
 
 import router from '@ohos.router';
 import StorageUtil from '../common/util/StorageUtil';
@@ -48,7 +48,14 @@ export interface RouteMapping {
   equals(other: RouteMapping): boolean;
 }
 
-// 路由映射实现�?
+// 导航历史序列化接口
+export interface SerializableHistoryItem {
+  route: string;
+  url: string;
+  timestamp: number;
+}
+
+// 路由映射实现�?
 export class RouteMappingImpl implements RouteMapping {
   url: string = '';
   route: string = '';
@@ -67,7 +74,7 @@ export class RouteMappingImpl implements RouteMapping {
   }
 }
 
-// 导航历史项接�?
+// 导航历史项接�?
 export interface NavigationHistoryItem {
   route: string;
   url: string;
@@ -124,7 +131,7 @@ export interface NavigationParams {
   clone(): NavigationParams;
 }
 
-// 导航参数实现�?
+// 导航参数实现�?
 export class NavigationParamsImpl implements NavigationParams {
   private _data: Record<string, string | number | boolean | null> = {};
   
@@ -146,7 +153,7 @@ export class NavigationParamsImpl implements NavigationParams {
     return clone;
   }
   
-  // 转换为普通对象以便在router中使�?
+  // 转换为普通对象以便在router中使�?
   toObject(): Record<string, string | number | boolean | null> {
     // 手动构建对象，避免使用Object.fromEntries
     const result: Record<string, string | number | boolean | null> = {};
@@ -183,7 +190,7 @@ export class AppNavigator {
   }
 
   /**
-   * 导航到首�?
+   * 导航到首�?
    */
   async navigateToHome(): Promise<void> {
     await this.navigateTo(PageRoute.HOME);
@@ -225,12 +232,12 @@ export class AppNavigator {
 
   /**
    * 导航到搜索页
-   * @param prefilledKeyword 预填关键�?
+   * @param prefilledKeyword 预填关键词
    */
   async navigateToSearch(prefilledKeyword: string): Promise<void> {
-    // 确保关键词始终是字符�?- 使用类型化对�?
+    // 确保关键词始终是字符�?- 使用类型化对象
     const searchParams: NavigationParams = new NavigationParamsImpl();
-    searchParams.keyword = prefilledKeyword || '';
+    searchParams.setParam('keyword', prefilledKeyword || '');
     await this.navigateTo(PageRoute.SEARCH, searchParams);
   }
 
@@ -254,11 +261,11 @@ export class AppNavigator {
    */
   async navigateToCategory(category: CategoryInfo): Promise<void> {
     // 确保category对象有正确的类型 - 明确类型标注
-      const categoryParams: NavigationParams = new NavigationParamsImpl();
-      categoryParams.id = category.id || '';
-      categoryParams.name = category.name;
-      categoryParams.type = category.type || 'vod';
-      await this.navigateTo(PageRoute.CATEGORY, categoryParams);
+    const categoryParams: NavigationParams = new NavigationParamsImpl();
+    categoryParams.setParam('id', category.id || '');
+    categoryParams.setParam('name', category.name);
+    categoryParams.setParam('type', category.type || 'vod');
+    await this.navigateTo(PageRoute.CATEGORY, categoryParams);
   }
 
   /**
@@ -282,18 +289,15 @@ export class AppNavigator {
   }
 
   /**
-   * 导航到页�?
+   * 导航到页�?
    * @param route 页面路由
    * @param params 路由参数
    */
   private async navigateTo(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用标准的router.getState()方法 - 虽然标记为已弃用，但目前没有直接替代方案
-      const state = router.getState();
-      const currentUrl = state.path || '';
       
-      // 记录导航历史 - 创建符合接口定义的对�?
+      // 记录导航历史 - 创建符合接口定义的对�?
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
       historyItem.route = route;
       historyItem.url = url;
@@ -301,15 +305,15 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       this.addToHistory(historyItem);
 
-      // 使用新的router.pushUrl方法替代已弃用的router.push
-      const pushOptions: router.PushOptions = {
+      // 简化router调用，不使用PushOptions类型
+      const routerParams = params instanceof NavigationParamsImpl ? 
+        params.toObject() : 
+        (params || {} as Record<string, string | number | boolean | null>);
+      await router.pushUrl({
         url: url,
-        params: params instanceof NavigationParamsImpl ? 
-          params.toObject() : 
-          (params || {} as Record<string, string | number | boolean | null>),
+        params: routerParams,
         mode: router.RouterMode.Single
-      };
-      await router.pushUrl(pushOptions);
+      });
     } catch (error) {
         // 安全处理错误信息
         const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
@@ -319,7 +323,7 @@ export class AppNavigator {
   }
 
   /**
-   * 返回上一�?
+   * 返回上一�?
    */
   async navigateToBack(): Promise<void> {
     try {
@@ -335,7 +339,7 @@ export class AppNavigator {
   }
 
   /**
-   * 返回首页（清空导航栈�?
+   * 返回首页（清空导航栈�?
    */
   async backToHome(): Promise<void> {
     try {
@@ -364,14 +368,14 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用新的router.replaceUrl方法替代已弃用的router.replace
-      const replaceOptions: router.ReplaceOptions = {
+      // 简化router调用，不使用ReplaceOptions类型
+      const routerParams = params instanceof NavigationParamsImpl ? 
+        params.toObject() : 
+        (params || {} as Record<string, string | number | boolean | null>);
+      await router.replaceUrl({
         url: url,
-        params: params instanceof NavigationParamsImpl ? 
-          params.toObject() : 
-          (params || {} as Record<string, string | number | boolean | null>)
-      };
-      await router.replaceUrl(replaceOptions);
+        params: routerParams
+      });
       
       // 创建符合接口定义的历史记录项
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
@@ -391,7 +395,7 @@ export class AppNavigator {
    * @param route 页面路由
    */
   getPageUrl(route: string): string {
-    // 使用switch语句替代索引签名，提高类型安全�?
+    // 使用switch语句替代索引签名，提高类型安全�?
     switch (route) {
       case PageRoute.HOME:
         return 'pages/HomePage';
@@ -419,8 +423,8 @@ export class AppNavigator {
   }
 
   /**
-   * 添加到导航历�?
-   * @param item 历史记录�?
+   * 添加到导航历�?
+   * @param item 历史记录�?
    */
   addToHistory(item: NavigationHistoryItem): void {
     this.navigationHistory.push(item);
@@ -432,7 +436,7 @@ export class AppNavigator {
   }
 
   /**
-   * 从历史记录中移除最后一�?
+   * 从历史记录中移除最后一�?
    */
   removeLastFromHistory(): void {
     if (this.navigationHistory.length > 0) {
@@ -442,8 +446,8 @@ export class AppNavigator {
   }
 
   /**
-   * 替换历史记录中的最后一�?
-   * @param item 新的历史记录�?
+   * 替换历史记录中的最后一�?
+   * @param item 新的历史记录�?
    */
   replaceLastInHistory(item: NavigationHistoryItem): void {
     if (this.navigationHistory.length > 0) {
@@ -453,45 +457,20 @@ export class AppNavigator {
   }
 
   /**
-   * 保存导航历史到存�?
+   * 保存导航历史到存储
    */
   async saveNavigationHistory(): Promise<void> {
     try {
-      // 修复Function.apply/call和原型赋值错误：使用Object.keys替代
-      const serializableHistory = new Array<NavigationHistoryItem>();
-      for (let i = 0; i < this.navigationHistory.length; i++) {
-        const item = this.navigationHistory[i];
-        const serializableItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
-        serializableItem.route = item.route;
-        serializableItem.url = item.url;
-        if (item.params) {
-          const validatedParams: NavigationParams = new NavigationParamsImpl();
-          // 复制基本属�?
-          if (item.params.id) validatedParams.id = item.params.id;
-          if (item.params.name) validatedParams.name = item.params.name;
-          if (item.params.title) validatedParams.title = item.params.title;
-          if (item.params.category) validatedParams.category = item.params.category;
-          if (item.params.page !== undefined) validatedParams.page = item.params.page;
-          if (item.params.keyword) validatedParams.keyword = item.params.keyword;
-          if (item.params.isFavorite !== undefined) validatedParams.isFavorite = item.params.isFavorite;
-          // 处理其他可能的参�?- 使用Object.keys替代in操作�?
-          const keys = Object.keys(item.params);
-          for (let j = 0; j < keys.length; j++) {
-            const key = keys[j];
-            if (!['id', 'name', 'title', 'category', 'page', 'keyword', 'isFavorite'].includes(key)) {
-              const value = item.params.getParam(key);
-              if (value !== undefined) {
-                validatedParams.setParam(key, value);
-              }
-            }
-          }
-          serializableItem.params = validatedParams;
-        } else {
-          serializableItem.params = undefined; // 使用undefined而不是null
-        }
-        serializableItem.timestamp = item.timestamp;
-        serializableHistory.push(serializableItem);
-      }
+      // 只保存基础数据，避免复杂对象序列化问题
+      const serializableHistory: SerializableHistoryItem[] = this.navigationHistory.map(item => {
+        // 显式声明对象类型为SerializableHistoryItem
+        const historyItem: SerializableHistoryItem = {
+          route: item.route,
+          url: item.url,
+          timestamp: item.timestamp
+        };
+        return historyItem;
+      });
       await StorageUtil.save('navigationHistory', serializableHistory);
     } catch (error) {
       console.error('Failed to save navigation history:', error);
@@ -499,26 +478,23 @@ export class AppNavigator {
   }
 
   /**
-   * 从存储加载导航历�?
+   * 从存储加载导航历史
    */
   async loadNavigationHistory(): Promise<void> {
     try {
-      // 修复any/unknown类型错误：明确指定返回类�?
-      const history: Array<NavigationHistoryItem> = await StorageUtil.get('navigationHistory', []);
+      // 使用已定义的接口作为类型断言，避免对象字面量类型
+      const history = await StorageUtil.get('navigationHistory', []) as SerializableHistoryItem[];
       // 确保类型安全
       if (Array.isArray(history)) {
-        // 避免直接类型断言，进行基本的类型检�?
         this.navigationHistory = history.filter(item => 
           item && typeof item === 'object' && 
           typeof item.route === 'string' && 
           typeof item.url === 'string' && 
           typeof item.timestamp === 'number'
         ).map(item => {
-          // 手动复制属性，避免使用扩展运算�?
           const newItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
           newItem.route = item.route;
           newItem.url = item.url;
-          newItem.params = item.params;
           newItem.timestamp = item.timestamp;
           return newItem;
         });
@@ -535,12 +511,12 @@ export class AppNavigator {
    * 获取当前页面路由
    */
   getCurrentRoute(): string {
-    // 获取当前路由状�?- 虽然标记为已弃用，但目前没有直接替代方案
+    // 获取当前路由状�?- 虽然标记为已弃用，但目前没有直接替代方案
     try {
       const state = router.getState();
       const url = state.path || '';
       
-      // 从URL映射回路�?- 使用数组避免索引签名问题，使用构造函数避免structural typing
+      // 从URL映射回路�?- 使用数组避免索引签名问题，使用构造函数避免structural typing
       const routeMap = new Array<RouteMapping>();
       
       routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));

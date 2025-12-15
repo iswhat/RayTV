@@ -1,5 +1,5 @@
 import Logger from '../../common/util/Logger';
-import FileSystemManager from '@ohos.file.fs';
+import fs from '@ohos.file.fs';
 
 /**
  * 缓存项接口
@@ -29,7 +29,7 @@ export class CacheManager {
   private readonly TAG: string = 'CacheManager';
   private static instance: CacheManager | null = null;
   private memoryCache: Map<string, CacheItem> = new Map();
-  private fsManager: FileSystemManager;
+  private fsManager: typeof fs;
   private cacheDir: string = '';
   private config: CacheConfig;
   private totalSize: number = 0;
@@ -61,7 +61,7 @@ export class CacheManager {
    * 私有构造函数防止外部实例化
    */
   private constructor() {
-    this.fsManager = FileSystemManager.getFileSystemManager();
+    this.fsManager = fs;
     // 避免对象展开操作符，显式赋值确保类型安全
     this.config = {
       maxSize: CacheManager.DEFAULT_CONFIG.maxSize,
@@ -70,7 +70,7 @@ export class CacheManager {
       enabled: CacheManager.DEFAULT_CONFIG.enabled
     };
     this.initialize();
-    Logger.info(this.TAG, 'CacheManager initialized');
+    Logger.info(this.TAG, 'CacheManager initialized', {});
   }
 
   /**
@@ -83,10 +83,12 @@ export class CacheManager {
       this.cacheDir = this.getCacheDirectory();
       
       // 确保缓存目录存在
-      if (!this.fsManager.existsSync(this.cacheDir)) {
-        this.fsManager.mkdirSync(this.cacheDir, { recursive: true });
-        Logger.info(this.TAG, `Created cache directory: ${this.cacheDir}`);
-      }
+    try {
+      await this.fsManager.access(this.cacheDir);
+    } catch {
+      await this.fsManager.mkdir(this.cacheDir, true);
+      Logger.info(this.TAG, `Created cache directory: ${this.cacheDir}`, {});
+    }
       
       // 启动定期清理
       this.startCleanupTimer();
@@ -94,7 +96,7 @@ export class CacheManager {
       // 初始清理
       this.cleanupExpiredCache();
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize cache manager: ${JSON.stringify(error)}`);
+      Logger.error(this.TAG, `Failed to initialize cache manager`, error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -110,7 +112,7 @@ export class CacheManager {
       cleanupInterval: config.cleanupInterval !== null && config.cleanupInterval !== undefined ? config.cleanupInterval : this.config.cleanupInterval,
       enabled: config.enabled !== null && config.enabled !== undefined ? config.enabled : this.config.enabled
     };
-    Logger.info(this.TAG, `Updated cache config: ${JSON.stringify(this.config)}`);
+    Logger.info(this.TAG, `Updated cache config`, { config: this.config });
     
     // 重新启动清理定时器
     if (this.cleanupTimer) {
@@ -139,7 +141,7 @@ export class CacheManager {
       if (cacheItem) {
         // 检查是否过期
         if (!this.isExpired(cacheItem)) {
-          Logger.debug(this.TAG, `Cache hit for key: ${key} (memory)`);
+          Logger.debug(this.TAG, `Cache hit for key: ${key} (memory)`, { key });
           return cacheItem.data;
         } else {
           // 过期则移除
@@ -149,9 +151,9 @@ export class CacheManager {
       
       // 从文件系统获取
       const filePath = this.getCacheFilePath(key);
-      if (this.fsManager.existsSync(filePath)) {
-        const fileContent = this.fsManager.readTextSync(filePath) as string;
-        const fileCacheItem: CacheItem = JSON.parse(fileContent) as CacheItem;
+      try {
+        const fileContent = await this.fsManager.readText(filePath);
+        const fileCacheItem: CacheItem = JSON.parse(fileContent);
         
         // 检查是否过期
         if (!this.isExpired(fileCacheItem)) {
@@ -211,15 +213,15 @@ export class CacheManager {
       
       // 保存到文件系统
       const filePath = this.getCacheFilePath(key);
-      this.fsManager.writeTextSync(filePath, JSON.stringify(cacheItem));
+      await this.fsManager.writeText(filePath, JSON.stringify(cacheItem));
       
       // 检查并清理超出大小限制的缓存
       this.cleanupExcessCache();
       
-      Logger.debug(this.TAG, `Cached data for key: ${key}, size: ${size} bytes, expiry: ${expiryTime}ms`);
+      Logger.debug(this.TAG, `Cached data for key: ${key}`, { key, size, expiry: expiryTime });
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to set cache for key ${key}: ${JSON.stringify(error)}`);
+      Logger.error(this.TAG, `Failed to set cache for key ${key}`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -240,14 +242,17 @@ export class CacheManager {
       
       // 从文件系统移除
       const filePath = this.getCacheFilePath(key);
-      if (this.fsManager.existsSync(filePath)) {
-        this.fsManager.unlinkSync(filePath);
+      try {
+        await this.fsManager.access(filePath);
+        await this.fsManager.unlink(filePath);
+      } catch {
+        // 文件不存在，忽略
       }
       
-      Logger.debug(this.TAG, `Removed cache for key: ${key}`);
+      Logger.debug(this.TAG, `Removed cache for key: ${key}`, { key });
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to remove cache for key ${key}: ${JSON.stringify(error)}`);
+      Logger.error(this.TAG, `Failed to remove cache for key ${key}`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -263,27 +268,32 @@ export class CacheManager {
       this.totalSize = 0;
       
       // 清空文件系统缓存
-      if (this.fsManager.existsSync(this.cacheDir)) {
-        const files = this.fsManager.listSync(this.cacheDir) as string[];
+      try {
+        await this.fsManager.access(this.cacheDir);
+        // 使用readDir替代listSync
+        const dir = await this.fsManager.readDir(this.cacheDir);
+        const files = dir.files;
         if (files) {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const filePath = `${this.cacheDir}/${file}`;
-            try {
-              // 直接删除文件，不检查文件类型
-              this.fsManager.unlinkSync(filePath);
-            } catch (error) {
-              // 如果删除失败，忽略并继续
-              Logger.warn(this.TAG, `Failed to delete cache file: ${filePath}, error: ${JSON.stringify(error)}`);
+            if (file.isFile) {
+              const filePath = `${this.cacheDir}/${file.name}`;
+              try {
+                // 直接删除文件，不检查文件类型
+                await this.fsManager.unlink(filePath);
+              } catch (error) {
+                // 如果删除失败，忽略并继续
+                Logger.warn(this.TAG, `Failed to delete cache file: ${filePath}`, error instanceof Error ? error : new Error(String(error)));
+              }
             }
           }
         }
       }
       
-      Logger.info(this.TAG, 'All cache cleared');
+      Logger.info(this.TAG, 'All cache cleared', {});
       return true;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear cache: ${JSON.stringify(error)}`);
+      Logger.error(this.TAG, `Failed to clear cache`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -310,7 +320,7 @@ export class CacheManager {
       }
       
       // 移除文件系统中的缓存
-      const files = this.fsManager.listSync(this.cacheDir) as string[];
+      const files = this.fsManager.listSync(this.cacheDir).files as string[];
       if (files) {
         for (const file of files) {
           if (file.startsWith(`${this.getCacheKeyHash(`${siteKey}:`)}_`)) {

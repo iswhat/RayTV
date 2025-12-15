@@ -1,9 +1,11 @@
-// AVPlayerService.ets - AV播放器服�?// 实现基于HarmonyOS AVPlayer的媒体播放功�?
+// AVPlayerService.ets - AV播放器服务
+// 实现基于HarmonyOS AVPlayer的媒体播放功能
 import media from '@ohos.multimedia.media';
 import Logger from '../../common/util/Logger';
 import { EventEmitter } from '../../common/util/EventEmitter';
 
-// 播放状态枚�?export enum PlaybackStatus {
+// 播放状态枚举
+export enum PlaybackStatus {
   IDLE = 'idle',
   INITIALIZED = 'initialized',
   PREPARING = 'preparing',
@@ -17,7 +19,7 @@ import { EventEmitter } from '../../common/util/EventEmitter';
 
 /**
  * AV播放器服务类
- * 提供媒体播放的核心功�? */
+ * 提供媒体播放的核心功�? */
 export class AVPlayerService extends EventEmitter {
   private static instance: AVPlayerService;
   private avPlayer: media.AVPlayer | null = null;
@@ -31,7 +33,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 获取播放器服务单例实�?   */
+   * 获取播放器服务单例实�?   */
   public static getInstance(): AVPlayerService {
     if (!AVPlayerService.instance) {
       AVPlayerService.instance = new AVPlayerService();
@@ -52,7 +54,8 @@ export class AVPlayerService extends EventEmitter {
       this.isInitialized = true;
       this.updateStatus(PlaybackStatus.IDLE);
 
-      // 状态变化回�?      this.avPlayer.on('stateChange', (state, reason) => {
+      // 状态变化回调
+      this.avPlayer.on('stateChange', (state, reason) => {
         Logger.info(this.TAG, `Player state changed: ${state}, reason: ${reason}`);
         this.updateStatus(this.mapAVPlayerState(state));
         this.emit('stateChange', this.status, reason);
@@ -85,7 +88,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 映射AVPlayer状态到自定义状�?   */
+   * 映射AVPlayer状态到自定义状�?   */
   private mapAVPlayerState(state: number): PlaybackStatus {
     switch (state) {
       case media.AVPlayerState.IDLE:
@@ -112,7 +115,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 更新播放状�?   */
+   * 更新播放状�?   */
   private updateStatus(newStatus: PlaybackStatus): void {
     if (this.status !== newStatus) {
       this.status = newStatus;
@@ -121,7 +124,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 设置播放�?   * @param source 播放源URL
+   * 设置播放�?   * @param source 播放源URL
    */
   public async setSource(source: string): Promise<void> {
     try {
@@ -160,7 +163,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 开始播�?   */
+   * 开始播�?   */
   public async play(): Promise<void> {
     try {
       if (!this.avPlayer) {
@@ -213,7 +216,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 跳转到指定位�?   * @param position 位置（毫秒）
+   * 跳转到指定位�?   * @param position 位置（毫秒）
    */
   public async seekTo(position: number): Promise<void> {
     try {
@@ -233,7 +236,7 @@ export class AVPlayerService extends EventEmitter {
 
   /**
    * 设置播放速度
-   * @param speed 播放速度�?.0为正常速度�?   */
+   * @param speed 播放速度�?.0为正常速度�?   */
   public async setSpeed(speed: number): Promise<void> {
     try {
       if (!this.avPlayer) {
@@ -250,7 +253,7 @@ export class AVPlayerService extends EventEmitter {
 
   /**
    * 设置音量
-   * @param volume 音量值（0.0-1.0�?   */
+   * @param volume 音量值（0.0-1.0�?   */
   public async setVolume(volume: number): Promise<void> {
     try {
       if (!this.avPlayer) {
@@ -283,7 +286,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 获取媒体总时�?   * @returns 总时长（毫秒�?   */
+   * 获取媒体总时�?   * @returns 总时长（毫秒�?   */
   public async getDuration(): Promise<number> {
     try {
       if (!this.avPlayer) {
@@ -298,7 +301,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 获取当前播放状�?   * @returns 播放状�?   */
+   * 获取当前播放状�?   * @returns 播放状�?   */
   public getStatus(): PlaybackStatus {
     return this.status;
   }
@@ -312,7 +315,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 释放播放器资�?   */
+   * 释放播放器资�?   */
   public async release(): Promise<void> {
     try {
       if (this.avPlayer) {
@@ -325,11 +328,12 @@ export class AVPlayerService extends EventEmitter {
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to release player: ${JSON.stringify(error)}`);
-      // 释放失败不影响其他操�?    }
+      // 释放失败不影响其他操作
+    }
   }
 
   /**
-   * 重置播放�?   */
+   * 重置播放�?   */
   public async reset(): Promise<void> {
     try {
       if (!this.avPlayer) {
@@ -355,7 +359,7 @@ export class AVPlayerService extends EventEmitter {
   }
 
   /**
-   * 获取播放器实�?   * @returns AVPlayer实例
+   * 获取播放器实�?   * @returns AVPlayer实例
    */
   public getPlayer(): media.AVPlayer | null {
     return this.avPlayer;

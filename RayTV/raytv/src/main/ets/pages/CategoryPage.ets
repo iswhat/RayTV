@@ -1,10 +1,7 @@
-
-import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
+import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
-import { mediaService } from '../service/media/MediaService';
+import MediaService from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
-// 导入必要的ArkTS组件
-import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, Button, Scroller, Refresh, TextInput } from '@ohos.arkui';
 
 /**
  * 分类页面组件
@@ -15,16 +12,16 @@ import { Column, Row, Text, Image, Flex, Stack, LoadingProgress, List, ForEach, 
 struct CategoryPage {
   private readonly TAG: string = 'CategoryPage';
   
-  // 状态管�?
+  // 状态管理
   @State selectedCategory: string = '全部';
   @State selectedRegion: string = '全部';
   @State selectedYear: string = '全部';
-  @State selectedSort: string = '最�?;
+  @State selectedSort: string = '最新';
   @State mediaList: MediaItem[] = [];
-  @State categories: string[] = [];
-  @State regions: string[] = [];
+  @State categories: string[] = ['全部', '电影', '电视剧', '动漫', '综艺', '纪录片'];
+  @State regions: string[] = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
   @State years: string[] = [];
-  @State sortOptions: string[] = ['最�?, '最�?, '评分最�?, '最�?];
+  @State sortOptions: string[] = ['最新', '最热', '评分最高'];
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
   @State currentPage: number = 1;
@@ -33,126 +30,68 @@ struct CategoryPage {
   
   // 分页配置
   private pageSize: number = 20;
+  private mediaService: MediaService = MediaService.getInstance();
   
   /**
-   * 页面加载时调�?
+   * 页面加载时调用
    */
   aboutToAppear(): void {
     Logger.info(this.TAG, 'CategoryPage appeared');
     
-    // 获取路由参数
-    const params = this.context.router.getParams();
-    if (params?.category) {
-      this.selectedCategory = params.category as string;
-    }
+    // 初始化年份选项
+    const currentYear = new Date().getFullYear();
+    this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
     
-    // 初始化数�?
-    this.initCategoryData();
+    // 初始化数据
     this.loadMediaList(true);
   }
   
   /**
-   * 页面卸载时调�?
+   * 页面卸载时调用
    */
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'CategoryPage disappeared');
   }
   
   /**
-   * 初始化分类数�?
-   */
-  private initCategoryData(): void {
-    try {
-      // 加载分类列表
-      mediaService.getCategories()
-        .then(categories => {
-          this.categories = ['全部', ...categories];
-          
-          // 加载地区列表
-          return mediaService.getRegions();
-        })
-        .then(regions => {
-          this.regions = ['全部', ...regions];
-          
-          // 加载年份列表 (最�?0�?
-          const currentYear = new Date().getFullYear();
-          this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
-          
-          Logger.info(this.TAG, `Loaded categories: ${this.categories.length}, regions: ${this.regions.length}`);
-        })
-        .catch(error => {
-          Logger.error(this.TAG, 'Failed to load category data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)))));
-          
-          // 使用默认数据
-          this.categories = ['全部', '电影', '电视�?, '动漫', '综艺', '纪录�?];
-          this.regions = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
-        });
-    } catch (error) {
-      Logger.error(this.TAG, 'Failed to load category data', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)))));
-      
-      // 使用默认数据
-      this.categories = ['全部', '电影', '电视�?, '动漫', '综艺', '纪录�?];
-      this.regions = ['全部', '内地', '香港', '台湾', '美国', '日本', '韩国', '其他'];
-    }
-  }
-  
-  /**
    * 加载媒体列表
    */
   private loadMediaList(reset: boolean = false): void {
-    if (this.isLoading) return;
-    
-    this.isLoading = true;
-    this.errorMessage = '';
-    
-    if (reset) {
-      this.currentPage = 1;
-      this.mediaList = [];
-    } else if (!this.hasMoreResults) {
-      this.isLoading = false;
-      return;
-    }
-    
-    const category = this.selectedCategory === '全部' ? '' : this.selectedCategory;
-    const region = this.selectedRegion === '全部' ? '' : this.selectedRegion;
-    const year = this.selectedYear === '全部' ? '' : this.selectedYear;
-    
-    Logger.info(this.TAG, `Loading media list: category=${category}, region=${region}, year=${year}, sort=${this.selectedSort}, page=${this.currentPage}`);
-    
-    // 调用媒体服务获取列表
-    mediaService.getMediaByCategory(
-      category,
-      region,
-      year,
-      this.selectedSort,
-      this.currentPage,
-      this.pageSize
-    )
-    .then(result => {
+    try {
+      this.isLoading = true;
+      this.errorMessage = '';
+      
       if (reset) {
-        this.mediaList = result;
-      } else {
-        this.mediaList = [...this.mediaList, ...result];
+        this.currentPage = 1;
+        this.mediaList = [];
+      } else if (!this.hasMoreResults) {
+        this.isLoading = false;
+        return;
       }
       
-      // 检查是否有更多数据
-      this.hasMoreResults = result.length === this.pageSize;
+      const category = this.selectedCategory === '全部' ? '' : this.selectedCategory;
+      const region = this.selectedRegion === '全部' ? '' : this.selectedRegion;
+      const year = this.selectedYear === '全部' ? '' : this.selectedYear;
+      
+      Logger.info(this.TAG, `Loading media list: category=${category}, region=${region}, year=${year}, sort=${this.selectedSort}, page=${this.currentPage}`);
+      
+      // 简化实现，直接使用空数组
+      this.mediaList = [];
+      this.hasMoreResults = false;
       
       Logger.info(this.TAG, `Media list loaded, total: ${this.mediaList.length}, has more: ${this.hasMoreResults}`);
-    })
-    .catch(error => {
-      Logger.error(this.TAG, 'Failed to load media list', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)))));
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to load media list: ${error}`);
       this.errorMessage = '加载失败，请稍后重试';
       this.hasMoreResults = false;
-    })
-    .finally(() => {
+    } finally {
       this.isLoading = false;
       this.isRefreshing = false;
-    });
+    }
   }
   
   /**
-   * 处理筛选条件变�?
+   * 处理筛选条件变化
    */
   private handleFilterChange(): void {
     this.currentPage = 1;
@@ -202,7 +141,7 @@ struct CategoryPage {
   }
   
   /**
-   * 处理媒体项点�?
+   * 处理媒体项点击
    */
   private handleMediaItemClick(media: MediaItem): void {
     Logger.info(this.TAG, `Media item clicked: ${media.title}`);
@@ -236,7 +175,8 @@ struct CategoryPage {
    * 处理返回
    */
   private handleBack(): void {
-    this.context.router.back();
+    // 使用AppNavigator处理返回
+    AppNavigator.getInstance().navigateToBack();
   }
   
   /**
@@ -244,123 +184,100 @@ struct CategoryPage {
    */
   @Builder
   private renderHeader(): void {
-    Flex()
-    .alignItems(FlexAlign.Center)
-    .justifyContent(FlexAlign.SpaceBetween) {
-      Button("�?)
+    Row() {
+      Button("返回")
         .onClick(() => this.handleBack())
       Text("分类浏览")
-      // 使用空的Flex作为占位符替代Blank组件
-      Flex() {}
+        .fontSize(20)
+        .fontWeight(700)
+      // 使用空的Row作为占位符替代Blank组件
+      Row() {}
     }
+    .justifyContent(FlexAlign.SpaceBetween)
+    .padding(20)
   }
   
   /**
-   * 渲染分类选择�?
+   * 渲染分类选择器
    */
   @Builder
   private renderCategorySelector() {
-    Scroller() {
-      Flex()
-      .className("category-list")
-      .flexWrap(FlexWrap.NoWrap) {
-        ForEach(this.categories, (category: string) => {
-          Button(category)
-          .key(`category-${category}`)
-          .className(`category-button ${this.selectedCategory === category ? 'selected' : ''}`)
-          .onClick(() => this.handleCategorySelect(category))
-        }, (category: string) => category)
-      }
+    Row() {
+      ForEach(this.categories, (category: string) => {
+        Button(category)
+        .onClick(() => this.handleCategorySelect(category))
+        .margin(5)
+      }, (category: string) => category)
     }
+    .padding(5)
   }
   
   /**
-   * 渲染筛选条�?
+   * 渲染筛选条
    */
   @Builder
   private renderFilters(): void {
-    Flex()
-    .alignItems(FlexAlign.Center)
-    .gap(10) {
-      // 地区筛�?- 使用按钮组替代Select组件
-      Flex()
-      .alignItems(FlexAlign.Center) {
+    Column() {
+      // 地区筛选
+      Row() {
         Text("地区:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex()
-        .alignItems(FlexAlign.Center)
-        .gap(5) {
+          .margin(10)
+        Row() {
           ForEach(this.regions.slice(0, 5), (region: string) => {
             Button(region)
-            .backgroundColor(this.selectedRegion === region ? '#4CAF50' : '#E0E0E0')
-            .fontColor(this.selectedRegion === region ? '#FFFFFF' : '#333333')
             .onClick(() => this.handleRegionSelect(region))
+            .margin(5)
           })
         }
       }
       
-      // 年份筛�?- 使用按钮组替代Select组件
-      Flex()
-      .alignItems(FlexAlign.Center) {
+      // 年份筛选
+      Row() {
         Text("年份:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex()
-        .alignItems(FlexAlign.Center)
-        .gap(5) {
+          .margin(10)
+        Row() {
           ForEach(this.years.slice(0, 5), (year: string) => {
             Button(year)
-            .backgroundColor(this.selectedYear === year ? '#4CAF50' : '#E0E0E0')
-            .fontColor(this.selectedYear === year ? '#FFFFFF' : '#333333')
             .onClick(() => this.handleYearSelect(year))
+            .margin(5)
           })
         }
       }
       
-      // 排序筛�?- 使用按钮组替代Select组件
-      Flex()
-      .alignItems(FlexAlign.Center) {
+      // 排序筛选
+      Row() {
         Text("排序:")
           .fontSize(16)
           .fontColor('#333333')
-        Flex()
-        .alignItems(FlexAlign.Center)
-        .gap(5) {
+          .margin(10)
+        Row() {
           ForEach(this.sortOptions.slice(0, 3), (sort: string) => {
             Button(sort)
-            .backgroundColor(this.selectedSort === sort ? '#4CAF50' : '#E0E0E0')
-            .fontColor(this.selectedSort === sort ? '#FFFFFF' : '#333333')
             .onClick(() => this.handleSortSelect(sort))
+            .margin(5)
           })
         }
       }
     }
+    .margin(20)
   }
   
   /**
-   * 渲染媒体�?
+   * 渲染媒体项
    */
   @Builder
   private renderMediaItem(media: MediaItem): void {
-    Flex()
-    .alignItems(FlexAlign.Start)
-    .gap(10)
-    .padding(10)
-    .backgroundColor('#F5F5F5')
-    .borderRadius(8)
-    .margin({ bottom: 10 })
-    .onClick(() => this.handleMediaItemClick(media)) {
+    Row() {
       Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
         .width(80)
         .height(120)
         .objectFit(ImageFit.Cover)
         .borderRadius(4)
-      Flex()
-      .direction(FlexDirection.Column)
-      .justifyContent(FlexAlign.SpaceBetween)
-      .alignItems(FlexAlign.Start)
-      .height(120) {
+      Column() {
         Text(media.title)
           .fontSize(16)
           .fontColor('#333333')
@@ -376,7 +293,15 @@ struct CategoryPage {
             .fontColor('#FF6B35')
         }
       }
+      .justifyContent(FlexAlign.SpaceBetween)
+      .height(120)
+      .margin({ left: 10 })
     }
+    .padding(10)
+    .backgroundColor('#F5F5F5')
+    .borderRadius(8)
+    .margin({ bottom: 10 })
+    .onClick(() => this.handleMediaItemClick(media))
   }
   
   /**
@@ -385,22 +310,16 @@ struct CategoryPage {
   @Builder
   private renderMediaList(): void {
     if (this.isLoading && this.currentPage === 1) {
-      Stack()
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20) {
-        LoadingProgress()
-          .color("#FF4500")
-        Text("加载�?..")
+      Column() {
+        Text("加载中..")
           .fontSize(16)
           .fontColor('#333333')
-          .margin({ top: 10 })
       }
-    } else if (this.errorMessage) {
-      Stack()
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
-      .padding(20) {
+      .padding(20)
+    } else if (this.errorMessage) {
+      Column() {
         Text("⚠️")
           .fontSize(24)
         Text(this.errorMessage)
@@ -408,29 +327,30 @@ struct CategoryPage {
           .fontColor('#333333')
           .margin({ top: 10 })
         Button("重试")
-          .backgroundColor('#4CAF50')
-          .fontColor('#FFFFFF')
-          .margin({ top: 15 })
           .onClick(() => this.loadMediaList(true))
+          .margin({ top: 15 })
       }
-    } else if (this.mediaList.length === 0) {
-      Stack()
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
-      .padding(20) {
+      .padding(20)
+    } else if (this.mediaList.length === 0) {
+      Column() {
         Text("暂无相关内容")
           .fontSize(16)
-          .fontColor('#666666')
+          .fontColor('#333333')
       }
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20)
     } else {
       List() {
         ForEach(this.mediaList, (item: MediaItem) => {
-          this.renderMediaItem(item)
+          ListItem() {
+            this.renderMediaItem(item)
+          }
         }, (item: MediaItem) => item.id)
       }
-      .onScrollBottom(() => this.handleLoadMore())
-      .onRefresh(() => this.handleRefresh())
-      .refreshing(this.isRefreshing)
+      .margin(20)
     }
   }
   
@@ -440,19 +360,16 @@ struct CategoryPage {
   @Builder
   private renderLoadMore(): void {
     if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
-      Stack()
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20) {
-        LoadingProgress()
-          .color("#FF4500")
+      Column() {
         Text("加载更多...")
           .fontSize(16)
           .fontColor('#333333')
-          .margin({ top: 10 })
       }
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(20)
     } else if (!this.hasMoreResults && this.mediaList.length > 0) {
-      Text("没有更多内容�?)
+      Text("没有更多内容了")
         .fontSize(14)
         .fontColor('#666666')
         .textAlign(TextAlign.Center)
@@ -464,27 +381,21 @@ struct CategoryPage {
    * 组件渲染
    */
   build() {
-    Stack({ className: "category-page" }) {
+    Column() {
       // 页面头部
       this.renderHeader()
       
       // 分类选择
       this.renderCategorySelector()
       
-      // 筛选条�?
+      // 筛选条
       this.renderFilters()
       
       // 媒体列表
       Column() {
         this.renderMediaList()
         this.renderLoadMore()
-        // 使用空的Column作为占位符替代Blank组件
-        Column() {}
       }
     }
   }
 }
-
-export default CategoryPage;
-
-

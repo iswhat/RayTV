@@ -14,11 +14,11 @@ export default class RayTVBackupAbility extends Ability {
   onBackup(): boolean {
     try {
       // 使用正确的参数格式调用Logger
-      Logger.info(`${this.TAG} onBackup`);
+      Logger.info(this.TAG, 'onBackup');
       return true;
     } catch (error) {
       // 简化错误处理，不传递Error对象
-      Logger.error(`${this.TAG} onBackup failed: ${String(error)}`);
+      Logger.error(this.TAG, `onBackup failed: ${String(error)}`);
       return false;
     }
   }
@@ -29,11 +29,11 @@ export default class RayTVBackupAbility extends Ability {
   onRestore(): boolean {
     try {
       // 使用正确的参数格式调用Logger
-      Logger.info(`${this.TAG} onRestore`);
+      Logger.info(this.TAG, 'onRestore');
       return true;
     } catch (error) {
       // 简化错误处理，不传递Error对象
-      Logger.error(`${this.TAG} onRestore failed: ${String(error)}`);
+      Logger.error(this.TAG, `onRestore failed: ${String(error)}`);
       return false;
     }
   }
@@ -46,7 +46,7 @@ export default class RayTVBackupAbility extends Ability {
       return '';
     } catch (error) {
       // 简化错误处理，不传递Error对象
-      Logger.error(`${this.TAG} getBackupDir failed: ${String(error)}`);
+      Logger.error(this.TAG, `getBackupDir failed: ${String(error)}`);
       return '';
     }
   }

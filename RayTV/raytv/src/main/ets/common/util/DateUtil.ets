@@ -34,40 +34,43 @@ export default class DateUtil {
       }
 
       // 根据格式类型获取对应的格式字符串
-      let formatStr = format;
-      if (typeof format !== 'string') {
-        switch (format) {
-          case DateFormatType.FULL:
-            formatStr = 'YYYY-MM-DD HH:mm:ss';
-            break;
-          case DateFormatType.DATE:
-            formatStr = 'YYYY-MM-DD';
-            break;
-          case DateFormatType.TIME:
-            formatStr = 'HH:mm:ss';
-            break;
-          case DateFormatType.TIME_SHORT:
-            formatStr = 'HH:mm';
-            break;
-          case DateFormatType.DATE_CHINESE:
-            formatStr = 'YYYY年MM月DD日';
-            break;
-          case DateFormatType.FULL_CHINESE:
-            formatStr = 'YYYY年MM月DD日 HH:mm:ss';
-            break;
-          default:
-            formatStr = 'YYYY-MM-DD HH:mm:ss';
-        }
+    let formatStr: string;
+    if (typeof format !== 'string') {
+      switch (format) {
+        case DateFormatType.FULL:
+          formatStr = 'YYYY-MM-DD HH:mm:ss';
+          break;
+        case DateFormatType.DATE:
+          formatStr = 'YYYY-MM-DD';
+          break;
+        case DateFormatType.TIME:
+          formatStr = 'HH:mm:ss';
+          break;
+        case DateFormatType.TIME_SHORT:
+          formatStr = 'HH:mm';
+          break;
+        case DateFormatType.DATE_CHINESE:
+          formatStr = 'YYYY年MM月DD日';
+          break;
+        case DateFormatType.FULL_CHINESE:
+          formatStr = 'YYYY年MM月DD日 HH:mm:ss';
+          break;
+        default:
+          formatStr = 'YYYY-MM-DD HH:mm:ss';
       }
+    } else {
+      formatStr = format;
+    }
 
-      // 格式化替换
-      return formatStr
-        .replace('YYYY', dateObj.getFullYear().toString())
-        .replace('MM', DateUtil.padZero(dateObj.getMonth() + 1))
-        .replace('DD', DateUtil.padZero(dateObj.getDate()))
-        .replace('HH', DateUtil.padZero(dateObj.getHours()))
-        .replace('mm', DateUtil.padZero(dateObj.getMinutes()))
-        .replace('ss', DateUtil.padZero(dateObj.getSeconds()));
+    // 格式化替换
+    return formatStr
+      .replace('YYYY', dateObj.getFullYear().toString())
+      .replace('MM', DateUtil.padZero(dateObj.getMonth() + 1))
+      .replace('DD', DateUtil.padZero(dateObj.getDate()))
+      .replace('HH', DateUtil.padZero(dateObj.getHours()))
+      .replace('mm', DateUtil.padZero(dateObj.getMinutes()))
+      .replace('ss', DateUtil.padZero(dateObj.getSeconds()));
+
     } catch (error) {
       Logger.error(TAG, `Failed to format date: ${error instanceof Error ? error.message : String(error)}`, error as Error);
       return '';
@@ -107,12 +110,12 @@ export default class DateUtil {
   private static parseWithFormat(dateStr: string, format: string): Date | null {
     try {
       // 提取格式中的年月日时分秒位置
-      const yearMatch = format.match(/YYYY/g);
-      const monthMatch = format.match(/MM/g);
-      const dayMatch = format.match(/DD/g);
-      const hourMatch = format.match(/HH/g);
-      const minuteMatch = format.match(/mm/g);
-      const secondMatch = format.match(/ss/g);
+      const yearMatch = format.match(/YYYY/);
+      const monthMatch = format.match(/MM/);
+      const dayMatch = format.match(/DD/);
+      const hourMatch = format.match(/HH/);
+      const minuteMatch = format.match(/mm/);
+      const secondMatch = format.match(/ss/);
 
       let year = 1970;
       let month = 0;

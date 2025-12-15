@@ -1,6 +1,6 @@
 // StorageUtil - 本地存储管理工具
 import Logger from './Logger';
-import AppConstant from '../constant/AppConstant';
+import { AppConstant } from '../constant/AppConstant';
 import FileUtil from './FileUtil';
 import preferences from '@ohos.data.preferences';
 
@@ -57,8 +57,8 @@ export class JsonDataClass {
     return Object.keys(this.data);
   }
 
-  toObject(): Record<string, string | number | boolean | JsonDataClass | null> {
-    const result: Record<string, string | number | boolean | JsonDataClass | null> = {};
+  toObject(): Record<string, string | number | boolean | object | null> {
+    const result: Record<string, string | number | boolean | object | null> = {};
     
     for (const key of this.keys()) {
       const value = this.get(key);
@@ -80,9 +80,9 @@ export class JsonDataClass {
       const value = obj[key];
       if (typeof value === 'string' || typeof value === 'number' || 
           typeof value === 'boolean' || value === null) {
-        jsonData.set(key, value);
+        jsonData.set(key, value as string | number | boolean | null);
       } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        const nestedData = JsonDataClass.fromObject(value);
+        const nestedData = JsonDataClass.fromObject(value as Record<string, string | number | boolean | object | null>);
         if (nestedData) {
           jsonData.set(key, nestedData);
         }
@@ -102,6 +102,12 @@ export type JsonData = JsonDataClass;
 export default class StorageUtil {
   // 使用局部变量存储单例实例
   private static _instance: StorageUtil | null = null;
+  
+  // 内存缓存
+  private static memoryCache: Record<string, MemoryCacheItem> = {};
+  private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
+  // 内存缓存清理定时器
+  private static cleanupTimer: number | undefined = undefined;
 
   /**
    * 获取单例实例
@@ -132,16 +138,6 @@ export default class StorageUtil {
       return undefined;
     }
     return obj[key];
-  }
-
-  private static memoryCache: Record<string, MemoryCacheItem> = {};
-  private static readonly MEMORY_CACHE_CLEAN_INTERVAL = 5 * 60 * 1000; // 5分钟清理一次
-  // 内存缓存清理定时器
-  private static cleanupTimer: number | undefined = undefined;
-
-  static {
-    // 启动内存缓存自动清理
-    StorageUtil.startMemoryCacheCleanup();
   }
 
   /**
@@ -369,7 +365,7 @@ export default class StorageUtil {
    */
   public static async remove(key: string, type: StorageType = StorageType.PREFERENCES): Promise<void> {
     if (!key || typeof key !== 'string') {
-      Logger.error(TAG, 'remove: key is empty or invalid');
+      Logger.error(TAG, 'remove: key is empty or invalid', {});
       return;
     }
 
@@ -425,7 +421,7 @@ export default class StorageUtil {
   }
 
   /**
-   * 清除所有存储数据
+   * 清空所有存储数据
    * @param type 存储类型
    */
   public static async clear(type: StorageType = StorageType.PREFERENCES): Promise<void> {
@@ -540,7 +536,7 @@ export default class StorageUtil {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
       const jsonData = JSON.stringify(data);
-      await pref.putString(key, jsonData);
+      await pref.put(key, jsonData);
       await pref.flush();
     } catch (error) {
       // 安全处理错误信息
@@ -556,18 +552,18 @@ export default class StorageUtil {
   private static async getFromPreferences(key: string): Promise<StorageData | null> {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const jsonData: string = await pref.getString(key, '');
-      
+      const jsonData: string = await pref.get(key, '') as string;
+
       if (jsonData === '') {
         return null;
       }
-      
+
       // 安全解析JSON
       const parsedData = StorageUtil.safeParseJSON(jsonData);
       if (!parsedData) {
         return null;
       }
-      
+
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
     } catch (error) {
@@ -595,13 +591,20 @@ export default class StorageUtil {
   }
 
   /**
-   * 清除所有偏好设置
+   * 清空所有偏好设置
    */
   private static async clearPreferences(): Promise<void> {
     try {
       const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const keys: string[] = await pref.getAllKeys() as string[];
-      
+      // 使用KeysIterator获取所有键
+      const keys: string[] = [];
+      // 显式声明iterator类型为preferences.KeysIterator
+      const iterator: preferences.KeysIterator = pref.keys();
+      let key: string | undefined;
+      while ((key = await iterator.next()) !== undefined) {
+        keys.push(key);
+      }
+
       // 检查keys是否为数组
       if (Array.isArray(keys)) {
         for (let i = 0; i < keys.length; i++) {
@@ -612,7 +615,7 @@ export default class StorageUtil {
           }
         }
       }
-      
+
       await pref.flush();
     } catch (error) {
       // 安全处理错误信息
@@ -647,11 +650,11 @@ export default class StorageUtil {
       const fileName = `${key}.json`;
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       const exists = await FileUtil.isFileExists(filePath);
-      
+
       if (!exists) {
         return null;
       }
-      
+
       // 确保FileUtil.readFile返回字符串类型
       const readResult = await FileUtil.readFile(filePath);
       let jsonData: string = '';
@@ -661,18 +664,18 @@ export default class StorageUtil {
         // 如果返回的不是字符串，转换为字符串
         jsonData = String(readResult);
       }
-      
+
       // 确保jsonData是字符串
       if (jsonData === '') {
         return null;
       }
-      
+
       // 安全解析JSON
       const parsedData = StorageUtil.safeParseJSON(jsonData);
       if (!parsedData) {
         return null;
       }
-      
+
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
     } catch (error) {
@@ -700,13 +703,13 @@ export default class StorageUtil {
   }
 
   /**
-   * 清除所有文件
+   * 清空所有文件
    */
   private static async clearFiles(): Promise<void> {
     try {
       const dirPath = await FileUtil.getApplicationDataDir();
       const files = await FileUtil.listFiles(dirPath);
-      
+
       // 检查files是否为数组
       if (Array.isArray(files)) {
         for (let i = 0; i < files.length; i++) {
@@ -754,20 +757,20 @@ export default class StorageUtil {
       timestamp: 0,
       expireTime: 0
     };
-    
-    // 安全地处理所有属性，避免使用索引访问和任何原型方法
+
+    // 安全地处理所有属性，避免使用索引访问和任何原始方法
     try {
       // 获取对象的所有自有属性键，避免使用in操作符
       const keys = Object.keys(parsedData);
-      
-      // 处理value属性- 避免使用索引访问
+
+      // 处理value属性
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key === 'value') {
           // 安全地获取属性值，避免使用索引访问
           if (Object.keys(parsedData).includes(key)) {
             const valueData = parsedData[key];
-            if (typeof valueData === 'string' || typeof valueData === 'number' || 
+            if (typeof valueData === 'string' || typeof valueData === 'number' ||
                 typeof valueData === 'boolean' || valueData === null) {
               result.value = valueData;
             }
@@ -780,7 +783,7 @@ export default class StorageUtil {
               result.timestamp = tsValue;
             } else if (typeof tsValue === 'string') {
               const numValue = Number(tsValue);
-              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              // 使用更可靠的NaN检查方式，避免使用Number.isNaN
               if (typeof numValue === 'number' && numValue === numValue) {
                 result.timestamp = numValue;
               }
@@ -791,13 +794,13 @@ export default class StorageUtil {
           if (Object.keys(parsedData).includes(key)) {
             const expValue = parsedData[key];
             if (typeof expValue === 'number') {
-              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              // 使用更可靠的NaN检查方式，避免使用Number.isNaN
               if (expValue === expValue) {
                 result.expireTime = expValue;
               }
             } else if (typeof expValue === 'string') {
               const numValue = Number(expValue);
-              // 使用更基础的NaN检查方式，避免使用Number.isNaN
+              // 使用更可靠的NaN检查方式，避免使用Number.isNaN
               if (typeof numValue === 'number' && numValue === numValue) {
                 result.expireTime = numValue;
               }
@@ -810,7 +813,7 @@ export default class StorageUtil {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to build StorageData: ${errorMessage}`, error as Error);
     }
-    
+
     return result;
   }
 
@@ -818,23 +821,23 @@ export default class StorageUtil {
    * 验证值的类型安全性
    */
   private static validateValue(value: string | number | boolean | JsonData | null | undefined): string | number | boolean | JsonData | null {
-    // 显式处理null和undefined
+    // 格式处理null和undefined
     if (value === null || value === undefined) {
       return null;
     }
-    
+
     switch (typeof value) {
       case 'string':
       case 'number':
       case 'boolean':
         return value;
       case 'object':
-        // 确保是纯对象而非数组
+        // 确保是对象而非数组
         if (!Array.isArray(value)) {
           if (value instanceof JsonDataClass) {
             return value;
           }
-          // 创建新对象确保类型安全
+          // 创建新对象保证类型安全
           const safeObj = new JsonDataClass();
           // 获取对象的所有自有属性键
           const keys = Object.keys(value);
@@ -855,7 +858,7 @@ export default class StorageUtil {
                   }
                   return undefined;
                 })();
-                
+
                 // 类型安全地处理每个属性值
                 if (propValue !== undefined) {
                   safeObj.set(safeKey, StorageUtil.validateValue(propValue) as string | number | boolean | JsonDataClass | null);

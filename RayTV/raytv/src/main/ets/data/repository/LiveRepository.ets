@@ -18,7 +18,7 @@ const TAG = 'LiveRepository';
 const CHANNEL_CACHE_EXPIRY = 7200000; // 2小时
 const EPG_CACHE_EXPIRY = 3600000; // 1小时
 
-// 批量操作的批次大�?const BATCH_SIZE = 200;
+// 批量操作的批次大�?const BATCH_SIZE = 200;
 
 export class LiveRepository {
   private static instance: LiveRepository;
@@ -44,12 +44,13 @@ export class LiveRepository {
   }
   
   /**
-   * 初始化直播仓�?   */
+   * 初始化直播仓�?   */
   public async init(): Promise<void> {
     try {
-      Logger.info(TAG, 'Initializing LiveRepository');
-      // 简化实现，仅记录日�?    } catch (error) {
-      Logger.error(TAG, new Error(`Failed to initialize LiveRepository: ${JSON.stringify(error)}`));
+      Logger.info(TAG, 'Initializing LiveRepository', {});
+      // 简化实现，仅记录日志
+    } catch (error) {
+      Logger.error(TAG, 'Failed to initialize LiveRepository', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -62,9 +63,10 @@ export class LiveRepository {
    */
   public async saveChannels(siteId: string, channels: LiveChannel[]): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving ${channels.length} channels for site ${siteId}`);
+      Logger.debug(TAG, `Saving ${channels.length} channels for site ${siteId}`, {});
       
-      // 简化实现，仅更新内存缓�?      if (!this.channelCache.has(siteId)) {
+      // 简化实现，仅更新内存缓存
+      if (!this.channelCache.has(siteId)) {
         this.channelCache.set(siteId, new Map());
       }
       
@@ -75,7 +77,7 @@ export class LiveRepository {
       
       return true;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to save channels: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to save channels', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -87,12 +89,12 @@ export class LiveRepository {
    */
   public async getChannels(siteId: string): Promise<LiveChannel[]> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
+      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
         return Array.from(this.channelCache.get(siteId)!.values());
       }
       return [];
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get channels: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to get channels', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -105,24 +107,24 @@ export class LiveRepository {
    */
   public async getChannelById(siteId: string, channelId: string): Promise<LiveChannel | null> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
+      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
         return this.channelCache.get(siteId)!.get(channelId) || null;
       }
       return null;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get channel by ID ${channelId}: ${JSON.stringify(error)}`));
+      Logger.error(TAG, `Failed to get channel by ID ${channelId}`, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
   
   /**
    * 搜索直播频道
-   * @param keyword 搜索关键�?   * @param siteId 站点ID（可选）
+   * @param keyword 搜索关键�?   * @param siteId 站点ID（可选）
    * @returns 搜索结果
    */
   public async searchChannels(keyword: string, siteId?: string): Promise<LiveChannel[]> {
     try {
-      // 简化实现，从内存缓存搜�?      const results: LiveChannel[] = [];
+      // 简化实现，从内存缓存搜�?      const results: LiveChannel[] = [];
       
       const siteIds = siteId ? [siteId] : Array.from(this.channelCache.keys());
       
@@ -138,7 +140,7 @@ export class LiveRepository {
       
       return results;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to search channels: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to search channels', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -152,16 +154,17 @@ export class LiveRepository {
    */
   public async saveEpgData(siteId: string, channelId: string, epgItems: EpgItem[]): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving ${epgItems.length} EPG items for channel ${channelId}`);
+      Logger.debug(TAG, `Saving ${epgItems.length} EPG items for channel ${channelId}`, {});
       
-      // 简化实现，仅更新内存缓�?      if (!this.epgCache.has(siteId)) {
+      // 简化实现，仅更新内存缓存
+      if (!this.epgCache.has(siteId)) {
         this.epgCache.set(siteId, new Map());
       }
       this.epgCache.get(siteId)!.set(channelId, epgItems);
       
       return true;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to save EPG data: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to save EPG data', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -174,12 +177,12 @@ export class LiveRepository {
    */
   public async getEpgData(siteId: string, channelId: string): Promise<EpgItem[]> {
     try {
-      // 从内存缓存获�?      if (this.epgCache.has(siteId)) {
+      // 从内存缓存获�?      if (this.epgCache.has(siteId)) {
         return this.epgCache.get(siteId)!.get(channelId) || [];
       }
       return [];
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get EPG data: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to get EPG data', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -192,13 +195,14 @@ export class LiveRepository {
    */
   public async saveGroups(siteId: string, groups: LiveGroup[]): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving ${groups.length} groups for site ${siteId}`);
+      Logger.debug(TAG, `Saving ${groups.length} groups for site ${siteId}`, {});
       
-      // 简化实现，仅更新内存缓�?      this.groupCache.set(siteId, groups);
+      // 简化实现，仅更新内存缓存
+      this.groupCache.set(siteId, groups);
       
       return true;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to save groups: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to save groups', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -210,9 +214,9 @@ export class LiveRepository {
    */
   public async getGroups(siteId: string): Promise<LiveGroup[]> {
     try {
-      // 从内存缓存获�?      return this.groupCache.get(siteId) || [];
+      // 从内存缓存获�?      return this.groupCache.get(siteId) || [];
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get groups: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to get groups', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -225,25 +229,25 @@ export class LiveRepository {
    */
   public async getGroupById(siteId: string, groupId: string): Promise<LiveGroup | null> {
     try {
-      // 从内存缓存获�?      const groups = this.groupCache.get(siteId);
+      // 从内存缓存获�?      const groups = this.groupCache.get(siteId);
       if (groups) {
         return groups.find(group => group.id === groupId) || null;
       }
       return null;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get group by ID ${groupId}: ${JSON.stringify(error)}`));
+      Logger.error(TAG, `Failed to get group by ID ${groupId}`, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
   
   /**
-   * 保存频道到收�?   * @param siteId 站点ID
+   * 保存频道到收�?   * @param siteId 站点ID
    * @param channelId 频道ID
    * @returns 是否保存成功
    */
   public async addChannelToFavorites(siteId: string, channelId: string): Promise<boolean> {
     try {
-      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
+      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
         const channel = this.channelCache.get(siteId)!.get(channelId);
         if (channel) {
           channel.isFavorite = true;
@@ -252,7 +256,7 @@ export class LiveRepository {
       }
       return false;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to add channel to favorites: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to add channel to favorites', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -265,7 +269,7 @@ export class LiveRepository {
    */
   public async removeChannelFromFavorites(siteId: string, channelId: string): Promise<boolean> {
     try {
-      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
+      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
         const channel = this.channelCache.get(siteId)!.get(channelId);
         if (channel) {
           channel.isFavorite = false;
@@ -274,34 +278,34 @@ export class LiveRepository {
       }
       return false;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to remove channel from favorites: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to remove channel from favorites', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
   
   /**
-   * 获取收藏的频道列�?   * @param siteId 站点ID
-   * @returns 收藏的频道列�?   */
+   * 获取收藏的频道列�?   * @param siteId 站点ID
+   * @returns 收藏的频道列�?   */
   public async getFavoriteChannels(siteId: string): Promise<LiveChannel[]> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
+      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
         return Array.from(this.channelCache.get(siteId)!.values())
           .filter(channel => channel.isFavorite);
       }
       return [];
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to get favorite channels: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to get favorite channels', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
   
   /**
-   * 清除指定站点的所有数�?   * @param siteId 站点ID
+   * 清除指定站点的所有数�?   * @param siteId 站点ID
    * @returns 是否清除成功
    */
   public async clearSiteData(siteId: string): Promise<boolean> {
     try {
-      Logger.info(TAG, `Clearing all data for site ${siteId}`);
+      Logger.info(TAG, `Clearing all data for site ${siteId}`, {});
       
       // 清空内存缓存
       this.channelCache.delete(siteId);
@@ -310,25 +314,26 @@ export class LiveRepository {
       
       return true;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to clear site data: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to clear site data', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
   
   /**
-   * 清除所有数�?   * @returns 是否清除成功
+   * 清除所有数�?   * @returns 是否清除成功
    */
   public async clearAllData(): Promise<boolean> {
     try {
-      Logger.info(TAG, 'Clearing all live data');
+      Logger.info(TAG, 'Clearing all live data', {});
       
-      // 清空所有内存缓�?      this.channelCache.clear();
+      // 清空所有内存缓存
+      this.channelCache.clear();
       this.groupCache.clear();
       this.epgCache.clear();
       
       return true;
     } catch (error) {
-      Logger.error(TAG, new Error(`Failed to clear all data: ${JSON.stringify(error)}`));
+      Logger.error(TAG, 'Failed to clear all data', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }

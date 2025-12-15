@@ -2,11 +2,9 @@
 // 负责设备信息的收集、存储和管理
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
-import { DEVICE_INFO_TABLE } from '../db/TableSchema';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
 import Logger from '../../common/util/Logger';
-import StorageUtil, { LocalStorageType } from '../../common/util/StorageUtil';
-// import codec from '@ohos.media.codec'; // 暂时注释，等待SDK支持
+import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import BusinessError from '@ohos.base';
 
 const TAG = 'DeviceInfoRepository';
@@ -17,9 +15,10 @@ class MockCodecDetector {
    * 模拟获取编解码器列表
    */
   static async getCodecList(codecName: string): Promise<string[]> {
-    Logger.info('MockCodecDetector', `Checking support for codec: ${codecName}`);
+    Logger.info(TAG, `Checking support for codec: ${codecName}`);
     
-    // 模拟编解码器支持检�?    const supportedCodecs: Record<string, string[]> = {
+    // 模拟编解码器支持检测
+    const supportedCodecs: Record<string, string[]> = {
       // 视频编解码器
       'h264': ['h264'],
       'h265': ['h265'],
@@ -38,23 +37,53 @@ class MockCodecDetector {
       'eac3': []  // 模拟不支持EAC3
     };
     
-    // 返回模拟的编解码器列�?    return supportedCodecs[codecName.toLowerCase()] || [];
+    // 返回模拟的编解码器列表
+    return supportedCodecs[codecName.toLowerCase()] || [];
   }
 }
 
-// 设备信息键常�?export const DeviceInfoKeys: Record<string, string | number | boolean | null> = { ... };
+// 设备信息键常量
+export const DeviceInfoKeys: Record<string, string> = {
+  DEVICE_ID: 'device_id',
+  DEVICE_NAME: 'device_name',
+  DEVICE_TYPE: 'device_type',
+  DEVICE_MODEL: 'device_model',
+  DEVICE_BRAND: 'device_brand',
+  OS_VERSION: 'os_version',
+  APP_VERSION: 'app_version',
+  SUPPORTED_VIDEO_CODECS: 'supported_video_codecs',
+  SUPPORTED_AUDIO_CODECS: 'supported_audio_codecs',
+  MAX_RESOLUTION: 'max_resolution',
+  HDR_SUPPORTED: 'hdr_supported',
+  DOLBY_ATMOS_SUPPORTED: 'dolby_atmos_supported',
+  SCREEN_WIDTH: 'screen_width',
+  SCREEN_HEIGHT: 'screen_height',
+  SCREEN_DPI: 'screen_dpi',
+  NETWORK_INFO: 'network_info',
+  LAST_UPDATED: 'last_updated',
+  FIRST_USE_TIME: 'first_use_time'
+};
+
+// 设备信息表定义
+const DEVICE_INFO_TABLE = {
+  TABLE_NAME: 'device_info',
+  COLUMNS: {
+    KEY: 'key',
+    VALUE: 'value',
+    IS_OBJECT: 'is_object',
+    UPDATED_AT: 'updated_at'
+  }
+};
 
 export class DeviceInfoRepository {
   private static instance: DeviceInfoRepository;
   private sqliteHelper: SQLiteHelper;
-  private storageUtil: StorageUtil;
   private deviceInfoCache: Map<string, unknown> = new Map();
   private deviceInfo: DeviceInfo | null = null;
   private isInitialized: boolean = false;
   
   private constructor() {
     this.sqliteHelper = SQLiteHelper.getInstance();
-    this.storageUtil = StorageUtil.getInstance();
   }
   
   /**
@@ -68,7 +97,9 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 初始化设备信息仓�?   * 加载已存储的设备信息并收集当前设备信�?   */
+   * 初始化设备信息仓库
+   * 加载已存储的设备信息并收集当前设备信息
+   */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
@@ -83,12 +114,14 @@ export class DeviceInfoRepository {
       // 收集当前设备信息
       await this.collectDeviceInfo();
       
-      // 检查首次使用时�?      await this.checkFirstUseTime();
+      // 检查首次使用时间
+      await this.checkFirstUseTime();
       
       this.isInitialized = true;
       Logger.info(TAG, 'Device info repository initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize device info repository: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to initialize device info repository: ${errorMsg}`);
     }
   }
   
@@ -97,7 +130,8 @@ export class DeviceInfoRepository {
    */
   private async loadStoredDeviceInfo(): Promise<void> {
     try {
-      // 从数据库查询所有设备信息记�?      const records = await this.sqliteHelper.query(DEVICE_INFO_TABLE.TABLE_NAME, ['*'] instanceof Error ? ['*'] : new Error(String(['*'] instanceof Error ? ['*'] instanceof Error ? ['*'] : new Error(String(['*'] : new Error(String(['*'] instanceof Error ? ['*'] : new Error(String(['*'] instanceof Error ? ['*'] instanceof Error ? ['*'] : new Error(String(['*'] instanceof Error ? ['*'] instanceof Error ? ['*'] : new Error(String(['*'] : new Error(String(['*'] instanceof Error ? ['*'] : new Error(String(['*'] : new Error(String(['*'] instanceof Error ? ['*'] : new Error(String(['*'] instanceof Error ? ['*'] instanceof Error ? ['*'] : new Error(String(['*'] : new Error(String(['*'] instanceof Error ? ['*'] : new Error(String(['*'])))))));
+      // 从数据库查询所有设备信息记录
+      const records = await this.sqliteHelper.query(DEVICE_INFO_TABLE.TABLE_NAME, ['*']);
       
       for (const record of records) {
         const key = record[DEVICE_INFO_TABLE.COLUMNS.KEY];
@@ -108,16 +142,18 @@ export class DeviceInfoRepository {
           try {
             value = JSON.parse(value);
           } catch (e) {
-            Logger.error(TAG, `Failed to parse device info JSON for key ${key}: ${JSON.stringify(e)}`);
+            const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+            Logger.error(TAG, `Failed to parse device info JSON for key ${key}: ${errorMsg}`);
           }
         }
         
-        this.deviceInfoCache.set(key, value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value)))))));
+        this.deviceInfoCache.set(key, value);
       }
       
       Logger.debug(TAG, `Loaded ${this.deviceInfoCache.size} device info records`);
     } catch (error) {
-      Logger.error(TAG, `Failed to load stored device info: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to load stored device info: ${errorMsg}`);
     }
   }
   
@@ -131,90 +167,13 @@ export class DeviceInfoRepository {
       const collectedInfo: Record<string, unknown> = {
         // 设备基础信息
         [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' instanceof Error ? unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model' : new Error(String(unknown> = {
-        // 设备基础信息
-        [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
-        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'))))))),
+        [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'),
         [DeviceInfoKeys.DEVICE_BRAND]: this.getSafeValue(DeviceInfoKeys.DEVICE_BRAND, 'Unknown Brand'),
         [DeviceInfoKeys.OS_VERSION]: this.getSafeValue(DeviceInfoKeys.OS_VERSION, '1.0.0'),
         [DeviceInfoKeys.APP_VERSION]: this.getSafeValue(DeviceInfoKeys.APP_VERSION, '1.0.0'),
         
-        // 设备能力 - 使用模拟编解码器检�?        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
+        // 设备能力 - 使用模拟编解码器检测
+        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
         [DeviceInfoKeys.SUPPORTED_AUDIO_CODECS]: await this.detectSupportedAudioCodecs(),
         [DeviceInfoKeys.MAX_RESOLUTION]: await this.detectMaxResolution(),
         [DeviceInfoKeys.HDR_SUPPORTED]: await this.detectHDRSupport(),
@@ -244,7 +203,8 @@ export class DeviceInfoRepository {
       
       Logger.info(TAG, `Device info collected: ${deviceId}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to collect device info: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to collect device info: ${errorMsg}`);
     }
   }
   
@@ -254,13 +214,12 @@ export class DeviceInfoRepository {
   private async getOrCreateDeviceId(): Promise<string> {
     try {
       // 尝试从存储中获取设备ID
-      let deviceId = await this.getDeviceInfo(DeviceInfoKeys.DEVICE_ID);
+      let deviceId = await this.getDeviceInfo<string>(DeviceInfoKeys.DEVICE_ID);
       
       if (!deviceId) {
         // 如果不存在，生成新的设备ID
         deviceId = this.generateDeviceId();
         // 使用安全存储保存设备ID
-        await this.storageUtil.save(DeviceInfoKeys.DEVICE_ID, deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE instanceof Error ? deviceId, LocalStorageType.SECURE : new Error(String(deviceId, LocalStorageType.SECURE)))))));
         await this.setDeviceInfo(DeviceInfoKeys.DEVICE_ID, deviceId);
         
         Logger.info(TAG, `Created new device ID: ${deviceId}`);
@@ -268,7 +227,8 @@ export class DeviceInfoRepository {
       
       return deviceId;
     } catch (error) {
-      Logger.error(TAG, `Failed to get or create device ID: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get or create device ID: ${errorMsg}`);
       return `unknown_${Date.now()}`;
     }
   }
@@ -278,15 +238,16 @@ export class DeviceInfoRepository {
    */
   private generateDeviceId(): string {
     const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 15 instanceof Error ? 15 : new Error(String(15 instanceof Error ? 15 instanceof Error ? 15 : new Error(String(15 : new Error(String(15 instanceof Error ? 15 : new Error(String(15 instanceof Error ? 15 instanceof Error ? 15 : new Error(String(15 instanceof Error ? 15 instanceof Error ? 15 : new Error(String(15 : new Error(String(15 instanceof Error ? 15 : new Error(String(15 : new Error(String(15 instanceof Error ? 15 : new Error(String(15 instanceof Error ? 15 instanceof Error ? 15 : new Error(String(15 : new Error(String(15 instanceof Error ? 15 : new Error(String(15)))))));
+    const random = Math.random().toString(36).substring(2, 15);
     return `tv_${timestamp}_${random}`;
   }
   
   /**
-   * 检查首次使用时�?   */
+   * 检查首次使用时间
+   */
   private async checkFirstUseTime(): Promise<void> {
     try {
-      const firstUseTime = await this.getDeviceInfo(DeviceInfoKeys.FIRST_USE_TIME);
+      const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME);
       
       if (!firstUseTime) {
         // 记录首次使用时间
@@ -295,7 +256,8 @@ export class DeviceInfoRepository {
         Logger.info(TAG, `First use time recorded: ${now}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to check first use time: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to check first use time: ${errorMsg}`);
     }
   }
   
@@ -305,7 +267,7 @@ export class DeviceInfoRepository {
   private buildDeviceInfoObject(): void {
     try {
       this.deviceInfo = {
-        deviceId: this.getSafeValue(DeviceInfoKeys.DEVICE_ID, 'unknown' instanceof Error ? 'unknown' : new Error(String('unknown' instanceof Error ? 'unknown' instanceof Error ? 'unknown' : new Error(String('unknown' : new Error(String('unknown' instanceof Error ? 'unknown' : new Error(String('unknown' instanceof Error ? 'unknown' instanceof Error ? 'unknown' : new Error(String('unknown' instanceof Error ? 'unknown' instanceof Error ? 'unknown' : new Error(String('unknown' : new Error(String('unknown' instanceof Error ? 'unknown' : new Error(String('unknown' : new Error(String('unknown' instanceof Error ? 'unknown' : new Error(String('unknown' instanceof Error ? 'unknown' instanceof Error ? 'unknown' : new Error(String('unknown' : new Error(String('unknown' instanceof Error ? 'unknown' : new Error(String('unknown'))))))),
+        deviceId: this.getSafeValue(DeviceInfoKeys.DEVICE_ID, 'unknown'),
         deviceName: this.getSafeValue(DeviceInfoKeys.DEVICE_NAME, 'Unknown Device'),
         deviceType: this.getSafeValue(DeviceInfoKeys.DEVICE_TYPE, DeviceType.OTHER),
         deviceModel: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'),
@@ -333,22 +295,31 @@ export class DeviceInfoRepository {
         firstUseTime: this.getSafeValue(DeviceInfoKeys.FIRST_USE_TIME, Date.now())
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to build device info object: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to build device info object: ${errorMsg}`);
     }
   }
   
   /**
    * 保存设备信息
-   * @param key 信息�?   * @param value 信息�?   * @returns 是否保存成功
+   * @param key 信息键
+   * @param value 信息值
+   * @returns 是否保存成功
    */
-  public async setDeviceInfo(key: string, value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null> instanceof Error ? value: Record<string, string | number | boolean | null> : new Error(String(value: Record<string, string | number | boolean | null>))))))): Promise<boolean> {
+  public async setDeviceInfo(key: string, value: unknown): Promise<boolean> {
     try {
       Logger.debug(TAG, `Setting device info: ${key}`);
       
-      // 序列化�?      const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      // 序列化值
+      const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
       const isObject = typeof value === 'object';
       
-      const infoData: Record<string, string | number | boolean | null> = { ... };
+      const infoData: Record<string, string | number | boolean | null> = {
+        [DEVICE_INFO_TABLE.COLUMNS.KEY]: key,
+        [DEVICE_INFO_TABLE.COLUMNS.VALUE]: valueStr,
+        [DEVICE_INFO_TABLE.COLUMNS.IS_OBJECT]: isObject ? 1 : 0,
+        [DEVICE_INFO_TABLE.COLUMNS.UPDATED_AT]: Date.now()
+      };
       
       // 检查是否已存在
       const exists = await this.hasDeviceInfo(key);
@@ -368,7 +339,8 @@ export class DeviceInfoRepository {
         
         return result.success;
       } else {
-        // 插入新记�?        const result = await this.sqliteHelper.insert(DEVICE_INFO_TABLE.TABLE_NAME, infoData);
+        // 插入新记录
+        const result = await this.sqliteHelper.insert(DEVICE_INFO_TABLE.TABLE_NAME, infoData);
         
         if (result.success) {
           // 更新缓存
@@ -378,17 +350,22 @@ export class DeviceInfoRepository {
         return result.success;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to set device info ${key}: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to set device info ${key}: ${errorMsg}`);
       return false;
     }
   }
   
   /**
    * 获取设备信息
-   * @param key 信息�?   * @param defaultValue 默认�?   * @returns 设备信息值或默认�?   */
-  public async getDeviceInfo<T = unknown>(key: string, defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T : new Error(String(defaultValue?: T instanceof Error ? defaultValue?: T : new Error(String(defaultValue?: T))))))): Promise<T | null> {
+   * @param key 信息键
+   * @param defaultValue 默认值
+   * @returns 设备信息值或默认值
+   */
+  public async getDeviceInfo<T = unknown>(key: string, defaultValue?: T): Promise<T | null> {
     try {
-      // 优先从缓存获�?      if (this.deviceInfoCache.has(key)) {
+      // 优先从缓存获取
+      if (this.deviceInfoCache.has(key)) {
         return this.deviceInfoCache.get(key) as T;
       }
       
@@ -408,35 +385,43 @@ export class DeviceInfoRepository {
         return defaultValue !== undefined ? defaultValue : null;
       }
       
-      let value: Record<string, string | number | boolean | null> = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
+      let value: unknown = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
       const isObject = record[DEVICE_INFO_TABLE.COLUMNS.IS_OBJECT] === 1;
       
       if (isObject) {
         try {
-          value = JSON.parse(value);
+          value = JSON.parse(value as string);
         } catch (e) {
-          Logger.error(TAG, `Failed to parse device info JSON for key ${key}: ${JSON.stringify(e)}`);
+          const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+          Logger.error(TAG, `Failed to parse device info JSON for key ${key}: ${errorMsg}`);
         }
       }
       
       // 更新缓存
-      this.deviceInfoCache.set(key, value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value instanceof Error ? value instanceof Error ? value : new Error(String(value : new Error(String(value instanceof Error ? value : new Error(String(value)))))));
+      this.deviceInfoCache.set(key, value);
       
       return value as T;
     } catch (error) {
-      Logger.error(TAG, `Failed to get device info ${key}: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get device info ${key}: ${errorMsg}`);
       return defaultValue !== undefined ? defaultValue : null;
     }
   }
   
   /**
-   * 从缓存获取设备信息（安全版本�?   * @param key 信息�?   * @param defaultValue 默认�?   * @returns 设备信息值或默认�?   */
-  private getSafeValue<T>(key: string, defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T : new Error(String(defaultValue: T instanceof Error ? defaultValue: T : new Error(String(defaultValue: T))))))): T {
-    return this.deviceInfoCache.get(key) ?? defaultValue;
+   * 从缓存获取设备信息（安全版本）
+   * @param key 信息键
+   * @param defaultValue 默认值
+   * @returns 设备信息值或默认值
+   */
+  private getSafeValue<T>(key: string, defaultValue: T): T {
+    return this.deviceInfoCache.get(key) as T || defaultValue;
   }
   
   /**
-   * 检查设备信息是否存�?   * @param key 信息�?   * @returns 是否存在
+   * 检查设备信息是否存在
+   * @param key 信息键
+   * @returns 是否存在
    */
   public async hasDeviceInfo(key: string): Promise<boolean> {
     try {
@@ -451,18 +436,20 @@ export class DeviceInfoRepository {
       
       return await this.sqliteHelper.exists(DEVICE_INFO_TABLE.TABLE_NAME, conditions);
     } catch (error) {
-      Logger.error(TAG, `Failed to check device info existence for key ${key}: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to check device info existence for key ${key}: ${errorMsg}`);
       return false;
     }
   }
   
   /**
    * 删除设备信息
-   * @param key 信息�?   * @returns 是否删除成功
+   * @param key 信息键
+   * @returns 是否删除成功
    */
   public async removeDeviceInfo(key: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` : new Error(String(`Removing device info: ${key}` instanceof Error ? `Removing device info: ${key}` : new Error(String(`Removing device info: ${key}`)))))));
+      Logger.debug(TAG, `Removing device info: ${key}`);
       
       const conditions: QueryCondition[] = [{
         column: DEVICE_INFO_TABLE.COLUMNS.KEY,
@@ -477,13 +464,15 @@ export class DeviceInfoRepository {
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to remove device info ${key}: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to remove device info ${key}: ${errorMsg}`);
       return false;
     }
   }
   
   /**
-   * 获取完整的设备信息对�?   */
+   * 获取完整的设备信息对象
+   */
   public async getFullDeviceInfo(): Promise<DeviceInfo | null> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -519,7 +508,7 @@ export class DeviceInfoRepository {
    * @param networkInfo 网络信息
    */
   public async updateNetworkInfo(networkInfo: DeviceNetworkInfo): Promise<boolean> {
-    return await this.setDeviceInfo(DeviceInfoKeys.NETWORK_INFO, networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo : new Error(String(networkInfo instanceof Error ? networkInfo : new Error(String(networkInfo)))))));
+    return await this.setDeviceInfo(DeviceInfoKeys.NETWORK_INFO, networkInfo);
   }
   
   /**
@@ -538,336 +527,65 @@ export class DeviceInfoRepository {
       const videoCodecs = ['h264', 'h265', 'vp8', 'vp9', 'av1', 'mpeg4'];
       const supportedCodecs: string[] = [];
       
-      // 使用模拟编解码器检�?      for (const codecName of videoCodecs) {
+      // 使用模拟编解码器检测
+      for (const codecName of videoCodecs) {
         try {
-          // 检查是否支持该编解码器的解码能�?          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模�?          if (isSupported) {
+          // 检查是否支持该编解码器的解码能力
+          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
+          if (isSupported) {
             supportedCodecs.push(codecName);
           }
         } catch (error) {
-          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${error}`);
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${errorMsg}`);
         }
       }
       
-      // 如果模拟检测失败，回退到基本编解码器列�?      return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
+      // 如果模拟检测失败，回退到基本编解码器列表
+      return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
     } catch (error) {
-      Logger.error(TAG, `Failed to detect video codecs: ${error}`);
-      return ['h264', 'h265', 'vp9']; // 默认回退�?    }
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to detect video codecs: ${errorMsg}`);
+      return ['h264', 'h265', 'vp9']; // 默认回退值
+    }
   }
   
   /**
    * 检测设备支持的音频编解码器
    */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( instanceof Error ? 'h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs( : new Error(String('h265', 'vp9']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备支持的音频编解码器
-   */
-  private async detectSupportedAudioCodecs())))))): Promise<string[]> {
+  private async detectSupportedAudioCodecs(): Promise<string[]> {
     try {
       // 常见音频编解码器列表
       const audioCodecs = ['aac', 'mp3', 'opus', 'flac', 'vorbis', 'ac3', 'eac3'];
       const supportedCodecs: string[] = [];
       
-      // 使用模拟编解码器检�?      for (const codecName of audioCodecs) {
+      // 使用模拟编解码器检测
+      for (const codecName of audioCodecs) {
         try {
-          // 检查是否支持该编解码器的解码能�?          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模�?          if (isSupported) {
+          // 检查是否支持该编解码器的解码能力
+          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
+          if (isSupported) {
             supportedCodecs.push(codecName);
           }
         } catch (error) {
-          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${error}`);
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          Logger.warn(TAG, `Failed to check support for codec ${codecName}: ${errorMsg}`);
         }
       }
       
-      // 如果模拟检测失败，回退到基本编解码器列�?      return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
+      // 如果模拟检测失败，回退到基本编解码器列表
+      return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
     } catch (error) {
-      Logger.error(TAG, `Failed to detect audio codecs: ${error}`);
-      return ['aac', 'mp3', 'opus']; // 默认回退�?    }
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to detect audio codecs: ${errorMsg}`);
+      return ['aac', 'mp3', 'opus']; // 默认回退值
+    }
   }
   
   /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( instanceof Error ? 'mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution( : new Error(String('mp3', 'opus']; // 默认回退�?    }
-  }
-  
-  /**
-   * 检测设备最大支持的分辨�?   */
-  private async detectMaxResolution())))))): Promise<string> {
+   * 检测设备最大支持的分辨率
+   */
+  private async detectMaxResolution(): Promise<string> {
     try {
       // 这里可以添加实际的分辨率检测逻辑
       // 暂时根据设备屏幕尺寸进行估算
@@ -883,8 +601,10 @@ export class DeviceInfoRepository {
         return '720p';
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to detect max resolution: ${error}`);
-      return '1080p'; // 默认回退�?    }
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to detect max resolution: ${errorMsg}`);
+      return '1080p'; // 默认回退值
+    }
   }
   
   /**
@@ -893,11 +613,14 @@ export class DeviceInfoRepository {
   private async detectHDRSupport(): Promise<boolean> {
     try {
       // 这里可以使用系统API检测HDR支持
-      // 暂时返回基于屏幕分辨率的估算�?      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920 instanceof Error ? 1920 : new Error(String(1920 instanceof Error ? 1920 instanceof Error ? 1920 : new Error(String(1920 : new Error(String(1920 instanceof Error ? 1920 : new Error(String(1920 instanceof Error ? 1920 instanceof Error ? 1920 : new Error(String(1920 instanceof Error ? 1920 instanceof Error ? 1920 : new Error(String(1920 : new Error(String(1920 instanceof Error ? 1920 : new Error(String(1920 : new Error(String(1920 instanceof Error ? 1920 : new Error(String(1920 instanceof Error ? 1920 instanceof Error ? 1920 : new Error(String(1920 : new Error(String(1920 instanceof Error ? 1920 : new Error(String(1920)))))));
+      // 暂时返回基于屏幕分辨率的估算值
+      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
       return screenWidth >= 3840; // 假设4K屏幕通常支持HDR
     } catch (error) {
-      Logger.error(TAG, `Failed to detect HDR support: ${error}`);
-      return false; // 默认不支�?    }
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to detect HDR support: ${errorMsg}`);
+      return false; // 默认不支持
+    }
   }
   
   /**
@@ -906,9 +629,13 @@ export class DeviceInfoRepository {
   private async detectDolbySupport(): Promise<boolean> {
     try {
       // 这里可以使用音频API检测Dolby支持
-      // 暂时返回一个默认�?      return false; // 默认不支持，实际应用中需要使用系统API检�?    } catch (error) {
-      Logger.error(TAG, `Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}` instanceof Error ? `Failed to detect Dolby support: ${error}` : new Error(String(`Failed to detect Dolby support: ${error}`)))))));
-      return false; // 默认不支�?    }
+      // 暂时返回一个默认值
+      return false; // 默认不支持，实际应用中需要使用系统API检测
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to detect Dolby support: ${errorMsg}`);
+      return false; // 默认不支持
+    }
   }
   
   /**
@@ -920,7 +647,8 @@ export class DeviceInfoRepository {
       const codecInfos = await MockCodecDetector.getCodecList(codecName);
       return codecInfos.length > 0;
     } catch (error) {
-      Logger.warn(TAG, `Error checking codec ${codecName} support: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Error checking codec ${codecName} support: ${errorMsg}`);
       return false;
     }
   }
@@ -952,15 +680,18 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 清空所有设备信息（谨慎使用�?   */
+   * 清空所有设备信息（谨慎使用）
+   */
   public async clearAllDeviceInfo(): Promise<boolean> {
     try {
       Logger.warning(TAG, 'Clearing all device info');
       
-      // 保留设备ID和首次使用时�?      const deviceId = await this.getDeviceId();
-      const firstUseTime = await this.getDeviceInfo(DeviceInfoKeys.FIRST_USE_TIME);
+      // 保留设备ID和首次使用时间
+      const deviceId = await this.getDeviceId();
+      const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME);
       
-      // 删除数据库中的所有记�?      await this.sqliteHelper.delete(DEVICE_INFO_TABLE.TABLE_NAME);
+      // 删除数据库中的所有记录
+      await this.sqliteHelper.delete(DEVICE_INFO_TABLE.TABLE_NAME);
       
       // 清空缓存
       this.deviceInfoCache.clear();
@@ -980,7 +711,8 @@ export class DeviceInfoRepository {
       Logger.info(TAG, 'All device info cleared and reinitialized');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear all device info: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to clear all device info: ${errorMsg}`);
       return false;
     }
   }
@@ -990,9 +722,10 @@ export class DeviceInfoRepository {
    */
   public async getUsageStatistics(): Promise<{
     deviceAge: number; // 设备使用天数
-    lastActive: number; // 最后活跃时�?  }> {
+    lastActive: number; // 最后活跃时间
+  }> {
     try {
-      const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME, Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( instanceof Error ? Date.now( : new Error(String(Date.now( : new Error(String(Date.now( instanceof Error ? Date.now( : new Error(String(Date.now())))))));
+      const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME, Date.now());
       const lastUpdated = await this.getDeviceInfo<number>(DeviceInfoKeys.LAST_UPDATED, Date.now());
       
       const now = Date.now();
@@ -1003,12 +736,12 @@ export class DeviceInfoRepository {
         lastActive: lastUpdated
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to get usage statistics: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get usage statistics: ${errorMsg}`);
       return {
-        deviceAge: 0, lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now( : new Error(String(lastActive: Date.now( instanceof Error ? lastActive: Date.now( : new Error(String(lastActive: Date.now()))))))
+        deviceAge: 0,
+        lastActive: Date.now()
       };
     }
   }
 }
-
-

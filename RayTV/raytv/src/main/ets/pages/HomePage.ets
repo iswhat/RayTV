@@ -4,29 +4,31 @@ import Logger from '../common/util/Logger';
 
 /**
  * 首页组件
- * 展示推荐媒体内容和功能入�? */
+ * 展示推荐媒体内容和功能入�? */
 @Component
 struct HomePage {
   private readonly TAG: string = 'HomePage';
   
-  // 状态管�?  @State isLoading: boolean = false;
+  // 状态管理
+  @State isLoading: boolean = false;
   
-  // 初始化页�?  aboutToAppear(): void {
-    Logger.info('HomePage mounted');
+  // 初始化页面
+  aboutToAppear(): void {
+    Logger.info(this.TAG, 'HomePage mounted');
   }
     
   // 清理资源
   aboutToDisappear(): void {
-    Logger.info('HomePage unmounted');
+    Logger.info(this.TAG, 'HomePage unmounted');
   }
   
   /**
    * 处理搜索
    */
   private handleSearch(): void {
-    Logger.info('Search button clicked');
+    Logger.info(this.TAG, 'Search button clicked');
     try {
-      // 跳转到搜索页�?      AppNavigator.getInstance().navigateToSearch();
+      // 跳转到搜索页�?      AppNavigator.getInstance().navigateToSearch();
     } catch (error) {
       Logger.error(this.TAG, `Failed to navigate to search page: ${error}`);
     }

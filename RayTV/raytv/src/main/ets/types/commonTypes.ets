@@ -1,7 +1,5 @@
 // 通用类型定义文件
-// 为项目中常见的数据结构提供明确的类型定义，减少对any类型的依�?
-// 引入ArkTS兼容的工具类�?import { ArkTSBaseTypes, ArkTSUtilityTypes } from '../common/util/ark/types/ArkTSBaseTypes';
-import { ArkTSPartial, ArkTSRequired, ArkTSPick, ArkTSOmit, ArkTSRecord, ArkTSReadonly } from '../common/util/ark/types/ArkTSUtilityTypes';
+// 为项目中常见的数据结构提供明确的类型定义，减少对any类型的依赖
 
 /**
  * 基础响应对象类型
@@ -23,14 +21,6 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
-
-// 重命名以避免与标准库冲突
-export type Partial<T> = ArkTSPartial<T>;
-export type Required<T> = ArkTSRequired<T>;
-export type Pick<T, K extends keyof T> = ArkTSPick<T, K>;
-export type Omit<T, K extends keyof T> = ArkTSOmit<T, K>;
-export type Record<K extends string | number | symbol, T> = ArkTSRecord<K, T>;
-export type Readonly<T> = ArkTSReadonly<T>;
 
 /**
  * 媒体项基础类型
@@ -103,7 +93,8 @@ export interface AuthInfo {
 }
 
 /**
- * 配置项类�? */
+ * 配置项类型
+ */
 export interface ConfigItem {
   key: string;
   value: string | number | boolean;
@@ -119,7 +110,8 @@ export interface CacheOptions<T> {
   key: string;
   value: T;
   ttl?: number; // 过期时间（毫秒）
-  tags?: string[]; // 标签，用于批量删�?}
+  tags?: string[]; // 标签，用于批量删除
+}
 
 /**
  * 搜索参数类型
@@ -134,7 +126,8 @@ export interface SearchParams {
 }
 
 /**
- * 历史记录项类�? */
+ * 历史记录项类型
+ */
 export interface HistoryItem {
   id: string;
   userId: string;
@@ -143,11 +136,12 @@ export interface HistoryItem {
   progress: number;
   lastPlayed: string;
   totalDuration?: number;
-  extra?: Record<string, Serializable>;
+  extra?: Record<string, any>;
 }
 
 /**
- * 收藏项类�? */
+ * 收藏项类型
+ */
 export interface FavoriteItem {
   id: string;
   userId: string;
@@ -155,7 +149,7 @@ export interface FavoriteItem {
   mediaType: 'video' | 'audio' | 'image' | 'playlist';
   addedAt: string;
   note?: string;
-  extra?: Record<string, Serializable>;
+  extra?: Record<string, any>;
 }
 
 /**
@@ -202,12 +196,13 @@ export interface HttpResponse<T> {
 export interface ErrorInfo {
   code: string;
   message: string;
-  details?: Record<string, Serializable>;
+  details?: Record<string, any>;
   timestamp?: number;
 }
 
 /**
- * 事件监听器类�? */
+ * 事件监听器类型
+ */
 export interface EventListenerOptions {
   once?: boolean;
   priority?: number;
@@ -238,21 +233,13 @@ export interface CancellablePromise<T> extends Promise<T> {
 export type ID = string | number;
 
 /**
- * 空值类�? */
+ * 空值类型
+ */
 export type Empty = null | undefined | void;
 
 /**
- * 可序列化的对象接�? */
-export interface SerializableObject {
-  // ArkTS兼容：不使用索引签名，使用明确的接口定义
-  getSerializable(key: string): Serializable;
-  setSerializable(key: string, value: Serializable): void;
-  hasSerializable(key: string): boolean;
-  toPlainObject(): Record<string, Serializable>;
-}
-
-/**
- * 可序列化的值类�? */
+ * 可序列化的值类型
+ */
 export type Serializable = 
   | string
   | number
@@ -260,41 +247,16 @@ export type Serializable =
   | null
   | undefined
   | Serializable[]
-  | SerializableObject;
+  | Record<string, Serializable>;
 
 /**
- * 深只读类�? */
-// ArkTS兼容的深只读实现 - 简化版�?export interface DeepReadonlyObject {
-  // ArkTS兼容：不使用索引签名
-  getReadonly(key: string): DeepReadonlyValue;
-  hasReadonly(key: string): boolean;
-}
-
-// 简化版：直接返回对象类型，不使用条件类�?export type DeepReadonlyValue = 
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | ReadonlyArray<DeepReadonlyValue>
-  | DeepReadonlyObject;
-
-/**
- * 可选键类型
+ * 深只读类型 - 简化版
  */
-// ArkTS兼容的可选属性实�?export interface OptionalBase<T> {
-  // ArkTS兼容：不使用索引签名
-  getOptional(key: string): T;
-  hasOptional(key: string): boolean;
-}
-
-/**
- * 必需键类�? */
-// ArkTS兼容的必需属性实�?export interface RequiredBase<T> {
-  // ArkTS兼容：不使用索引签名
-  getRequired(key: string): T;
-  hasRequired(key: string): boolean;
-}
+export type DeepReadonly<T> = T extends (infer U)[] 
+  ? readonly DeepReadonly<U>[]
+  : T extends object
+  ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+  : T;
 
 /**
  * 空对象类型（非null且非undefined的对象）
@@ -302,24 +264,27 @@ export type Serializable =
 export type NonEmptyObject<T extends object> = T;
 
 /**
- * 排除null和undefined的类�? */
-// ArkTS兼容的非空类型实�?export type NonNullableValue<T> = T;
+ * 排除null和undefined的类型
+ */
+export type NonNullableValue<T> = T;
 
 /**
- * 通用函数类型 - 接受任意参数，返回任意�? */
+ * 通用函数类型
+ */
 export interface AnyFunction {
-  (...args: never[]): never;
+  (...args: any[]): any;
 }
 
 /**
- * 异步函数类型 - 接受任意参数，返回Promise
+ * 异步函数类型
  */
 export interface AsyncFunction<T> {
-  (...args: never[]): Promise<T>;
+  (...args: any[]): Promise<T>;
 }
 
 /**
- * 延迟执行的返回类�? */
+ * 延迟执行的返回类型
+ */
 export interface DelayResult {
   clear: () => void;
   promise: Promise<void>;

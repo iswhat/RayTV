@@ -33,14 +33,16 @@ export class HistoryRepository {
   }
   
   /**
-   * 保存或更新历史记�?   * @param history 历史记录信息
+   * 保存或更新历史记录
+   * @param history 历史记录信息
    * @returns 是否保存成功
    */
   public async saveHistory(history: History): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving history for: ${history.title}`);
       
-      // 检查是否已存在相同内容的历史记�?      const existingHistory = await this.findExistingHistory(history);
+      // 检查是否已存在相同内容的历史记录
+      const existingHistory = await this.findExistingHistory(history);
       
       const historyData = {
         [HISTORY_TABLE.COLUMNS.ID]: existingHistory?.id || null,
@@ -61,7 +63,7 @@ export class HistoryRepository {
         [HISTORY_TABLE.COLUMNS.EXTRA_DATA]: JSON.stringify(history.extraData || {})
       };
       
-      let result: number | undefined;
+      let result;
       if (existingHistory?.id) {
         // 更新现有历史记录
         const conditions: QueryCondition[] = [{
@@ -73,7 +75,8 @@ export class HistoryRepository {
           history.id = existingHistory.id.toString();
         }
       } else {
-        // 插入新历史记�?        result = await this.sqliteHelper.insert(HISTORY_TABLE.TABLE_NAME, historyData);
+        // 插入新历史记录
+        result = await this.sqliteHelper.insert(HISTORY_TABLE.TABLE_NAME, historyData);
         if (result.success && result.lastInsertRowId) {
           history.id = result.lastInsertRowId.toString();
         }
@@ -92,16 +95,19 @@ export class HistoryRepository {
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to save history: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to save history: ${errorMsg}`);
       return false;
     }
   }
   
   /**
-   * 查找是否存在相同内容的历史记�?   */
-  private async findExistingHistory(history: History): Promise<unknown | null> {
+   * 查找是否存在相同内容的历史记录
+   */
+  private async findExistingHistory(history: History): Promise<Record<string, any> | null> {
     const conditions: QueryCondition[] = [{
-      column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE, value: history.contentType
+      column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE, 
+      value: history.contentType
     }, {
       column: HISTORY_TABLE.COLUMNS.CONTENT_ID,
       value: history.contentId
@@ -121,16 +127,19 @@ export class HistoryRepository {
   /**
    * 获取历史记录列表
    * @param limit 限制数量
-   * @param offset 偏移�?   * @returns 历史记录列表
+   * @param offset 偏移量
+   * @returns 历史记录列表
    */
-  public async getHistoryList(limit: number = 50, offset: number = 0): Promise<History[]> {
+  public async getHistoryList(limit: number, offset: number = 0): Promise<History[]> {
     try {
-      // 构建排序选项 - 按最后播放时间降�?      const sortOptions = [{
+      // 构建排序选项 - 按最后播放时间降序
+      const sortOptions = [{
         column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
         order: 'DESC'
       }];
       
-      // 查询数据�?      const historyRecords = await this.sqliteHelper.query(
+      // 查询数据库
+      const historyRecords = await this.sqliteHelper.query(
         HISTORY_TABLE.TABLE_NAME,
         ['*'],
         undefined,
@@ -145,17 +154,19 @@ export class HistoryRepository {
       Logger.info(TAG, `Retrieved ${histories.length} history items`);
       return histories;
     } catch (error) {
-      Logger.error(TAG, `Failed to get history list: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history list: ${errorMsg}`);
       return [];
     }
   }
   
   /**
-   * 按内容类型获取历史记�?   * @param contentType 内容类型
+   * 按内容类型获取历史记录
+   * @param contentType 内容类型
    * @param limit 限制数量
    * @returns 历史记录列表
    */
-  public async getHistoryByContentType(contentType: ContentType, limit: number = 50): Promise<History[]> {
+  public async getHistoryByContentType(contentType: ContentType, limit: number): Promise<History[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE,
@@ -179,17 +190,19 @@ export class HistoryRepository {
       Logger.info(TAG, `Retrieved ${histories.length} history items for type ${contentType}`);
       return histories;
     } catch (error) {
-      Logger.error(TAG, `Failed to get history by content type: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history by content type: ${errorMsg}`);
       return [];
     }
   }
   
   /**
-   * 按站点获取历史记�?   * @param siteId 站点ID
+   * 按站点获取历史记录
+   * @param siteId 站点ID
    * @param limit 限制数量
    * @returns 历史记录列表
    */
-  public async getHistoryBySite(siteId: string, limit: number = 50): Promise<History[]> {
+  public async getHistoryBySite(siteId: string, limit: number): Promise<History[]> {
     try {
       const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.SITE_ID,
@@ -213,7 +226,8 @@ export class HistoryRepository {
       Logger.info(TAG, `Retrieved ${histories.length} history items for site ${siteId}`);
       return histories;
     } catch (error) {
-      Logger.error(TAG, `Failed to get history by site: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history by site: ${errorMsg}`);
       return [];
     }
   }
@@ -225,13 +239,15 @@ export class HistoryRepository {
    */
   public async getHistoryById(historyId: string): Promise<History | null> {
     try {
-      // 尝试从缓存获�?      const cachedHistory = await this.getCachedHistoryItem(historyId);
+      // 尝试从缓存获取
+      const cachedHistory = await this.getCachedHistoryItem(historyId);
       if (cachedHistory) {
         Logger.debug(TAG, `Returning history ${historyId} from cache`);
         return cachedHistory;
       }
       
-      // 查询数据�?      const conditions: QueryCondition[] = [{
+      // 查询数据库
+      const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.ID,
         value: historyId
       }];
@@ -254,7 +270,8 @@ export class HistoryRepository {
       
       return history;
     } catch (error) {
-      Logger.error(TAG, `Failed to get history by ID: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history by ID: ${errorMsg}`);
       return null;
     }
   }
@@ -295,7 +312,8 @@ export class HistoryRepository {
       
       return this.convertToHistoryObject(historyRecord);
     } catch (error) {
-      Logger.error(TAG, `Failed to get history by content: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history by content: ${errorMsg}`);
       return null;
     }
   }
@@ -325,7 +343,8 @@ export class HistoryRepository {
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to delete history: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to delete history: ${errorMsg}`);
       return false;
     }
   }
@@ -333,7 +352,8 @@ export class HistoryRepository {
   /**
    * 批量删除历史记录
    * @param historyIds 历史记录ID列表
-   * @returns 删除成功的数�?   */
+   * @returns 删除成功的数量
+   */
   public async deleteHistories(historyIds: string[]): Promise<number> {
     if (!historyIds || historyIds.length === 0) {
       return 0;
@@ -361,13 +381,15 @@ export class HistoryRepository {
       
       return result.affectedRows || 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to batch delete histories: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to batch delete histories: ${errorMsg}`);
       return 0;
     }
   }
   
   /**
-   * 清空所有历史记�?   * @returns 是否清空成功
+   * 清空所有历史记录
+   * @returns 是否清空成功
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
@@ -376,20 +398,24 @@ export class HistoryRepository {
       const result = await this.sqliteHelper.delete(HISTORY_TABLE.TABLE_NAME);
       
       if (result.success) {
-        // 清除所有缓�?        await this.clearHistoryCache();
+        // 清除所有缓存
+        await this.clearHistoryCache();
         Logger.info(TAG, `All history cleared, deleted ${result.affectedRows} records`);
       }
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear all history: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to clear all history: ${errorMsg}`);
       return false;
     }
   }
   
   /**
-   * 清空指定类型的历史记�?   * @param contentType 内容类型
-   * @returns 删除成功的数�?   */
+   * 清空指定类型的历史记录
+   * @param contentType 内容类型
+   * @returns 删除成功的数量
+   */
   public async clearHistoryByType(contentType: ContentType): Promise<number> {
     try {
       Logger.debug(TAG, `Clearing history for type: ${contentType}`);
@@ -408,7 +434,8 @@ export class HistoryRepository {
       
       return result.affectedRows || 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear history by type: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to clear history by type: ${errorMsg}`);
       return 0;
     }
   }
@@ -421,7 +448,8 @@ export class HistoryRepository {
     try {
       return await this.sqliteHelper.count(HISTORY_TABLE.TABLE_NAME);
     } catch (error) {
-      Logger.error(TAG, `Failed to get history count: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history count: ${errorMsg}`);
       return 0;
     }
   }
@@ -440,7 +468,8 @@ export class HistoryRepository {
       
       return await this.sqliteHelper.count(HISTORY_TABLE.TABLE_NAME, conditions);
     } catch (error) {
-      Logger.error(TAG, `Failed to get history count by type: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get history count by type: ${errorMsg}`);
       return 0;
     }
   }
@@ -449,7 +478,8 @@ export class HistoryRepository {
    * 更新播放进度
    * @param historyId 历史记录ID
    * @param playPosition 播放位置（毫秒）
-   * @param totalDuration 总时长（毫秒�?   * @returns 是否更新成功
+   * @param totalDuration 总时长（毫秒）
+   * @returns 是否更新成功
    */
   public async updatePlayProgress(historyId: string, playPosition: number, totalDuration: number): Promise<boolean> {
     try {
@@ -478,20 +508,23 @@ export class HistoryRepository {
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to update play progress: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to update play progress: ${errorMsg}`);
       return false;
     }
   }
   
   /**
    * 获取最近观看的历史记录分组
-   * @param limit 每个类型的限制数�?   * @returns 分组后的历史记录
+   * @param limit 每个类型的限制数量
+   * @returns 分组后的历史记录
    */
-  public async getRecentHistoryGroups(limit: number = 10): Promise<HistoryGroup[]> {
+  public async getRecentHistoryGroups(limit: number): Promise<HistoryGroup[]> {
     try {
       const groups: HistoryGroup[] = [];
       
-      // 按内容类型分组获�?      const contentTypes = [ContentType.MOVIE, ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
+      // 按内容类型分组获取
+      const contentTypes = [ContentType.MOVIE, ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
       
       for (const type of contentTypes) {
         const histories = await this.getHistoryByContentType(type, limit);
@@ -507,7 +540,8 @@ export class HistoryRepository {
       Logger.info(TAG, `Retrieved ${groups.length} history groups`);
       return groups;
     } catch (error) {
-      Logger.error(TAG, `Failed to get recent history groups: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get recent history groups: ${errorMsg}`);
       return [];
     }
   }
@@ -538,22 +572,26 @@ export class HistoryRepository {
           // 构建删除条件
           const idsToDelete = oldestRecords.map(record => record[HISTORY_TABLE.COLUMNS.ID].toString());
           
-          // 删除旧记�?          await this.deleteHistories(idsToDelete);
+          // 删除旧记录
+          await this.deleteHistories(idsToDelete);
           Logger.info(TAG, `Cleaned up ${idsToDelete.length} old history records`);
         }
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to cleanup old history: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to cleanup old history: ${errorMsg}`);
     }
   }
   
   /**
-   * 缓存历史记录�?   */
+   * 缓存历史记录项
+   */
   private async cacheHistoryItem(history: History): Promise<void> {
     try {
       await this.storageUtil.setObject(`${HISTORY_CACHE_PREFIX}${history.id}`, history);
     } catch (error) {
-      Logger.warn(TAG, `Failed to cache history item: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Failed to cache history item: ${errorMsg}`);
     }
   }
   
@@ -564,6 +602,8 @@ export class HistoryRepository {
     try {
       return await this.storageUtil.getObject<History>(`${HISTORY_CACHE_PREFIX}${historyId}`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Failed to get cached history item: ${errorMsg}`);
       return null;
     }
   }
@@ -575,37 +615,43 @@ export class HistoryRepository {
     try {
       await this.storageUtil.remove(`${HISTORY_CACHE_PREFIX}${historyId}`);
     } catch (error) {
-      Logger.warn(TAG, `Failed to remove cached history item: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Failed to remove cached history item: ${errorMsg}`);
     }
   }
   
   /**
-   * 使历史记录列表缓存失�?   */
+   * 使历史记录列表缓存失效
+   */
   private async invalidateHistoryListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(HISTORY_LIST_CACHE);
     } catch (error) {
-      Logger.warn(TAG, `Failed to invalidate history list cache: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Failed to invalidate history list cache: ${errorMsg}`);
     }
   }
   
   /**
-   * 清除所有历史记录缓�?   */
+   * 清除所有历史记录缓存
+   */
   private async clearHistoryCache(): Promise<void> {
     try {
       // 这里简化处理，实际应用中可能需要更复杂的缓存清理逻辑
       await this.storageUtil.remove(HISTORY_LIST_CACHE);
     } catch (error) {
-      Logger.warn(TAG, `Failed to clear history cache: ${JSON.stringify(error)}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      Logger.warn(TAG, `Failed to clear history cache: ${errorMsg}`);
     }
   }
   
   /**
-   * 获取内容类型的标�?   */
+   * 获取内容类型的标题
+   */
   private getContentTypeTitle(contentType: ContentType): string {
-    const titles: Record<string, string | number | boolean | null> = {
+    const titles: Record<string, string> = {
       [ContentType.MOVIE]: '电影',
-      [ContentType.SERIES]: '电视�?,
+      [ContentType.SERIES]: '电视剧',
       [ContentType.LIVE]: '直播',
       [ContentType.EPISODE]: '剧集'
     };
@@ -615,7 +661,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录转换为History对象
    */
-  private convertToHistoryObject(record: Record<string, string | number | boolean | null>): History {
+  private convertToHistoryObject(record: Record<string, any>): History {
     return {
       id: record[HISTORY_TABLE.COLUMNS.ID]?.toString(),
       title: record[HISTORY_TABLE.COLUMNS.TITLE],
@@ -639,7 +685,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录数组转换为History对象数组
    */
-  private convertToHistoryObjects(records: Record<string, string | number | boolean | null>[]): History[] {
+  private convertToHistoryObjects(records: Record<string, any>[]): History[] {
     return records.map(record => this.convertToHistoryObject(record));
   }
 }

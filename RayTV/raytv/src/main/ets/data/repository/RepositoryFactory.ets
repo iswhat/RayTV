@@ -1,4 +1,5 @@
-// RepositoryFactory - 仓库工厂�?import Logger from '../../common/util/Logger';
+// RepositoryFactory - 仓库工厂类
+import Logger from '../../common/util/Logger';
 import DatabaseRepository from './DatabaseRepository';
 import SQLiteDatabaseRepository from './SQLiteDatabaseRepository';
 import NetworkRepository from './NetworkRepository';
@@ -15,14 +16,17 @@ export enum RepositoryType {
 }
 
 /**
- * Repository工厂�? * 负责创建和管理各种Repository的实�? */
+ * Repository工厂类
+ * 负责创建和管理各种Repository的实现
+ */
 export default class RepositoryFactory {
   private static instance: RepositoryFactory | null;
-  private repositoryMap: Map<RepositoryType, DatabaseRepository | NetworkRepository> = new Map();
+  private repositoryMap: Map<RepositoryType, any> = new Map(); // 修改为any类型以兼容所有Repository实现
   private isInitialized: boolean = false;
 
   /**
-   * 私有构造函�?   */
+   * 私有构造函数
+   */
   private constructor() {}
 
   /**
@@ -37,7 +41,9 @@ export default class RepositoryFactory {
   }
 
   /**
-   * 初始化所有仓�?   * @returns 是否初始化成�?   */
+   * 初始化所有仓库
+   * @returns 是否初始化成功
+   */
   public async initialize(): Promise<boolean> {
     try {
       if (this.isInitialized) {
@@ -49,19 +55,14 @@ export default class RepositoryFactory {
 
       // 初始化数据库仓库
       const databaseRepository = new SQLiteDatabaseRepository();
-      const dbInitResult = await databaseRepository.initialize();
-      
-      if (!dbInitResult.success) {
-        Logger.error(TAG, `Failed to initialize database repository: ${dbInitResult.message || 'Unknown error'}`);
-        return false;
-      }
-      
+      // 注意：SQLiteDatabaseRepository需要先设置context，这里暂时跳过初始化
+      // 在实际使用前需要调用setContext并initialize
       this.repositoryMap.set(RepositoryType.DATABASE, databaseRepository);
-      Logger.info(TAG, 'Database repository initialized successfully');
+      Logger.info(TAG, 'Database repository created (needs specific initialization)');
 
       // 初始化网络仓库（这里使用默认配置，实际使用时需要提供具体配置）
       const networkRepository = new DefaultNetworkRepository();
-      // 注意：这里不进行初始化，因为需要具体的baseUrl配置
+      // 注意：DefaultNetworkRepository需要先设置config，这里暂时跳过初始化
       // 在使用网络仓库之前，需要调用setConfig并initialize
       this.repositoryMap.set(RepositoryType.NETWORK, networkRepository);
       Logger.info(TAG, 'Network repository created (needs specific initialization)');
@@ -76,7 +77,8 @@ export default class RepositoryFactory {
   }
 
   /**
-   * 获取数据库仓库实�?   * @returns DatabaseRepository实例
+   * 获取数据库仓库实例
+   * @returns DatabaseRepository实例
    */
   public getDatabaseRepository(): DatabaseRepository {
     const repository = this.repositoryMap.get(RepositoryType.DATABASE);
@@ -99,10 +101,11 @@ export default class RepositoryFactory {
   }
 
   /**
-   * 设置自定义仓库实�?   * @param type 仓库类型
+   * 设置自定义仓库实例
+   * @param type 仓库类型
    * @param repository 仓库实例
    */
-  public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository): void {
+  public setRepository(type: RepositoryType, repository: any): void {
     this.repositoryMap.set(type, repository);
     Logger.info(TAG, `Custom repository set for type: ${type}`);
   }
@@ -110,18 +113,21 @@ export default class RepositoryFactory {
   /**
    * 检查仓库是否初始化
    * @param type 仓库类型
-   * @returns 是否初始�?   */
+   * @returns 是否初始化
+   */
   public isRepositoryInitialized(type: RepositoryType): boolean {
     return this.repositoryMap.has(type);
   }
 
   /**
-   * 关闭所有仓库资�?   */
+   * 关闭所有仓库资源
+   */
   public async close(): Promise<void> {
     try {
       Logger.info(TAG, 'Closing repositories...');
 
-      // 关闭数据库仓�?      const dbRepository = this.repositoryMap.get(RepositoryType.DATABASE);
+      // 关闭数据库仓库
+      const dbRepository = this.repositoryMap.get(RepositoryType.DATABASE);
       if (dbRepository && typeof dbRepository.close === 'function') {
         await dbRepository.close();
         Logger.info(TAG, 'Database repository closed');

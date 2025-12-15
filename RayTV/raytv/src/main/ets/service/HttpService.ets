@@ -1,11 +1,26 @@
-// HTTP服务�?// 提供网络请求的统一接口，支持GET、POST等方法，处理请求头、响应拦截等
+// HTTP服务类
+// 提供网络请求的统一接口，支持GET、POST等方法，处理请求头、响应拦截等
 
 import http from '@ohos.net.http';
-import { ConfigService } from './config/ConfigService';
-import { AdBlockManager } from './adblock/AdBlockManager';
+import ConfigService from './config/ConfigService';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
-import { HttpResponse, HttpOptions } from '../types/common';
+
+// HTTP请求选项接口
+export interface HttpOptions {
+  headers?: Record<string, string>;
+  timeout?: number;
+  retryCount?: number;
+  responseType?: 'json' | 'text' | 'arraybuffer';
+}
+
+// HTTP响应接口
+export interface HttpResponse<T> {
+  status: number;
+  data: T;
+  headers: Record<string, string>;
+  url: string;
+}
 
 // HTTP请求选项接口
 export interface HttpRequestOptions extends HttpOptions {
@@ -13,34 +28,50 @@ export interface HttpRequestOptions extends HttpOptions {
   data?: Record<string, string | number | boolean | null> | string;
 }
 
+// 下载选项接口
+export interface DownloadOptions extends HttpOptions {
+  onProgress?: (receivedSize: number, totalSize: number) => void;
+}
+
+// 下载结果接口
+export interface DownloadResult {
+  status: number;
+  filePath: string;
+  headers: Record<string, string>;
+  fileSize?: number;
+}
+
 export class HttpService {
   private static instance: HttpService;
   private httpConfig: { timeout: number; retryCount: number; userAgent: string };
-  private adBlockManager: AdBlockManager;
   private context: common.Context | null = null;
 
   private constructor() {
-    // 初始化默认配�?    const defaultTimeout = 30;
+    // 初始化默认配置
+    const defaultTimeout = 30;
     const defaultRetryCount = 3;
-    const networkConfig = ConfigService.getInstance().getConfig('network');
+    const networkConfig = ConfigService.getInstance().getFullConfig().then(config => config.network);
     
-    // 手动初始化配置，避免使用对象字面�?    this.httpConfig = {
-      timeout: networkConfig?.timeout !== undefined ? networkConfig.timeout as number : defaultTimeout,
-      retryCount: networkConfig?.retryCount !== undefined ? networkConfig.retryCount as number : defaultRetryCount,
-      userAgent: networkConfig?.userAgent as string || ''
+    // 手动初始化配置，避免使用对象字面量
+    this.httpConfig = {
+      timeout: defaultTimeout,
+      retryCount: defaultRetryCount,
+      userAgent: ''
     };
-    
-    this.adBlockManager = AdBlockManager.getInstance();
   }
 
   /**
-   * 设置应用上下�?   * @param ctx 应用上下�?   */
+   * 设置应用上下文
+   * @param ctx 应用上下文
+   */
   public setContext(ctx: common.Context): void {
     this.context = ctx;
   }
 
   /**
-   * 获取应用上下�?   * @returns 应用上下�?   */
+   * 获取应用上下文
+   * @returns 应用上下文
+   */
   private getContext(): common.Context {
     if (!this.context) {
       throw new Error('HttpService context not set. Please call setContext() first.');
@@ -59,18 +90,11 @@ export class HttpService {
   }
 
   /**
-   * 初始化HTTP服务（空实现，用于兼容AppService的初始化流程�?   */
-  public async initialize(): Promise<void> {
-    // HTTP服务在构造函数中已经初始化完�?    // 这里提供一个空实现以兼容AppService的初始化流程
-  }
-  
-  /**
-   * 获取对象的所有键
-   * 替代Object.keys，兼容ArkTS语法
+   * 初始化HTTP服务（空实现，用于兼容AppService的初始化流程）
    */
-  private getObjectKeys<T extends object>(obj: T): string[] {
-    // 直接使用Object.keys获取键，避免for-in循环
-    return Object.keys(obj);
+  public async initialize(): Promise<void> {
+    // HTTP服务在构造函数中已经初始化完成
+    // 这里提供一个空实现以兼容AppService的初始化流程
   }
 
   /**
@@ -88,7 +112,6 @@ export class HttpService {
       if (options.headers) requestOptions.headers = options.headers;
       if (options.timeout !== undefined) requestOptions.timeout = options.timeout;
       if (options.retryCount !== undefined) requestOptions.retryCount = options.retryCount;
-      if (options.responseType) requestOptions.responseType = options.responseType;
     }
     
     return this.request<T>(url, requestOptions);
@@ -111,7 +134,6 @@ export class HttpService {
       if (options.headers) requestOptions.headers = options.headers;
       if (options.timeout !== undefined) requestOptions.timeout = options.timeout;
       if (options.retryCount !== undefined) requestOptions.retryCount = options.retryCount;
-      if (options.responseType) requestOptions.responseType = options.responseType;
     }
     
     return this.request<T>(url, requestOptions);
@@ -119,7 +141,8 @@ export class HttpService {
 
   /**
    * 检查并请求网络权限
-   * 只在需要时请求权限，避免重复申�?   */
+   * 只在需要时请求权限，避免重复申请
+   */
   private async checkAndRequestNetworkPermission(): Promise<void> {
     try {
       const atManager = abilityAccessCtrl.createAtManager();
@@ -139,33 +162,30 @@ export class HttpService {
   }
 
   /**
-   * 发送网络请�?   * @param url 请求URL
+   * 发送网络请求
+   * @param url 请求URL
    * @param options 请求选项
    */
   public async request<T>(url: string, options: HttpRequestOptions): Promise<HttpResponse<T>> {
     try {
-      // 检查网络权限（只在需要时请求�?      await this.checkAndRequestNetworkPermission();
-
-      // 检查URL是否在广告屏蔽列表中
-      if (this.adBlockManager.isEnabled() && this.adBlockManager.shouldBlockUrl(url)) {
-        throw new Error(`URL blocked by ad blocker: ${url}`);
-      }
+      // 检查网络权限（只在需要时请求）
+      await this.checkAndRequestNetworkPermission();
 
       const method = options.method || 'GET';
       const headers = options.headers || {};
       const requestData = options.data || null;
-      const timeout = options.timeout !== undefined ? options.timeout : (this.httpConfig.timeout as number) * 1000;
+      const timeout = options.timeout !== undefined ? options.timeout : this.httpConfig.timeout * 1000;
 
       // 创建HTTP请求对象
       const httpRequest = http.createHttp();
       
       // 构建请求配置
       const requestConfig: http.HttpRequestOptions = {
-        method,
+        method: method as http.RequestMethod,
         connectTimeout: timeout,
         readTimeout: timeout,
         header: {
-          'User-Agent': (this.httpConfig.userAgent as string) || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+          'User-Agent': this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
           'Content-Type': 'application/json'
         }
       };
@@ -176,10 +196,8 @@ export class HttpService {
         if (!requestConfig.header) {
           requestConfig.header = {};
         }
-        const headerKeys = this.getObjectKeys(headers);
-        for (let i = 0; i < headerKeys.length; i++) {
-          const key = headerKeys[i];
-          requestConfig.header![key] = headers[key];
+        for (const [key, value] of Object.entries(headers)) {
+          requestConfig.header[key] = value;
         }
       }
 
@@ -193,10 +211,11 @@ export class HttpService {
         }
       }
 
-      // 发送请�?      let response: http.HttpResponse | null = null;
+      // 发送请求
+      let response: http.HttpResponse | null = null;
       let retryCount = 0;
       let lastError: Error | null = null;
-      const maxRetryCount = options.retryCount !== undefined ? options.retryCount : (this.httpConfig.retryCount as number);
+      const maxRetryCount = options.retryCount !== undefined ? options.retryCount : this.httpConfig.retryCount;
 
       while (retryCount <= maxRetryCount) {
         try {
@@ -210,11 +229,13 @@ export class HttpService {
             throw lastError;
           }
           
-          // 重试前等�?          await this.sleep(1000 * retryCount);
+          // 重试前等待
+          await this.sleep(1000 * retryCount);
         }
       }
 
-      // 确保response有�?      if (!response) {
+      // 确保response有值
+      if (!response) {
         throw new Error('Failed to get HTTP response');
       }
 
@@ -250,7 +271,8 @@ export class HttpService {
    */
   public async downloadFile(url: string, filePath: string, options?: DownloadOptions): Promise<DownloadResult> {
     try {
-      // 检查网络权�?      try {
+      // 检查网络权限
+      try {
         const atManager = abilityAccessCtrl.createAtManager();
         await atManager.requestPermissionsFromUser(this.getContext(), ['ohos.permission.INTERNET']);
       } catch (permissionError) {
@@ -258,24 +280,19 @@ export class HttpService {
         throw new Error('Network permission denied');
       }
 
-      // 检查URL是否在广告屏蔽列表中
-      if (this.adBlockManager.isEnabled() && this.adBlockManager.shouldBlockUrl(url)) {
-        throw new Error(`URL blocked by ad blocker: ${url}`);
-      }
-
       const headers = options?.headers || {};
-      const timeout = options?.timeout !== undefined ? options.timeout : (this.httpConfig.timeout as number) * 1000;
+      const timeout = options?.timeout !== undefined ? options.timeout : this.httpConfig.timeout * 1000;
       
       // 创建HTTP请求对象
       const httpRequest = http.createHttp();
       
       // 构建请求配置
       const requestConfig: http.HttpRequestOptions = {
-        method: 'GET',
+        method: 'GET' as http.RequestMethod,
         connectTimeout: timeout,
         readTimeout: timeout,
         header: {
-          'User-Agent': (this.httpConfig.userAgent as string) || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
+          'User-Agent': this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
         }
       };
       
@@ -285,10 +302,8 @@ export class HttpService {
         if (!requestConfig.header) {
           requestConfig.header = {};
         }
-        const headerKeys = this.getObjectKeys(headers);
-        for (let i = 0; i < headerKeys.length; i++) {
-          const key = headerKeys[i];
-          requestConfig.header[key] = headers[key];
+        for (const [key, value] of Object.entries(headers)) {
+          requestConfig.header[key] = value;
         }
       }
 
@@ -303,7 +318,7 @@ export class HttpService {
         expectDataType?: http.HttpDataType;
       }
       
-      // 发送请�?      // 确保所有属性都有正确的类型
+      // 确保所有属性都有正确的类型
       const method: string = typeof requestConfig.method === 'string' ? requestConfig.method : 'GET';
       const connectTimeout: number = typeof requestConfig.connectTimeout === 'number' ? requestConfig.connectTimeout : 30000;
       const readTimeout: number = typeof requestConfig.readTimeout === 'number' ? requestConfig.readTimeout : 30000;
@@ -324,14 +339,14 @@ export class HttpService {
       // 关闭请求对象
       httpRequest.destroy();
 
-      const result: DownloadResult = {
+      const downloadResult: DownloadResult = {
         status: response.responseCode,
         filePath,
         headers: this.sanitizeHeaders(response.header),
         fileSize: response.fileSize
       };
 
-      return result;
+      return downloadResult;
     } catch (error) {
       console.error(`File download failed: ${url}`, error);
       throw error instanceof Error ? error : new Error(String(error));
@@ -346,7 +361,8 @@ export class HttpService {
     try {
       return JSON.parse(data) as T;
     } catch {
-      // 如果不是JSON格式，直接返�?      return data as T;
+      // 如果不是JSON格式，直接返回
+      return data as T;
     }
   }
 
@@ -372,45 +388,9 @@ export class HttpService {
 
   /**
    * 延迟函数
-   * @param ms 延迟毫秒�?   */
+   * @param ms 延迟毫秒数
+   */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-}
-
-/**
- * HTTP请求选项
- */
-export interface HttpOptions {
-  headers?: Record<string, string>;
-  timeout?: number;
-  retryCount?: number;
-  responseType?: 'json' | 'text' | 'arraybuffer';
-}
-
-/**
- * HTTP响应
- */
-export interface HttpResponse<T> {
-  status: number;
-  data: T;
-  headers: Record<string, string>;
-  url: string;
-}
-
-/**
- * 下载选项
- */
-export interface DownloadOptions extends HttpOptions {
-  onProgress?: (receivedSize: number, totalSize: number) => void;
-}
-
-/**
- * 下载结果
- */
-export interface DownloadResult {
-  status: number;
-  filePath: string;
-  headers: Record<string, string>;
-  fileSize?: number;
 }

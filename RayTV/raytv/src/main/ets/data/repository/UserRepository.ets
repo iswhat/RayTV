@@ -1,4 +1,5 @@
-// UserRepository - 用户数据仓库�?// 负责管理用户相关数据，包括用户信息、权限、收藏、历史记录等
+// UserRepository - 用户数据仓库
+// 负责管理用户相关数据，包括用户信息、权限、收藏、历史记录等
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -39,7 +40,7 @@ export const UserEventType = {
 } as const;
 
 /**
- * 用户状态变更事件数�? */
+ * 用户状态变更事件数�? */
 export interface UserStatusChangeEvent {
   userId: string;
   oldStatus: UserStatus;
@@ -67,7 +68,7 @@ export interface UserActivityEvent {
 }
 
 /**
- * 用户数据仓库�? */
+ * 用户数据仓库�? */
 export class UserRepository {
   private static instance: UserRepository;
   private logger = Logger.getInstance();
@@ -99,7 +100,7 @@ export class UserRepository {
     changePassword: '/user/change-password'
   };
   
-  // 缓存键配�?  private cacheKeys = {
+  // 缓存键配�?  private cacheKeys = {
     currentUser: 'user:current',
     authToken: 'user:authToken',
     sessionExpiry: 'user:sessionExpiry',
@@ -109,9 +110,9 @@ export class UserRepository {
   };
 
   /**
-   * 私有构造函�?   */
+   * 私有构造函�?   */
   private constructor() {
-    this.logger.info('UserRepository initialized');
+    this.logger.info('UserRepository initialized', {});
     this.setupEventListeners();
     this.initialize();
   }
@@ -127,27 +128,27 @@ export class UserRepository {
   }
 
   /**
-   * 初始化用户仓�?   */
+   * 初始化用户仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 从存储中恢复用户会话
       await this.restoreUserSession();
       
-      // 注册会话过期检�?      this.setupSessionExpiryCheck();
+      // 注册会话过期检�?      this.setupSessionExpiryCheck();
       
-      this.logger.info('UserRepository initialization completed');
+      this.logger.info('UserRepository initialization completed', {});
     } catch (error) {
-      this.Logger.error('Failed to initialize UserRepository', error as Error);
+      this.logger.error('Failed to initialize UserRepository', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
-      this.eventBus.emit(UserEventType.USER_ERROR, { error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error } : new Error(String({ error: error as Error } instanceof Error ? { error: error as Error } : new Error(String({ error: error as Error })))))));
+      this.eventBus.emit(UserEventType.USER_ERROR, { error: error instanceof Error ? error : new Error(String(error)) });
     }
   }
 
   /**
-   * 设置事件监听�?   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听应用退出事件，保存用户状�?    this.eventBus.on('app:exit', async () => {
+    // 监听应用退出事件，保存用户状�?    this.eventBus.on('app:exit', async () => {
       await this.saveUserSession();
     });
     
@@ -159,7 +160,7 @@ export class UserRepository {
       }
     });
   }
-
+  
   /**
    * 用户注册
    * @param request 注册请求
@@ -172,7 +173,8 @@ export class UserRepository {
       // 调用API注册
       const response = await this.networkUtil.post<UserInfo>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.register}`,
-        request
+        request,
+        {}
       );
       
       const userInfo = response.data;
@@ -180,68 +182,16 @@ export class UserRepository {
       // 发布用户注册事件
       this.eventBus.emit(UserEventType.USER_REGISTERED, userInfo);
       
-      this.logger.info(`User registered successfully: ${userInfo.username}`);
+      this.logger.info(`User registered successfully: ${userInfo.username}`, {});
       
       return userInfo;
     } catch (error) {
-      this.Logger.error('User registration failed', error as Error);
+      this.logger.error('User registration failed', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
       this.eventBus.emit(UserEventType.USER_ERROR, { 
         operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'register', 
-        error: (error as Error : new Error(String({ 
-        operation: 'register', 
-        error: (error as Error))))))).message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       
       throw error;
@@ -269,12 +219,14 @@ export class UserRepository {
       
       const { user, token, expiresIn } = response.data;
       
-      // 设置当前用户和认证信�?      this.setCurrentUser(user, token, expiresIn);
+      // 设置当前用户和认证信息
+      this.setCurrentUser(user, token, expiresIn);
       
       // 保存会话
       await this.saveUserSession();
       
-      // 加载用户设置和统计信�?      await this.loadUserSettings();
+      // 加载用户设置和统计信息
+      await this.loadUserSettings();
       await this.loadUserStatistics();
       
       // 发布用户登录事件
@@ -284,64 +236,12 @@ export class UserRepository {
       
       return user;
     } catch (error) {
-      this.Logger.error('User login failed', error as Error);
+      this.logger.error('User login failed', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
       this.eventBus.emit(UserEventType.USER_ERROR, { 
         operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'login', 
-        error: (error as Error : new Error(String({ 
-        operation: 'login', 
-        error: (error as Error))))))).message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       
       throw error;
@@ -371,7 +271,7 @@ export class UserRepository {
           }
         );
       } catch (error) {
-        // API调用失败时记录日志但不抛出错�?        this.logger.warn('API logout failed, continuing with local logout', error as Error);
+        // API调用失败时记录日志但不抛出错�?        this.logger.warn('API logout failed, continuing with local logout', error instanceof Error ? error : new Error(String(error)));
       }
       
       // 清除本地会话数据
@@ -382,7 +282,7 @@ export class UserRepository {
       
       this.logger.info(`User logged out: ${userId}`);
     } catch (error) {
-      this.Logger.error('User logout failed', error as Error);
+      this.logger.error('User logout failed', error instanceof Error ? error : new Error(String(error)));
       
       // 即使出错也要清理本地会话
       this.clearUserSession();
@@ -404,169 +304,14 @@ export class UserRepository {
         token: string;
         expiresIn: number;
       }>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.refreshToken}`, {},
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.refreshToken}`, 
+        {},
         {
           headers: {
             'Authorization': `Bearer ${this.authToken}`
           }
         }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? {},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String({},
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-      )))))));
+      );
       
       const { token, expiresIn } = response.data;
       
@@ -582,9 +327,9 @@ export class UserRepository {
       
       return true;
     } catch (error) {
-      this.Logger.error('Failed to refresh auth token', error as Error);
+      this.logger.error('Failed to refresh auth token', error instanceof Error ? error : new Error(String(error)));
       
-      // 令牌刷新失败，可能需要重新登�?      await this.logout();
+      // 令牌刷新失败，可能需要重新登�?      await this.logout();
       
       return false;
     }
@@ -617,173 +362,18 @@ export class UserRepository {
       }
       
       const response = await this.networkUtil.put<UserProfile>(
-        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userProfile}`, request,
+        `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userProfile}`, 
+        request,
         {
           headers: {
             'Authorization': `Bearer ${this.authToken}`
           }
         }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       instanceof Error ? request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-       : new Error(String(request,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`
-          }
-        }
-      )))))));
+      );
       
       const updatedProfile = response.data;
       
-      // 更新当前用户的资料信�?      if (this.currentUser) {
+      // 更新当前用户的资料信�?      if (this.currentUser) {
         this.currentUser.profile = { ...this.currentUser.profile, ...updatedProfile };
         
         // 更新缓存
@@ -804,64 +394,12 @@ export class UserRepository {
       
       return updatedProfile;
     } catch (error) {
-      this.Logger.error('Failed to update user profile', error as Error);
+      this.logger.error('Failed to update user profile', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
       this.eventBus.emit(UserEventType.USER_ERROR, { 
         operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateProfile', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateProfile', 
-        error: (error as Error))))))).message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       
       throw error;
@@ -919,64 +457,12 @@ export class UserRepository {
       
       return updatedSettings;
     } catch (error) {
-      this.Logger.error('Failed to update user settings', error as Error);
+      this.logger.error('Failed to update user settings', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
       this.eventBus.emit(UserEventType.USER_ERROR, { 
         operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'updateSettings', 
-        error: (error as Error : new Error(String({ 
-        operation: 'updateSettings', 
-        error: (error as Error))))))).message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       
       throw error;
@@ -1013,64 +499,12 @@ export class UserRepository {
       
       return true;
     } catch (error) {
-      this.Logger.error('Failed to change password', error as Error);
+      this.logger.error('Failed to change password', error instanceof Error ? error : new Error(String(error)));
       
       // 发布用户错误事件
       this.eventBus.emit(UserEventType.USER_ERROR, { 
         operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error instanceof Error ? { 
-        operation: 'changePassword', 
-        error: (error as Error : new Error(String({ 
-        operation: 'changePassword', 
-        error: (error as Error))))))).message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
       
       throw error;
@@ -1107,11 +541,11 @@ export class UserRepository {
       return false;
     }
     
-    // 超级管理员拥有所有权�?    if (this.currentUser.role === UserRole.ADMINISTRATOR) {
+    // 超级管理员拥有所有权�?    if (this.currentUser.role === UserRole.ADMINISTRATOR) {
       return true;
     }
     
-    // 检查用户权限列�?    return this.currentUser.permissions?.includes(permission) || false;
+    // 检查用户权限列�?    return this.currentUser.permissions?.includes(permission) || false;
   }
 
   /**
@@ -1123,7 +557,7 @@ export class UserRepository {
       return false;
     }
     
-    // 角色有层级关系，高级角色包含低级角色的权�?    switch (role) {
+    // 角色有层级关系，高级角色包含低级角色的权�?    switch (role) {
       case UserRole.USER:
         return true; // 所有已登录用户都至少有USER角色
       case UserRole.PREMIUM:
@@ -1144,7 +578,7 @@ export class UserRepository {
   }
 
   /**
-   * 设置当前用户和认证信�?   */
+   * 设置当前用户和认证信�?   */
   private setCurrentUser(user: UserInfo, token: string, expiresIn: number): void {
     this.currentUser = user;
     this.authToken = token;
@@ -1152,11 +586,11 @@ export class UserRepository {
   }
 
   /**
-   * 保存用户会话到存�?   */
+   * 保存用户会话到存�?   */
   private async saveUserSession(): Promise<void> {
     try {
       if (this.currentUser) {
-        // 保存用户信息（不包含敏感数据�?        await this.storageUtil.setObject(
+        // 保存用户信息（不包含敏感数据�?        await this.storageUtil.setObject(
           this.cacheKeys.currentUser, 
           this.sanitizeUserInfo(this.currentUser),
           LocalStorageType.SECURE
@@ -1173,12 +607,12 @@ export class UserRepository {
         await this.storageUtil.setNumber(this.cacheKeys.sessionExpiry, this.sessionExpiry, LocalStorageType.SECURE);
       }
     } catch (error) {
-      this.logger.warn('Failed to save user session', error as Error);
+      this.logger.warn('Failed to save user session', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
   /**
-   * 从存储恢复用户会�?   */
+   * 从存储恢复用户会�?   */
   private async restoreUserSession(): Promise<void> {
     try {
       // 读取用户信息
@@ -1186,7 +620,7 @@ export class UserRepository {
       const savedToken = await this.storageUtil.getString(this.cacheKeys.authToken, LocalStorageType.SECURE);
       const savedExpiry = await this.storageUtil.getNumber(this.cacheKeys.sessionExpiry, LocalStorageType.SECURE);
       
-      // 检查会话是否有�?      if (savedUser && savedToken && savedExpiry && Date.now() < savedExpiry) {
+      // 检查会话是否有�?      if (savedUser && savedToken && savedExpiry && Date.now() < savedExpiry) {
         this.currentUser = savedUser;
         this.authToken = savedToken;
         this.sessionExpiry = savedExpiry;
@@ -1200,7 +634,7 @@ export class UserRepository {
           // 令牌可能已过期，尝试刷新
           const refreshed = await this.refreshToken();
           if (!refreshed) {
-            // 刷新失败，清除会�?            this.clearUserSession();
+            // 刷新失败，清除会�?            this.clearUserSession();
           }
         }
       } else {
@@ -1208,7 +642,7 @@ export class UserRepository {
         await this.clearStoredSession();
       }
     } catch (error) {
-      this.logger.warn('Failed to restore user session', error as Error);
+      this.logger.warn('Failed to restore user session', error instanceof Error ? error : new Error(String(error)));
       await this.clearStoredSession();
     }
   }
@@ -1224,13 +658,13 @@ export class UserRepository {
     // 清除内存缓存
     this.cacheService.removeCache(this.cacheKeys.currentUser);
     
-    // 异步清除存储的会话数�?    this.clearStoredSession().catch(err => {
-      this.logger.warn('Failed to clear stored session', err);
+    // 异步清除存储的会话数�?    this.clearStoredSession().catch(err => {
+      this.logger.warn('Failed to clear stored session', err instanceof Error ? err : new Error(String(err)));
     });
   }
 
   /**
-   * 清除存储的会话数�?   */
+   * 清除存储的会话数�?   */
   private async clearStoredSession(): Promise<void> {
     await this.storageUtil.remove(this.cacheKeys.currentUser, LocalStorageType.SECURE);
     await this.storageUtil.remove(this.cacheKeys.authToken, LocalStorageType.SECURE);
@@ -1238,9 +672,9 @@ export class UserRepository {
   }
 
   /**
-   * 设置会话过期检�?   */
+   * 设置会话过期检�?   */
   private setupSessionExpiryCheck(): void {
-    // �?0秒检查一次会话是否过�?    setInterval(async () => {
+    // �?0秒检查一次会话是否过�?    setInterval(async () => {
       if (this.sessionExpiry && Date.now() > this.sessionExpiry) {
         // 会话已过期，尝试刷新令牌
         const refreshed = await this.refreshToken();
@@ -1288,7 +722,7 @@ export class UserRepository {
       
       this.logger.debug(`Loaded user profile: ${this.currentUser.username}`);
     } catch (error) {
-      this.Logger.error('Failed to load user profile', error as Error);
+      this.logger.error('Failed to load user profile', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -1304,147 +738,18 @@ export class UserRepository {
       
       const settingsKey = `${this.cacheKeys.userSettings}${this.currentUser.id}`;
       
-      // 尝试从缓存获�?      let settings = await this.cacheService.getCache<UserSettings>(settingsKey);
+      // 尝试从缓存获�?      let settings = await this.cacheService.getCache<UserSettings>(settingsKey);
       
       if (!settings) {
         // 从API获取
         const response = await this.networkUtil.get<UserSettings>(
-          `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userSettings}`, {
+          `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userSettings}`,
+          {
             headers: {
               'Authorization': `Bearer ${this.authToken}`
             }
           }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         instanceof Error ? {
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-         : new Error(String({
-            headers: {
-              'Authorization': `Bearer ${this.authToken}`
-            }
-          }
-        )))))));
+        );
         
         settings = response.data;
         
@@ -1461,7 +766,7 @@ export class UserRepository {
       
       return settings;
     } catch (error) {
-      this.logger.warn('Failed to load user settings', error as Error);
+      this.logger.warn('Failed to load user settings', error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
@@ -1477,7 +782,7 @@ export class UserRepository {
       
       const statsKey = `${this.cacheKeys.userStatistics}${this.currentUser.id}`;
       
-      // 尝试从缓存获取（统计信息可以缓存5分钟�?      let statistics = await this.cacheService.getCache<UserStatistics>(statsKey);
+      // 尝试从缓存获取（统计信息可以缓存5分钟�?      let statistics = await this.cacheService.getCache<UserStatistics>(statsKey);
       
       if (!statistics) {
         // 从API获取
@@ -1505,13 +810,13 @@ export class UserRepository {
       
       return statistics;
     } catch (error) {
-      this.logger.warn('Failed to load user statistics', error as Error);
+      this.logger.warn('Failed to load user statistics', error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
 
   /**
-   * 同步用户数据（在线时�?   */
+   * 同步用户数据（在线时�?   */
   private async syncUserData(): Promise<void> {
     try {
       if (!this.isLoggedIn()) {
@@ -1527,7 +832,7 @@ export class UserRepository {
       
       this.logger.debug('User data synchronized');
     } catch (error) {
-      this.logger.warn('Failed to synchronize user data', error as Error);
+      this.logger.warn('Failed to synchronize user data', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -1548,7 +853,7 @@ export class UserRepository {
         timestamp: Date.now()
       } as UserActivityEvent);
       
-      // 异步发送到服务�?      this.networkUtil.post(
+      // 异步发送到服务�?      this.networkUtil.post(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userActivity}`,
         {
           ...activity,
@@ -1560,10 +865,10 @@ export class UserRepository {
           }
         }
       ).catch(error => {
-        this.logger.warn('Failed to send user activity to server', error as Error);
+        this.logger.warn('Failed to send user activity to server', error instanceof Error ? error : new Error(String(error)));
       });
     } catch (error) {
-      this.logger.warn('Failed to log user activity', error as Error);
+      this.logger.warn('Failed to log user activity', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -1622,15 +927,13 @@ export class UserRepository {
   }
 
   /**
-   * 清理用户信息，移除敏感数�?   */
+   * 清理用户信息，移除敏感数�?   */
   private sanitizeUserInfo(userInfo: UserInfo): UserInfo {
-    const sanitized: Record<string, string | number | boolean | null> = { ... };
+    const sanitized = { ...userInfo };
     
-    // 移除敏感信息（如果有�?    if (sanitized) {
-        delete (sanitized as Record<string, unknown>).password;
-        delete (sanitized as Record<string, unknown>).resetToken;
-        delete (sanitized as Record<string, unknown>).verificationToken;
-    }
+    // 移除敏感信息（如果有�?    delete (sanitized as any).password;
+    delete (sanitized as any).resetToken;
+    delete (sanitized as any).verificationToken;
     
     return sanitized;
   }
@@ -1638,5 +941,3 @@ export class UserRepository {
 
 // 导出默认实例
 export default UserRepository.getInstance();
-
-
