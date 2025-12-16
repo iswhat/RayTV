@@ -84,6 +84,27 @@ export interface UserSerializableData {
  * 用户实体类
  * 定义用户的基本信息和相关操作
  */
+// 定义User构造函数参数接口
+export interface UserConstructorParams {
+  id?: string;
+  username?: string;
+  nickname?: string;
+  email?: string;
+  avatarUrl?: string;
+  role?: UserRole;
+  preferences?: UserPreferences;
+  lastLoginTime?: string;
+  registrationDate?: string;
+  activeDevices?: DeviceInfo[];
+  isVerified?: boolean;
+  status?: 'active' | 'inactive' | 'suspended';
+  subscriptionEndDate?: string;
+  watchHistoryEnabled?: boolean;
+  favoritesEnabled?: boolean;
+  totalWatchTime?: number;
+  settings?: UserSettings;
+}
+
 export default class User {
   id: string;                    // 用户唯一标识
   username: string;              // 用户名
@@ -106,7 +127,7 @@ export default class User {
   /**
    * 构造函数
    */
-  constructor(data: Partial<User>) {
+  constructor(data: UserConstructorParams) {
     // 创建局部变量存储ID和用户名
     const defaultId = `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
     const defaultUsername = `user_${Math.random().toString(36).substr(2, 8)}`;
@@ -138,10 +159,10 @@ export default class User {
         defaultLanguage: typeof data.settings.defaultLanguage === 'string' ? data.settings.defaultLanguage : undefined,
         themePreference: typeof data.settings.themePreference === 'string' ? data.settings.themePreference : undefined,
         subtitleSize: typeof data.settings.subtitleSize === 'number' ? data.settings.subtitleSize : undefined
-      };
+      } as UserSettings;
     } else {
       // 使用明确的空对象
-      this.settings = {};
+      this.settings = {} as UserSettings;
     }
   }
 
@@ -460,7 +481,7 @@ export default class User {
    * @returns User实例
    */
   public static fromSerializable(data: UserSerializableData): User {
-    // 直接创建完整实例，避免使用类作为对象
+    // 直接创建User实例，不使用中间的userData对象
     const user = new User({
       id: typeof data.id === 'string' ? data.id : `user_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`,
       username: typeof data.username === 'string' ? data.username : `user_${Math.random().toString(36).substr(2, 8)}`,
@@ -475,7 +496,7 @@ export default class User {
       watchHistoryEnabled: typeof data.watchHistoryEnabled === 'boolean' ? data.watchHistoryEnabled : true,
       favoritesEnabled: typeof data.favoritesEnabled === 'boolean' ? data.favoritesEnabled : true,
       totalWatchTime: typeof data.totalWatchTime === 'number' ? data.totalWatchTime : 0
-    });
+    } as UserConstructorParams);
     
     // 处理preferences
     if (data.preferences && typeof data.preferences === 'object' && !Array.isArray(data.preferences)) {
@@ -537,7 +558,7 @@ export default class User {
    * @returns 克隆后的实例
    */
   public clone(): User {
-    // 直接创建完整实例，处理所有属性
+    // 直接创建User实例，不使用中间的userData对象
     return new User({
       id: this.id,
       username: this.username,
@@ -553,11 +574,11 @@ export default class User {
       watchHistoryEnabled: this.watchHistoryEnabled,
       favoritesEnabled: this.favoritesEnabled,
       totalWatchTime: this.totalWatchTime,
-      // 手动复制复杂类型属性，避免使用扩展运算符
+      // 手动复制复杂类型属性
       preferences: this.preferences ? this.clonePreferences(this.preferences) : undefined,
       activeDevices: this.activeDevices ? this.cloneActiveDevices(this.activeDevices) : undefined,
       settings: this.settings ? this.cloneSettings(this.settings) : undefined
-    });
+    } as UserConstructorParams);
   }
 
   /**
@@ -577,7 +598,7 @@ export default class User {
       osVersion: device.osVersion,
       appVersion: device.appVersion,
       ipAddress: device.ipAddress
-    }));
+    } as DeviceInfo));
   }
 
   /**

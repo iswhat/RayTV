@@ -53,12 +53,39 @@ export interface PlaySource {
   rules: Record<string, SearchRuleItem>;
 }
 
+// 站点配置值接口
+export interface SiteConfigValue {
+  api?: string;
+  name?: string;
+}
+
+// 播放源项接口
+export interface PlaySourceItem {
+  key: string;
+  source: PlaySource;
+}
+
 export interface PlayRules {
   // ArkTS兼容：使用数组替代索引签名
-  sources: Array<{
-    key: string;
-    source: PlaySource;
-  }>;
+  sources: PlaySourceItem[];
+}
+
+// 站点配置接口
+export interface SiteConfig {
+  type?: SiteType;
+  searchable?: boolean;
+  categories?: Array<Record<string, string | number | boolean>>;
+  headers?: Record<string, string>;
+  search?: Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+  detail?: Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+  play?: Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+  filterable?: boolean;
+  filters?: Array<Record<string, string | number | boolean>>;
+  proxy?: boolean;
+  weight?: number;
+  enabled?: boolean;
+  updateTime?: number;
+  lastCheckTime?: number;
 }
 
 /**
@@ -92,7 +119,7 @@ export class ConfigParser {
    * 验证站点配置
    * @param site 站点配置
    */
-  public validateSite(site: any): boolean {
+  public validateSite(site: SiteConfig | Site): boolean {
     try {
       // 使用TypeSafetyUtil确保安全访问
       const siteObj = TypeSafetyUtil.asObject(site);
@@ -126,30 +153,31 @@ export class ConfigParser {
       const type = TypeSafetyUtil.getProperty(siteObj, 'type', '') as string;
       if (type && !this.isValidSiteType(type)) {
         Logger.warn(TAG, `Site ${name} has invalid type: ${type}`);
-        (siteObj as Record<string, any>).type = SiteType.VOD;
+        (siteObj as SiteConfig).type = SiteType.VOD;
       }
       
       // 验证解析规则
       const search = TypeSafetyUtil.getProperty(siteObj, 'search', null);
       if (search && typeof search !== 'object') {
         Logger.warn(TAG, `Site ${name} has invalid search config`);
-        (siteObj as Record<string, any>).search = { 
+        const defaultSearchRules: SearchRules = { 
           page: true, 
           searchKey: 'wd', 
           pageKey: 'page', 
           resultPath: '', 
           list: [] 
         };
+        (siteObj as SiteConfig).search = defaultSearchRules as unknown as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
       }
       
       const detail = TypeSafetyUtil.getProperty(siteObj, 'detail', null);
       if (detail && typeof detail !== 'object') {
         Logger.warn(TAG, `Site ${name} has invalid detail config`);
-        (siteObj as Record<string, any>).detail = {};
+        (siteObj as SiteConfig).detail = {};
       }
       
       // 确保必要的默认值
-      this.ensureDefaultValues(siteObj);
+      this.ensureDefaultValues(siteObj as SiteConfig);
       
       return true;
     } catch (error) {
@@ -166,7 +194,7 @@ export class ConfigParser {
     return validTypes.includes(type as SiteType);
   }
   
-  private ensureDefaultValues(site: Record<string, any>): void {
+  private ensureDefaultValues(site: SiteConfig): void {
     site.type = site.type || SiteType.VOD;
     site.searchable = typeof site.searchable === 'boolean' ? site.searchable : true;
     site.categories = Array.isArray(site.categories) ? site.categories : [];
@@ -176,7 +204,15 @@ export class ConfigParser {
     if (search !== null && typeof search === 'object') {
       site.search = search;
     } else {
-      site.search = { page: true, searchKey: 'wd', pageKey: 'page', resultPath: '', list: [] };
+      // 使用SearchRules接口确保类型安全
+      const defaultSearchRules: SearchRules = { 
+        page: true, 
+        searchKey: 'wd', 
+        pageKey: 'page', 
+        resultPath: '', 
+        list: [] 
+      };
+      site.search = TypeSafetyUtil.asObject(defaultSearchRules);
     }
     
     site.detail = typeof site.detail === 'object' && site.detail !== null ? site.detail : {};
@@ -232,7 +268,7 @@ export class ConfigParser {
       return sites;
     } catch (error) {
       Logger.error(TAG, `Failed to parse sites configuration: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -248,8 +284,8 @@ export class ConfigParser {
            keys.some(key => {
              const value = config[key];
              return value !== null && typeof value === 'object' && !Array.isArray(value) && 
-                    (typeof (value as any).api === 'string' || 
-                     typeof (value as any).name === 'string');
+                    (typeof (value as SiteConfigValue).api === 'string' || 
+                     typeof (value as SiteConfigValue).name === 'string');
            });
   }
   
@@ -265,51 +301,54 @@ export class ConfigParser {
       const now = Date.now();
       
       // 遍历配置中的每个站点
-      for (const [key, value] of Object.entries(fongmiConfig)) {
-        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-          const siteData = value as Record<string, unknown>;
-          
-          // 转换为标准站点格式，包含所有必需属性
-          const site: Site = {
-            key: key,
-            name: typeof siteData.name === 'string' ? siteData.name : key,
-            type: this.detectSiteType(siteData),
-            loaderType: 'js' as LoaderType,
-            api: typeof siteData.api === 'string' ? siteData.api : '',
-            searchConfig: {
-              enabled: true
-            },
-            filterConfig: {
-              enabled: false
-            },
-            performanceConfig: {
-              timeout: 30000,
-              retryCount: 3,
-              cacheEnabled: true,
-              cacheDuration: 60
-            },
-            stats: {
-              queryCount: 0,
-              errorCount: 0,
-              avgResponseTime: 0
-            },
-            lifecycle: {
-              initialized: false,
-              loading: false,
-              error: false
-            },
-            enabled: typeof siteData.enabled === 'boolean' ? siteData.enabled : true,
-            order: 0,
-            createdAt: now,
-            updatedAt: now
-          };
-          
-          // 验证并添加到结果列表
-          if (this.validateSite(site as any)) {
-            sites.push(site);
-          }
+    const configKeys = Object.keys(fongmiConfig);
+    for (let i = 0; i < configKeys.length; i++) {
+      const key = configKeys[i];
+      const value = fongmiConfig[key];
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        const siteData = value as Record<string, unknown>;
+        
+        // 转换为标准站点格式，包含所有必需属性
+        const site: Site = {
+          key: key,
+          name: typeof siteData.name === 'string' ? siteData.name : key,
+          type: this.detectSiteType(siteData),
+          loaderType: 'js' as LoaderType,
+          api: typeof siteData.api === 'string' ? siteData.api : '',
+          searchConfig: {
+            enabled: true
+          },
+          filterConfig: {
+            enabled: false
+          },
+          performanceConfig: {
+            timeout: 30000,
+            retryCount: 3,
+            cacheEnabled: true,
+            cacheDuration: 60
+          },
+          stats: {
+            queryCount: 0,
+            errorCount: 0,
+            avgResponseTime: 0
+          },
+          lifecycle: {
+            initialized: false,
+            loading: false,
+            error: false
+          },
+          enabled: typeof siteData.enabled === 'boolean' ? siteData.enabled : true,
+          order: 0,
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        // 验证并添加到结果列表
+        if (this.validateSite(site)) {
+          sites.push(site);
         }
       }
+    }
       
       Logger.info(TAG, `Converted ${sites.length} sites from Fongmi format`);
       return sites;
@@ -354,14 +393,14 @@ export class ConfigParser {
    * 安全解析JSON内容
    * @param content JSON字符串内容
    */
-  public parseJsonContent(content: string): any {
+  public parseJsonContent(content: string): Record<string, unknown> {
     try {
       // 预处理，移除注释和多余空白
       const cleanContent = this.cleanJsonContent(content);
-      return JSON.parse(cleanContent);
+      return JSON.parse(cleanContent) as Record<string, unknown>;
     } catch (error) {
       Logger.error(TAG, `Failed to parse JSON content: ${error instanceof Error ? error.message : String(error)}`);
-      throw new Error(`Invalid JSON format: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error('Invalid JSON format');
     }
   }
   
@@ -431,7 +470,7 @@ export class ConfigParser {
       updatedAt: now
     };
     
-    if (!this.validateSite(site as any)) {
+    if (!this.validateSite(site)) {
       throw new Error(`Invalid site configuration for: ${site.name}`);
     }
     
@@ -483,11 +522,11 @@ export class ConfigParser {
       });
     } else if (headers && typeof headers === 'object') {
       // 对象格式，手动复制字符串值
-      for (const key in headers) {
-        if (Object.prototype.hasOwnProperty.call(headers, key)) {
-          const value = headers[key];
-          result[key] = String(value);
-        }
+      const keys = Object.keys(headers);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = headers[key];
+        result[key] = String(value);
       }
     }
     
@@ -498,7 +537,7 @@ export class ConfigParser {
    * 转换分类配置
    * @param categories 原始分类
    */
-  public convertCategories(categories: any): CategoryItem[] {
+  public convertCategories(categories: string[] | Record<string, string | number | boolean | Record<string, string | number | boolean>>): CategoryItem[] {
     const result: CategoryItem[] = [];
     
     if (!categories) {
@@ -507,7 +546,7 @@ export class ConfigParser {
     
     // 处理数组格式分类
     if (Array.isArray(categories)) {
-      categories.forEach((cat: any) => {
+      categories.forEach((cat) => {
         if (typeof cat === 'string') {
             const category: CategoryItem = {
               key: cat,
@@ -515,7 +554,7 @@ export class ConfigParser {
             };
             result.push(category);
           } else if (cat !== null && typeof cat === 'object' && !Array.isArray(cat)) {
-            const catObj = cat as Record<string, any>;
+            const catObj = cat as Record<string, unknown>;
             const key = typeof catObj.key === 'string' ? catObj.key : '';
             const name = typeof catObj.name === 'string' ? catObj.name : '';
             if (key && name) {
@@ -530,7 +569,10 @@ export class ConfigParser {
     } 
     // 处理Fongmi格式分类（对象格式）
     else if (categories !== null && typeof categories === 'object' && !Array.isArray(categories)) {
-      for (const [key, value] of Object.entries(categories)) {
+      const categoryKeys = Object.keys(categories);
+      for (let i = 0; i < categoryKeys.length; i++) {
+        const key = categoryKeys[i];
+        const value = categories[key];
         const name = typeof value === 'string' ? value : key;
         const category: CategoryItem = {
           key: key,
@@ -591,9 +633,54 @@ export class ConfigParser {
     
     const result: DetailRules = {};
     
-    // 手动复制所有属性
-    for (const [key, value] of Object.entries(detailData)) {
-      (result as any)[key] = value;
+    // 手动复制所有属性，确保类型安全
+    const entries = Object.entries(detailData);
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const key = entry[0];
+      const value = entry[1];
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        const searchRuleItem = value as SearchRuleItem;
+        // 使用switch语句替代索引访问，确保类型安全
+        switch (key) {
+          case 'title':
+            result.title = searchRuleItem;
+            break;
+          case 'cover':
+            result.cover = searchRuleItem;
+            break;
+          case 'desc':
+            result.desc = searchRuleItem;
+            break;
+          case 'director':
+            result.director = searchRuleItem;
+            break;
+          case 'actor':
+            result.actor = searchRuleItem;
+            break;
+          case 'year':
+            result.year = searchRuleItem;
+            break;
+          case 'area':
+            result.area = searchRuleItem;
+            break;
+          case 'update':
+            result.update = searchRuleItem;
+            break;
+          case 'score':
+            result.score = searchRuleItem;
+            break;
+          case 'type':
+            result.type = searchRuleItem;
+            break;
+          case 'playlist':
+            result.playlist = searchRuleItem;
+            break;
+          case 'tags':
+            result.tags = searchRuleItem;
+            break;
+        }
+      }
     }
     
     return result;
@@ -603,20 +690,41 @@ export class ConfigParser {
    * 转换播放规则
    * @param playData 原始播放配置
    */
-  public convertPlayRules(playData: Record<string, unknown>): PlayRules {
+  public convertPlayRules(playData: Record<string, string | number | boolean | Record<string, string | number | boolean>>): PlayRules {
     if (playData === null || typeof playData !== 'object' || Array.isArray(playData)) {
-      return { sources: [] };
+      return {
+        sources: []
+      };
     }
     
-    const result: PlayRules = { sources: [] };
+    const result: PlayRules = {
+      sources: []
+    };
     
     // 手动复制所有属性到sources数组
-    for (const [key, value] of Object.entries(playData)) {
+    const playDataKeys = Object.keys(playData);
+    for (let i = 0; i < playDataKeys.length; i++) {
+      const key = playDataKeys[i];
+      const value = playData[key];
       if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        const valueObj = value as any;
+        const valueObj = value as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+        // 处理rules对象
+        const rules: Record<string, SearchRuleItem> = {};
+        const sourceRules = valueObj.rules;
+        if (sourceRules !== null && typeof sourceRules === 'object' && !Array.isArray(sourceRules)) {
+          const sourceRulesObj = sourceRules as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+          const sourceRulesKeys = Object.keys(sourceRulesObj);
+          for (let j = 0; j < sourceRulesKeys.length; j++) {
+            const ruleKey = sourceRulesKeys[j];
+            const ruleValue = sourceRulesObj[ruleKey];
+            if (ruleValue !== null && typeof ruleValue === 'object' && !Array.isArray(ruleValue)) {
+              rules[ruleKey] = ruleValue as SearchRuleItem;
+            }
+          }
+        }
         const playSource: PlaySource = {
           name: typeof valueObj.name === 'string' ? valueObj.name : key,
-          rules: typeof valueObj.rules === 'object' && valueObj.rules !== null ? valueObj.rules : {}
+          rules: rules
         };
         result.sources.push({ key, source: playSource });
       }
@@ -653,7 +761,7 @@ export class ConfigParser {
       
       const config = this.parseJsonContent(configContent);
       const harmonySection = typeof config.harmony === 'object' && config.harmony !== null ? config.harmony : {};
-      const harmonySectionObj = harmonySection as Record<string, any>;
+      const harmonySectionObj = harmonySection as Record<string, unknown>;
       
       // 创建HarmonyOS专用配置
       const harmonyConfig: HarmonyConfig = {

@@ -7,6 +7,11 @@ import DefaultNetworkRepository from './DefaultNetworkRepository';
 
 const TAG = 'RepositoryFactory';
 
+// 定义具有close方法的仓库接口
+interface ClosableRepository {
+  close?: () => Promise<void>;
+}
+
 /**
  * Repository类型枚举
  */
@@ -21,7 +26,7 @@ export enum RepositoryType {
  */
 export default class RepositoryFactory {
   private static instance: RepositoryFactory | null;
-  private repositoryMap: Map<RepositoryType, any> = new Map(); // 修改为any类型以兼容所有Repository实现
+  private repositoryMap: Map<RepositoryType, DatabaseRepository | NetworkRepository> = new Map();
   private isInitialized: boolean = false;
 
   /**
@@ -105,7 +110,7 @@ export default class RepositoryFactory {
    * @param type 仓库类型
    * @param repository 仓库实例
    */
-  public setRepository(type: RepositoryType, repository: any): void {
+  public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository): void {
     this.repositoryMap.set(type, repository);
     Logger.info(TAG, `Custom repository set for type: ${type}`);
   }
@@ -127,11 +132,15 @@ export default class RepositoryFactory {
       Logger.info(TAG, 'Closing repositories...');
 
       // 关闭数据库仓库
-      const dbRepository = this.repositoryMap.get(RepositoryType.DATABASE);
-      if (dbRepository && typeof dbRepository.close === 'function') {
-        await dbRepository.close();
+    const dbRepository = this.repositoryMap.get(RepositoryType.DATABASE);
+    // 使用类型断言确保只在有close方法的对象上调用
+    if (dbRepository) {
+      const repo = dbRepository as ClosableRepository;
+      if (typeof repo.close === 'function') {
+        await repo.close();
         Logger.info(TAG, 'Database repository closed');
       }
+    }
 
       // 清理仓库映射
       this.repositoryMap.clear();
@@ -148,8 +157,8 @@ export default class RepositoryFactory {
    */
   public static reset(): void {
     if (RepositoryFactory.instance) {
-      RepositoryFactory.instance.close().catch(error => {
-        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
+      RepositoryFactory.instance.close().catch((error: Error) => {
+        Logger.error(TAG, `Error during factory reset: ${error.message}`);
       });
       RepositoryFactory.instance = null;
     }

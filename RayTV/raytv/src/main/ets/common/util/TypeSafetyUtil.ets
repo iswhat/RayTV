@@ -1,4 +1,4 @@
-// TypeSafetyUtil - 类型安全工具�?
+// TypeSafetyUtil - 类型安全工具类
 // 提供安全的类型转换和验证功能
 
 // 定义基础类型接口，避免使用any/unknown
@@ -98,7 +98,7 @@ export class TypeSafetyUtil {
    * @param key - 属性键�?
    * @returns 属性值，如果属性不存在则返回undefined
    */
-  public static getPropertyValue(obj: Record<string, string | number | boolean | null>, key: string): string | number | boolean | null | undefined {
+  public static getPropertyValue(obj: Record<string, string | number | boolean | object | null>, key: string): string | number | boolean | object | null | undefined {
     if (!obj || typeof obj !== 'object') {
       return undefined;
     }
@@ -125,12 +125,10 @@ export class TypeSafetyUtil {
     }
     
     try {
-      // 修复：使用更精确的类型断言和类型安全的属性访�?
-      const safeObj = obj as Record<string | number, string | number | boolean | object | null>;
-      // 使用类型安全的属性访问方�?
-      const propertyValue = TypeSafetyUtil.getPropertyValue(safeObj, key);
+      // 使用类型安全的属性访问方式
+      const propertyValue = TypeSafetyUtil.getPropertyValue(obj, key);
       if (propertyValue !== undefined) {
-        safeObj[key] = value;
+        obj[key] = value;
         return true;
       }
       return false;
@@ -227,7 +225,7 @@ export class TypeSafetyUtil {
   public static safeCast<T, U>(
     value: T,
     transformer: (v: T) => U,
-    guard?: (v: string | number | boolean | object | null) => boolean,
+    guard?: (v: U) => boolean,
     defaultValue?: U
   ): U | null {
     try {
@@ -279,7 +277,7 @@ export class TypeSafetyUtil {
    * @param fn 原始函数
    * @returns 增强后的函数
    */
-  public static createEnhancedGenericFunction<T, R>(fn: (arg: T) => R): EnhancedFunction<R, [T]> {
+  public static createEnhancedGenericFunction<T extends string | number | boolean, R>(fn: (arg: T) => R): EnhancedFunction<R, [T]> {
     const enhancedFn: EnhancedFunction<R, [T]> = (arg: T): R => {
       return fn(arg);
     };
@@ -598,7 +596,7 @@ export class TypeSafetyUtil {
         // 只保留基本类型�?
         const value = data[key];
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
-          result[key] = value;
+          result[key] = value as string | number | boolean | null;
         } else {
           // 对于复杂类型，转换为字符串或忽略
           result[key] = value === undefined ? null : String(value);
@@ -658,14 +656,14 @@ export class TypeSafetyUtil {
    * @returns 合并后的对象
    */
   public static mergeObjects(
-    target: Record<string, string | number | boolean | null>,
-    ...sources: Record<string, string | number | boolean | null>[]
-  ): Record<string, string | number | boolean | null> {
+    target: Record<string, string | number | boolean | object | null>,
+    ...sources: Record<string, string | number | boolean | object | null>[]
+  ): Record<string, string | number | boolean | object | null> {
     // 创建目标对象的副本，避免直接修改原对�?
-    const result: Record<string, string | number | boolean | null> = {};
+    const result: Record<string, string | number | boolean | object | null> = {};
     
     // 复制目标对象的属�?
-    const targetEntries = TypeSafetyUtil.getObjectEntries<string | number | boolean | null>(target);
+    const targetEntries = TypeSafetyUtil.getObjectEntries(target as Record<string, string | number | boolean | null>);
     for (let i = 0; i < targetEntries.length; i++) {
       const entry = targetEntries[i];
       const key = entry[0];
@@ -674,7 +672,7 @@ export class TypeSafetyUtil {
     }
     
     for (const source of sources) {
-      const entries = TypeSafetyUtil.getObjectEntries<string | number | boolean | null>(source);
+      const entries = TypeSafetyUtil.getObjectEntries(source as Record<string, string | number | boolean | null>);
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
         const key = entry[0];
@@ -687,16 +685,16 @@ export class TypeSafetyUtil {
       const targetValue = result[key];
       if (typeof targetValue === 'object' && targetValue !== null && !Array.isArray(targetValue)) {
         result[key] = TypeSafetyUtil.mergeObjects(
-          targetValue as Record<string, string | number | boolean>, 
-          value as Record<string, string | number | boolean>
+          targetValue as Record<string, string | number | boolean | object | null>, 
+          value as Record<string, string | number | boolean | object | null>
         );
       } else {
         // 避免使用对象展开操作，改用明确的对象创建
-        result[key] = TypeSafetyUtil.asObject(value as Record<string, string | number | boolean>);
+        result[key] = TypeSafetyUtil.asObject(value as Record<string, string | number | boolean | null>);
       }
     } else if (Array.isArray(value)) {
-      // 避免使用数组展开操作，改用Array.from创建新数组
-      result[key] = Array.from(value);
+      // 数组类型不适合存储在基本类型记录中，转换为字符串
+      result[key] = JSON.stringify(value) as string;
     } else {
       result[key] = value;
     }
@@ -853,11 +851,11 @@ export class TypeSafetyUtil {
     
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      if (key !== undefined && obj[key] !== undefined) {
+      if (key !== undefined && typeof key === 'string' && obj[key] !== undefined) {
         // 使用类型安全的属性访问方�?
         const propertyValue = TypeSafetyUtil.getPropertyValue(obj, key);
         if (propertyValue !== undefined) {
-          result[key as string] = propertyValue;
+          result[key] = propertyValue;
         }
       }
     }
@@ -889,11 +887,11 @@ export class TypeSafetyUtil {
         }
       }
       
-      if (!shouldExclude && key !== undefined) {
+      if (!shouldExclude && key !== undefined && typeof key === 'string') {
         // 使用类型安全的属性访问方�?
         const propertyValue = TypeSafetyUtil.getPropertyValue(obj, key);
         if (propertyValue !== undefined) {
-          result[key as string] = propertyValue;
+          result[key] = propertyValue;
         }
       }
     }

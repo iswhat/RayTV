@@ -96,6 +96,7 @@ export interface MovieSerializable {
   title?: string;
   originalTitle?: string;
   type?: VideoType;
+  contentType?: VideoType; // 添加contentType属性，兼容旧代码
   coverUrl?: string;
   backdropUrl?: string;
   overview?: string;
@@ -121,44 +122,12 @@ export interface MovieSerializable {
   year?: number;
 }
 
-/**
- * 电影/视频实体类
- * 定义视频内容的基本属性和相关操作
- */
-export default class Movie {
-  id: string;                  // 唯一标识
-  title: string;               // 标题
-  originalTitle?: string;      // 原始标题
-  type: VideoType;             // 视频类型
-  coverUrl?: string;           // 封面图URL
-  backdropUrl?: string;        // 背景图URL
-  overview?: string;           // 简介
-  releaseDate?: string;        // 上映日期
-  genres?: string[];           // 类型标签
-  tags?: string[];             // 标签
-  ratings?: RatingInfo[];      // 评分信息
-  directors?: string[];        // 导演
-  actors?: string[];           // 演员
-  countries?: string[];        // 制片国家/地区
-  languages?: string[];        // 语言
-  duration?: number;           // 总时长（秒）
-  totalEpisodes?: number;      // 总集数
-  currentSeason?: number;      // 当前季数
-  episodes?: Episode[];        // 剧集列表
-  recommended?: boolean;       // 是否推荐
-  favorite?: boolean;          // 是否收藏
-  watchedProgress?: number;    // 观看进度（秒）
-  playCount?: number;          // 播放次数
-  updateTime?: string;         // 更新时间
-  sources?: VideoSource[];     // 播放源列表
-  score?: number;              // 综合评分（用于排序）
-  year?: number;               // 年份
 
-}
 
 /**
  * 电影数据构造参数接口
  */
+// 导出MovieConstructorParams接口，以便在其他文件中使用
 export interface MovieConstructorParams {
   id?: string;
   title?: string;
@@ -484,7 +453,7 @@ export default class Movie {
       id: data.id,
       title: data.title,
       originalTitle: data.originalTitle,
-      type: data.contentType as VideoType,
+      type: data.type || data.contentType as VideoType || VideoType.OTHER,
       coverUrl: data.coverUrl,
       backdropUrl: data.backdropUrl,
       overview: data.overview,

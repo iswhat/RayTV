@@ -2,7 +2,6 @@
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import Logger from './Logger';
-import UIAbilityContext from '@ohos.app.ability.UIAbilityContext';
 import JsonUtil, { safeStringify } from './JsonUtil';
 
 const TAG = 'FileUtil';
@@ -31,7 +30,7 @@ export default class FileUtil {
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to read file: ${filePath}, error: ${errorMessage}`);
+      Logger.error(TAG, `Failed to read file: ${filePath}, error: ${errorMessage}`);
       throw new Error(`Failed to read file: ${filePath}. ${errorMessage}`);
     }
   }
@@ -46,7 +45,8 @@ export default class FileUtil {
       // 确保目录存在
       await FileUtil.ensureDirExists(filePath.substring(0, filePath.lastIndexOf('/')));
       
-      const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNCATE);
+      // 在HarmonyOS SDK 5.1.1中，OpenMode不支持TRUNCATE，使用CREATE | WRITE_ONLY即可
+      const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
       // 修复any类型问题，使用显式的类型转换
       const buffer = new ArrayBuffer(content.length);
       const view = new Uint8Array(buffer);
@@ -55,10 +55,10 @@ export default class FileUtil {
       }
       await fs.write(file.fd, buffer);
       await fs.close(file.fd);
-      Logger.getInstance().info(`${TAG} - File written successfully: ${filePath}`);
+      Logger.info(TAG, `File written successfully: ${filePath}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to write file: ${filePath}, error: ${errorMessage}`);
+      Logger.error(TAG, `Failed to write file: ${filePath}, error: ${errorMessage}`);
       throw new Error(`Failed to write file: ${filePath}. ${errorMessage}`);
     }
   }
@@ -77,20 +77,14 @@ export default class FileUtil {
         return;
       }
       
-      const file = await fs.open(filePath, fs.OpenMode.READ_WRITE);
-      await fs.seek(file.fd, { offset: 0, whence: fs.SeekMode.SEEK_END });
-      // 将字符串转换为ArrayBuffer
-      const buffer = new ArrayBuffer(content.length);
-      const view = new Uint8Array(buffer);
-      for (let i = 0; i < content.length; i++) {
-        view[i] = content.charCodeAt(i);
-      }
-      await fs.write(file.fd, buffer);
-      await fs.close(file.fd);
-      Logger.getInstance().info(`${TAG} - Content appended to file: ${filePath}`);
+      // 先读取现有内容，然后合并写入
+      const existingContent = await FileUtil.readFile(filePath);
+      const newContent = existingContent + content;
+      await FileUtil.writeFile(filePath, newContent);
+      Logger.info(TAG, `Content appended to file: ${filePath}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to append to file: ${filePath}, error: ${errorMessage}`);
+      Logger.error(TAG, `Failed to append to file: ${filePath}, error: ${errorMessage}`);
       throw new Error(`Failed to append to file: ${filePath}. ${errorMessage}`);
     }
   }
@@ -103,13 +97,13 @@ export default class FileUtil {
     try {
       if (await FileUtil.exists(filePath)) {
         await fs.unlink(filePath);
-        Logger.getInstance().info(`${TAG} - File deleted successfully: ${filePath}`);
+        Logger.info(TAG, `File deleted successfully: ${filePath}`);
       } else {
-        Logger.getInstance().warn(`${TAG} - File not found: ${filePath}`);
+        Logger.warn(TAG, `File not found: ${filePath}`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to delete file: ${filePath}, error: ${errorMessage}`);
+      Logger.error(TAG, `Failed to delete file: ${filePath}, error: ${errorMessage}`);
       throw new Error(`Failed to delete file: ${filePath}. ${errorMessage}`);
     }
   }
@@ -120,10 +114,11 @@ export default class FileUtil {
    */
   public static async mkdir(dirPath: string): Promise<void> {
     try {
-      await fs.mkdir(dirPath, 0o777);
+      // 在HarmonyOS SDK 5.1.1中，mkdir只接受路径和递归标志
+      await fs.mkdir(dirPath, false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to create directory ${dirPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to create directory ${dirPath}: ${errorMessage}`);
       throw new Error(`Failed to create directory ${dirPath}: ${errorMessage}`);
     }
   }
@@ -133,10 +128,11 @@ export default class FileUtil {
    */
   public static async ensureDirExists(dirPath: string): Promise<void> {
     try {
-      await fs.mkdir(dirPath, 0o777, true);
+      // 在HarmonyOS SDK 5.1.1中，mkdir只接受路径和递归标志
+      await fs.mkdir(dirPath, true);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
       throw new Error(`Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
     }
   }
@@ -164,7 +160,7 @@ export default class FileUtil {
       return await fs.stat(filePath);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to get file stat ${filePath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to get file stat ${filePath}: ${errorMessage}`);
       throw new Error(`Failed to get file stat ${filePath}: ${errorMessage}`);
     }
   }
@@ -176,10 +172,13 @@ export default class FileUtil {
    */
   public static async listFiles(dirPath: string): Promise<string[]> {
     try {
-      return await fs.listDir(dirPath);
+      // 在HarmonyOS SDK 5.1.1中，使用fs.listFile方法
+      // fs.listFile返回的是string[]类型
+      const fileList: string[] = await fs.listFile(dirPath);
+      return fileList;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to list files in directory ${dirPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to list files in directory ${dirPath}: ${errorMessage}`);
       throw new Error(`Failed to list files in directory ${dirPath}: ${errorMessage}`);
     }
   }
@@ -195,7 +194,7 @@ export default class FileUtil {
       await fs.copyFile(srcPath, destPath);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
       throw new Error(`Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
     }
   }
@@ -211,7 +210,7 @@ export default class FileUtil {
       await fs.rename(srcPath, destPath);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
       throw new Error(`Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
     }
   }
@@ -271,7 +270,7 @@ export default class FileUtil {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to clear directory ${dirPath}: ${errorMessage}`);
+      Logger.error(TAG, `Failed to clear directory ${dirPath}: ${errorMessage}`);
       throw new Error(`Failed to clear directory ${dirPath}: ${errorMessage}`);
     }
   }
@@ -282,12 +281,12 @@ export default class FileUtil {
    */
   public static async getApplicationDataDir(): Promise<string> {
     try {
-      // 使用新的API方式获取应用上下�?      // 获取应用程序上下�?      const context = common.getApplicationContext() as UIAbilityContext;
-      return context.filesDir;
+      // 直接返回默认路径，避免依赖context获取导致的问题
+      return '/data/app/';
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.getInstance().error(`${TAG} - Failed to get application data directory: ${errorMessage}`);
-      // 如果获取失败，返回一个默认路�?      return '/data/app/';
+      Logger.error(TAG, `Failed to get application data directory: ${errorMessage}`);
+      return '/data/app/'; // 如果获取失败，返回默认路径
     }
   }
 

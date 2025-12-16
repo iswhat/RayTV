@@ -40,7 +40,13 @@ struct CategoryPage {
     
     // 初始化年份选项
     const currentYear = new Date().getFullYear();
-    this.years = ['全部', ...Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())];
+    // 先创建年份数组，然后添加"全部"选项
+    const yearArray: string[] = [];
+    yearArray.push('全部');
+    for (let i = 0; i < 10; i++) {
+      yearArray.push((currentYear - i).toString());
+    }
+    this.years = yearArray;
     
     // 初始化数据
     this.loadMediaList(true);

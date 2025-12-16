@@ -12,6 +12,20 @@ import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
 // 常量定义
 const TAG = 'ConfigService';
 
+// 配置导出项接口
+export interface ConfigExportItem {
+  key: string;
+  value: string | number | boolean;
+  updatedAt: number;
+}
+
+// 配置导出数据接口
+export interface ConfigExportData {
+  exportDate: string;
+  version: string;
+  configs: ConfigExportItem[];
+}
+
 // 配置项类型定义
 export type ConfigKey = 
   | 'theme'
@@ -102,11 +116,14 @@ export interface NetworkConfig {
   cacheSize: number;
   autoDetectNetwork: boolean;
   useProxy: boolean;
-  proxyConfig: {
-    type: string;
-    host: string;
-    port: number;
-  };
+  proxyConfig: ProxyConfig;
+}
+
+// 代理配置接口
+export interface ProxyConfig {
+  type: string;
+  host: string;
+  port: number;
 }
 
 // 存储配置接口
@@ -194,6 +211,20 @@ export interface Config {
   vod: VodConfig;
 }
 
+// 选项项接口
+export interface OptionItem {
+  label: string;
+  value: ConfigValue;
+}
+
+// 验证配置接口
+export interface ValidationConfig {
+  min?: number;
+  max?: number;
+  pattern?: string;
+  required?: boolean;
+}
+
 // 配置项接口
 export interface ConfigItem {
   key: ConfigKey;
@@ -202,15 +233,17 @@ export interface ConfigItem {
   type: 'string' | 'number' | 'boolean' | 'object' | 'null';
   defaultValue: ConfigValue;
   category: string;
-  options?: Array<{ label: string; value: ConfigValue }>;
-  validation?: {
-    min?: number;
-    max?: number;
-    pattern?: string;
-    required?: boolean;
-  };
+  options?: OptionItem[];
+  validation?: ValidationConfig;
   updatedAt: number;
   createdAt: number;
+}
+
+// 配置导入结果接口
+export interface ConfigImportResult {
+  imported: number;
+  skipped: number;
+  invalid: number;
 }
 
 // 完整默认配置
@@ -392,7 +425,7 @@ export default class ConfigService {
   private static instance: ConfigService;
   private configCache: Map<ConfigKey, ConfigItem> = new Map();
   private configParser: ConfigParser;
-  private fullConfig: Config = { ...DEFAULT_FULL_CONFIG };
+  private fullConfig: Config = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
   private isInitialized: boolean = false;
 
   /**
@@ -417,13 +450,7 @@ export default class ConfigService {
    * 替代Object.keys，兼容ArkTS语法
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    return Object.keys(obj);
   }
   
   /**
@@ -433,31 +460,32 @@ export default class ConfigService {
     if (!this.isInitialized) {
       await this.initializeConfig();
     }
-    return { ...this.fullConfig };
+    return JSON.parse(JSON.stringify(this.fullConfig));
   }
   
   /**
    * 合并配置
    */
-  private mergeConfig(defaultConfig: any, customConfig: any): any {
+  private mergeConfig<T>(defaultConfig: T, customConfig: Record<string, string | number | boolean | object | null>): T {
     // 使用ArkTS兼容的对象合并方法
     if (!customConfig || typeof customConfig !== 'object') {
       return defaultConfig;
     }
     
-    const result = { ...defaultConfig };
+    const result = JSON.parse(JSON.stringify(defaultConfig)) as T;
     
-    for (const key in customConfig) {
-      if (Object.prototype.hasOwnProperty.call(customConfig, key)) {
-        const customValue = customConfig[key];
-        const defaultValue = defaultConfig[key];
-        
-        // 递归合并嵌套对象
-        if (customValue && typeof customValue === 'object' && defaultValue && typeof defaultValue === 'object') {
-          result[key] = this.mergeConfig(defaultValue, customValue);
-        } else if (customValue !== undefined) {
-          result[key] = customValue;
-        }
+    const customKeys = Object.keys(customConfig);
+    for (let i = 0; i < customKeys.length; i++) {
+      const key = customKeys[i];
+      const customValue = customConfig[key];
+      const defaultValue = (defaultConfig as Record<string, string | number | boolean | object | null>)[key];
+      
+      // 递归合并嵌套对象
+      if (customValue && typeof customValue === 'object' && !Array.isArray(customValue) && 
+          defaultValue && typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
+        (result as Record<string, string | number | boolean | object | null>)[key] = this.mergeConfig(defaultValue, customValue);
+      } else if (customValue !== undefined) {
+        (result as Record<string, string | number | boolean | object | null>)[key] = customValue;
       }
     }
     
@@ -538,21 +566,23 @@ export default class ConfigService {
       this.configCache = new Map();
       
       // 合并默认配置和数据库配置
-      for (const [key, defaultValue] of Object.entries(DEFAULT_CONFIG)) {
-        const configKey = key as ConfigKey;
+      const defaultConfigKeys = Object.keys(DEFAULT_CONFIG);
+      for (let i = 0; i < defaultConfigKeys.length; i++) {
+        const key = defaultConfigKeys[i] as ConfigKey;
+        const defaultValue = DEFAULT_CONFIG[key];
         
         // 创建默认配置项
         const defaultItem: ConfigItem = {
-          key: configKey,
+          key: key,
           value: defaultValue,
           type: this.getValueType(defaultValue),
           defaultValue,
-          category: this.getConfigCategory(configKey),
+          category: this.getConfigCategory(key),
           updatedAt: Date.now(),
           createdAt: Date.now()
         };
         
-        this.configCache.set(configKey, defaultItem);
+        this.configCache.set(key, defaultItem);
       }
       
       // 确保默认配置完整
@@ -561,9 +591,9 @@ export default class ConfigService {
       this.isInitialized = true;
       Logger.info(TAG, 'Configuration initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize configuration`);
+      Logger.error(TAG, `Failed to initialize configuration: ${error instanceof Error ? error.message : String(error)}`);
       // 初始化失败时使用默认配置
-      this.fullConfig = { ...DEFAULT_FULL_CONFIG };
+      this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
       this.ensureDefaultConfig();
       this.isInitialized = true;
     }
@@ -577,20 +607,20 @@ export default class ConfigService {
       // 尝试从本地存储加载完整配置
       const storedConfig = await StorageUtil.get('app_full_config');
       
-      if (storedConfig) {
+      if (storedConfig && typeof storedConfig === 'object') {
         // 合并存储的配置和默认配置
-        this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig);
+        this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig as Record<string, string | number | boolean | object | null>);
         Logger.info(TAG, 'Loaded full configuration from storage');
       } else {
         // 使用默认配置
-        this.fullConfig = { ...DEFAULT_FULL_CONFIG };
+        this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
         await StorageUtil.set('app_full_config', JSON.parse(JSON.stringify(this.fullConfig)));
         Logger.info(TAG, 'Using default full configuration');
       }
     } catch (error) {
       Logger.error(TAG, `Failed to load full configuration`);
       // 加载失败时使用默认配置
-      this.fullConfig = { ...DEFAULT_FULL_CONFIG };
+      this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
     }
   }
 
@@ -621,34 +651,182 @@ export default class ConfigService {
   /**
    * 获取部分配置
    */
-  public async getPartialConfig<K extends keyof Config>(key: K): Promise<Config[K]> {
+  public async getPartialConfig(key: keyof Config): Promise<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig> {
     if (!this.isInitialized) {
       await this.initializeConfig();
     }
     
-    const configSection = this.fullConfig[key];
-    if (!configSection) {
-      // 如果配置部分不存在，从默认配置获取
-      return DEFAULT_FULL_CONFIG[key];
+    let configSection: any;
+    
+    // 手动处理不同配置部分的访问
+    switch (key) {
+      case 'player':
+        configSection = this.fullConfig.player;
+        break;
+      case 'display':
+        configSection = this.fullConfig.display;
+        break;
+      case 'network':
+        configSection = this.fullConfig.network;
+        break;
+      case 'storage':
+        configSection = this.fullConfig.storage;
+        break;
+      case 'general':
+        configSection = this.fullConfig.general;
+        break;
+      case 'security':
+        configSection = this.fullConfig.security;
+        break;
+      case 'notification':
+        configSection = this.fullConfig.notification;
+        break;
+      case 'accessibility':
+        configSection = this.fullConfig.accessibility;
+        break;
+      case 'live':
+        configSection = this.fullConfig.live;
+        break;
+      case 'vod':
+        configSection = this.fullConfig.vod;
+        break;
+      default:
+        configSection = undefined;
+        break;
     }
     
-    return { ...configSection };
+    if (!configSection) {
+      // 如果配置部分不存在，从默认配置获取
+      let defaultSection: any;
+      switch (key) {
+        case 'player':
+          defaultSection = DEFAULT_FULL_CONFIG.player;
+          break;
+        case 'display':
+          defaultSection = DEFAULT_FULL_CONFIG.display;
+          break;
+        case 'network':
+          defaultSection = DEFAULT_FULL_CONFIG.network;
+          break;
+        case 'storage':
+          defaultSection = DEFAULT_FULL_CONFIG.storage;
+          break;
+        case 'general':
+          defaultSection = DEFAULT_FULL_CONFIG.general;
+          break;
+        case 'security':
+          defaultSection = DEFAULT_FULL_CONFIG.security;
+          break;
+        case 'notification':
+          defaultSection = DEFAULT_FULL_CONFIG.notification;
+          break;
+        case 'accessibility':
+          defaultSection = DEFAULT_FULL_CONFIG.accessibility;
+          break;
+        case 'live':
+          defaultSection = DEFAULT_FULL_CONFIG.live;
+          break;
+        case 'vod':
+          defaultSection = DEFAULT_FULL_CONFIG.vod;
+          break;
+        default:
+          defaultSection = undefined;
+          break;
+      }
+      return JSON.parse(JSON.stringify(defaultSection));
+    }
+    
+    return JSON.parse(JSON.stringify(configSection));
   }
   
   /**
    * 更新部分配置
    */
-  public async updatePartialConfig<K extends keyof Config>(key: K, sectionConfig: Partial<Config[K]>): Promise<ApiResponse<Config[K]>> {
+  public async updatePartialConfig(key: keyof Config, sectionConfig: Record<string, string | number | boolean | object | null>): Promise<ApiResponse<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig>> {
     try {
       if (!this.isInitialized) {
         await this.initializeConfig();
       }
       
       // 更新部分配置
-      this.fullConfig[key] = {
-        ...this.fullConfig[key],
-        ...sectionConfig
-      };
+      let updatedSection: any;
+      
+      // 手动处理不同配置部分的访问和更新
+      switch (key) {
+        case 'player':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.player));
+          break;
+        case 'display':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.display));
+          break;
+        case 'network':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.network));
+          break;
+        case 'storage':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.storage));
+          break;
+        case 'general':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.general));
+          break;
+        case 'security':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.security));
+          break;
+        case 'notification':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.notification));
+          break;
+        case 'accessibility':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.accessibility));
+          break;
+        case 'live':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.live));
+          break;
+        case 'vod':
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.vod));
+          break;
+        default:
+          return ApiResponse.error(ResponseCode.BAD_REQUEST, '无效的配置部分');
+      }
+      
+      // 手动合并属性
+      const sectionKeys = Object.keys(sectionConfig);
+      for (let i = 0; i < sectionKeys.length; i++) {
+        const sectionKey = sectionKeys[i];
+        updatedSection[sectionKey] = sectionConfig[sectionKey];
+      }
+      
+      // 更新配置部分
+      switch (key) {
+        case 'player':
+          this.fullConfig.player = updatedSection as PlayerConfig;
+          break;
+        case 'display':
+          this.fullConfig.display = updatedSection as DisplayConfig;
+          break;
+        case 'network':
+          this.fullConfig.network = updatedSection as NetworkConfig;
+          break;
+        case 'storage':
+          this.fullConfig.storage = updatedSection as StorageConfig;
+          break;
+        case 'general':
+          this.fullConfig.general = updatedSection as GeneralConfig;
+          break;
+        case 'security':
+          this.fullConfig.security = updatedSection as SecurityConfig;
+          break;
+        case 'notification':
+          this.fullConfig.notification = updatedSection as NotificationConfig;
+          break;
+        case 'accessibility':
+          this.fullConfig.accessibility = updatedSection as AccessibilityConfig;
+          break;
+        case 'live':
+          this.fullConfig.live = updatedSection as LiveConfig;
+          break;
+        case 'vod':
+          this.fullConfig.vod = updatedSection as VodConfig;
+          break;
+      }
       
       // 更新最后修改时间
       this.fullConfig.general.lastUpdated = Date.now();
@@ -656,7 +834,45 @@ export default class ConfigService {
       // 保存到存储
       await StorageUtil.set('app_full_config', JSON.parse(JSON.stringify(this.fullConfig)));
       
-      return ApiResponse.success(this.fullConfig[key], '配置更新成功');
+      // 返回更新后的配置部分
+      let finalConfigSection: any;
+      switch (key) {
+        case 'player':
+          finalConfigSection = this.fullConfig.player;
+          break;
+        case 'display':
+          finalConfigSection = this.fullConfig.display;
+          break;
+        case 'network':
+          finalConfigSection = this.fullConfig.network;
+          break;
+        case 'storage':
+          finalConfigSection = this.fullConfig.storage;
+          break;
+        case 'general':
+          finalConfigSection = this.fullConfig.general;
+          break;
+        case 'security':
+          finalConfigSection = this.fullConfig.security;
+          break;
+        case 'notification':
+          finalConfigSection = this.fullConfig.notification;
+          break;
+        case 'accessibility':
+          finalConfigSection = this.fullConfig.accessibility;
+          break;
+        case 'live':
+          finalConfigSection = this.fullConfig.live;
+          break;
+        case 'vod':
+          finalConfigSection = this.fullConfig.vod;
+          break;
+        default:
+          finalConfigSection = undefined;
+          break;
+      }
+      
+      return ApiResponse.success(finalConfigSection, '配置更新成功');
     } catch (error) {
       Logger.error(TAG, `Failed to update partial config for key: ${String(key)}`);
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
@@ -714,7 +930,19 @@ export default class ConfigService {
       
       if (this.configCache.has(key)) {
         // 更新现有配置
-        configItem = { ...this.configCache.get(key)! };
+        const existingItem = this.configCache.get(key)!;
+        configItem = {
+          key: existingItem.key,
+          value: existingItem.value,
+          type: existingItem.type,
+          defaultValue: existingItem.defaultValue,
+          category: existingItem.category,
+          description: existingItem.description,
+          options: existingItem.options,
+          validation: existingItem.validation,
+          updatedAt: existingItem.updatedAt,
+          createdAt: existingItem.createdAt
+        };
         configItem.value = value;
         configItem.updatedAt = Date.now();
       } else {
@@ -754,7 +982,10 @@ export default class ConfigService {
       let updated = 0;
       let failed = 0;
       
-      for (const { key, value } of configs) {
+      for (let i = 0; i < configs.length; i++) {
+        const configItem = configs[i];
+        const key = configItem.key;
+        const value = configItem.value;
         try {
           // 验证配置值
           const validationResult = this.validateConfigValue(key, value);
@@ -1058,14 +1289,14 @@ export default class ConfigService {
         return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取配置失败，无法导出');
       }
       
-      const exportData = {
+      const exportData: ConfigExportData = {
         exportDate: new Date().toISOString(),
         version: '1.0',
         configs: allConfigs.data.map(item => ({
           key: item.key,
           value: item.value,
           updatedAt: item.updatedAt
-        }))
+        } as ConfigExportItem))
       };
       
       // 使用ConfigParser格式化导出数据
@@ -1080,15 +1311,27 @@ export default class ConfigService {
   /**
    * 导入配置
    */
-  public async importConfig(jsonData: string, merge: boolean = true): Promise<ApiResponse<{
-    imported: number;
-    skipped: number;
-    invalid: number;
-  }>> {
+  public async importConfig(jsonData: string, merge: boolean = true): Promise<ApiResponse<ConfigImportResult>> {
     try {
       Logger.info(TAG, 'Importing configuration...');
       
-      const importData = JSON.parse(jsonData);
+      // 创建接口替代any类型
+      interface ImportConfigItem {
+        key: string;
+        value: ConfigValue;
+      }
+      
+      interface ImportData {
+        configs: ImportConfigItem[];
+      }
+      
+      interface ImportResult {
+        imported: number;
+        skipped: number;
+        invalid: number;
+      }
+      
+      const importData: ImportData = JSON.parse(jsonData) as ImportData;
       const configs = importData.configs || [];
       
       let imported = 0;
@@ -1096,10 +1339,19 @@ export default class ConfigService {
       let invalid = 0;
       
       for (const configData of configs) {
-        const { key, value } = configData;
+        // 替换解构声明，直接访问属性
+        const key = configData.key;
+        const value = configData.value;
         
         // 验证配置项
-        if (!key || !DEFAULT_CONFIG.hasOwnProperty(key)) {
+        if (!key) {
+          invalid++;
+          continue;
+        }
+        
+        // 使用数组includes替代hasOwnProperty
+        const configKeys: string[] = Object.keys(DEFAULT_CONFIG);
+        if (!configKeys.includes(key)) {
           invalid++;
           continue;
         }
@@ -1119,8 +1371,16 @@ export default class ConfigService {
       }
       
       Logger.info(TAG, `Configuration import completed: imported=${imported}, skipped=${skipped}, invalid=${invalid}`);
+      
+      // 使用明确的接口类型
+      const result: ImportResult = {
+        imported,
+        skipped,
+        invalid
+      };
+      
       return ApiResponse.success(
-        { imported, skipped, invalid },
+        result,
         `导入配置完成，成功${imported}项，跳过${skipped}项，无效${invalid}项`
       );
     } catch (error) {

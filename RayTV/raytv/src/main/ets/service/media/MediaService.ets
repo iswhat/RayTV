@@ -6,14 +6,34 @@ import Logger from '../../common/util/Logger';
 // 常量定义
 const TAG = 'MediaService';
 
+// 播放记录接口
+export interface PlaybackRecord {
+  mediaId: string;
+  title: string;
+  episodeName?: string;
+  position: number;
+  duration: number;
+  lastPlayedAt: number;
+}
+
+// 媒体信息接口
+export interface MediaInfo {
+  mediaId: string;
+  title: string;
+  type: string;
+  cover?: string;
+  siteKey: string;
+  addedAt: number;
+}
+
 /**
  * 媒体服务类
  * 实现媒体管理功能，包括播放记录、收藏管理等
  */
 export class MediaService {
   private static instance: MediaService;
-  private playbackRecords: Map<string, any> = new Map();
-  private collections: Map<string, any> = new Map();
+  private playbackRecords: Map<string, PlaybackRecord> = new Map();
+  private collections: Map<string, MediaInfo> = new Map();
   private isInitialized: boolean = false;
   private progressSyncInterval: number | null = null;
 
@@ -55,8 +75,9 @@ export class MediaService {
       this.isInitialized = true;
       Logger.info(TAG, 'Media service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize media service: ${error}`);
-      throw error;
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to initialize media service: ${errorObj.message}`);
+      throw errorObj;
     }
   }
 
@@ -84,14 +105,14 @@ export class MediaService {
   /**
    * 更新播放记录
    */
-  public updatePlaybackRecord(mediaId: string, record: any): void {
+  public updatePlaybackRecord(mediaId: string, record: PlaybackRecord): void {
     this.playbackRecords.set(mediaId, record);
   }
 
   /**
    * 获取播放记录
    */
-  public getPlaybackRecord(mediaId: string): any | undefined {
+  public getPlaybackRecord(mediaId: string): PlaybackRecord | undefined {
     return this.playbackRecords.get(mediaId);
   }
 
@@ -105,14 +126,14 @@ export class MediaService {
   /**
    * 获取所有播放记录
    */
-  public getAllPlaybackRecords(): Map<string, any> {
+  public getAllPlaybackRecords(): Map<string, PlaybackRecord> {
     return this.playbackRecords;
   }
 
   /**
    * 添加到收藏
    */
-  public addToCollection(mediaId: string, mediaInfo: any): void {
+  public addToCollection(mediaId: string, mediaInfo: MediaInfo): void {
     this.collections.set(mediaId, mediaInfo);
   }
 
@@ -133,7 +154,7 @@ export class MediaService {
   /**
    * 获取所有收藏
    */
-  public getAllCollections(): Map<string, any> {
+  public getAllCollections(): Map<string, MediaInfo> {
     return this.collections;
   }
 

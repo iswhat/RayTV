@@ -2,7 +2,7 @@
 // 管理页面路由、导航栈和页面跳转
 
 import router from '@ohos.router';
-import StorageUtil from '../common/util/StorageUtil';
+import StorageUtil, { StorageType } from '../common/util/StorageUtil';
 
 // 页面路由常量
 export class PageRoute {
@@ -305,14 +305,13 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       this.addToHistory(historyItem);
 
-      // 简化router调用，不使用PushOptions类型
+      // 使用新的router.push API替代已弃用的router.pushUrl
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.pushUrl({
+      await router.push({
         url: url,
-        params: routerParams,
-        mode: router.RouterMode.Single
+        params: routerParams
       });
     } catch (error) {
         // 安全处理错误信息
@@ -343,13 +342,11 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用新的router.pushUrl方法替代已弃用的router.push
-      const pushOptions: router.PushOptions = {
+      // 使用新的router.push API替代已弃用的router.pushUrl
+      await router.push({
         url: this.getPageUrl(PageRoute.HOME),
-        params: {} as Record<string, string | number | boolean | null>,
-        mode: router.RouterMode.Single
-      };
-      await router.pushUrl(pushOptions);
+        params: {} as Record<string, string | number | boolean | null>
+      });
       this.navigationHistory = [];
       await this.saveNavigationHistory();
     } catch (error) {
@@ -368,11 +365,11 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 简化router调用，不使用ReplaceOptions类型
+      // 使用新的router.replace API替代已弃用的router.replaceUrl
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.replaceUrl({
+      await router.replace({
         url: url,
         params: routerParams
       });
@@ -471,7 +468,9 @@ export class AppNavigator {
         };
         return historyItem;
       });
-      await StorageUtil.save('navigationHistory', serializableHistory);
+      // 转换为JSON字符串保存，避免类型不兼容问题
+      const historyJson = JSON.stringify(serializableHistory);
+      await StorageUtil.save('navigationHistory', historyJson);
     } catch (error) {
       console.error('Failed to save navigation history:', error);
     }
@@ -483,7 +482,12 @@ export class AppNavigator {
   async loadNavigationHistory(): Promise<void> {
     try {
       // 使用已定义的接口作为类型断言，避免对象字面量类型
-      const history = await StorageUtil.get('navigationHistory', []) as SerializableHistoryItem[];
+      const historyJson = await StorageUtil.getString('navigationHistory', StorageType.PREFERENCES);
+      let history = [] as SerializableHistoryItem[];
+      if (historyJson) {
+        history = JSON.parse(historyJson) as SerializableHistoryItem[];
+      }
+      
       // 确保类型安全
       if (Array.isArray(history)) {
         this.navigationHistory = history.filter(item => 
@@ -511,7 +515,7 @@ export class AppNavigator {
    * 获取当前页面路由
    */
   getCurrentRoute(): string {
-    // 获取当前路由状�?- 虽然标记为已弃用，但目前没有直接替代方案
+    // 使用新的router.getState() API，虽然标记为已弃用，但目前没有直接替代方案
     try {
       const state = router.getState();
       const url = state.path || '';

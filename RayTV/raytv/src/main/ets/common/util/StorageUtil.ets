@@ -164,7 +164,7 @@ export default class StorageUtil {
 
       switch (type) {
         case StorageType.PREFERENCES:
-          await StorageUtil.saveToPreferences(key, dataToSave);
+          await StorageUtil.saveToFileStorage(key, dataToSave);
           break;
         case StorageType.FILE:
           await StorageUtil.saveToFile(key, dataToSave);
@@ -203,7 +203,7 @@ export default class StorageUtil {
 
       switch (type) {
         case StorageType.PREFERENCES:
-          data = await StorageUtil.getFromPreferences(key);
+          data = await StorageUtil.getFromFileStorage(key);
           break;
         case StorageType.FILE:
           data = await StorageUtil.getFromFile(key);
@@ -365,7 +365,7 @@ export default class StorageUtil {
    */
   public static async remove(key: string, type: StorageType = StorageType.PREFERENCES): Promise<void> {
     if (!key || typeof key !== 'string') {
-      Logger.error(TAG, 'remove: key is empty or invalid', {});
+      Logger.error(TAG, 'remove: key is empty or invalid');
       return;
     }
 
@@ -388,7 +388,7 @@ export default class StorageUtil {
 
       switch (type) {
         case StorageType.PREFERENCES:
-          await StorageUtil.removeFromPreferences(key);
+          await StorageUtil.removeFromFileStorage(key);
           break;
         case StorageType.FILE:
           await StorageUtil.removeFromFile(key);
@@ -428,7 +428,7 @@ export default class StorageUtil {
     try {
       switch (type) {
         case StorageType.PREFERENCES:
-          await StorageUtil.clearPreferences();
+          await StorageUtil.clearFileStorage();
           break;
         case StorageType.FILE:
           await StorageUtil.clearFiles();
@@ -530,30 +530,36 @@ export default class StorageUtil {
   }
 
   /**
-   * 保存到偏好设置
+   * 保存到文件存储（替代偏好设置）
    */
-  private static async saveToPreferences(key: string, data: StorageData): Promise<void> {
+  private static async saveToFileStorage(key: string, data: StorageData): Promise<void> {
     try {
-      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
+      const fileName = `${key}.json`;
+      const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       const jsonData = JSON.stringify(data);
-      await pref.put(key, jsonData);
-      await pref.flush();
+      await FileUtil.writeFile(filePath, jsonData);
     } catch (error) {
       // 安全处理错误信息
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(TAG, `Failed to save to preferences for key ${key}: ${errorMessage}`, error as Error);
+      Logger.error(TAG, `Failed to save to file storage for key ${key}: ${errorMessage}`, error as Error);
       throw new Error(errorMessage);
     }
   }
 
   /**
-   * 从偏好设置读取
+   * 从文件存储读取（替代偏好设置）
    */
-  private static async getFromPreferences(key: string): Promise<StorageData | null> {
+  private static async getFromFileStorage(key: string): Promise<StorageData | null> {
     try {
-      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      const jsonData: string = await pref.get(key, '') as string;
+      const fileName = `${key}.json`;
+      const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
+      const exists = await FileUtil.isFileExists(filePath);
 
+      if (!exists) {
+        return null;
+      }
+
+      const jsonData = await FileUtil.readFile(filePath);
       if (jsonData === '') {
         return null;
       }
@@ -569,58 +575,49 @@ export default class StorageUtil {
     } catch (error) {
       // 安全处理错误信息
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(TAG, `Failed to get from preferences for key ${key}: ${errorMessage}`, error as Error);
+      Logger.error(TAG, `Failed to get from file storage for key ${key}: ${errorMessage}`, error as Error);
       throw new Error(errorMessage);
     }
   }
 
   /**
-   * 从偏好设置移除
+   * 从文件存储移除（替代偏好设置）
    */
-  private static async removeFromPreferences(key: string): Promise<void> {
+  private static async removeFromFileStorage(key: string): Promise<void> {
     try {
-      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      await pref.delete(key);
-      await pref.flush();
+      const fileName = `${key}.json`;
+      const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
+      await FileUtil.deleteFile(filePath);
     } catch (error) {
       // 安全处理错误信息
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(TAG, `Failed to remove from preferences for key ${key}: ${errorMessage}`, error as Error);
+      Logger.error(TAG, `Failed to remove from file storage for key ${key}: ${errorMessage}`, error as Error);
       throw new Error(errorMessage);
     }
   }
 
   /**
-   * 清空所有偏好设置
+   * 清空所有文件存储（替代偏好设置）
    */
-  private static async clearPreferences(): Promise<void> {
+  private static async clearFileStorage(): Promise<void> {
     try {
-      const pref = await preferences.getPreferences(AppConstant.APP_PACKAGE_NAME, AppConstant.PREFERENCES_NAME);
-      // 使用KeysIterator获取所有键
-      const keys: string[] = [];
-      // 显式声明iterator类型为preferences.KeysIterator
-      const iterator: preferences.KeysIterator = pref.keys();
-      let key: string | undefined;
-      while ((key = await iterator.next()) !== undefined) {
-        keys.push(key);
-      }
+      const dirPath = await FileUtil.getApplicationDataDir();
+      const files = await FileUtil.listFiles(dirPath);
 
-      // 检查keys是否为数组
-      if (Array.isArray(keys)) {
-        for (let i = 0; i < keys.length; i++) {
-          const key: string = keys[i];
-          // 确保key是字符串类型
-          if (typeof key === 'string') {
-            await pref.delete(key);
+      // 检查files是否为数组
+      if (Array.isArray(files)) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          // 确保file是字符串类型
+          if (typeof file === 'string' && file.endsWith('.json')) {
+            await FileUtil.deleteFile(dirPath + '/' + file);
           }
         }
       }
-
-      await pref.flush();
     } catch (error) {
       // 安全处理错误信息
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(TAG, `Failed to clear preferences: ${errorMessage}`, error as Error);
+      Logger.error(TAG, `Failed to clear file storage: ${errorMessage}`, error as Error);
       throw new Error(errorMessage);
     }
   }
@@ -853,7 +850,7 @@ export default class StorageUtil {
                 const propValue = (() => {
                   for (const k of Object.keys(value)) {
                     if (k === safeKey) {
-                      return (value as Record<string, string | number | boolean | object | null>)[k];
+                      return (value as Record<string, string | number | boolean | null>)[k];
                     }
                   }
                   return undefined;
@@ -861,7 +858,8 @@ export default class StorageUtil {
 
                 // 类型安全地处理每个属性值
                 if (propValue !== undefined) {
-                  safeObj.set(safeKey, StorageUtil.validateValue(propValue) as string | number | boolean | JsonDataClass | null);
+                  const validatedValue = StorageUtil.validateValue(propValue);
+                  safeObj.set(safeKey, validatedValue);
                 }
               }
             }

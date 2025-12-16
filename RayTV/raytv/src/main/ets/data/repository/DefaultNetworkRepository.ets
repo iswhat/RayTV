@@ -16,6 +16,30 @@ import NetworkRepository, {
 import Movie from '../model/Movie';
 import SearchResult, { ResultType } from '../model/SearchResult';
 
+// 定义请求配置类型
+interface RepositoryRequestConfig {
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  data?: Record<string, string | number | boolean | null>;
+  params: Record<string, string | number | boolean>;
+  headers: Record<string, string>;
+  timeout: number;
+  retryCount: number;
+}
+
+// 定义缓存项类型
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+}
+
+// 定义响应数据类型
+interface ResponseData<T> {
+  data: T;
+  headers: Record<string, string>;
+  status: number;
+}
+
 const TAG = 'DefaultNetworkRepository';
 const DEFAULT_CACHE_KEY_PREFIX = 'network_cache_';
 const DEFAULT_CACHE_EXPIRY = 3600000; // 默认缓存1小时
@@ -121,9 +145,9 @@ export default class DefaultNetworkRepository implements NetworkRepository {
    */
   private async testConnection(): Promise<void> {
     try {
-      // 发送一个简单的GET请求来测试连接
+      // 发送请求
       const testUrl = `${this.config.baseUrl}/api/test`;
-      const response = await NetworkUtil.request({
+      const response = await NetworkUtil.request<Record<string, string | number | boolean>>({
         url: testUrl,
         method: 'GET',
         timeout: this.config.timeout
@@ -147,29 +171,57 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
+   * 将SearchParams转换为Record类型的辅助函数
+   */
+  private searchParamsToRecord(params: SearchParams): Record<string, string | number | boolean | null> {
+    const result: Record<string, string | number | boolean | null> = {
+      keyword: params.keyword,
+      page: params.page,
+      pageSize: params.pageSize
+    };
+    
+    // 只添加存在的可选属性，排除filters属性，因为它的类型不兼容
+    if (params.type !== undefined) result.type = params.type;
+    if (params.genre !== undefined) result.genre = params.genre;
+    if (params.year !== undefined) result.year = params.year;
+    if (params.region !== undefined) result.region = params.region;
+    if (params.sortBy !== undefined) result.sortBy = params.sortBy;
+    if (params.sortOrder !== undefined) result.sortOrder = params.sortOrder;
+    // 跳过filters属性，因为它包含数组类型，不兼容
+    
+    return result;
+  }
+
+  /**
    * 创建请求配置
    */
   private createRequestConfig(
     url: string,
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
     data?: Record<string, string | number | boolean | null>,
     params?: Record<string, string | number | boolean | null>,
     customHeaders?: Record<string, string>
-  ): any {
+  ): RepositoryRequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
     // 合并headers
     const headers: Record<string, string> = {};
     
     // 复制默认headers
     if (this.config.headers) {
-      for (const [key, value] of Object.entries(this.config.headers)) {
+      const configHeadersKeys = Object.keys(this.config.headers);
+      for (let i = 0; i < configHeadersKeys.length; i++) {
+        const key = configHeadersKeys[i];
+        const value = this.config.headers[key];
         headers[key] = value;
       }
     }
     
     // 复制自定义headers（覆盖默认值）
     if (customHeaders) {
-      for (const [key, value] of Object.entries(customHeaders)) {
+      const customHeadersKeys = Object.keys(customHeaders);
+      for (let i = 0; i < customHeadersKeys.length; i++) {
+        const key = customHeadersKeys[i];
+        const value = customHeaders[key];
         headers[key] = value;
       }
     }
@@ -177,7 +229,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     // 过滤掉params中的null值
     const filteredParams: Record<string, string | number | boolean> = {};
     if (params) {
-      for (const [key, value] of Object.entries(params)) {
+      const paramsKeys = Object.keys(params);
+      for (let i = 0; i < paramsKeys.length; i++) {
+        const key = paramsKeys[i];
+        const value = params[key];
         if (value !== null) {
           filteredParams[key] = value;
         }
@@ -196,9 +251,21 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   }
 
   /**
-   * 处理网络响应
+   * 处理网络响应 - 针对Response<ResponseData<T>>类型
    */
-  private processNetworkResponse<T>(response: any): NetworkResult<T> {
+  private processNetworkResponse<T>(response: Response<ResponseData<T>>): NetworkResult<T> {
+    return {
+      success: true,
+      data: response.data.data,
+      headers: response.headers,
+      statusCode: response.status
+    };
+  }
+
+  /**
+   * 处理网络响应 - 针对Response<T>类型的重载
+   */
+  private processNetworkResponseDirect<T>(response: Response<T>): NetworkResult<T> {
     return {
       success: true,
       data: response.data,
@@ -227,17 +294,12 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       const cached = await StorageUtil.get(key);
       if (cached && typeof cached === 'object') {
         // 将JsonDataClass转换为普通对象
-        let cacheObj: any;
-        if (cached instanceof JsonDataClass) {
-          cacheObj = cached.toObject();
-        } else {
-          cacheObj = cached;
-        }
+        let cacheObj = cached instanceof JsonDataClass ? cached.toObject() : cached;
         
         // 使用Object.keys检查属性存在性，替代in操作符
         const cacheKeys = Object.keys(cacheObj);
         if (cacheKeys.includes('data') && cacheKeys.includes('timestamp')) {
-          const cacheItem = cacheObj as { data: T; timestamp: number };
+          const cacheItem = cacheObj as CacheItem<T>;
           const now = Date.now();
           const expiry = cacheItem.timestamp + (this.config.cacheExpiry || DEFAULT_CACHE_EXPIRY);
           
@@ -266,16 +328,16 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
 
     try {
-      const cacheItem: Record<string, unknown> = {
+      const cacheItem = {
         data,
         timestamp: Date.now()
       };
       // 将普通对象转换为JsonDataClass实例，使用类型断言确保类型安全
-      const jsonData = JsonDataClass.fromObject(cacheItem as Record<string, string | number | boolean | object | null>);
+      const jsonData = JsonDataClass.fromObject((cacheItem as unknown) as Record<string, string | number | boolean | object | null>);
       await StorageUtil.set(key, jsonData);
       Logger.debug(TAG, `Cache set for key: ${key}`);
     } catch (error) {
-      Logger.warn(TAG, `Failed to set cache: ${(error as Error).message}`);
+      Logger.warn(TAG, `Failed to set cache: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -284,7 +346,9 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async searchContent(params: SearchParams): Promise<NetworkResult<PaginatedResponse<SearchResult>>> {
     try {
       const requestUrl = '/api/search';
-      const cacheKey = this.generateCacheKey(requestUrl, 'GET', params as unknown as Record<string, string | number | boolean | null>);
+      // 使用辅助函数转换SearchParams类型
+      const paramsRecord = this.searchParamsToRecord(params);
+      const cacheKey = this.generateCacheKey(requestUrl, 'GET', paramsRecord);
       
       // 尝试从缓存获取
       const cachedData = await this.getCachedData<PaginatedResponse<SearchResult>>(cacheKey);
@@ -296,8 +360,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       }
 
       // 发送请求
-      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params as unknown as Record<string, string | number | boolean | null>);
-      const response = await NetworkUtil.request(requestConfig);
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, paramsRecord as Record<string, string | number | boolean | null>);
+      const response = await NetworkUtil.request<ResponseData<PaginatedResponse<SearchResult>>>(requestConfig);
 
       const result = this.processNetworkResponse<PaginatedResponse<SearchResult>>(response);
       
@@ -308,10 +372,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to search content: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to search content: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'Search failed'
       };
     }
@@ -320,7 +385,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async getHotSearchKeywords(limit: number = 20): Promise<NetworkResult<string[]>> {
     try {
       const requestUrl = '/api/search/hot';
-      const params: Record<string, string | number | boolean | null> = { limit };
+      const params: Record<string, number> = { limit };
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
       // 尝试从缓存获取
@@ -333,7 +398,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       }
 
       const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
-      const response = await NetworkUtil.request(requestConfig);
+      const response = await NetworkUtil.request<ResponseData<string[]>>(requestConfig);
       const result = this.processNetworkResponse<string[]>(response);
       
       // 缓存成功的响应
@@ -343,10 +408,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to get hot search keywords: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to get hot search keywords: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'Failed to get hot search keywords'
       };
     }
@@ -358,13 +424,14 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       const params: Record<string, string | number> = { keyword, limit };
       
       const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params);
-      const response = await NetworkUtil.request(requestConfig);
-      return this.processNetworkResponse<string[]>(response);
+      const response = await NetworkUtil.request<string[]>(requestConfig);
+      return this.processNetworkResponseDirect<string[]>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to get search suggestions: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to get search suggestions: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'Failed to get search suggestions'
       };
     }
@@ -387,7 +454,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       }
 
       const requestConfig = this.createRequestConfig(requestUrl, 'GET');
-      const response = await NetworkUtil.request(requestConfig);
+      const response = await NetworkUtil.request<ResponseData<Movie>>(requestConfig);
       const result = this.processNetworkResponse<Movie>(response);
       
       // 缓存成功的响应
@@ -400,10 +467,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
 
       return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to get movie detail: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to get movie detail: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'Failed to get movie detail'
       };
     }
@@ -412,7 +480,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async getMovieList(params: SearchParams): Promise<NetworkResult<PaginatedResponse<Movie>>> {
     try {
       const requestUrl = '/api/movies';
-      const cacheKey = this.generateCacheKey(requestUrl, 'GET', params as unknown as Record<string, string | number | boolean | null>);
+      const cacheKey = this.generateCacheKey(requestUrl, 'GET', this.searchParamsToRecord(params));
       
       // 尝试从缓存获取
       const cachedData = await this.getCachedData<PaginatedResponse<Movie>>(cacheKey);
@@ -420,94 +488,102 @@ export default class DefaultNetworkRepository implements NetworkRepository {
         return {
           success: true,
           data: cachedData
-        };
+        } as NetworkResult<PaginatedResponse<Movie>>;
       }
 
-      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, params as unknown as Record<string, string | number | boolean | null>);
-      const response = await NetworkUtil.request(requestConfig);
-      const result = this.processNetworkResponse<PaginatedResponse<Movie>>(response);
+      // 使用辅助函数转换SearchParams类型
+      const paramsRecord = this.searchParamsToRecord(params);
+      const requestConfig = this.createRequestConfig(requestUrl, 'GET', undefined, paramsRecord as Record<string, string | number | boolean | null>);
+      const response = await NetworkUtil.request<PaginatedResponse<Movie>>(requestConfig);
+      const result = this.processNetworkResponseDirect<PaginatedResponse<Movie>>(response);
       
       // 缓存成功的响应并转换数据
       if (result.success && result.data) {
         // 转换API响应数据为Movie对象数组
-        result.data.items = result.data.items.map(item => new Movie(item));
+        const movieItems = result.data.items.map(item => new Movie(item));
+        result.data.items = movieItems;
         await this.setCachedData(cacheKey, result.data);
       }
 
-      return result;
+      return result as NetworkResult<PaginatedResponse<Movie>>;
     } catch (error) {
-      Logger.error(TAG, `Failed to get movie list: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to get movie list: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'Failed to get movie list'
-      };
+      } as NetworkResult<PaginatedResponse<Movie>>;
     }
   }
 
   // ========== 通用网络方法实现 ==========
 
-  async get<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async get<T>(url: string, params?: Record<string, string | number | boolean | null>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const requestConfig = this.createRequestConfig(url, 'GET', undefined, params as Record<string, string | number | boolean | null>, headers);
-      const response = await NetworkUtil.request(requestConfig);
+      const requestConfig = this.createRequestConfig(url, 'GET', undefined, params, headers);
+      const response = await NetworkUtil.request<ResponseData<T>>(requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send GET request: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to send GET request: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'GET request failed'
       };
     }
   }
 
-  async post<T>(url: string, data?: Record<string, unknown>, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async post<T>(url: string, data?: Record<string, string | number | boolean | null>, params?: Record<string, string | number | boolean | null>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const requestConfig = this.createRequestConfig(url, 'POST', data as Record<string, string | number | boolean | null>, params as Record<string, string | number | boolean | null>, headers);
-      const response = await NetworkUtil.request(requestConfig);
+      const requestConfig = this.createRequestConfig(url, 'POST', data, params, headers);
+      const response = await NetworkUtil.request<ResponseData<T>>(requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send POST request: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to send POST request: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'POST request failed'
       };
     }
   }
 
-  async put<T>(url: string, data?: Record<string, unknown>, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async put<T>(url: string, data?: Record<string, string | number | boolean | null>, params?: Record<string, string | number | boolean | null>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const requestConfig = this.createRequestConfig(url, 'PUT', data as Record<string, string | number | boolean | null>, params as Record<string, string | number | boolean | null>, headers);
-      const response = await NetworkUtil.request(requestConfig);
+      const requestConfig = this.createRequestConfig(url, 'PUT', data, params, headers);
+      const response = await NetworkUtil.request<ResponseData<T>>(requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send PUT request: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to send PUT request: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'PUT request failed'
       };
     }
   }
 
-  async delete<T>(url: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async delete<T>(url: string, params?: Record<string, string | number | boolean | null>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
-      const requestConfig = this.createRequestConfig(url, 'DELETE', undefined, params as Record<string, string | number | boolean | null>, headers);
-      const response = await NetworkUtil.request(requestConfig);
+      const requestConfig = this.createRequestConfig(url, 'DELETE', undefined, params, headers);
+      const response = await NetworkUtil.request<ResponseData<T>>(requestConfig);
       return this.processNetworkResponse<T>(response);
     } catch (error) {
-      Logger.error(TAG, `Failed to send DELETE request: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to send DELETE request: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'DELETE request failed'
       };
     }
   }
 
-  async upload<T>(url: string, file: any, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
+  async upload<T>(url: string, file: Object, params?: Record<string, string | number | boolean | null>, headers?: Record<string, string>): Promise<NetworkResult<T>> {
     try {
       Logger.warn(TAG, 'Upload functionality is not fully implemented');
       // 简单实现，返回失败
@@ -516,10 +592,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
         message: 'Upload not implemented'
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to upload file: ${(error as Error).message}`);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      Logger.error(TAG, `Failed to upload file: ${errorObj.message}`);
       return {
         success: false,
-        error: error as Error,
+        error: errorObj,
         message: 'File upload failed'
       };
     }

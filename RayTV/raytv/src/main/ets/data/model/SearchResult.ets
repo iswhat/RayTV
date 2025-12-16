@@ -67,6 +67,35 @@ export interface SearchResultSerializable {
 }
 
 /**
+ * SearchResult构造函数参数接口
+ */
+export interface SearchResultConstructorParams {
+  id?: string;
+  title?: string;
+  originalTitle?: string;
+  type?: ResultType;
+  coverUrl?: string;
+  backdropUrl?: string;
+  description?: string;
+  score?: number;
+  year?: number;
+  releaseDate?: string;
+  genres?: string[];
+  tags?: string[];
+  duration?: number;
+  totalEpisodes?: number;
+  currentSeason?: number;
+  actors?: string[];
+  directors?: string[];
+  popularity?: number;
+  matchScore?: number;
+  extraInfo?: ExtraInfo;
+  link?: string;
+  sourceId?: string;
+  sourceName?: string;
+}
+
+/**
  * 搜索结果实体类
  * 定义搜索结果的数据结构和相关操作
  */
@@ -98,7 +127,7 @@ export default class SearchResult {
   /**
    * 构造函数
    */
-  constructor(data: Partial<SearchResult>) {
+  constructor(data: SearchResultConstructorParams) {
     this.id = data.id ?? `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     this.title = data.title ?? '';
     this.originalTitle = data.originalTitle;
@@ -421,7 +450,7 @@ export default class SearchResult {
           
           if (value && typeof value === 'object' && !Array.isArray(value)) {
             // 检查是否为NestedExtraInfo类型
-            const potentialNested = value as Record<string, unknown>;
+            const potentialNested = value as NestedExtraInfo;
             if (potentialNested.nestedData && typeof potentialNested.nestedData === 'object' && !Array.isArray(potentialNested.nestedData)) {
               // 克隆NestedExtraInfo对象
               const nestedCloned: NestedExtraInfo = {
@@ -433,7 +462,10 @@ export default class SearchResult {
               for (let j = 0; j < nestedKeys.length; j++) {
                 const nestedKey = nestedKeys[j];
                 const nestedValue = potentialNested.nestedData![nestedKey];
-                nestedCloned.nestedData![nestedKey] = nestedValue;
+                // 只复制基本类型值
+                if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || typeof nestedValue === 'boolean' || nestedValue === null) {
+                  nestedCloned.nestedData![nestedKey] = nestedValue;
+                }
               }
               
               extraInfo.extraData![key] = nestedCloned;
@@ -445,14 +477,16 @@ export default class SearchResult {
             }
           } else {
             // 直接复制基本类型值
-            extraInfo.extraData![key] = value;
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+              extraInfo.extraData![key] = value;
+            }
           }
         }
       }
     }
     
-    // 直接使用构造函数创建实例
-    const searchResultParams: Partial<SearchResult> = {
+    // 直接将对象字面量传递给构造函数
+    return new SearchResult({
       id: typeof data.id === 'string' ? data.id : `result_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title: typeof data.title === 'string' ? data.title : '',
       originalTitle: typeof data.originalTitle === 'string' ? data.originalTitle : undefined,
@@ -476,9 +510,7 @@ export default class SearchResult {
       link: typeof data.link === 'string' ? data.link : undefined,
       sourceId: typeof data.sourceId === 'string' ? data.sourceId : undefined,
       sourceName: typeof data.sourceName === 'string' ? data.sourceName : undefined
-    };
-    
-    return new SearchResult(searchResultParams);
+    });
   }
 
   /**
@@ -486,8 +518,60 @@ export default class SearchResult {
    * @returns 克隆后的实例
    */
   public clone(): SearchResult {
-    // 创建一个符合Partial<SearchResult>类型的对象
-    const cloneData: Partial<SearchResult> = {
+    // 克隆extraInfo
+    let clonedExtraInfo: ExtraInfo | undefined;
+    if (this.extraInfo) {
+      clonedExtraInfo = {
+        extraData: {}
+      };
+      
+      // 确保extraInfo.extraData存在
+      if (this.extraInfo.extraData) {
+        // 手动复制extraData中的每个属性
+        const keys = Object.keys(this.extraInfo.extraData);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = this.extraInfo.extraData![key];
+          
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            // 检查是否为NestedExtraInfo类型
+            const potentialNested = value as NestedExtraInfo;
+            if (potentialNested.nestedData && typeof potentialNested.nestedData === 'object' && !Array.isArray(potentialNested.nestedData)) {
+              // 克隆NestedExtraInfo对象
+              const nestedCloned: NestedExtraInfo = {
+                nestedData: {}
+              };
+              
+              // 手动复制nestedData中的每个属性
+              const nestedKeys = Object.keys(potentialNested.nestedData);
+              for (let j = 0; j < nestedKeys.length; j++) {
+                const nestedKey = nestedKeys[j];
+                const nestedValue = potentialNested.nestedData![nestedKey];
+                // 只复制基本类型值
+                if (typeof nestedValue === 'string' || typeof nestedValue === 'number' || typeof nestedValue === 'boolean' || nestedValue === null) {
+                  nestedCloned.nestedData![nestedKey] = nestedValue;
+                }
+              }
+              
+              clonedExtraInfo.extraData![key] = nestedCloned;
+            } else {
+              // 直接复制基本类型值
+              if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+                clonedExtraInfo.extraData![key] = value;
+              }
+            }
+          } else {
+            // 直接复制基本类型值
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+              clonedExtraInfo.extraData![key] = value;
+            }
+          }
+        }
+      }
+    }
+    
+    // 直接将对象字面量传递给构造函数
+    return new SearchResult({
       id: this.id,
       title: this.title,
       originalTitle: this.originalTitle,
@@ -509,58 +593,9 @@ export default class SearchResult {
       matchScore: this.matchScore,
       link: this.link,
       sourceId: this.sourceId,
-      sourceName: this.sourceName
-    };
-    
-    // 克隆extraInfo
-    if (this.extraInfo) {
-      const clonedExtraInfo: ExtraInfo = {
-        extraData: {}
-      };
-      
-      // 确保extraInfo.extraData存在
-      if (this.extraInfo.extraData) {
-        // 手动复制extraData中的每个属性
-        const keys = Object.keys(this.extraInfo.extraData);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          const value = this.extraInfo.extraData![key];
-          
-          if (value && typeof value === 'object' && !Array.isArray(value)) {
-            // 检查是否为NestedExtraInfo类型
-            const potentialNested = value as Record<string, unknown>;
-            if (potentialNested.nestedData && typeof potentialNested.nestedData === 'object' && !Array.isArray(potentialNested.nestedData)) {
-              // 克隆NestedExtraInfo对象
-              const nestedCloned: NestedExtraInfo = {
-                nestedData: {}
-              };
-              
-              // 手动复制nestedData中的每个属性
-              const nestedKeys = Object.keys(potentialNested.nestedData);
-              for (let j = 0; j < nestedKeys.length; j++) {
-                const nestedKey = nestedKeys[j];
-                const nestedValue = potentialNested.nestedData![nestedKey];
-                nestedCloned.nestedData![nestedKey] = nestedValue;
-              }
-              
-              clonedExtraInfo.extraData![key] = nestedCloned;
-            } else {
-              // 直接复制基本类型值
-              if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
-                clonedExtraInfo.extraData![key] = value;
-              }
-            }
-          } else {
-            // 直接复制基本类型值
-            clonedExtraInfo.extraData![key] = value;
-          }
-        }
-      }
-      
-      cloneData.extraInfo = clonedExtraInfo;
-    }
-    
-    return new SearchResult(cloneData);
+      sourceName: this.sourceName,
+      extraInfo: clonedExtraInfo
+    });
   }
 
   /**

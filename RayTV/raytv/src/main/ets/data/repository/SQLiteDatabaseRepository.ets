@@ -8,7 +8,7 @@ import DatabaseRepository, {
   PaginatedResult,
   ConfigValue
 } from './DatabaseRepository';
-import Movie from '../model/Movie';
+import Movie, { MovieConstructorParams } from '../model/Movie';
 import User from '../model/User';
 import History from '../model/History';
 import SearchResult, { ResultType } from '../model/SearchResult';
@@ -23,6 +23,7 @@ const DATABASE_VERSION = 1;
 // 配置值类型接口
 interface ConfigValueObject {
   value: string;
+  // ArkTS不支持索引签名，移除索引签名
 }
 
 /**
@@ -337,8 +338,8 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
               }
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
-              const configValue: ConfigValueObject = { value: value || '' };
-              this.configMap.set(`${config_group}:${key}`, configValue as unknown as Record<string, string | number | boolean | Record<string, string | number | boolean>>);
+              const configValue = { value: value || '' } as ConfigValueObject;
+              this.configMap.set(`${config_group}:${key}`, configValue);
             }
           }
         } while (resultSet.goToNextRow());
@@ -357,35 +358,33 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      // 使用更明确的类型断言来避免属性访问错误
-      const movieObj = movie as any;
       const valuesBucket: relationalStore.ValuesBucket = {
-        'id': movieObj.id,
-        'title': movieObj.title,
-        'originalTitle': movieObj.originalTitle || null,
-        'type': movieObj.type,
-        'coverUrl': movieObj.coverUrl || null,
-        'backdropUrl': movieObj.backdropUrl || null,
-        'description': movieObj.overview || null,
-        'releaseDate': movieObj.releaseDate || null,
-        'year': movieObj.year || null,
-        'genres': JsonUtil.stringify(movieObj.genres || []),
-        'tags': JsonUtil.stringify(movieObj.tags || []),
-        'duration': movieObj.duration || null,
-        'totalEpisodes': movieObj.totalEpisodes || null,
-        'currentSeason': movieObj.currentSeason || null,
-        'score': movieObj.score || null,
-        'directors': JsonUtil.stringify(movieObj.directors || []),
-        'actors': JsonUtil.stringify(movieObj.actors || []),
-        'country': movieObj.countries ? movieObj.countries.join(',') : null,
-        'language': movieObj.languages ? movieObj.languages.join(',') : null,
-        'plot': movieObj.overview || null,
-        'createTime': Date.now(),
-        'updateTime': Date.now(),
-        'videoSources': JsonUtil.stringify(movieObj.sources || []),
-        'episodes': JsonUtil.stringify(movieObj.episodes || []),
-        'ratingInfo': movieObj.ratings ? JsonUtil.stringify(movieObj.ratings) : null
-      };
+      'id': movie.id,
+      'title': movie.title,
+      'originalTitle': movie.originalTitle || null,
+      'type': movie.type,
+      'coverUrl': movie.coverUrl || null,
+      'backdropUrl': movie.backdropUrl || null,
+      'description': movie.overview || null,
+      'releaseDate': movie.releaseDate || null,
+      'year': movie.year || null,
+      'genres': JsonUtil.stringify(movie.genres || []),
+      'tags': JsonUtil.stringify(movie.tags || []),
+      'duration': movie.duration || null,
+      'totalEpisodes': movie.totalEpisodes || null,
+      'currentSeason': movie.currentSeason || null,
+      'score': movie.score || null,
+      'directors': JsonUtil.stringify(movie.directors || []),
+      'actors': JsonUtil.stringify(movie.actors || []),
+      'country': movie.countries ? movie.countries.join(',') : null,
+      'language': movie.languages ? movie.languages.join(',') : null,
+      'plot': movie.overview || null,
+      'createTime': Date.now(),
+      'updateTime': Date.now(),
+      'videoSources': JsonUtil.stringify(movie.sources || []),
+      'episodes': JsonUtil.stringify(movie.episodes || []),
+      'ratingInfo': movie.ratings ? JsonUtil.stringify(movie.ratings) : null
+    };
 
       const rowsInserted = await this.rdbStore.insert('movies', valuesBucket);
       
@@ -416,33 +415,31 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
-      // 使用更明确的类型断言来避免属性访问错误
-      const movieObj = movie as any;
       const valuesBucket: relationalStore.ValuesBucket = {
-        'title': movieObj.title,
-        'originalTitle': movieObj.originalTitle || null,
-        'type': movieObj.type,
-        'coverUrl': movieObj.coverUrl || null,
-        'backdropUrl': movieObj.backdropUrl || null,
-        'description': movieObj.overview || null,
-        'releaseDate': movieObj.releaseDate || null,
-        'year': movieObj.year || null,
-        'genres': JsonUtil.stringify(movieObj.genres || []),
-        'tags': JsonUtil.stringify(movieObj.tags || []),
-        'duration': movieObj.duration || null,
-        'totalEpisodes': movieObj.totalEpisodes || null,
-        'currentSeason': movieObj.currentSeason || null,
-        'score': movieObj.score || null,
-        'directors': JsonUtil.stringify(movieObj.directors || []),
-        'actors': JsonUtil.stringify(movieObj.actors || []),
-        'country': movieObj.countries ? movieObj.countries.join(',') : null,
-        'language': movieObj.languages ? movieObj.languages.join(',') : null,
-        'plot': movieObj.overview || null,
-        'updateTime': Date.now(),
-        'videoSources': JsonUtil.stringify(movieObj.sources || []),
-        'episodes': JsonUtil.stringify(movieObj.episodes || []),
-        'ratingInfo': movieObj.ratings ? JsonUtil.stringify(movieObj.ratings) : null
-      };
+      'title': movie.title,
+      'originalTitle': movie.originalTitle || null,
+      'type': movie.type,
+      'coverUrl': movie.coverUrl || null,
+      'backdropUrl': movie.backdropUrl || null,
+      'description': movie.overview || null,
+      'releaseDate': movie.releaseDate || null,
+      'year': movie.year || null,
+      'genres': JsonUtil.stringify(movie.genres || []),
+      'tags': JsonUtil.stringify(movie.tags || []),
+      'duration': movie.duration || null,
+      'totalEpisodes': movie.totalEpisodes || null,
+      'currentSeason': movie.currentSeason || null,
+      'score': movie.score || null,
+      'directors': JsonUtil.stringify(movie.directors || []),
+      'actors': JsonUtil.stringify(movie.actors || []),
+      'country': movie.countries ? movie.countries.join(',') : null,
+      'language': movie.languages ? movie.languages.join(',') : null,
+      'plot': movie.overview || null,
+      'updateTime': Date.now(),
+      'videoSources': JsonUtil.stringify(movie.sources || []),
+      'episodes': JsonUtil.stringify(movie.episodes || []),
+      'ratingInfo': movie.ratings ? JsonUtil.stringify(movie.ratings) : null
+    };
 
       const predicates = new relationalStore.RdbPredicates('movies');
       predicates.equalTo('id', movie.id);
@@ -566,38 +563,37 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return null;
       }
 
-      // 创建一个符合Partial<Movie>类型的对象，避免直接使用对象字面量
-      // 使用any类型断言来避免Partial<Movie>类型的属性访问错误
-      const movieData: any = {};
-      
-      // 逐个赋值属性，确保类型安全
-      movieData.id = this.safeGetString(resultSet, 'id') || '';
-      movieData.title = this.safeGetString(resultSet, 'title') || '';
-      movieData.originalTitle = this.safeGetString(resultSet, 'originalTitle');
-      movieData.type = this.safeGetLong(resultSet, 'type') || 0;
-      movieData.coverUrl = this.safeGetString(resultSet, 'coverUrl');
-      movieData.backdropUrl = this.safeGetString(resultSet, 'backdropUrl');
-      movieData.overview = this.safeGetString(resultSet, 'description');
-      movieData.releaseDate = this.safeGetString(resultSet, 'releaseDate');
-      movieData.year = this.safeGetLong(resultSet, 'year');
-      movieData.genres = this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]');
-      movieData.tags = this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]');
-      movieData.duration = this.safeGetLong(resultSet, 'duration');
-      movieData.totalEpisodes = this.safeGetLong(resultSet, 'totalEpisodes');
-      movieData.currentSeason = this.safeGetLong(resultSet, 'currentSeason') || 1;
-      movieData.score = this.safeGetDouble(resultSet, 'score');
-      movieData.directors = this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]');
-      movieData.actors = this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]');
-      const countryStr = this.safeGetString(resultSet, 'country');
-      movieData.countries = countryStr ? countryStr.split(',') : [];
-      const languageStr = this.safeGetString(resultSet, 'language');
-      movieData.languages = languageStr ? languageStr.split(',') : [];
-      movieData.sources = this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]');
-      movieData.episodes = this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]');
-      movieData.ratings = this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '[]');
-      
-      const movie = new Movie(movieData);
-      return movie;
+      // 创建一个符合Movie构造函数参数的对象
+    const movieData: MovieConstructorParams = {};
+    
+    // 逐个赋值属性，确保类型安全
+    movieData.id = this.safeGetString(resultSet, 'id') || '';
+    movieData.title = this.safeGetString(resultSet, 'title') || '';
+    movieData.originalTitle = this.safeGetString(resultSet, 'originalTitle');
+    movieData.type = this.safeGetLong(resultSet, 'type') || 0;
+    movieData.coverUrl = this.safeGetString(resultSet, 'coverUrl');
+    movieData.backdropUrl = this.safeGetString(resultSet, 'backdropUrl');
+    movieData.overview = this.safeGetString(resultSet, 'description');
+    movieData.releaseDate = this.safeGetString(resultSet, 'releaseDate');
+    movieData.year = this.safeGetLong(resultSet, 'year');
+    movieData.genres = this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]');
+    movieData.tags = this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]');
+    movieData.duration = this.safeGetLong(resultSet, 'duration');
+    movieData.totalEpisodes = this.safeGetLong(resultSet, 'totalEpisodes');
+    movieData.currentSeason = this.safeGetLong(resultSet, 'currentSeason') || 1;
+    movieData.score = this.safeGetDouble(resultSet, 'score');
+    movieData.directors = this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]');
+    movieData.actors = this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]');
+    const countryStr = this.safeGetString(resultSet, 'country');
+    movieData.countries = countryStr ? countryStr.split(',') : [];
+    const languageStr = this.safeGetString(resultSet, 'language');
+    movieData.languages = languageStr ? languageStr.split(',') : [];
+    movieData.sources = this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]');
+    movieData.episodes = this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]');
+    movieData.ratings = this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '[]');
+    
+    const movie = new Movie(movieData as Partial<Movie>);
+    return movie;
     } catch (error) {
       Logger.error(TAG, `Failed to parse movie from result set: ${error instanceof Error ? error.message : String(error)}`);
       return null;

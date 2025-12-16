@@ -60,7 +60,7 @@ export interface ErrorDetail {
 /**
  * API响应参数接口
  */
-export interface ApiResponseParams<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
+export interface ApiResponseParams<T = Record<string, string | number | boolean | null>> {
   code: ResponseCode;
   message: string;
   data?: T;
@@ -70,7 +70,7 @@ export interface ApiResponseParams<T = string | number | boolean | null | Record
   trace?: string;
 }
 
-export default class ApiResponse<T = string | number | boolean | null | Record<string, string | number | boolean | null>> {
+export default class ApiResponse<T = Record<string, string | number | boolean | null>> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
   data?: T;                       // 响应数据
@@ -209,24 +209,41 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): Record<string, unknown> {
-    return {
+  toObject(): Record<string, string | number | boolean | null | T | ErrorDetail[] | PaginationInfo> {
+    const result: Record<string, string | number | boolean | null | T | ErrorDetail[] | PaginationInfo> = {
       code: this.code,
       message: this.message,
-      data: this.data,
-      errors: this.errors,
-      pagination: this.pagination,
-      timestamp: this.timestamp,
-      requestId: this.requestId,
-      trace: this.trace
+      timestamp: this.timestamp
     };
+    
+    if (this.data !== undefined) {
+      result.data = this.data;
+    }
+    
+    if (this.errors !== undefined) {
+      result.errors = this.errors;
+    }
+    
+    if (this.pagination !== undefined) {
+      result.pagination = this.pagination;
+    }
+    
+    if (this.requestId !== undefined) {
+      result.requestId = this.requestId;
+    }
+    
+    if (this.trace !== undefined) {
+      result.trace = this.trace;
+    }
+    
+    return result;
   }
 
   /**
    * 从对象创建实例
    * @param obj 对象数据
    */
-  static fromObject<T = unknown>(obj: Record<string, unknown>): ApiResponse<T> {
+  static fromObject<T>(obj: Record<string, unknown>): ApiResponse<T> {
     const params: ApiResponseParams<T> = {
       code: typeof obj.code === 'number' ? obj.code : ResponseCode.SUCCESS,
       message: typeof obj.message === 'string' ? obj.message : 'Unknown response',
@@ -244,7 +261,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   /**
    * 创建成功响应
    */
-  static success<T = unknown>(data?: T, message: string = 'Success'): ApiResponse<T> {
+  static success<T = Record<string, string | number | boolean | null>>(data?: T, message: string = 'Success'): ApiResponse<T> {
     return new ApiResponse<T>({
       code: ResponseCode.SUCCESS,
       message,
@@ -255,7 +272,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   /**
    * 创建带分页的成功响应
    */
-  static successWithPagination<T = unknown>(
+  static successWithPagination<T = Record<string, string | number | boolean | null>>(
     data: T,
     pagination: PaginationInfo,
     message: string = 'Success'
@@ -271,7 +288,7 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   /**
    * 创建错误响应
    */
-  static error<T = unknown>(
+  static error<T = Record<string, string | number | boolean | null>>(
     code: ResponseCode,
     message: string,
     errors?: ErrorDetail[]
@@ -286,82 +303,82 @@ export default class ApiResponse<T = string | number | boolean | null | Record<s
   /**
    * 创建参数错误响应
    */
-  static badRequest<T = unknown>(message: string = 'Bad Request', errors?: ErrorDetail[]): ApiResponse<T> {
-    return this.error<T>(ResponseCode.BAD_REQUEST, message, errors);
+  static badRequest<T = Record<string, string | number | boolean | null>>(message: string = 'Bad Request', errors?: ErrorDetail[]): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.BAD_REQUEST, message, errors);
   }
 
   /**
    * 创建未授权错误响应
    */
-  static unauthorized<T = unknown>(message: string = 'Unauthorized'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.UNAUTHORIZED, message);
+  static unauthorized<T = Record<string, string | number | boolean | null>>(message: string = 'Unauthorized'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.UNAUTHORIZED, message);
   }
 
   /**
    * 创建禁止访问错误响应
    */
-  static forbidden<T = unknown>(message: string = 'Forbidden'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.FORBIDDEN, message);
+  static forbidden<T = Record<string, string | number | boolean | null>>(message: string = 'Forbidden'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.FORBIDDEN, message);
   }
 
   /**
    * 创建未找到资源错误响应
    */
-  static notFound<T = unknown>(message: string = 'Resource not found'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.NOT_FOUND, message);
+  static notFound<T = Record<string, string | number | boolean | null>>(message: string = 'Resource not found'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.NOT_FOUND, message);
   }
 
   /**
    * 创建服务器错误响应
    */
-  static serverError<T = unknown>(message: string = 'Internal server error'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.INTERNAL_SERVER_ERROR, message);
+  static serverError<T = Record<string, string | number | boolean | null>>(message: string = 'Internal server error'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.INTERNAL_SERVER_ERROR, message);
   }
 
   /**
    * 创建网络错误响应
    */
-  static networkError<T = unknown>(message: string = 'Network error'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.NETWORK_ERROR, message);
+  static networkError<T = Record<string, string | number | boolean | null>>(message: string = 'Network error'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.NETWORK_ERROR, message);
   }
 
   /**
    * 创建超时错误响应
    */
-  static timeoutError<T = unknown>(message: string = 'Request timeout'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.TIMEOUT_ERROR, message);
+  static timeoutError<T = Record<string, string | number | boolean | null>>(message: string = 'Request timeout'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.TIMEOUT_ERROR, message);
   }
 
   /**
    * 创建解析错误响应
    */
-  static parseError<T = unknown>(message: string = 'Parse error'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.PARSE_ERROR, message);
+  static parseError<T = Record<string, string | number | boolean | null>>(message: string = 'Parse error'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.PARSE_ERROR, message);
   }
 
   /**
    * 创建验证错误响应
    */
-  static validationError<T = unknown>(errors: ErrorDetail[], message: string = 'Validation failed'): ApiResponse<T> {
-    return this.error<T>(ResponseCode.VALIDATION_ERROR, message, errors);
+  static validationError<T = Record<string, string | number | boolean | null>>(errors: ErrorDetail[], message: string = 'Validation failed'): ApiResponse<T> {
+    return ApiResponse.error<T>(ResponseCode.VALIDATION_ERROR, message, errors);
   }
 
   /**
    * 创建单个验证错误响应
    */
-  static singleValidationError<T = unknown>(field: string, message: string): ApiResponse<T> {
+  static singleValidationError<T = Record<string, string | number | boolean | null>>(field: string, message: string): ApiResponse<T> {
     const error: ErrorDetail = { field, message };
-    return this.validationError<T>([error]);
+    return ApiResponse.validationError<T>([error]);
   }
 
   /**
    * 从错误创建响应
    */
-  static fromError<T = unknown>(error: Error): ApiResponse<T> {
+  static fromError<T = Record<string, string | number | boolean | null>>(error: Error): ApiResponse<T> {
     // 可以根据不同类型的错误返回不同的响应
     Logger.error(TAG, `Creating response from error: ${error.message}`, error);
     
-    return this.error<T>(ResponseCode.UNKNOWN_ERROR, error.message);
+    return ApiResponse.error<T>(ResponseCode.UNKNOWN_ERROR, error.message);
   }
 
   /**

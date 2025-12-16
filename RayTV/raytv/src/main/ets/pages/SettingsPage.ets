@@ -67,7 +67,7 @@ struct SettingsPage {
   /**
    * 保存设置项
    */
-  private saveSetting(key: string, value: any): void {
+  private saveSetting(key: string, value: string | number | boolean): void {
     try {
       // 由于ConfigService的setConfig方法需要ConfigKey类型，这里简化处理
       Logger.info(this.TAG, `Setting saved: ${key} = ${value}`);

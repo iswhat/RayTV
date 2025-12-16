@@ -31,6 +31,30 @@ export interface HistorySerializable {
 }
 
 /**
+ * History构造函数参数接口
+ */
+export interface HistoryConstructorParams {
+  id?: string;
+  userId?: string;
+  contentId?: string;
+  contentTitle?: string;
+  contentType?: VideoType;
+  coverUrl?: string;
+  episodeId?: string;
+  episodeTitle?: string;
+  season?: number;
+  episode?: number;
+  progress?: number;
+  totalDuration?: number;
+  lastWatchTime?: string;
+  playCount?: number;
+  isFinished?: boolean;
+  sourceId?: string;
+  quality?: string;
+  deviceId?: string;
+}
+
+/**
  * 观看历史实体类
  * 记录用户的观看历史信息
  */
@@ -57,7 +81,7 @@ export default class History {
   /**
    * 构造函数
    */
-  constructor(data: Partial<History>) {
+  constructor(data: HistoryConstructorParams) {
     this.id = data.id || `history_${DateUtil.getTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
     this.userId = data.userId || '';
     this.contentId = data.contentId || '';
@@ -180,8 +204,8 @@ export default class History {
    * @returns History 实例
    */
   public static fromSerializable(data: HistorySerializable): History {
-    // 显式声明对象字面量类型为 Partial<History>
-    const historyParams: Partial<History> = {
+    // 直接将对象字面量传递给构造函数
+    return new History({
       id: data.id,
       userId: data.userId,
       contentId: data.contentId,
@@ -200,8 +224,7 @@ export default class History {
       sourceId: data.sourceId,
       quality: data.quality,
       deviceId: data.deviceId
-    };
-    return new History(historyParams);
+    });
   }
 
   /**
@@ -209,8 +232,8 @@ export default class History {
    * @returns 克隆后的实例
    */
   public clone(): History {
-    // 显式声明对象字面量类型为 Partial<History>
-    const historyParams: Partial<History> = {
+    // 直接将对象字面量传递给构造函数
+    return new History({
       id: this.id,
       userId: this.userId,
       contentId: this.contentId,
@@ -229,8 +252,7 @@ export default class History {
       sourceId: this.sourceId,
       quality: this.quality,
       deviceId: this.deviceId
-    };
-    return new History(historyParams);
+    });
   }
 
   /**

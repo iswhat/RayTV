@@ -4,6 +4,28 @@
 import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 
+// 搜索结果接口
+export interface SearchResult {
+  id: string;
+  title: string;
+  type: string;
+  coverUrl: string;
+}
+
+// 搜索历史仓库接口
+export interface SearchHistoryRepository {
+  getHistory(): Promise<string[]>;
+  saveHistory(history: string[]): Promise<void>;
+  clearHistory(): Promise<void>;
+}
+
+// 媒体服务接口
+export interface MediaService {
+  search(keyword: string): Promise<SearchResult[]>;
+  getHotKeywords(): Promise<string[]>;
+  quickSearch(keyword: string): Promise<SearchResult[]>;
+}
+
 @Entry
 @Component
 struct SearchPage {
@@ -11,23 +33,48 @@ struct SearchPage {
   @State searchText: string = '';
   @State searchHistory: string[] = [];
   @State hotKeywords: string[] = [];
-  @State searchResults: any[] = [];
+  @State searchResults: SearchResult[] = [];
   @State isSearching: boolean = false;
   @State showQuickResults: boolean = false;
-  @State quickResults: any[] = [];
+  @State quickResults: SearchResult[] = [];
   @State showHistory: boolean = true;
   @State showHotKeywords: boolean = true;
-  private searchHistoryRepo: any;
-  private mediaService: any;
+  private searchHistoryRepo: SearchHistoryRepository | null = null;
+  private mediaService: MediaService | null = null;
 
   aboutToAppear() {
     // 这里应该注入真实的SearchHistoryRepository和mediaService，暂时用模拟实现
-    this.searchHistoryRepo = {
-      getHistory: () => Promise.resolve([]),
-      saveHistory: () => Promise.resolve(),
-      clearHistory: () => Promise.resolve()
-    };
-    this.mediaService = {};
+    // 使用类实现来替代对象字面量
+    class MockSearchHistoryRepository implements SearchHistoryRepository {
+      async getHistory(): Promise<string[]> {
+        return [];
+      }
+      
+      async saveHistory(history: string[]): Promise<void> {
+        // 模拟实现
+      }
+      
+      async clearHistory(): Promise<void> {
+        // 模拟实现
+      }
+    }
+    
+    class MockMediaService implements MediaService {
+      async search(keyword: string): Promise<SearchResult[]> {
+        return [];
+      }
+      
+      async getHotKeywords(): Promise<string[]> {
+        return [];
+      }
+      
+      async quickSearch(keyword: string): Promise<SearchResult[]> {
+        return [];
+      }
+    }
+    
+    this.searchHistoryRepo = new MockSearchHistoryRepository();
+    this.mediaService = new MockMediaService();
     
     this.loadHotKeywords();
     this.loadSearchHistory();
@@ -55,14 +102,18 @@ struct SearchPage {
   private async loadSearchHistory(): Promise<void> {
     try {
       // 使用SearchHistoryRepository从本地存储中读取搜索历史
-      const history = await this.searchHistoryRepo.getHistory();
-      
-      // 确保history是数组类型
-      if (Array.isArray(history)) {
-        this.searchHistory = history;
-        Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
+      if (this.searchHistoryRepo) {
+        const history = await this.searchHistoryRepo.getHistory();
+        
+        // 确保history是数组类型
+        if (Array.isArray(history)) {
+          this.searchHistory = history;
+          Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
+        } else {
+          Logger.warn(this.TAG, `Invalid history data format, using empty array`);
+          this.searchHistory = [];
+        }
       } else {
-        Logger.warn(this.TAG, `Invalid history data format, using empty array`);
         this.searchHistory = [];
       }
     } catch (error) {
@@ -83,7 +134,9 @@ struct SearchPage {
       this.searchHistory = history;
       
       // 使用SearchHistoryRepository保存到本地存储
-      await this.searchHistoryRepo.saveHistory(history);
+      if (this.searchHistoryRepo) {
+        await this.searchHistoryRepo.saveHistory(history);
+      }
       
       Logger.info(this.TAG, `Search history saved: ${keyword}`);
     } catch (error) {
@@ -160,7 +213,7 @@ struct SearchPage {
   /**
    * 处理快速搜索结果点击
    */
-  private async handleQuickResultClick(result: any): Promise<void> {
+  private async handleQuickResultClick(result: SearchResult): Promise<void> {
     try {
       // 保存搜索历史
       await this.saveSearchHistory(this.searchText);
@@ -181,7 +234,7 @@ struct SearchPage {
   /**
    * 处理搜索结果点击
    */
-  private async handleSearchResultClick(result: any): Promise<void> {
+  private async handleSearchResultClick(result: SearchResult): Promise<void> {
     try {
       // 跳转到详情页
       await AppNavigator.getInstance().navigateToDetail({
@@ -229,7 +282,9 @@ struct SearchPage {
     try {
       this.searchHistory = [];
       // 使用SearchHistoryRepository清空本地存储
-      await this.searchHistoryRepo.clearHistory();
+      if (this.searchHistoryRepo) {
+        await this.searchHistoryRepo.clearHistory();
+      }
       Logger.info(this.TAG, 'Search history cleared');
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear search history: ${error}`);
@@ -256,12 +311,12 @@ struct SearchPage {
     Column() {
       Row() {
         // 返回按钮
-        Button()
-          .onClick(() => this.handleBack()) {
+        Button() {
           Text('返回')
             .fontSize(24)
             .fontColor('#FFFFFF')
         }
+        .onClick(() => this.handleBack())
 
         // 搜索输入区域
         Column() {
@@ -272,9 +327,8 @@ struct SearchPage {
           // 快速搜索结果
           if (this.showQuickResults && this.quickResults.length > 0) {
             Column() {
-              ForEach(this.quickResults, (result) => {
-                Row()
-                  .onClick(() => this.handleQuickResultClick(result)) {
+              ForEach(this.quickResults, (result: SearchResult) => {
+                Row() {
                   Column() {
                     Text(result.title)
                       .fontSize(16)
@@ -287,19 +341,20 @@ struct SearchPage {
                     .fontSize(18)
                     .fontColor('#999999')
                 }
+                .onClick(() => this.handleQuickResultClick(result))
               })
             }
           }
         }
 
         // 搜索按钮
-        Button()
-          .onClick(() => this.executeSearch()) {
+        Button() {
           Text('搜索')
             .fontSize(16)
             .fontColor('#4CAF50')
             .fontWeight(600)
         }
+        .onClick(() => this.executeSearch())
       }
     }
   }
@@ -316,22 +371,22 @@ struct SearchPage {
             .fontSize(18)
             .fontColor('#333333')
             .fontWeight(600)
-          Button()
-            .onClick(() => this.clearSearchHistory()) {
+          Button() {
             Text('清空')
               .fontSize(14)
               .fontColor('#666666')
           }
+          .onClick(() => this.clearSearchHistory())
         }
 
         Flex() {
-          ForEach(this.searchHistory, (keyword) => {
-            Button()
-              .onClick(() => this.handleHistoryClick(keyword)) {
+          ForEach(this.searchHistory, (keyword: string) => {
+            Button() {
               Text(keyword)
                 .fontSize(14)
                 .fontColor('#333333')
             }
+            .onClick(() => this.handleHistoryClick(keyword))
           })
         }
       }
@@ -353,13 +408,13 @@ struct SearchPage {
         }
 
         Flex() {
-          ForEach(this.hotKeywords, (keyword) => {
-            Button()
-              .onClick(() => this.handleHotKeywordClick(keyword)) {
+          ForEach(this.hotKeywords, (keyword: string) => {
+            Button() {
               Text(keyword)
                 .fontSize(14)
                 .fontColor('#FFFFFF')
             }
+            .onClick(() => this.handleHotKeywordClick(keyword))
           })
         }
       }
@@ -384,9 +439,8 @@ struct SearchPage {
           .fontColor('#333333')
           .fontWeight(600)
 
-        ForEach(this.searchResults, (result) => {
-          Row()
-            .onClick(() => this.handleSearchResultClick(result)) {
+        ForEach(this.searchResults, (result: SearchResult) => {
+          Row() {
             // 占位封面
             Column() {
               Text('封面')
@@ -407,6 +461,7 @@ struct SearchPage {
               .fontSize(20)
               .fontColor('#999999')
           }
+          .onClick(() => this.handleSearchResultClick(result))
         })
       }
     } else if (this.searchText.trim()) {

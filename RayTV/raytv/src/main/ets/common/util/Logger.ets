@@ -91,6 +91,13 @@ class Logger {
 
 // 静态方法包装器
 class StaticLogger {
+  /**
+   * 获取StaticLogger实例（为了兼容旧代码，实际返回StaticLogger本身）
+   */
+  public static getInstance(): StaticLogger {
+    return StaticLogger;
+  }
+
   public static debug(tag: string, message: string): void {
     const formatted = `[${tag}] ${message}`;
     Logger.getInstance().debug(formatted);
