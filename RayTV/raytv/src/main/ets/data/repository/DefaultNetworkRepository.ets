@@ -20,8 +20,8 @@ import SearchResult, { ResultType } from '../model/SearchResult';
 interface RepositoryRequestConfig {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  data?: Record<string, string | number | boolean | null>;
-  params: Record<string, string | number | boolean>;
+  data?: Record<string, string | number | boolean | string[] | null>;
+  params: Record<string, string | number | boolean | string[]>;
   headers: Record<string, string>;
   timeout: number;
   retryCount: number;
@@ -215,8 +215,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   private createRequestConfig(
     url: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-    data?: Record<string, string | number | boolean | null>,
-    params?: Record<string, string | number | boolean | null>,
+    data?: Record<string, string | number | boolean | string[] | null>,
+    params?: Record<string, string | number | boolean | string[] | null>,
     customHeaders?: Record<string, string>
   ): RepositoryRequestConfig {
     const requestUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
@@ -244,7 +244,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     }
 
     // 过滤掉params中的null值
-    const filteredParams: Record<string, string | number | boolean> = {};
+    const filteredParams: Record<string, string | number | boolean | string[]> = {};
     if (params) {
       const paramsKeys = Object.keys(params);
       for (let i = 0; i < paramsKeys.length; i++) {
