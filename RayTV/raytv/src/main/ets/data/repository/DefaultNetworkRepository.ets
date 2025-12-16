@@ -294,7 +294,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   /**
    * 生成缓存键
    */
-  private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | null>): string {
+  private generateCacheKey(url: string, method: string, params?: Record<string, string | number | boolean | string[] | null>): string {
     const paramsStr = params ? JSON.stringify(params) : '';
     return `${DEFAULT_CACHE_KEY_PREFIX}${method}_${url}_${paramsStr}`;
   }
