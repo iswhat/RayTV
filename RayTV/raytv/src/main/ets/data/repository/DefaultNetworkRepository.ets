@@ -33,6 +33,13 @@ interface CacheItem<T> {
   timestamp: number;
 }
 
+// 定义HTTP响应接口
+interface Response<T> {
+  data: T;
+  headers: Record<string, string>;
+  status: number;
+}
+
 // 定义响应数据类型
 interface ResponseData<T> {
   data: T;
@@ -173,21 +180,31 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   /**
    * 将SearchParams转换为Record类型的辅助函数
    */
-  private searchParamsToRecord(params: SearchParams): Record<string, string | number | boolean | null> {
-    const result: Record<string, string | number | boolean | null> = {
+  private searchParamsToRecord(params: SearchParams): Record<string, string | number | boolean | string[] | null> {
+    const result: Record<string, string | number | boolean | string[] | null> = {
       keyword: params.keyword,
       page: params.page,
       pageSize: params.pageSize
     };
     
-    // 只添加存在的可选属性，排除filters属性，因为它的类型不兼容
+    // 只添加存在的可选属性
     if (params.type !== undefined) result.type = params.type;
     if (params.genre !== undefined) result.genre = params.genre;
     if (params.year !== undefined) result.year = params.year;
     if (params.region !== undefined) result.region = params.region;
     if (params.sortBy !== undefined) result.sortBy = params.sortBy;
     if (params.sortOrder !== undefined) result.sortOrder = params.sortOrder;
-    // 跳过filters属性，因为它包含数组类型，不兼容
+    // 包含filters属性，转换为数组字符串
+    if (params.filters !== undefined) {
+      // 处理filters中的数组类型
+      for (const [key, value] of Object.entries(params.filters)) {
+        if (Array.isArray(value)) {
+          result[key] = value;
+        } else {
+          result[key] = value;
+        }
+      }
+    }
     
     return result;
   }
