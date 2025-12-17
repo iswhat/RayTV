@@ -539,10 +539,10 @@ export default class StorageUtil {
       const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save to file storage for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 
@@ -573,10 +573,11 @@ export default class StorageUtil {
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get from file storage for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，返回null，允许应用继续运行
+      return null;
     }
   }
 
@@ -589,10 +590,10 @@ export default class StorageUtil {
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       await FileUtil.deleteFile(filePath);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to remove from file storage for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 
@@ -615,10 +616,10 @@ export default class StorageUtil {
         }
       }
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear file storage: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 
@@ -632,10 +633,10 @@ export default class StorageUtil {
       const jsonData = JSON.stringify(data);
       await FileUtil.writeFile(filePath, jsonData);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to save to file for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 
@@ -676,10 +677,11 @@ export default class StorageUtil {
       // 构建安全的返回对象
       return StorageUtil.buildStorageData(parsedData);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to get from file for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，返回null，允许应用继续运行
+      return null;
     }
   }
 
@@ -692,10 +694,10 @@ export default class StorageUtil {
       const filePath = await FileUtil.getApplicationDataDir() + '/' + fileName;
       await FileUtil.deleteFile(filePath);
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to remove from file for key ${key}: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 
@@ -718,10 +720,10 @@ export default class StorageUtil {
         }
       }
     } catch (error) {
-      // 安全处理错误信息
+      // 安全处理错误信息，不抛出异常，避免应用崩溃
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to clear files: ${errorMessage}`, error as Error);
-      throw new Error(errorMessage);
+      // 不抛出异常，允许应用继续运行
     }
   }
 

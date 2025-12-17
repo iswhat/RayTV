@@ -281,12 +281,13 @@ export default class FileUtil {
    */
   public static async getApplicationDataDir(): Promise<string> {
     try {
-      // 直接返回默认路径，避免依赖context获取导致的问题
-      return '/data/app/';
+      // 对于HarmonyOS应用，使用临时目录替代直接访问/data/app/
+      // 避免权限问题和路径错误
+      return '/data/storage/el2/base/haps/';
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       Logger.error(TAG, `Failed to get application data directory: ${errorMessage}`);
-      return '/data/app/'; // 如果获取失败，返回默认路径
+      return '/data/storage/el2/base/haps/'; // 如果获取失败，返回安全的默认路径
     }
   }
 
