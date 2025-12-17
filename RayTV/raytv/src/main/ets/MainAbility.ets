@@ -3,6 +3,7 @@ import Want from '@ohos.app.ability.Want';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
+import display from '@ohos.display';
 
 export default class MainAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
@@ -18,6 +19,16 @@ export default class MainAbility extends UIAbility {
       // 设置WindowStage的事件监听回调
       windowStage.on('windowStageEvent', () => {
         hilog.info(0x0000, 'MainAbility', 'WindowStage event occurred');
+      });
+
+      // 设置窗口支持横竖屏切换
+      windowStage.getMainWindow().then((mainWindow) => {
+        // 设置窗口模式为自适应
+        mainWindow.setWindowMode(window.WindowMode.FULLSCREEN);
+        // 允许屏幕旋转
+        mainWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION);
+        // 设置窗口背景
+        mainWindow.setBackgroundColor('#ffffff');
       });
 
       // 设置UI页面加载

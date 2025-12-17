@@ -46,6 +46,16 @@ struct SettingsPage {
   @State enableVoiceAssistant: boolean = true;
   @State enableDeviceFlow: boolean = true;
   
+  // 影视源设置
+  @State videoSources: Array<{id: string, name: string, url: string, enabled: boolean}> = [
+    { id: '1', name: 'Eoeoo源', url: 'https://eoeoo.com/base2/a.json', enabled: true },
+    { id: '2', name: 'Uoouo源', url: 'https://q.uoouo.com/dianshi.json', enabled: true },
+    { id: '3', name: '默认源', url: 'https://example.com/api', enabled: false }
+  ];
+  @State showAddSourceDialog: boolean = false;
+  @State newSourceName: string = '';
+  @State newSourceUrl: string = '';
+  
   // 对话框状态
   @State showClearCacheDialog: boolean = false;
   @State showAboutDialog: boolean = false;
@@ -263,6 +273,93 @@ struct SettingsPage {
         }
       }
       .margin(10)
+      
+      // 影视源设置
+      Column() {
+        Text('影视源设置')
+          .fontSize(20)
+          .margin(10)
+          .fontWeight(700)
+          .fontColor('#333333')
+        
+        // 影视源列表
+        Column() {
+          ForEach(this.videoSources, (source) => {
+            Column() {
+              Row() {
+                Column() {
+                  Text(source.name)
+                    .fontSize(16)
+                    .fontWeight(600)
+                    .fontColor('#333333')
+                  Text(source.url)
+                    .fontSize(12)
+                    .fontColor('#666666')
+                    .margin({ top: 4 })
+                }
+                .flexGrow(1)
+                
+                Row() {
+                  Switch()
+                    .checked(source.enabled)
+                    .onChange((isChecked) => {
+                      const index = this.videoSources.findIndex(item => item.id === source.id);
+                      if (index !== -1) {
+                        this.videoSources[index].enabled = isChecked;
+                      }
+                    })
+                    .margin({ right: 10 })
+                  
+                  Button('编辑')
+                    .backgroundColor('#007AFF')
+                    .fontColor('white')
+                    .borderRadius(8)
+                    .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+                    .margin({ right: 5 })
+                    .fontSize(12)
+                  
+                  Button('删除')
+                    .backgroundColor('#FF3B30')
+                    .fontColor('white')
+                    .borderRadius(8)
+                    .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+                    .fontSize(12)
+                }
+              }
+              .padding(15)
+              .backgroundColor('#FFFFFF')
+              .borderRadius(10)
+              .margin({ bottom: 10 })
+              .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 1 })
+            }
+          }, (source) => source.id)
+        }
+        .padding({ left: 15, right: 15, bottom: 15 })
+        
+        // 添加影视源按钮
+        Button('添加影视源')
+          .backgroundColor('#007AFF')
+          .fontColor('white')
+          .borderRadius(10)
+          .padding({ left: 20, right: 20, top: 10, bottom: 10 })
+          .margin({ left: 15, right: 15, bottom: 20 })
+          .fontSize(16)
+          .shadow({ radius: 4, color: 'rgba(0, 122, 255, 0.3)', offsetY: 2 })
+          .onClick(() => {
+            this.showAddSourceDialog = true;
+          })
+        
+        // 影视源说明
+        Text('提示：添加多个影视源可以提高内容可用性，系统会自动切换可用源')
+          .fontSize(12)
+          .fontColor('#999999')
+          .margin({ left: 15, right: 15, bottom: 20 })
+          .textAlign(TextAlign.Center)
+      }
+      .margin(10)
+      .backgroundColor('#F5F5F5')
+      .borderRadius(15)
+      .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.05)', offsetY: 2 })
     }
     .width('100%')
     .height('100%')
