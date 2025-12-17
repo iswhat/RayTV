@@ -246,6 +246,18 @@ export interface ConfigImportResult {
   invalid: number;
 }
 
+// 批量配置项接口
+export interface BatchConfigItem {
+  key: ConfigKey;
+  value: ConfigValue;
+}
+
+// 批量配置结果接口
+export interface BatchConfigResult {
+  updated: number;
+  failed: number;
+}
+
 // 完整默认配置
 export const DEFAULT_FULL_CONFIG: Config = {
   player: {
@@ -346,76 +358,83 @@ export const DEFAULT_FULL_CONFIG: Config = {
   }
 };
 
-// 配置项默认配置
-export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {
-  // 界面相关
-  theme: 'dark',
-  language: 'auto',
-  interfaceScale: 100,
-  uiAnimationEnabled: true,
-  startupScreen: 'home',
-  homeLayout: 'default',
-  
-  // 视频播放相关
-  videoQuality: 'high',
-  playbackSpeed: 1.0,
-  autoPlay: true,
-  autoNextEpisode: true,
-  backgroundPlayEnabled: false,
-  videoPlayerSettings: {},
-  
-  // 字幕相关
-  subtitleEnabled: true,
-  subtitleSize: 16,
-  subtitleColor: '#FFFFFF',
-  subtitleDelay: 0,
-  
-  // 缓存相关
-  cacheEnabled: true,
-  cacheLimit: 5000, // MB
-  
-  // 网络相关
-  networkTimeout: 30, // 秒
-  proxyEnabled: false,
-  proxyConfig: null,
-  dataSaverEnabled: false,
-  customHeaders: {},
-  customCookies: {},
-  
-  // 通知相关
-  notificationEnabled: true,
-  
-  // 更新相关
-  updateCheckEnabled: true,
-  
-  // 数据收集相关
-  crashReportingEnabled: false,
-  analyticsEnabled: false,
-  
-  // 排序相关
-  favoriteSort: 'addedAt_desc',
-  historySort: 'timestamp_desc',
-  searchSort: 'relevance_desc',
-  
-  // 下载相关
-  maxConcurrentDownloads: 3,
-  downloadNetworkType: 'all', // all, wifi, cellular
-  
-  // 家长控制
-  parentalControlEnabled: false,
-  parentalControlPin: null,
-  showAdultContent: false,
-  
-  // 其他
-  recentlyWatchedLimit: 20,
-  streamingEnabled: true,
-  localPlaybackEnabled: true,
-  defaultCategory: 'all',
-  preferredServer: 'auto'
-};
+// 配置项默认配置 - 使用更安全的方式创建，避免对象字面量类型问题
+export const DEFAULT_CONFIG: Record<ConfigKey, ConfigValue> = {} as Record<ConfigKey, ConfigValue>;
+
+// 逐个添加属性，避免对象字面量类型问题
+// 界面相关
+DEFAULT_CONFIG.theme = 'dark';
+DEFAULT_CONFIG.language = 'auto';
+DEFAULT_CONFIG.interfaceScale = 100;
+DEFAULT_CONFIG.uiAnimationEnabled = true;
+DEFAULT_CONFIG.startupScreen = 'home';
+DEFAULT_CONFIG.homeLayout = 'default';
+
+// 视频播放相关
+DEFAULT_CONFIG.videoQuality = 'high';
+DEFAULT_CONFIG.playbackSpeed = 1.0;
+DEFAULT_CONFIG.autoPlay = true;
+DEFAULT_CONFIG.autoNextEpisode = true;
+DEFAULT_CONFIG.backgroundPlayEnabled = false;
+DEFAULT_CONFIG.videoPlayerSettings = {} as Record<string, string | number | boolean>;
+
+// 字幕相关
+DEFAULT_CONFIG.subtitleEnabled = true;
+DEFAULT_CONFIG.subtitleSize = 16;
+DEFAULT_CONFIG.subtitleColor = '#FFFFFF';
+DEFAULT_CONFIG.subtitleDelay = 0;
+
+// 缓存相关
+DEFAULT_CONFIG.cacheEnabled = true;
+DEFAULT_CONFIG.cacheLimit = 5000; // MB
+
+// 网络相关
+DEFAULT_CONFIG.networkTimeout = 30; // 秒
+DEFAULT_CONFIG.proxyEnabled = false;
+DEFAULT_CONFIG.proxyConfig = null;
+DEFAULT_CONFIG.dataSaverEnabled = false;
+DEFAULT_CONFIG.customHeaders = {} as Record<string, string>;
+DEFAULT_CONFIG.customCookies = {} as Record<string, string>;
+
+// 通知相关
+DEFAULT_CONFIG.notificationEnabled = true;
+
+// 更新相关
+DEFAULT_CONFIG.updateCheckEnabled = true;
+
+// 数据收集相关
+DEFAULT_CONFIG.crashReportingEnabled = false;
+DEFAULT_CONFIG.analyticsEnabled = false;
+
+// 排序相关
+DEFAULT_CONFIG.favoriteSort = 'addedAt_desc';
+DEFAULT_CONFIG.historySort = 'timestamp_desc';
+DEFAULT_CONFIG.searchSort = 'relevance_desc';
+
+// 下载相关
+DEFAULT_CONFIG.maxConcurrentDownloads = 3;
+DEFAULT_CONFIG.downloadNetworkType = 'all'; // all, wifi, cellular
+
+// 家长控制
+DEFAULT_CONFIG.parentalControlEnabled = false;
+DEFAULT_CONFIG.parentalControlPin = null;
+DEFAULT_CONFIG.showAdultContent = false;
+
+// 其他
+DEFAULT_CONFIG.recentlyWatchedLimit = 20;
+DEFAULT_CONFIG.streamingEnabled = true;
+DEFAULT_CONFIG.localPlaybackEnabled = true;
+DEFAULT_CONFIG.defaultCategory = 'all';
+DEFAULT_CONFIG.preferredServer = 'auto';
 
 // 配置分类
 export const CONFIG_CATEGORIES: Record<string, string> = {};
+
+// 验证结果接口
+export interface ValidationResult {
+  isValid: boolean;
+  errorMessage?: string;
+}
 
 /**
  * 配置服务
@@ -466,9 +485,9 @@ export default class ConfigService {
   /**
    * 合并配置
    */
-  private mergeConfig<T>(defaultConfig: T, customConfig: Record<string, string | number | boolean | object | null>): T {
+  private mergeConfig<T>(defaultConfig: T, customConfig: Record<string, string | number | boolean | Record<string, string | number | boolean>>): T {
     // 使用ArkTS兼容的对象合并方法
-    if (!customConfig || typeof customConfig !== 'object') {
+    if (!customConfig || typeof customConfig !== 'object' || Array.isArray(customConfig)) {
       return defaultConfig;
     }
     
@@ -478,14 +497,14 @@ export default class ConfigService {
     for (let i = 0; i < customKeys.length; i++) {
       const key = customKeys[i];
       const customValue = customConfig[key];
-      const defaultValue = (defaultConfig as Record<string, string | number | boolean | object | null>)[key];
+      const defaultValue = (defaultConfig as Record<string, string | number | boolean | Record<string, string | number | boolean>>)[key];
       
       // 递归合并嵌套对象
       if (customValue && typeof customValue === 'object' && !Array.isArray(customValue) && 
           defaultValue && typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
-        (result as Record<string, string | number | boolean | object | null>)[key] = this.mergeConfig(defaultValue, customValue);
+        (result as Record<string, string | number | boolean | Record<string, string | number | boolean>>)[key] = this.mergeConfig(defaultValue, customValue as Record<string, string | number | boolean | Record<string, string | number | boolean>>);
       } else if (customValue !== undefined) {
-        (result as Record<string, string | number | boolean | object | null>)[key] = customValue;
+        (result as Record<string, string | number | boolean | Record<string, string | number | boolean>>)[key] = customValue;
       }
     }
     
@@ -516,8 +535,9 @@ export default class ConfigService {
    */
   public async updateFullConfig(customConfig: Partial<Config>): Promise<ApiResponse<Config>> {
     try {
-      // 合并配置
-      this.fullConfig = this.mergeConfig(this.fullConfig, customConfig);
+      // 合并配置 - 使用类型安全的方式
+      const safeConfig = JSON.parse(JSON.stringify(customConfig)) as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+      this.fullConfig = this.mergeConfig(this.fullConfig, safeConfig);
       this.ensureDefaultConfig();
       
       // 保存到存储
@@ -608,8 +628,9 @@ export default class ConfigService {
       const storedConfig = await StorageUtil.get('app_full_config');
       
       if (storedConfig && typeof storedConfig === 'object') {
-        // 合并存储的配置和默认配置
-        this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig as Record<string, string | number | boolean | object | null>);
+        // 合并存储的配置和默认配置 - 避免unknown类型转换
+        const safeStoredConfig = JSON.parse(JSON.stringify(storedConfig)) as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+        this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, safeStoredConfig);
         Logger.info(TAG, 'Loaded full configuration from storage');
       } else {
         // 使用默认配置
@@ -656,7 +677,7 @@ export default class ConfigService {
       await this.initializeConfig();
     }
     
-    let configSection: any;
+    let configSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig | undefined;
     
     // 手动处理不同配置部分的访问
     switch (key) {
@@ -697,7 +718,7 @@ export default class ConfigService {
     
     if (!configSection) {
       // 如果配置部分不存在，从默认配置获取
-      let defaultSection: any;
+      let defaultSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig | undefined;
       switch (key) {
         case 'player':
           defaultSection = DEFAULT_FULL_CONFIG.player;
@@ -733,7 +754,7 @@ export default class ConfigService {
           defaultSection = undefined;
           break;
       }
-      return JSON.parse(JSON.stringify(defaultSection));
+      return JSON.parse(JSON.stringify(defaultSection)) as PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
     }
     
     return JSON.parse(JSON.stringify(configSection));
@@ -742,56 +763,89 @@ export default class ConfigService {
   /**
    * 更新部分配置
    */
-  public async updatePartialConfig(key: keyof Config, sectionConfig: Record<string, string | number | boolean | object | null>): Promise<ApiResponse<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig>> {
+  public async updatePartialConfig(key: keyof Config, sectionConfig: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): Promise<ApiResponse<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig>> {
     try {
       if (!this.isInitialized) {
         await this.initializeConfig();
       }
       
       // 更新部分配置
-      let updatedSection: any;
+      let updatedSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
       
       // 手动处理不同配置部分的访问和更新
       switch (key) {
         case 'player':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.player));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.player)) as PlayerConfig;
           break;
         case 'display':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.display));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.display)) as DisplayConfig;
           break;
         case 'network':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.network));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.network)) as NetworkConfig;
           break;
         case 'storage':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.storage));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.storage)) as StorageConfig;
           break;
         case 'general':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.general));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.general)) as GeneralConfig;
           break;
         case 'security':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.security));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.security)) as SecurityConfig;
           break;
         case 'notification':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.notification));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.notification)) as NotificationConfig;
           break;
         case 'accessibility':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.accessibility));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.accessibility)) as AccessibilityConfig;
           break;
         case 'live':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.live));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.live)) as LiveConfig;
           break;
         case 'vod':
-          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.vod));
+          updatedSection = JSON.parse(JSON.stringify(this.fullConfig.vod)) as VodConfig;
           break;
         default:
           return ApiResponse.error(ResponseCode.BAD_REQUEST, '无效的配置部分');
       }
       
-      // 手动合并属性
+      // 手动合并属性 - 使用类型安全的方式访问属性，避免使用unknown
       const sectionKeys = Object.keys(sectionConfig);
-      for (let i = 0; i < sectionKeys.length; i++) {
-        const sectionKey = sectionKeys[i];
-        updatedSection[sectionKey] = sectionConfig[sectionKey];
+      const sectionConfigObj = sectionConfig as Record<string, string | number | boolean | object | null>;
+      
+      // 根据配置类型，使用不同的赋值方式，避免使用unknown类型转换
+      // 将sectionConfigObj转换为正确的类型，避免object类型导致的索引签名问题
+      const typedConfig = sectionConfigObj as Record<string, string | number | boolean | Record<string, string | number | boolean> | null>;
+      switch (key) {
+        case 'player':
+          this.mergePlayerConfig(updatedSection as PlayerConfig, typedConfig);
+          break;
+        case 'display':
+          this.mergeDisplayConfig(updatedSection as DisplayConfig, typedConfig);
+          break;
+        case 'network':
+          this.mergeNetworkConfig(updatedSection as NetworkConfig, typedConfig);
+          break;
+        case 'storage':
+          this.mergeStorageConfig(updatedSection as StorageConfig, typedConfig);
+          break;
+        case 'general':
+          this.mergeGeneralConfig(updatedSection as GeneralConfig, typedConfig);
+          break;
+        case 'security':
+          this.mergeSecurityConfig(updatedSection as SecurityConfig, typedConfig);
+          break;
+        case 'notification':
+          this.mergeNotificationConfig(updatedSection as NotificationConfig, typedConfig);
+          break;
+        case 'accessibility':
+          this.mergeAccessibilityConfig(updatedSection as AccessibilityConfig, typedConfig);
+          break;
+        case 'live':
+          this.mergeLiveConfig(updatedSection as LiveConfig, typedConfig);
+          break;
+        case 'vod':
+          this.mergeVodConfig(updatedSection as VodConfig, typedConfig);
+          break;
       }
       
       // 更新配置部分
@@ -835,7 +889,7 @@ export default class ConfigService {
       await StorageUtil.set('app_full_config', JSON.parse(JSON.stringify(this.fullConfig)));
       
       // 返回更新后的配置部分
-      let finalConfigSection: any;
+      let finalConfigSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
       switch (key) {
         case 'player':
           finalConfigSection = this.fullConfig.player;
@@ -868,7 +922,7 @@ export default class ConfigService {
           finalConfigSection = this.fullConfig.vod;
           break;
         default:
-          finalConfigSection = undefined;
+          finalConfigSection = this.fullConfig.general; // 默认为general配置
           break;
       }
       
@@ -975,7 +1029,7 @@ export default class ConfigService {
   /**
    * 批量设置配置
    */
-  public async setMultipleConfig(configs: Array<{ key: ConfigKey; value: ConfigValue }>): Promise<ApiResponse<{ updated: number; failed: number }>> {
+  public async setMultipleConfig(configs: BatchConfigItem[]): Promise<ApiResponse<BatchConfigResult>> {
     try {
       Logger.info(TAG, `Setting multiple configs: ${configs.length} items`);
       
@@ -1005,8 +1059,12 @@ export default class ConfigService {
       }
       
       Logger.info(TAG, `Multiple configs updated: ${updated} success, ${failed} failed`);
+      const result: BatchConfigResult = {
+        updated,
+        failed
+      };
       return ApiResponse.success(
-        { updated, failed },
+        result,
         `批量更新配置完成，成功${updated}项，失败${failed}项`
       );
     } catch (error) {
@@ -1101,7 +1159,7 @@ export default class ConfigService {
   /**
    * 验证配置值
    */
-  private validateConfigValue(key: ConfigKey, value: ConfigValue): { isValid: boolean; errorMessage?: string } {
+  private validateConfigValue(key: ConfigKey, value: ConfigValue): ValidationResult {
     // 获取默认值类型
     const defaultValue = DEFAULT_CONFIG[key];
     if (defaultValue === undefined) {
@@ -1273,6 +1331,125 @@ export default class ConfigService {
       }
     }
   }
+  
+  // ========== 配置合并方法 ==========
+  
+  private mergePlayerConfig(config: PlayerConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.defaultPlayer !== undefined) config.defaultPlayer = updates.defaultPlayer as string;
+    if (updates.autoPlay !== undefined) config.autoPlay = updates.autoPlay as boolean;
+    if (updates.rememberPosition !== undefined) config.rememberPosition = updates.rememberPosition as boolean;
+    if (updates.maxBufferSize !== undefined) config.maxBufferSize = updates.maxBufferSize as number;
+    if (updates.minBufferSize !== undefined) config.minBufferSize = updates.minBufferSize as number;
+    if (updates.preloadSeconds !== undefined) config.preloadSeconds = updates.preloadSeconds as number;
+    if (updates.enableHardwareDecoding !== undefined) config.enableHardwareDecoding = updates.enableHardwareDecoding as boolean;
+    if (updates.enableHDR !== undefined) config.enableHDR = updates.enableHDR as boolean;
+    if (updates.subtitleSize !== undefined) config.subtitleSize = updates.subtitleSize as number;
+    if (updates.subtitleColor !== undefined) config.subtitleColor = updates.subtitleColor as string;
+    if (updates.subtitleBackgroundColor !== undefined) config.subtitleBackgroundColor = updates.subtitleBackgroundColor as string;
+    if (updates.audioTrack !== undefined) config.audioTrack = updates.audioTrack as string;
+    if (updates.videoTrack !== undefined) config.videoTrack = updates.videoTrack as string;
+  }
+  
+  private mergeDisplayConfig(config: DisplayConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.theme !== undefined) config.theme = updates.theme as string;
+    if (updates.fontScale !== undefined) config.fontScale = updates.fontScale as number;
+    if (updates.enableAnimations !== undefined) config.enableAnimations = updates.enableAnimations as boolean;
+    if (updates.enableBlur !== undefined) config.enableBlur = updates.enableBlur as boolean;
+    if (updates.autoRotate !== undefined) config.autoRotate = updates.autoRotate as boolean;
+    if (updates.resolution !== undefined) config.resolution = updates.resolution as string;
+    if (updates.screenSaverDelay !== undefined) config.screenSaverDelay = updates.screenSaverDelay as number;
+    if (updates.idleTimeout !== undefined) config.idleTimeout = updates.idleTimeout as number;
+  }
+  
+  private mergeNetworkConfig(config: NetworkConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.timeout !== undefined) config.timeout = updates.timeout as number;
+    if (updates.retryCount !== undefined) config.retryCount = updates.retryCount as number;
+    if (updates.retryDelay !== undefined) config.retryDelay = updates.retryDelay as number;
+    if (updates.enableCache !== undefined) config.enableCache = updates.enableCache as boolean;
+    if (updates.cacheSize !== undefined) config.cacheSize = updates.cacheSize as number;
+    if (updates.autoDetectNetwork !== undefined) config.autoDetectNetwork = updates.autoDetectNetwork as boolean;
+    if (updates.useProxy !== undefined) config.useProxy = updates.useProxy as boolean;
+    if (updates.proxyConfig !== undefined) {
+      const proxyConfig = updates.proxyConfig as Record<string, string | number | boolean>;
+      config.proxyConfig = {
+        type: (proxyConfig.type as string) || 'none',
+        host: (proxyConfig.host as string) || '',
+        port: (proxyConfig.port as number) || 0
+      };
+    }
+  }
+  
+  private mergeStorageConfig(config: StorageConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.cachePath !== undefined) config.cachePath = updates.cachePath as string;
+    if (updates.downloadPath !== undefined) config.downloadPath = updates.downloadPath as string;
+    if (updates.maxCacheSize !== undefined) config.maxCacheSize = updates.maxCacheSize as number;
+    if (updates.autoClearCache !== undefined) config.autoClearCache = updates.autoClearCache as boolean;
+    if (updates.clearCacheInterval !== undefined) config.clearCacheInterval = updates.clearCacheInterval as number;
+    if (updates.enableBackgroundCleanup !== undefined) config.enableBackgroundCleanup = updates.enableBackgroundCleanup as boolean;
+  }
+  
+  private mergeGeneralConfig(config: GeneralConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.language !== undefined) config.language = updates.language as string;
+    if (updates.region !== undefined) config.region = updates.region as string;
+    if (updates.timeZone !== undefined) config.timeZone = updates.timeZone as string;
+    if (updates.enableAnalytics !== undefined) config.enableAnalytics = updates.enableAnalytics as boolean;
+    if (updates.enableUsageReport !== undefined) config.enableUsageReport = updates.enableUsageReport as boolean;
+    if (updates.firstLaunch !== undefined) config.firstLaunch = updates.firstLaunch as boolean;
+    if (updates.version !== undefined) config.version = updates.version as string;
+    if (updates.lastUpdated !== undefined) config.lastUpdated = updates.lastUpdated as number;
+  }
+  
+  private mergeSecurityConfig(config: SecurityConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.enablePinCode !== undefined) config.enablePinCode = updates.enablePinCode as boolean;
+    if (updates.pinCode !== undefined) config.pinCode = updates.pinCode as string;
+    if (updates.enableBiometric !== undefined) config.enableBiometric = updates.enableBiometric as boolean;
+    if (updates.allowedApps !== undefined) {
+      // 确保allowedApps是数组类型
+      const allowedApps = updates.allowedApps;
+      if (Array.isArray(allowedApps)) {
+        config.allowedApps = allowedApps as string[];
+      } else {
+        config.allowedApps = [];
+      }
+    }
+    if (updates.lockTimeout !== undefined) config.lockTimeout = updates.lockTimeout as number;
+    if (updates.secureContentOnly !== undefined) config.secureContentOnly = updates.secureContentOnly as boolean;
+  }
+  
+  private mergeNotificationConfig(config: NotificationConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.enablePush !== undefined) config.enablePush = updates.enablePush as boolean;
+    if (updates.enableUpdateNotification !== undefined) config.enableUpdateNotification = updates.enableUpdateNotification as boolean;
+    if (updates.enableContentNotification !== undefined) config.enableContentNotification = updates.enableContentNotification as boolean;
+    if (updates.enableLiveReminder !== undefined) config.enableLiveReminder = updates.enableLiveReminder as boolean;
+    if (updates.notificationSound !== undefined) config.notificationSound = updates.notificationSound as string;
+    if (updates.notificationVolume !== undefined) config.notificationVolume = updates.notificationVolume as number;
+  }
+  
+  private mergeAccessibilityConfig(config: AccessibilityConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.enableHighContrast !== undefined) config.enableHighContrast = updates.enableHighContrast as boolean;
+    if (updates.enableScreenReader !== undefined) config.enableScreenReader = updates.enableScreenReader as boolean;
+    if (updates.textToSpeechRate !== undefined) config.textToSpeechRate = updates.textToSpeechRate as number;
+    if (updates.closedCaptionEnabled !== undefined) config.closedCaptionEnabled = updates.closedCaptionEnabled as boolean;
+    if (updates.audioDescriptionEnabled !== undefined) config.audioDescriptionEnabled = updates.audioDescriptionEnabled as boolean;
+    if (updates.hapticFeedbackEnabled !== undefined) config.hapticFeedbackEnabled = updates.hapticFeedbackEnabled as boolean;
+  }
+  
+  private mergeLiveConfig(config: LiveConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.epgEnabled !== undefined) config.epgEnabled = updates.epgEnabled as boolean;
+    if (updates.epgAutoUpdate !== undefined) config.epgAutoUpdate = updates.epgAutoUpdate as boolean;
+    if (updates.epgUpdateInterval !== undefined) config.epgUpdateInterval = updates.epgUpdateInterval as number;
+    if (updates.channelFavoritesEnabled !== undefined) config.channelFavoritesEnabled = updates.channelFavoritesEnabled as boolean;
+    if (updates.lastWatchedChannel !== undefined) config.lastWatchedChannel = updates.lastWatchedChannel as string;
+    if (updates.lastWatchedGroup !== undefined) config.lastWatchedGroup = updates.lastWatchedGroup as string;
+  }
+  
+  private mergeVodConfig(config: VodConfig, updates: Record<string, string | number | boolean | Record<string, string | number | boolean> | null>): void {
+    if (updates.autoPlayNextEpisode !== undefined) config.autoPlayNextEpisode = updates.autoPlayNextEpisode as boolean;
+    if (updates.showRecommendedContent !== undefined) config.showRecommendedContent = updates.showRecommendedContent as boolean;
+    if (updates.contentRating !== undefined) config.contentRating = updates.contentRating as string;
+    if (updates.downloadQuality !== undefined) config.downloadQuality = updates.downloadQuality as string;
+    if (updates.streamingQuality !== undefined) config.streamingQuality = updates.streamingQuality as string;
+  }
 
   // ========== 配置导出/导入 ==========
 
@@ -1315,23 +1492,11 @@ export default class ConfigService {
     try {
       Logger.info(TAG, 'Importing configuration...');
       
-      // 创建接口替代any类型
-      interface ImportConfigItem {
-        key: string;
-        value: ConfigValue;
-      }
-      
+      // 使用提前定义的接口，避免对象字面量作为类型声明
       interface ImportData {
-        configs: ImportConfigItem[];
+        configs?: ConfigExportItem[];
       }
-      
-      interface ImportResult {
-        imported: number;
-        skipped: number;
-        invalid: number;
-      }
-      
-      const importData: ImportData = JSON.parse(jsonData) as ImportData;
+      const importData = JSON.parse(jsonData) as ImportData;
       const configs = importData.configs || [];
       
       let imported = 0;
@@ -1373,7 +1538,7 @@ export default class ConfigService {
       Logger.info(TAG, `Configuration import completed: imported=${imported}, skipped=${skipped}, invalid=${invalid}`);
       
       // 使用明确的接口类型
-      const result: ImportResult = {
+      const result: ConfigImportResult = {
         imported,
         skipped,
         invalid

@@ -70,6 +70,20 @@ export interface ApiResponseParams<T = Record<string, string | number | boolean 
   trace?: string;
 }
 
+/**
+ * API响应对象接口（用于序列化）
+ */
+export interface ApiResponseObject<T = Record<string, string | number | boolean | null>> {
+  code: ResponseCode;
+  message: string;
+  timestamp: number;
+  data?: T;
+  errors?: ErrorDetail[];
+  pagination?: PaginationInfo;
+  requestId?: string;
+  trace?: string;
+}
+
 export default class ApiResponse<T = Record<string, string | number | boolean | null>> {
   code: ResponseCode;             // 响应状态码
   message: string;                // 响应消息
@@ -209,8 +223,8 @@ export default class ApiResponse<T = Record<string, string | number | boolean | 
   /**
    * 转换为对象（用于序列化）
    */
-  toObject(): Record<string, string | number | boolean | null | T | ErrorDetail[] | PaginationInfo> {
-    const result: Record<string, string | number | boolean | null | T | ErrorDetail[] | PaginationInfo> = {
+  toObject(): ApiResponseObject<T> {
+    const result: ApiResponseObject<T> = {
       code: this.code,
       message: this.message,
       timestamp: this.timestamp
@@ -243,7 +257,7 @@ export default class ApiResponse<T = Record<string, string | number | boolean | 
    * 从对象创建实例
    * @param obj 对象数据
    */
-  static fromObject<T>(obj: Record<string, unknown>): ApiResponse<T> {
+  static fromObject<T>(obj: Record<string, string | number | boolean | null | T | ErrorDetail[] | PaginationInfo>): ApiResponse<T> {
     const params: ApiResponseParams<T> = {
       code: typeof obj.code === 'number' ? obj.code : ResponseCode.SUCCESS,
       message: typeof obj.message === 'string' ? obj.message : 'Unknown response',

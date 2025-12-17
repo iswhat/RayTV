@@ -33,7 +33,7 @@ interface ConfigValueObject {
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置
+  private configMap: Map<string, ConfigValueObject | Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置
   private context: common.UIAbilityContext | null = null;
 
   /**
@@ -592,7 +592,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     movieData.episodes = this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]');
     movieData.ratings = this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '[]');
     
-    const movie = new Movie(movieData as Partial<Movie>);
+    const movie = new Movie(movieData as MovieConstructorParams);
     return movie;
     } catch (error) {
       Logger.error(TAG, `Failed to parse movie from result set: ${error instanceof Error ? error.message : String(error)}`);
