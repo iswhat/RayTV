@@ -23,12 +23,8 @@ export default class MainAbility extends UIAbility {
 
       // 设置窗口支持横竖屏切换
       windowStage.getMainWindow().then((mainWindow) => {
-        // 设置窗口模式为自适应
-        mainWindow.setWindowMode(window.WindowMode.FULLSCREEN);
-        // 允许屏幕旋转
-        mainWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION);
-        // 设置窗口背景
-        mainWindow.setBackgroundColor('#ffffff');
+        // 允许屏幕旋转 - 使用正确的API
+        mainWindow.setPreferredOrientation(AbilityConstant.Orientation.AUTO_ROTATION);
       });
 
       // 设置UI页面加载

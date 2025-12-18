@@ -10,6 +10,13 @@ import { Button } from '@kit.ArkUI';
  * 设置页面组件
  * 实现应用配置管理，包括主题、语言、缓存、播放等设置
  */
+interface VideoSource {
+  id: string;
+  name: string;
+  url: string;
+  enabled: boolean;
+}
+
 @Entry
 @Component
 struct SettingsPage {
@@ -47,7 +54,7 @@ struct SettingsPage {
   @State enableDeviceFlow: boolean = true;
   
   // 影视源设置
-  @State videoSources: Array<{id: string, name: string, url: string, enabled: boolean}> = [
+  @State videoSources: VideoSource[] = [
     { id: '1', name: 'Eoeoo源', url: 'https://eoeoo.com/base2/a.json', enabled: true },
     { id: '2', name: 'Uoouo源', url: 'https://q.uoouo.com/dianshi.json', enabled: true },
     { id: '3', name: '默认源', url: 'https://example.com/api', enabled: false }
@@ -284,7 +291,7 @@ struct SettingsPage {
         
         // 影视源列表
         Column() {
-          ForEach(this.videoSources, (source) => {
+          ForEach(this.videoSources, (source: VideoSource) => {
             Column() {
               Row() {
                 Column() {
@@ -300,9 +307,8 @@ struct SettingsPage {
                 .flexGrow(1)
                 
                 Row() {
-                  Switch()
-                    .checked(source.enabled)
-                    .onChange((isChecked) => {
+                  Toggle({ type: ToggleType.Switch, isOn: source.enabled })
+                    .onChange((isChecked: boolean) => {
                       const index = this.videoSources.findIndex(item => item.id === source.id);
                       if (index !== -1) {
                         this.videoSources[index].enabled = isChecked;
@@ -332,7 +338,7 @@ struct SettingsPage {
               .margin({ bottom: 10 })
               .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 1 })
             }
-          }, (source) => source.id)
+          }, (source: VideoSource) => source.id)
         }
         .padding({ left: 15, right: 15, bottom: 15 })
         

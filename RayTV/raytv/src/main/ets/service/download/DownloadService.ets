@@ -1,4 +1,4 @@
-// DownloadService - 下载服务�?import Logger from '../../common/util/Logger';
+// DownloadService - 下载服务�?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import FileUtil from '../../common/util/FileUtil';
@@ -17,8 +17,8 @@ const TAG = 'DownloadService';
 const DOWNLOAD_QUEUE_KEY = 'download_queue';
 const DOWNLOAD_SETTINGS_KEY = 'download_settings';
 
-// 下载状态枚�?export enum DownloadStatus {
-  QUEUED = 'queued',        // 已加入队�?  DOWNLOADING = 'downloading',  // 下载�?  PAUSED = 'paused',        // 暂停
+// 下载状态枚�?export enum DownloadStatus {
+  QUEUED = 'queued',        // 已加入队�?  DOWNLOADING = 'downloading',  // 下载�?  PAUSED = 'paused',        // 暂停
   COMPLETED = 'completed',    // 完成
   FAILED = 'failed',        // 失败
   CANCELLED = 'cancelled'    // 取消
@@ -45,30 +45,30 @@ export interface DownloadTask {
   seasonNumber?: number;      // 季数（可选）
   episodeNumber?: number;     // 集数（可选）
   videoType: VideoType;       // 视频类型
-  videoSource: VideoSource;    // 视频�?  videoQuality: string;       // 视频质量
+  videoSource: VideoSource;    // 视频�?  videoQuality: string;       // 视频质量
   videoUrl: string;          // 视频URL
   coverUrl?: string;         // 封面URL
-  totalSize: number;         // 总大小（字节�?  downloadedSize: number;      // 已下载大小（字节�?  progress: number;          // 下载进度�?-100�?  status: DownloadStatus;     // 下载状�?  downloadSpeed: number;      // 下载速度（字�?秒）
-  startTime?: number;         // 开始时�?  endTime?: number;          // 结束时间
+  totalSize: number;         // 总大小（字节�?  downloadedSize: number;      // 已下载大小（字节�?  progress: number;          // 下载进度�?-100�?  status: DownloadStatus;     // 下载状�?  downloadSpeed: number;      // 下载速度（字�?秒）
+  startTime?: number;         // 开始时�?  endTime?: number;          // 结束时间
   errorType?: DownloadErrorType; // 错误类型
   errorMessage?: string;      // 错误信息
   downloadPath: string;       // 下载文件路径
   tempFilePath: string;       // 临时文件路径
   resumedFrom: number;        // 续传起始位置
-  isActive: boolean;          // 是否为活动任�?  isHighPriority: boolean;     // 是否高优先级
+  isActive: boolean;          // 是否为活动任�?  isHighPriority: boolean;     // 是否高优先级
   networkType: 'all' | 'wifi' | 'cellular'; // 网络类型限制
-  autoStart: boolean;         // 是否自动开�?  userData?: Record<string, any>; // 用户自定义数�?}
+  autoStart: boolean;         // 是否自动开�?  userData?: Record<string, any>; // 用户自定义数�?}
 
 // 下载设置接口
 export interface DownloadSettings {
   maxConcurrentDownloads: number; // 最大并发下载数
-  downloadNetworkType: 'all' | 'wifi' | 'cellular'; // 允许的网络类�?  autoResumeDownloads: boolean; // 是否自动恢复下载
+  downloadNetworkType: 'all' | 'wifi' | 'cellular'; // 允许的网络类�?  autoResumeDownloads: boolean; // 是否自动恢复下载
   autoDeleteFailedDownloads: boolean; // 是否自动删除失败下载
-  autoPlayCompletedDownloads: boolean; // 是否自动播放完成的下�?  downloadFolder: string; // 下载文件�?  maxDownloadSize: number; // 最大下载大小（MB�?  allowBackgroundDownloads: boolean; // 是否允许后台下载
+  autoPlayCompletedDownloads: boolean; // 是否自动播放完成的下�?  downloadFolder: string; // 下载文件�?  maxDownloadSize: number; // 最大下载大小（MB�?  allowBackgroundDownloads: boolean; // 是否允许后台下载
   showNotifications: boolean; // 是否显示通知
   playWhileDownloading: boolean; // 是否允许边下边播
   verifyDownloads: boolean; // 是否验证下载
-  deleteSourceFiles: boolean; // 是否删除源文�?  cleanTempFiles: boolean; // 是否清理临时文件
+  deleteSourceFiles: boolean; // 是否删除源文�?  cleanTempFiles: boolean; // 是否清理临时文件
 }
 
 // 默认下载设置
@@ -89,7 +89,7 @@ export const DEFAULT_DOWNLOAD_SETTINGS: DownloadSettings = {
 };
 
 /**
- * 下载服务�? * 负责管理视频下载任务和下载队�? */
+ * 下载服务�? * 负责管理视频下载任务和下载队�? */
 export default class DownloadService {
   private static instance: DownloadService;
   private databaseRepo: DatabaseRepository;
@@ -102,12 +102,12 @@ export default class DownloadService {
   private isInitialized: boolean = false;
   private pauseDownloadsOnQueueFull: boolean = false;
   
-  // 任务监听�?  private taskListeners: Map<string, Array<(task: DownloadTask) => void>> = new Map();
+  // 任务监听�?  private taskListeners: Map<string, Array<(task: DownloadTask) => void>> = new Map();
   private queueListeners: Array<(queue: DownloadTask[]) => void> = [];
   private statusListeners: Map<DownloadStatus, Array<(task: DownloadTask) => void>> = new Map();
 
   /**
-   * 构造函数（私有，防止外部实例化�?   */
+   * 构造函数（私有，防止外部实例化�?   */
   private constructor() {
     this.databaseRepo = RepositoryFactory.getRepository('database') as DatabaseRepository;
     this.networkRepo = RepositoryFactory.getRepository('network') as NetworkRepository;
@@ -126,12 +126,12 @@ export default class DownloadService {
   }
 
   /**
-   * 初始化下载服�?   */
+   * 初始化下载服�?   */
   public async initialize(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing download service...');
       
-      // 设置默认下载文件�?      this.settings.downloadFolder = await FileUtil.getDownloadDirectory('RayTV');
+      // 设置默认下载文件�?      this.settings.downloadFolder = await FileUtil.getDownloadDirectory('RayTV');
       
       // 从数据库加载下载队列
       const savedQueue = await this.databaseRepo.getDownloadQueue();
@@ -140,7 +140,7 @@ export default class DownloadService {
         Logger.info(TAG, `Loaded ${this.downloadQueue.length} download tasks from database`);
       }
       
-      // 从配置服务加载设�?      await this.loadSettingsFromConfig();
+      // 从配置服务加载设�?      await this.loadSettingsFromConfig();
       
       // 从本地存储加载设置（兼容旧版本）
       const savedSettings = await StorageUtil.getObject<DownloadSettings>(DOWNLOAD_SETTINGS_KEY);
@@ -172,7 +172,7 @@ export default class DownloadService {
   }
 
   /**
-   * 从配置服务加载设�?   */
+   * 从配置服务加载设�?   */
   private async loadSettingsFromConfig(): Promise<void> {
     try {
       const maxDownloads = await this.configService.getConfig('maxConcurrentDownloads');
@@ -212,21 +212,21 @@ export default class DownloadService {
     }
   ): Promise<ApiResponse<DownloadTask>> {
     try {
-      // 检查网络状�?      const networkAvailable = await NetworkUtil.isNetworkAvailable();
+      // 检查网络状�?      const networkAvailable = await NetworkUtil.isNetworkAvailable();
       if (!networkAvailable) {
-        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '网络不可用，无法开始下�?);
+        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '网络不可用，无法开始下�?);
       }
       
-      // 检查网络类型限�?      const networkType = await NetworkUtil.getNetworkType();
+      // 检查网络类型限�?      const networkType = await NetworkUtil.getNetworkType();
       if (this.settings.downloadNetworkType === 'wifi' && networkType !== 'wifi') {
-        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在WiFi网络下允许下�?);
+        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在WiFi网络下允许下�?);
       }
       
       if (this.settings.downloadNetworkType === 'cellular' && networkType !== 'cellular') {
-        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在移动网络下允许下�?);
+        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在移动网络下允许下�?);
       }
       
-      // 检查存储空�?      const freeSpace = await FileUtil.getFreeSpace();
+      // 检查存储空�?      const freeSpace = await FileUtil.getFreeSpace();
       if (freeSpace <= 0) {
         return ApiResponse.error(ResponseCode.STORAGE_ERROR, '无法获取可用存储空间');
       }
@@ -273,7 +273,7 @@ export default class DownloadService {
       if (fileExists) {
         const fileSize = await FileUtil.getFileSize(downloadPath);
         if (videoSource.size && fileSize === videoSource.size) {
-          // 文件已存在且大小匹配，标记为已完�?          task.status = DownloadStatus.COMPLETED;
+          // 文件已存在且大小匹配，标记为已完�?          task.status = DownloadStatus.COMPLETED;
           task.progress = 100;
           task.downloadedSize = fileSize;
           task.totalSize = fileSize;
@@ -283,7 +283,7 @@ export default class DownloadService {
         }
       }
       
-      // 添加到下载队�?      if (task.isHighPriority) {
+      // 添加到下载队�?      if (task.isHighPriority) {
         this.downloadQueue.unshift(task);
       } else {
         this.downloadQueue.push(task);
@@ -295,7 +295,7 @@ export default class DownloadService {
       // 通知队列变更
       this.notifyQueueChanged();
       
-      // 自动开始下�?      if (task.autoStart && task.status === DownloadStatus.QUEUED) {
+      // 自动开始下�?      if (task.autoStart && task.status === DownloadStatus.QUEUED) {
         await this.startDownload(task.id);
       }
       
@@ -308,19 +308,19 @@ export default class DownloadService {
   }
 
   /**
-   * 开始下载任�?   */
+   * 开始下载任�?   */
   public async startDownload(taskId: string): Promise<ApiResponse<DownloadTask>> {
     try {
       Logger.info(TAG, `Starting download task: ${taskId}`);
       
       const taskIndex = this.downloadQueue.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       const task = this.downloadQueue[taskIndex];
       
-      // 检查任务状�?      if (task.status === DownloadStatus.COMPLETED) {
+      // 检查任务状�?      if (task.status === DownloadStatus.COMPLETED) {
         return ApiResponse.success(task, '任务已经完成');
       }
       
@@ -329,10 +329,10 @@ export default class DownloadService {
       }
       
       if (task.status === DownloadStatus.CANCELLED) {
-        return ApiResponse.error(ResponseCode.INVALID_OPERATION, '已取消的任务无法重新开�?);
+        return ApiResponse.error(ResponseCode.INVALID_OPERATION, '已取消的任务无法重新开�?);
       }
       
-      // 检查活动任务数�?      if (this.activeTasks.size >= this.settings.maxConcurrentDownloads) {
+      // 检查活动任务数�?      if (this.activeTasks.size >= this.settings.maxConcurrentDownloads) {
         this.pauseDownloadsOnQueueFull = true;
         return ApiResponse.error(ResponseCode.LIMIT_EXCEEDED, '下载队列已满，请等待当前任务完成');
       }
@@ -346,10 +346,10 @@ export default class DownloadService {
       // 添加到活动任务集
       this.activeTasks.add(taskId);
       
-      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
+      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.DOWNLOADING, task);
       this.notifyQueueChanged();
       
@@ -358,10 +358,10 @@ export default class DownloadService {
         Logger.error(TAG, `Download failed for task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       });
       
-      return ApiResponse.success(task, '开始下载成�?);
+      return ApiResponse.success(task, '开始下载成�?);
     } catch (error) {
       Logger.error(TAG, `Failed to start download task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '开始下载失�?);
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '开始下载失�?);
     }
   }
 
@@ -385,7 +385,7 @@ export default class DownloadService {
         task.resumedFrom = tempSize;
       }
       
-      // 开始下�?      const startTime = Date.now();
+      // 开始下�?      const startTime = Date.now();
       let lastProgressUpdate = startTime;
       let lastDownloadedSize = task.downloadedSize;
       
@@ -401,7 +401,7 @@ export default class DownloadService {
         const currentTime = Date.now();
         const elapsedTime = currentTime - lastProgressUpdate;
         
-        if (elapsedTime >= 1000) { // 每秒更新一�?          // 模拟下载速度�?0KB/s - 2MB/s�?          const simulatedSpeed = 50 * 1024 + Math.random() * 1.95 * 1024 * 1024;
+        if (elapsedTime >= 1000) { // 每秒更新一�?          // 模拟下载速度�?0KB/s - 2MB/s�?          const simulatedSpeed = 50 * 1024 + Math.random() * 1.95 * 1024 * 1024;
           const downloadedBytes = Math.floor(simulatedSpeed * (elapsedTime / 1000));
           
           task.downloadedSize += downloadedBytes;
@@ -415,7 +415,7 @@ export default class DownloadService {
           // 更新队列
           this.downloadQueue[taskIndex] = task;
           
-          // �?秒保存一次进�?          if (currentTime - startTime >= 5000) {
+          // �?秒保存一次进�?          if (currentTime - startTime >= 5000) {
             await this.saveDownloadQueue();
           }
           
@@ -426,15 +426,15 @@ export default class DownloadService {
           lastDownloadedSize = task.downloadedSize;
         }
         
-        // 检查下载是否完�?        if (task.totalSize > 0 && task.downloadedSize >= task.totalSize) {
+        // 检查下载是否完�?        if (task.totalSize > 0 && task.downloadedSize >= task.totalSize) {
           clearInterval(updateInterval);
           
           // 标记任务完成
           await this.completeDownload(taskId);
         }
-      }, 100); // �?00ms检查一�?      
+      }, 100); // �?00ms检查一�?      
       // 模拟下载完成
-      // 在实际应用中，这里应该是真实的下载实�?      // 这里只是为了演示
+      // 在实际应用中，这里应该是真实的下载实�?      // 这里只是为了演示
     } catch (error) {
       Logger.error(TAG, `Error performing download for task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       await this.failDownload(taskId, DownloadErrorType.UNKNOWN_ERROR, String(error));
@@ -450,28 +450,28 @@ export default class DownloadService {
       
       const taskIndex = this.downloadQueue.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       const task = this.downloadQueue[taskIndex];
       
-      // 检查任务状�?      if (task.status !== DownloadStatus.DOWNLOADING) {
+      // 检查任务状�?      if (task.status !== DownloadStatus.DOWNLOADING) {
         return ApiResponse.error(ResponseCode.INVALID_OPERATION, `任务状态不允许暂停: ${task.status}`);
       }
       
       // 更新任务状�?      task.status = DownloadStatus.PAUSED;
       task.isActive = false;
       
-      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
+      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
       
-      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
+      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.PAUSED, task);
       this.notifyQueueChanged();
       
-      // 检查是否有等待的任务可以开�?      if (this.pauseDownloadsOnQueueFull) {
+      // 检查是否有等待的任务可以开�?      if (this.pauseDownloadsOnQueueFull) {
         await this.startNextTaskInQueue();
       }
       
@@ -491,27 +491,27 @@ export default class DownloadService {
       
       const taskIndex = this.downloadQueue.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       const task = this.downloadQueue[taskIndex];
       
-      // 检查任务状�?      if (task.status !== DownloadStatus.PAUSED) {
+      // 检查任务状�?      if (task.status !== DownloadStatus.PAUSED) {
         return ApiResponse.error(ResponseCode.INVALID_OPERATION, `任务状态不允许恢复: ${task.status}`);
       }
       
-      // 检查网络状�?      const networkAvailable = await NetworkUtil.isNetworkAvailable();
+      // 检查网络状�?      const networkAvailable = await NetworkUtil.isNetworkAvailable();
       if (!networkAvailable) {
         return ApiResponse.error(ResponseCode.NETWORK_ERROR, '网络不可用，无法恢复下载');
       }
       
-      // 检查网络类型限�?      const networkType = await NetworkUtil.getNetworkType();
+      // 检查网络类型限�?      const networkType = await NetworkUtil.getNetworkType();
       if (task.networkType === 'wifi' && networkType !== 'wifi') {
-        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在WiFi网络下允许下�?);
+        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在WiFi网络下允许下�?);
       }
       
       if (task.networkType === 'cellular' && networkType !== 'cellular') {
-        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在移动网络下允许下�?);
+        return ApiResponse.error(ResponseCode.NETWORK_ERROR, '仅在移动网络下允许下�?);
       }
       
       // 更新任务状�?      task.status = DownloadStatus.DOWNLOADING;
@@ -520,14 +520,14 @@ export default class DownloadService {
       // 添加到活动任务集
       this.activeTasks.add(taskId);
       
-      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
+      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.DOWNLOADING, task);
       this.notifyQueueChanged();
       
-      // 重新开始下�?      this.performDownload(taskId).catch(error => {
+      // 重新开始下�?      this.performDownload(taskId).catch(error => {
         Logger.error(TAG, `Failed to resume download for task: ${taskId}`, error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
       });
       
@@ -547,7 +547,7 @@ export default class DownloadService {
       
       const taskIndex = this.downloadQueue.findIndex(task => task.id === taskId);
       if (taskIndex === -1) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       const task = this.downloadQueue[taskIndex];
@@ -557,7 +557,7 @@ export default class DownloadService {
       task.isActive = false;
       task.endTime = Date.now();
       
-      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
+      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
       
       // 删除文件
       if (deleteFiles) {
@@ -579,7 +579,7 @@ export default class DownloadService {
       // 保存队列
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.CANCELLED, task);
       this.notifyQueueChanged();
       
@@ -612,20 +612,20 @@ export default class DownloadService {
       task.progress = 100;
       task.endTime = Date.now();
       
-      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
+      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
       
-      // 如果有临时文件，重命名为最终文�?      if (await FileUtil.fileExists(task.tempFilePath)) {
+      // 如果有临时文件，重命名为最终文�?      if (await FileUtil.fileExists(task.tempFilePath)) {
         await FileUtil.moveFile(task.tempFilePath, task.downloadPath);
       }
       
-      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
+      // 更新队列并保�?      this.downloadQueue[taskIndex] = task;
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.COMPLETED, task);
       this.notifyQueueChanged();
       
-      // 自动播放完成的下�?      if (this.settings.autoPlayCompletedDownloads) {
+      // 自动播放完成的下�?      if (this.settings.autoPlayCompletedDownloads) {
         // 这里可以触发播放事件
         Logger.info(TAG, `Auto-playing completed download: ${task.id}`);
       }
@@ -664,9 +664,9 @@ export default class DownloadService {
       task.errorMessage = errorMessage;
       task.endTime = Date.now();
       
-      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
+      // 从活动任务集中移�?      this.activeTasks.delete(taskId);
       
-      // 自动删除失败的下�?      if (this.settings.autoDeleteFailedDownloads) {
+      // 自动删除失败的下�?      if (this.settings.autoDeleteFailedDownloads) {
         try {
           if (await FileUtil.fileExists(task.tempFilePath)) {
             await FileUtil.deleteFile(task.tempFilePath);
@@ -684,7 +684,7 @@ export default class DownloadService {
       // 保存队列
       await this.saveDownloadQueue();
       
-      // 通知任务状态变�?      this.notifyTaskChanged(task);
+      // 通知任务状态变�?      this.notifyTaskChanged(task);
       this.notifyStatusChanged(DownloadStatus.FAILED, task);
       this.notifyQueueChanged();
       
@@ -696,10 +696,10 @@ export default class DownloadService {
   }
 
   /**
-   * 启动队列中的下一个任�?   */
+   * 启动队列中的下一个任�?   */
   private async startNextTaskInQueue(): Promise<void> {
     try {
-      // 检查是否有空闲下载�?      if (this.activeTasks.size >= this.settings.maxConcurrentDownloads) {
+      // 检查是否有空闲下载�?      if (this.activeTasks.size >= this.settings.maxConcurrentDownloads) {
         return;
       }
       
@@ -720,7 +720,7 @@ export default class DownloadService {
   }
 
   /**
-   * 启动所有等待中的任�?   */
+   * 启动所有等待中的任�?   */
   public async startAllDownloads(): Promise<ApiResponse<{ started: number; failed: number }>> {
     try {
       Logger.info(TAG, 'Starting all download tasks');
@@ -728,12 +728,12 @@ export default class DownloadService {
       let started = 0;
       let failed = 0;
       
-      // 获取所有等待中的任�?      const pendingTasks = this.downloadQueue.filter(task => 
+      // 获取所有等待中的任�?      const pendingTasks = this.downloadQueue.filter(task => 
         (task.status === DownloadStatus.QUEUED || task.status === DownloadStatus.PAUSED) && 
         !task.isActive
       );
       
-      // 启动任务，受最大并发限�?      for (const task of pendingTasks) {
+      // 启动任务，受最大并发限�?      for (const task of pendingTasks) {
         if (this.activeTasks.size >= this.settings.maxConcurrentDownloads) {
           break;
         }
@@ -752,12 +752,12 @@ export default class DownloadService {
       );
     } catch (error) {
       Logger.error(TAG, 'Failed to start all downloads', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '开始所有下载失�?);
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '开始所有下载失�?);
     }
   }
 
   /**
-   * 暂停所有下载任�?   */
+   * 暂停所有下载任�?   */
   public async pauseAllDownloads(): Promise<ApiResponse<{ paused: number; failed: number }>> {
     try {
       Logger.info(TAG, 'Pausing all download tasks');
@@ -782,11 +782,11 @@ export default class DownloadService {
       
       return ApiResponse.success(
         { paused, failed },
-        `暂停下载完成，成�?{paused}项，失败${failed}项`
+        `暂停下载完成，成�?{paused}项，失败${failed}项`
       );
     } catch (error) {
       Logger.error(TAG, 'Failed to pause all downloads', error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error instanceof Error ? error instanceof Error ? error : new Error(String(error : new Error(String(error instanceof Error ? error : new Error(String(error : new Error(String(error  as Error)));
-      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '暂停所有下载失�?);
+      return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '暂停所有下载失�?);
     }
   }
 
@@ -798,7 +798,7 @@ export default class DownloadService {
       const task = this.downloadQueue.find(task => task.id === taskId);
       
       if (!task) {
-        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
+        return ApiResponse.error(ResponseCode.NOT_FOUND, '下载任务不存�?);
       }
       
       return ApiResponse.success(task, '获取下载任务成功');
@@ -818,15 +818,15 @@ export default class DownloadService {
     try {
       let tasks = [...this.downloadQueue];
       
-      // 按状态过�?      if (status) {
+      // 按状态过�?      if (status) {
         tasks = tasks.filter(task => task.status === status);
       }
       
-      // 按视频类型过�?      if (videoType) {
+      // 按视频类型过�?      if (videoType) {
         tasks = tasks.filter(task => task.videoType === videoType);
       }
       
-      // 按优先级和状态排�?      tasks.sort((a, b) => {
+      // 按优先级和状态排�?      tasks.sort((a, b) => {
         // 高优先级任务排在前面
         if (a.isHighPriority !== b.isHighPriority) {
           return a.isHighPriority ? -1 : 1;
@@ -840,7 +840,7 @@ export default class DownloadService {
           return 1;
         }
         
-        // 暂停的任务排在队列任务前�?        if (a.status === DownloadStatus.PAUSED && b.status === DownloadStatus.QUEUED) {
+        // 暂停的任务排在队列任务前�?        if (a.status === DownloadStatus.PAUSED && b.status === DownloadStatus.QUEUED) {
           return -1;
         }
         if (b.status === DownloadStatus.PAUSED && a.status === DownloadStatus.QUEUED) {
@@ -876,7 +876,7 @@ export default class DownloadService {
     try {
       const stats: Record<string, string | number | boolean | null> = { ... };
       
-      // 计算总大小和总进�?      const activeTasks = this.downloadQueue.filter(t => t.isActive);
+      // 计算总大小和总进�?      const activeTasks = this.downloadQueue.filter(t => t.isActive);
       stats.totalSize = this.downloadQueue.reduce((sum, t) => sum + (t.totalSize || 0), 0);
       stats.averageSpeed = activeTasks.length > 0 
         ? activeTasks.reduce((sum, t) => sum + t.downloadSpeed, 0) / activeTasks.length 
@@ -934,7 +934,7 @@ export default class DownloadService {
         task.status === DownloadStatus.QUEUED && !task.isActive
       );
       
-      // 启动适量的任�?      const maxToStart = Math.min(pendingTasks.length, this.settings.maxConcurrentDownloads);
+      // 启动适量的任�?      const maxToStart = Math.min(pendingTasks.length, this.settings.maxConcurrentDownloads);
       
       for (let i = 0; i < maxToStart; i++) {
         await this.startDownload(pendingTasks[i].id);
@@ -947,7 +947,7 @@ export default class DownloadService {
   // ========== 事件监听相关 ==========
 
   /**
-   * 添加下载任务监听�?   */
+   * 添加下载任务监听�?   */
   public addTaskListener(taskId: string, listener: (task: DownloadTask) => void): () => void {
     if (!this.taskListeners.has(taskId)) {
       this.taskListeners.set(taskId, []);
@@ -966,7 +966,7 @@ export default class DownloadService {
   }
 
   /**
-   * 添加下载队列监听�?   */
+   * 添加下载队列监听�?   */
   public addQueueListener(listener: (queue: DownloadTask[]) => void): () => void {
     this.queueListeners.push(listener);
     
@@ -1030,7 +1030,7 @@ export default class DownloadService {
   }
 
   /**
-   * 通知状态变�?   */
+   * 通知状态变�?   */
   private notifyStatusChanged(status: DownloadStatus, task: DownloadTask): void {
     if (this.statusListeners.has(status)) {
       const listeners = this.statusListeners.get(status)!;
@@ -1071,7 +1071,7 @@ export default class DownloadService {
         const currentActiveCount = this.activeTasks.size;
         const maxConcurrent = newSettings.maxConcurrentDownloads;
         
-        // 如果当前活动任务超过新限制，暂停多余的任�?        if (currentActiveCount > maxConcurrent) {
+        // 如果当前活动任务超过新限制，暂停多余的任�?        if (currentActiveCount > maxConcurrent) {
           const activeTasks = this.downloadQueue.filter(task => task.isActive);
           const tasksToPause = activeTasks.slice(maxConcurrent);
           
@@ -1079,7 +1079,7 @@ export default class DownloadService {
             await this.pauseDownload(task.id);
           }
         }
-        // 如果有空闲槽位，启动等待的任�?        else if (currentActiveCount < maxConcurrent) {
+        // 如果有空闲槽位，启动等待的任�?        else if (currentActiveCount < maxConcurrent) {
           await this.startNextTaskInQueue();
         }
       }
@@ -1098,7 +1098,7 @@ export default class DownloadService {
     try {
       this.settings = { ...DEFAULT_DOWNLOAD_SETTINGS };
       
-      // 确保下载文件夹有�?      this.settings.downloadFolder = await FileUtil.getDownloadDirectory('RayTV');
+      // 确保下载文件夹有�?      this.settings.downloadFolder = await FileUtil.getDownloadDirectory('RayTV');
       
       // 保存设置
       await StorageUtil.setObject(DOWNLOAD_SETTINGS_KEY, this.settings);

@@ -8,15 +8,15 @@ import Logger from '../../common/util/Logger';
 const TAG = 'SQLiteHelper';
 
 /**
- * 数据库支持的值类�?*/
+ * 数据库支持的值类�?*/
 export type ValueType = string | number | boolean | null;
 
 /**
- * 数据库记录类�?*/
+ * 数据库记录类�?*/
 export type DatabaseRecord = Record<string, ValueType>;
 
 /**
- * SQLiteHelper类定义开�?*/
+ * SQLiteHelper类定义开�?*/
 
 
 /**
@@ -37,7 +37,7 @@ export interface SortOption {
 }
 
 /**
- * 数据库操作结果接�?*/
+ * 数据库操作结果接�?*/
 export interface DatabaseResult {
   success: boolean;
   message?: string;
@@ -50,7 +50,7 @@ export class SQLiteHelper {
   private dbManager: DatabaseManager;
   
   /**
-   * 获取对象的键数组（ArkTS兼容方法�?*/
+   * 获取对象的键数组（ArkTS兼容方法�?*/
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
     const keys: string[] = [];
     for (const key in obj) {
@@ -62,7 +62,7 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取对象的值数组（ArkTS兼容方法�?*/
+   * 获取对象的值数组（ArkTS兼容方法�?*/
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
     const values: ValueType[] = [];
     for (const key in obj) {
@@ -210,7 +210,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -222,7 +222,7 @@ export class SQLiteHelper {
       // 执行更新
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
+      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
       const affectedRows = result.firstItem?.getLong(result.columnNames.indexOf('affected_rows')) || 0;
       
       Logger.info(TAG, `Updated ${affectedRows} records in ${tableName}`);
@@ -271,7 +271,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -283,7 +283,7 @@ export class SQLiteHelper {
       // 执行删除
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
+      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
       const affectedRows = result.firstItem?.getLong(result.columnNames.indexOf('affected_rows')) || 0;
       
       Logger.info(TAG, `Deleted ${affectedRows} records from ${tableName}`);
@@ -304,10 +304,10 @@ export class SQLiteHelper {
   /**
    * 查询数据
    * @param tableName 表名
-   * @param columns 要查询的�?   * @param conditions 查询条件
+   * @param columns 要查询的�?   * @param conditions 查询条件
    * @param sortOptions 排序选项
    * @param limit 限制数量
-   * @param offset 偏移�?   * @returns 查询结果列表
+   * @param offset 偏移�?   * @returns 查询结果列表
    */
   public async query<T extends DatabaseRecord>(
     tableName: string,
@@ -339,7 +339,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -372,15 +372,15 @@ export class SQLiteHelper {
       while (result.goToNextRow()) {
         const record: DatabaseRecord = {};
         result.columnNames.forEach((column, index) => {
-          // 根据数据类型获取�?          const value = result.getDouble(index);
+          // 根据数据类型获取�?          const value = result.getDouble(index);
           if (!isNaN(value)) {
-            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
+            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
               record[column] = Math.floor(value);
             } else {
               record[column] = value;
             }
           } else {
-            // 尝试获取字符�?            record[column] = result.getString(index);
+            // 尝试获取字符�?            record[column] = result.getString(index);
           }
         });
         records.push(record);
@@ -397,7 +397,7 @@ export class SQLiteHelper {
   /**
    * 获取单条记录
    * @param tableName 表名
-   * @param columns 要查询的�?   * @param conditions 查询条件
+   * @param columns 要查询的�?   * @param conditions 查询条件
    * @returns 单条记录或null
    */
   public async getFirst<T extends DatabaseRecord>(
@@ -437,7 +437,7 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参�?        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             bindArgs.push(...cond.value);
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
@@ -459,7 +459,7 @@ export class SQLiteHelper {
   }
   
   /**
-   * 检查记录是否存�?   * @param tableName 表名
+   * 检查记录是否存�?   * @param tableName 表名
    * @param conditions 查询条件
    * @returns 是否存在
    */
@@ -487,15 +487,15 @@ export class SQLiteHelper {
       while (result.goToNextRow()) {
         const record: DatabaseRecord = {};
         result.columnNames.forEach((column, index) => {
-          // 根据数据类型获取�?          const value = result.getDouble(index);
+          // 根据数据类型获取�?          const value = result.getDouble(index);
           if (!isNaN(value)) {
-            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
+            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
               record[column] = Math.floor(value);
             } else {
               record[column] = value;
             }
           } else {
-            // 尝试获取字符�?            record[column] = result.getString(index);
+            // 尝试获取字符�?            record[column] = result.getString(index);
           }
         });
         records.push(record);

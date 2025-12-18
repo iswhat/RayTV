@@ -8,6 +8,11 @@ import display from '@ohos.display';
  * 应用主页面
  * 作为应用的入口页面，显示主要功能区域
  */
+interface TabItem {
+  key: string;
+  name: string;
+}
+
 interface FeaturedMediaItem {
   id: string;
   title: string;
@@ -15,6 +20,12 @@ interface FeaturedMediaItem {
   type: string;
   siteKey?: string;
   rating?: string;
+}
+
+interface CategoryItem {
+  id: string;
+  name: string;
+  type: string;
 }
 
 @Entry
@@ -32,7 +43,7 @@ struct MainPage {
   @State screenHeight: number = 0;
   
   // 导航标签数据
-  private tabs: Array<{ key: string, name: string }> = [
+  private tabs: TabItem[] = [
     { key: 'home', name: '首页' },
     { key: 'movie', name: '电影' },
     { key: 'tv', name: '电视剧' },
@@ -82,14 +93,15 @@ struct MainPage {
   private registerScreenOrientationListener() {
     try {
       const displayId = display.getDefaultDisplaySync().id;
-      display.on('change', displayId, (info) => {
+      display.on('change', displayId, (info: display.Display) => {
         Logger.info(this.TAG, `Display change: ${JSON.stringify(info)}`);
         this.screenWidth = info.width;
         this.screenHeight = info.height;
         this.isLandscape = this.screenWidth > this.screenHeight;
       });
     } catch (error) {
-      Logger.error(this.TAG, `Failed to register screen orientation listener: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to register screen orientation listener: ${errorMsg}`);
     }
   }
   
@@ -110,7 +122,8 @@ struct MainPage {
       ];
       Logger.info(this.TAG, 'Loaded featured media items');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load featured media: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to load featured media: ${errorMsg}`);
       this.featuredMedia = [];
     } finally {
       this.isLoading = false;
@@ -118,7 +131,7 @@ struct MainPage {
   }
   
   // 跳转到分类页面
-  private navigateToCategory(category: { id: string, name: string, type: string }) {
+  private navigateToCategory(category: CategoryItem) {
     AppNavigator.getInstance().navigateToCategory(category);
   }
   
@@ -230,11 +243,9 @@ struct MainPage {
             ForEach(this.tabs, (tab) => {
               Text(tab.name)
                 .fontSize(14)
-                .fontWeight(this.selectedTab === tab.key ? 700 : 400)
-                .fontColor(this.selectedTab === tab.key ? "#4CAF50" : "#333333")
-                .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-                .borderBottomWidth(this.selectedTab === tab.key ? 3 : 0)
-                .borderBottomColor("#4CAF50")
+              .fontWeight(this.selectedTab === tab.key ? 700 : 400)
+              .fontColor(this.selectedTab === tab.key ? "#4CAF50" : "#333333")
+              .padding({ left: 16, right: 16, top: 12, bottom: 12 })
                 .onClick(() => {
                   this.selectedTab = tab.key;
                 })
@@ -413,6 +424,6 @@ struct MainPage {
     .width('100%')
     .height('100%')
     .backgroundColor("#F5F5F5")
-    .flexDirection(FlexDirection.Column)
+    .direction(FlexDirection.Column)
   }
 }

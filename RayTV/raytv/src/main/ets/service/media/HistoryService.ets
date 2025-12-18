@@ -5,7 +5,7 @@ import { MediaItem } from '../../data/bean/MediaItem';
 import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 
 /**
- * 历史记录项接�? */
+ * 历史记录项接�? */
 /**
  * 历史记录附加信息接口
  */
@@ -14,27 +14,27 @@ export interface HistoryExtraData {
 }
 
 /**
- * 播放源信息接�? */
+ * 播放源信息接�? */
 export interface PlaySource {
   sourceId: string;     // 播放源ID
-  sourceName: string;   // 播放源名�?  url?: string;         // 播放URL
+  sourceName: string;   // 播放源名�?  url?: string;         // 播放URL
   quality?: string;     // 视频质量
   format?: string;      // 视频格式
 }
 
 /**
- * 历史记录项接�? */
+ * 历史记录项接�? */
 export interface HistoryItem {
   id: string;           // 历史记录ID
   mediaId: string;      // 媒体ID
   siteKey: string;      // 站点标识
   title: string;        // 标题
-  cover?: string;       // 封面�?  type: MediaType;      // 媒体类型
+  cover?: string;       // 封面�?  type: MediaType;      // 媒体类型
   episodeId?: string;   // 剧集ID
   episodeTitle?: string; // 剧集标题
-  progress: number;     // 播放进度（秒�?  duration?: number;    // 总时长（秒）
-  lastPlayTime: number; // 最后播放时�?  playCount: number;    // 播放次数
-  playSource?: PlaySource; // 播放源信�?  extra?: HistoryExtraData; // 其他附加信息
+  progress: number;     // 播放进度（秒�?  duration?: number;    // 总时长（秒）
+  lastPlayTime: number; // 最后播放时�?  playCount: number;    // 播放次数
+  playSource?: PlaySource; // 播放源信�?  extra?: HistoryExtraData; // 其他附加信息
 }
 
 /**
@@ -59,7 +59,7 @@ export class HistoryService {
   }
 
   /**
-   * 构造函�?   * 私有构造函数防止外部实例化
+   * 构造函�?   * 私有构造函数防止外部实例化
    */
   private constructor() {
     this.dbManager = DatabaseManager.getInstance();
@@ -68,10 +68,10 @@ export class HistoryService {
   }
 
   /**
-   * 初始化历史记录服�?   */
+   * 初始化历史记录服�?   */
   public async initialize(): Promise<void> {
     try {
-      // 创建历史记录�?      await this.dbManager.executeSql(`
+      // 创建历史记录�?      await this.dbManager.executeSql(`
         CREATE TABLE IF NOT EXISTS ${this.historyTable} (
           id TEXT PRIMARY KEY,
           mediaId TEXT NOT NULL,
@@ -109,8 +109,8 @@ export class HistoryService {
   }
 
   /**
-   * 添加或更新历史记�?   * @param media 媒体信息
-   * @param progress 播放进度（秒�?   * @param duration 总时长（秒）
+   * 添加或更新历史记�?   * @param media 媒体信息
+   * @param progress 播放进度（秒�?   * @param duration 总时长（秒）
    * @param episodeId 剧集ID（可选）
    * @param episodeTitle 剧集标题（可选）
    * @param playSource 播放源（可选）
@@ -129,7 +129,7 @@ export class HistoryService {
       const historyId = this.generateHistoryId(media.id, media.siteKey, episodeId);
       const progressValue = Math.max(0, Math.min(progress, duration));
 
-      // 构建历史记录�?      const historyItem: HistoryItem = {
+      // 构建历史记录�?      const historyItem: HistoryItem = {
         id: historyId,
         mediaId: media.id,
         siteKey: media.siteKey,
@@ -176,7 +176,7 @@ export class HistoryService {
           ]
         );
       } else {
-        // 插入新记�?        await this.dbManager.executeSql(
+        // 插入新记�?        await this.dbManager.executeSql(
           `INSERT INTO ${this.historyTable} 
            (id, mediaId, siteKey, title, cover, type, episodeId, episodeTitle, 
             progress, duration, lastPlayTime, playCount, playSource, extra) 
@@ -212,7 +212,7 @@ export class HistoryService {
    * 更新播放进度
    * @param mediaId 媒体ID
    * @param siteKey 站点标识
-   * @param progress 播放进度（秒�?   * @param episodeId 剧集ID（可选）
+   * @param progress 播放进度（秒�?   * @param episodeId 剧集ID（可选）
    * @returns Promise<boolean>
    */
   public async updateProgress(
@@ -225,7 +225,7 @@ export class HistoryService {
       const historyId = this.generateHistoryId(mediaId, siteKey, episodeId);
       const now = Date.now();
 
-      // 先检查记录是否存�?      const exists = await this.getHistoryById(historyId);
+      // 先检查记录是否存�?      const exists = await this.getHistoryById(historyId);
       if (!exists) {
         return false;
       }
@@ -338,7 +338,7 @@ export class HistoryService {
   }
 
   /**
-   * 获取媒体的历史记�?   * @param mediaId 媒体ID
+   * 获取媒体的历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @returns Promise<HistoryItem | null>
    */
@@ -372,7 +372,7 @@ export class HistoryService {
   }
 
   /**
-   * 获取媒体剧集的历史记�?   * @param mediaId 媒体ID
+   * 获取媒体剧集的历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @param episodeId 剧集ID
    * @returns Promise<HistoryItem | null>
@@ -434,7 +434,7 @@ export class HistoryService {
   }
 
   /**
-   * 删除媒体的所有历史记�?   * @param mediaId 媒体ID
+   * 删除媒体的所有历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @returns Promise<boolean>
    */
@@ -458,7 +458,7 @@ export class HistoryService {
   }
 
   /**
-   * 清空所有历史记�?   * @returns Promise<boolean>
+   * 清空所有历史记�?   * @returns Promise<boolean>
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
@@ -473,7 +473,7 @@ export class HistoryService {
   }
 
   /**
-   * 清空指定类型的历史记�?   * @param type 媒体类型
+   * 清空指定类型的历史记�?   * @param type 媒体类型
    * @returns Promise<boolean>
    */
   public async clearHistoryByType(type: MediaType): Promise<boolean> {
@@ -525,7 +525,7 @@ export class HistoryService {
   }
 
   /**
-   * 检查是否存在历史记�?   * @param mediaId 媒体ID
+   * 检查是否存在历史记�?   * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @param episodeId 剧集ID（可选）
    * @returns Promise<boolean>
@@ -610,7 +610,7 @@ export class HistoryService {
   }
 
   /**
-   * 安全地解析JSON字符�?   * @param jsonString JSON字符�?   * @returns 解析后的对象或默认�?   */
+   * 安全地解析JSON字符�?   * @param jsonString JSON字符�?   * @returns 解析后的对象或默认�?   */
   private safeParseJson<T>(jsonString: Record<string, string | number | boolean | null>, defaultValue?: T): T {
     try {
       if (!jsonString || typeof jsonString !== 'string') {
@@ -624,7 +624,7 @@ export class HistoryService {
   }
 
   /**
-   * 解析多行数据库记�?   * @param rows 数据库行数组
+   * 解析多行数据库记�?   * @param rows 数据库行数组
    * @returns HistoryItem[]
    * @private
    */
@@ -633,7 +633,7 @@ export class HistoryService {
   }
 
   /**
-   * 清理过期的历史记�?   * @param keepDays 保留天数
+   * 清理过期的历史记�?   * @param keepDays 保留天数
    * @returns Promise<number>
    */
   public async cleanupOldHistory(keepDays: number = 30): Promise<number> {
@@ -663,7 +663,7 @@ export class HistoryService {
    * @param mediaId 媒体ID
    * @param siteKey 站点标识
    * @param episodeId 剧集ID
-   * @param progress 播放进度（秒�?   * @param duration 总时长（秒）
+   * @param progress 播放进度（秒�?   * @param duration 总时长（秒）
    * @returns Promise<boolean>
    */
   public async saveWatchProgress(
@@ -677,7 +677,7 @@ export class HistoryService {
       const historyId = this.generateHistoryId(mediaId, siteKey, episodeId);
       const now = Date.now();
 
-      // 检查记录是否存�?      const existing = await this.getHistoryById(historyId);
+      // 检查记录是否存�?      const existing = await this.getHistoryById(historyId);
       
       if (existing) {
         // 更新现有记录
@@ -688,7 +688,7 @@ export class HistoryService {
           [progress, duration, now, historyId]
         );
       } else {
-        // 如果记录不存在，创建一个基本记�?        await this.dbManager.executeSql(
+        // 如果记录不存在，创建一个基本记�?        await this.dbManager.executeSql(
           `INSERT INTO ${this.historyTable} 
            (id, mediaId, siteKey, title, type, episodeId, 
             progress, duration, lastPlayTime, playCount) 
