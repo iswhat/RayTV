@@ -3,6 +3,7 @@
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
+import { Serializable } from '../../types/commonTypes';
 import Logger from '../../common/util/Logger';
 import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import BusinessError from '@ohos.base';
@@ -78,7 +79,7 @@ const DEVICE_INFO_TABLE = {
 export class DeviceInfoRepository {
   private static instance: DeviceInfoRepository;
   private sqliteHelper: SQLiteHelper;
-  private deviceInfoCache: Map<string, unknown> = new Map();
+  private deviceInfoCache: Map<string, Serializable> = new Map();
   private deviceInfo: DeviceInfo | null = null;
   private isInitialized: boolean = false;
   
@@ -164,7 +165,7 @@ export class DeviceInfoRepository {
   private async collectDeviceInfo(): Promise<void> {
     try {
       // 使用HarmonyOS API获取设备信息
-      const collectedInfo: Record<string, unknown> = {
+      const collectedInfo: Record<string, Serializable> = {
         // 设备基础信息
         [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
         [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'),
@@ -306,7 +307,7 @@ export class DeviceInfoRepository {
    * @param value 信息值
    * @returns 是否保存成功
    */
-  public async setDeviceInfo(key: string, value: unknown): Promise<boolean> {
+  public async setDeviceInfo(key: string, value: Serializable): Promise<boolean> {
     try {
       Logger.debug(TAG, `Setting device info: ${key}`);
       
@@ -362,7 +363,7 @@ export class DeviceInfoRepository {
    * @param defaultValue 默认值
    * @returns 设备信息值或默认值
    */
-  public async getDeviceInfo<T = unknown>(key: string, defaultValue?: T): Promise<T | null> {
+  public async getDeviceInfo<T = Serializable>(key: string, defaultValue?: T): Promise<T | null> {
     try {
       // 优先从缓存获取
       if (this.deviceInfoCache.has(key)) {
@@ -385,7 +386,7 @@ export class DeviceInfoRepository {
         return defaultValue !== undefined ? defaultValue : null;
       }
       
-      let value: unknown = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
+      let value: Serializable = record[DEVICE_INFO_TABLE.COLUMNS.VALUE];
       const isObject = record[DEVICE_INFO_TABLE.COLUMNS.IS_OBJECT] === 1;
       
       if (isObject) {

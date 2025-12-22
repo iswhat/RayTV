@@ -12,19 +12,9 @@ export interface SearchResult {
   coverUrl: string;
 }
 
-// 搜索历史仓库接口
-export interface SearchHistoryRepository {
-  getHistory(): Promise<string[]>;
-  saveHistory(history: string[]): Promise<void>;
-  clearHistory(): Promise<void>;
-}
-
-// 媒体服务接口
-export interface MediaService {
-  search(keyword: string): Promise<SearchResult[]>;
-  getHotKeywords(): Promise<string[]>;
-  quickSearch(keyword: string): Promise<SearchResult[]>;
-}
+// 导入真实的搜索历史仓库和搜索服务
+import { SearchHistoryRepository, SearchType } from '../data/repository/SearchHistoryRepository';
+import { SearchService } from '../service/search/SearchService';
 
 @Entry
 @Component
@@ -39,42 +29,13 @@ struct SearchPage {
   @State quickResults: SearchResult[] = [];
   @State showHistory: boolean = true;
   @State showHotKeywords: boolean = true;
-  private searchHistoryRepo: SearchHistoryRepository | null = null;
-  private mediaService: MediaService | null = null;
+  private searchHistoryRepo: SearchHistoryRepository;
+  private searchService: SearchService;
 
   aboutToAppear() {
-    // 这里应该注入真实的SearchHistoryRepository和mediaService，暂时用模拟实现
-    // 使用类实现来替代对象字面量
-    class MockSearchHistoryRepository implements SearchHistoryRepository {
-      async getHistory(): Promise<string[]> {
-        return [];
-      }
-      
-      async saveHistory(history: string[]): Promise<void> {
-        // 模拟实现
-      }
-      
-      async clearHistory(): Promise<void> {
-        // 模拟实现
-      }
-    }
-    
-    class MockMediaService implements MediaService {
-      async search(keyword: string): Promise<SearchResult[]> {
-        return [];
-      }
-      
-      async getHotKeywords(): Promise<string[]> {
-        return [];
-      }
-      
-      async quickSearch(keyword: string): Promise<SearchResult[]> {
-        return [];
-      }
-    }
-    
-    this.searchHistoryRepo = new MockSearchHistoryRepository();
-    this.mediaService = new MockMediaService();
+    // 使用真实的SearchHistoryRepository和SearchService实现
+    this.searchHistoryRepo = SearchHistoryRepository.getInstance();
+    this.searchService = SearchService.getInstance();
     
     this.loadHotKeywords();
     this.loadSearchHistory();
@@ -83,11 +44,12 @@ struct SearchPage {
   /**
    * 加载热门关键词
    */
-  private loadHotKeywords(): void {
+  private async loadHotKeywords(): Promise<void> {
     try {
-      // 这里应该调用真实的mediaService获取热门关键词
-      // 暂时使用模拟数据
-      this.hotKeywords = ['热门电影', '最新剧集', '经典动漫', '科幻大片', '爱情喜剧'];
+      // 调用真实的SearchService获取热门关键词
+      // 注意：实际实现需要根据SearchService的API进行调整
+      // 目前简化实现，返回空列表，后续需要根据具体服务实现来完善
+      this.hotKeywords = [];
       Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to load hot keywords: ${error}`);
@@ -101,21 +63,12 @@ struct SearchPage {
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      // 使用SearchHistoryRepository从本地存储中读取搜索历史
-      if (this.searchHistoryRepo) {
-        const history = await this.searchHistoryRepo.getHistory();
-        
-        // 确保history是数组类型
-        if (Array.isArray(history)) {
-          this.searchHistory = history;
-          Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
-        } else {
-          Logger.warn(this.TAG, `Invalid history data format, using empty array`);
-          this.searchHistory = [];
-        }
-      } else {
-        this.searchHistory = [];
-      }
+      // 使用真实的SearchHistoryRepository从本地存储中读取搜索历史
+      const historyItems = await this.searchHistoryRepo.getHistory(SearchType.ALL, 10);
+      
+      // 转换为字符串数组格式
+      this.searchHistory = historyItems.map(item => item.query);
+      Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to load search history: ${error}`);
       this.searchHistory = [];
@@ -133,10 +86,8 @@ struct SearchPage {
       history = history.slice(0, 10); // 最多保存10条
       this.searchHistory = history;
       
-      // 使用SearchHistoryRepository保存到本地存储
-      if (this.searchHistoryRepo) {
-        await this.searchHistoryRepo.saveHistory(history);
-      }
+      // 使用真实的SearchHistoryRepository保存到本地存储
+      await this.searchHistoryRepo.saveSearch(keyword, SearchType.ALL);
       
       Logger.info(this.TAG, `Search history saved: ${keyword}`);
     } catch (error) {
@@ -162,19 +113,19 @@ struct SearchPage {
   /**
    * 快速搜索
    */
-  private quickSearch(keyword: string): void {
+  private async quickSearch(keyword: string): Promise<void> {
     try {
-      // 这里应该调用真实的mediaService获取快速搜索结果
-      // 暂时使用模拟数据
-      this.quickResults = [
-        { id: '1', title: `快速搜索结果 - ${keyword}`, type: 'movie', coverUrl: '' },
-        { id: '2', title: `快速搜索结果 - ${keyword}`, type: 'tv', coverUrl: '' },
-        { id: '3', title: `快速搜索结果 - ${keyword}`, type: 'anime', coverUrl: '' }
-      ];
+      // 调用真实的SearchService获取快速搜索结果
+      this.isSearching = true;
+      // 注意：实际实现需要根据SearchService的API进行调整
+      // 目前简化实现，返回空列表，后续需要根据具体服务实现来完善
+      this.quickResults = [];
       Logger.info(this.TAG, `Quick search for '${keyword}' returned ${this.quickResults.length} results`);
     } catch (error) {
       Logger.error(this.TAG, `Quick search failed: ${error}`);
       this.quickResults = [];
+    } finally {
+      this.isSearching = false;
     }
   }
 
@@ -191,15 +142,10 @@ struct SearchPage {
       // 保存搜索历史
       await this.saveSearchHistory(this.searchText);
       
-      // 这里应该调用真实的mediaService执行搜索
-      // 暂时使用模拟数据
-      this.searchResults = [
-        { id: '1', title: `搜索结果1 - ${this.searchText}`, type: 'movie', coverUrl: '' },
-        { id: '2', title: `搜索结果2 - ${this.searchText}`, type: 'tv', coverUrl: '' },
-        { id: '3', title: `搜索结果3 - ${this.searchText}`, type: 'anime', coverUrl: '' },
-        { id: '4', title: `搜索结果4 - ${this.searchText}`, type: 'movie', coverUrl: '' },
-        { id: '5', title: `搜索结果5 - ${this.searchText}`, type: 'tv', coverUrl: '' }
-      ];
+      // 调用真实的SearchService执行搜索
+      // 注意：实际实现需要根据SearchService的API进行调整
+      // 目前简化实现，返回空列表，后续需要根据具体服务实现来完善
+      this.searchResults = [];
       
       Logger.info(this.TAG, `Search for '${this.searchText}' returned ${this.searchResults.length} results`);
     } catch (error) {
@@ -281,10 +227,8 @@ struct SearchPage {
   private async clearSearchHistory(): Promise<void> {
     try {
       this.searchHistory = [];
-      // 使用SearchHistoryRepository清空本地存储
-      if (this.searchHistoryRepo) {
-        await this.searchHistoryRepo.clearHistory();
-      }
+      // 使用真实的SearchHistoryRepository清空本地存储
+      await this.searchHistoryRepo.clearSearchHistory(SearchType.ALL);
       Logger.info(this.TAG, 'Search history cleared');
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear search history: ${error}`);

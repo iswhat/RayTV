@@ -6,13 +6,13 @@ import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
 
 /**
- * Python执行上下�? */
+ * Python执行上下�? */
 interface PyContext {
-  contextData?: Record<string, unknown>;
+  contextData?: Record<string, Serializable>;
 }
 
 /**
- * Ark Python加载�? * 实现基于HarmonyOS的Python代码加载和执行器
+ * Ark Python加载�? * 实现基于HarmonyOS的Python代码加载和执行器
  */
 export class ArkPyLoader extends BaseLoader {
   private readonly TAG: string = 'ArkPyLoader';
@@ -27,7 +27,7 @@ export class ArkPyLoader extends BaseLoader {
   private pyModuleName: string = '';
 
   /**
-   * 构造函�?   * @param site 站点配置
+   * 构造函�?   * @param site 站点配置
    */
   constructor(site: Site) {
     super(site);
@@ -44,7 +44,7 @@ export class ArkPyLoader extends BaseLoader {
    */
   protected async onInit(): Promise<void> {
     try {
-      // 检查内存使用情�?      if (!this.memoryManager.checkMemoryAvailability()) {
+      // 检查内存使用情�?      if (!this.memoryManager.checkMemoryAvailability()) {
         throw new Error('Insufficient memory to initialize Python loader');
       }
 
@@ -59,7 +59,7 @@ export class ArkPyLoader extends BaseLoader {
       // 注入基础API
       this.injectApis();
       
-      // 执行初始化脚�?      await this.executeInitScript();
+      // 执行初始化脚�?      await this.executeInitScript();
       
       this.isInitialized = true;
       this.lastUsedTime = Date.now();
@@ -86,14 +86,14 @@ export class ArkPyLoader extends BaseLoader {
     this.lastUsedTime = Date.now();
 
     try {
-      // 安全检�?      this.validateParams(params);
+      // 安全检�?      this.validateParams(params);
       
       Logger.info(this.TAG, `Invoking Python method: ${method} for site: ${this.site.name}`);
 
       // 设置执行超时
       const timeoutId = this.timeoutManager.setTimeout(() => {
         throw new Error(`Method ${method} execution timed out`);
-      }, 60000); // Python执行可能需要更长时间，设置60秒超�?
+      }, 60000); // Python执行可能需要更长时间，设置60秒超�?
       try {
         // 在后台线程执行Python方法
         const result = await this.taskPoolManager.execute(() => {
@@ -109,7 +109,7 @@ export class ArkPyLoader extends BaseLoader {
       // 错误计数增加
       this.errorCount++;
 
-      // 如果错误过多，清理资�?      if (this.errorCount >= this.maxErrorCount) {
+      // 如果错误过多，清理资�?      if (this.errorCount >= this.maxErrorCount) {
         Logger.warn(this.TAG, `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources`)))))));
         this.cleanupResources();
       }
@@ -119,7 +119,7 @@ export class ArkPyLoader extends BaseLoader {
   }
 
   /**
-   * 销毁方�?   * @protected
+   * 销毁方�?   * @protected
    */
   protected onDestroy(): void {
     this.cleanupResources();
@@ -131,7 +131,7 @@ export class ArkPyLoader extends BaseLoader {
    * @private
    */
   private cleanupResources(): void {
-    // 清理Python上下�?    if (this.pyContext) {
+    // 清理Python上下�?    if (this.pyContext) {
       // 直接创建新对象替代delete操作
       this.pyContext = {};
     }
@@ -146,7 +146,7 @@ export class ArkPyLoader extends BaseLoader {
   }
   
   /**
-   * 获取最后使用时�?   */
+   * 获取最后使用时�?   */
   public getLastUsedTime(): number {
     return this.lastUsedTime;
   }
@@ -173,7 +173,7 @@ export class ArkPyLoader extends BaseLoader {
         this.scriptContent = response.data as string;
       } catch (error) {
         Logger.error(this.TAG, `Failed to load Python script from URL: ${error}`);
-        // 如果URL加载失败，尝试使用备用代�?        if (config.content) {
+        // 如果URL加载失败，尝试使用备用代�?        if (config.content) {
           Logger.warn(this.TAG, 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content')))))));
           this.scriptContent = config.content as string;
         } else {
@@ -236,11 +236,11 @@ export class ArkPyLoader extends BaseLoader {
     // 注入HTTP请求API
     this.pyContext.http = {
       get: async (url: string, options?: { headers?: Record<string, string>, timeout?: number }) => {
-        // 验证URL安全�?        this.validateUrl(url);
+        // 验证URL安全�?        this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
       post: async (url: string, data?: Record<string, string | number | boolean | null>, options?: { headers?: Record<string, string>, timeout?: number }) => {
-        // 验证URL安全�?        this.validateUrl(url);
+        // 验证URL安全�?        this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
       }
     };
@@ -254,7 +254,7 @@ export class ArkPyLoader extends BaseLoader {
           for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // 转换�?2位整�?          }
+            hash = hash & hash; // 转换�?2位整�?          }
           return Math.abs(hash).toString(16);
         } catch (error) {
           // 降级处理
@@ -333,17 +333,17 @@ export class ArkPyLoader extends BaseLoader {
           }
         }
       }, sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number : new Error(String(sleep: (seconds: number instanceof Error ? sleep: (seconds: number : new Error(String(sleep: (seconds: number))))))) => {
-        return new Promise(resolve => setTimeout(resolve, Math.min(seconds * 1000, 10000))); // 限制最大延�?0�?      }
+        return new Promise(resolve => setTimeout(resolve, Math.min(seconds * 1000, 10000))); // 限制最大延�?0�?      }
     };
 
     Logger.info(this.TAG, 'Injected enhanced APIs into Python context');
   }
   
   /**
-   * 验证URL安全�?   * @private
+   * 验证URL安全�?   * @private
    */
   private validateUrl(url: string): void {
-    // 检查URL是否为相对路径或白名单内的域�?    const allowedDomains = this.site.allowedDomains || [];
+    // 检查URL是否为相对路径或白名单内的域�?    const allowedDomains = this.site.allowedDomains || [];
 
     try {
       const urlObj = new URL(url);
@@ -367,11 +367,11 @@ export class ArkPyLoader extends BaseLoader {
   }
 
   /**
-   * 执行初始化代�?   * @private
+   * 执行初始化代�?   * @private
    */
   private async executeInitScript(): Promise<void> {
     try {
-      // 在Python环境中执行脚�?      // 注意：这里使用JavaScript模拟Python执行环境
+      // 在Python环境中执行脚�?      // 注意：这里使用JavaScript模拟Python执行环境
       // 实际项目中可能需要使用Python解释器或桥接方案
       
       // 预处理Python代码，转换为JavaScript兼容格式
@@ -385,7 +385,7 @@ export class ArkPyLoader extends BaseLoader {
       execContext.__file__ = `${this.pyModuleName}.py`;
       
       // 执行脚本
-      // 注意：这是一个简化实现，实际项目可能需要更复杂的Python代码转译或解�?      Logger.info(this.TAG, 'Executing Python initialization script');
+      // 注意：这是一个简化实现，实际项目可能需要更复杂的Python代码转译或解�?      Logger.info(this.TAG, 'Executing Python initialization script');
       
       // 提取Python函数
       this.extractPythonFunctions();
@@ -407,8 +407,8 @@ export class ArkPyLoader extends BaseLoader {
    * @private
    */
   private executeMethod(method: string, params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null> instanceof Error ? params: Record<string, string | number | boolean | null> : new Error(String(params: Record<string, string | number | boolean | null>))))))): Record<string, string | number | boolean | null> {
-    // 检查方法是否存�?    if (typeof this.pyContext[method] !== 'function') {
-      // 尝试在Python模块中查�?      const pyMethodName = `parse_${method}`;
+    // 检查方法是否存�?    if (typeof this.pyContext[method] !== 'function') {
+      // 尝试在Python模块中查�?      const pyMethodName = `parse_${method}`;
       if (typeof this.pyContext[pyMethodName] !== 'function') {
         throw new Error(`Method ${method} or ${pyMethodName} not found in Python script`);
       }
@@ -422,12 +422,12 @@ export class ArkPyLoader extends BaseLoader {
     }
 
     try {
-      // 深度拷贝参数，避免引用问�?      const safeParams = this.deepClone(params);
+      // 深度拷贝参数，避免引用问�?      const safeParams = this.deepClone(params);
 
       // 执行方法
       const result = this.pyContext[method](safeParams);
 
-      // 序列化结果以检测循环引�?      const serializedResult = JSON.stringify(result);
+      // 序列化结果以检测循环引�?      const serializedResult = JSON.stringify(result);
 
       // 深度拷贝结果返回
       return this.deepClone(result);
@@ -455,7 +455,7 @@ export class ArkPyLoader extends BaseLoader {
   }
 
   /**
-   * 获取安全的内置函�?   * @private
+   * 获取安全的内置函�?   * @private
    */
   
   /**
@@ -477,7 +477,7 @@ export class ArkPyLoader extends BaseLoader {
    * @private
    */
   private preprocessPythonCode(code: string): string {
-    // 这里是简化的Python代码预处理示�?    // 实际项目中可能需要更复杂的转换逻辑
+    // 这里是简化的Python代码预处理示�?    // 实际项目中可能需要更复杂的转换逻辑
     
     // 移除Python特定语法注释
     let processed = code.replace(/#.*$/gm, '');
@@ -537,7 +537,7 @@ export class ArkPyLoader extends BaseLoader {
       }
     }
 
-    // 检查代码复杂度，防止恶意循�?    const lineCount = this.scriptContent.split('\n').length;
+    // 检查代码复杂度，防止恶意循�?    const lineCount = this.scriptContent.split('\n').length;
     const braceCount = (this.scriptContent.match(/:/g) || []).length;
 
     if (lineCount > 2000 || braceCount > 800) {
@@ -571,14 +571,14 @@ export class ArkPyLoader extends BaseLoader {
    * 关闭Python沙箱
    * @private
    */
-  // closePythonSandbox方法已合并到cleanupResources方法�?
+  // closePythonSandbox方法已合并到cleanupResources方法�?
   /**
    * 验证参数
    * @param params 方法参数
    * @private
    */
   private validateParams(params: Record<string, string | number | boolean | null>): void {
-    // 检查参数大小，防止过大的参数导致内存问�?    const paramsSize = JSON.stringify(params).length;
+    // 检查参数大小，防止过大的参数导致内存问�?    const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 2 * 1024 * 1024) { // Python可能处理更大的数据，设置2MB限制
       throw new Error('Parameters too large');
     }
@@ -589,11 +589,11 @@ export class ArkPyLoader extends BaseLoader {
       throw new Error('Parameters too deeply nested');
     }
 
-    // 检查数组长度，防止过大的数�?    this.checkCollectionSize(params);
+    // 检查数组长度，防止过大的数�?    this.checkCollectionSize(params);
   }
   
   /**
-   * 检查对象深�?   * @private
+   * 检查对象深�?   * @private
    */
   private checkObjectDepth(obj: Record<string, string | number | boolean | null>, currentDepth: number = 0): number {
     if (obj === null || typeof obj !== 'object') {
@@ -614,7 +614,7 @@ export class ArkPyLoader extends BaseLoader {
   }
   
   /**
-   * 检查集合大�?   * @private
+   * 检查集合大�?   * @private
    */
   private checkCollectionSize(obj: Record<string, string | number | boolean | null>): void {
     const maxArrayLength = 20000;
@@ -624,7 +624,7 @@ export class ArkPyLoader extends BaseLoader {
         throw new Error('Array too large');
       }
 
-      // 递归检查数组元�?      for (const item of obj) {
+      // 递归检查数组元�?      for (const item of obj) {
         if (typeof item === 'object' && item !== null) {
           this.checkCollectionSize(item);
         }
@@ -635,7 +635,7 @@ export class ArkPyLoader extends BaseLoader {
         throw new Error('Object has too many properties');
       }
 
-      // 递归检查对象属�?      for (const key of keys) {
+      // 递归检查对象属�?      for (const key of keys) {
         this.checkCollectionSize(obj[key]);
       }
     }
@@ -646,6 +646,6 @@ export class ArkPyLoader extends BaseLoader {
    * @param params JavaScript参数
    * @private
    */
-  // 转换方法已在deepClone和executeMethod中处�?}
+  // 转换方法已在deepClone和executeMethod中处�?}
 
 

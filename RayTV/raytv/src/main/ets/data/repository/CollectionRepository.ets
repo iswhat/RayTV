@@ -6,6 +6,7 @@ import { COLLECTION_TABLE, COLLECTION_FOLDER_TABLE } from '../db/TableSchema';
 import { CollectionItemType, CollectionVisibility, CollectionSortType } from '../model/LocalModel';
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
+import { Serializable } from '../../types/commonTypes';
 
 const TAG = 'CollectionRepository';
 const COLLECTION_CACHE_PREFIX = 'collection_item_';
@@ -26,7 +27,7 @@ export interface CollectionItem {
   visibility?: CollectionVisibility;
   createTime?: number;
   updateTime?: number;
-  extraData?: Record<string, unknown>;
+  extraData?: Record<string, Serializable>;
 }
 
 export interface CollectionFolder {
@@ -713,7 +714,7 @@ export class CollectionRepository {
    * @param record 数据库记录
    * @returns CollectionItem对象
    */
-  private convertToCollectionObject(record: Record<string, any>): CollectionItem {
+  private convertToCollectionObject(record: Record<string, Serializable>): CollectionItem {
     const tags = record[COLLECTION_TABLE.COLUMNS.TAGS] ? record[COLLECTION_TABLE.COLUMNS.TAGS].split(',') : [];
     const extraData = record[COLLECTION_TABLE.COLUMNS.EXTRA_DATA] ? JSON.parse(record[COLLECTION_TABLE.COLUMNS.EXTRA_DATA]) : {};
     
@@ -741,7 +742,7 @@ export class CollectionRepository {
    * @param records 数据库记录数组
    * @returns CollectionItem对象数组
    */
-  private convertToCollectionObjects(records: Record<string, any>[]): CollectionItem[] {
+  private convertToCollectionObjects(records: Record<string, Serializable>[]): CollectionItem[] {
     return records.map(record => this.convertToCollectionObject(record));
   }
   

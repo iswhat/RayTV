@@ -68,7 +68,8 @@ export type ConfigKey =
   | 'uiAnimationEnabled'
   | 'backgroundPlayEnabled'
   | 'customHeaders'
-  | 'customCookies';
+  | 'customCookies'
+  | 'videoSources';
 
 // 配置值类型定义
 export type ConfigValue = 
@@ -426,6 +427,7 @@ DEFAULT_CONFIG.streamingEnabled = true;
 DEFAULT_CONFIG.localPlaybackEnabled = true;
 DEFAULT_CONFIG.defaultCategory = 'all';
 DEFAULT_CONFIG.preferredServer = 'auto';
+DEFAULT_CONFIG.videoSources = [];
 
 // 配置分类
 export const CONFIG_CATEGORIES: Record<string, string> = {};

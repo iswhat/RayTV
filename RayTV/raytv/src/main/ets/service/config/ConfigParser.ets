@@ -3,7 +3,7 @@
 import Logger from '../../common/util/Logger';
 import { TypeSafetyUtil } from '../../common/util/TypeSafetyUtil';
 import { Site, SiteType, LoaderType } from '../../data/bean/Site';
-import { AppConfig, HarmonyConfig } from '../../data/bean/Config';
+import { AppConfig, HarmonyConfig, LiveCollection, LiveConfigItem, LiveGroup, LiveChannel } from '../../data/bean/Config';
 
 
 const TAG = 'ConfigParser';
@@ -809,6 +809,79 @@ export class ConfigParser {
       Logger.error(TAG, `Failed to parse application configuration: ${error instanceof Error ? error.message : String(error)}`);
       // 返回默认配置
       return this.getDefaultConfig();
+    }
+  }
+  
+  /**
+   * 解析直播配置
+   * @param configContent 配置文件内容
+   */
+  public parseLives(configContent: string): LiveCollection {
+    try {
+      Logger.info(TAG, 'Parsing live configuration');
+      
+      const config = this.parseJsonContent(configContent);
+      const livesData = config.lives || [];
+      
+      if (!Array.isArray(livesData)) {
+        Logger.warn(TAG, 'Invalid lives configuration format, expected array');
+        return { lives: [] };
+      }
+      
+      const lives: (LiveConfigItem | LiveGroup)[] = [];
+      
+      for (const item of livesData) {
+        if (typeof item === 'object' && item !== null) {
+          // 检查是否为分组格式：检查是否有 group 属性且 channels 是数组
+          const groupObj = item as Record<string, any>;
+          if (typeof groupObj.group === 'string' && Array.isArray(groupObj.channels)) {
+            // 分组格式
+            const group: LiveGroup = {
+              group: groupObj.group,
+              channels: []
+            };
+            
+            // 解析频道列表
+            const channels = groupObj.channels as Record<string, any>[];
+            for (const channel of channels) {
+              if (typeof channel === 'object' && channel !== null) {
+                const channelObj = channel as Record<string, any>;
+                const liveChannel: LiveChannel = {
+                  name: typeof channelObj.name === 'string' ? channelObj.name : '未知频道',
+                  url: typeof channelObj.url === 'string' ? channelObj.url : undefined,
+                  urls: Array.isArray(channelObj.urls) ? channelObj.urls : undefined,
+                  epg: typeof channelObj.epg === 'string' ? channelObj.epg : undefined,
+                  logo: typeof channelObj.logo === 'string' ? channelObj.logo : undefined
+                };
+                group.channels.push(liveChannel);
+              }
+            }
+            lives.push(group);
+          } else {
+            // 直接直播源格式
+            const itemObj = item as Record<string, any>;
+            const liveConfig: LiveConfigItem = {
+              name: typeof itemObj.name === 'string' ? itemObj.name : '未知直播源',
+              type: typeof itemObj.type === 'number' ? itemObj.type : 0,
+              playerType: typeof itemObj.playerType === 'number' ? itemObj.playerType : undefined,
+              url: typeof itemObj.url === 'string' ? itemObj.url : undefined,
+              epg: typeof itemObj.epg === 'string' ? itemObj.epg : undefined,
+              logo: typeof itemObj.logo === 'string' ? itemObj.logo : undefined
+            };
+            lives.push(liveConfig);
+          }
+        }
+      }
+      
+      Logger.info(TAG, `Successfully parsed ${lives.length} live configurations`);
+      return {
+        lives,
+        version: typeof config.version === 'string' ? config.version : undefined,
+        updatedAt: typeof config.updatedAt === 'number' ? config.updatedAt : Date.now()
+      };
+    } catch (error) {
+      Logger.error(TAG, `Failed to parse live configuration: ${error instanceof Error ? error.message : String(error)}`);
+      return { lives: [] };
     }
   }
   

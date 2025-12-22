@@ -66,7 +66,7 @@ export class SiteRepository {
         }];
         result = await this.sqliteHelper.update(SITE_TABLE.TABLE_NAME, siteData, conditions);
       } else {
-        // 插入新站�?        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
+        // 插入新站�?        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
         if (result.success && result.lastInsertRowId) {
           site.id = result.lastInsertRowId.toString();
         }
@@ -89,7 +89,7 @@ export class SiteRepository {
   /**
    * 批量保存站点
    * @param sites 站点列表
-   * @returns 保存成功的站点数�?   */
+   * @returns 保存成功的站点数�?   */
   public async saveSites(sites: Site[]): Promise<number> {
     if (!sites || sites.length === 0) {
       return 0;
@@ -115,11 +115,11 @@ export class SiteRepository {
   }
   
   /**
-   * 获取所有站�?   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
+   * 获取所有站�?   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
   public async getAllSites(includeDisabled: boolean = false): Promise<Site[]> {
     try {
-      // 尝试从缓存获�?      const cachedList = await this.getCachedSiteList();
+      // 尝试从缓存获�?      const cachedList = await this.getCachedSiteList();
       if (cachedList && cachedList.length > 0 && includeDisabled === false) {
         Logger.debug(TAG, 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache' : new Error(String('Returning sites from cache' instanceof Error ? 'Returning sites from cache' : new Error(String('Returning sites from cache')))))));
         return cachedList;
@@ -143,7 +143,7 @@ export class SiteRepository {
         order: 'ASC'
       }];
       
-      // 查询数据�?      const siteRecords = await this.sqliteHelper.query(
+      // 查询数据�?      const siteRecords = await this.sqliteHelper.query(
         SITE_TABLE.TABLE_NAME,
         ['*'],
         conditions,
@@ -153,7 +153,7 @@ export class SiteRepository {
       // 转换为Site对象
       const sites = this.convertToSiteObjects(siteRecords);
       
-      // 缓存启用的站点列�?      if (!includeDisabled && sites.length > 0) {
+      // 缓存启用的站点列�?      if (!includeDisabled && sites.length > 0) {
         await this.cacheSiteList(sites);
       }
       
@@ -172,13 +172,13 @@ export class SiteRepository {
    */
   public async getSiteById(siteId: string): Promise<Site | null> {
     try {
-      // 尝试从缓存获�?      const cachedSite = await this.getCachedSite(siteId);
+      // 尝试从缓存获�?      const cachedSite = await this.getCachedSite(siteId);
       if (cachedSite) {
         Logger.debug(TAG, `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache` instanceof Error ? `Returning site ${siteId} from cache` : new Error(String(`Returning site ${siteId} from cache`)))))));
         return cachedSite;
       }
       
-      // 查询数据�?      const conditions: QueryCondition[] = [{
+      // 查询数据�?      const conditions: QueryCondition[] = [{
         column: SITE_TABLE.COLUMNS.ID,
         value: siteId
       }];
@@ -210,7 +210,7 @@ export class SiteRepository {
   /**
    * 根据类型获取站点
    * @param type 站点类型
-   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
+   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
   public async getSitesByType(type: SiteType, includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false))))))): Promise<Site[]> {
     try {
@@ -253,7 +253,7 @@ export class SiteRepository {
   /**
    * 根据分组获取站点
    * @param groupId 分组ID
-   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
+   * @param includeDisabled 是否包含禁用的站�?   * @returns 站点列表
    */
   public async getSitesByGroup(groupId: string, includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false instanceof Error ? includeDisabled: boolean = false : new Error(String(includeDisabled: boolean = false))))))): Promise<Site[]> {
     try {
@@ -326,7 +326,7 @@ export class SiteRepository {
   /**
    * 批量删除站点
    * @param siteIds 站点ID列表
-   * @returns 删除成功的站点数�?   */
+   * @returns 删除成功的站点数�?   */
   public async deleteSites(siteIds: string[]): Promise<number> {
     if (!siteIds || siteIds.length === 0) {
       return 0;
@@ -360,7 +360,7 @@ export class SiteRepository {
   }
   
   /**
-   * 更新站点启用状�?   * @param siteId 站点ID
+   * 更新站点启用状�?   * @param siteId 站点ID
    * @param enabled 是否启用
    * @returns 是否更新成功
    */
@@ -440,7 +440,7 @@ export class SiteRepository {
         }];
         result = await this.sqliteHelper.update(SITE_GROUP_TABLE.TABLE_NAME, groupData, conditions);
       } else {
-        // 插入新分�?        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
+        // 插入新分�?        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
         if (result.success && result.lastInsertRowId) {
           group.id = result.lastInsertRowId.toString();
         }
@@ -455,7 +455,7 @@ export class SiteRepository {
   }
   
   /**
-   * 获取所有站点分�?   * @returns 站点分组列表
+   * 获取所有站点分�?   * @returns 站点分组列表
    */
   public async getAllSiteGroups(): Promise<SiteGroup[]> {
     try {
@@ -788,7 +788,7 @@ export class SiteRepository {
   }
   
   /**
-   * 获取缓存的站点数�?   */
+   * 获取缓存的站点数�?   */
   private async getCachedSite(siteId: string): Promise<Site | null> {
     try {
       return await this.storageUtil.getObject<Site>(`${SITE_CACHE_PREFIX}${siteId}`);
@@ -798,7 +798,7 @@ export class SiteRepository {
   }
   
   /**
-   * 移除缓存的站点数�?   */
+   * 移除缓存的站点数�?   */
   private async removeCachedSite(siteId: string): Promise<void> {
     try {
       await this.storageUtil.remove(`${SITE_CACHE_PREFIX}${siteId}`);
@@ -819,7 +819,7 @@ export class SiteRepository {
   }
   
   /**
-   * 获取缓存的站点列�?   */
+   * 获取缓存的站点列�?   */
   private async getCachedSiteList(): Promise<Site[] | null> {
     try {
       return await this.storageUtil.getObject<Site[]>(SITE_LIST_CACHE);
@@ -829,7 +829,7 @@ export class SiteRepository {
   }
   
   /**
-   * 使站点列表缓存失�?   */
+   * 使站点列表缓存失�?   */
   private async invalidateSiteListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(SITE_LIST_CACHE);
@@ -841,7 +841,7 @@ export class SiteRepository {
   /**
    * 将数据库记录转换为Site对象
    */
-  private convertToSiteObject(record: Record<string, unknown>): Site {
+  private convertToSiteObject(record: Record<string, Serializable>): Site {
     return {
       id: record[SITE_TABLE.COLUMNS.ID]?.toString(),
       name: record[SITE_TABLE.COLUMNS.NAME],

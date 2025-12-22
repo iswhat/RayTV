@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 RayTV. All rights reserved.
- * 视频仓库�?- 负责视频相关数据的获取和管理
+ * 视频仓库�?- 负责视频相关数据的获取和管理
  */
 
 import Logger from '@ohos:common@ohos/common/src/main/ets/utils/Logger';
@@ -52,7 +52,7 @@ export interface VideoEvent {
   error?: Error;
 }
 
-// 收藏状态变更事件接�?export interface FavoriteChangeEvent extends VideoEvent {
+// 收藏状态变更事件接�?export interface FavoriteChangeEvent extends VideoEvent {
   favorited: boolean;
   userId: string;
 }
@@ -181,7 +181,7 @@ export interface PlaybackProgress {
 }
 
 /**
- * 视频仓库�? */
+ * 视频仓库�? */
 export class VideoRepository {
   private static instance: VideoRepository;
   private logger: Logger;
@@ -206,7 +206,7 @@ export class VideoRepository {
     watchHistory: '/user/watch-history'
   };
   
-  // 存储键配�?  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     videoCache: 'video:detail:',
     videoListCache: 'video:list:',
     categories: 'video:categories',
@@ -230,7 +230,7 @@ export class VideoRepository {
   private progressCache: Map<string, PlaybackProgress> = new Map();
   
   /**
-   * 私有构造函�?   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger = Logger.getInstance();
     this.storageUtil = StorageUtil.getInstance();
@@ -251,13 +251,13 @@ export class VideoRepository {
   }
   
   /**
-   * 初始化视频仓�?   */
+   * 初始化视频仓�?   */
   public async initialize(): Promise<void> {
     try {
       // 加载播放进度缓存
       await this.loadProgressCache();
       
-      // 预加载分�?      await this.loadCategories();
+      // 预加载分�?      await this.loadCategories();
       
       // 设置事件监听
       this.setupEventListeners();
@@ -273,13 +273,13 @@ export class VideoRepository {
    * 设置事件监听
    */
   private setupEventListeners(): void {
-    // 监听应用退出事�?    // this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
+    // 监听应用退出事�?    // this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
     //   await this.saveAllProgress();
     // });
     
-    // 监听网络状态变�?    // this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    // 监听网络状态变�?    // this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
     //   if (status.isOnline) {
-    //     // 在线时同步播放进�?    //     await this.syncPlaybackProgress();
+    //     // 在线时同步播放进�?    //     await this.syncPlaybackProgress();
     //   }
     // });
     
@@ -291,7 +291,7 @@ export class VideoRepository {
     // });
     
     // this.eventBus.on('user:logout', async () => {
-    //   // 登出前保存所有进�?    //   await this.saveAllProgress();
+    //   // 登出前保存所有进�?    //   await this.saveAllProgress();
     // });
   }
   
@@ -304,7 +304,7 @@ export class VideoRepository {
     try {
       const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
       
-      // 尝试从缓存获�?      if (!forceRefresh) {
+      // 尝试从缓存获�?      if (!forceRefresh) {
         const cachedVideo = await this.cacheService.getCache<VideoInfo>(cacheKey);
         if (cachedVideo) {
           this.logger.debug(`Video detail loaded from cache: ${videoId}`);
@@ -325,9 +325,9 @@ export class VideoRepository {
       const url = this.apiEndpoints.videoDetail.replace(':id', videoId);
       
       // 构建请求配置
-      const config: Record<string, unknown> = {};
+      const config: Record<string, Serializable> = {};
       
-      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
+      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
       if (authToken) {
         config.headers = {
           'Authorization': `Bearer ${authToken}`
@@ -465,9 +465,9 @@ export class VideoRepository {
       // 验证请求参数
       this.validateVideoListRequest(request);
       
-      // 生成缓存�?      const cacheKey = this.generateVideoListCacheKey(request);
+      // 生成缓存�?      const cacheKey = this.generateVideoListCacheKey(request);
       
-      // 尝试从缓存获�?      const cachedList = await this.cacheService.getCache<VideoListResponse>(cacheKey);
+      // 尝试从缓存获�?      const cachedList = await this.cacheService.getCache<VideoListResponse>(cacheKey);
       if (cachedList) {
         this.logger.debug(`Video list loaded from cache`);
         
@@ -485,11 +485,11 @@ export class VideoRepository {
       const params = this.buildVideoListParams(request);
       
       // 构建请求配置
-      const config: Record<string, unknown> = {
+      const config: Record<string, Serializable> = {
         params
       };
       
-      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
+      // 如果用户已登录，添加认证�?      const authToken = this.userRepository.getAuthToken();
       if (authToken) {
         config.headers = {
           'Authorization': `Bearer ${authToken}`
@@ -595,7 +595,7 @@ export class VideoRepository {
    */
   public async getCategories(): Promise<VideoCategory[]> {
     try {
-      // 尝试从缓存获�?      const cachedCategories = await this.cacheService.getCache<VideoCategory[]>(this.storageKeys.categories);
+      // 尝试从缓存获�?      const cachedCategories = await this.cacheService.getCache<VideoCategory[]>(this.storageKeys.categories);
       if (cachedCategories) {
         return cachedCategories;
       }
@@ -629,9 +629,9 @@ export class VideoRepository {
    */
   public async getPopularTags(limit: number = 50): Promise<VideoTag[]> {
     try {
-      // 生成缓存�?      const cacheKey = `${this.storageKeys.tags}:${limit}`;
+      // 生成缓存�?      const cacheKey = `${this.storageKeys.tags}:${limit}`;
       
-      // 尝试从缓存获�?      const cachedTags = await this.cacheService.getCache<VideoTag[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedTags = await this.cacheService.getCache<VideoTag[]>(cacheKey);
       if (cachedTags) {
         return cachedTags;
       }
@@ -1140,9 +1140,9 @@ export class VideoRepository {
    */
   public async getRelatedVideos(videoId: string, limit: number = 10))))))): Promise<RelatedVideo[]> {
     try {
-      // 生成缓存�?      const cacheKey = `video:related:${videoId}:${limit}`;
+      // 生成缓存�?      const cacheKey = `video:related:${videoId}:${limit}`;
       
-      // 尝试从缓存获�?      const cachedRelated = await this.cacheService.getCache<RelatedVideo[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedRelated = await this.cacheService.getCache<RelatedVideo[]>(cacheKey);
       if (cachedRelated) {
         return cachedRelated;
       }
@@ -1210,7 +1210,7 @@ export class VideoRepository {
     } catch (error) {
       this.Logger.error(`Failed to get comments for video ${videoId}`, error as Error);
       
-      // 返回空评论列�?      return {
+      // 返回空评论列�?      return {
         comments: [], total: 0,
         page,
         pageSize
@@ -1599,7 +1599,7 @@ export class VideoRepository {
       const url = this.apiEndpoints.videoFavorites.replace(':id', videoId);
       
       try {
-        // 调用API更新收藏状�?        await this.networkUtil.post(
+        // 调用API更新收藏状�?        await this.networkUtil.post(
           `${this.apiEndpoints.baseUrl}${url}`,
           { favorited },
           {
@@ -1609,15 +1609,15 @@ export class VideoRepository {
           }
         );
       } catch (error) {
-        // API调用失败时，仍然更新本地状�?        this.logger.warn(`Failed to update favorite status on server for video ${videoId}`, error as Error);
+        // API调用失败时，仍然更新本地状�?        this.logger.warn(`Failed to update favorite status on server for video ${videoId}`, error as Error);
       }
       
-      // 更新本地收藏状�?      const favorites = await this.getFavorites();
+      // 更新本地收藏状�?      const favorites = await this.getFavorites();
       
       if (favorited) {
         // 添加收藏
         if (!favorites.includes(videoId)) {
-          // 检查收藏数量限�?          if (favorites.length >= this.videoConfig.maxFavorites) {
+          // 检查收藏数量限�?          if (favorites.length >= this.videoConfig.maxFavorites) {
             throw new Error(`Maximum number of favorites (${this.videoConfig.maxFavorites}) reached`);
           }
           favorites.push(videoId);
@@ -1633,7 +1633,7 @@ export class VideoRepository {
       // 保存更新后的收藏列表
       await this.storageUtil.setObject(this.storageKeys.favorites, favorites, LocalStorageType.DEFAULT);
       
-      // 发布收藏状态变更事�?      // this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
+      // 发布收藏状态变更事�?      // this.eventBus.emit(favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED, {
       //   videoId,
       //   type: favorited ? VideoEventType.VIDEO_FAVORITED : VideoEventType.VIDEO_UNFAVORITED,
       //   timestamp: Date.now(),
@@ -1641,7 +1641,7 @@ export class VideoRepository {
       //   userId
       // } as FavoriteChangeEvent);
       
-      // 更新视频缓存中的收藏状�?      await this.updateVideoFavoriteStatus(videoId, favorited);
+      // 更新视频缓存中的收藏状�?      await this.updateVideoFavoriteStatus(videoId, favorited);
       
       return true;
     } catch (error) {
@@ -1677,8 +1677,8 @@ export class VideoRepository {
   }
   
   /**
-   * 对视频进行评�?   * @param videoId 视频ID
-   * @param rating 评分�?-5�?   */
+   * 对视频进行评�?   * @param videoId 视频ID
+   * @param rating 评分�?-5�?   */
   public async rateVideo(videoId: string, rating: number): Promise<VideoRating> {
     try {
       // 检查用户是否已登录
@@ -1794,7 +1794,7 @@ export class VideoRepository {
         await this.storageUtil.setObject(key, progress, LocalStorageType.DEFAULT);
       }
       
-      // 更新最后观看记�?      await this.updateLastWatched(videoId, progress.currentTime);
+      // 更新最后观看记�?      await this.updateLastWatched(videoId, progress.currentTime);
       
       // 发布进度更新事件
       // this.eventBus.emit(VideoEventType.VIDEO_PROGRESS_UPDATED, {
@@ -1804,7 +1804,7 @@ export class VideoRepository {
       //   progress
       // } as ProgressUpdateEvent);
       
-      // 如果视频接近完成，记录为已观�?      if (progress.duration > 0 && progress.currentTime / progress.duration > 0.9) {
+      // 如果视频接近完成，记录为已观�?      if (progress.duration > 0 && progress.currentTime / progress.duration > 0.9) {
         await this.markAsWatched(videoId);
       }
     } catch (error) {
@@ -1818,7 +1818,7 @@ export class VideoRepository {
    */
   public async getPlaybackProgress(videoId: string): Promise<PlaybackProgress | null> {
     try {
-      // 首先检查内存缓�?      const cachedProgress = this.progressCache.get(videoId);
+      // 首先检查内存缓�?      const cachedProgress = this.progressCache.get(videoId);
       if (cachedProgress) {
         return cachedProgress;
       }
@@ -1833,7 +1833,7 @@ export class VideoRepository {
   }
   
   /**
-   * 添加到观看历�?   * @param videoId 视频ID
+   * 添加到观看历�?   * @param videoId 视频ID
    * @param videoInfo 视频信息
    */
   public async addToWatchHistory(videoId: string, videoInfo?: VideoInfo): Promise<void> {
@@ -1841,9 +1841,9 @@ export class VideoRepository {
       // 获取现有观看历史
       const history = await this.getWatchHistory();
       
-      // 移除重复�?      const filteredHistory = history.filter(item => item.videoId !== videoId);
+      // 移除重复�?      const filteredHistory = history.filter(item => item.videoId !== videoId);
       
-      // 获取视频信息（如果未提供�?      let video = videoInfo;
+      // 获取视频信息（如果未提供�?      let video = videoInfo;
       if (!video) {
         try {
           video = await this.getVideoDetail(videoId, false);
@@ -1853,9 +1853,9 @@ export class VideoRepository {
         }
       }
       
-      // 创建历史记录�?      const historyItem: Record<string, string | number | boolean | null> = { ... };
+      // 创建历史记录�?      const historyItem: Record<string, string | number | boolean | null> = { ... };
       
-      // 添加到历史记录开�?      filteredHistory.unshift(historyItem);
+      // 添加到历史记录开�?      filteredHistory.unshift(historyItem);
       
       // 限制历史记录数量
       const limitedHistory = filteredHistory.slice(0, this.videoConfig.maxWatchHistoryItems);
@@ -1922,7 +1922,7 @@ export class VideoRepository {
    */
   private async markAsWatched(videoId: string): Promise<void> {
     try {
-      // 发布视频已观看事�?      // this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
+      // 发布视频已观看事�?      // this.eventBus.emit(VideoEventType.VIDEO_WATCHED, {
       //   videoId,
       //   type: VideoEventType.VIDEO_WATCHED,
       //   timestamp: Date.now( instanceof Error ? {
@@ -2006,7 +2006,7 @@ export class VideoRepository {
       //   timestamp: Date.now()))))))
       // } as VideoEvent);
       
-      // 异步发送观看记录到服务�?      if (this.userRepository.isLoggedIn()) {
+      // 异步发送观看记录到服务�?      if (this.userRepository.isLoggedIn()) {
         this.networkUtil.post(
           `${this.apiEndpoints.baseUrl}${this.apiEndpoints.watchHistory}`,
           {
@@ -2028,7 +2028,7 @@ export class VideoRepository {
   }
 
   /**
-   * 更新最后观看记�?   * @param videoId 视频ID
+   * 更新最后观看记�?   * @param videoId 视频ID
    * @param currentTime 当前播放时间
    */
   private async updateLastWatched(videoId: string, currentTime: number): Promise<void> {
@@ -2052,7 +2052,7 @@ export class VideoRepository {
    */
   private async loadProgressCache(): Promise<void> {
     try {
-      // 获取所有存储的进度记录�?      const keys = await this.storageUtil.getAllKeys(LocalStorageType.DEFAULT);
+      // 获取所有存储的进度记录�?      const keys = await this.storageUtil.getAllKeys(LocalStorageType.DEFAULT);
       const progressKeys = keys.filter(key => key.startsWith(this.storageKeys.playbackProgress));
       
       // 加载所有进度记录到内存缓存
@@ -2071,10 +2071,10 @@ export class VideoRepository {
   }
 
   /**
-   * 保存所有播放进�?   */
+   * 保存所有播放进�?   */
   private async saveAllProgress(): Promise<void> {
     try {
-      // 将内存缓存中的所有进度保存到持久化存�?      for (const [videoId, progress] of this.progressCache.entries()) {
+      // 将内存缓存中的所有进度保存到持久化存�?      for (const [videoId, progress] of this.progressCache.entries()) {
         const key = `${this.storageKeys.playbackProgress}${videoId}`;
         await this.storageUtil.setObject(key, progress, LocalStorageType.DEFAULT);
       }
@@ -2094,8 +2094,8 @@ export class VideoRepository {
         return;
       }
       
-      // 获取需要同步的进度记录（例如最近更新的�?      const recentProgress = Array.from(this.progressCache.entries())
-        .filter(([_, progress]) => progress.lastUpdated > Date.now() - 3600000) // 最�?小时更新�?        .slice(0, 50); // 限制同步数量
+      // 获取需要同步的进度记录（例如最近更新的�?      const recentProgress = Array.from(this.progressCache.entries())
+        .filter(([_, progress]) => progress.lastUpdated > Date.now() - 3600000) // 最�?小时更新�?        .slice(0, 50); // 限制同步数量
       
       if (recentProgress.length === 0) {
         return;
@@ -2167,7 +2167,7 @@ export class VideoRepository {
   }
 
   /**
-   * 更新视频缓存中的收藏状�?   * @param videoId 视频ID
+   * 更新视频缓存中的收藏状�?   * @param videoId 视频ID
    * @param favorited 是否收藏
    */
   private async updateVideoFavoriteStatus(videoId: string, favorited: boolean): Promise<void> {
@@ -2263,7 +2263,7 @@ export class VideoRepository {
   }
 
   /**
-   * 生成视频列表缓存�?   */
+   * 生成视频列表缓存�?   */
   private generateVideoListCacheKey(request: VideoListRequest): string {
     const filtersString = request.filters ? 
       JSON.stringify(request.filters) : '';
@@ -2280,21 +2280,21 @@ export class VideoRepository {
 
   /**
    * 清除视频缓存
-   * @param videoId 可选的视频ID，如果不提供则清除所有缓�?   */
+   * @param videoId 可选的视频ID，如果不提供则清除所有缓�?   */
   public async clearVideoCache(videoId?: string): Promise<void> {
     try {
       if (videoId) {
-        // 清除特定视频的缓�?        const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
+        // 清除特定视频的缓�?        const cacheKey = `${this.storageKeys.videoCache}${videoId}`;
         await this.cacheService.removeCache(cacheKey);
         
         // 清除相关缓存
         await this.cacheService.removeCache(`video:related:${videoId}:*`);
         await this.cacheService.removeCache(`search:item:*:${videoId}`);
       } else {
-        // 清除所有视频列表缓�?        const pattern = `${this.storageKeys.videoListCache}*`;
+        // 清除所有视频列表缓�?        const pattern = `${this.storageKeys.videoListCache}*`;
         await this.cacheService.removeCacheByPattern(pattern);
         
-        // 清除所有视频详情缓�?        const detailPattern = `${this.storageKeys.videoCache}*`;
+        // 清除所有视频详情缓�?        const detailPattern = `${this.storageKeys.videoCache}*`;
         await this.cacheService.removeCacheByPattern(detailPattern);
       }
       

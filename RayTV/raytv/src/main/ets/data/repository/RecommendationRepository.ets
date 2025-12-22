@@ -7,6 +7,7 @@ import CacheService from '../../service/cache/CacheService';
 import UserRepository from './UserRepository';
 import SearchHistoryRepository from './SearchHistoryRepository';
 import { LocalStorageType, CacheType } from '../model/commonTypes';
+import { Serializable } from '../../types/commonTypes';
 
 // 推荐类型枚举
 export enum RecommendationType {
@@ -27,7 +28,7 @@ export enum RecommendationType {
 export interface RecommendationItem {
   id: string;
   type: 'video' | 'live' | 'playlist';
-  data: Record<string, unknown>; // 使用通用类型替代具体类型
+  data: Record<string, Serializable>; // 使用通用类型替代具体类型
   reason?: string; // 推荐理由
   score: number; // 推荐分数
   tags: string[]; // 相关标签
@@ -100,7 +101,7 @@ export const RecommendationEventType = {
 export interface RecommendationEvent {
   type: string;
   timestamp: number;
-  data?: string | number | boolean | null | Record<string, unknown> | unknown[];
+  data?: string | number | boolean | null | Record<string, Serializable> | Serializable[];
   error?: Error;
 }
 
@@ -484,7 +485,7 @@ export class RecommendationRepository {
       throw new Error(`Failed to fetch recommendations: ${response.error}`);
     }
     
-    return this.parseRecommendationResponse(response.data as Record<string, unknown>, request);
+    return this.parseRecommendationResponse(response.data as Record<string, Serializable>, request);
   }
   
   /**
@@ -545,7 +546,7 @@ export class RecommendationRepository {
   /**
    * 解析推荐响应
    */
-  private parseRecommendationResponse(data: Record<string, unknown>, request: RecommendationRequest): RecommendationResponse {
+  private parseRecommendationResponse(data: Record<string, Serializable>, request: RecommendationRequest): RecommendationResponse {
     return {
       items: (data.items as RecommendationItem[]) || [],
       total: data.total as number || 0,

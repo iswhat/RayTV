@@ -6,13 +6,13 @@ import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
 
 /**
- * JavaScript执行上下�? */
+ * JavaScript执行上下�? */
 interface JsContext {
-  contextData?: Record<string, unknown>;
+  contextData?: Record<string, Serializable>;
 }
 
 /**
- * Ark JavaScript加载�? * 实现基于HarmonyOS的JavaScript代码加载和执行器
+ * Ark JavaScript加载�? * 实现基于HarmonyOS的JavaScript代码加载和执行器
  */
 export class ArkJsLoader extends BaseLoader {
   private readonly TAG: string = 'ArkJsLoader';
@@ -26,7 +26,7 @@ export class ArkJsLoader extends BaseLoader {
   private isInitialized: boolean = false;
 
   /**
-   * 构造函�?   * @param site 站点配置
+   * 构造函�?   * @param site 站点配置
    */
   constructor(site: Site) {
     super(site);
@@ -42,7 +42,7 @@ export class ArkJsLoader extends BaseLoader {
    */
   protected async onInit(): Promise<void> {
     try {
-      // 检查内存使用情�?      if (!this.memoryManager.checkMemoryAvailability()) {
+      // 检查内存使用情�?      if (!this.memoryManager.checkMemoryAvailability()) {
         throw new Error('Insufficient memory to initialize JS loader');
       }
       
@@ -55,7 +55,7 @@ export class ArkJsLoader extends BaseLoader {
       // 注入基础API
       this.injectApis();
       
-      // 执行初始化脚�?      await this.executeInitScript();
+      // 执行初始化脚�?      await this.executeInitScript();
       
       this.isInitialized = true;
       this.lastUsedTime = Date.now();
@@ -82,12 +82,12 @@ export class ArkJsLoader extends BaseLoader {
     this.lastUsedTime = Date.now();
     
     try {
-      // 安全检�?      this.validateParams(params);
+      // 安全检�?      this.validateParams(params);
       
       // 设置执行超时
       const timeoutId = this.timeoutManager.setTimeout(() => {
         throw new Error(`Method ${method} execution timed out`);
-      }, 30000); // 30秒超�?      
+      }, 30000); // 30秒超�?      
       try {
         // 在后台线程执行JavaScript方法
         const result = await this.taskPoolManager.execute(() => {
@@ -103,7 +103,7 @@ export class ArkJsLoader extends BaseLoader {
       // 错误计数增加
       this.errorCount++;
       
-      // 如果错误过多，清理资�?      if (this.errorCount >= this.maxErrorCount) {
+      // 如果错误过多，清理资�?      if (this.errorCount >= this.maxErrorCount) {
         Logger.warn(this.TAG, `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources` instanceof Error ? `Too many errors, cleaning up resources` : new Error(String(`Too many errors, cleaning up resources`)))))));
         this.cleanupResources();
       }
@@ -113,7 +113,7 @@ export class ArkJsLoader extends BaseLoader {
   }
 
   /**
-   * 销毁方�?   * @protected
+   * 销毁方�?   * @protected
    */
   protected onDestroy(): void {
     this.cleanupResources();
@@ -125,7 +125,7 @@ export class ArkJsLoader extends BaseLoader {
    * @private
    */
   private cleanupResources(): void {
-    // 清理JavaScript上下�?    if (this.jsContext) {
+    // 清理JavaScript上下�?    if (this.jsContext) {
       // 直接创建新对象替代delete操作
       this.jsContext = {};
     }
@@ -140,7 +140,7 @@ export class ArkJsLoader extends BaseLoader {
   }
   
   /**
-   * 获取最后使用时�?   */
+   * 获取最后使用时�?   */
   public getLastUsedTime(): number {
     return this.lastUsedTime;
   }
@@ -167,7 +167,7 @@ export class ArkJsLoader extends BaseLoader {
         this.scriptContent = response.data as string;
       } catch (error) {
         Logger.error(this.TAG, `Failed to load script from URL: ${error}`);
-        // 如果URL加载失败，尝试使用备用代�?        if (config.content) {
+        // 如果URL加载失败，尝试使用备用代�?        if (config.content) {
           Logger.warn(this.TAG, 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content' : new Error(String('Falling back to config content' instanceof Error ? 'Falling back to config content' : new Error(String('Falling back to config content')))))));
           this.scriptContent = config.content as string;
         } else {
@@ -207,11 +207,11 @@ export class ArkJsLoader extends BaseLoader {
     // 注入HTTP请求API
     this.jsContext.http = {
       get: async (url: string, options?: { headers?: Record<string, string>, timeout?: number }) => {
-        // 验证URL安全�?        this.validateUrl(url);
+        // 验证URL安全�?        this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
       post: async (url: string, data?: Record<string, string | number | boolean | null>, options?: { headers?: Record<string, string>, timeout?: number }) => {
-        // 验证URL安全�?        this.validateUrl(url);
+        // 验证URL安全�?        this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
       }
     };
@@ -221,11 +221,11 @@ export class ArkJsLoader extends BaseLoader {
       md5: (str: string) => {
         // 使用HarmonyOS提供的加密API
         try {
-          // 在HarmonyOS中，可以使用@ohos.security.crypto提供的加密功�?          // 这里使用简单的字符串处理作为降级方�?          let hash = 0;
+          // 在HarmonyOS中，可以使用@ohos.security.crypto提供的加密功�?          // 这里使用简单的字符串处理作为降级方�?          let hash = 0;
           for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // 转换�?2位整�?          }
+            hash = hash & hash; // 转换�?2位整�?          }
           return Math.abs(hash).toString(16);
         } catch (error) {
           // 降级处理
@@ -329,17 +329,17 @@ export class ArkJsLoader extends BaseLoader {
       sleep: (ms: number instanceof Error ? // 添加延时函数
       sleep: (ms: number : new Error(String(// 添加延时函数
       sleep: (ms: number))))))) => {
-        return new Promise(resolve => setTimeout(resolve, Math.min(ms, 5000))); // 限制最大延�?�?      }
+        return new Promise(resolve => setTimeout(resolve, Math.min(ms, 5000))); // 限制最大延�?�?      }
     };
     
     Logger.info(this.TAG, 'Injected enhanced APIs into JS context');
   }
   
   /**
-   * 验证URL安全�?   * @private
+   * 验证URL安全�?   * @private
    */
   private validateUrl(url: string): void {
-    // 检查URL是否为相对路径或白名单内的域�?    const allowedDomains = this.site.allowedDomains || [];
+    // 检查URL是否为相对路径或白名单内的域�?    const allowedDomains = this.site.allowedDomains || [];
     
     try {
       const urlObj = new URL(url);
@@ -363,11 +363,11 @@ export class ArkJsLoader extends BaseLoader {
   }
 
   /**
-   * 执行初始化脚�?   * @private
+   * 执行初始化脚�?   * @private
    */
   private async executeInitScript(): Promise<void> {
     try {
-      // 使用安全的方式执行脚�?      const safeEval = new Function('context', `
+      // 使用安全的方式执行脚�?      const safeEval = new Function('context', `
         with(context) {
           ${this.scriptContent};
         }
@@ -406,12 +406,12 @@ export class ArkJsLoader extends BaseLoader {
     }
     
     try {
-      // 深度拷贝参数，避免引用问�?      const safeParams = this.deepClone(params);
+      // 深度拷贝参数，避免引用问�?      const safeParams = this.deepClone(params);
       
       // 执行方法
       const result = this.jsContext[method](safeParams);
       
-      // 序列化结果以检测循环引�?      const serializedResult = JSON.stringify(result);
+      // 序列化结果以检测循环引�?      const serializedResult = JSON.stringify(result);
       
       // 深度拷贝结果返回
       return this.deepClone(result);
@@ -475,7 +475,7 @@ export class ArkJsLoader extends BaseLoader {
       }
     }
     
-    // 检查代码复杂度，防止恶意循�?    const lineCount = this.scriptContent.split('\n').length;
+    // 检查代码复杂度，防止恶意循�?    const lineCount = this.scriptContent.split('\n').length;
     const braceCount = (this.scriptContent.match(/\{/g) || []).length;
     
     if (lineCount > 1000 || braceCount > 500) {
@@ -489,7 +489,7 @@ export class ArkJsLoader extends BaseLoader {
    * @private
    */
   private validateParams(params: Record<string, string | number | boolean | null>): void {
-    // 检查参数大小，防止过大的参数导致内存问�?    const paramsSize = JSON.stringify(params).length;
+    // 检查参数大小，防止过大的参数导致内存问�?    const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 1024 * 1024) { // 1MB限制
       throw new Error('Parameters too large');
     }
@@ -500,11 +500,11 @@ export class ArkJsLoader extends BaseLoader {
       throw new Error('Parameters too deeply nested');
     }
     
-    // 检查数组长度，防止过大的数�?    this.checkCollectionSize(params);
+    // 检查数组长度，防止过大的数�?    this.checkCollectionSize(params);
   }
   
   /**
-   * 检查对象深�?   * @private
+   * 检查对象深�?   * @private
    */
   private checkObjectDepth(obj: Record<string, string | number | boolean | null>, currentDepth: number = 0): number {
     if (obj === null || typeof obj !== 'object') {
@@ -539,7 +539,7 @@ export class ArkJsLoader extends BaseLoader {
   }
 
   /**
-   * 检查集合大�?   * @private
+   * 检查集合大�?   * @private
    */
   private checkCollectionSize(obj: Record<string, string | number | boolean | null>): void {
     const maxArrayLength = 10000;
@@ -549,7 +549,7 @@ export class ArkJsLoader extends BaseLoader {
         throw new Error('Array too large');
       }
       
-      // 递归检查数组元�?      for (const item of obj) {
+      // 递归检查数组元�?      for (const item of obj) {
         if (typeof item === 'object' && item !== null) {
           this.checkCollectionSize(item);
         }
@@ -560,7 +560,7 @@ export class ArkJsLoader extends BaseLoader {
         throw new Error('Object has too many properties');
       }
       
-      // 递归检查对象属�?      for (const key of keys) {
+      // 递归检查对象属�?      for (const key of keys) {
         this.checkCollectionSize(obj[key]);
       }
     }

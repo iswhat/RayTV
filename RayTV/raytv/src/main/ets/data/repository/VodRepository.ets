@@ -9,6 +9,7 @@ import {
   Actor,
   Director
 } from '../bean/Vod';
+import { HistoryItem } from '../../types/commonTypes';
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 
@@ -194,7 +195,7 @@ export class VodRepository {
    * @param offset 偏移量
    * @returns 播放历史列表
    */
-  public async getVodHistory(limit: number = 50, offset: number = 0): Promise<Record<string, unknown>[]> {
+  public async getVodHistory(limit: number = 50, offset: number = 0): Promise<HistoryItem[]> {
     try {
       const sortOptions: SortOption[] = [{
         column: HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT,

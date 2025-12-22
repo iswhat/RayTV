@@ -392,30 +392,30 @@ export class AppNavigator {
    * @param route 页面路由
    */
   getPageUrl(route: string): string {
-    // 使用switch语句替代索引签名，提高类型安全�?
+    // 使用switch语句替代索引签名，提高类型安全
     switch (route) {
       case PageRoute.HOME:
-        return 'pages/HomePage';
+        return 'pages/MainPage'; // 实际首页组件是MainPage.ets
       case PageRoute.VIDEO_PLAY:
-        return 'pages/VideoPlayPage';
+        return 'pages/PlaybackPage'; // 实际视频播放组件是PlaybackPage.ets
       case PageRoute.LINE_MANAGER:
-        return 'pages/LineManagerPage';
+        return 'pages/LineManagerPage'; // 线路管理页存在
       case PageRoute.SETTINGS:
-        return 'pages/SettingsPage';
+        return 'pages/SettingsPage'; // 设置页存在
       case PageRoute.SEARCH:
-        return 'pages/SearchPage';
+        return 'pages/SearchPage'; // 搜索页存在
       case PageRoute.FAVORITES:
-        return 'pages/FavoritesPage';
+        return 'pages/FavoritesPage'; // 收藏页存在
       case PageRoute.HISTORY:
-        return 'pages/HistoryPage';
+        return 'pages/HistoryPage'; // 历史记录页存在
       case PageRoute.CATEGORY:
-        return 'pages/CategoryPage';
+        return 'pages/CategoryPage'; // 分类页存在
       case PageRoute.DETAIL:
-        return 'pages/DetailPage';
+        return 'pages/MediaDetailPage'; // 实际详情页组件是MediaDetailPage.ets
       case PageRoute.LIVE:
-        return 'pages/LivePage';
+        return 'pages/MainPage'; // 暂时返回首页，因为缺少LivePage.ets
       default:
-        return 'pages/HomePage';
+        return 'pages/MainPage'; // 默认返回首页
     }
   }
 

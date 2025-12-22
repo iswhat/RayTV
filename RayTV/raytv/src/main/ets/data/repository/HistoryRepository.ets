@@ -104,7 +104,7 @@ export class HistoryRepository {
   /**
    * 查找是否存在相同内容的历史记录
    */
-  private async findExistingHistory(history: History): Promise<Record<string, any> | null> {
+  private async findExistingHistory(history: History): Promise<Record<string, Serializable> | null> {
     const conditions: QueryCondition[] = [{
       column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE, 
       value: history.contentType
@@ -661,7 +661,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录转换为History对象
    */
-  private convertToHistoryObject(record: Record<string, any>): History {
+  private convertToHistoryObject(record: Record<string, Serializable>): History {
     return {
       id: record[HISTORY_TABLE.COLUMNS.ID]?.toString(),
       title: record[HISTORY_TABLE.COLUMNS.TITLE],
@@ -685,7 +685,7 @@ export class HistoryRepository {
   /**
    * 将数据库记录数组转换为History对象数组
    */
-  private convertToHistoryObjects(records: Record<string, any>[]): History[] {
+  private convertToHistoryObjects(records: Record<string, Serializable>[]): History[] {
     return records.map(record => this.convertToHistoryObject(record));
   }
 }

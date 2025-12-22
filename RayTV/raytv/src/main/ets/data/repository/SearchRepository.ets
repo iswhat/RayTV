@@ -70,7 +70,7 @@ export interface SearchRequest {
   sort: SearchSort;
   page: number;
   pageSize: number;
-  filters?: Record<string, unknown>;
+  filters?: Record<string, Serializable>;
 }
 
 /**
@@ -85,7 +85,7 @@ export interface SearchResult {
 }
 
 /**
- * 搜索结果项接�? */
+ * 搜索结果项接�? */
 export interface SearchResultItem {
   id: string;
   title: string;
@@ -117,7 +117,7 @@ export interface TrendingSearch {
 }
 
 /**
- * 搜索历史项接�? */
+ * 搜索历史项接�? */
 export interface SearchHistoryItem {
   query: string;
   type: SearchType;
@@ -126,7 +126,7 @@ export interface SearchHistoryItem {
 }
 
 /**
- * 视频信息接口（用于搜索结果项详情�? */
+ * 视频信息接口（用于搜索结果项详情�? */
 export interface VideoInfo {
   id: string;
   title: string;
@@ -140,11 +140,11 @@ export interface VideoInfo {
 }
 
 /**
- * 搜索仓库�? */
+ * 搜索仓库�? */
 export class SearchRepository {
   private static instance: SearchRepository | null = null;
   
-  // 搜索类型枚举�?  private getSearchTypeValues(): SearchType[] {
+  // 搜索类型枚举�?  private getSearchTypeValues(): SearchType[] {
     return [
       SearchType.ALL,
       SearchType.VIDEO,
@@ -154,7 +154,7 @@ export class SearchRepository {
     ];
   }
   
-  // 搜索排序枚举�?  private getSearchSortValues(): SearchSort[] {
+  // 搜索排序枚举�?  private getSearchSortValues(): SearchSort[] {
     return [
       SearchSort.DEFAULT,
       SearchSort.LATEST,
@@ -194,13 +194,13 @@ export class SearchRepository {
   private searchConfig = {
     maxHistoryItems: 50, // 最大历史记录数
     historyExpiryDays: 30, // 历史记录过期天数
-    resultCacheDuration: 3600, // 搜索结果缓存时间（秒�?    suggestionsCacheDuration: 300, // 搜索建议缓存时间（秒�?    trendingCacheDuration: 3600, // 热门搜索缓存时间（秒�?    minSearchLength: 1, // 最小搜索长�?    debounceTime: 300 // 搜索防抖时间（毫秒）
+    resultCacheDuration: 3600, // 搜索结果缓存时间（秒�?    suggestionsCacheDuration: 300, // 搜索建议缓存时间（秒�?    trendingCacheDuration: 3600, // 热门搜索缓存时间（秒�?    minSearchLength: 1, // 最小搜索长�?    debounceTime: 300 // 搜索防抖时间（毫秒）
   };
   
-  // 搜索防抖定时�?  private searchDebounceTimer: number | null = null;
+  // 搜索防抖定时�?  private searchDebounceTimer: number | null = null;
 
   /**
-   * 私有构造函�?   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('SearchRepository initialized');
     this.setupEventListeners();
@@ -218,12 +218,12 @@ export class SearchRepository {
   }
 
   /**
-   * 初始化搜索仓�?   */
+   * 初始化搜索仓�?   */
   public async initialize(): Promise<void> {
     try {
-      // 清理过期的搜索历�?      await this.cleanupExpiredHistory();
+      // 清理过期的搜索历�?      await this.cleanupExpiredHistory();
       
-      // 预加载热门搜索（异步�?      this.loadTrendingSearches().catch(err => {
+      // 预加载热门搜索（异步�?      this.loadTrendingSearches().catch(err => {
         this.logger.warn('Failed to preload trending searches', err);
       });
       
@@ -234,16 +234,16 @@ export class SearchRepository {
   }
 
   /**
-   * 设置事件监听�?   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听应用退出事件，确保数据持久�?    this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
+    // 监听应用退出事件，确保数据持久�?    this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
       // 清理过期历史记录
       await this.cleanupExpiredHistory();
     });
     
-    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
       if (status.isOnline) {
-        // 在线时刷新热门搜�?        await this.loadTrendingSearches();
+        // 在线时刷新热门搜�?        await this.loadTrendingSearches();
       }
     });
   }
@@ -260,14 +260,14 @@ export class SearchRepository {
       
       const searchId = this.generateSearchId(request);
       
-      // 发布搜索开始事�?      this.eventBus.emit(SearchEventType.SEARCH_PERFORMED, {
+      // 发布搜索开始事�?      this.eventBus.emit(SearchEventType.SEARCH_PERFORMED, {
         query: request.query,
         type: request.type,
         sort: request.sort,
         timestamp: Date.now()
       } as SearchEvent);
       
-      // 尝试从缓存获取结�?      if (useCache) {
+      // 尝试从缓存获取结�?      if (useCache) {
         const cachedResult = await this.getCachedSearchResult(searchId);
         if (cachedResult) {
           this.logger.debug(`Search result loaded from cache for: ${request.query}`);
@@ -456,7 +456,7 @@ export class SearchRepository {
       clearTimeout(this.searchDebounceTimer);
     }
     
-    // 设置新的定时�?    this.searchDebounceTimer = setTimeout(async () => {
+    // 设置新的定时�?    this.searchDebounceTimer = setTimeout(async () => {
       try {
         const result = await this.performSearch(request);
         callback(result);
@@ -480,9 +480,9 @@ export class SearchRepository {
         return [];
       }
       
-      // 生成缓存�?      const cacheKey = `search:suggestions:${query}:${type || 'all'}`;
+      // 生成缓存�?      const cacheKey = `search:suggestions:${query}:${type || 'all'}`;
       
-      // 尝试从缓存获�?      const cachedSuggestions = await this.cacheService.getCache<SearchSuggestion[]>(cacheKey);
+      // 尝试从缓存获�?      const cachedSuggestions = await this.cacheService.getCache<SearchSuggestion[]>(cacheKey);
       if (cachedSuggestions) {
         return cachedSuggestions;
       }
@@ -507,7 +507,7 @@ export class SearchRepository {
       
       const suggestions = response.data;
       
-      // 获取用户搜索历史，标记最近搜�?      const history = await this.getSearchHistory();
+      // 获取用户搜索历史，标记最近搜�?      const history = await this.getSearchHistory();
       suggestions.forEach(suggestion => {
         const recent = history.find(h => 
           h.query.toLowerCase() === suggestion.text.toLowerCase() && 
@@ -552,7 +552,7 @@ export class SearchRepository {
       return cached;
     }
     
-    // 缓存未命中，加载新数�?    return this.loadTrendingSearches();
+    // 缓存未命中，加载新数�?    return this.loadTrendingSearches();
   }
 
   /**
@@ -597,7 +597,7 @@ export class SearchRepository {
   /**
    * 获取搜索历史
    * @param limit 限制数量
-   * @param type 筛选类�?   */
+   * @param type 筛选类�?   */
   public async getSearchHistory(limit?: number, type?: SearchType): Promise<SearchHistoryItem[]> {
     try {
       const history = await this.storageUtil.getObject<SearchHistoryItem[]>(
@@ -605,12 +605,12 @@ export class SearchRepository {
         LocalStorageType.DEFAULT
       ) || [];
       
-      // 筛选类�?      let filtered = history;
+      // 筛选类�?      let filtered = history;
       if (type) {
         filtered = history.filter(item => item.type === type);
       }
       
-      // 排序（最新的在前�?      filtered.sort((a, b) => b.timestamp - a.timestamp);
+      // 排序（最新的在前�?      filtered.sort((a, b) => b.timestamp - a.timestamp);
       
       // 限制数量
       if (limit && limit > 0) {
@@ -626,11 +626,11 @@ export class SearchRepository {
 
   /**
    * 清除搜索历史
-   * @param type 可选的类型筛�?   */
+   * @param type 可选的类型筛�?   */
   public async clearSearchHistory(type?: SearchType): Promise<void> {
     try {
       if (type) {
-        // 清除特定类型的历�?        const history = await this.getSearchHistory();
+        // 清除特定类型的历�?        const history = await this.getSearchHistory();
         const filteredHistory = history.filter(item => item.type !== type);
         await this.storageUtil.setObject(
           this.storageKeys.searchHistory, filteredHistory,
@@ -689,7 +689,7 @@ export class SearchRepository {
           LocalStorageType.DEFAULT
         )))))));
       } else {
-        // 清除所有历�?        await this.storageUtil.remove(this.storageKeys.searchHistory, LocalStorageType.DEFAULT);
+        // 清除所有历�?        await this.storageUtil.remove(this.storageKeys.searchHistory, LocalStorageType.DEFAULT);
       }
       
       // 发布历史清除事件
@@ -703,7 +703,7 @@ export class SearchRepository {
   }
 
   /**
-   * 从搜索历史中移除特定�?   * @param query 搜索查询
+   * 从搜索历史中移除特定�?   * @param query 搜索查询
    * @param type 搜索类型
    */
   public async removeFromSearchHistory(query: string, type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType))))))): Promise<void> {
@@ -726,13 +726,13 @@ export class SearchRepository {
   }
 
   /**
-   * 根据ID获取搜索结果项详�?   * @param id 搜索结果项ID
-   * @param type 搜索结果项类�?   */
+   * 根据ID获取搜索结果项详�?   * @param id 搜索结果项ID
+   * @param type 搜索结果项类�?   */
   public async getSearchResultItemById(id: string, type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType))))))): Promise<SearchResultItem | null> {
     try {
-      // 构建缓存�?      const cacheKey = `search:item:${type}:${id}`;
+      // 构建缓存�?      const cacheKey = `search:item:${type}:${id}`;
       
-      // 尝试从缓存获�?      let item = await this.cacheService.getCache<SearchResultItem>(cacheKey);
+      // 尝试从缓存获�?      let item = await this.cacheService.getCache<SearchResultItem>(cacheKey);
       if (item) {
         return item;
       }
@@ -787,7 +787,7 @@ export class SearchRepository {
           return null;
       }
       
-      // 缓存结果�?      if (item) {
+      // 缓存结果�?      if (item) {
         await this.cacheService.setCache(
           cacheKey,
           item,
@@ -871,7 +871,7 @@ export class SearchRepository {
   }
 
   /**
-   * 获取缓存的搜索结�?   */
+   * 获取缓存的搜索结�?   */
   private async getCachedSearchResult(searchId: string): Promise<SearchResult | null> {
     try {
       return await this.cacheService.getCache<SearchResult>(searchId);
@@ -900,10 +900,10 @@ export class SearchRepository {
   }
 
   /**
-   * 添加到搜索历�?   */
+   * 添加到搜索历�?   */
   private async addToSearchHistory(request: SearchRequest, resultCount: number): Promise<void> {
     try {
-      // 生成历史记录�?      const historyItem: SearchHistoryItem = {
+      // 生成历史记录�?      const historyItem: SearchHistoryItem = {
         query: request.query.trim(),
         type: request.type,
         timestamp: Date.now(),
@@ -913,11 +913,11 @@ export class SearchRepository {
       // 获取现有历史
       const history = await this.getSearchHistory();
       
-      // 移除重复项（如果存在相同的查询和类型�?      const filteredHistory = history.filter(
+      // 移除重复项（如果存在相同的查询和类型�?      const filteredHistory = history.filter(
         item => !(item.query.toLowerCase() === historyItem.query.toLowerCase() && item.type === historyItem.type)
       );
       
-      // 添加新项到开�?      filteredHistory.unshift(historyItem);
+      // 添加新项到开�?      filteredHistory.unshift(historyItem);
       
       // 限制历史记录数量
       const limitedHistory = filteredHistory.slice(0, this.searchConfig.maxHistoryItems);
@@ -937,7 +937,7 @@ export class SearchRepository {
   }
 
   /**
-   * 清理过期的搜索历�?   */
+   * 清理过期的搜索历�?   */
   private async cleanupExpiredHistory(): Promise<void> {
     try {
       const history = await this.getSearchHistory();
@@ -978,7 +978,7 @@ export class SearchRepository {
           recent: true
         }));
       
-      // 去重并限制数�?      const uniqueSuggestions = this.deduplicateSuggestions(suggestions).slice(0, 5);
+      // 去重并限制数�?      const uniqueSuggestions = this.deduplicateSuggestions(suggestions).slice(0, 5);
       
       return uniqueSuggestions;
     } catch (error) {
@@ -1008,10 +1008,10 @@ export class SearchRepository {
   private trackSearch(request: SearchRequest, resultCount: number): void {
     try {
       // 这里可以添加搜索行为分析逻辑
-      // 例如发送搜索统计信息到分析服务�?      
+      // 例如发送搜索统计信息到分析服务�?      
       this.logger.debug(`Tracking search: ${request.query}, results: ${resultCount}`);
     } catch (error) {
-      // 分析失败不影响搜索功�?      this.logger.warn('Failed to track search', error as Error);
+      // 分析失败不影响搜索功�?      this.logger.warn('Failed to track search', error as Error);
     }
   }
 
@@ -1030,7 +1030,7 @@ export class SearchRepository {
       // 计算统计信息
       const totalSearches = history.length;
       
-      // 最�?天的搜索�?      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      // 最�?天的搜索�?      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
       const recentSearches = history.filter(item => item.timestamp > weekAgo).length;
       
       // 最常搜索的类型
@@ -1049,7 +1049,7 @@ export class SearchRepository {
         }
       });
       
-      // 平均结果�?      const resultsSum = history.reduce((sum, item) => sum + (item.resultCount || 0), 0);
+      // 平均结果�?      const resultsSum = history.reduce((sum, item) => sum + (item.resultCount || 0), 0);
       const averageResults = history.length > 0 ? resultsSum / history.length : 0;
       
       return {

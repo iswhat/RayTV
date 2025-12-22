@@ -1,27 +1,32 @@
 /**
- * 事件总线工具�? * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能
+ * 事件总线工具类
+ * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能
  */
 
 import Logger from './Logger';
 
 /**
- * 事件处理器类�? */
-export type EventHandler<T = unknown> = (data?: T) => void;
+ * 事件处理器类型
+ */
+export type EventHandler<T = Record<string, string | number | boolean | null>> = (data?: T) => void;
 
 /**
  * 事件订阅接口
  */
 export interface Subscription {
   /**
-   * 事件处理�?   */
+   * 事件处理器
+   */
   handler: EventHandler;
   
   /**
-   * 优先级（数值越小优先级越高�?   */
+   * 优先级（数值越小优先级越高）
+   */
   priority: number;
   
   /**
-   * 是否一次性订�?   */
+   * 是否一次性订阅
+   */
   once: boolean;
   
   /**
@@ -31,10 +36,30 @@ export interface Subscription {
 }
 
 /**
- * 事件总线工具�? */
+ * 批量订阅事件接口
+ */
+export interface BatchEvent {
+  eventName: string;
+  handler: EventHandler;
+  priority?: number;
+  once?: boolean;
+  namespace?: string;
+}
+
+/**
+ * 批量发布事件接口
+ */
+export interface BatchEmitEvent {
+  eventName: string;
+  data?: Record<string, string | number | boolean | null>;
+}
+
+/**
+ * 事件总线工具类
+ */
 export class EventBusUtil {
-  private static instance: EventBusUtil;
-  private logger = Logger;
+  private static instance: EventBusUtil | undefined;
+  private logger = Logger.getInstance();
   private eventMap: Record<string, Subscription[]> = {};
   private isPublishing = false;
   private debounceTimers: Record<string, number> = {};
@@ -52,9 +77,12 @@ export class EventBusUtil {
   /**
    * 订阅事件
    * @param eventName 事件名称
-   * @param handler 事件处理�?   * @param priority 优先级（默认0�?   * @param once 是否一次性订阅（默认false�?   * @param namespace 命名空间
+   * @param handler 事件处理器
+   * @param priority 优先级（默认0）
+   * @param once 是否一次性订阅（默认false）
+   * @param namespace 命名空间
    */
-  public on<T = unknown>(
+  public on<T = Record<string, string | number | boolean | null>>(
     eventName: string,
     handler: EventHandler<T>,
     priority: number = 0,
@@ -80,10 +108,13 @@ export class EventBusUtil {
   }
 
   /**
-   * 一次性订阅事�?   * @param eventName 事件名称
-   * @param handler 事件处理�?   * @param priority 优先�?   * @param namespace 命名空间
+   * 一次性订阅事件
+   * @param eventName 事件名称
+   * @param handler 事件处理器
+   * @param priority 优先级
+   * @param namespace 命名空间
    */
-  public once<T = unknown>(
+  public once<T = Record<string, string | number | boolean | null>>(
     eventName: string,
     handler: EventHandler<T>,
     priority: number = 0,
@@ -97,7 +128,10 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param handler 事件处理器（可选，不传则取消该事件的所有订阅）
    */
-  public off<T = unknown>(eventName: string, handler?: EventHandler<T>): void {
+  public off<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    handler?: EventHandler<T>
+  ): void {
     if (!this.eventMap[eventName]) {
       return;
     }
@@ -110,12 +144,21 @@ export class EventBusUtil {
         this.logger.d('EventBus', `Unsubscribed handler from event: ${eventName}`);
       }
     } else {
-      // 取消该事件的所有订�?      this.eventMap[eventName] = [];
+      // 取消该事件的所有订阅
+      this.eventMap[eventName] = [];
       this.logger.d('EventBus', `Unsubscribed all handlers from event: ${eventName}`);
     }
 
-    // 如果事件没有订阅者了，删除事件条�?    if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
-      delete this.eventMap[eventName];
+    // 如果事件没有订阅者了，删除事件条目
+    if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
+      // 创建新对象，排除当前事件
+      const newEventMap: Record<string, Subscription[]> = {};
+      for (const key in this.eventMap) {
+        if (key !== eventName) {
+          newEventMap[key] = this.eventMap[key];
+        }
+      }
+      this.eventMap = newEventMap;
     }
   }
 
@@ -124,7 +167,10 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T = unknown>(eventName: string, data?: T): void {
+  public emit<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    data?: T
+  ): void {
     if (!this.eventMap[eventName]) {
       return;
     }
@@ -133,16 +179,19 @@ export class EventBusUtil {
     this.isPublishing = true;
 
     try {
-      // 复制订阅列表，避免在遍历过程中修�?      const subscriptions = this.eventMap[eventName].slice();
+      // 复制订阅列表，避免在遍历过程中修改
+      const subscriptions = this.eventMap[eventName].slice();
       const onceSubscriptions: number[] = [];
 
-      // 执行所有订阅�?      for (let i = 0; i < subscriptions.length; i++) {
+      // 执行所有订阅者
+      for (let i = 0; i < subscriptions.length; i++) {
         const subscription = subscriptions[i];
         
         try {
           subscription.handler(data);
           
-          // 标记一次性订�?          if (subscription.once) {
+          // 标记一次性订阅
+          if (subscription.once) {
             onceSubscriptions.push(i);
           }
         } catch (error) {
@@ -150,7 +199,8 @@ export class EventBusUtil {
         }
       }
 
-      // 移除一次性订�?      if (onceSubscriptions.length > 0) {
+      // 移除一次性订阅
+      if (onceSubscriptions.length > 0) {
         // 从后往前删除，避免索引变化
         for (let i = onceSubscriptions.length - 1; i >= 0; i--) {
           const index = onceSubscriptions[i];
@@ -159,8 +209,16 @@ export class EventBusUtil {
           }
         }
         
-        // 如果事件没有订阅者了，删除事件条�?        if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
-          delete this.eventMap[eventName];
+        // 如果事件没有订阅者了，删除事件条目
+        if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
+          // 创建新对象，排除当前事件
+          const newEventMap: Record<string, Subscription[]> = {};
+          for (const key in this.eventMap) {
+            if (key !== eventName) {
+              newEventMap[key] = this.eventMap[key];
+            }
+          }
+          this.eventMap = newEventMap;
         }
       }
 
@@ -174,14 +232,9 @@ export class EventBusUtil {
    * 批量订阅事件
    * @param events 事件配置数组
    */
-  public onBatch(events: Array<{
-    eventName: string;
-    handler: EventHandler;
-    priority?: number;
-    once?: boolean;
-    namespace?: string;
-  }>): void {
-    events.forEach(event => {
+  public onBatch(events: BatchEvent[]): void {
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
       this.on(
         event.eventName,
         event.handler,
@@ -189,17 +242,18 @@ export class EventBusUtil {
         event.once || false,
         event.namespace
       );
-    });
+    }
   }
 
   /**
    * 批量发布事件
    * @param events 事件数组
    */
-  public emitBatch(events: Array<{ eventName: string; data?: Record<string, string | number | boolean | null> }>): void {
-    events.forEach(event => {
+  public emitBatch(events: BatchEmitEvent[]): void {
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
       this.emit(event.eventName, event.data);
-    });
+    }
   }
 
   /**
@@ -208,33 +262,56 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param wait 等待时间（毫秒）
    */
-  public emitDebounced<T = unknown>(eventName: string, data?: T, wait: number = 300): void {
+  public emitDebounced<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    data?: T, 
+    wait: number = 300
+  ): void {
     const debounceKey = `__debounce_${eventName}`;
     
     // 清除之前的定时器
     this.clearDebounceTimer(debounceKey);
     
-    // 创建新的定时�?    const timerId = setTimeout(() => {
-      // 清除定时器引�?      delete this.debounceTimers[debounceKey];
+    // 创建新的定时器
+    const timerId = setTimeout(() => {
+      // 清除定时器引用
+      const newDebounceTimers: Record<string, number> = {};
+      for (const key in this.debounceTimers) {
+        if (key !== debounceKey) {
+          newDebounceTimers[key] = this.debounceTimers[key];
+        }
+      }
+      this.debounceTimers = newDebounceTimers;
+      
       // 发布事件
       this.emit(eventName, data);
-      this.logger.debug(`Debounced event emitted: ${eventName}`);
+      this.logger.d('EventBus', `Debounced event emitted: ${eventName}`);
     }, wait);
     
     // 存储定时器ID
     this.debounceTimers[debounceKey] = timerId;
-    this.logger.debug(`Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
+    this.logger.d('EventBus', `Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
   }
 
   /**
    * 清除指定事件的防抖定时器
-   * @param debounceKey 防抖�?   */
+   * @param debounceKey 防抖键
+   */
   private clearDebounceTimer(debounceKey: string): void {
     if (this.debounceTimers[debounceKey]) {
       const timerId = this.debounceTimers[debounceKey];
       clearTimeout(timerId);
-      delete this.debounceTimers[debounceKey];
-      this.logger.debug(`Debounced timer cleared for key: ${debounceKey}`);
+      
+      // 创建新对象，排除当前防抖键
+      const newDebounceTimers: Record<string, number> = {};
+      for (const key in this.debounceTimers) {
+        if (key !== debounceKey) {
+          newDebounceTimers[key] = this.debounceTimers[key];
+        }
+      }
+      this.debounceTimers = newDebounceTimers;
+      
+      this.logger.d('EventBus', `Debounced timer cleared for key: ${debounceKey}`);
     }
   }
 
@@ -243,12 +320,10 @@ export class EventBusUtil {
    */
   public clearAllDebounceTimers(): void {
     try {
-      this.logger.debug('Clearing all debounce timers', {});
+      this.logger.d('EventBus', 'Clearing all debounce timers', {});
       for (const debounceKey in this.debounceTimers) {
-        if (debounceKey in this.debounceTimers) {
-          const timerId = this.debounceTimers[debounceKey];
-          clearTimeout(timerId);
-        }
+        const timerId = this.debounceTimers[debounceKey];
+        clearTimeout(timerId);
       }
       this.debounceTimers = {};
     } catch (error) {
@@ -257,19 +332,8 @@ export class EventBusUtil {
   }
 
   /**
-   * 获取事件订阅数量
-   * @param eventName 事件名称
-   * @returns 订阅数量
-   */
-  public getSubscriptionCount(eventName: string): number {
-    if (this.eventMap[eventName]) {
-      return this.eventMap[eventName].length;
-    }
-    return 0;
-  }
-
-  /**
-   * 查找数组中元素的索引（兼容ES5的findIndex实现�?   * @param array 数组
+   * 查找数组中元素的索引（兼容ES5的findIndex实现）
+   * @param array 数组
    * @param predicate 断言函数
    * @returns 索引，未找到返回-1
    */
@@ -283,35 +347,43 @@ export class EventBusUtil {
   }
 
   /**
-   * 检查是否有特定事件的订阅�?   * @param eventName 事件名称
-   * @returns 是否有订阅�?   */
+   * 检查是否有特定事件的订阅者
+   * @param eventName 事件名称
+   * @returns 是否有订阅者
+   */
   public hasSubscribers(eventName: string): boolean {
     return !!this.eventMap[eventName] && this.eventMap[eventName].length > 0;
   }
 
   /**
-   * 获取所有事件名�?   * @returns 事件名称数组
+   * 获取所有事件名称
+   * @returns 事件名称数组
    */
   public getEventNames(): string[] {
-    return Object.keys(this.eventMap);
+    const eventNames: string[] = [];
+    for (const key in this.eventMap) {
+      eventNames.push(key);
+    }
+    return eventNames;
   }
 
   /**
    * 清空所有事件订阅
    */
   public clear(): void {
-    const operation = () => {
+    // 创建操作函数
+    const clearAll = (): void => {
       this.eventMap = {};
       // 同时清除所有防抖定时器
       this.clearAllDebounceTimers();
-      this.logger.debug('All event subscriptions cleared', {});
+      this.logger.d('EventBus', 'All event subscriptions cleared', {});
     };
 
     // 如果当前正在发布事件，延迟执行
     if (this.isPublishing) {
-      setTimeout(operation, 0);
+      setTimeout(clearAll, 0);
     } else {
-      operation();
+      clearAll();
     }
   }
 
@@ -320,13 +392,14 @@ export class EventBusUtil {
    */
   public destroy(): void {
     this.clear();
-    EventBusUtil.instance = null as any;
-    this.logger.debug('EventBus instance destroyed', {});
+    EventBusUtil.instance = undefined;
+    this.logger.d('EventBus', 'EventBus instance destroyed', {});
   }
 }
 
 /**
- * 事件命名空间�? */
+ * 事件命名空间类
+ */
 export class EventNamespace {
   private namespace: string;
   private eventBus: EventBusUtil;
@@ -339,21 +412,34 @@ export class EventNamespace {
   /**
    * 订阅命名空间事件
    */
-  public on<T = unknown>(eventName: string, handler: EventHandler<T>, priority: number = 0, once: boolean = false): void {
+  public on<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    handler: EventHandler<T>, 
+    priority: number = 0, 
+    once: boolean = false
+  ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
     this.eventBus.on(fullEventName, handler, priority, once, this.namespace);
   }
 
   /**
-   * 一次性订阅命名空间事�?   */
-  public once<T = unknown>(eventName: string, handler: EventHandler<T>, priority: number = 0): void {
+   * 一次性订阅命名空间事件
+   */
+  public once<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    handler: EventHandler<T>, 
+    priority: number = 0
+  ): void {
     this.on(eventName, handler, priority, true);
   }
 
   /**
    * 取消命名空间事件订阅
    */
-  public off<T = unknown>(eventName: string, handler?: EventHandler<T>): void {
+  public off<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    handler?: EventHandler<T>
+  ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
     this.eventBus.off(fullEventName, handler);
   }
@@ -361,20 +447,34 @@ export class EventNamespace {
   /**
    * 发布命名空间事件
    */
-  public emit<T = unknown>(eventName: string, data?: T): void {
+  public emit<T = Record<string, string | number | boolean | null>>(
+    eventName: string, 
+    data?: T
+  ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
     this.eventBus.emit(fullEventName, data);
   }
 
   /**
-   * 清空命名空间下的所有事件订�?   */
+   * 清空命名空间下的所有事件订阅
+   */
   public clear(): void {
     const allEvents = this.eventBus.getEventNames();
-    const namespaceEvents = allEvents.filter(event => event.indexOf(`${this.namespace}:`) === 0);
+    const namespaceEvents: string[] = [];
     
-    namespaceEvents.forEach(event => {
+    // 收集命名空间下的所有事件
+    for (let i = 0; i < allEvents.length; i++) {
+      const event = allEvents[i];
+      if (event.startsWith(`${this.namespace}:`)) {
+        namespaceEvents.push(event);
+      }
+    }
+    
+    // 取消所有命名空间下的事件订阅
+    for (let i = 0; i < namespaceEvents.length; i++) {
+      const event = namespaceEvents[i];
       this.eventBus.off(event);
-    });
+    }
   }
 }
 

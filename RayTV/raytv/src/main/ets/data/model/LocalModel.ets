@@ -1,5 +1,5 @@
 // LocalModel - 本地存储相关模型定义
-// 定义本地文件、存储等相关的数据模�?
+// 定义本地文件、存储等相关的数据模�?
 /**
  * 本地存储类型枚举
  */
@@ -20,7 +20,7 @@ export enum LocalStorageType {
   SECURE = 'secure',
   
   /**
-   * 持久化存�?   */
+   * 持久化存�?   */
   PERSISTENT = 'persistent'
 }
 
@@ -117,7 +117,7 @@ export enum FileFormat {
   // 压缩格式
   ZIP = 'zip',
   RAR = 'rar',
-  7Z = '7z',
+  SEVEN_Z = '7z',
   TAR = 'tar',
   GZ = 'gz',
   BZ2 = 'bz2',
@@ -144,7 +144,7 @@ export enum StorageLocation {
   EXTERNAL = 'external',
   
   /**
-   * SD卡存�?   */
+   * SD卡存�?   */
   SD_CARD = 'sd_card',
   
   /**
@@ -159,7 +159,7 @@ export enum StorageLocation {
 }
 
 /**
- * 文件元数据接�? */
+ * 文件元数据接�? */
 export interface FileMetadata {
   /**
    * 文件路径
@@ -167,7 +167,7 @@ export interface FileMetadata {
   path: string;
   
   /**
-   * 文件�?   */
+   * 文件�?   */
   name: string;
   
   /**
@@ -176,15 +176,15 @@ export interface FileMetadata {
   size: number;
   
   /**
-   * 修改时间（时间戳�?   */
+   * 修改时间（时间戳�?   */
   modifiedAt: number;
   
   /**
-   * 创建时间（时间戳�?   */
+   * 创建时间（时间戳�?   */
   createdAt?: number;
   
   /**
-   * 是否为目�?   */
+   * 是否为目�?   */
   isDirectory: boolean;
   
   /**
@@ -198,7 +198,7 @@ export interface FileMetadata {
   fileFormat?: FileFormat;
   
   /**
-   * 文件扩展�?   */
+   * 文件扩展�?   */
   extension?: string;
   
   /**
@@ -217,7 +217,7 @@ export interface FileMetadata {
   permissions?: string;
   
   /**
-   * 校验和（MD5�?   */
+   * 校验和（MD5�?   */
   md5?: string;
 }
 
@@ -236,15 +236,15 @@ export interface DirectoryInfo {
   name: string;
   
   /**
-   * 子文件数�?   */
+   * 子文件数�?   */
   fileCount: number;
   
   /**
-   * 子目录数�?   */
+   * 子目录数�?   */
   directoryCount: number;
   
   /**
-   * 总大小（字节�?   */
+   * 总大小（字节�?   */
   totalSize: number;
   
   /**
@@ -278,7 +278,7 @@ export interface StorageDevice {
   mountPath: string;
   
   /**
-   * 总空间（字节�?   */
+   * 总空间（字节�?   */
   totalSpace: number;
   
   /**
@@ -292,7 +292,7 @@ export interface StorageDevice {
   type: StorageDeviceType;
   
   /**
-   * 是否可移�?   */
+   * 是否可移�?   */
   removable: boolean;
   
   /**
@@ -316,7 +316,7 @@ export enum StorageDeviceType {
   INTERNAL = 'internal',
   
   /**
-   * SD�?   */
+   * SD�?   */
   SD_CARD = 'sd_card',
   
   /**
@@ -345,7 +345,7 @@ export interface FileSearchParams {
   searchPath: string;
   
   /**
-   * 搜索关键�?   */
+   * 搜索关键�?   */
   keyword?: string;
   
   /**
@@ -359,15 +359,15 @@ export interface FileSearchParams {
   fileFormats?: FileFormat[];
   
   /**
-   * 是否递归搜索子目�?   */
+   * 是否递归搜索子目�?   */
   recursive?: boolean;
   
   /**
-   * 最小文件大小（字节�?   */
+   * 最小文件大小（字节�?   */
   minSize?: number;
   
   /**
-   * 最大文件大小（字节�?   */
+   * 最大文件大小（字节�?   */
   maxSize?: number;
   
   /**
@@ -446,7 +446,7 @@ export enum FileOperationType {
   DELETE = 'delete',
   
   /**
-   * 重命�?   */
+   * 重命�?   */
   RENAME = 'rename',
   
   /**
@@ -480,7 +480,7 @@ export interface FileOperationResult {
   operationType: FileOperationType;
   
   /**
-   * 源文件路�?   */
+   * 源文件路�?   */
   sourcePath?: string;
   
   /**
@@ -554,11 +554,11 @@ export interface FileMonitorEvent {
   path: string;
   
   /**
-   * 旧文件路径（用于移动事件�?   */
+   * 旧文件路径（用于移动事件�?   */
   oldPath?: string;
   
   /**
-   * 事件时间�?   */
+   * 事件时间�?   */
   timestamp: number;
 }
 
@@ -567,15 +567,15 @@ export interface FileMonitorEvent {
  */
 export enum FileCleanupStrategy {
   /**
-   * 按文件大�?   */
+   * 按文件大�?   */
   BY_SIZE = 'by_size',
   
   /**
-   * 按文件时�?   */
+   * 按文件时�?   */
   BY_TIME = 'by_time',
   
   /**
-   * 按文件类�?   */
+   * 按文件类�?   */
   BY_TYPE = 'by_type',
   
   /**
@@ -599,7 +599,7 @@ export interface FileCleanupConfig {
   targetDir: string;
   
   /**
-   * 最大文件大小（字节�?   */
+   * 最大文件大小（字节�?   */
   maxFileSize?: number;
   
   /**
@@ -618,11 +618,11 @@ export interface FileCleanupConfig {
   keepLatestCount?: number;
   
   /**
-   * 是否递归清理子目�?   */
+   * 是否递归清理子目�?   */
   recursive: boolean;
   
   /**
-   * 是否预览（不实际删除�?   */
+   * 是否预览（不实际删除�?   */
   previewOnly: boolean;
 }
 
@@ -641,11 +641,11 @@ export interface FileCleanupResult {
   directoriesCleaned: number;
   
   /**
-   * 释放的空间（字节�?   */
+   * 释放的空间（字节�?   */
   spaceFreed: number;
   
   /**
-   * 清理失败的文�?   */
+   * 清理失败的文�?   */
   failedFiles: string[];
   
   /**
@@ -689,11 +689,11 @@ export interface LocalStorageConfig {
   tempDir: string;
   
   /**
-   * 最大缓存大小（字节�?   */
+   * 最大缓存大小（字节�?   */
   maxCacheSize: number;
   
   /**
-   * 自动清理缓存的时间间隔（毫秒�?   */
+   * 自动清理缓存的时间间隔（毫秒�?   */
   autoCleanupInterval: number;
   
   /**
@@ -719,7 +719,7 @@ export interface FileIcon {
    */
   iconResourceId: string;
   /**
-   * 自定义图标路�?   */
+   * 自定义图标路�?   */
   customIconPath?: string;
 }
 

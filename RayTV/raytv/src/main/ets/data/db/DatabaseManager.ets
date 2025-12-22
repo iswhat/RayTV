@@ -1,5 +1,7 @@
 // DatabaseManager.ets - 数据库管理器
-// 实现基于HarmonyOS RelationalStore的数据库连接和管�?import relationalStore from '@ohos.data.relationalStore';
+// 实现基于HarmonyOS RelationalStore的数据库连接和管理
+import relationalStore from '@ohos.data.relationalStore';
+import { Context } from '@ohos.ability.featureAbility';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
 import Logger from '../../common/util/Logger';
 

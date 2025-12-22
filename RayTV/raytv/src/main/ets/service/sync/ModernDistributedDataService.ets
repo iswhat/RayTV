@@ -6,6 +6,7 @@ import deviceManager from '@ohos.distributedDeviceManager';
 import BusinessError from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
+import { Serializable } from '../../types/commonTypes';
 
 // 常量定义
 const TAG = 'ModernDistributedDataService';
@@ -310,7 +311,7 @@ export default class ModernDistributedDataService {
    * @param key 数据键
    * @param data 数据内容
    */
-  async saveSyncData<T = unknown>(dataType: SyncDataType, key: string, data: T): Promise<void> {
+  async saveSyncData<T = Serializable>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
       return;
     }
@@ -336,7 +337,7 @@ export default class ModernDistributedDataService {
    * @param dataType 数据类型
    * @param key 数据键
    */
-  async getSyncData<T = unknown>(dataType: SyncDataType, key: string): Promise<T | null> {
+  async getSyncData<T = Serializable>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
       return null;
     }

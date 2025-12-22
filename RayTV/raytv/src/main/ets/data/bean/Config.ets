@@ -240,8 +240,39 @@ export interface ConfigImportExportOptions {
 }
 
 /**
- * 站点配置集合接口
- */
+ *// Live频道接口
+export interface LiveChannel {
+  name: string;              // 频道名称
+  url?: string;              // 直播URL
+  urls?: string[];           // 直播URL列表
+  epg?: string;              // EPG配置
+  logo?: string;             // 频道Logo
+}
+
+// Live组接口
+export interface LiveGroup {
+  group: string;             // 组名
+  channels: LiveChannel[];   // 频道列表
+}
+
+// Live配置接口
+export interface LiveConfigItem {
+  name: string;              // 直播源名称
+  type: number;              // 类型
+  playerType?: number | string;  // 播放器类型
+  url?: string;              // 直播列表URL
+  epg?: string;              // EPG配置
+  logo?: string;             // Logo
+}
+
+// Live配置集合接口
+export interface LiveCollection {
+  lives: (LiveConfigItem | LiveGroup)[];  // 直播配置列表
+  version?: string;          // 版本
+  updatedAt?: number;        // 更新时间
+}
+
+// 站点配置集合接口
 export interface SiteCollection {
   sites: SiteInfo[];           // 站点列表
   version: string;             // 版本：  updatedAt: number;           // 更新时间

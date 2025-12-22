@@ -929,11 +929,8 @@ export class UserRepository {
   /**
    * 清理用户信息，移除敏感数�?   */
   private sanitizeUserInfo(userInfo: UserInfo): UserInfo {
-    const sanitized = { ...userInfo };
-    
-    // 移除敏感信息（如果有�?    delete (sanitized as any).password;
-    delete (sanitized as any).resetToken;
-    delete (sanitized as any).verificationToken;
+    // 使用解构创建新对象，只包含非敏感属性
+    const { password, resetToken, verificationToken, ...sanitized } = userInfo;
     
     return sanitized;
   }

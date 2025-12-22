@@ -19,7 +19,7 @@ declare module '@ohos.net.http' {
   
   export interface HttpResponse {
     responseCode: number;
-    result: string | ArrayBuffer | Record<string, any>;
+    result: string | ArrayBuffer | Record<string, Serializable>;
     header: Record<string, string>;
   }
   

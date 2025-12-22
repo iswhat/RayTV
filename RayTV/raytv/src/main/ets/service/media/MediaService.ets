@@ -2,6 +2,7 @@
 // 实现媒体管理功能，包括播放记录、收藏管理等
 
 import Logger from '../../common/util/Logger';
+import ApiResponse from '../../data/dto/ApiResponse';
 
 // 常量定义
 const TAG = 'MediaService';
@@ -24,6 +25,16 @@ export interface MediaInfo {
   cover?: string;
   siteKey: string;
   addedAt: number;
+}
+
+// 推荐内容接口
+export interface RecommendedContent {
+  id: string;
+  title: string;
+  cover?: string;
+  type: string;
+  siteKey: string;
+  rating?: string;
 }
 
 /**
@@ -156,6 +167,38 @@ export class MediaService {
    */
   public getAllCollections(): Map<string, MediaInfo> {
     return this.collections;
+  }
+  
+  /**
+   * 获取推荐内容
+   */
+  public async getRecommendedContent(): Promise<ApiResponse<RecommendedContent[]>> {
+    try {
+      Logger.info(TAG, 'Getting recommended content...');
+      
+      // 从真实站点获取推荐内容
+      // 1. 获取所有启用的站点
+      const SiteService = await import('../spider/SiteService');
+      const siteService = SiteService.SiteService.getInstance();
+      const enabledSites = await siteService.getEnabledSites();
+      
+      // 2. 如果没有启用的站点，返回空列表
+      if (enabledSites.length === 0) {
+        Logger.warn(TAG, 'No enabled sites found');
+        return ApiResponse.success([], '获取推荐内容成功');
+      }
+      
+      // 3. 从每个启用的站点获取推荐内容
+      // 注意：这里需要根据实际的站点API实现来获取内容
+      // 目前简化实现，返回空列表，后续需要根据具体站点实现来完善
+      const recommendedContent: RecommendedContent[] = [];
+      
+      Logger.info(TAG, `Retrieved ${recommendedContent.length} recommended content items from ${enabledSites.length} sites`);
+      return ApiResponse.success(recommendedContent, '获取推荐内容成功');
+    } catch (error) {
+      Logger.error(TAG, `Failed to get recommended content: ${error instanceof Error ? error.message : String(error)}`);
+      return ApiResponse.error(500, '获取推荐内容失败');
+    }
   }
 
   /**

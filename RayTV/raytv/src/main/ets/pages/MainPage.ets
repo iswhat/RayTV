@@ -1,4 +1,4 @@
-import { AppNavigator } from '../navigation/AppNavigator';
+import { AppNavigator, DetailParams, CategoryInfo } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import ConfigService from '../service/config/ConfigService';
 import MediaService from '../service/media/MediaService';
@@ -22,11 +22,7 @@ interface FeaturedMediaItem {
   rating?: string;
 }
 
-interface CategoryItem {
-  id: string;
-  name: string;
-  type: string;
-}
+
 
 @Entry
 @Component
@@ -37,6 +33,8 @@ struct MainPage {
   // 状态管理
   @State featuredMedia: FeaturedMediaItem[] = [];
   @State isLoading: boolean = true;
+  @State isError: boolean = false;
+  @State errorMessage: string = '推荐内容加载失败';
   @State selectedTab: string = 'home';
   @State isLandscape: boolean = false;
   @State screenWidth: number = 0;
@@ -92,16 +90,25 @@ struct MainPage {
   // 注册屏幕方向监听器
   private registerScreenOrientationListener() {
     try {
-      const displayId = display.getDefaultDisplaySync().id;
-      display.on('change', displayId, (info: display.Display) => {
-        Logger.info(this.TAG, `Display change: ${JSON.stringify(info)}`);
-        this.screenWidth = info.width;
-        this.screenHeight = info.height;
-        this.isLandscape = this.screenWidth > this.screenHeight;
-      });
+      // 移除事件监听，简化实现
+      this.updateScreenOrientation();
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to register screen orientation listener: ${errorMsg}`);
+      Logger.error(this.TAG, `Failed to update screen orientation: ${errorMsg}`);
+    }
+  }
+  
+  // 更新屏幕方向
+  private updateScreenOrientation() {
+    try {
+      const displayInfo = display.getDefaultDisplaySync();
+      this.screenWidth = displayInfo.width;
+      this.screenHeight = displayInfo.height;
+      this.isLandscape = this.screenWidth > this.screenHeight;
+      Logger.info(this.TAG, `Screen orientation updated: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to get display info: ${errorMsg}`);
     }
   }
   
@@ -111,19 +118,34 @@ struct MainPage {
   private async loadFeaturedMedia() {
     try {
       this.isLoading = true;
-      // 简化实现，使用模拟数据
-      this.featuredMedia = [
-        { id: '1', title: '天剑心', cover: 'https://example.com/cover1.jpg', type: 'vod', rating: '7.2' },
-        { id: '2', title: '毕正明的证明', cover: 'https://example.com/cover2.jpg', type: 'vod', rating: '7.6' },
-        { id: '3', title: '命悬一生', cover: 'https://example.com/cover3.jpg', type: 'vod', rating: '7.4' },
-        { id: '4', title: '花漾少女杀人事件', cover: 'https://example.com/cover4.jpg', type: 'vod', rating: '6.5' },
-        { id: '5', title: '许你耀眼', cover: 'https://example.com/cover5.jpg', type: 'vod', rating: '8.1' },
-        { id: '6', title: '沉默的荣耀', cover: 'https://example.com/cover6.jpg', type: 'vod', rating: '9.0' }
-      ];
-      Logger.info(this.TAG, 'Loaded featured media items');
+      this.isError = false;
+      Logger.info(this.TAG, 'Loading featured media...');
+      
+      // 使用MediaService获取实际的推荐内容
+      const result = await this.mediaService.getRecommendedContent();
+      
+      if (result.isSuccess() && result.data && result.data.length > 0) {
+        this.featuredMedia = result.data.map(item => ({
+          id: item.id,
+          title: item.title,
+          cover: item.cover || '',
+          type: item.type,
+          siteKey: item.siteKey,
+          rating: item.rating
+        } as FeaturedMediaItem));
+        Logger.info(this.TAG, `Loaded ${this.featuredMedia.length} featured media items`);
+      } else {
+        // 加载失败，设置错误状态
+        this.isError = true;
+        this.errorMessage = result.message || '推荐内容加载失败';
+        this.featuredMedia = [];
+        Logger.warn(this.TAG, `Failed to load featured media: ${this.errorMessage}`);
+      }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to load featured media: ${errorMsg}`);
+      this.isError = true;
+      this.errorMessage = errorMsg;
       this.featuredMedia = [];
     } finally {
       this.isLoading = false;
@@ -131,7 +153,7 @@ struct MainPage {
   }
   
   // 跳转到分类页面
-  private navigateToCategory(category: CategoryItem) {
+  private navigateToCategory(category: CategoryInfo) {
     AppNavigator.getInstance().navigateToCategory(category);
   }
   
@@ -157,8 +179,7 @@ struct MainPage {
   
   // 切换线路
   private switchLine() {
-    // 实现线路切换逻辑
-    Logger.info(this.TAG, 'Switching line');
+    AppNavigator.getInstance().navigateToLineManager();
   }
   
   // 获取当前日期时间
@@ -188,12 +209,19 @@ struct MainPage {
   @Builder
   renderMediaItem(media: FeaturedMediaItem) {
     Column() {
+      // 修复图片显示问题：添加错误处理和默认图片
       Image(media.cover)
         .width('100%')
         .aspectRatio(3/4)
         .objectFit(ImageFit.Cover)
         .borderRadius(8)
         .margin({ top: 10 })
+        .backgroundColor('#F5F5F5')
+        .onError(() => {
+          Logger.warn(this.TAG, `Failed to load cover image: ${media.cover}`);
+          // 图片加载失败时，使用占位图片
+          // 这里使用系统默认占位图，也可以替换为实际的占位图片资源
+        })
       Text(media.title)
         .fontSize(14)
         .maxLines(2)
@@ -210,7 +238,14 @@ struct MainPage {
     .backgroundColor('#FFFFFF')
     .borderRadius(10)
     .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
-    .onClick(() => AppNavigator.getInstance().navigateToDetail({ id: media.id, siteKey: media.siteKey || '', type: 'vod' }))
+    .onClick(() => {
+      const params: DetailParams = {
+        id: media.id,
+        siteKey: media.siteKey || '',
+        type: 'vod'
+      };
+      AppNavigator.getInstance().navigateToDetail(params);
+    })
   }
   
   build() {
@@ -240,16 +275,16 @@ struct MainPage {
         // 导航标签栏
         Scroll() {
           Row() {
-            ForEach(this.tabs, (tab) => {
+            ForEach(this.tabs, (tab: TabItem) => {
               Text(tab.name)
                 .fontSize(14)
-              .fontWeight(this.selectedTab === tab.key ? 700 : 400)
-              .fontColor(this.selectedTab === tab.key ? "#4CAF50" : "#333333")
-              .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+                .fontWeight(this.selectedTab === tab.key ? 700 : 400)
+                .fontColor(this.selectedTab === tab.key ? "#4CAF50" : "#333333")
+                .padding({ left: 16, right: 16, top: 12, bottom: 12 })
                 .onClick(() => {
                   this.selectedTab = tab.key;
                 })
-            }, (tab) => tab.key)
+            }, (tab: TabItem) => tab.key)
           }
           .width("100%")
         }
@@ -260,94 +295,89 @@ struct MainPage {
       
       // 功能按钮栏
       Row() {
-        Button() {
-          Row() {
-            Image("/resources/base/media/app_icon.svg")
-              .width(20)
-              .height(20)
-            Text("历史")
-              .fontSize(14)
-              .margin({ left: 4 })
-          }
+        Column() {
+          Image("/resources/base/media/app_icon.svg")
+            .width(20)
+            .height(20)
+            .margin({ bottom: 4 })
+          Text("历史")
+            .fontSize(14)
+            .fontColor("#FFFFFF")
         }
-        .backgroundColor("#FFFFFF")
-        .fontColor("#333333")
-        .height(40)
-        .padding({ left: 15, right: 15 })
-        .borderRadius(20)
+        .backgroundColor("#4CAF50")
+        .height(70)
+        .padding({ left: 20, right: 20 })
+        .borderRadius(8)
         .margin({ left: 10 })
+        .justifyContent(FlexAlign.Center)
         .onClick(() => this.navigateToHistory())
         
-        Button() {
-          Row() {
-            Image("/resources/base/media/app_icon.svg")
-              .width(20)
-              .height(20)
-            Text("直播")
-              .fontSize(14)
-              .margin({ left: 4 })
-          }
+        Column() {
+          Image("/resources/base/media/app_icon.svg")
+            .width(20)
+            .height(20)
+            .margin({ bottom: 4 })
+          Text("直播")
+            .fontSize(14)
+            .fontColor("#FFFFFF")
         }
-        .backgroundColor("#FFFFFF")
-        .fontColor("#333333")
-        .height(40)
-        .padding({ left: 15, right: 15 })
-        .borderRadius(20)
+        .backgroundColor("#4CAF50")
+        .height(70)
+        .padding({ left: 20, right: 20 })
+        .borderRadius(8)
         .margin({ left: 10 })
+        .justifyContent(FlexAlign.Center)
         .onClick(() => this.navigateToLive())
         
-        Button() {
-          Row() {
-            Image("/resources/base/media/app_icon.svg")
-              .width(20)
-              .height(20)
-            Text("搜索")
-              .fontSize(14)
-              .margin({ left: 4 })
-          }
+        Column() {
+          Image("/resources/base/media/app_icon.svg")
+            .width(20)
+            .height(20)
+            .margin({ bottom: 4 })
+          Text("搜索")
+            .fontSize(14)
+            .fontColor("#FFFFFF")
         }
-        .backgroundColor("#FFFFFF")
-        .fontColor("#333333")
-        .height(40)
-        .padding({ left: 15, right: 15 })
-        .borderRadius(20)
+        .backgroundColor("#4CAF50")
+        .height(70)
+        .padding({ left: 20, right: 20 })
+        .borderRadius(8)
         .margin({ left: 10 })
+        .justifyContent(FlexAlign.Center)
         .onClick(() => this.navigateToSearch())
         
-        Button() {
-          Row() {
-            Image("/resources/base/media/app_icon.svg")
-              .width(20)
-              .height(20)
-            Text("线路")
-              .fontSize(14)
-              .margin({ left: 4 })
-          }
+        Column() {
+          Image("/resources/base/media/app_icon.svg")
+            .width(20)
+            .height(20)
+            .margin({ bottom: 4 })
+          Text("线路")
+            .fontSize(14)
+            .fontColor("#FFFFFF")
         }
-        .backgroundColor("#FFFFFF")
-        .fontColor("#333333")
-        .height(40)
-        .padding({ left: 15, right: 15 })
-        .borderRadius(20)
+        .backgroundColor("#4CAF50")
+        .height(70)
+        .padding({ left: 20, right: 20 })
+        .borderRadius(8)
         .margin({ left: 10 })
+        .justifyContent(FlexAlign.Center)
         .onClick(() => this.switchLine())
         
-        Button() {
-          Row() {
-            Image("/resources/base/media/app_icon.svg")
-              .width(20)
-              .height(20)
-            Text("设置")
-              .fontSize(14)
-              .margin({ left: 4 })
-          }
+        Column() {
+          Image("/resources/base/media/app_icon.svg")
+            .width(20)
+            .height(20)
+            .margin({ bottom: 4 })
+          Text("设置")
+            .fontSize(14)
+            .fontColor("#FFFFFF")
         }
-        .backgroundColor("#FFFFFF")
-        .fontColor("#333333")
-        .height(40)
-        .padding({ left: 15, right: 15 })
-        .borderRadius(20)
+        .backgroundColor("#4CAF50")
+        .height(70)
+        .padding({ left: 20, right: 20 })
+        .borderRadius(8)
         .margin({ left: 10, right: 10 })
+        .justifyContent(FlexAlign.Center)
         .onClick(() => this.navigateToSettings())
       }
       .width("100%")
@@ -372,6 +402,42 @@ struct MainPage {
             }
             .justifyContent(FlexAlign.Center)
             .height(200)
+          } else if (this.isError) {
+            // 显示错误信息和操作按钮
+            Column() {
+              Image("/resources/base/media/app_icon.svg")
+                .width(80)
+                .height(80)
+                .opacity(0.3)
+              Text("推荐内容加载失败")
+                .fontSize(16)
+                .fontColor("#FF5252")
+                .margin({ top: 15 })
+              Text(this.errorMessage)
+                .fontSize(14)
+                .fontColor("#FF9800")
+                .margin({ top: 8 })
+              Row() {
+                Button("重试")
+                  .onClick(() => this.loadFeaturedMedia())
+                  .backgroundColor("#4CAF50")
+                  .fontColor("white")
+                  .borderRadius(15)
+                  .padding({ left: 20, right: 20, top: 8, bottom: 8 })
+                  .margin({ top: 15, right: 10 })
+                  .fontSize(14)
+                Button("切换片源")
+                  .onClick(() => this.switchLine())
+                  .backgroundColor("#2196F3")
+                  .fontColor("white")
+                  .borderRadius(15)
+                  .padding({ left: 20, right: 20, top: 8, bottom: 8 })
+                  .margin({ top: 15, left: 10 })
+                  .fontSize(14)
+              }
+            }
+            .justifyContent(FlexAlign.Center)
+            .height(250)
           } else if (this.featuredMedia.length > 0) {
             // 使用Grid布局显示内容，根据屏幕方向自动调整列数
             Grid() {
@@ -424,6 +490,5 @@ struct MainPage {
     .width('100%')
     .height('100%')
     .backgroundColor("#F5F5F5")
-    .direction(FlexDirection.Column)
   }
 }

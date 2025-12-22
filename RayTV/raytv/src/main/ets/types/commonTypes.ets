@@ -136,7 +136,7 @@ export interface HistoryItem {
   progress: number;
   lastPlayed: string;
   totalDuration?: number;
-  extra?: Record<string, any>;
+  extra?: Record<string, Serializable>;
 }
 
 /**
@@ -149,7 +149,7 @@ export interface FavoriteItem {
   mediaType: 'video' | 'audio' | 'image' | 'playlist';
   addedAt: string;
   note?: string;
-  extra?: Record<string, any>;
+  extra?: Record<string, Serializable>;
 }
 
 /**
@@ -196,7 +196,7 @@ export interface HttpResponse<T> {
 export interface ErrorInfo {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, Serializable>;
   timestamp?: number;
 }
 
@@ -272,14 +272,14 @@ export type NonNullableValue<T> = T;
  * 通用函数类型
  */
 export interface AnyFunction {
-  (...args: any[]): any;
+  (...args: Serializable[]): Serializable;
 }
 
 /**
  * 异步函数类型
  */
 export interface AsyncFunction<T> {
-  (...args: any[]): Promise<T>;
+  (...args: Serializable[]): Promise<T>;
 }
 
 /**

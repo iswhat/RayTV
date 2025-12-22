@@ -98,13 +98,48 @@ struct MediaDetailPage {
   @State errorMessage: string = '';
   @State activeTab: string = 'episodes';
 
+  /**
+   * 返回上一页
+   */
+  private handleBack(): void {
+    // 实现返回逻辑
+  }
+
+  /**
+   * 显示内容简介
+   */
+  private showContentIntro(): void {
+    // 实现显示内容简介逻辑
+  }
+
+  /**
+   * 处理剧集点击
+   */
+  private handleEpisodeClick(episode: Episode): void {
+    // 实现处理剧集点击逻辑
+  }
+
+  /**
+   * 处理播放点击
+   */
+  private handlePlayClick(episode: Episode, source: PlaySource): void {
+    // 实现处理播放点击逻辑
+  }
+
+  /**
+   * 切换线路
+   */
+  private switchLine(lineId: string): void {
+    // 实现切换线路逻辑
+  }
+
   build() {
     Column() {
       // 顶部导航栏
       Row() {
         Button()
           .backgroundColor('transparent')
-          .onClick(this.handleBack)
+          .onClick(() => this.handleBack())
         {
           Text("返回")
             .fontSize(24)
@@ -192,8 +227,147 @@ struct MediaDetailPage {
    * 渲染媒体顶部信息
    */
   @Builder
-  private renderHeader(): void {
-    // 这里应该实现媒体顶部信息的渲染逻辑
+  private renderHeader() {
+    Column() {
+      // 封面图和标题信息
+      Row() {
+        // 封面图
+        Image(this.mediaDetail.coverUrl)
+          .width(200)
+          .height(280)
+          .objectFit(ImageFit.Cover)
+          .borderRadius(8)
+          .margin({ right: 20 })
+        
+        // 标题信息
+        Column() {
+          Text(this.mediaDetail.title)
+            .fontSize(24)
+            .fontColor('#FFFFFF')
+            .fontWeight(700)
+            .margin({ bottom: 10 })
+          
+          // 来源信息
+          Text(`来源: ${this.mediaDetail.siteKey}`)
+            .fontSize(16)
+            .fontColor('#FFFFFF')
+            .margin({ bottom: 10 })
+          
+          // 年份信息
+          if (this.mediaDetail.year) {
+            Text(`年份: ${this.mediaDetail.year}`)
+              .fontSize(16)
+              .fontColor('#FFFFFF')
+              .margin({ bottom: 10 })
+          }
+          
+          // 导演和演员信息
+          if (this.mediaDetail.directors && this.mediaDetail.directors.length > 0) {
+            Text(`导演: ${this.mediaDetail.directors.join('、')}`)
+              .fontSize(16)
+              .fontColor('#FFFFFF')
+              .margin({ bottom: 5 })
+          }
+          
+          if (this.mediaDetail.actors && this.mediaDetail.actors.length > 0) {
+            Text(`演员: ${this.mediaDetail.actors.slice(0, 5).join('、')}${this.mediaDetail.actors.length > 5 ? '...' : ''}`)
+              .fontSize(16)
+              .fontColor('#FFFFFF')
+              .margin({ bottom: 15 })
+          }
+          
+          // 播放地址
+          Text(`播放地址: ${this.mediaDetail.siteKey}_${this.mediaDetail.id}`)
+            .fontSize(14)
+            .fontColor('#FFFFFF')
+            .margin({ bottom: 15 })
+          
+          // 内容简介按钮
+            Button('内容简介')
+              .backgroundColor('#2196F3')
+              .fontColor('#FFFFFF')
+              .borderRadius(8)
+              .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+              .fontSize(14)
+              .onClick(() => {
+                this.showContentIntro();
+              })
+        }
+        .flexGrow(1)
+      }
+      .padding({ left: 20, right: 20, top: 15 })
+      
+      // 功能按钮
+      Row() {
+        Button('快速搜索')
+          .backgroundColor('#FF9800')
+          .fontColor('#FFFFFF')
+          .borderRadius(8)
+          .padding({ left: 16, right: 16, top: 10, bottom: 10 })
+          .fontSize(16)
+          .margin({ right: 10 })
+          
+        Button('倒序')
+          .backgroundColor('#9C27B0')
+          .fontColor('#FFFFFF')
+          .borderRadius(8)
+          .padding({ left: 16, right: 16, top: 10, bottom: 10 })
+          .fontSize(16)
+          .margin({ right: 10 })
+          
+        Button('加入收藏')
+          .backgroundColor('#4CAF50')
+          .fontColor('#FFFFFF')
+          .borderRadius(8)
+          .padding({ left: 16, right: 16, top: 10, bottom: 10 })
+          .fontSize(16)
+          .margin({ right: 10 })
+          
+        Button('内容简介')
+          .backgroundColor('#2196F3')
+          .fontColor('#FFFFFF')
+          .borderRadius(8)
+          .padding({ left: 16, right: 16, top: 10, bottom: 10 })
+          .fontSize(16)
+      }
+      .padding({ left: 20, right: 20, top: 20 })
+      
+      // 线路切换
+      Row() {
+        Text('线路二(点击换线)')
+          .backgroundColor('#66BB6A')
+          .fontColor('#FFFFFF')
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .borderRadius(8)
+          .margin({ right: 10 })
+          .fontSize(16)
+          .onClick(() => {
+            this.switchLine('line2');
+          })
+          
+        Text('线路四(点击换线)')
+          .backgroundColor('#66BB6A')
+          .fontColor('#FFFFFF')
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .borderRadius(8)
+          .margin({ right: 10 })
+          .fontSize(16)
+          .onClick(() => {
+            this.switchLine('line4');
+          })
+          
+        Text('线路三(点击换线)')
+          .backgroundColor('#66BB6A')
+          .fontColor('#FFFFFF')
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .borderRadius(8)
+          .fontSize(16)
+          .onClick(() => {
+            this.switchLine('line3');
+          })
+      }
+      .padding({ left: 20, right: 20, top: 15, bottom: 15 })
+    }
   }
 
   /**
@@ -201,22 +375,62 @@ struct MediaDetailPage {
    */
   @Builder
   private renderTabBar(): void {
-    // 这里应该实现标签页切换栏的渲染逻辑
+    Row() {
+      Button('剧集列表')
+        .backgroundColor(this.activeTab === 'episodes' ? '#66BB6A' : '#4CAF50')
+        .fontColor('#FFFFFF')
+        .padding({ left: 24, right: 24, top: 12, bottom: 12 })
+        .borderRadius(0)
+        .fontSize(18)
+        .onClick(() => {
+          this.activeTab = 'episodes';
+        })
+      
+      Button('播放源')
+        .backgroundColor(this.activeTab === 'sources' ? '#66BB6A' : '#4CAF50')
+        .fontColor('#FFFFFF')
+        .padding({ left: 24, right: 24, top: 12, bottom: 12 })
+        .borderRadius(0)
+        .fontSize(18)
+        .onClick(() => {
+          this.activeTab = 'sources';
+        })
+    }
   }
 
   /**
    * 渲染剧集列表
    */
   @Builder
-  private renderEpisodes(): void {
-    // 这里应该实现剧集列表的渲染逻辑
+  private renderEpisodes() {
+    // 剧集网格布局
+    Grid() {
+      ForEach(this.episodes, (episode: Episode, index: number) => {
+        GridItem() {
+          Button(episode.name || `${index + 1}`)
+            .backgroundColor('#66BB6A')
+            .fontColor('#FFFFFF')
+            .padding(15)
+            .borderRadius(8)
+            .fontSize(16)
+            .onClick(() => {
+              this.handleEpisodeClick(episode);
+            })
+        })
+      })
+    }
+    .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr')
+    .columnsGap(10)
+    .rowsGap(10)
+    .width('100%')
+    .height('auto')
   }
 
   /**
    * 渲染播放源
    */
   @Builder
-  private renderPlaySources(): void {
+  private renderPlaySources() {
     if (this.filteredSources?.length === 0) {
       Column() {
         Text("暂无播放源或没有匹配的片源")
@@ -263,7 +477,7 @@ struct MediaDetailPage {
    * 渲染相关推荐
    */
   @Builder
-  private renderRelatedMedia(): void {
+  private renderRelatedMedia() {
     Column() {
       Text("相关推荐")
         .fontSize(22)
@@ -317,13 +531,47 @@ struct MediaDetailPage {
    * 处理播放点击
    */
   private handlePlayClick(episode: Episode, source: PlaySource): void {
-    // 这里应该实现播放点击的逻辑
+    // 实现播放点击的逻辑
+    Logger.info(this.TAG, `Playing episode ${episode.name} with source ${source.name}`);
   }
 
   /**
    * 处理相关媒体点击
    */
   private handleRelatedMediaClick(media: MediaItem): void {
-    // 这里应该实现相关媒体点击的逻辑
+    // 实现相关媒体点击的逻辑
+    Logger.info(this.TAG, `Clicked related media: ${media.title}`);
+  }
+  
+  /**
+   * 处理返回按钮点击
+   */
+  private handleBack(): void {
+    AppNavigator.getInstance().navigateBack();
+  }
+  
+  /**
+   * 显示内容简介
+   */
+  private showContentIntro(): void {
+    if (!this.mediaDetail?.description) {
+      Logger.info(this.TAG, 'No description available');
+      return;
+    }
+    Logger.info(this.TAG, `Showing content intro: ${this.mediaDetail.description}`);
+  }
+  
+  /**
+   * 切换线路
+   */
+  private switchLine(lineId: string): void {
+    Logger.info(this.TAG, `Switching to line: ${lineId}`);
+  }
+  
+  /**
+   * 处理剧集点击
+   */
+  private handleEpisodeClick(episode: Episode): void {
+    Logger.info(this.TAG, `Clicked episode: ${episode.name}`);
   }
 }

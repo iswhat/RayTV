@@ -23,8 +23,8 @@ export default class MainAbility extends UIAbility {
 
       // 设置窗口支持横竖屏切换
       windowStage.getMainWindow().then((mainWindow) => {
-        // 允许屏幕旋转 - 使用正确的API
-        mainWindow.setPreferredOrientation(AbilityConstant.Orientation.AUTO_ROTATION);
+        // 允许屏幕旋转
+        mainWindow.setPreferredOrientation(1); // 1 表示 AUTO_ROTATION
       });
 
       // 设置UI页面加载

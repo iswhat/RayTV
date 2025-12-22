@@ -2,8 +2,18 @@
 // 定义RayTV应用的所有数据库表结构和字段常量
 
 /**
- * 站点表定�? */
-export const SITE_TABLE = {
+ * 表结构接口定义
+ */
+export interface TableDefinition {
+  NAME: string;
+  CREATE_SQL: string;
+  COLUMNS: Record<string, string>;
+}
+
+/**
+ * 站点表定义
+ */
+export const SITE_TABLE: TableDefinition = {
   NAME: 'site',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS site (
@@ -80,8 +90,9 @@ export const SITE_TABLE = {
 };
 
 /**
- * 历史记录表定�? */
-export const HISTORY_TABLE = {
+ * 历史记录表定义
+ */
+export const HISTORY_TABLE: TableDefinition = {
   NAME: 'history',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS history (
@@ -179,8 +190,9 @@ export const HISTORY_TABLE = {
 };
 
 /**
- * 收藏表定�? */
-export const KEEP_TABLE = {
+ * 收藏表定义
+ */
+export const KEEP_TABLE: TableDefinition = {
   NAME: 'keep',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS keep (
@@ -232,8 +244,9 @@ export const KEEP_TABLE = {
 };
 
 /**
- * 配置表定�? */
-export const CONFIG_TABLE = {
+ * 配置表定义
+ */
+export const CONFIG_TABLE: TableDefinition = {
   NAME: 'config',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS config (
@@ -278,7 +291,7 @@ export const CONFIG_TABLE = {
 /**
  * 收藏文件夹表定义
  */
-export const KEEP_FOLDER_TABLE = {
+export const KEEP_FOLDER_TABLE: TableDefinition = {
   NAME: 'keep_folder',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS keep_folder (
@@ -287,10 +300,11 @@ export const KEEP_FOLDER_TABLE = {
       description TEXT,
       icon TEXT,
       color TEXT,
+      parent_id TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      item_count INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
-      item_count INTEGER NOT NULL DEFAULT 0,
-      sort_order INTEGER NOT NULL DEFAULT 0,
       is_default INTEGER DEFAULT 0
     );
   `,
@@ -300,17 +314,19 @@ export const KEEP_FOLDER_TABLE = {
     DESCRIPTION: 'description',
     ICON: 'icon',
     COLOR: 'color',
+    PARENT_ID: 'parent_id',
+    SORT_ORDER: 'sort_order',
+    ITEM_COUNT: 'item_count',
     CREATED_AT: 'created_at',
     UPDATED_AT: 'updated_at',
-    ITEM_COUNT: 'item_count',
-    SORT_ORDER: 'sort_order',
     IS_DEFAULT: 'is_default'
   }
 };
 
 /**
- * 搜索历史表定�? */
-export const SEARCH_HISTORY_TABLE = {
+ * 搜索历史表定义
+ */
+export const SEARCH_HISTORY_TABLE: TableDefinition = {
   NAME: 'search_history',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS search_history (
@@ -335,8 +351,9 @@ export const SEARCH_HISTORY_TABLE = {
 };
 
 /**
- * 线路表定�? */
-export const LINE_TABLE = {
+ * 线路表定义
+ */
+export const LINE_TABLE: TableDefinition = {
   NAME: 'line',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS line (
@@ -371,8 +388,9 @@ export const LINE_TABLE = {
 };
 
 /**
- * 订阅表定�? */
-export const SUBSCRIPTION_TABLE = {
+ * 订阅表定义
+ */
+export const SUBSCRIPTION_TABLE: TableDefinition = {
   NAME: 'subscription',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS subscription (
@@ -401,8 +419,9 @@ export const SUBSCRIPTION_TABLE = {
 };
 
 /**
- * 直播频道表定�? */
-export const LIVE_CHANNEL_TABLE = {
+ * 直播频道表定义
+ */
+export const LIVE_CHANNEL_TABLE: TableDefinition = {
   NAME: 'live_channel',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS live_channel (
@@ -465,8 +484,9 @@ export const LIVE_CHANNEL_TABLE = {
 };
 
 /**
- * 直播分组表定�? */
-export const LIVE_GROUP_TABLE = {
+ * 直播分组表定义
+ */
+export const LIVE_GROUP_TABLE: TableDefinition = {
   NAME: 'live_group',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS live_group (
@@ -513,11 +533,11 @@ export function getAllTables(): string[] {
 }
 
 /**
- * 获取所有表�? */
+ * 获取所有表名
+ */
 export function getAllTableNames(): string[] {
   return [
     SITE_TABLE.NAME,
-    SITE_GROUP_TABLE.NAME,
     HISTORY_TABLE.NAME,
     KEEP_TABLE.NAME,
     CONFIG_TABLE.NAME,
@@ -526,17 +546,58 @@ export function getAllTableNames(): string[] {
     LINE_TABLE.NAME,
     SUBSCRIPTION_TABLE.NAME,
     LIVE_CHANNEL_TABLE.NAME,
-    LIVE_GROUP_TABLE.NAME,
-    LIVE_PLAY_HISTORY_TABLE.NAME,
-    EPG_TABLE.NAME
+    LIVE_GROUP_TABLE.NAME
   ];
 }
 
 /**
  * 索引创建SQL语句
  */
-export const INDEXES: Record<string, string | number | boolean | null> = { ... };
+export interface IndexDefinition {
+  [key: string]: string;
+}
+
+export const INDEXES: IndexDefinition = {
+  // 站点表索引
+  SITE_TYPE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_type ON site(type);',
+  SITE_ENABLED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_enabled ON site(enabled);',
+  SITE_LAST_USED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_last_used ON site(last_used_at);',
+  
+  // 历史记录表索引
+  HISTORY_SOURCE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_source ON history(source_key);',
+  HISTORY_CONTENT_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_content ON history(content_id, content_type);',
+  HISTORY_LAST_PLAYED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_last_played ON history(last_played_at);',
+  
+  // 收藏表索引
+  KEEP_SOURCE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_source ON keep(source_key);',
+  KEEP_CONTENT_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_content ON keep(content_id, content_type);',
+  KEEP_FOLDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_folder ON keep(folder_id);',
+  
+  // 搜索历史表索引
+  SEARCH_HISTORY_KEYWORD_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_keyword ON search_history(keyword);',
+  SEARCH_HISTORY_TIME_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_time ON search_history(search_time);',
+  SEARCH_HISTORY_FAVORITE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_favorite ON search_history(is_favorite);',
+  
+  // 直播频道表索引
+  LIVE_CHANNEL_GROUP_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_group ON live_channel(group_id);',
+  LIVE_CHANNEL_FAVORITE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_favorite ON live_channel(is_favorite);',
+  LIVE_CHANNEL_NAME_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_name ON live_channel(name);',
+  
+  // 直播分组表索引
+  LIVE_GROUP_ORDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");'
+};
 
 /**
- * 数据库版本信�? */
-export const DATABASE_INFO: Record<string, string | number | boolean | null> = { ... };
+ * 数据库版本信息
+ */
+export interface DatabaseInfo {
+  VERSION: number;
+  NAME: string;
+  DESCRIPTION: string;
+}
+
+export const DATABASE_INFO: DatabaseInfo = {
+  VERSION: 1,
+  NAME: 'raytv.db',
+  DESCRIPTION: 'RayTV应用数据库'
+};

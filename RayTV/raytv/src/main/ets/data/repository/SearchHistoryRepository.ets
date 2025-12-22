@@ -45,16 +45,28 @@ export interface SearchHistoryConfig {
 }
 
 /**
+ * 搜索历史事件类型接口
+ */
+export interface SearchHistoryEventTypeInterface {
+  readonly SEARCH_HISTORY_ADDED: string;
+  readonly SEARCH_HISTORY_DELETED: string;
+  readonly SEARCH_HISTORY_CLEARED: string;
+  readonly SEARCH_HISTORY_UPDATED: string;
+  readonly SEARCH_FAVORITE_TOGGLED: string;
+  readonly SEARCH_HISTORY_CONFIG_CHANGED: string;
+}
+
+/**
  * 搜索历史事件类型
  */
-export const SearchHistoryEventType = {
+export const SearchHistoryEventType: SearchHistoryEventTypeInterface = {
   SEARCH_HISTORY_ADDED: 'searchHistory:added',
   SEARCH_HISTORY_DELETED: 'searchHistory:deleted',
   SEARCH_HISTORY_CLEARED: 'searchHistory:cleared',
   SEARCH_HISTORY_UPDATED: 'searchHistory:updated',
   SEARCH_FAVORITE_TOGGLED: 'searchHistory:favoriteToggled',
   SEARCH_HISTORY_CONFIG_CHANGED: 'searchHistory:configChanged'
-} as const;
+};
 
 /**
  * 搜索历史事件数据
@@ -76,7 +88,7 @@ export class SearchHistoryRepository {
   private eventBus = EventBusUtil.getInstance();
   
   // 存储键配置
-  private storageKeys = {
+  private storageKeys: Record<string, string> = {
     searchHistory: 'search:history',
     favoriteSearches: 'search:favorites',
     searchHistoryConfig: 'search:history:config',
@@ -94,13 +106,13 @@ export class SearchHistoryRepository {
   };
   
   // 缓存的配置
-  private cachedConfig: SearchHistoryConfig | null = null;
+  private cachedConfig: SearchHistoryConfig = this.defaultConfig;
   
   // 缓存的历史记录
-  private cachedHistory: SearchHistoryItem[] | null = null;
+  private cachedHistory: SearchHistoryItem[] = [];
   
   // 缓存的收藏搜索
-  private cachedFavorites: SearchHistoryItem[] | null = null;
+  private cachedFavorites: SearchHistoryItem[] = [];
 
   /**
    * 私有构造函数
@@ -256,7 +268,7 @@ export class SearchHistoryRepository {
       return newItem;
     } catch (error) {
       this.logger.error('Failed to save search history', error as Error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -272,7 +284,7 @@ export class SearchHistoryRepository {
         await this.loadHistory();
       }
       
-      let history = [...this.cachedHistory!];
+      let history = [...(this.cachedHistory || [])];
       
       // 按类型过滤
       if (type && type !== SearchType.ALL) {
@@ -343,7 +355,7 @@ export class SearchHistoryRepository {
       return true;
     } catch (error) {
       this.logger.error(`Failed to delete search history item ${id}`, error as Error);
-      return false;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -475,7 +487,7 @@ export class SearchHistoryRepository {
       return item;
     } catch (error) {
       this.logger.error(`Failed to toggle favorite for search history item ${id}`, error as Error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -489,7 +501,7 @@ export class SearchHistoryRepository {
         await this.loadFavorites();
       }
       
-      return [...this.cachedFavorites!];
+      return [...this.cachedFavorites];
     } catch (error) {
       this.logger.error('Failed to get favorite searches', error as Error);
       return [];
@@ -634,10 +646,10 @@ export class SearchHistoryRepository {
         await this.loadConfig();
       }
       
-      return { ...this.cachedConfig! };
+      return Object.assign({}, this.cachedConfig!);
     } catch (error) {
       this.logger.error('Failed to get search history config', error as Error);
-      return { ...this.defaultConfig };
+      return Object.assign({}, this.defaultConfig);
     }
   }
 
@@ -709,7 +721,7 @@ export class SearchHistoryRepository {
         LocalStorageType.DEFAULT
       );
       
-      this.cachedConfig = config ? { ...this.defaultConfig, ...config } : { ...this.defaultConfig };
+      this.cachedConfig = config ? Object.assign({}, this.defaultConfig, config) : Object.assign({}, this.defaultConfig);
       
       // 验证配置
       this.validateConfig(this.cachedConfig);
