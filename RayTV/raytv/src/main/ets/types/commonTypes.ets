@@ -216,9 +216,7 @@ export type EventHandler<T> = (event: T) => void | Promise<void>;
 /**
  * 通用回调函数类型
  */
-export interface Callback<T = void, E = Error> {
-  (error?: E | null, result?: T): void;
-}
+export type Callback<T = void, E = Error> = (error?: E | null, result?: T) => void;
 
 /**
  * 可取消的Promise类型
@@ -240,23 +238,17 @@ export type Empty = null | undefined | void;
 /**
  * 可序列化的值类型
  */
-export type Serializable = 
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | Serializable[]
-  | Record<string, Serializable>;
+export interface SerializableValue {
+  type: 'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'array' | 'object';
+  value: any;
+}
+
+export type Serializable = string | number | boolean | null | undefined;
 
 /**
  * 深只读类型 - 简化版
  */
-export type DeepReadonly<T> = T extends (infer U)[] 
-  ? readonly DeepReadonly<U>[]
-  : T extends object
-  ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
-  : T;
+export type DeepReadonly<T> = T;
 
 /**
  * 空对象类型（非null且非undefined的对象）
@@ -271,16 +263,12 @@ export type NonNullableValue<T> = T;
 /**
  * 通用函数类型
  */
-export interface AnyFunction {
-  (...args: Serializable[]): Serializable;
-}
+export type AnyFunction = (...args: Serializable[]) => Serializable;
 
 /**
  * 异步函数类型
  */
-export interface AsyncFunction<T> {
-  (...args: Serializable[]): Promise<T>;
-}
+export type AsyncFunction<T> = (...args: Serializable[]) => Promise<T>;
 
 /**
  * 延迟执行的返回类型

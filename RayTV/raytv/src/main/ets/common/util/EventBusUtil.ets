@@ -59,7 +59,7 @@ export interface BatchEmitEvent {
  */
 export class EventBusUtil {
   private static instance: EventBusUtil | undefined;
-  private logger = Logger.getInstance();
+  private logger = Logger;
   private eventMap: Record<string, Subscription[]> = {};
   private isPublishing = false;
   private debounceTimers: Record<string, number> = {};
@@ -153,7 +153,9 @@ export class EventBusUtil {
     if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
       // 创建新对象，排除当前事件
       const newEventMap: Record<string, Subscription[]> = {};
-      for (const key in this.eventMap) {
+      const keys = Object.keys(this.eventMap);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (key !== eventName) {
           newEventMap[key] = this.eventMap[key];
         }
@@ -213,7 +215,9 @@ export class EventBusUtil {
         if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
           // 创建新对象，排除当前事件
           const newEventMap: Record<string, Subscription[]> = {};
-          for (const key in this.eventMap) {
+          const keys = Object.keys(this.eventMap);
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
             if (key !== eventName) {
               newEventMap[key] = this.eventMap[key];
             }
@@ -276,7 +280,9 @@ export class EventBusUtil {
     const timerId = setTimeout(() => {
       // 清除定时器引用
       const newDebounceTimers: Record<string, number> = {};
-      for (const key in this.debounceTimers) {
+      const keys = Object.keys(this.debounceTimers);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (key !== debounceKey) {
           newDebounceTimers[key] = this.debounceTimers[key];
         }
@@ -304,7 +310,9 @@ export class EventBusUtil {
       
       // 创建新对象，排除当前防抖键
       const newDebounceTimers: Record<string, number> = {};
-      for (const key in this.debounceTimers) {
+      const keys = Object.keys(this.debounceTimers);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (key !== debounceKey) {
           newDebounceTimers[key] = this.debounceTimers[key];
         }
@@ -321,7 +329,9 @@ export class EventBusUtil {
   public clearAllDebounceTimers(): void {
     try {
       this.logger.d('EventBus', 'Clearing all debounce timers', {});
-      for (const debounceKey in this.debounceTimers) {
+      const debounceKeys = Object.keys(this.debounceTimers);
+      for (let i = 0; i < debounceKeys.length; i++) {
+        const debounceKey = debounceKeys[i];
         const timerId = this.debounceTimers[debounceKey];
         clearTimeout(timerId);
       }
@@ -360,11 +370,7 @@ export class EventBusUtil {
    * @returns 事件名称数组
    */
   public getEventNames(): string[] {
-    const eventNames: string[] = [];
-    for (const key in this.eventMap) {
-      eventNames.push(key);
-    }
-    return eventNames;
+    return Object.keys(this.eventMap);
   }
 
   /**

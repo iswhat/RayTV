@@ -2,9 +2,8 @@
 // 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等
 
 import Logger from '../../common/util/Logger';
-import StorageUtil from '../../common/util/StorageUtil';
+import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
-import { LocalStorageType } from '../model/LocalModel';
 
 /**
  * 搜索记录类型枚举
@@ -69,13 +68,64 @@ export const SearchHistoryEventType: SearchHistoryEventTypeInterface = {
 };
 
 /**
- * 搜索历史事件数据
- */
+   * 搜索历史事件数据
+   */
 export interface SearchHistoryEvent {
   type: string;
   timestamp: number;
-  data?: Record<string, string | number | boolean | null>;
+  data?: SearchHistoryItem | DeleteEventData | ClearEventData | FavoriteToggleEventData | SearchHistoryConfig;
   error?: Error;
+}
+
+/**
+   * 搜索历史导出数据接口
+   */
+export interface SearchHistoryExportData {
+  history: SearchHistoryItem[];
+  favorites: SearchHistoryItem[];
+  config: SearchHistoryConfig;
+  exportTime: number;
+}
+
+/**
+ * 删除事件数据接口
+ */
+export interface DeleteEventData {
+  id: string;
+}
+
+/**
+ * 清除事件数据接口
+ */
+export interface ClearEventData {
+  type: string;
+}
+
+/**
+ * 收藏切换事件数据接口
+ */
+export interface FavoriteToggleEventData {
+  item: SearchHistoryItem;
+  isFavorite: boolean;
+}
+
+/**
+ * 搜索历史导入数据接口
+ */
+export interface SearchHistoryImportData {
+  history?: SearchHistoryItem[];
+  favorites?: SearchHistoryItem[];
+  config?: Partial<SearchHistoryConfig>;
+}
+
+/**
+ * 存储键配置接口
+ */
+interface StorageKeys {
+  searchHistory: string;
+  favoriteSearches: string;
+  searchHistoryConfig: string;
+  recentSearches: string;
 }
 
 /**
@@ -85,10 +135,10 @@ export class SearchHistoryRepository {
   private static instance: SearchHistoryRepository;
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
-  private eventBus = EventBusUtil.getInstance();
+  private eventBus: EventBusUtil = EventBusUtil.getInstance();
   
   // 存储键配置
-  private storageKeys: Record<string, string> = {
+  private storageKeys: StorageKeys = {
     searchHistory: 'search:history',
     favoriteSearches: 'search:favorites',
     searchHistoryConfig: 'search:history:config',
@@ -253,15 +303,16 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       // 发布搜索历史添加事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED, {
+      const addedEvent: SearchHistoryEvent = {
         type: SearchHistoryEventType.SEARCH_HISTORY_ADDED,
         timestamp: Date.now(),
         data: newItem
-      } as SearchHistoryEvent);
+      };
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED, addedEvent);
       
       this.logger.debug(`Search history saved: "${trimmedQuery}" (type: ${type})`);
       
@@ -284,7 +335,7 @@ export class SearchHistoryRepository {
         await this.loadHistory();
       }
       
-      let history = [...(this.cachedHistory || [])];
+      let history = [...this.cachedHistory];
       
       // 按类型过滤
       if (type && type !== SearchType.ALL) {
@@ -340,15 +391,19 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       // 发布搜索历史删除事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED, {
+      const deleteData: DeleteEventData = {
+        id
+      };
+      const deletedEvent: SearchHistoryEvent = {
         type: SearchHistoryEventType.SEARCH_HISTORY_DELETED,
         timestamp: Date.now(),
-        data: { id }
-      } as SearchHistoryEvent);
+        data: deleteData
+      };
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED, deletedEvent);
       
       this.logger.debug(`Search history item deleted: ${id}`);
       
@@ -378,18 +433,19 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory, 
         history,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       // 清除最近搜索缓存
       await this.clearRecentSearches();
       
       // 发布搜索历史清除事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED, {
+      const clearedEvent: SearchHistoryEvent = {
         type: SearchHistoryEventType.SEARCH_HISTORY_CLEARED,
         timestamp: Date.now(),
-        data: { type }
-      } as SearchHistoryEvent);
+        data: { type: type || '' }
+      };
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED, clearedEvent);
       
       this.logger.info(`Search history cleared${type ? ` for type: ${type}` : ''}`);
       
@@ -405,7 +461,7 @@ export class SearchHistoryRepository {
    */
   private async clearRecentSearches(): Promise<void> {
     try {
-      await this.storageUtil.remove(this.storageKeys.recentSearches, LocalStorageType.DEFAULT);
+      await this.storageUtil.remove(this.storageKeys.recentSearches, StorageType.DEFAULT);
     } catch (error) {
       this.logger.warn('Failed to clear recent searches', error as Error);
     }
@@ -463,24 +519,26 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       await this.storageUtil.setObject(
         this.storageKeys.favoriteSearches,
         favorites,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       // 发布收藏状态变更事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED, {
+      const favoriteData: FavoriteToggleEventData = {
+        item,
+        isFavorite: item.isFavorite || false
+      };
+      const favoriteToggledEvent: SearchHistoryEvent = {
         type: SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED,
         timestamp: Date.now(),
-        data: {
-          item,
-          isFavorite: item.isFavorite
-        }
-      } as SearchHistoryEvent);
+        data: favoriteData
+      };
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED, favoriteToggledEvent);
       
       this.logger.debug(`Search favorite toggled: ${id}, favorite: ${item.isFavorite}`);
       
@@ -501,9 +559,9 @@ export class SearchHistoryRepository {
         await this.loadFavorites();
       }
       
-      return [...this.cachedFavorites];
+      return Array.from(this.cachedFavorites);
     } catch (error) {
-      this.logger.error('Failed to get favorite searches', error as Error);
+      this.logger.error('SearchHistory', 'Failed to get favorite searches', error as Error);
       return [];
     }
   }
@@ -517,10 +575,19 @@ export class SearchHistoryRepository {
       const history = await this.getHistory();
       
       // 移除所有收藏标记
-      const updatedHistory = history.map(item => ({
-        ...item,
-        isFavorite: false
-      }));
+      const updatedHistory = history.map(item => {
+        const updatedItem: SearchHistoryItem = {
+          id: item.id,
+          query: item.query,
+          type: item.type,
+          timestamp: item.timestamp,
+          resultCount: item.resultCount,
+          category: item.category,
+          isFavorite: false,
+          selected: item.selected
+        };
+        return updatedItem;
+      });
       
       // 保存更新后的历史记录
       this.cachedHistory = updatedHistory;
@@ -529,13 +596,13 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory,
         updatedHistory,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       await this.storageUtil.setObject(
         this.storageKeys.favoriteSearches,
         [],
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       this.logger.info('All favorite searches cleared');
@@ -602,8 +669,12 @@ export class SearchHistoryRepository {
       
       // 合并新配置
       const updatedConfig: SearchHistoryConfig = {
-        ...currentConfig,
-        ...config
+        maxHistoryItems: config.maxHistoryItems ?? currentConfig.maxHistoryItems,
+        maxFavoriteItems: config.maxFavoriteItems ?? currentConfig.maxFavoriteItems,
+        autoClearDays: config.autoClearDays ?? currentConfig.autoClearDays,
+        enableAutoComplete: config.enableAutoComplete ?? currentConfig.enableAutoComplete,
+        enableRecentSearches: config.enableRecentSearches ?? currentConfig.enableRecentSearches,
+        enableFavorites: config.enableFavorites ?? currentConfig.enableFavorites
       };
       
       // 验证配置
@@ -614,25 +685,26 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
         updatedConfig,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       // 根据新配置清理数据
       await this.applyConfigChanges(currentConfig, updatedConfig);
       
       // 发布配置变更事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED, {
+      const configChangedEvent: SearchHistoryEvent = {
         type: SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED,
         timestamp: Date.now(),
         data: updatedConfig
-      } as SearchHistoryEvent);
+      };
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED, configChangedEvent);
       
       this.logger.info('Search history configuration updated');
       
       return updatedConfig;
     } catch (error) {
       this.logger.error('Failed to set search history config', error as Error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -646,10 +718,26 @@ export class SearchHistoryRepository {
         await this.loadConfig();
       }
       
-      return Object.assign({}, this.cachedConfig!);
+      // 使用手动属性复制代替Object.assign
+      return {
+        maxHistoryItems: this.cachedConfig!.maxHistoryItems,
+        maxFavoriteItems: this.cachedConfig!.maxFavoriteItems,
+        autoClearDays: this.cachedConfig!.autoClearDays,
+        enableAutoComplete: this.cachedConfig!.enableAutoComplete,
+        enableRecentSearches: this.cachedConfig!.enableRecentSearches,
+        enableFavorites: this.cachedConfig!.enableFavorites
+      };
     } catch (error) {
       this.logger.error('Failed to get search history config', error as Error);
-      return Object.assign({}, this.defaultConfig);
+      // 使用手动属性复制代替Object.assign
+      return {
+        maxHistoryItems: this.defaultConfig.maxHistoryItems,
+        maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
+        autoClearDays: this.defaultConfig.autoClearDays,
+        enableAutoComplete: this.defaultConfig.enableAutoComplete,
+        enableRecentSearches: this.defaultConfig.enableRecentSearches,
+        enableFavorites: this.defaultConfig.enableFavorites
+      };
     }
   }
 
@@ -659,19 +747,33 @@ export class SearchHistoryRepository {
   public async resetConfig(): Promise<SearchHistoryConfig> {
     try {
       // 保存默认配置
-      this.cachedConfig = { ...this.defaultConfig };
+      this.cachedConfig = {
+        maxHistoryItems: this.defaultConfig.maxHistoryItems,
+        maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
+        autoClearDays: this.defaultConfig.autoClearDays,
+        enableAutoComplete: this.defaultConfig.enableAutoComplete,
+        enableRecentSearches: this.defaultConfig.enableRecentSearches,
+        enableFavorites: this.defaultConfig.enableFavorites
+      };
       await this.storageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
         this.defaultConfig,
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
-      this.logger.info('Search history configuration reset to default');
-      
-      return { ...this.defaultConfig };
+      this.logger.info('SearchHistory', 'Search history configuration reset to default');
+    
+      return {
+        maxHistoryItems: this.defaultConfig.maxHistoryItems,
+        maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
+        autoClearDays: this.defaultConfig.autoClearDays,
+        enableAutoComplete: this.defaultConfig.enableAutoComplete,
+        enableRecentSearches: this.defaultConfig.enableRecentSearches,
+        enableFavorites: this.defaultConfig.enableFavorites
+      };
     } catch (error) {
-      this.logger.error('Failed to reset search history config', error as Error);
-      throw error;
+      this.logger.error('SearchHistory', 'Failed to reset search history config', error as Error);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -682,13 +784,13 @@ export class SearchHistoryRepository {
     try {
       const history = await this.storageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.searchHistory, 
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       this.cachedHistory = history || [];
-      this.logger.debug(`Loaded ${this.cachedHistory.length} search history items`);
+      this.logger.debug('SearchHistory', `Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
-      this.logger.error('Failed to load search history', error as Error);
+      this.logger.error('SearchHistory', 'Failed to load search history', error as Error);
       this.cachedHistory = [];
     }
   }
@@ -700,13 +802,13 @@ export class SearchHistoryRepository {
     try {
       const favorites = await this.storageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.favoriteSearches, 
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
       this.cachedFavorites = favorites || [];
-      this.logger.debug(`Loaded ${this.cachedFavorites.length} favorite searches`);
+      this.logger.debug('SearchHistory', `Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
-      this.logger.error('Failed to load favorite searches', error as Error);
+      this.logger.error('SearchHistory', 'Failed to load favorite searches', error as Error);
       this.cachedFavorites = [];
     }
   }
@@ -718,18 +820,46 @@ export class SearchHistoryRepository {
     try {
       const config = await this.storageUtil.getObject<SearchHistoryConfig>(
         this.storageKeys.searchHistoryConfig, 
-        LocalStorageType.DEFAULT
+        StorageType.DEFAULT
       );
       
-      this.cachedConfig = config ? Object.assign({}, this.defaultConfig, config) : Object.assign({}, this.defaultConfig);
+      // 使用手动属性复制代替Object.assign
+      if (config) {
+        this.cachedConfig = {
+          maxHistoryItems: config.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
+          maxFavoriteItems: config.maxFavoriteItems ?? this.defaultConfig.maxFavoriteItems,
+          autoClearDays: config.autoClearDays ?? this.defaultConfig.autoClearDays,
+          enableAutoComplete: config.enableAutoComplete ?? this.defaultConfig.enableAutoComplete,
+          enableRecentSearches: config.enableRecentSearches ?? this.defaultConfig.enableRecentSearches,
+          enableFavorites: config.enableFavorites ?? this.defaultConfig.enableFavorites
+        };
+      } else {
+        // 使用手动属性复制代替Object.assign和扩展运算符
+        this.cachedConfig = {
+          maxHistoryItems: this.defaultConfig.maxHistoryItems,
+          maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
+          autoClearDays: this.defaultConfig.autoClearDays,
+          enableAutoComplete: this.defaultConfig.enableAutoComplete,
+          enableRecentSearches: this.defaultConfig.enableRecentSearches,
+          enableFavorites: this.defaultConfig.enableFavorites
+        };
+      }
       
       // 验证配置
       this.validateConfig(this.cachedConfig);
       
-      this.logger.debug('Search history configuration loaded');
+      this.logger.debug('SearchHistory', 'Search history configuration loaded');
     } catch (error) {
-      this.logger.error('Failed to load search history config', error as Error);
-      this.cachedConfig = { ...this.defaultConfig };
+      this.logger.error('SearchHistory', 'Failed to load search history config', error as Error);
+      // 使用手动属性复制代替扩展运算符
+      this.cachedConfig = {
+        maxHistoryItems: this.defaultConfig.maxHistoryItems,
+        maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
+        autoClearDays: this.defaultConfig.autoClearDays,
+        enableAutoComplete: this.defaultConfig.enableAutoComplete,
+        enableRecentSearches: this.defaultConfig.enableRecentSearches,
+        enableFavorites: this.defaultConfig.enableFavorites
+      };
     }
   }
 
@@ -742,17 +872,17 @@ export class SearchHistoryRepository {
         this.storageUtil.setObject(
           this.storageKeys.searchHistory, 
           this.cachedHistory || [],
-          LocalStorageType.DEFAULT
+          StorageType.DEFAULT
         ),
         this.storageUtil.setObject(
           this.storageKeys.favoriteSearches,
           this.cachedFavorites || [],
-          LocalStorageType.DEFAULT
+          StorageType.DEFAULT
         ),
         this.storageUtil.setObject(
           this.storageKeys.searchHistoryConfig,
           this.cachedConfig || this.defaultConfig,
-          LocalStorageType.DEFAULT
+          StorageType.DEFAULT
         )
       ]);
       
@@ -787,8 +917,8 @@ export class SearchHistoryRepository {
         this.cachedHistory = filteredHistory;
         await this.storageUtil.setObject(
           this.storageKeys.searchHistory, 
-          filteredHistory,
-          LocalStorageType.DEFAULT
+        filteredHistory,
+        StorageType.DEFAULT
         );
         
         this.logger.info(`Cleaned up ${history.length - filteredHistory.length} expired search history items`);
@@ -814,8 +944,8 @@ export class SearchHistoryRepository {
           this.cachedHistory = filteredHistory;
           await this.storageUtil.setObject(
             this.storageKeys.searchHistory,
-            filteredHistory,
-            LocalStorageType.DEFAULT
+          filteredHistory,
+          StorageType.DEFAULT
           );
         }
       }
@@ -829,22 +959,31 @@ export class SearchHistoryRepository {
           
           // 更新历史记录中的收藏状态
           const history = await this.getHistory();
-          const updatedHistory = history.map(item => ({
-            ...item,
-            isFavorite: filteredFavorites.some(fav => fav.id === item.id)
-          }));
+          const updatedHistory = history.map(item => {
+            const updatedItem: SearchHistoryItem = {
+              id: item.id,
+              query: item.query,
+              type: item.type,
+              timestamp: item.timestamp,
+              resultCount: item.resultCount,
+              category: item.category,
+              isFavorite: filteredFavorites.some(fav => fav.id === item.id),
+              selected: item.selected
+            };
+            return updatedItem;
+          });
           
           this.cachedHistory = updatedHistory;
           await this.storageUtil.setObject(
             this.storageKeys.favoriteSearches,
-            filteredFavorites,
-            LocalStorageType.DEFAULT
-          );
-          await this.storageUtil.setObject(
-            this.storageKeys.searchHistory,
-            updatedHistory,
-            LocalStorageType.DEFAULT
-          );
+          filteredFavorites,
+          StorageType.DEFAULT
+        );
+        await this.storageUtil.setObject(
+          this.storageKeys.searchHistory,
+          updatedHistory,
+          StorageType.DEFAULT
+        );
         }
       }
     } catch (error) {
@@ -885,12 +1024,7 @@ export class SearchHistoryRepository {
   /**
    * 导出搜索历史数据
    */
-  public async exportData(): Promise<{
-    history: SearchHistoryItem[];
-    favorites: SearchHistoryItem[];
-    config: SearchHistoryConfig;
-    exportTime: number;
-  }> {
+  public async exportData(): Promise<SearchHistoryExportData> {
     try {
       const data = {
         history: await this.getHistory(),
@@ -899,12 +1033,12 @@ export class SearchHistoryRepository {
         exportTime: Date.now()
       };
       
-      this.logger.info('Search history data exported');
+      this.logger.info('SearchHistory', 'Search history data exported');
       
       return data;
     } catch (error) {
-      this.logger.error('Failed to export search history data', error as Error);
-      throw error;
+      this.logger.error('SearchHistory', 'Failed to export search history data', error as Error);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -914,11 +1048,7 @@ export class SearchHistoryRepository {
    * @param merge 是否合并（true）或覆盖（false）
    */
   public async importData(
-    data: {
-      history?: SearchHistoryItem[];
-      favorites?: SearchHistoryItem[];
-      config?: Partial<SearchHistoryConfig>;
-    }, 
+    data: SearchHistoryImportData, 
     merge: boolean = true
   ): Promise<void> {
     try {
@@ -932,17 +1062,24 @@ export class SearchHistoryRepository {
       
       // 处理配置导入
       if (data.config) {
-        const mergedConfig = merge ? 
-          { ...currentConfig, ...data.config } : 
-          { ...this.defaultConfig, ...data.config };
+        // 使用手动合并替代扩展运算符
+        const baseConfig = merge ? currentConfig : this.defaultConfig;
+        const mergedConfig: SearchHistoryConfig = {
+          maxHistoryItems: data.config.maxHistoryItems ?? baseConfig.maxHistoryItems,
+          maxFavoriteItems: data.config.maxFavoriteItems ?? baseConfig.maxFavoriteItems,
+          autoClearDays: data.config.autoClearDays ?? baseConfig.autoClearDays,
+          enableAutoComplete: data.config.enableAutoComplete ?? baseConfig.enableAutoComplete,
+          enableRecentSearches: data.config.enableRecentSearches ?? baseConfig.enableRecentSearches,
+          enableFavorites: data.config.enableFavorites ?? baseConfig.enableFavorites
+        };
         
         this.validateConfig(mergedConfig);
         this.cachedConfig = mergedConfig;
         
         await this.storageUtil.setObject(
           this.storageKeys.searchHistoryConfig,
-          mergedConfig,
-          LocalStorageType.DEFAULT
+        mergedConfig,
+        StorageType.DEFAULT
         );
       }
       
@@ -994,7 +1131,7 @@ export class SearchHistoryRepository {
         await this.storageUtil.setObject(
           this.storageKeys.searchHistory,
           finalHistory,
-          LocalStorageType.DEFAULT
+          StorageType.DEFAULT
         );
       }
       
@@ -1003,7 +1140,19 @@ export class SearchHistoryRepository {
         const processedFavorites = data.favorites
           .filter(item => this.isValidHistoryItem(item))
           .map(item => this.normalizeHistoryItem(item))
-          .map(item => ({ ...item, isFavorite: true }));
+          .map(item => {
+            const favoriteItem: SearchHistoryItem = {
+              id: item.id,
+              query: item.query,
+              type: item.type,
+              timestamp: item.timestamp,
+              resultCount: item.resultCount,
+              category: item.category,
+              isFavorite: true,
+              selected: item.selected
+            };
+            return favoriteItem;
+          });
         
         let finalFavorites: SearchHistoryItem[];
         
@@ -1037,7 +1186,7 @@ export class SearchHistoryRepository {
         await this.storageUtil.setObject(
           this.storageKeys.favoriteSearches,
           finalFavorites,
-          LocalStorageType.DEFAULT
+          StorageType.DEFAULT
         );
       }
       
@@ -1045,23 +1194,32 @@ export class SearchHistoryRepository {
       if (data.favorites) {
         const history = await this.getHistory();
         const favorites = await this.getFavorites();
-        const updatedHistory = history.map(item => ({
-          ...item,
-          isFavorite: favorites.some(fav => fav.id === item.id) || false
-        }));
+        const updatedHistory = history.map(item => {
+          const updatedItem: SearchHistoryItem = {
+            id: item.id,
+            query: item.query,
+            type: item.type,
+            timestamp: item.timestamp,
+            resultCount: item.resultCount,
+            category: item.category,
+            isFavorite: favorites.some(fav => fav.id === item.id) || false,
+            selected: item.selected
+          };
+          return updatedItem;
+        });
         
         this.cachedHistory = updatedHistory;
         await this.storageUtil.setObject(
           this.storageKeys.searchHistory,
-          updatedHistory,
-          LocalStorageType.DEFAULT
+        updatedHistory,
+        StorageType.DEFAULT
         );
       }
       
       this.logger.info('Search history data imported successfully');
     } catch (error) {
       this.logger.error('Failed to import search history data', error as Error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

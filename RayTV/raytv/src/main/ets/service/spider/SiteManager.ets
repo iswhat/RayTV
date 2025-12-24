@@ -4,7 +4,8 @@ import { Site } from '../../data/bean/Site';
 import { SiteDao } from '../../data/db/dao/SiteDao';
 
 /**
- * 站点状态枚�? */
+ * 站点状态枚举
+ */
 export enum SiteStatus {
   NORMAL = 'normal',
   ERROR = 'error',
@@ -24,7 +25,8 @@ export interface SiteInfo extends Site {
 }
 
 /**
- * 站点管理�? * 负责站点信息的注册、更新、删除和查询
+ * 站点管理器
+ * 负责站点信息的注册、更新、删除和查询
  */
 export class SiteManager {
   private readonly TAG: string = 'SiteManager';
@@ -45,15 +47,18 @@ export class SiteManager {
   }
 
   /**
-   * 验证加载器类�?   */
+   * 验证加载器类型
+   */
   private validateLoaderType(type: string): void {
-    const validTypes = ['jar', 'js', 'py']; // 对应LoaderType的所有�?    if (!validTypes.includes(type)) {
+    const validTypes = ['jar', 'js', 'py']; // 对应LoaderType的所有值
+    if (!validTypes.includes(type)) {
       throw new Error(`Invalid loader type: ${type}`);
     }
   }
 
   /**
-   * 构造函�?   * 私有构造函数防止外部实例化
+   * 构造函数
+   * 私有构造函数防止外部实例化
    */
   private constructor() {
     this.siteDao = new SiteDao();
@@ -75,9 +80,20 @@ export class SiteManager {
       // 从数据库加载站点信息
       const sites = await this.siteDao.getAll();
       
-      // 初始化站点信�?      for (const site of sites) {
+      // 初始化站点信息
+      for (const site of sites) {
+        // 使用手动属性赋值替代扩展运算符
         const siteInfo: SiteInfo = {
-          ...site,
+          key: site.key,
+          name: site.name,
+          type: site.type,
+          api: site.api,
+          enabled: site.enabled,
+          order: site.order,
+          createdAt: site.createdAt,
+          updatedAt: site.updatedAt,
+          headers: site.headers,
+          ext: site.ext,
           status: site.enabled ? SiteStatus.NORMAL : SiteStatus.DISABLED,
           errorCount: 0,
           performanceScore: 100
@@ -88,8 +104,8 @@ export class SiteManager {
       this.initialized = true;
       Logger.info(this.TAG, `Site manager initialized with ${this.sites.size} sites`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize site manager: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to initialize site manager: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -108,177 +124,33 @@ export class SiteManager {
         throw new Error(`Site already exists: ${site.key}`);
       }
       
-      // 创建站点信息
+      // 创建站点信息 - 使用手动属性赋值替代扩展运算符
       const siteInfo: SiteInfo = {
-        ...site, status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
+        key: site.key,
+        name: site.name,
+        type: site.type,
+        api: site.api,
+        enabled: site.enabled,
+        order: site.order,
+        createdAt: site.createdAt,
+        updatedAt: site.updatedAt,
+        headers: site.headers,
+        ext: site.ext,
+        status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
         errorCount: 0,
         performanceScore: 100
       };
       
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
+      // 添加到内存
+      this.sites.set(site.key, siteInfo);
       
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
+      // 保存到数据库
+      await this.siteDao.insert(siteInfo);
       
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo instanceof Error ? status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo : new Error(String(status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
-        errorCount: 0,
-        performanceScore: 100
-      };
-      
-      // 添加到内存并保存到数据库
-      this.sites.set(site.key, siteInfo)))))));
-      await this.siteDao.save(site);
-      
-      Logger.info(this.TAG, `Registered site: ${site.name} (${site.key})`);
+      Logger.info(this.TAG, `Site registered successfully: ${site.name} (${site.key})`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to register site: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to register site: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -292,209 +164,41 @@ export class SiteManager {
       // 验证站点信息
       this.validateSite(site);
       
-      // 检查站点是否存�?      const existingSite = this.sites.get(site.key);
+      // 检查站点是否存在
+      const existingSite = this.sites.get(site.key);
       if (!existingSite) {
         throw new Error(`Site not found: ${site.key}`);
       }
       
-      // 更新站点信息
+      // 更新站点信息 - 使用手动属性赋值替代扩展运算符
       const updatedSiteInfo: SiteInfo = {
-        ...site, status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
+        key: site.key,
+        name: site.name,
+        type: site.type,
+        api: site.api,
+        enabled: site.enabled,
+        order: site.order,
+        createdAt: site.createdAt,
+        updatedAt: site.updatedAt,
+        headers: site.headers,
+        ext: site.ext,
+        status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
         errorCount: existingSite.errorCount,
         lastError: existingSite.lastError,
         lastSuccessTime: existingSite.lastSuccessTime,
         performanceScore: existingSite.performanceScore
       };
       
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
+      // 更新内存
+      this.sites.set(site.key, updatedSiteInfo);
       
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo instanceof Error ? status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo : new Error(String(status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
-        errorCount: existingSite.errorCount,
-        lastError: existingSite.lastError,
-        lastSuccessTime: existingSite.lastSuccessTime,
-        performanceScore: existingSite.performanceScore
-      };
-      
-      // 更新内存并保存到数据�?      this.sites.set(site.key, updatedSiteInfo)))))));
+      // 保存到数据库
       await this.siteDao.update(site);
       
       Logger.info(this.TAG, `Updated site: ${site.name} (${site.key})`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update site: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to update site: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -505,7 +209,8 @@ export class SiteManager {
    */
   public async deleteSite(siteKey: string): Promise<void> {
     try {
-      // 检查站点是否存�?      if (!this.sites.has(siteKey)) {
+      // 检查站点是否存在
+      if (!this.sites.has(siteKey)) {
         throw new Error(`Site not found: ${siteKey}`);
       }
       
@@ -513,10 +218,10 @@ export class SiteManager {
       this.sites.delete(siteKey);
       await this.siteDao.delete(siteKey);
       
-      Logger.info(this.TAG, `Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}` instanceof Error ? `Deleted site: ${siteKey}` : new Error(String(`Deleted site: ${siteKey}`)))))));
+      Logger.info(this.TAG, `Deleted site: ${siteKey}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete site: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to delete site: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -530,14 +235,16 @@ export class SiteManager {
   }
 
   /**
-   * 获取所有站�?   * @returns SiteInfo[]
+   * 获取所有站点
+   * @returns SiteInfo[]
    */
   public getAllSites(): SiteInfo[] {
     return Array.from(this.sites.values());
   }
 
   /**
-   * 获取启用的站�?   * @returns SiteInfo[]
+   * 获取启用的站点
+   * @returns SiteInfo[]
    */
   public getEnabledSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
@@ -546,14 +253,17 @@ export class SiteManager {
   }
 
   /**
-   * 获取指定类型的站�?   * @param loaderType 加载器类�?   * @returns SiteInfo[]
+   * 获取指定类型的站点
+   * @param loaderType 加载器类型
+   * @returns SiteInfo[]
    */
   public getSitesByType(loaderType: LoaderType): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => site.type === loaderType);
   }
 
   /**
-   * 获取支持搜索的站�?   * @returns SiteInfo[]
+   * 获取支持搜索的站点
+   * @returns SiteInfo[]
    */
   public getSearchableSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
@@ -562,7 +272,8 @@ export class SiteManager {
   }
 
   /**
-   * 获取支持点播的站�?   * @returns SiteInfo[]
+   * 获取支持点播的站点
+   * @returns SiteInfo[]
    */
   public getVodSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
@@ -571,7 +282,8 @@ export class SiteManager {
   }
 
   /**
-   * 获取支持直播的站�?   * @returns SiteInfo[]
+   * 获取支持直播的站点
+   * @returns SiteInfo[]
    */
   public getLiveSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
@@ -580,10 +292,12 @@ export class SiteManager {
   }
 
   /**
-   * 更新站点状�?   * @param siteKey 站点唯一标识
-   * @param status 站点状�?   * @param errorMessage 错误信息（可选）
+   * 更新站点状态
+   * @param siteKey 站点唯一标识
+   * @param status 站点状态
+   * @param errorMessage 错误信息（可选）
    */
-  public updateSiteStatus(siteKey: string, status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string instanceof Error ? status: SiteStatus, errorMessage?: string : new Error(String(status: SiteStatus, errorMessage?: string))))))): void {
+  public updateSiteStatus(siteKey: string, status: SiteStatus, errorMessage?: string): void {
     const site = this.sites.get(siteKey);
     if (site) {
       site.status = status;
@@ -605,7 +319,8 @@ export class SiteManager {
   }
 
   /**
-   * 设置站点启用状�?   * @param siteKey 站点唯一标识
+   * 设置站点启用状态
+   * @param siteKey 站点唯一标识
    * @param enabled 是否启用
    */
   public async setSiteEnabled(siteKey: string, enabled: boolean): Promise<void> {
@@ -614,7 +329,8 @@ export class SiteManager {
       site.enabled = enabled;
       site.status = enabled ? SiteStatus.NORMAL : SiteStatus.DISABLED;
       
-      // 更新数据�?      await this.siteDao.update(site);
+      // 更新数据库
+      await this.siteDao.update(site);
       
       Logger.info(this.TAG, `Set site ${siteKey} enabled: ${enabled}`);
     }
@@ -631,27 +347,28 @@ export class SiteManager {
         try {
           await this.registerSite(site);
         } catch (error) {
-          Logger.warn(this.TAG, `Failed to register site ${site.key}: ${error}`);
+          Logger.warn(this.TAG, `Failed to register site ${site.key}: ${error instanceof Error ? error.message : String(error)}`);
           // 继续处理其他站点
         }
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to register sites: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to register sites: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 清除所有站�?   * @returns Promise<void>
+   * 清除所有站点
+   * @returns Promise<void>
    */
   public async clearAllSites(): Promise<void> {
     try {
       this.sites.clear();
       await this.siteDao.clearAll();
-      Logger.info(this.TAG, 'Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites' : new Error(String('Cleared all sites' instanceof Error ? 'Cleared all sites' : new Error(String('Cleared all sites')))))));
+      Logger.info(this.TAG, 'Cleared all sites');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear sites: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to clear sites: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -672,22 +389,78 @@ export class SiteManager {
   }
 
   /**
+   * 获取活跃站点
+   * @returns Promise<SiteInfo[]> 活跃站点列表
+   */
+  public async getActiveSites(): Promise<SiteInfo[]> {
+    // 确保初始化完成
+    if (!this.initialized) {
+      await this.initialize();
+    }
+    return this.getEnabledSites();
+  }
+
+  /**
+   * 调用站点方法选项接口
+   */
+export interface CallSiteMethodOptions {
+  timeout?: number;
+}
+
+/**
+   * 调用站点方法
+   * @param siteKey 站点唯一标识
+   * @param methodName 方法名称
+   * @param args 方法参数
+   * @param options 调用选项
+   * @returns Promise<T> 方法返回值
+   */
+  public async callSiteMethod<T>(
+    siteKey: string,
+    methodName: string,
+    args: Array<string | number | boolean | Record<string, string | number | boolean | Array<string | number | boolean>>> = [],
+    options: CallSiteMethodOptions = { timeout: 30000 }
+  ): Promise<T> {
+    const site = this.getSite(siteKey);
+    if (!site) {
+      throw new Error(`Site not found: ${siteKey}`);
+    }
+
+    if (!site.enabled || site.status === SiteStatus.DISABLED) {
+      throw new Error(`Site ${siteKey} is disabled`);
+    }
+
+    try {
+      this.updateSiteStatus(siteKey, SiteStatus.LOADING);
+      
+      // 这里应该实现实际的站点方法调用逻辑
+      // 例如，调用加载器的方法
+      // 目前返回一个空数组作为模拟实现
+      const result: T = [] as T;
+      
+      this.updateSiteStatus(siteKey, SiteStatus.NORMAL);
+      return result;
+    } catch (error) {
+      this.updateSiteStatus(siteKey, SiteStatus.ERROR, error instanceof Error ? error.message : 'Unknown error');
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  /**
    * 验证站点信息
    * @param site 站点信息
    * @private
    */
   private validateSite(site: Site): void {
     if (!site.key || !site.name || !site.type) {
-      throw new Error('Invalid site: key, name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required' : new Error(String(name and type are required' instanceof Error ? name and type are required' : new Error(String(name and type are required')))))));
+      throw new Error('Invalid site: key, name and type are required');
     }
     
     // 在ArkTS中，枚举不能直接作为对象使用
     this.validateLoaderType(site.type);
     
-    if (site.url && !site.url.startsWith('http://') && !site.url.startsWith('https://')) {
-      throw new Error(`Invalid URL: ${site.url}`);
+    if (site.api && !site.api.startsWith('http://') && !site.api.startsWith('https://')) {
+      throw new Error(`Invalid API URL: ${site.api}`);
     }
   }
 }
-
-

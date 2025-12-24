@@ -5,6 +5,28 @@ import { Context } from '@ohos.ability.featureAbility';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
 import Logger from '../../common/util/Logger';
 
+// 定义接口，用于类型安全
+export interface DatabaseInfo {
+  name: string;
+  version: number;
+}
+
+export interface MigrationResult {
+  success: boolean;
+  message?: string;
+}
+
+export interface TransactionResult {
+  success: boolean;
+  affectedRows?: number;
+}
+
+export interface DatabaseSizeInfo {
+  pageCount: number;
+  pageSize: number;
+  totalSize: number;
+}
+
 const TAG = 'DatabaseManager';
 
 export class DatabaseManager {
@@ -50,10 +72,11 @@ export class DatabaseManager {
     try {
       Logger.info(TAG, 'Starting database initialization');
       
-      const config: relationalStore.StoreConfig = {
-        name: DATABASE_INFO.NAME,
-        securityLevel: relationalStore.SecurityLevel[DATABASE_INFO.SECURITY_LEVEL as keyof typeof relationalStore.SecurityLevel]
-      };
+      // 使用默认安全级别
+    const config: relationalStore.StoreConfig = {
+      name: DATABASE_INFO.NAME,
+      securityLevel: relationalStore.SecurityLevel.S2
+    };
       
       // 获取数据库连�?      this.database = await relationalStore.getRdbStore(context, config);
       
@@ -69,7 +92,7 @@ export class DatabaseManager {
     } catch (error) {
       Logger.error(TAG, `Failed to initialize database: ${JSON.stringify(error)}`);
       this.isInitialized = false;
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     } finally {
       this.initializationPromise = null;
     }
@@ -79,7 +102,8 @@ export class DatabaseManager {
    * 创建数据库表
    */
   private async createTables(): Promise<void> {
-    if (!this.database) {
+    const db = this.database;
+    if (!db) {
       throw new Error('Database not initialized');
     }
     
@@ -88,14 +112,14 @@ export class DatabaseManager {
       Logger.info(TAG, `Creating ${tables.length} tables`);
       
       for (const sql of tables) {
-        await this.database.executeSql(sql);
+        await db.executeSql(sql);
         Logger.debug(TAG, `Created table with SQL: ${sql.substring(0, 100)}...`);
       }
       
       Logger.info(TAG, 'All tables created successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to create tables: ${JSON.stringify(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -103,7 +127,8 @@ export class DatabaseManager {
    * 创建索引
    */
   private async createIndexes(): Promise<void> {
-    if (!this.database) {
+    const db = this.database;
+    if (!db) {
       throw new Error('Database not initialized');
     }
     
@@ -111,7 +136,7 @@ export class DatabaseManager {
       Logger.info(TAG, `Creating ${INDEXES.CREATE_INDEXES.length} indexes`);
       
       for (const indexSql of INDEXES.CREATE_INDEXES) {
-        await this.database.executeSql(indexSql);
+        await db.executeSql(indexSql);
         Logger.debug(TAG, `Created index: ${indexSql.substring(0, 80)}...`);
       }
       
@@ -125,11 +150,17 @@ export class DatabaseManager {
   /**
    * 检查数据库版本并执行迁�?   */
   private async checkDatabaseVersion(): Promise<void> {
+    const db = this.database;
+    if (!db) {
+      throw new Error('Database not initialized');
+    }
+    
     try {
       Logger.info(TAG, `Checking database version: ${DATABASE_INFO.VERSION}`);
       
-      // 从数据库元数据表中获取当前版�?      let currentVersion = 0;
-      const resultSet = await this.database.querySql(
+      // 从数据库元数据表中获取当前版本
+      let currentVersion = 0;
+      const resultSet = await db.querySql(
         'SELECT version FROM database_meta WHERE id = 1',
         []
       );
@@ -141,10 +172,11 @@ export class DatabaseManager {
       
       Logger.info(TAG, `Current database version: ${currentVersion}, Target version: ${DATABASE_INFO.VERSION}`);
       
-      // 如果需要升�?      if (currentVersion < DATABASE_INFO.VERSION) {
+      // 如果需要升级
+      if (currentVersion < DATABASE_INFO.VERSION) {
         await this.migrateDatabase(currentVersion, DATABASE_INFO.VERSION);
         // 更新版本信息
-        await this.database.executeSql(
+        await db.executeSql(
           'INSERT OR REPLACE INTO database_meta (id, version, last_updated) VALUES (1, ?, ?)',
           [DATABASE_INFO.VERSION, Date.now()]
         );
@@ -154,7 +186,7 @@ export class DatabaseManager {
       Logger.info(TAG, `Database version: ${DATABASE_INFO.VERSION}`);
     } catch (error) {
       Logger.error(TAG, `Failed to check database version: ${JSON.stringify(error)}`);
-      throw error; // 版本检查失败应该抛出异常，因为这是关键功能
+      throw error instanceof Error ? error : new Error(String(error)); // 版本检查失败应该抛出异常，因为这是关键功能
     }
   }
   
@@ -162,10 +194,16 @@ export class DatabaseManager {
    * 执行数据库迁�?   * @param fromVersion 源版�?   * @param toVersion 目标版本
    */
   private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
+    const database = this.database;
+    if (!database) {
+      throw new Error('Database not initialized');
+    }
+    
     try {
       Logger.info(TAG, `Migrating database from version ${fromVersion} to ${toVersion}`);
       
-      // 开始事�?      await this.executeTransaction(async (db) => {
+      // 开始事务
+      await this.executeTransaction(async (db) => {
         // 根据版本逐步执行迁移脚本
         for (let version = fromVersion + 1; version <= toVersion; version++) {
           Logger.info(TAG, `Applying migration for version ${version}`);
@@ -187,7 +225,7 @@ export class DatabaseManager {
       Logger.info(TAG, `Database migration completed successfully`);
     } catch (error) {
       Logger.error(TAG, `Database migration failed: ${JSON.stringify(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -206,7 +244,7 @@ export class DatabaseManager {
    * @param sql SQL语句
    * @param bindArgs 绑定参数
    */
-  public async executeSql(sql: string, bindArgs?: Array<ValueType>): Promise<void> {
+  public async executeSql(sql: string, bindArgs?: Array<number | string | boolean | null>): Promise<void> {
     if (!this.database) {
       throw new Error('Database not initialized');
     }
@@ -216,7 +254,7 @@ export class DatabaseManager {
       await this.database.executeSql(sql, bindArgs);
     } catch (error) {
       Logger.error(TAG, `Failed to execute SQL: ${sql}, error: ${JSON.stringify(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -235,7 +273,7 @@ export class DatabaseManager {
       Logger.debug(TAG, 'Transaction completed successfully');
     } catch (error) {
       Logger.error(TAG, `Transaction failed: ${JSON.stringify(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -259,7 +297,7 @@ export class DatabaseManager {
   
   /**
    * 获取数据库信�?   * @returns 数据库信�?   */
-  public getDatabaseInfo(): { name: string; version: number } {
+  public getDatabaseInfo(): DatabaseInfo {
     return {
       name: DATABASE_INFO.NAME,
       version: DATABASE_INFO.VERSION
@@ -283,7 +321,7 @@ export class DatabaseManager {
       Logger.info(TAG, 'Database reset completed successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to reset database: ${JSON.stringify(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -291,6 +329,11 @@ export class DatabaseManager {
    * 获取数据库大小信�?   * @returns 数据库大小（字节数）
    */
   public async getDatabaseSize(): Promise<number> {
+    if (!this.database) {
+      Logger.error(TAG, 'Failed to get database size: Database not initialized');
+      return 0;
+    }
+    
     try {
       Logger.debug(TAG, 'Getting database size');
       
@@ -321,6 +364,11 @@ export class DatabaseManager {
   /**
    * 优化数据�?   */
   public async optimizeDatabase(): Promise<void> {
+    if (!this.database) {
+      Logger.error(TAG, 'Failed to optimize database: Database not initialized');
+      return;
+    }
+    
     try {
       // 在SQLite中，VACUUM命令可以优化数据�?      await this.executeSql('VACUUM');
       Logger.info(TAG, 'Database optimized successfully');

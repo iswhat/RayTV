@@ -52,25 +52,35 @@ export class SQLiteHelper {
   /**
    * 获取对象的键数组（ArkTS兼容方法�?*/
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.keys(obj).includes(key)) {
-        keys.push(key);
-      }
+    try {
+      const jsonString = JSON.stringify(obj);
+      const tempObj = JSON.parse(jsonString);
+      const keys: string[] = [];
+      
+      // 使用JSON序列化/反序列化方式获取键
+      const keyString = JSON.stringify(Object.keys(tempObj));
+      return JSON.parse(keyString);
+    } catch {
+      return [];
     }
-    return keys;
   }
   
   /**
    * 获取对象的值数组（ArkTS兼容方法�?*/
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
-    const values: ValueType[] = [];
-    for (const key in obj) {
-      if (Object.keys(obj).includes(key)) {
+    try {
+      const keys = this.getObjectKeys(obj);
+      const values: ValueType[] = [];
+      
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         values.push(obj[key]);
       }
+      
+      return values;
+    } catch {
+      return [];
     }
-    return values;
   }
   
   private constructor() {
@@ -123,7 +133,7 @@ export class SQLiteHelper {
         affectedRows: 1
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to insert into ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to insert into ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
@@ -163,7 +173,7 @@ export class SQLiteHelper {
         affectedRows
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to batch insert into ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to batch insert into ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
@@ -210,9 +220,13 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参数
+        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            bindArgs.push(...cond.value);
+            // 替换spread运算符，使用传统的for循环
+            for (let i = 0; i < cond.value.length; i++) {
+              bindArgs.push(cond.value[i]);
+            }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
             bindArgs.push(cond.value);
           }
@@ -232,7 +246,7 @@ export class SQLiteHelper {
         affectedRows
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to update ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to update ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
@@ -271,9 +285,13 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参数
+        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            bindArgs.push(...cond.value);
+            // 替换spread运算符，使用传统的for循环
+            for (let i = 0; i < cond.value.length; i++) {
+              bindArgs.push(cond.value[i]);
+            }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
             bindArgs.push(cond.value);
           }
@@ -293,7 +311,7 @@ export class SQLiteHelper {
         affectedRows
       };
     } catch (error) {
-      Logger.error(TAG, `Failed to delete from ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to delete from ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
@@ -339,9 +357,13 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参数
+        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            bindArgs.push(...cond.value);
+            // 替换spread运算符，使用传统的for循环
+            for (let i = 0; i < cond.value.length; i++) {
+              bindArgs.push(cond.value[i]);
+            }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
             bindArgs.push(cond.value);
           }
@@ -389,7 +411,7 @@ export class SQLiteHelper {
       Logger.info(TAG, `Retrieved ${records.length} records from ${tableName}`);
       return records;
     } catch (error) {
-      Logger.error(TAG, `Failed to query ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to query ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -437,9 +459,13 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参�?        conditions.forEach(cond => {
+        // 处理IN条件的参数
+        conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            bindArgs.push(...cond.value);
+            // 替换spread运算符，使用传统的for循环
+            for (let i = 0; i < cond.value.length; i++) {
+              bindArgs.push(cond.value[i]);
+            }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
             bindArgs.push(cond.value);
           }
@@ -453,7 +479,7 @@ export class SQLiteHelper {
       }
       return 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to count ${tableName}: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to count ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return 0;
     }
   }
@@ -503,7 +529,7 @@ export class SQLiteHelper {
       
       return records;
     } catch (error) {
-      Logger.error(TAG, `Failed to execute custom query: ${JSON.stringify(error)}`);
+      Logger.error(TAG, `Failed to execute custom query: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }

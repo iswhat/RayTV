@@ -20,6 +20,17 @@ const CACHE_EXPIRY_TIME = 3600000; // 1小时
 
 // 批量操作的批次大�?const BATCH_SIZE = 100;
 
+/**
+ * 缓存统计信息类型
+ */
+export interface CacheStats {
+  totalItems: number;
+  expiredItems: number;
+  cacheSize: number;
+  oldestItemTime: number;
+  newestItemTime: number;
+}
+
 export class VodRepository {
   private static instance: VodRepository;
   private sqliteHelper: SQLiteHelper;
@@ -49,7 +60,7 @@ export class VodRepository {
    */
   public async cacheVodItem(vodItem: Vod): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.name}`, {});
+      Logger.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.name}`);
       // 简化实现，仅记录日志
       return true;
     } catch (error) {
@@ -69,7 +80,7 @@ export class VodRepository {
     }
     
     // 简化实现，仅记录日志
-    Logger.info(TAG, `Batch cached ${vodItems.length} VOD items`, {});
+    Logger.info(TAG, `Batch cached ${vodItems.length} VOD items`);
     return vodItems.length;
   }
   
@@ -130,21 +141,21 @@ export class VodRepository {
    */
   public async saveVodHistory(vodItem: Vod, episodeIndex: number = 0, progress: number = 0): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving VOD history: ${vodItem.name}`, {});
+      Logger.debug(TAG, `Saving VOD history: ${vodItem.name}`);
       
-      const historyData: Record<string, string | number | boolean | null> = {
-        [HISTORY_TABLE.COLUMNS.CONTENT_ID]: vodItem.id,
-        [HISTORY_TABLE.COLUMNS.CONTENT_NAME]: vodItem.name,
-        [HISTORY_TABLE.COLUMNS.TYPE]: vodItem.type,
-        [HISTORY_TABLE.COLUMNS.CONTENT_TYPE]: 'vod',
-        [HISTORY_TABLE.COLUMNS.SOURCE_KEY]: vodItem.sourceKey,
-        [HISTORY_TABLE.COLUMNS.COVER]: vodItem.poster || '',
-        [HISTORY_TABLE.COLUMNS.PROGRESS]: progress,
-        [HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT]: Date.now(),
-        [HISTORY_TABLE.COLUMNS.FIRST_PLAYED_AT]: Date.now(),
-        [HISTORY_TABLE.COLUMNS.CREATED_AT]: Date.now(),
-        [HISTORY_TABLE.COLUMNS.UPDATED_AT]: Date.now()
-      };
+      // 使用普通赋值方式替代计算属性名
+      const historyData: Record<string, string | number | boolean | null> = {};
+      historyData[HISTORY_TABLE.COLUMNS.CONTENT_ID] = vodItem.id;
+      historyData[HISTORY_TABLE.COLUMNS.CONTENT_NAME] = vodItem.name;
+      historyData[HISTORY_TABLE.COLUMNS.TYPE] = vodItem.type;
+      historyData[HISTORY_TABLE.COLUMNS.CONTENT_TYPE] = 'vod';
+      historyData[HISTORY_TABLE.COLUMNS.SOURCE_KEY] = vodItem.sourceKey;
+      historyData[HISTORY_TABLE.COLUMNS.COVER] = vodItem.cover || '';
+      historyData[HISTORY_TABLE.COLUMNS.PROGRESS] = progress;
+      historyData[HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT] = Date.now();
+      historyData[HISTORY_TABLE.COLUMNS.FIRST_PLAYED_AT] = Date.now();
+      historyData[HISTORY_TABLE.COLUMNS.CREATED_AT] = Date.now();
+      historyData[HISTORY_TABLE.COLUMNS.UPDATED_AT] = Date.now();
       
       // 简化实现，仅记录日志
       return true;
@@ -175,11 +186,11 @@ export class VodRepository {
         value: siteId
       }];
       
-      const updateData: Record<string, string | number | boolean | null> = {
-        [HISTORY_TABLE.COLUMNS.PROGRESS]: progress,
-        [HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT]: Date.now(),
-        [HISTORY_TABLE.COLUMNS.UPDATED_AT]: Date.now()
-      };
+      // 使用普通赋值方式替代计算属性名
+      const updateData: Record<string, string | number | boolean | null> = {};
+      updateData[HISTORY_TABLE.COLUMNS.PROGRESS] = progress;
+      updateData[HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT] = Date.now();
+      updateData[HISTORY_TABLE.COLUMNS.UPDATED_AT] = Date.now();
       
       // 简化实现，仅记录日志
       return true;
@@ -275,7 +286,7 @@ export class VodRepository {
    */
   public cacheRecentVods(siteId: string, vodItems: Vod[]): void {
     this.recentVodsCache.set(siteId, vodItems);
-    Logger.debug(TAG, `Cached ${vodItems.length} recent VODs for site ${siteId}`, {});
+    Logger.debug(TAG, `Cached ${vodItems.length} recent VODs for site ${siteId}`);
   }
   
   /**
@@ -294,7 +305,7 @@ export class VodRepository {
    */
   public cachePopularVods(siteId: string, vodItems: Vod[]): void {
     this.popularVodsCache.set(siteId, vodItems);
-    Logger.debug(TAG, `Cached ${vodItems.length} popular VODs for site ${siteId}`, {});
+    Logger.debug(TAG, `Cached ${vodItems.length} popular VODs for site ${siteId}`);
   }
   
   /**
@@ -313,7 +324,7 @@ export class VodRepository {
   public async clearExpiredCache(): Promise<number> {
     try {
       // 简化实现，返回0
-      Logger.info(TAG, `Cleared 0 expired VOD cache records`, {});
+      Logger.info(TAG, `Cleared 0 expired VOD cache records`);
       return 0;
     } catch (error) {
       Logger.error(TAG, `Failed to clear expired VOD cache`, error instanceof Error ? error : new Error(String(error)));
@@ -331,7 +342,7 @@ export class VodRepository {
       this.recentVodsCache.clear();
       this.popularVodsCache.clear();
       
-      Logger.info(TAG, `Cleared all VOD cache (0 records)`, {});
+      Logger.info(TAG, `Cleared all VOD cache (0 records)`);
       return true;
     } catch (error) {
       Logger.error(TAG, `Failed to clear all VOD cache`, error instanceof Error ? error : new Error(String(error)));
@@ -351,7 +362,7 @@ export class VodRepository {
       }];
       
       // 简化实现，仅记录日志
-      Logger.info(TAG, `Cleared all VOD history (0 records)`, {});
+      Logger.info(TAG, `Cleared all VOD history (0 records)`);
       return true;
     } catch (error) {
       Logger.error(TAG, `Failed to clear VOD history`, error instanceof Error ? error : new Error(String(error)));
@@ -376,31 +387,27 @@ export class VodRepository {
   /**
    * 获取缓存统计信息
    */
-  public async getCacheStats(): Promise<{
-    totalItems: number;
-    expiredItems: number;
-    cacheSize: number;
-    oldestItemTime: number;
-    newestItemTime: number;
-  }> {
+  public async getCacheStats(): Promise<CacheStats> {
     try {
       // 简化实现，返回默认值
-      return {
+      const stats: CacheStats = {
         totalItems: 0,
         expiredItems: 0,
         cacheSize: 0,
         oldestItemTime: 0,
         newestItemTime: 0
       };
+      return stats;
     } catch (error) {
       Logger.error(TAG, `Failed to get VOD cache stats`, error instanceof Error ? error : new Error(String(error)));
-      return {
+      const stats: CacheStats = {
         totalItems: 0,
         expiredItems: 0,
         cacheSize: 0,
         oldestItemTime: 0,
         newestItemTime: 0
       };
+      return stats;
     }
   }
 }

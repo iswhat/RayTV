@@ -31,6 +31,29 @@ export interface SearchRules {
   list: SearchRuleItem[];
 }
 
+// Live配置解析中间接口
+export interface LiveGroupConfig {
+  group?: string;
+  channels?: LiveChannelConfig[];
+}
+
+export interface LiveChannelConfig {
+  name?: string;
+  url?: string;
+  urls?: string[];
+  epg?: string;
+  logo?: string;
+}
+
+export interface LiveItemConfig {
+  name?: string;
+  type?: number;
+  playerType?: number;
+  url?: string;
+  epg?: string;
+  logo?: string;
+}
+
 // 详情规则接口 - 替换unknown为具体类型
 export interface DetailRules {
   title?: SearchRuleItem;
@@ -833,7 +856,7 @@ export class ConfigParser {
       for (const item of livesData) {
         if (typeof item === 'object' && item !== null) {
           // 检查是否为分组格式：检查是否有 group 属性且 channels 是数组
-          const groupObj = item as Record<string, any>;
+          const groupObj = item as LiveGroupConfig;
           if (typeof groupObj.group === 'string' && Array.isArray(groupObj.channels)) {
             // 分组格式
             const group: LiveGroup = {
@@ -842,16 +865,15 @@ export class ConfigParser {
             };
             
             // 解析频道列表
-            const channels = groupObj.channels as Record<string, any>[];
+            const channels = groupObj.channels as LiveChannelConfig[];
             for (const channel of channels) {
               if (typeof channel === 'object' && channel !== null) {
-                const channelObj = channel as Record<string, any>;
                 const liveChannel: LiveChannel = {
-                  name: typeof channelObj.name === 'string' ? channelObj.name : '未知频道',
-                  url: typeof channelObj.url === 'string' ? channelObj.url : undefined,
-                  urls: Array.isArray(channelObj.urls) ? channelObj.urls : undefined,
-                  epg: typeof channelObj.epg === 'string' ? channelObj.epg : undefined,
-                  logo: typeof channelObj.logo === 'string' ? channelObj.logo : undefined
+                  name: typeof channel.name === 'string' ? channel.name : '未知频道',
+                  url: typeof channel.url === 'string' ? channel.url : undefined,
+                  urls: Array.isArray(channel.urls) ? channel.urls : undefined,
+                  epg: typeof channel.epg === 'string' ? channel.epg : undefined,
+                  logo: typeof channel.logo === 'string' ? channel.logo : undefined
                 };
                 group.channels.push(liveChannel);
               }
@@ -859,7 +881,7 @@ export class ConfigParser {
             lives.push(group);
           } else {
             // 直接直播源格式
-            const itemObj = item as Record<string, any>;
+            const itemObj = item as LiveItemConfig;
             const liveConfig: LiveConfigItem = {
               name: typeof itemObj.name === 'string' ? itemObj.name : '未知直播源',
               type: typeof itemObj.type === 'number' ? itemObj.type : 0,

@@ -34,7 +34,7 @@ export class SiteDao {
       Logger.info(this.TAG, `Inserted site: ${site.name} (${site.key})`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to insert site: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -55,7 +55,7 @@ export class SiteDao {
       Logger.info(this.TAG, `Successfully batch inserted ${sites.length} sites`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -67,13 +67,13 @@ export class SiteDao {
   public async update(site: Site): Promise<void> {
     try {
       const valuesBucket: relationalStore.ValuesBucket = {
-        [SITE_TABLE.COLUMNS.NAME]: site.name,
-        [SITE_TABLE.COLUMNS.TYPE]: site.type,
-        [SITE_TABLE.COLUMNS.API]: site.api,
-        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries())) : null,
-        [SITE_TABLE.COLUMNS.ENABLED]: site.enabled ? 1 : 0,
-        [SITE_TABLE.COLUMNS.ORDER]: site.order,
-        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now()
+        name: site.name,
+        type: site.type,
+        api: site.api,
+        headers: site.headers ? JsonUtil.stringify(Array.from<[string, string]>(site.headers.entries())) : null,
+        enabled: site.enabled ? 1 : 0,
+        order: site.order,
+        updated_at: Date.now()
       };
       
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
@@ -87,7 +87,7 @@ export class SiteDao {
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to update site: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -109,7 +109,7 @@ export class SiteDao {
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to delete site: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -124,7 +124,7 @@ export class SiteDao {
       Logger.info(this.TAG, `Cleared all ${count} sites`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to clear all sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -141,7 +141,7 @@ export class SiteDao {
       return this.parseResultSet(resultSet);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -159,7 +159,7 @@ export class SiteDao {
       return this.parseResultSet(resultSet);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get enabled sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -179,7 +179,7 @@ export class SiteDao {
       return this.parseResultSet(resultSet);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get sites by type: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -198,7 +198,7 @@ export class SiteDao {
       return sites.length > 0 ? sites[0] : null;
     } catch (error) {
       Logger.error(this.TAG, `Failed to get site by key: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -214,10 +214,10 @@ export class SiteDao {
         return;
       }
       
-      const valuesBucket: relationalStore.ValuesBucket = {
-        [SITE_TABLE.COLUMNS.ENABLED]: enabled ? 1 : 0,
-        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now()
-      };
+      // 使用Record类型创建valuesBucket，避免使用计算属性名
+      const valuesBucket: Record<string, number> = {};
+      valuesBucket[SITE_TABLE.COLUMNS.ENABLED] = enabled ? 1 : 0;
+      valuesBucket[SITE_TABLE.COLUMNS.UPDATED_AT] = Date.now();
       
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.in(SITE_TABLE.COLUMNS.KEY, keys);
@@ -226,7 +226,7 @@ export class SiteDao {
       Logger.info(this.TAG, `Updated enabled status for ${count} sites`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to batch update enabled status: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -238,10 +238,10 @@ export class SiteDao {
    */
   public async updateOrder(key: string, order: number): Promise<void> {
     try {
-      const valuesBucket: relationalStore.ValuesBucket = {
-        [SITE_TABLE.COLUMNS.ORDER]: order,
-        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now()
-      };
+      // 使用Record类型创建valuesBucket，避免使用计算属性名
+      const valuesBucket: Record<string, number> = {};
+      valuesBucket[SITE_TABLE.COLUMNS.ORDER] = order;
+      valuesBucket[SITE_TABLE.COLUMNS.UPDATED_AT] = Date.now();
       
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
@@ -250,7 +250,7 @@ export class SiteDao {
       Logger.info(this.TAG, `Updated order for site ${key} to ${order}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to update site order: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -294,7 +294,7 @@ export class SiteDao {
       return this.parseResultSet(resultSet);
     } catch (error) {
       Logger.error(this.TAG, `Failed to search sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -335,10 +335,29 @@ export class SiteDao {
         resultSet.goToFirstRow();
         do {
           const headersStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.HEADERS));
-          const headers = headersStr ? new Map<string, string>(JSON.parse(headersStr)) : undefined;
+          let headers: { headers?: Record<string, string> } | undefined;
+          if (headersStr) {
+            try {
+              const headersArray = JSON.parse(headersStr) as [string, string][];
+              const headersRecord: Record<string, string> = {};
+              // 使用传统for循环替代解构变量声明
+              for (let i = 0; i < headersArray.length; i++) {
+                const key = headersArray[i][0];
+                const value = headersArray[i][1];
+                headersRecord[key] = value;
+              }
+              headers = { headers: headersRecord };
+            } catch (error) {
+              // If parsing as array fails, try parsing as record
+              const headersRecord = JSON.parse(headersStr) as Record<string, string>;
+              headers = { headers: headersRecord };
+            }
+          } else {
+            headers = undefined;
+          }
           
           const extStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CONFIG));
-          const ext = extStr ? JSON.parse(extStr) : undefined;
+          const ext: Record<string, any> | undefined = extStr ? JSON.parse(extStr) : undefined;
           
           sites.push({
             key: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)),
@@ -369,16 +388,16 @@ export class SiteDao {
    */
   private createValuesBucket(site: Site): relationalStore.ValuesBucket {
     return {
-      [SITE_TABLE.COLUMNS.KEY]: site.key,
-      [SITE_TABLE.COLUMNS.NAME]: site.name,
-      [SITE_TABLE.COLUMNS.TYPE]: site.type,
-      [SITE_TABLE.COLUMNS.API]: site.api,
-      [SITE_TABLE.COLUMNS.ENABLED]: site.enabled ? 1 : 0,
-      [SITE_TABLE.COLUMNS.ORDER]: site.order,
-      [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries())) : null,
-      [SITE_TABLE.COLUMNS.CONFIG]: site.ext ? JsonUtil.stringify(site.ext) : null,
-      [SITE_TABLE.COLUMNS.CREATED_AT]: site.createdAt || Date.now(),
-      [SITE_TABLE.COLUMNS.UPDATED_AT]: site.updatedAt || Date.now()
+      key: site.key,
+      name: site.name,
+      type: site.type,
+      api: site.api,
+      enabled: site.enabled ? 1 : 0,
+      order: site.order,
+      headers: site.headers ? JsonUtil.stringify(Array.from(site.headers.entries())) : null,
+      config: site.ext ? JsonUtil.stringify(site.ext) : null,
+      created_at: site.createdAt || Date.now(),
+      updated_at: site.updatedAt || Date.now()
     };
   }
 }

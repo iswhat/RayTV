@@ -41,9 +41,16 @@ export interface DownloadResult {
   fileSize?: number;
 }
 
+// HTTP配置接口
+export interface HttpConfig {
+  timeout: number;
+  retryCount: number;
+  userAgent: string;
+}
+
 export class HttpService {
   private static instance: HttpService;
-  private httpConfig: { timeout: number; retryCount: number; userAgent: string };
+  private httpConfig: HttpConfig;
   private context: common.Context | null = null;
 
   private constructor() {
@@ -149,7 +156,7 @@ export class HttpService {
       const context = this.getContext();
       
       // 先检查权限状态，避免重复申请
-      const permissionResult = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
+      const permissionResult: abilityAccessCtrl.GrantStatus = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
       
       // 只有当权限未授权时才请求
       if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
@@ -196,14 +203,19 @@ export class HttpService {
         if (!requestConfig.header) {
           requestConfig.header = {};
         }
-        for (const [key, value] of Object.entries(headers)) {
+        // 使用传统for循环替代解构变量声明
+        const entries = Object.entries(headers);
+        for (let i = 0; i < entries.length; i++) {
+          const key = entries[i][0];
+          const value = entries[i][1];
           requestConfig.header[key] = value;
         }
       }
 
       // 添加请求数据
       if (requestData !== null && requestData !== undefined) {
-        const contentType = requestConfig.header?.['Content-Type'] || 'application/json';
+        const headers = requestConfig.header as Record<string, string>;
+        const contentType = headers['Content-Type'] || 'application/json';
         if (contentType.includes('json')) {
           requestConfig.extraData = JSON.stringify(requestData);
         } else {
@@ -302,7 +314,11 @@ export class HttpService {
         if (!requestConfig.header) {
           requestConfig.header = {};
         }
-        for (const [key, value] of Object.entries(headers)) {
+        // 使用传统for循环替代解构变量声明
+        const entries = Object.entries(headers);
+        for (let i = 0; i < entries.length; i++) {
+          const key = entries[i][0];
+          const value = entries[i][1];
           requestConfig.header[key] = value;
         }
       }
@@ -342,7 +358,7 @@ export class HttpService {
       const downloadResult: DownloadResult = {
         status: response.responseCode,
         filePath,
-        headers: this.sanitizeHeaders(response.header),
+        headers: this.sanitizeHeaders(response.header as Record<string, string>),
         fileSize: response.fileSize
       };
 
@@ -377,7 +393,11 @@ export class HttpService {
     }
     
     const headersObj = headers as Record<string, string | number | boolean>;
-    for (const [key, value] of Object.entries(headersObj)) {
+    // 使用传统for循环替代解构变量声明
+    const entries = Object.entries(headersObj);
+    for (let i = 0; i < entries.length; i++) {
+      const key = entries[i][0];
+      const value = entries[i][1];
       if (value !== null && value !== undefined) {
         result[key] = String(value);
       }

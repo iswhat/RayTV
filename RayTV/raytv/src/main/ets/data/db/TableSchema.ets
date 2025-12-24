@@ -2,12 +2,17 @@
 // 定义RayTV应用的所有数据库表结构和字段常量
 
 /**
+ * 列定义类型
+ */
+export type ColumnDefinition = Record<string, string>;
+
+/**
  * 表结构接口定义
  */
 export interface TableDefinition {
   NAME: string;
   CREATE_SQL: string;
-  COLUMNS: Record<string, string>;
+  COLUMNS: ColumnDefinition;
 }
 
 /**
@@ -551,12 +556,31 @@ export function getAllTableNames(): string[] {
 }
 
 /**
- * 索引创建SQL语句
+ * 索引创建SQL语句接口
  */
 export interface IndexDefinition {
-  [key: string]: string;
+  SITE_TYPE_INDEX: string;
+  SITE_ENABLED_INDEX: string;
+  SITE_LAST_USED_INDEX: string;
+  HISTORY_SOURCE_INDEX: string;
+  HISTORY_CONTENT_INDEX: string;
+  HISTORY_LAST_PLAYED_INDEX: string;
+  KEEP_SOURCE_INDEX: string;
+  KEEP_CONTENT_INDEX: string;
+  KEEP_FOLDER_INDEX: string;
+  SEARCH_HISTORY_KEYWORD_INDEX: string;
+  SEARCH_HISTORY_TIME_INDEX: string;
+  SEARCH_HISTORY_FAVORITE_INDEX: string;
+  LIVE_CHANNEL_GROUP_INDEX: string;
+  LIVE_CHANNEL_FAVORITE_INDEX: string;
+  LIVE_CHANNEL_NAME_INDEX: string;
+  LIVE_GROUP_ORDER_INDEX: string;
+  CREATE_INDEXES: string[];
 }
 
+/**
+ * 索引创建SQL语句
+ */
 export const INDEXES: IndexDefinition = {
   // 站点表索引
   SITE_TYPE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_type ON site(type);',
@@ -584,7 +608,38 @@ export const INDEXES: IndexDefinition = {
   LIVE_CHANNEL_NAME_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_name ON live_channel(name);',
   
   // 直播分组表索引
-  LIVE_GROUP_ORDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");'
+  LIVE_GROUP_ORDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");',
+  
+  // Array of all index creation SQL statements (used by DatabaseManager)
+  CREATE_INDEXES: [
+    // Site table indexes
+    'CREATE INDEX IF NOT EXISTS idx_site_type ON site(type);',
+    'CREATE INDEX IF NOT EXISTS idx_site_enabled ON site(enabled);',
+    'CREATE INDEX IF NOT EXISTS idx_site_last_used ON site(last_used_at);',
+    
+    // History table indexes
+    'CREATE INDEX IF NOT EXISTS idx_history_source ON history(source_key);',
+    'CREATE INDEX IF NOT EXISTS idx_history_content ON history(content_id, content_type);',
+    'CREATE INDEX IF NOT EXISTS idx_history_last_played ON history(last_played_at);',
+    
+    // Keep table indexes
+    'CREATE INDEX IF NOT EXISTS idx_keep_source ON keep(source_key);',
+    'CREATE INDEX IF NOT EXISTS idx_keep_content ON keep(content_id, content_type);',
+    'CREATE INDEX IF NOT EXISTS idx_keep_folder ON keep(folder_id);',
+    
+    // Search history table indexes
+    'CREATE INDEX IF NOT EXISTS idx_search_keyword ON search_history(keyword);',
+    'CREATE INDEX IF NOT EXISTS idx_search_time ON search_history(search_time);',
+    'CREATE INDEX IF NOT EXISTS idx_search_favorite ON search_history(is_favorite);',
+    
+    // Live channel table indexes
+    'CREATE INDEX IF NOT EXISTS idx_live_channel_group ON live_channel(group_id);',
+    'CREATE INDEX IF NOT EXISTS idx_live_channel_favorite ON live_channel(is_favorite);',
+    'CREATE INDEX IF NOT EXISTS idx_live_channel_name ON live_channel(name);',
+    
+    // Live group table index
+    'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");'
+  ]
 };
 
 /**
