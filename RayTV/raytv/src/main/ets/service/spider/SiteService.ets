@@ -1,6 +1,6 @@
 import Logger from '../../../common/util/Logger';
-import { Site, SiteType } from '../../data/bean/Site';
-import { SiteDao } from '../db/dao/SiteDao';
+import { Site, SiteType, LoaderType } from '../../data/bean/Site';
+import { SiteDao } from '../../data/db/dao/SiteDao';
 import JsonUtil from '../../../common/util/JsonUtil';
 
 // 站点测试结果接口
@@ -278,8 +278,15 @@ export class SiteService implements ISiteService {
         site.lifecycle = { initialized: false, loading: false, error: false };
       }
       
-      await this.siteDao.save(site);
-      Logger.info(TAG, `Saved site: ${site.name} (${site.key})`);
+      // 检查站点是否已存在
+      const exists = await this.siteDao.exists(site.key);
+      if (exists) {
+        await this.siteDao.update(site);
+        Logger.info(TAG, `Updated site: ${site.name} (${site.key})`);
+      } else {
+        await this.siteDao.insert(site);
+        Logger.info(TAG, `Inserted site: ${site.name} (${site.key})`);
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to save site ${site.name}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -291,10 +298,10 @@ export class SiteService implements ISiteService {
    */
   public async batchSaveSites(sites: Site[]): Promise<void> {
     try {
-      await this.siteDao.batchSave(sites);
-      Logger.info(TAG, `Batch saved ${sites.length} sites`);
+      await this.siteDao.batchInsert(sites);
+      Logger.info(TAG, `Batch inserted ${sites.length} sites`);
     } catch (error) {
-      Logger.error(TAG, `Failed to batch save sites: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -439,14 +446,14 @@ export class SiteService implements ISiteService {
       const exportData = sites.map(site => {
         // 手动复制属性，不使用Object.assign
         const exportSite: ExportSite = {
-          id: site.id || null,
+          id: null, // Site接口没有id属性，使用key作为唯一标识
           key: site.key || null,
           name: site.name || null,
-          url: site.url || null,
+          url: site.api || null, // Site接口使用api属性，而不是url
           type: site.type || null,
-          status: site.status || null,
-          sort: site.sort || null,
-          parser: site.parser || null,
+          status: site.enabled ? 'enabled' : 'disabled', // Site接口使用enabled属性，而不是status
+          sort: site.order || null, // Site接口使用order属性，而不是sort
+          parser: null, // Site接口没有parser属性
           headers: null,
           siteAuth: null,
           customCode: site.customCode || null,
@@ -541,7 +548,7 @@ export class SiteService implements ISiteService {
             key: siteData.key as string,
             name: siteData.name as string,
             type: (siteData.type as SiteType) || SiteType.MIXED,
-            loaderType: 'js',
+            loaderType: LoaderType.JS,
             api: siteData.api as string || siteData.url as string || '',
             searchConfig: { enabled: false },
             filterConfig: { enabled: false },

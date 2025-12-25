@@ -235,8 +235,28 @@ export class VodRepository {
    */
   public async searchVod(keyword: string, siteId?: string, limit: number = 50): Promise<Vod[]> {
     try {
-      // 简化实现，返回空数组
-      return [];
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      // 构建API请求URL
+      let apiUrl = `/api/vod/search?keyword=${encodeURIComponent(keyword)}&limit=${limit}`;
+      if (siteId) {
+        apiUrl += `&siteId=${siteId}`;
+      }
+      
+      const response = await httpService.get<Vod[]>(apiUrl, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        Logger.error(TAG, `Failed to search VOD: Invalid response format`);
+        return [];
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to search VOD`, error instanceof Error ? error : new Error(String(error)));
       return [];
@@ -253,8 +273,25 @@ export class VodRepository {
    */
   public async getVodsByCategory(categoryId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      // 简化实现，返回空数组
-      return [];
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      // 构建API请求URL
+      const apiUrl = `/api/vod/category/${categoryId}?siteId=${siteId}&limit=${limit}&offset=${offset}`;
+      
+      const response = await httpService.get<Vod[]>(apiUrl, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        Logger.error(TAG, `Failed to get VODs by category: Invalid response format`);
+        return [];
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to get VODs by category`, error instanceof Error ? error : new Error(String(error)));
       return [];
@@ -271,8 +308,25 @@ export class VodRepository {
    */
   public async getVodsByTag(tagId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      // 简化实现，返回空数组
-      return [];
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      // 构建API请求URL
+      const apiUrl = `/api/vod/tag/${tagId}?siteId=${siteId}&limit=${limit}&offset=${offset}`;
+      
+      const response = await httpService.get<Vod[]>(apiUrl, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        Logger.error(TAG, `Failed to get VODs by tag: Invalid response format`);
+        return [];
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to get VODs by tag`, error instanceof Error ? error : new Error(String(error)));
       return [];

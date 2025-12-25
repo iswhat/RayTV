@@ -1,12 +1,70 @@
 // 数据分析服务
 // 提供用户行为统计、页面访问追踪、播放统计等功能
 
-import { StorageUtil } from '../../common/util/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 import { HttpService } from '../HttpService';
+
+
+
+/**
+ * 分析配置接口
+ */
+export interface AnalyticsConfig {
+  enabled: boolean;
+}
+
+/**
+ * 视频播放参数接口
+ */
+export interface VideoPlayParams {
+  episode_name?: string;
+  position?: number;
+  duration?: number;
+  quality?: string;
+}
+
+/**
+ * 搜索事件参数接口
+ */
+export interface SearchEventParams {
+  keyword: string;
+  site_key?: string;
+  result_count?: number;
+}
+
+/**
+ * 事件属性类型
+ */
+export interface EventProperties {
+  [key: string]: string | number | boolean | null;
+}
+
+/**
+ * 使用统计摘要
+ */
+export interface UsageSummary {
+  userId: string;
+  sessionId: string;
+  sessionStartTime: number;
+  totalPlays: number;
+  totalPages: number;
+  totalSearches: number;
+  sessionDuration: number;
+}
+
+/**
+ * 分析事件接口
+ */
+export interface AnalyticsEvent {
+  eventName: string;
+  timestamp: number;
+  userId: string;
+  sessionId: string;
+  properties: EventProperties;
+}
 
 export class AnalyticsService {
   private static instance: AnalyticsService;
-  private storageUtil: StorageUtil;
   private httpService: HttpService;
   private eventQueue: AnalyticsEvent[] = [];
   private isEnabled: boolean = true;
@@ -15,7 +73,6 @@ export class AnalyticsService {
   private sessionStartTime: number = 0;
 
   private constructor() {
-    this.storageUtil = StorageUtil.getInstance();
     this.httpService = HttpService.getInstance();
     this.initialize();
   }
@@ -31,28 +88,30 @@ export class AnalyticsService {
   }
 
   /**
-   * 初始化分析服�?   */
+   * 初始化分析服务
+   */
   public async initialize(): Promise<void> {
-    // 定义配置接口
-    interface AnalyticsConfig {
-      enabled: boolean;
-    }
-    
     // 加载配置
-    const config: AnalyticsConfig = await this.storageUtil.get<AnalyticsConfig>('analyticsConfig', { enabled: true });
-    this.isEnabled = config.enabled;
+    const defaultConfig: AnalyticsConfig = { enabled: true };
+    const config = await StorageUtil.get<AnalyticsConfig>('analyticsConfig', defaultConfig);
+    this.isEnabled = config?.enabled ?? defaultConfig.enabled;
 
     // 生成或获取用户ID
-    this.userId = await this.storageUtil.get<string>('userId', this.generateId());
-    await this.storageUtil.save('userId', this.userId);
+    const defaultUserId = this.generateId();
+    const storedUserId = await StorageUtil.getString('userId', defaultUserId);
+    this.userId = storedUserId || defaultUserId;
+    await StorageUtil.setString('userId', this.userId);
 
-    // 创建新会�?    this.createNewSession();
+    // 创建新会话
+    this.createNewSession();
 
-    // 开始自动上�?    this.startAutoReport();
+    // 开始自动上报
+    this.startAutoReport();
   }
 
   /**
-   * 创建新会�?   */
+   * 创建新会话
+   */
   private createNewSession(): void {
     this.sessionId = this.generateId();
     this.sessionStartTime = Date.now();
@@ -66,13 +125,16 @@ export class AnalyticsService {
   }
 
   /**
-   * 开始自动上�?   */
+   * 开始自动上报
+   */
   private startAutoReport(): void {
-    // �?0秒上报一次事件队�?    setInterval(() => {
+    // 30秒上报一次事件队列
+    setInterval(() => {
       this.reportEvents();
     }, 30000);
 
-    // 应用进入后台时上�?    // 在鸿蒙系统中监听应用生命周期事件
+    // 应用进入后台时上报
+    // 在鸿蒙系统中监听应用生命周期事件
     // 这里需要注册到应用的生命周期监听中
   }
 
@@ -81,11 +143,11 @@ export class AnalyticsService {
    * @param pageName 页面名称
    * @param params 额外参数
    */
-  public trackPageView(pageName: string, params?: Record<string, string | number | boolean | null>): void {
+  public trackPageView(pageName: string, params?: EventProperties): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: Record<string, string | number | boolean | null> = {
+    const eventProperties: EventProperties = {
       page_name: pageName
     };
     
@@ -113,13 +175,14 @@ export class AnalyticsService {
   /**
    * 记录视频播放
    * @param videoId 视频ID
-   * @param siteKey 站点�?   * @param params 播放参数
+   * @param siteKey 站点Key
+   * @param params 播放参数
    */
   public trackVideoPlay(videoId: string, siteKey: string, params?: VideoPlayParams): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: Record<string, string | number | boolean | null> = {
+    const eventProperties: EventProperties = {
       video_id: videoId,
       site_key: siteKey
     };
@@ -157,11 +220,11 @@ export class AnalyticsService {
    * @param duration 播放时长
    * @param params 额外参数
    */
-  public trackVideoComplete(videoId: string, duration: number, params?: Record<string, string | number | boolean | null>): void {
+  public trackVideoComplete(videoId: string, duration: number, params?: EventProperties): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: Record<string, string | number | boolean | null> = {
+    const eventProperties: EventProperties = {
       video_id: videoId,
       duration: duration
     };
@@ -189,21 +252,24 @@ export class AnalyticsService {
 
   /**
    * 记录搜索事件
-   * @param keyword 搜索关键�?   * @param siteKey 站点�?   * @param resultCount 结果数量
+   * @param keyword 搜索关键词
+   * @param siteKey 站点Key
+   * @param resultCount 结果数量
    */
-  public trackSearch(keyword: string, siteKey?: string, resultCount: number = 0): void {
+  public trackSearch(keyword: string, siteKey?: string, resultCount?: number): void {
     if (!this.isEnabled) return;
 
+    const properties: EventProperties = {
+      keyword: keyword,
+      site_key: siteKey || null,
+      result_count: resultCount || null
+    };
     const event: AnalyticsEvent = {
       eventName: 'search',
       timestamp: Date.now(),
       userId: this.userId,
       sessionId: this.sessionId,
-      properties: {
-        keyword: keyword,
-        site_key: siteKey,
-        result_count: resultCount
-      }
+      properties: properties
     };
 
     this.addToQueue(event);
@@ -212,19 +278,21 @@ export class AnalyticsService {
   /**
    * 记录收藏事件
    * @param itemId 收藏项ID
-   * @param itemType 收藏项类�?   */
+   * @param itemType 收藏项类型
+   */
   public trackFavorite(itemId: string, itemType: 'vod' | 'live'): void {
     if (!this.isEnabled) return;
 
+    const properties: EventProperties = {
+      item_id: itemId,
+      item_type: itemType
+    };
     const event: AnalyticsEvent = {
       eventName: 'favorite',
       timestamp: Date.now(),
       userId: this.userId,
       sessionId: this.sessionId,
-      properties: {
-        item_id: itemId,
-        item_type: itemType
-      }
+      properties: properties
     };
 
     this.addToQueue(event);
@@ -234,12 +302,13 @@ export class AnalyticsService {
    * 记录错误事件
    * @param errorType 错误类型
    * @param message 错误消息
-   * @param context 错误上下�?   */
-  public trackError(errorType: string, message: string, context?: Record<string, string | number | boolean | null>): void {
+   * @param context 错误上下文
+   */
+  public trackError(errorType: string, message: string, context?: EventProperties): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: Record<string, string | number | boolean | null> = {
+    const eventProperties: EventProperties = {
       error_type: errorType,
       error_message: message
     };
@@ -266,7 +335,8 @@ export class AnalyticsService {
   }
 
   /**
-   * 添加事件到队�?   * @param event 分析事件
+   * 添加事件到队列
+   * @param event 分析事件
    */
   private addToQueue(event: AnalyticsEvent): void {
     this.eventQueue.push(event);
@@ -284,20 +354,22 @@ export class AnalyticsService {
     if (this.eventQueue.length === 0) return;
 
     // 使用传统方式复制数组，不使用扩展运算符
-    const eventsToReport = [];
+    const eventsToReport: AnalyticsEvent[] = [];
     for (let i = 0; i < this.eventQueue.length; i++) {
       eventsToReport.push(this.eventQueue[i]);
     }
     this.eventQueue = [];
 
     try {
-      // 这里应该发送到分析服务�?      // 由于是本地实现，可以保存到本地存储或日志文件
+      // 这里应该发送到分析服务器
+      // 由于是本地实现，可以保存到本地存储或日志文件
       // 模拟上报
       // await this.httpService.post('https://analytics-api.example.com/events', {
       //   events: eventsToReport
       // });
 
-      // 保存到本地日�?      await this.saveEventsToLog(eventsToReport);
+      // 保存到本地日志
+      await this.saveEventsToLog(eventsToReport);
     } catch (error) {
       // 上报失败，将事件重新加入队列
       // 上报失败，将事件重新加入队列
@@ -309,12 +381,13 @@ export class AnalyticsService {
   }
 
   /**
-   * 保存事件到本地日�?   * @param events 事件列表
+   * 保存事件到本地日志
+   * @param events 事件列表
    */
   private async saveEventsToLog(events: AnalyticsEvent[]): Promise<void> {
     try {
       const logKey = `analytics_log_${new Date().toISOString().split('T')[0]}`;
-      const existingLogs = await this.storageUtil.get<string>(logKey, '');
+      const existingLogs = await StorageUtil.getString(logKey, '');
       let newLogs = '';
       for (let i = 0; i < events.length; i++) {
         newLogs += JSON.stringify(events[i]);
@@ -322,7 +395,7 @@ export class AnalyticsService {
           newLogs += '\n';
         }
       }
-      await this.storageUtil.save(logKey, existingLogs + newLogs + '\n');
+      await StorageUtil.setString(logKey, existingLogs + newLogs + '\n');
     } catch (error) {
       // 保存日志失败
     }
@@ -334,23 +407,28 @@ export class AnalyticsService {
    */
   public async setEnabled(enabled: boolean): Promise<void> {
     this.isEnabled = enabled;
-    await this.storageUtil.save('analyticsConfig', { enabled });
+    const config: AnalyticsConfig = {
+      enabled: enabled
+    };
+    await StorageUtil.set('analyticsConfig', config);
   }
 
   /**
-   * 获取分析状�?   */
+   * 获取分析状态
+   */
   public getEnabled(): boolean {
     return this.isEnabled;
   }
 
   /**
-   * 清除所有数�?   */
+   * 清除所有数据
+   */
   public async clearData(): Promise<void> {
     this.eventQueue = [];
     this.createNewSession();
-    await this.storageUtil.remove('userId');
+    await StorageUtil.remove('userId');
     this.userId = this.generateId();
-    await this.storageUtil.save('userId', this.userId);
+    await StorageUtil.setString('userId', this.userId);
   }
 
   /**
@@ -359,7 +437,7 @@ export class AnalyticsService {
   public async getUsageSummary(): Promise<UsageSummary> {
     const today = new Date().toISOString().split('T')[0];
     const logKey = `analytics_log_${today}`;
-    const logs = await this.storageUtil.get<string>(logKey, '');
+    const logs = await StorageUtil.getString(logKey, '');
     
     let totalPlays = 0;
     let totalPages = 0;
@@ -398,38 +476,4 @@ export class AnalyticsService {
       sessionDuration: Date.now() - this.sessionStartTime
     };
   }
-}
-
-/**
-   * 分析事件
-   */
-export interface AnalyticsEvent {
-  eventName: string;
-  timestamp: number;
-  userId: string;
-  sessionId: string;
-  properties: Record<string, string | number | boolean | null | Array<string | number | boolean>>;
-}
-
-/**
- * 视频播放参数
- */
-export interface VideoPlayParams {
-  episode_name?: string;
-  position?: number;
-  duration?: number;
-  quality?: string;
-}
-
-/**
- * 使用统计摘要
- */
-export interface UsageSummary {
-  userId: string;
-  sessionId: string;
-  sessionStartTime: number;
-  totalPlays: number;
-  totalPages: number;
-  totalSearches: number;
-  sessionDuration: number;
 }

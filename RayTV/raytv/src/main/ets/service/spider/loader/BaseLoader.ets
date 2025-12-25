@@ -130,6 +130,8 @@ export interface LiveChannel {
   url?: string;
   category?: string;
   online?: boolean;
+  siteKey?: string;
+  siteName?: string;
 }
 
 export interface LiveResult {
@@ -157,7 +159,7 @@ export interface SiteAuthConfig {
 
 export interface SiteConfigItem {
   key?: string;
-  value?: any;
+  value?: string | number | boolean;
   type?: string;
   label?: string;
   required?: boolean;
@@ -191,13 +193,13 @@ export interface SiteUpdateConfig {
   description?: string;
   siteAuth?: SiteAuthConfig;
   headers?: Record<string, string>;
-  config?: Record<string, any>;
+  config?: Record<string, string | number | boolean>;
   configItems?: SiteConfigItem[];
-  searchConfig?: Record<string, any>;       
-  filterConfig?: Record<string, any>;       
+  searchConfig?: Record<string, string | number | boolean>;       
+  filterConfig?: Record<string, string | number | boolean>;       
   performanceConfig?: SitePerformanceConfig;
   version?: string;
-  stats?: Record<string, any>;
+  stats?: Record<string, string | number | boolean>;
   lifecycle?: SiteLifecycleConfig;
   enabled?: boolean;
   order?: number;
@@ -256,7 +258,7 @@ export abstract class BaseLoader {
         Logger.info(this.TAG, `Loader initialized successfully for site: ${this.site.name}`);
         return true;
       } catch (error) {
-        Logger.error(this.TAG, `Failed to initialize loader: ${error}`);
+        Logger.error(this.TAG, `Failed to initialize loader: ${(error as Error).message}`);
         this.handleError();
         return false;
       }
@@ -276,7 +278,7 @@ export abstract class BaseLoader {
         this.isInitialized = false;
         Logger.info(this.TAG, `Loader destroyed successfully for site: ${this.site.name}`);
       } catch (error) {
-        Logger.error(this.TAG, `Failed to destroy loader: ${error}`);
+        Logger.error(this.TAG, `Failed to destroy loader: ${(error as Error).message}`);
       }
     }
   }
@@ -316,9 +318,9 @@ export abstract class BaseLoader {
       Logger.debug(this.TAG, `Method ${method} executed successfully for site: ${this.site.name}`);
       return this.createSuccessResult(result);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to invoke method ${method}: ${error}`);
+      Logger.error(this.TAG, `Failed to invoke method ${method}: ${(error as Error).message}`);
       this.handleError();
-      return this.createErrorResult<T>(error instanceof Error ? error.message : String(error));
+      return this.createErrorResult<T>((error as Error).message);
     }
   }
 
@@ -563,7 +565,7 @@ export abstract class BaseLoader {
    * @param params 方法参数
    * @protected
    */
-  protected abstract onInvoke<T>(method: string, params: Record<string, string | number | boolean | object | null>): Promise<T>;
+  protected abstract onInvoke<T>(method: string, params: Record<string, string | number | boolean | null>): Promise<T>;
 
   /**
    * 销毁方法（由子类实现）

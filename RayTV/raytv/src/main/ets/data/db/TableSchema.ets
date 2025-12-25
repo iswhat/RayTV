@@ -2,23 +2,264 @@
 // 定义RayTV应用的所有数据库表结构和字段常量
 
 /**
- * 列定义类型
+ * 站点表列定义
  */
-export type ColumnDefinition = Record<string, string>;
+export interface SiteColumns {
+  KEY: string;
+  NAME: string;
+  TYPE: string;
+  LOADER_TYPE: string;
+  API: string;
+  LOGO: string;
+  DESCRIPTION: string;
+  SITE_AUTH: string;
+  HEADERS: string;
+  CONFIG: string;
+  CONFIG_ITEMS: string;
+  SEARCH_CONFIG: string;
+  FILTER_CONFIG: string;
+  PERFORMANCE_CONFIG: string;
+  VERSION: string;
+  STATS: string;
+  LIFECYCLE: string;
+  ENABLED: string;
+  ORDER: string;
+  GROUP: string;
+  TAGS: string;
+  CUSTOM_CODE: string;
+  SANDBOX_ENABLED: string;
+  ALLOW_THIRD_PARTY: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  LAST_USED_AT: string;
+  USER_AGENT: string;
+  REFERER: string;
+  PROXY: string;
+  ENCODING: string;
+  CHARSET: string;
+  CERTIFICATE: string;
+}
+
+/**
+ * 历史记录表列定义
+ */
+export interface HistoryColumns {
+  ID: string;
+  CONTENT_ID: string;
+  CONTENT_NAME: string;
+  TYPE: string;
+  CONTENT_TYPE: string;
+  SOURCE_KEY: string;
+  COVER: string;
+  POSTER: string;
+  BACKDROP: string;
+  POSITION: string;
+  DURATION: string;
+  PROGRESS: string;
+  PLAYBACK_STATUS: string;
+  EPISODE_NAME: string;
+  EPISODE_ID: string;
+  SEASON_NAME: string;
+  SEASON_ID: string;
+  SOURCE_NAME: string;
+  SOURCE_URL: string;
+  PLAY_COUNT: string;
+  TOTAL_WATCH_TIME: string;
+  LAST_PLAYED_AT: string;
+  FIRST_PLAYED_AT: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  DEVICE_ID: string;
+  DEVICE_NAME: string;
+  USER_AGENT: string;
+  RESOLUTION: string;
+  BITRATE: string;
+  LANGUAGE: string;
+  SUBTITLES: string;
+  AUDIO_TRACKS: string;
+  SELECTED_AUDIO_TRACK: string;
+  SELECTED_SUBTITLE: string;
+  PLAYBACK_SPEED: string;
+  VOLUME: string;
+  BRIGHTNESS: string;
+  CONTRAST: string;
+  SATURATION: string;
+  HUE: string;
+  PLAYBACK_NOTES: string;
+  WATCH_TIME_LIST: string;
+}
+
+/**
+ * 收藏表列定义
+ */
+export interface KeepColumns {
+  ID: string;
+  CONTENT_ID: string;
+  CONTENT_NAME: string;
+  TYPE: string;
+  CONTENT_TYPE: string;
+  SOURCE_KEY: string;
+  COVER: string;
+  POSTER: string;
+  BACKDROP: string;
+  DESCRIPTION: string;
+  EPISODE_NAME: string;
+  SEASON_NAME: string;
+  ADD_TIME: string;
+  LAST_UPDATE_TIME: string;
+  SORT_ORDER: string;
+  FOLDER_ID: string;
+  RATING: string;
+  TAGS: string;
+  NOTES: string;
+  PROGRESS: string;
+}
+
+/**
+ * 配置表列定义
+ */
+export interface ConfigColumns {
+  ID: string;
+  PLAYER_CONFIG: string;
+  DISPLAY_CONFIG: string;
+  NETWORK_CONFIG: string;
+  SECURITY_CONFIG: string;
+  AD_BLOCK_CONFIG: string;
+  HARMONY_CONFIG: string;
+  SEARCH_CONFIG: string;
+  DOWNLOAD_CONFIG: string;
+  SYNC_CONFIG: string;
+  LOG_CONFIG: string;
+  VERSION: string;
+  LAST_UPDATED: string;
+  MIGRATION_VERSION: string;
+  CUSTOM_SETTINGS: string;
+  IS_DEFAULT: string;
+}
+
+/**
+ * 收藏文件夹表列定义
+ */
+export interface KeepFolderColumns {
+  ID: string;
+  NAME: string;
+  DESCRIPTION: string;
+  ICON: string;
+  COLOR: string;
+  PARENT_ID: string;
+  SORT_ORDER: string;
+  ITEM_COUNT: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  IS_DEFAULT: string;
+}
+
+/**
+ * 搜索历史表列定义
+ */
+export interface SearchHistoryColumns {
+  ID: string;
+  KEYWORD: string;
+  SEARCH_TYPE: string;
+  SOURCE_KEY: string;
+  SEARCH_TIME: string;
+  RESULT_COUNT: string;
+  IS_FAVORITE: string;
+}
+
+/**
+ * 线路表列定义
+ */
+export interface LineColumns {
+  ID: string;
+  NAME: string;
+  URL: string;
+  DESCRIPTION: string;
+  TYPE: string;
+  UPDATE_TIME: string;
+  CREATE_TIME: string;
+  SOURCE_COUNT: string;
+  ENABLED: string;
+  CURRENT: string;
+  CACHE_TIME: string;
+  RESPONSE_TIME: string;
+}
+
+/**
+ * 订阅表列定义
+ */
+export interface SubscriptionColumns {
+  ID: string;
+  NAME: string;
+  URL: string;
+  DESCRIPTION: string;
+  UPDATE_TIME: string;
+  CREATE_TIME: string;
+  SITE_COUNT: string;
+  ENABLED: string;
+  CURRENT: string;
+}
+
+/**
+ * 直播频道表列定义
+ */
+export interface LiveChannelColumns {
+  ID: string;
+  NAME: string;
+  GROUP_ID: string;
+  LOGO: string;
+  EPG_ID: string;
+  STREAMS: string;
+  ORDER: string;
+  IS_FAVORITE: string;
+  IS_LOCKED: string;
+  PASSWORD: string;
+  PLAY_COUNT: string;
+  LAST_PLAY_TIME: string;
+  LAST_CHECK_TIME: string;
+  STATUS: string;
+  COUNTRY: string;
+  LANGUAGE: string;
+  CATEGORY: string;
+  DESCRIPTION: string;
+  CURRENT_EPG: string;
+  NEXT_EPG: string;
+  SOURCE_KEY: string;
+  CUSTOM_URL: string;
+  TAGS: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  USER_CONFIG: string;
+}
+
+/**
+ * 直播分组表列定义
+ */
+export interface LiveGroupColumns {
+  ID: string;
+  NAME: string;
+  ORDER: string;
+  ICON: string;
+  CHANNEL_COUNT: string;
+  IS_EXPANDED: string;
+  IS_DEFAULT: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+}
 
 /**
  * 表结构接口定义
  */
-export interface TableDefinition {
+export interface TableDefinition<T> {
   NAME: string;
   CREATE_SQL: string;
-  COLUMNS: ColumnDefinition;
+  COLUMNS: T;
 }
 
 /**
  * 站点表定义
  */
-export const SITE_TABLE: TableDefinition = {
+export const SITE_TABLE: TableDefinition<SiteColumns> = {
   NAME: 'site',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS site (
@@ -97,7 +338,7 @@ export const SITE_TABLE: TableDefinition = {
 /**
  * 历史记录表定义
  */
-export const HISTORY_TABLE: TableDefinition = {
+export const HISTORY_TABLE: TableDefinition<HistoryColumns> = {
   NAME: 'history',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS history (
@@ -192,12 +433,12 @@ export const HISTORY_TABLE: TableDefinition = {
     PLAYBACK_NOTES: 'playback_notes',
     WATCH_TIME_LIST: 'watch_time_list'
   }
-};
+}
 
 /**
  * 收藏表定义
  */
-export const KEEP_TABLE: TableDefinition = {
+export const KEEP_TABLE: TableDefinition<KeepColumns> = {
   NAME: 'keep',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS keep (
@@ -246,12 +487,12 @@ export const KEEP_TABLE: TableDefinition = {
     NOTES: 'notes',
     PROGRESS: 'progress'
   }
-};
+}
 
 /**
  * 配置表定义
  */
-export const CONFIG_TABLE: TableDefinition = {
+export const CONFIG_TABLE: TableDefinition<ConfigColumns> = {
   NAME: 'config',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS config (
@@ -291,12 +532,12 @@ export const CONFIG_TABLE: TableDefinition = {
     CUSTOM_SETTINGS: 'custom_settings',
     IS_DEFAULT: 'is_default'
   }
-};
+}
 
 /**
  * 收藏文件夹表定义
  */
-export const KEEP_FOLDER_TABLE: TableDefinition = {
+export const KEEP_FOLDER_TABLE: TableDefinition<KeepFolderColumns> = {
   NAME: 'keep_folder',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS keep_folder (
@@ -326,12 +567,12 @@ export const KEEP_FOLDER_TABLE: TableDefinition = {
     UPDATED_AT: 'updated_at',
     IS_DEFAULT: 'is_default'
   }
-};
+}
 
 /**
  * 搜索历史表定义
  */
-export const SEARCH_HISTORY_TABLE: TableDefinition = {
+export const SEARCH_HISTORY_TABLE: TableDefinition<SearchHistoryColumns> = {
   NAME: 'search_history',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS search_history (
@@ -353,12 +594,12 @@ export const SEARCH_HISTORY_TABLE: TableDefinition = {
     RESULT_COUNT: 'result_count',
     IS_FAVORITE: 'is_favorite'
   }
-};
+}
 
 /**
  * 线路表定义
  */
-export const LINE_TABLE: TableDefinition = {
+export const LINE_TABLE: TableDefinition<LineColumns> = {
   NAME: 'line',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS line (
@@ -390,12 +631,12 @@ export const LINE_TABLE: TableDefinition = {
     CACHE_TIME: 'cache_time',
     RESPONSE_TIME: 'response_time'
   }
-};
+}
 
 /**
  * 订阅表定义
  */
-export const SUBSCRIPTION_TABLE: TableDefinition = {
+export const SUBSCRIPTION_TABLE: TableDefinition<SubscriptionColumns> = {
   NAME: 'subscription',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS subscription (
@@ -421,12 +662,12 @@ export const SUBSCRIPTION_TABLE: TableDefinition = {
     ENABLED: 'enabled',
     CURRENT: 'current'
   }
-};
+}
 
 /**
  * 直播频道表定义
  */
-export const LIVE_CHANNEL_TABLE: TableDefinition = {
+export const LIVE_CHANNEL_TABLE: TableDefinition<LiveChannelColumns> = {
   NAME: 'live_channel',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS live_channel (
@@ -486,12 +727,12 @@ export const LIVE_CHANNEL_TABLE: TableDefinition = {
     UPDATED_AT: 'updated_at',
     USER_CONFIG: 'user_config'
   }
-};
+}
 
 /**
  * 直播分组表定义
  */
-export const LIVE_GROUP_TABLE: TableDefinition = {
+export const LIVE_GROUP_TABLE: TableDefinition<LiveGroupColumns> = {
   NAME: 'live_group',
   CREATE_SQL: `
     CREATE TABLE IF NOT EXISTS live_group (
@@ -517,7 +758,7 @@ export const LIVE_GROUP_TABLE: TableDefinition = {
     CREATED_AT: 'created_at',
     UPDATED_AT: 'updated_at'
   }
-};
+}
 
 /**
  * 获取所有表的创建SQL语句
@@ -640,7 +881,7 @@ export const INDEXES: IndexDefinition = {
     // Live group table index
     'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");'
   ]
-};
+}
 
 /**
  * 数据库版本信息

@@ -9,7 +9,11 @@ export interface Episode {
   name: string;        // 剧集名称
   url: string;         // 剧集播放URL
   source?: string;     // 来源标识
-  isNew?: boolean;     // 是否新剧�?  isPlayed?: boolean;  // 是否已播�?  progress?: number;   // 播放进度（百分比�?  duration?: number;   // 总时长（毫秒�?}
+  isNew?: boolean;     // 是否新剧
+  isPlayed?: boolean;  // 是否已播放
+  progress?: number;   // 播放进度（百分比）
+  duration?: number;   // 总时长（毫秒）
+}
 
 /**
  * 演员信息接口
@@ -36,7 +40,8 @@ export interface Director {
 export interface RecommendReason {
   type: string;        // 推荐类型
   content: string;     // 推荐内容
-  priority?: number;   // 优先�?}
+  priority?: number;   // 优先等级（数字越大越优先）
+}
 
 /**
  * 点播内容数据模型
@@ -49,10 +54,13 @@ export interface Vod {
   lang: string;                 // 语言
   year: string;                 // 年份
   score: string;                // 评分
-  status: string;               // 状态（连载中、已完结�?  desc: string;                 // 简�?  cover: string;                // 封面图URL
+  status: string;               // 状态（连载中、已完结）
+  desc: string;                 // 简单描述
+  cover: string;                // 封面图URL
   tag: string;                  // 标签
   url: string;                  // 内容详情页URL
-  sourceKey: string;            // 数据源标�?  episodeList?: Episode[];      // 剧集列表
+  sourceKey: string;            // 数据源标签  
+  episodeList?: Episode[];      // 剧集列表
   selectedEpisode?: number;     // 当前选中剧集
   createdAt: number;            // 创建时间
   updatedAt: number;            // 更新时间
@@ -63,10 +71,12 @@ export interface Vod {
   isPay?: boolean;              // 是否付费内容
   originalPrice?: number;       // 原价
   currentPrice?: number;        // 当前价格
-  isCollect?: boolean;          // 是否已收�?  playCount?: number;           // 播放次数
+  isCollect?: boolean;          // 是否已收藏
+  playCount?: number;           // 播放次数
   collectCount?: number;        // 收藏次数
   commentCount?: number;        // 评论次数
-  sourceList?: Map<string, Episode[]>; // 多来源剧集列�?  subTitleList?: string[];      // 字幕列表
+  sourceList?: Map<string, Episode[]>; // 多来源剧集列表
+  subTitleList?: string[];      // 字幕列表
   videoQualityList?: string[];  // 画质选项
   isHdr?: boolean;              // 是否支持HDR
   isDolby?: boolean;            // 是否支持杜比音效
@@ -92,7 +102,13 @@ export interface VodSearchResult {
   total: number;                // 总数
   page: number;                 // 当前页码
   pageSize: number;             // 每页数量
-  hasMore: boolean;             // 是否有更�?  keyword?: string;             // 搜索关键�?  category?: string;            // 分类筛�?  area?: string;                // 地区筛�?  year?: string;                // 年份筛�?  sortBy?: string;              // 排序方式
+  hasMore: boolean;             // 是否有更新  
+  keyword?: string;             // 搜索关键词  
+  category?: string;            // 分类筛选  
+  area?: string;                // 地区筛选  
+  year?: string;                // 年份筛选  
+  sortBy?: string;              // 排序方式
+
 }
 
 /**
@@ -101,10 +117,13 @@ export interface VodSearchResult {
 export interface VodRecommendation {
   id: string;                   // 推荐ID
   title: string;                // 推荐标题
-  subtitle?: string;            // 推荐副标�?  vods: Vod[];                  // 推荐内容列表
+  subtitle?: string;            // 推荐副标题
+  vods: Vod[];                  // 推荐内容列表
   type: string;                 // 推荐类型
   refreshInterval?: number;     // 刷新间隔（毫秒）
-  coverImage?: string;          // 封面�?  priority: number;             // 优先�?  createdAt: number;            // 创建时间
+  coverImage?: string;          // 封面
+  priority: number;             // 优先等级
+  createdAt: number;            // 创建时间
   updatedAt: number;            // 更新时间
 }
 
@@ -119,16 +138,19 @@ export interface ContentTag {
 }
 
 /**
- * 内容筛选条件接�? */
+ * 内容筛选条件接口 */
 export interface VodFilter {
   category?: string;            // 分类
   area?: string;                // 地区
   year?: string;                // 年份
-  status?: string;              // 状�?  tag?: string;                 // 标签
+  status?: string;              // 状态
+  tag?: string;                 // 标签
   sortBy?: string;              // 排序方式
-  keyword?: string;             // 关键�?  page?: number;                // 页码
+  keyword?: string;             // 关键词
+  page?: number;                // 页码
   pageSize?: number;            // 每页数量
-  sourceKey?: string;           // 数据�?  isVip?: boolean;              // 是否VIP
+  sourceKey?: string;           // 数据源标签
+  isVip?: boolean;              // 是否VIP
 }
 
 /**
@@ -136,7 +158,8 @@ export interface VodFilter {
  */
 export interface VodDetailRequest {
   id: string;                   // 内容ID
-  sourceKey: string;            // 数据源标�?  includeEpisodes?: boolean;    // 是否包含剧集列表
+  sourceKey: string;            // 数据源标签
+  includeEpisodes?: boolean;    // 是否包含剧集列表
   includeRelated?: boolean;     // 是否包含相关内容
   includeComments?: boolean;    // 是否包含评论
   commentPage?: number;         // 评论页码
@@ -148,6 +171,13 @@ export interface VodDetailRequest {
  */
 export interface VodDetailResponse {
   vod: Vod;                     // 内容详情
+  seasonInfo?: SeasonInfo;      // 季数信息
+  episodeInfo?: EpisodeInfo;    // 集数信息
+  playHistory?: PlayHistory;    // 播放历史信息
+  cast?: Cast[];                // 演员表
+  director?: string[];          // 导演
+  writer?: string[];            // 编剧
+  genre?: string[];             // 流派
   relatedVods?: Vod[];          // 相关内容
   comments?: CommentList;       // 评论列表
   refreshTime: number;          // 刷新时间
@@ -163,7 +193,8 @@ export interface Comment {
   userAvatar?: string;          // 用户头像
   content: string;              // 评论内容
   rating?: number;              // 评分
-  likes: number;                // 点赞�?  replies?: Comment[];          // 回复列表
+  likes: number;                // 点赞数
+  replies?: Comment[];          // 回复列表
   createdAt: number;            // 创建时间
   updatedAt: number;            // 更新时间
   isLiked?: boolean;            // 当前用户是否点赞
@@ -177,20 +208,32 @@ export interface CommentList {
   total: number;                // 评论总数
   page: number;                 // 当前页码
   pageSize: number;             // 每页数量
-  hasMore: boolean;             // 是否有更多评�?
+  hasMore: boolean;             // 是否有更多评论
+}
 
 /**
  * 季数信息接口
  */
 export interface SeasonInfo {
   current: number;            // 当前季数
-  total: number;              // 总季�?}
-
+  total: number;              // 总季数
+  watched: number;            // 已看季数
+  unwatched: number;          // 未看季数
+}
 /**
  * 集数信息接口
  */
 export interface EpisodeInfo {
-  total: number;              // 总集�?  watched: number;            // 已看集数
+  total: number;              // 总集数  
+  watched: number;            // 已看集数
+  unwatched: number;          // 未看集数
+  current: number;            // 当前集数
+  totalDuration?: number;     // 总时长（秒）
+  currentDuration?: number;    // 当前剧集时长（秒）
+  progress?: number;           // 当前剧集进度（秒）
+  watchedDuration?: number;    // 已看时长（秒）
+  unwatchedDuration?: number;  // 未看时长（秒）
+
 }
 
 /**
@@ -200,4 +243,9 @@ export interface PlayHistory {
   episodeIndex: number;       // 上次观看剧集索引
   position: number;           // 上次观看位置
   lastPlayTime: number;       // 上次观看时间
+  totalDuration?: number;     // 总时长（秒）
+  currentDuration?: number;    // 当前剧集时长（秒）
+  progress?: number;           // 当前剧集进度（秒）
+  watchedDuration?: number;    // 已看时长（秒）
+  unwatchedDuration?: number;  // 未看时长（秒）
 }

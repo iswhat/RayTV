@@ -135,7 +135,7 @@ export class SearchHistoryRepository {
   private static instance: SearchHistoryRepository;
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
-  private eventBus: EventBusUtil = EventBusUtil.getInstance();
+  private eventBus = EventBusUtil.getInstance();
   
   // 存储键配置
   private storageKeys: StorageKeys = {
@@ -561,7 +561,7 @@ export class SearchHistoryRepository {
       
       return Array.from(this.cachedFavorites);
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to get favorite searches', error as Error);
+      this.logger.error('Failed to get favorite searches', error as Error);
       return [];
     }
   }
@@ -761,7 +761,7 @@ export class SearchHistoryRepository {
         StorageType.DEFAULT
       );
       
-      this.logger.info('SearchHistory', 'Search history configuration reset to default');
+      this.logger.info('Search history configuration reset to default');
     
       return {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
@@ -772,7 +772,7 @@ export class SearchHistoryRepository {
         enableFavorites: this.defaultConfig.enableFavorites
       };
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to reset search history config', error as Error);
+      this.logger.error('Failed to reset search history config', error as Error);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -782,15 +782,15 @@ export class SearchHistoryRepository {
    */
   private async loadHistory(): Promise<void> {
     try {
-      const history = await this.storageUtil.getObject<SearchHistoryItem[]>(
+      const historyResult: SearchHistoryItem[] | null = await this.storageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.searchHistory, 
         StorageType.DEFAULT
       );
       
-      this.cachedHistory = history || [];
-      this.logger.debug('SearchHistory', `Loaded ${this.cachedHistory.length} search history items`);
+      this.cachedHistory = historyResult || [];
+      this.logger.debug(`Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to load search history', error as Error);
+      this.logger.error('Failed to load search history', error as Error);
       this.cachedHistory = [];
     }
   }
@@ -800,15 +800,15 @@ export class SearchHistoryRepository {
    */
   private async loadFavorites(): Promise<void> {
     try {
-      const favorites = await this.storageUtil.getObject<SearchHistoryItem[]>(
+      const favoritesResult: SearchHistoryItem[] | null = await this.storageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.favoriteSearches, 
         StorageType.DEFAULT
       );
       
-      this.cachedFavorites = favorites || [];
-      this.logger.debug('SearchHistory', `Loaded ${this.cachedFavorites.length} favorite searches`);
+      this.cachedFavorites = favoritesResult || [];
+      this.logger.debug(`Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to load favorite searches', error as Error);
+      this.logger.error('Failed to load favorite searches', error as Error);
       this.cachedFavorites = [];
     }
   }
@@ -818,20 +818,20 @@ export class SearchHistoryRepository {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const config = await this.storageUtil.getObject<SearchHistoryConfig>(
+      const configResult: SearchHistoryConfig | null = await this.storageUtil.getObject<SearchHistoryConfig>(
         this.storageKeys.searchHistoryConfig, 
         StorageType.DEFAULT
       );
       
       // 使用手动属性复制代替Object.assign
-      if (config) {
+      if (configResult) {
         this.cachedConfig = {
-          maxHistoryItems: config.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
-          maxFavoriteItems: config.maxFavoriteItems ?? this.defaultConfig.maxFavoriteItems,
-          autoClearDays: config.autoClearDays ?? this.defaultConfig.autoClearDays,
-          enableAutoComplete: config.enableAutoComplete ?? this.defaultConfig.enableAutoComplete,
-          enableRecentSearches: config.enableRecentSearches ?? this.defaultConfig.enableRecentSearches,
-          enableFavorites: config.enableFavorites ?? this.defaultConfig.enableFavorites
+          maxHistoryItems: configResult.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
+          maxFavoriteItems: configResult.maxFavoriteItems ?? this.defaultConfig.maxFavoriteItems,
+          autoClearDays: configResult.autoClearDays ?? this.defaultConfig.autoClearDays,
+          enableAutoComplete: configResult.enableAutoComplete ?? this.defaultConfig.enableAutoComplete,
+          enableRecentSearches: configResult.enableRecentSearches ?? this.defaultConfig.enableRecentSearches,
+          enableFavorites: configResult.enableFavorites ?? this.defaultConfig.enableFavorites
         };
       } else {
         // 使用手动属性复制代替Object.assign和扩展运算符
@@ -848,9 +848,9 @@ export class SearchHistoryRepository {
       // 验证配置
       this.validateConfig(this.cachedConfig);
       
-      this.logger.debug('SearchHistory', 'Search history configuration loaded');
+      this.logger.debug('Search history configuration loaded');
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to load search history config', error as Error);
+      this.logger.error('Failed to load search history config', error as Error);
       // 使用手动属性复制代替扩展运算符
       this.cachedConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
@@ -1026,18 +1026,18 @@ export class SearchHistoryRepository {
    */
   public async exportData(): Promise<SearchHistoryExportData> {
     try {
-      const data = {
+      const data: SearchHistoryExportData = {
         history: await this.getHistory(),
         favorites: await this.getFavorites(),
         config: await this.getConfig(),
         exportTime: Date.now()
       };
       
-      this.logger.info('SearchHistory', 'Search history data exported');
+      this.logger.info('Search history data exported');
       
       return data;
     } catch (error) {
-      this.logger.error('SearchHistory', 'Failed to export search history data', error as Error);
+      this.logger.error('Failed to export search history data', error as Error);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }

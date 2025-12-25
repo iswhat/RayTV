@@ -3,6 +3,8 @@
 
 import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
+import { SearchHistoryRepository, SearchType } from '../data/repository/SearchHistoryRepository';
+import { SearchService } from '../service/search/SearchService';
 
 // 搜索结果接口
 export interface SearchResult {
@@ -11,10 +13,6 @@ export interface SearchResult {
   type: string;
   coverUrl: string;
 }
-
-// 导入真实的搜索历史仓库和搜索服务
-import { SearchHistoryRepository, SearchType } from '../data/repository/SearchHistoryRepository';
-import { SearchService } from '../service/search/SearchService';
 
 @Entry
 @Component
@@ -29,8 +27,8 @@ struct SearchPage {
   @State quickResults: SearchResult[] = [];
   @State showHistory: boolean = true;
   @State showHotKeywords: boolean = true;
-  private searchHistoryRepo: SearchHistoryRepository;
-  private searchService: SearchService;
+  private searchHistoryRepo!: SearchHistoryRepository;
+  private searchService!: SearchService;
 
   aboutToAppear() {
     // 使用真实的SearchHistoryRepository和SearchService实现
@@ -67,10 +65,14 @@ struct SearchPage {
       const historyItems = await this.searchHistoryRepo.getHistory(SearchType.ALL, 10);
       
       // 转换为字符串数组格式
-      this.searchHistory = historyItems.map(item => item.query);
+      const history: string[] = [];
+      for (let i = 0; i < historyItems.length; i++) {
+        history.push(historyItems[i].query);
+      }
+      this.searchHistory = history;
       Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load search history: ${error}`);
+      Logger.error(this.TAG, `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
       this.searchHistory = [];
     }
   }

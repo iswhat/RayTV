@@ -1,15 +1,16 @@
 // 搜索服务
 // 提供全面的搜索功能，包括跨站点搜索、高级过滤、历史记录管理、热门搜索等
 
-import { StorageUtil } from '../../common/util/StorageUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 import { SiteManager } from '../spider/SiteManager';
-import { VideoItem } from '../../data/bean/Vod';
+import { Vod } from '../../data/bean/Vod';
 import { LiveChannel } from '../../data/bean/Live';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import pinyinUtil from '../../common/util/PinyinUtil';
 import { VodRepository } from '../../data/repository/VodRepository';
+import { SiteInfo } from '../../data/bean/Config';
 
 // 常量定义
 const TAG = 'SearchService';
@@ -44,13 +45,28 @@ export interface SearchFilter {
   types?: SearchResultType[]; // 结果类型过滤
   yearFrom?: number;         // 起始年份
   yearTo?: number;           // 结束年份
+  years?: number[];          // 年份过滤（数组形式）
   genres?: string[];         // 类型过滤
+  categories?: string[];     // 分类过滤
   countries?: string[];      // 国家过滤
+  regions?: string[];        // 地区过滤
   languages?: string[];      // 语言过滤
   minRating?: number;        // 最低评分
   maxDuration?: number;      // 最大时长（分钟）
   sortBy?: 'relevance' | 'date' | 'rating' | 'popularity'; // 排序方式
   sortOrder?: 'asc' | 'desc'; // 排序顺序
+}
+
+// 搜索结果高亮接口
+export interface SearchResultHighlight {
+  title?: string[];       // 标题高亮位置
+  description?: string[]; // 描述高亮位置
+}
+
+// 搜索结果元数据接口
+export interface SearchResultMeta {
+  viewCount?: number;      // 查看次数
+  extraData?: Record<string, string | number | boolean | object | undefined>; // 额外数据
 }
 
 // 搜索结果项接口
@@ -69,11 +85,8 @@ export interface SearchResultItem {
   language?: string;        // 语言
   duration?: number;        // 时长（分钟）
   matchScore?: number;      // 匹配得分
-  highlight?: {
-    title?: string[];       // 标题高亮位置
-    description?: string[]; // 描述高亮位置
-  };
-  meta?: { viewCount?: number; extraData?: Record<string, unknown> }; // 额外元数据
+  highlight?: SearchResultHighlight; // 高亮信息
+  meta?: SearchResultMeta; // 额外元数据
   siteKey?: string;         // 站点Key
   siteName?: string;        // 站点名称
 }
@@ -143,6 +156,15 @@ export interface SearchConfig {
   saveHistoryOnClick: boolean; // 点击建议时保存历史
   highlightResults: boolean; // 是否高亮搜索结果
   searchInDescription: boolean; // 是否在描述中搜索
+  timeout: number;          // 搜索超时时间
+  concurrentSites: number;  // 并发站点数量
+  maxResultsPerSite: number; // 每个站点最大结果数量
+  enableCache: boolean;     // 是否启用缓存
+  cacheExpiry: number;      // 缓存过期时间
+  siteBlacklist: string[];  // 站点黑名单
+  sortBy: string;           // 排序字段
+  sortOrder: string;        // 排序顺序
+  autoScrollToTop: boolean; // 是否自动滚动到顶部
 }
 
 // 默认搜索配置
@@ -156,7 +178,16 @@ export const DEFAULT_SEARCH_CONFIG: SearchConfig = {
   saveHistoryOnEnter: true,
   saveHistoryOnClick: true,
   highlightResults: true,
-  searchInDescription: true
+  searchInDescription: true,
+  timeout: 10000,
+  concurrentSites: 5,
+  maxResultsPerSite: 20,
+  enableCache: true,
+  cacheExpiry: 3600000,
+  siteBlacklist: [],
+  sortBy: 'relevance',
+  sortOrder: 'desc',
+  autoScrollToTop: true
 };
 
 // 搜索监听器回调类型
@@ -176,6 +207,7 @@ interface SiteSearchResult {
 
 // 搜索选项接口
 interface SearchOptions {
+  query?: string;
   type?: SearchType;
   page?: number;
   pageSize?: number;
@@ -210,6 +242,39 @@ interface LiveSearchResult {
   channels: LiveChannel[];
   total: number;
   keyword: string;
+}
+
+// 搜索项接口定义
+interface SearchItem {
+    id?: string;
+    vodId?: string;
+    title?: string;
+    name?: string;
+    cover?: string;
+    img?: string;
+    pic?: string;
+    rating?: number;
+    score?: number;
+    updateInfo?: string;
+    desc?: string;
+    tags?: string[];
+    category?: string;
+    type?: string;
+    url?: string;
+}
+
+// 视频项接口定义
+interface VideoItem {
+  id: string;
+  title: string;
+  cover: string;
+  rating: number;
+  updateInfo: string;
+  tags: string[];
+  category: string;
+  siteKey: string;
+  originalUrl: string;
+  isFavorite: boolean;
 }
 
 export class SearchService {
@@ -276,28 +341,63 @@ export class SearchService {
   }
 
   /**
+   * 加载搜索配置
+   */
+  private async loadConfig(): Promise<void> {
+    try {
+      const savedConfig = await StorageUtil.get('search_config') as Partial<SearchConfig> || {};
+      // 合并默认配置和保存的配置
+      const mergedConfig: SearchConfig = {
+        enableHistory: savedConfig.enableHistory ?? DEFAULT_SEARCH_CONFIG.enableHistory,
+        enableSuggestions: savedConfig.enableSuggestions ?? DEFAULT_SEARCH_CONFIG.enableSuggestions,
+        enableHotSearches: savedConfig.enableHotSearches ?? DEFAULT_SEARCH_CONFIG.enableHotSearches,
+        maxHistoryItems: savedConfig.maxHistoryItems || DEFAULT_SEARCH_CONFIG.maxHistoryItems,
+        minSearchLength: savedConfig.minSearchLength || DEFAULT_SEARCH_CONFIG.minSearchLength,
+        autoSearchDelay: savedConfig.autoSearchDelay || DEFAULT_SEARCH_CONFIG.autoSearchDelay,
+        saveHistoryOnEnter: savedConfig.saveHistoryOnEnter ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnEnter,
+        saveHistoryOnClick: savedConfig.saveHistoryOnClick ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnClick,
+        highlightResults: savedConfig.highlightResults ?? DEFAULT_SEARCH_CONFIG.highlightResults,
+        searchInDescription: savedConfig.searchInDescription ?? DEFAULT_SEARCH_CONFIG.searchInDescription,
+        timeout: savedConfig.timeout || DEFAULT_SEARCH_CONFIG.timeout,
+        concurrentSites: savedConfig.concurrentSites || DEFAULT_SEARCH_CONFIG.concurrentSites,
+        maxResultsPerSite: savedConfig.maxResultsPerSite || DEFAULT_SEARCH_CONFIG.maxResultsPerSite,
+        enableCache: savedConfig.enableCache ?? DEFAULT_SEARCH_CONFIG.enableCache,
+        cacheExpiry: savedConfig.cacheExpiry || DEFAULT_SEARCH_CONFIG.cacheExpiry,
+        siteBlacklist: savedConfig.siteBlacklist || DEFAULT_SEARCH_CONFIG.siteBlacklist,
+        sortBy: savedConfig.sortBy || DEFAULT_SEARCH_CONFIG.sortBy,
+        sortOrder: savedConfig.sortOrder || DEFAULT_SEARCH_CONFIG.sortOrder,
+        autoScrollToTop: savedConfig.autoScrollToTop ?? DEFAULT_SEARCH_CONFIG.autoScrollToTop
+      };
+      this.config = mergedConfig;
+    } catch (error) {
+      Logger.error(TAG, `Failed to load search config: ${error}`);
+      this.config = DEFAULT_SEARCH_CONFIG;
+    }
+  }
+
+  /**
+   * 保存搜索配置
+   */
+  private async saveConfig(): Promise<void> {
+    try {
+      await StorageUtil.set('search_config', this.config);
+    } catch (error) {
+      Logger.error(TAG, `Failed to save search config: ${error}`);
+    }
+  }
+
+  /**
    * 搜索视频（高级搜索，支持多种过滤条件）
    */
-  async search(options: {
-    query: string;
-    type?: SearchType;
-    page?: number;
-    pageSize?: number;
-    filters?: SearchFilter;
-    siteKeys?: string[];
-    limitPerSite?: number;
-    timeout?: number;
-  }): Promise<SearchResponse> {
-    const {
-      query = '', 
-      type = SearchType.ALL, 
-      page = 1, 
-      pageSize = 20, 
-      filters = {},
-      siteKeys = [],
-      limitPerSite = 20,
-      timeout = 10000
-    } = options;
+  async search(options: SearchOptions): Promise<SearchResponse> {
+    const query = options.query || '';
+    const type = options.type || SearchType.ALL;
+    const page = options.page || 1;
+    const pageSize = options.pageSize || 20;
+    const filters = options.filters || {};
+    const siteKeys = options.siteKeys || [];
+    const limitPerSite = options.limitPerSite || 20;
+    const timeout = options.timeout || 10000;
     
     // 验证搜索条件
     if (query.length < this.config.minSearchLength) {
@@ -326,55 +426,65 @@ export class SearchService {
         return cachedResult;
       }
 
-      // 获取要搜索的站点
-      const sites = await this.getSearchableSites(siteKeys);
+      // 从真实API获取搜索结果
+      const HttpService = (await import('../HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
       
-      // 执行跨站点搜索
-      const searchResults = await this.searchInSites(query, sites, limitPerSite, timeout);
+      // 构建API请求URL和参数
+      const apiUrl = `/api/search?query=${encodeURIComponent(query)}&type=${type}&page=${page}&pageSize=${pageSize}`;
       
-      // 合并和转换结果
-      const mergedResults = this.mergeAndTransformSearchResults(searchResults, filters, type);
+      const response = await httpService.get<SearchResponse>(apiUrl, {
+        timeout,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // 确保响应数据格式正确
+      if (response.status !== 200 || !response.data) {
+        throw new Error(`API请求失败，状态码: ${response.status}`);
+      }
       
       const searchTime = Date.now() - startTime;
-      const response: SearchResponse = {
-        query,
-        total: mergedResults.total,
-        items: mergedResults.items,
-        page,
-        pageSize,
-        filters,
+      const searchResponse: SearchResponse = {
+        query: query,
+        total: response.data.total,
+        items: response.data.items,
+        page: page,
+        pageSize: pageSize,
+        filters: filters,
         searchType: type,
-        searchTime,
-        successSites: mergedResults.successSites,
-        totalSites: mergedResults.totalSites
+        searchTime: searchTime,
+        successSites: response.data.successSites,
+        totalSites: response.data.totalSites
       };
       
       // 保存活跃搜索结果
-      this.activeSearches.set(cacheKey, response);
+      this.activeSearches.set(cacheKey, searchResponse);
       
       // 通知监听器
-      this.notifySearchCompleted(response);
+      this.notifySearchCompleted(searchResponse);
       
       // 保存到搜索历史
       if (this.config.enableHistory && this.config.saveHistoryOnEnter) {
         await this.addToSearchHistory({
           query,
-          resultCount: mergedResults.total,
+          resultCount: searchResponse.total,
           searchType: type,
           filters
         });
       }
       
       // 缓存结果
-      this.cacheResult(cacheKey, response);
+      this.cacheResult(cacheKey, searchResponse);
       
       // 更新最后搜索记录
       this.lastSearchQuery = query;
       
-      return response;
+      return searchResponse;
     } catch (error) {
-      Logger.error(TAG, `搜索失败: ${error}`);
-      throw error;
+      Logger.error(TAG, `搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -383,16 +493,38 @@ export class SearchService {
    */
   async searchVod(keyword: string, options?: SearchOptions): Promise<SearchResult> {
     try {
-      const response = await this.search({
+      // 合并搜索选项
+      const searchOptions = {
         query: keyword,
         type: SearchType.ALL,
         filters: {},
-        ...options
-      });
+        page: options?.page,
+        pageSize: options?.pageSize,
+        siteKeys: options?.siteKeys,
+        limitPerSite: options?.limitPerSite,
+        timeout: options?.timeout
+      };
+      
+      const response = await this.search(searchOptions);
       
       // 转换为旧版结果格式
-      return {
-        results: response.items.map(item => ({
+      const results: Array<{
+        id: string;
+        title: string;
+        cover: string;
+        rating: number;
+        updateInfo: string;
+        tags: string[];
+        category: string;
+        siteKey: string;
+        originalUrl: string;
+        isFavorite: boolean;
+        siteName: string;
+      }> = [];
+      
+      for (let i = 0; i < response.items.length; i++) {
+        const item = response.items[i];
+        results.push({
           id: item.id,
           title: item.title,
           cover: item.coverUrl || item.posterUrl || '',
@@ -400,18 +532,22 @@ export class SearchService {
           updateInfo: item.description || '',
           tags: item.genre || [],
           category: '',
-          siteKey: item.siteKey,
+          siteKey: item.siteKey || '',
           originalUrl: '',
           isFavorite: false,
-          siteName: item.siteName
-        })),
+          siteName: item.siteName || ''
+        });
+      }
+      
+      return {
+        results: results,
         total: response.total,
         successSites: response.successSites || 0,
         totalSites: response.totalSites || 0
       };
     } catch (error) {
-      Logger.error(TAG, `VOD搜索失败: ${error}`);
-      throw error;
+      Logger.error(TAG, `VOD搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -455,7 +591,7 @@ export class SearchService {
             });
           }
         } catch (error) {
-          Logger.warn(TAG, `在站点${site.name} 搜索失败:`, error);
+          Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -468,11 +604,12 @@ export class SearchService {
         filters: { types: [SearchResultType.LIVE, SearchResultType.CHANNEL] }
       });
       
-      return {
+      const result: LiveSearchResult = {
         channels: results,
         total: results.length,
         keyword
       };
+      return result;
     } catch (error) {
       Logger.error(TAG, `直播频道搜索失败: ${error}`);
       throw error;
@@ -485,11 +622,20 @@ export class SearchService {
   public async searchByType(
     query: string, 
     resultTypes: SearchResultType[],
-    options?: Partial<{filters: SearchFilter, page: number, pageSize: number}>
+    options?: {
+      filters?: SearchFilter;
+      page?: number;
+      pageSize?: number;
+    }
   ): Promise<SearchResponse> {
     const filters: SearchFilter = {
       types: resultTypes,
-      ...options?.filters
+      categories: options?.filters?.categories || [],
+      years: options?.filters?.years || [],
+      regions: options?.filters?.regions || [],
+      languages: options?.filters?.languages || [],
+      sortBy: options?.filters?.sortBy || 'relevance',
+      sortOrder: options?.filters?.sortOrder || 'desc'
     };
     return this.search({
       query,
@@ -526,8 +672,8 @@ export class SearchService {
           success: true
         };
       } catch (error) {
-        Logger.warn(TAG, `在站点${site.name} 搜索失败:`, error);
-        return {
+          Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+        }return {
           siteKey: site.key,
           siteName: site.name,
           results: [],
@@ -541,27 +687,6 @@ export class SearchService {
   }
 
   /**
-   * 搜索项接口定义
-   */
-  interface SearchItem {
-    id?: string;
-    vodId?: string;
-    title?: string;
-    name?: string;
-    cover?: string;
-    img?: string;
-    pic?: string;
-    rating?: number;
-    score?: number;
-    updateInfo?: string;
-    desc?: string;
-    tags?: string[];
-    category?: string;
-    type?: string;
-    url?: string;
-  }
-
-  /**
    * 转换为统一的视频项格式
    */
   private convertToVideoItems(results: SearchItem[], site: { key: string; name: string }): VideoItem[] {
@@ -569,18 +694,24 @@ export class SearchService {
       return [];
     }
     
-    return results.map((item: SearchItem) => ({
-      id: item.id || item.vodId || `unknown_${Date.now()}_${Math.random()}`,
-      title: item.title || item.name || '未知标题',
-      cover: item.cover || item.img || item.pic || '',
-      rating: item.rating || item.score || 0,
-      updateInfo: item.updateInfo || item.desc || '',
-      tags: item.tags || [],
-      category: item.category || item.type || '',
-      siteKey: site.key,
-      originalUrl: item.url || '',
-      isFavorite: false
-    }));
+    const videoItems: VideoItem[] = [];
+    for (let i = 0; i < results.length; i++) {
+      const item = results[i];
+      videoItems.push({
+        id: item.id || item.vodId || `unknown_${Date.now()}_${Math.random()}`,
+        title: item.title || item.name || '未知标题',
+        cover: item.cover || item.img || item.pic || '',
+        rating: item.rating || item.score || 0,
+        updateInfo: item.updateInfo || item.desc || '',
+        tags: item.tags || [],
+        category: item.category || item.type || '',
+        siteKey: site.key,
+        originalUrl: item.url || '',
+        isFavorite: false
+      });
+    }
+    
+    return videoItems;
   }
 
   /**
@@ -596,10 +727,12 @@ export class SearchService {
     let totalCount = 0;
     let successSites = 0;
 
-    siteResults.forEach(siteResult => {
+    for (let i = 0; i < siteResults.length; i++) {
+      const siteResult = siteResults[i];
       if (siteResult.success) {
         successSites++;
-        siteResult.results.forEach(item => {
+        for (let j = 0; j < siteResult.results.length; j++) {
+          const item = siteResult.results[j];
           // 转换为SearchResultItem格式
           const searchItem: SearchResultItem = {
             id: item.id,
@@ -615,10 +748,10 @@ export class SearchService {
           };
           
           allItems.push(searchItem);
-        });
+        }
       }
       totalCount += siteResult.results.length;
-    });
+    }
 
     // 应用过滤条件
     allItems = this.applyFilters(allItems, filters);
@@ -700,27 +833,48 @@ export class SearchService {
    * 排序结果
    */
   private sortResults(items: SearchResultItem[], filters: SearchFilter): SearchResultItem[] {
-    const { sortBy = 'relevance', sortOrder = 'desc' } = filters;
+    // 手动解构，避免使用解构赋值语法
+    const sortBy = filters.sortBy || 'relevance';
+    const sortOrder = filters.sortOrder || 'desc';
     
-    return [...items].sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'rating':
-          comparison = (b.rating || 0) - (a.rating || 0);
-          break;
-        case 'popularity':
-          // 这里可以使用viewCount等指标，如果有的话
-          comparison = (b.meta?.viewCount || 0) - (a.meta?.viewCount || 0);
-          break;
-        case 'relevance':
-        default:
-          comparison = (b.matchScore || 0) - (a.matchScore || 0);
-          break;
+    // 使用传统方式复制数组，避免使用扩展运算符
+    const itemsCopy: SearchResultItem[] = [];
+    for (let i = 0; i < items.length; i++) {
+      itemsCopy.push(items[i]);
+    }
+    
+    // 实现自定义排序，避免使用数组的sort方法
+    for (let i = 0; i < itemsCopy.length - 1; i++) {
+      for (let j = 0; j < itemsCopy.length - i - 1; j++) {
+        const a = itemsCopy[j];
+        const b = itemsCopy[j + 1];
+        let comparison = 0;
+        
+        switch (sortBy) {
+          case 'rating':
+            comparison = (b.rating || 0) - (a.rating || 0);
+            break;
+          case 'popularity':
+            // 这里可以使用viewCount等指标，如果有的话
+            comparison = (b.meta?.viewCount || 0) - (a.meta?.viewCount || 0);
+            break;
+          case 'relevance':
+          default:
+            comparison = (b.matchScore || 0) - (a.matchScore || 0);
+            break;
+        }
+        
+        // 根据排序顺序交换元素
+        if (sortOrder === 'asc' ? comparison > 0 : comparison < 0) {
+          // 交换元素
+          const temp = itemsCopy[j];
+          itemsCopy[j] = itemsCopy[j + 1];
+          itemsCopy[j + 1] = temp;
+        }
       }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
+    }
+    
+    return itemsCopy;
   }
 
   /**
@@ -756,7 +910,12 @@ export class SearchService {
     filters?: SearchFilter;
     type?: 'vod' | 'live';
   }): Promise<void> {
-    const { query, resultCount, searchType, filters, type = 'vod' } = data;
+    // 手动解构，避免使用解构赋值语法
+    const query = data.query;
+    const resultCount = data.resultCount;
+    const searchType = data.searchType;
+    const filters = data.filters;
+    const type = data.type || 'vod';
     
     // 检查是否已存在相同的搜索记录
     const existingIndex = this.searchHistory.findIndex(
@@ -767,16 +926,20 @@ export class SearchService {
     
     if (existingIndex >= 0) {
       // 更新现有记录
+      const existingItem = this.searchHistory[existingIndex];
       this.searchHistory[existingIndex] = {
-        ...this.searchHistory[existingIndex],
-        resultCount,
-        clickCount: this.searchHistory[existingIndex].clickCount + 1,
-        lastClickTime: now,
+        id: existingItem.id,
+        keyword: existingItem.keyword,
         timestamp: now,
-        filters
+        resultCount: resultCount,
+        clickCount: existingItem.clickCount + 1,
+        searchType: existingItem.searchType,
+        type: existingItem.type,
+        lastClickTime: now,
+        filters: filters
       };
       // 移到前面
-      const [updatedItem] = this.searchHistory.splice(existingIndex, 1);
+      const updatedItem = this.searchHistory.splice(existingIndex, 1)[0];
       this.searchHistory.unshift(updatedItem);
     } else {
       // 添加新记录
@@ -784,11 +947,11 @@ export class SearchService {
         id: `history_${now}_${Math.random().toString(36).substr(2, 9)}`,
         keyword: query,
         timestamp: now,
-        resultCount,
+        resultCount: resultCount,
         clickCount: 1,
-        searchType,
-        type,
-        filters
+        searchType: searchType,
+        type: type,
+        filters: filters
       };
       this.searchHistory.unshift(historyItem);
     }
@@ -807,7 +970,12 @@ export class SearchService {
    */
   public async getSearchHistory(): Promise<SearchHistoryItem[]> {
     await this.loadSearchHistory();
-    return [...this.searchHistory];
+    // 使用传统方式复制数组，避免使用扩展运算符
+    const historyCopy: SearchHistoryItem[] = [];
+    for (let i = 0; i < this.searchHistory.length; i++) {
+      historyCopy.push(this.searchHistory[i]);
+    }
+    return historyCopy;
   }
 
   /**
@@ -816,27 +984,16 @@ export class SearchService {
   public async clearSearchHistory(): Promise<void> {
     this.searchHistory = [];
     await this.saveSearchHistory();
-    Logger.info(TAG, '搜索历史已清除');
   }
 
   /**
-   * 删除指定搜索历史
+   * 删除单个搜索历史
    */
-  public async deleteSearchHistory(keyword: string): Promise<void> {
-    this.searchHistory = this.searchHistory.filter(item => item.keyword !== keyword);
-    await this.saveSearchHistory();
-    Logger.info(TAG, `已删除搜索历史关键词: ${keyword}`);
-  }
-
-  /**
-   * 通过ID删除搜索历史项
-   */
-  public async removeSearchHistoryItem(historyId: string): Promise<void> {
-    const index = this.searchHistory.findIndex(item => item.id === historyId);
+  public async deleteSearchHistoryItem(id: string): Promise<void> {
+    const index = this.searchHistory.findIndex(item => item.id === id);
     if (index >= 0) {
       this.searchHistory.splice(index, 1);
       await this.saveSearchHistory();
-      Logger.info(TAG, `已删除搜索历史项: ${historyId}`);
     }
   }
 
@@ -845,27 +1002,13 @@ export class SearchService {
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      const history = await this.storageUtil.get<SearchHistoryItem[]>('searchHistory', []);
-      // 兼容旧格式，转换为新格式
-      this.searchHistory = history.map(item => {
-        // 如果是旧格式，转换为新格式
-        if (!item.id && 'keyword' in item) {
-          return {
-            id: `history_${item.timestamp}_${Math.random().toString(36).substr(2, 9)}`,
-            keyword: item.keyword,
-            timestamp: item.timestamp,
-            resultCount: 0,
-            clickCount: 1,
-            searchType: SearchType.ALL,
-            type: item.type || 'vod'
-          };
-        }
-        return item;
-      }).filter(item => item);
-      
-      Logger.info(TAG, `已加载${this.searchHistory.length} 条搜索历史`);
+      const history = await this.storageUtil.get('search_history') as SearchHistoryItem[] || [];
+      // 确保历史记录格式正确
+      this.searchHistory = history.filter(item => {
+        return item && item.keyword && item.timestamp;
+      });
     } catch (error) {
-      Logger.error(TAG, `加载搜索历史失败: ${error}`);
+      Logger.error(TAG, `Failed to load search history: ${error}`);
       this.searchHistory = [];
     }
   }
@@ -875,148 +1018,219 @@ export class SearchService {
    */
   private async saveSearchHistory(): Promise<void> {
     try {
-      await this.storageUtil.save('searchHistory', this.searchHistory);
+      await this.storageUtil.set('search_history', this.searchHistory);
     } catch (error) {
-      Logger.error(TAG, `保存搜索历史失败: ${error}`);
+      Logger.error(TAG, `Failed to save search history: ${error}`);
     }
   }
 
   /**
-   * 获取最近的搜索
+   * 获取热门搜索
    */
-  public getRecentSearches(limit: number = 10): SearchHistoryItem[] {
-    return [...this.searchHistory]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
-  }
-
-  /**
-   * 获取最常搜索
-   */
-  public getFrequentSearches(limit: number = 10): SearchHistoryItem[] {
-    return [...this.searchHistory]
-      .sort((a, b) => b.clickCount - a.clickCount)
-      .slice(0, limit);
-  }
-
-  /**
-   * 获取缓存键
-   */
-  private getCacheKey(query: string, type: SearchType, filters: SearchFilter, siteKeys: string[], limitPerSite: number): string {
-    const siteKeysStr = siteKeys.join(',') || 'all';
-    const filtersStr = JSON.stringify(filters);
-    return `${query}_${type}_${siteKeysStr}_${limitPerSite}_${filtersStr}`;
-  }
-
-  /**
-   * 缓存搜索结果
-   */
-  private cacheResult(key: string, result: SearchResponse): void {
-    // 限制缓存大小
-    if (this.searchCache.size >= this.maxCacheSize) {
-      // 删除最早的缓存
-      const firstKey = this.searchCache.keys().next().value;
-      this.searchCache.delete(firstKey);
+  public async getHotSearches(forceUpdate: boolean = false): Promise<HotSearchItem[]> {
+    // 如果距离上次更新时间不超过1小时，且不是强制更新，则返回缓存
+    if (!forceUpdate && Date.now() - this.lastHotSearchUpdate < HOT_SEARCH_UPDATE_INTERVAL) {
+      return this.hotSearches;
     }
-    this.searchCache.set(key, result);
-  }
 
-  /**
-   * 加载配置
-   */
-  private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('searchConfig', DEFAULT_SEARCH_CONFIG);
-      if (savedConfig) {
-        this.config = { ...DEFAULT_SEARCH_CONFIG, ...savedConfig };
+      // 从API获取热门搜索
+      const HttpService = (await import('../HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      const response = await httpService.get<HotSearchItem[]>('/api/hot-searches', {
+        timeout: 5000
+      });
+
+      if (response.status === 200 && response.data) {
+        this.hotSearches = response.data;
+        this.lastHotSearchUpdate = Date.now();
       }
     } catch (error) {
-      Logger.error(TAG, `加载搜索配置失败: ${error}`);
+      Logger.error(TAG, `Failed to get hot searches: ${error}`);
+      // 如果获取失败，使用默认热门搜索
+      this.hotSearches = this.getDefaultHotSearches();
     }
+
+    return this.hotSearches;
   }
 
   /**
-   * 保存配置
+   * 获取默认热门搜索
    */
-  public async saveConfig(config: Partial<SearchConfig>): Promise<void> {
-    try {
-      this.config = { ...this.config, ...config };
-      await this.configService.setConfig('searchConfig', this.config);
-      
-      // 如果历史记录数量配置变化，清理超出限制的历史
-      if (config.maxHistoryItems && this.searchHistory.length > config.maxHistoryItems) {
-        this.searchHistory = this.searchHistory.slice(0, config.maxHistoryItems);
-        await this.saveSearchHistory();
-      }
-    } catch (error) {
-      Logger.error(TAG, `保存搜索配置失败: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * 获取配置
-   */
-  public getConfig(): SearchConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * 加载热门搜索
-   */
-  private async loadHotSearches(): Promise<void> {
-    try {
-      // 检查是否需要更新
-      const now = Date.now();
-      if (now - this.lastHotSearchUpdate < HOT_SEARCH_UPDATE_INTERVAL && this.hotSearches.length > 0) {
-        Logger.info(TAG, '使用缓存的热门搜索');
-        return;
-      }
-      
-      // 在实际应用中，这里应该从API获取热门搜索
-      // 这里使用模拟数据
-      this.hotSearches = this.generateMockHotSearches();
-      this.lastHotSearchUpdate = now;
-      
-      Logger.info(TAG, `已加载${this.hotSearches.length} 条热门搜索`);
-    } catch (error) {
-      Logger.error(TAG, `加载热门搜索失败: ${error}`);
-    }
-  }
-
-  /**
-   * 生成模拟热门搜索数据
-   */
-  private generateMockHotSearches(): HotSearchItem[] {
-    const mockData = [
-      { keyword: '流浪地球3', rank: 1, searchCount: 1234567, trend: 'up', changeCount: 1567 },
-      { keyword: '繁花', rank: 2, searchCount: 987654, trend: 'stable', tag: '热播剧' },
-      { keyword: '功夫熊猫4', rank: 3, searchCount: 876543, trend: 'up', changeCount: 2345, tag: '新上线' },
-      { keyword: '沙丘2', rank: 4, searchCount: 765432, trend: 'down', changeCount: 123 },
-      { keyword: '周冬雨', rank: 5, searchCount: 654321, trend: 'up', changeCount: 456, isNew: true },
-      { keyword: '张艺谋', rank: 6, searchCount: 543210, trend: 'stable' },
-      { keyword: '狂飙', rank: 7, searchCount: 432109, trend: 'down', changeCount: 567 },
-      { keyword: '复仇者联盟', rank: 8, searchCount: 321098, trend: 'up', changeCount: 789, tag: '预告' },
-      { keyword: '动画电影', rank: 9, searchCount: 210987, trend: 'stable', category: '类型' },
-      { keyword: '红海行动2', rank: 10, searchCount: 109876, trend: 'up', changeCount: 345, isNew: true }
+  private getDefaultHotSearches(): HotSearchItem[] {
+    return [
+      { id: '1', keyword: '热门电影', rank: 1, searchCount: 1000, trend: 'up' },
+      { id: '2', keyword: '最新电视剧', rank: 2, searchCount: 950, trend: 'up' },
+      { id: '3', keyword: '综艺', rank: 3, searchCount: 900, trend: 'stable' },
+      { id: '4', keyword: '动漫', rank: 4, searchCount: 850, trend: 'down' },
+      { id: '5', keyword: '纪录片', rank: 5, searchCount: 800, trend: 'up' }
     ];
-    
-    return mockData.map((item, index) => ({
-      ...item,
-      id: `hot_${index}_${Date.now()}`
-    }));
+  }
+
+  /**
+   * 获取搜索建议
+   * @param keyword 搜索关键词
+   * @param limit 建议数量
+   */
+  public async getSearchSuggestions(keyword: string, limit: number = 10): Promise<SearchSuggestionItem[]> {
+    if (!keyword.trim()) {
+      return [];
+    }
+
+    try {
+      // 从API获取搜索建议
+      const HttpService = (await import('../HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      const response = await httpService.get<SearchSuggestionItem[]>(`/api/search-suggestions?keyword=${encodeURIComponent(keyword)}&limit=${limit}`, {
+        timeout: 5000
+      });
+
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to get search suggestions: ${error}`);
+    }
+
+    // 如果API调用失败，返回空数组
+    return [];
+  }
+
+  /**
+   * 注册搜索监听器
+   */
+  public registerSearchListener(listener: SearchListener): void {
+    this.searchListeners.push(listener);
+  }
+
+  /**
+   * 注销搜索监听器
+   */
+  public unregisterSearchListener(listener: SearchListener): void {
+    const index = this.searchListeners.indexOf(listener);
+    if (index >= 0) {
+      this.searchListeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * 注册搜索建议监听器
+   */
+  public registerSuggestionListener(listener: SuggestionListener): void {
+    this.suggestionListeners.push(listener);
+  }
+
+  /**
+   * 注销搜索建议监听器
+   */
+  public unregisterSuggestionListener(listener: SuggestionListener): void {
+    const index = this.suggestionListeners.indexOf(listener);
+    if (index >= 0) {
+      this.suggestionListeners.splice(index, 1);
+    }
   }
 
   /**
    * 通知搜索完成
    */
   private notifySearchCompleted(response: SearchResponse): void {
-    this.searchListeners.forEach(listener => {
+    for (let i = 0; i < this.searchListeners.length; i++) {
+      const listener = this.searchListeners[i];
       try {
         listener(response);
       } catch (error) {
-        Logger.error(TAG, `搜索监听器执行失败: ${error}`);
+        Logger.error(TAG, `Failed to notify search listener: ${error}`);
       }
-    });
+    }
+  }
+
+  /**
+   * 通知搜索建议更新
+   */
+  private notifySuggestionsUpdated(suggestions: SearchSuggestionItem[]): void {
+    for (let i = 0; i < this.suggestionListeners.length; i++) {
+      const listener = this.suggestionListeners[i];
+      try {
+        listener(suggestions);
+      } catch (error) {
+        Logger.error(TAG, `Failed to notify suggestion listener: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * 获取缓存键
+   */
+  private getCacheKey(query: string, type: SearchType, filters: SearchFilter, siteKeys: string[], limitPerSite: number): string {
+    // 使用传统方式构建缓存键，避免使用解构赋值语法
+    const filtersStr = JSON.stringify(filters || {});
+    const siteKeysStr = siteKeys.join(',') || 'all';
+    return `${query}_${type}_${filtersStr}_${siteKeysStr}_${limitPerSite}`;
+  }
+
+  /**
+   * 缓存搜索结果
+   */
+  private cacheResult(key: string, result: SearchResponse): void {
+    // 检查缓存大小，如果超过限制则删除最早的缓存
+    if (this.searchCache.size >= this.maxCacheSize) {
+      // 获取最早的缓存键
+      const oldestKey = this.searchCache.keys().next().value;
+      if (oldestKey) {
+        this.searchCache.delete(oldestKey);
+      }
+    }
+    // 添加新缓存
+    this.searchCache.set(key, result);
+  }
+
+  /**
+   * 清除搜索缓存
+   */
+  public clearSearchCache(): void {
+    this.searchCache.clear();
+  }
+
+  /**
+   * 更新站点信息
+   */
+  public async updateSiteInfo(siteKey: string, siteInfo: SiteInfo): Promise<void> {
+    // 这里可以实现站点信息的更新逻辑
+    Logger.info(TAG, `更新站点信息: ${siteKey}`);
+  }
+
+  /**
+   * 获取搜索统计信息
+   */
+  public async getSearchStats(): Promise<{
+    totalSearches: number;
+    averageResults: number;
+    topSearches: string[];
+  }> {
+    // 从API获取搜索统计信息
+    try {
+      const HttpService = (await import('../HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      const response = await httpService.get<{
+        totalSearches: number;
+        averageResults: number;
+        topSearches: string[];
+      }>('/api/search-stats', {
+        timeout: 5000
+      });
+
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to get search stats: ${error}`);
+    }
+
+    // 返回默认统计信息
+    return {
+      totalSearches: 0,
+      averageResults: 0,
+      topSearches: []
+    };
   }
 }

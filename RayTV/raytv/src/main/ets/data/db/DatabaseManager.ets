@@ -1,7 +1,7 @@
 // DatabaseManager.ets - 数据库管理器
 // 实现基于HarmonyOS RelationalStore的数据库连接和管理
 import relationalStore from '@ohos.data.relationalStore';
-import { Context } from '@ohos.ability.featureAbility';
+import Context from '@ohos.ability.featureAbility';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
 import Logger from '../../common/util/Logger';
 
@@ -309,7 +309,7 @@ export class DatabaseManager {
    * @param context 应用上下�?   */
   public async resetDatabase(context: Context): Promise<void> {
     try {
-      Logger.warning(TAG, 'Resetting database - this will delete all data!');
+      Logger.warn(TAG, 'Resetting database - this will delete all data!');
       
       // 关闭现有连接
       this.closeDatabase();
@@ -337,14 +337,15 @@ export class DatabaseManager {
     try {
       Logger.debug(TAG, 'Getting database size');
       
-      // 使用PRAGMA page_count和page_size查询数据库大�?      const pageCountResult = await this.database.querySql('PRAGMA page_count', []);
+      // 使用PRAGMA page_count和page_size查询数据库大小
+      const pageCountResult: relationalStore.ResultSet = await this.database.querySql('PRAGMA page_count', []);
       let pageCount = 0;
       if (pageCountResult.goToFirstRow()) {
         pageCount = pageCountResult.getLong(0) || 0;
       }
       pageCountResult.close();
       
-      const pageSizeResult = await this.database.querySql('PRAGMA page_size', []);
+      const pageSizeResult: relationalStore.ResultSet = await this.database.querySql('PRAGMA page_size', []);
       let pageSize = 0;
       if (pageSizeResult.goToFirstRow()) {
         pageSize = pageSizeResult.getLong(0) || 0;

@@ -3,7 +3,7 @@
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
-import NetworkUtil from '../../common/util/NetworkUtil';
+import HttpService from '../../service/HttpService';
 import EventBusUtil from '../../common/util/EventBusUtil';
 import CacheService from '../../service/cache/CacheService';
 import {
@@ -73,7 +73,7 @@ export class UserRepository {
   private static instance: UserRepository;
   private logger = Logger.getInstance();
   private storageUtil = StorageUtil.getInstance();
-  private networkUtil = NetworkUtil.getInstance();
+  private httpService = HttpService.getInstance();
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
@@ -171,10 +171,9 @@ export class UserRepository {
       this.validateRegisterRequest(request);
       
       // 调用API注册
-      const response = await this.networkUtil.post<UserInfo>(
+      const response = await this.httpService.post<UserInfo>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.register}`,
-        request,
-        {}
+        request
       );
       
       const userInfo = response.data;
@@ -208,7 +207,7 @@ export class UserRepository {
       this.validateLoginRequest(request);
       
       // 调用API登录
-      const response = await this.networkUtil.post<{
+      const response = await this.httpService.post<{
         user: UserInfo;
         token: string;
         expiresIn: number;
@@ -261,7 +260,7 @@ export class UserRepository {
       
       try {
         // 尝试调用API登出
-        await this.networkUtil.post(
+        await this.httpService.post(
           `${this.apiEndpoints.baseUrl}${this.apiEndpoints.logout}`,
           {},
           {
@@ -271,7 +270,8 @@ export class UserRepository {
           }
         );
       } catch (error) {
-        // API调用失败时记录日志但不抛出错�?        this.logger.warn('API logout failed, continuing with local logout', error instanceof Error ? error : new Error(String(error)));
+        // API调用失败时记录日志但不抛出错误
+        this.logger.warn('API logout failed, continuing with local logout', error instanceof Error ? error : new Error(String(error)));
       }
       
       // 清除本地会话数据
@@ -300,7 +300,7 @@ export class UserRepository {
         return false;
       }
       
-      const response = await this.networkUtil.post<{
+      const response = await this.httpService.post<{
         token: string;
         expiresIn: number;
       }>(
@@ -361,7 +361,7 @@ export class UserRepository {
         throw new Error('User not logged in');
       }
       
-      const response = await this.networkUtil.put<UserProfile>(
+      const response = await this.httpService.post<UserProfile>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userProfile}`, 
         request,
         {
@@ -427,7 +427,7 @@ export class UserRepository {
         throw new Error('User not logged in');
       }
       
-      const response = await this.networkUtil.put<UserSettings>(
+      const response = await this.httpService.post<UserSettings>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userSettings}`,
         request,
         {
@@ -479,7 +479,7 @@ export class UserRepository {
         throw new Error('User not logged in');
       }
       
-      await this.networkUtil.post(
+      await this.httpService.post(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.changePassword}`,
         request,
         {
@@ -699,7 +699,7 @@ export class UserRepository {
         return;
       }
       
-      const response = await this.networkUtil.get<UserInfo>(
+      const response = await this.httpService.get<UserInfo>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userProfile}`,
         {
           headers: {
@@ -742,7 +742,7 @@ export class UserRepository {
       
       if (!settings) {
         // 从API获取
-        const response = await this.networkUtil.get<UserSettings>(
+        const response = await this.httpService.get<UserSettings>(
           `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userSettings}`,
           {
             headers: {
@@ -786,7 +786,7 @@ export class UserRepository {
       
       if (!statistics) {
         // 从API获取
-        const response = await this.networkUtil.get<UserStatistics>(
+        const response = await this.httpService.get<UserStatistics>(
           `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userStatistics}`,
           {
             headers: {
@@ -853,7 +853,7 @@ export class UserRepository {
         timestamp: Date.now()
       } as UserActivityEvent);
       
-      // 异步发送到服务�?      this.networkUtil.post(
+      // 异步发送到服务�?      this.httpService.post(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.userActivity}`,
         {
           ...activity,

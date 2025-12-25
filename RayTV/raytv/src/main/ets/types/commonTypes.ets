@@ -240,7 +240,7 @@ export type Empty = null | undefined | void;
  */
 export interface SerializableValue {
   type: 'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'array' | 'object';
-  value: any;
+  value: Serializable | SerializableValue[] | Record<string, SerializableValue>;
 }
 
 export type Serializable = string | number | boolean | null | undefined;

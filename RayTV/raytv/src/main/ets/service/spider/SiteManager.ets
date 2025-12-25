@@ -25,6 +25,13 @@ export interface SiteInfo extends Site {
 }
 
 /**
+ * 调用站点方法选项接口
+ */
+export interface CallSiteMethodOptions {
+  timeout?: number;
+}
+
+/**
  * 站点管理器
  * 负责站点信息的注册、更新、删除和查询
  */
@@ -87,13 +94,36 @@ export class SiteManager {
           key: site.key,
           name: site.name,
           type: site.type,
+          loaderType: site.loaderType,
           api: site.api,
+          logo: site.logo,
+          description: site.description,
+          siteAuth: site.siteAuth,
+          headers: site.headers,
+          config: site.config,
+          configItems: site.configItems,
+          searchConfig: site.searchConfig,
+          filterConfig: site.filterConfig,
+          performanceConfig: site.performanceConfig,
+          version: site.version,
+          stats: site.stats,
+          lifecycle: site.lifecycle,
           enabled: site.enabled,
           order: site.order,
+          group: site.group,
+          tags: site.tags,
+          customCode: site.customCode,
+          sandboxEnabled: site.sandboxEnabled,
+          allowThirdParty: site.allowThirdParty,
           createdAt: site.createdAt,
           updatedAt: site.updatedAt,
-          headers: site.headers,
-          ext: site.ext,
+          lastUsedAt: site.lastUsedAt,
+          userAgent: site.userAgent,
+          referer: site.referer,
+          proxy: site.proxy,
+          encoding: site.encoding,
+          charset: site.charset,
+          certificate: site.certificate,
           status: site.enabled ? SiteStatus.NORMAL : SiteStatus.DISABLED,
           errorCount: 0,
           performanceScore: 100
@@ -129,13 +159,36 @@ export class SiteManager {
         key: site.key,
         name: site.name,
         type: site.type,
+        loaderType: site.loaderType,
         api: site.api,
+        logo: site.logo,
+        description: site.description,
+        siteAuth: site.siteAuth,
+        headers: site.headers,
+        config: site.config,
+        configItems: site.configItems,
+        searchConfig: site.searchConfig,
+        filterConfig: site.filterConfig,
+        performanceConfig: site.performanceConfig,
+        version: site.version,
+        stats: site.stats,
+        lifecycle: site.lifecycle,
         enabled: site.enabled,
         order: site.order,
-        createdAt: site.createdAt,
-        updatedAt: site.updatedAt,
-        headers: site.headers,
-        ext: site.ext,
+        group: site.group,
+        tags: site.tags,
+        customCode: site.customCode,
+        sandboxEnabled: site.sandboxEnabled,
+        allowThirdParty: site.allowThirdParty,
+        createdAt: site.createdAt || Date.now(),
+        updatedAt: site.updatedAt || Date.now(),
+        lastUsedAt: site.lastUsedAt,
+        userAgent: site.userAgent,
+        referer: site.referer,
+        proxy: site.proxy,
+        encoding: site.encoding,
+        charset: site.charset,
+        certificate: site.certificate,
         status: site.enabled !== false ? SiteStatus.NORMAL : SiteStatus.DISABLED,
         errorCount: 0,
         performanceScore: 100
@@ -175,13 +228,36 @@ export class SiteManager {
         key: site.key,
         name: site.name,
         type: site.type,
+        loaderType: site.loaderType,
         api: site.api,
+        logo: site.logo,
+        description: site.description,
+        siteAuth: site.siteAuth,
+        headers: site.headers,
+        config: site.config,
+        configItems: site.configItems,
+        searchConfig: site.searchConfig,
+        filterConfig: site.filterConfig,
+        performanceConfig: site.performanceConfig,
+        version: site.version,
+        stats: site.stats,
+        lifecycle: site.lifecycle,
         enabled: site.enabled,
         order: site.order,
+        group: site.group,
+        tags: site.tags,
+        customCode: site.customCode,
+        sandboxEnabled: site.sandboxEnabled,
+        allowThirdParty: site.allowThirdParty,
         createdAt: site.createdAt,
-        updatedAt: site.updatedAt,
-        headers: site.headers,
-        ext: site.ext,
+        updatedAt: site.updatedAt || Date.now(),
+        lastUsedAt: site.lastUsedAt,
+        userAgent: site.userAgent,
+        referer: site.referer,
+        proxy: site.proxy,
+        encoding: site.encoding,
+        charset: site.charset,
+        certificate: site.certificate,
         status: site.enabled !== false ? existingSite.status : SiteStatus.DISABLED,
         errorCount: existingSite.errorCount,
         lastError: existingSite.lastError,
@@ -267,7 +343,7 @@ export class SiteManager {
    */
   public getSearchableSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
-      site.enabled !== false && site.searchable !== false && site.status !== SiteStatus.DISABLED
+      site.enabled !== false && site.searchConfig && site.searchConfig.enabled !== false && site.status !== SiteStatus.DISABLED
     );
   }
 
@@ -277,7 +353,7 @@ export class SiteManager {
    */
   public getVodSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
-      site.enabled !== false && site.tvod !== false && site.status !== SiteStatus.DISABLED
+      site.enabled !== false && site.type === 'vod' && site.status !== SiteStatus.DISABLED
     );
   }
 
@@ -287,7 +363,7 @@ export class SiteManager {
    */
   public getLiveSites(): SiteInfo[] {
     return Array.from(this.sites.values()).filter(site => 
-      site.enabled !== false && site.live !== false && site.status !== SiteStatus.DISABLED
+      site.enabled !== false && site.type === 'live' && site.status !== SiteStatus.DISABLED
     );
   }
 
@@ -400,12 +476,7 @@ export class SiteManager {
     return this.getEnabledSites();
   }
 
-  /**
-   * 调用站点方法选项接口
-   */
-export interface CallSiteMethodOptions {
-  timeout?: number;
-}
+  
 
 /**
    * 调用站点方法

@@ -332,28 +332,29 @@ export class PinyinUtil {
                 i++;
               }
               // 去除空格并转换为字符串
-              currentValue = currentValue.trim();
-              inValue = false;
+                currentValue = this.trimString(currentValue);
+                inValue = false;
             }
             
             // 处理当前键值对
-            if (currentKey && currentValue) {
-              const isUpdate = PINYIN_MAP.hasOwnProperty(currentKey);
-              
-              // 验证值的有效性 - 确保是单字符拼音（通常是字母）
-              // 但也允许特殊情况，如多字符拼音或音调标记
-              if (typeof currentValue === 'string' && currentValue.length > 0) {
-                // 在ArkTS中安全地设置属性
-                const keyToSet = currentKey;
-                const valueToSet = currentValue;
-                PINYIN_MAP[keyToSet] = valueToSet;
+              if (currentKey && currentValue) {
+                // 使用直接检查属性值是否存在的方式替代hasOwnProperty
+                const isUpdate = PINYIN_MAP[currentKey] !== undefined;
                 
-                if (isUpdate) {
-                  updatedCount++;
-                } else {
-                  addedCount++;
+                // 验证值的有效性 - 确保是单字符拼音（通常是字母）
+                // 但也允许特殊情况，如多字符拼音或音调标记
+                if (typeof currentValue === 'string' && currentValue.length > 0) {
+                  // 在ArkTS中安全地设置属性
+                  const keyToSet = currentKey;
+                  const valueToSet = currentValue;
+                  PINYIN_MAP[keyToSet] = valueToSet;
+                  
+                  if (isUpdate) {
+                    updatedCount++;
+                  } else {
+                    addedCount++;
+                  }
                 }
-              }
               
               // 重置键值缓冲区
               currentKey = '';

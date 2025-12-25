@@ -240,7 +240,8 @@ export interface ConfigImportExportOptions {
 }
 
 /**
- *// Live频道接口
+ * Live频道接口
+ */
 export interface LiveChannel {
   name: string;              // 频道名称
   url?: string;              // 直播URL

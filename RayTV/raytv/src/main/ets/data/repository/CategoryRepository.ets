@@ -1,4 +1,4 @@
-// CategoryRepository - 分类仓库�?// 负责管理视频和直播的分类数据
+// CategoryRepository - 分类仓库�?// 负责管理视频和直播的分类数据
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -27,7 +27,7 @@ export enum CategoryType {
 }
 
 /**
- * 分类可见性枚�? */
+ * 分类可见性枚�? */
 export enum CategoryVisibility {
   PUBLIC = 'public',
   PRIVATE = 'private',
@@ -73,19 +73,19 @@ export interface CategoryIcon {
 }
 
 /**
- * 分类元数据接�? */
+ * 分类元数据接�? */
 export interface CategoryMetadata {
   viewCount: number; // 浏览次数
   contentCount: number; // 内容数量
-  followerCount: number; // 关注者数�?  isFollowing?: boolean; // 当前用户是否关注
-  isFeatured?: boolean; // 是否精�?  lastUpdated: number; // 最后更新时�?  createdAt: number; // 创建时间
+  followerCount: number; // 关注者数�?  isFollowing?: boolean; // 当前用户是否关注
+  isFeatured?: boolean; // 是否精�?  lastUpdated: number; // 最后更新时�?  createdAt: number; // 创建时间
   updatedBy?: string; // 更新者ID
   createdBy?: string; // 创建者ID
   parentCategoryId?: string; // 父分类ID
   childCategoryIds?: string[]; // 子分类ID列表
   relatedCategoryIds?: string[]; // 相关分类ID列表
   allowedUserIds?: string[]; // 允许访问的用户ID列表（私有分类）
-  restrictedCountries?: string[]; // 限制访问的国家列�?  tags?: string[]; // 分类标签
+  restrictedCountries?: string[]; // 限制访问的国家列�?  tags?: string[]; // 分类标签
   description?: string; // 详细描述
   coverImageUrl?: string; // 封面图片URL
   bannerImageUrl?: string; // 横幅图片URL
@@ -99,21 +99,21 @@ export interface Category {
   id: string; // 分类ID
   name: string; // 分类名称
   type: CategoryType; // 分类类型
-  visibility: CategoryVisibility; // 可见�?  slug: string; // URL友好的标�?  metadata: CategoryMetadata; // 元数�?  orderIndex?: number; // 排序索引
-  status: 'active' | 'inactive' | 'pending' | 'deprecated'; // 状�?  localization?: Record<string, { // 本地化数�?    name: string;
+  visibility: CategoryVisibility; // 可见�?  slug: string; // URL友好的标�?  metadata: CategoryMetadata; // 元数�?  orderIndex?: number; // 排序索引
+  status: 'active' | 'inactive' | 'pending' | 'deprecated'; // 状�?  localization?: Record<string, { // 本地化数�?    name: string;
     description?: string;
     slug?: string;
   }>;
 }
 
 /**
- * 分类组接�? */
+ * 分类组接�? */
 export interface CategoryGroup {
   id: string; // 组ID
-  name: string; // 组名�?  description?: string; // 组描�?  categoryIds: string[]; // 分类ID列表
+  name: string; // 组名�?  description?: string; // 组描�?  categoryIds: string[]; // 分类ID列表
   orderIndex?: number; // 排序索引
   isExpanded?: boolean; // 是否展开
-  icon?: CategoryIcon; // 组图�?  createdAt: number; // 创建时间
+  icon?: CategoryIcon; // 组图�?  createdAt: number; // 创建时间
   updatedAt: number; // 更新时间
 }
 
@@ -128,7 +128,7 @@ export const CategoryEventType = {
   ACTIVATED: 'category:activated',
   DEACTIVATED: 'category:deactivated',
   
-  // 状态变更事�?  VISIBILITY_CHANGED: 'category:visibilityChanged',
+  // 状态变更事�?  VISIBILITY_CHANGED: 'category:visibilityChanged',
   FOLLOWED: 'category:followed',
   UNFOLLOWED: 'category:unfollowed',
   
@@ -137,7 +137,7 @@ export const CategoryEventType = {
   CONTENT_REMOVED: 'category:contentRemoved',
   CONTENT_COUNT_CHANGED: 'category:contentCountChanged',
   
-  // 组事�?  GROUP_CREATED: 'category:groupCreated',
+  // 组事�?  GROUP_CREATED: 'category:groupCreated',
   GROUP_UPDATED: 'category:groupUpdated',
   GROUP_DELETED: 'category:groupDeleted',
   
@@ -176,20 +176,20 @@ export interface CategoryEvent {
  */
 export interface CategoryFilter {
   types?: CategoryType[]; // 分类类型
-  visibility?: CategoryVisibility[]; // 可见�?  searchTerm?: string; // 搜索�?  parentId?: string; // 父分类ID
-  childOf?: string; // 子分类筛�?  status?: string[]; // 状�?  featured?: boolean; // 是否精�?  followed?: boolean; // 是否已关�?  contentCountMin?: number; // 内容数量下限
+  visibility?: CategoryVisibility[]; // 可见�?  searchTerm?: string; // 搜索�?  parentId?: string; // 父分类ID
+  childOf?: string; // 子分类筛�?  status?: string[]; // 状�?  featured?: boolean; // 是否精�?  followed?: boolean; // 是否已关�?  contentCountMin?: number; // 内容数量下限
   contentCountMax?: number; // 内容数量上限
-  tags?: string[]; // 标签筛�?  sortBy?: CategorySortType; // 排序方式
+  tags?: string[]; // 标签筛�?  sortBy?: CategorySortType; // 排序方式
   limit?: number; // 数量限制
-  offset?: number; // 偏移�?  lang?: string; // 语言筛�?  region?: string; // 地区筛�?}
+  offset?: number; // 偏移�?  lang?: string; // 语言筛�?  region?: string; // 地区筛�?}
 
 /**
  * 分类请求接口
  */
 export interface CategoryRequest {
   filter?: CategoryFilter;
-  includeMetadata?: boolean; // 是否包含元数�?  includeGroups?: boolean; // 是否包含分组
-  includeLocalization?: boolean; // 是否包含本地�?  includeChildCategories?: boolean; // 是否包含子分�?  includeContentCount?: boolean; // 是否包含内容计数
+  includeMetadata?: boolean; // 是否包含元数�?  includeGroups?: boolean; // 是否包含分组
+  includeLocalization?: boolean; // 是否包含本地�?  includeChildCategories?: boolean; // 是否包含子分�?  includeContentCount?: boolean; // 是否包含内容计数
   cachePolicy?: CachePolicy; // 缓存策略
 }
 
@@ -224,13 +224,13 @@ export interface CategoryStats {
  */
 export interface CategoryStorageConfig {
   cacheTTL: number; // 缓存过期时间（毫秒）
-  maxCacheItems: number; // 最大缓存项�?  persistCategories: boolean; // 是否持久化分�?  autoSync: boolean; // 是否自动同步
+  maxCacheItems: number; // 最大缓存项�?  persistCategories: boolean; // 是否持久化分�?  autoSync: boolean; // 是否自动同步
   syncInterval: number; // 同步间隔（毫秒）
   offlineMode: boolean; // 离线模式
 }
 
 /**
- * 分类仓库�? */
+ * 分类仓库�? */
 export class CategoryRepository {
   private static instance: CategoryRepository;
   private logger = Logger.getInstance();
@@ -239,7 +239,7 @@ export class CategoryRepository {
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
-  // 存储键配�?  private storageKeys = {
+  // 存储键配�?  private storageKeys = {
     categories: 'category:categories',
     groups: 'category:groups',
     stats: 'category:stats',
@@ -280,14 +280,14 @@ export class CategoryRepository {
     lastUpdated: 0
   };
   
-  // 同步状�?  private lastSyncTime: number = 0;
+  // 同步状�?  private lastSyncTime: number = 0;
   private isSyncing: boolean = false;
   private syncTimer: number | null = null;
   
-  // 初始化状�?  private initialized: boolean = false;
+  // 初始化状�?  private initialized: boolean = false;
   
   /**
-   * 私有构造函�?   */
+   * 私有构造函�?   */
   private constructor() {
     this.logger.info('CategoryRepository initialized');
     this.setupEventListeners();
@@ -304,7 +304,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 初始化分类仓�?   * @param config 存储配置
+   * 初始化分类仓�?   * @param config 存储配置
    */
   public async initialize(config?: Partial<CategoryStorageConfig>): Promise<void> {
     try {
@@ -404,9 +404,9 @@ export class CategoryRepository {
   }
 
   /**
-   * 设置事件监听�?   */
+   * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听网络状态变�?    this.eventBus.on('network:online', () => {
+    // 监听网络状态变�?    this.eventBus.on('network:online', () => {
       this.onNetworkOnline();
     });
     
@@ -414,7 +414,7 @@ export class CategoryRepository {
       this.onNetworkOffline();
     });
     
-    // 监听应用退出事�?    this.eventBus.on('app:exit', async () => {
+    // 监听应用退出事�?    this.eventBus.on('app:exit', async () => {
       await this.shutdown();
     });
   }
@@ -451,7 +451,7 @@ export class CategoryRepository {
         this.followedCategories = new Set(followed);
       }
       
-      // 加载自定义排�?      const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
+      // 加载自定义排�?      const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
       if (orderData) {
         const order = JSON.parse(orderData) as Record<string, number>;
         this.customOrder.clear();
@@ -466,7 +466,7 @@ export class CategoryRepository {
         this.stats = JSON.parse(statsData) as CategoryStats;
       }
       
-      // 加载最后同步时�?      const syncTimeData = await this.storageUtil.get(LocalStorageType.LAST_SYNC_TIME);
+      // 加载最后同步时�?      const syncTimeData = await this.storageUtil.get(LocalStorageType.LAST_SYNC_TIME);
       if (syncTimeData) {
         this.lastSyncTime = parseInt(syncTimeData);
       }
@@ -514,7 +514,7 @@ export class CategoryRepository {
         JSON.stringify(followed)
       );
       
-      // 保存自定义排�?      const order = Object.fromEntries(this.customOrder);
+      // 保存自定义排�?      const order = Object.fromEntries(this.customOrder);
       await this.storageUtil.set(
         LocalStorageType.CATEGORY_CUSTOM_ORDER,
         JSON.stringify(order)
@@ -526,7 +526,7 @@ export class CategoryRepository {
         JSON.stringify(this.stats)
       );
       
-      // 保存最后同步时�?      await this.storageUtil.set(
+      // 保存最后同步时�?      await this.storageUtil.set(
         LocalStorageType.LAST_SYNC_TIME,
         this.lastSyncTime.toString()
       );
@@ -563,7 +563,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 检查是否需要同�?   */
+   * 检查是否需要同�?   */
   private shouldSync(): boolean {
     const now = Date.now();
     const timeSinceLastSync = now - this.lastSyncTime;
@@ -620,7 +620,7 @@ export class CategoryRepository {
           await this.updateGroups(response.groups);
         }
         
-        // 更新最后同步时�?        this.lastSyncTime = Date.now();
+        // 更新最后同步时�?        this.lastSyncTime = Date.now();
         
         // 保存本地数据
         await this.saveLocalData();
@@ -714,16 +714,22 @@ export class CategoryRepository {
       const url = '/api/categories';
       const cacheKey = `categories:${Date.now()}`;
       
-      // 尝试从缓存获�?      const cachedResponse = await this.cacheService.getCache<CategoryResponse>(cacheKey);
+      // 尝试从缓存获�?      const cachedResponse = await this.cacheService.getCache<CategoryResponse>(cacheKey);
       if (cachedResponse) {
         this.logger.debug('Category data loaded from cache');
         return { ...cachedResponse, cacheHit: true };
       }
       
-      // 从网络获�?      const response = await this.networkUtil.get(url);
+      // 从真实API获取
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
       
-      if (response.success && response.data) {
-        const categoryResponse = response.data as CategoryResponse;
+      const response = await httpService.get<CategoryResponse>(url, {
+        timeout: 5000
+      });
+      
+      if (response.status === 200 && response.data) {
+        const categoryResponse = response.data;
         
         // 缓存响应数据
         await this.cacheService.setCache(cacheKey, categoryResponse, {
@@ -784,7 +790,7 @@ export class CategoryRepository {
         this.categories.set(newCategory.id, updatedCategory)))))));
         updatedCategories.push(updatedCategory);
       } else {
-        // 添加新分�?        this.categories.set(newCategory.id, newCategory);
+        // 添加新分�?        this.categories.set(newCategory.id, newCategory);
         createdCategories.push(newCategory);
       }
     }
@@ -826,7 +832,7 @@ export class CategoryRepository {
         this.groups.set(newGroup.id, updatedGroup);
         updatedGroups.push(updatedGroup);
       } else {
-        // 添加新分�?        this.groups.set(newGroup.id, newGroup);
+        // 添加新分�?        this.groups.set(newGroup.id, newGroup);
         createdGroups.push(newGroup);
       }
     }
@@ -869,10 +875,10 @@ export class CategoryRepository {
     
     // 计算统计信息
     for (const category of this.categories.values()) {
-      // 按类型统�?      const typeCount = this.stats.byType.get(category.type) || 0;
+      // 按类型统�?      const typeCount = this.stats.byType.get(category.type) || 0;
       this.stats.byType.set(category.type, typeCount + 1);
       
-      // 按可见性统�?      const visibilityCount = this.stats.byVisibility.get(category.visibility) || 0;
+      // 按可见性统�?      const visibilityCount = this.stats.byVisibility.get(category.visibility) || 0;
       this.stats.byVisibility.set(category.visibility, visibilityCount + 1);
       
       // 统计活跃分类
@@ -880,7 +886,7 @@ export class CategoryRepository {
         this.stats.activeCategories++;
       }
       
-      // 统计精选分�?      if (category.metadata.isFeatured) {
+      // 统计精选分�?      if (category.metadata.isFeatured) {
         this.stats.featuredCategories++;
       }
       
@@ -906,13 +912,13 @@ export class CategoryRepository {
     }
     
     try {
-      // 检查是否需要同�?      if (this.shouldSync() && !this.isSyncing) {
+      // 检查是否需要同�?      if (this.shouldSync() && !this.isSyncing) {
         this.syncCategories();
       }
       
-      // 获取所有分�?      let categories = Array.from(this.categories.values());
+      // 获取所有分�?      let categories = Array.from(this.categories.values());
       
-      // 应用过滤�?      if (request?.filter) {
+      // 应用过滤�?      if (request?.filter) {
         categories = this.filterCategories(categories, request.filter);
       }
       
@@ -1041,7 +1047,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 获取分类组列�?   */
+   * 获取分类组列�?   */
   public getCategoryGroups(): CategoryGroup[] {
     if (!this.initialized) {
       throw new Error('CategoryRepository not initialized');
@@ -1075,7 +1081,7 @@ export class CategoryRepository {
       // 添加关注
       this.followedCategories.add(categoryId);
       
-      // 更新分类元数�?      category.metadata.isFollowing = true;
+      // 更新分类元数�?      category.metadata.isFollowing = true;
       category.metadata.followerCount++;
       
       // 保存本地数据
@@ -1174,7 +1180,7 @@ export class CategoryRepository {
       // 移除关注
       this.followedCategories.delete(categoryId);
       
-      // 更新分类元数�?      category.metadata.isFollowing = false;
+      // 更新分类元数�?      category.metadata.isFollowing = false;
       category.metadata.followerCount = Math.max(0, category.metadata.followerCount - 1);
       
       // 保存本地数据
@@ -1288,7 +1294,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 设置分类自定义排�?   * @param categoryId 分类ID
+   * 设置分类自定义排�?   * @param categoryId 分类ID
    * @param orderIndex 排序索引
    */
   public async setCategoryOrder(categoryId: string, orderIndex: number): Promise<void> {
@@ -1405,7 +1411,7 @@ export class CategoryRepository {
           this.categories.set(category.id, updatedCategory);
           updatedCategories.push(updatedCategory);
         } else {
-          // 添加新分�?          this.categories.set(category.id, category);
+          // 添加新分�?          this.categories.set(category.id, category);
           updatedCategories.push(category);
         }
       }
@@ -1492,11 +1498,11 @@ export class CategoryRepository {
    */
   private filterCategories(categories: Category[], filter: CategoryFilter): Category[] {
     return categories.filter(category => {
-      // 检查类�?      if (filter.types && filter.types.length > 0 && !filter.types.includes(category.type)) {
+      // 检查类�?      if (filter.types && filter.types.length > 0 && !filter.types.includes(category.type)) {
         return false;
       }
       
-      // 检查可见�?      if (filter.visibility && filter.visibility.length > 0 && !filter.visibility.includes(category.visibility)) {
+      // 检查可见�?      if (filter.visibility && filter.visibility.length > 0 && !filter.visibility.includes(category.visibility)) {
         return false;
       }
       
@@ -1522,19 +1528,19 @@ export class CategoryRepository {
         return false;
       }
       
-      // 检查状�?      if (filter.status && filter.status.length > 0 && !filter.status.includes(category.status)) {
+      // 检查状�?      if (filter.status && filter.status.length > 0 && !filter.status.includes(category.status)) {
         return false;
       }
       
-      // 检查精选状�?      if (filter.featured !== undefined && category.metadata.isFeatured !== filter.featured) {
+      // 检查精选状�?      if (filter.featured !== undefined && category.metadata.isFeatured !== filter.featured) {
         return false;
       }
       
-      // 检查关注状�?      if (filter.followed !== undefined && this.followedCategories.has(category.id) !== filter.followed) {
+      // 检查关注状�?      if (filter.followed !== undefined && this.followedCategories.has(category.id) !== filter.followed) {
         return false;
       }
       
-      // 检查内容数量范�?      if (filter.contentCountMin && category.metadata.contentCount < filter.contentCountMin) {
+      // 检查内容数量范�?      if (filter.contentCountMin && category.metadata.contentCount < filter.contentCountMin) {
         return false;
       }
       
@@ -1542,7 +1548,7 @@ export class CategoryRepository {
         return false;
       }
       
-      // 检查标�?      if (filter.tags && filter.tags.length > 0) {
+      // 检查标�?      if (filter.tags && filter.tags.length > 0) {
         const hasMatchingTag = filter.tags.some(tag => category.metadata.tags?.includes(tag));
         if (!hasMatchingTag) {
           return false;
@@ -1554,7 +1560,7 @@ export class CategoryRepository {
         return false;
       }
       
-      // 检查地�?      if (filter.region && category.metadata.restrictedCountries?.includes(filter.region)) {
+      // 检查地�?      if (filter.region && category.metadata.restrictedCountries?.includes(filter.region)) {
         return false;
       }
       
@@ -1582,7 +1588,7 @@ export class CategoryRepository {
           return (b.metadata.viewCount || 0) - (a.metadata.viewCount || 0);
         
         case CategorySortType.TRENDING:
-          // 简化实现：基于最后更新时�?          return (b.metadata.lastUpdated || 0) - (a.metadata.lastUpdated || 0);
+          // 简化实现：基于最后更新时�?          return (b.metadata.lastUpdated || 0) - (a.metadata.lastUpdated || 0);
         
         case CategorySortType.RECENTLY_ADDED:
           return (b.metadata.createdAt || 0) - (a.metadata.createdAt || 0);

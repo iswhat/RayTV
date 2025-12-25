@@ -89,12 +89,40 @@ export class LiveRepository {
    */
   public async getChannels(siteId: string): Promise<LiveChannel[]> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
-        return Array.from(this.channelCache.get(siteId)!.values());
+      // 从真实API获取频道数据
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      const response = await httpService.get<LiveChannel[]>(
+        `/api/live/channels/${siteId}`,
+        { timeout: 5000 }
+      );
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        // 更新内存缓存
+        if (!this.channelCache.has(siteId)) {
+          this.channelCache.set(siteId, new Map());
+        }
+        
+        const channelMap = this.channelCache.get(siteId)!;
+        response.data.forEach(channel => {
+          channelMap.set(channel.id, channel);
+        });
+        
+        return response.data;
+      } else {
+        // 如果API调用失败，从内存缓存获取
+        if (this.channelCache.has(siteId)) {
+          return Array.from(this.channelCache.get(siteId)!.values());
+        }
+        return [];
       }
-      return [];
     } catch (error) {
       Logger.error(TAG, 'Failed to get channels', error instanceof Error ? error : new Error(String(error)));
+      // 如果API调用失败，从内存缓存获取
+      if (this.channelCache.has(siteId)) {
+        return Array.from(this.channelCache.get(siteId)!.values());
+      }
       return [];
     }
   }
@@ -124,7 +152,44 @@ export class LiveRepository {
    */
   public async searchChannels(keyword: string, siteId?: string): Promise<LiveChannel[]> {
     try {
-      // 简化实现，从内存缓存搜�?      const results: LiveChannel[] = [];
+      // 从真实API获取搜索结果
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      let apiUrl = `/api/live/search?keyword=${encodeURIComponent(keyword)}`;
+      if (siteId) {
+        apiUrl += `&siteId=${siteId}`;
+      }
+      
+      const response = await httpService.get<LiveChannel[]>(
+        apiUrl,
+        { timeout: 5000 }
+      );
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        // 如果API调用失败，从内存缓存搜索
+        const results: LiveChannel[] = [];
+        
+        const siteIds = siteId ? [siteId] : Array.from(this.channelCache.keys());
+        
+        for (const sid of siteIds) {
+          if (this.channelCache.has(sid)) {
+            const channels = Array.from(this.channelCache.get(sid)!.values());
+            const matchedChannels = channels.filter(channel => 
+              channel.name.includes(keyword)
+            );
+            results.push(...matchedChannels);
+          }
+        }
+        
+        return results;
+      }
+    } catch (error) {
+      Logger.error(TAG, 'Failed to search channels', error instanceof Error ? error : new Error(String(error)));
+      // 如果API调用失败，从内存缓存搜索
+      const results: LiveChannel[] = [];
       
       const siteIds = siteId ? [siteId] : Array.from(this.channelCache.keys());
       
@@ -139,9 +204,6 @@ export class LiveRepository {
       }
       
       return results;
-    } catch (error) {
-      Logger.error(TAG, 'Failed to search channels', error instanceof Error ? error : new Error(String(error)));
-      return [];
     }
   }
   
@@ -177,12 +239,36 @@ export class LiveRepository {
    */
   public async getEpgData(siteId: string, channelId: string): Promise<EpgItem[]> {
     try {
-      // 从内存缓存获�?      if (this.epgCache.has(siteId)) {
-        return this.epgCache.get(siteId)!.get(channelId) || [];
+      // 从真实API获取EPG数据
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      const response = await httpService.get<EpgItem[]>(
+        `/api/live/epg/${siteId}/${channelId}`,
+        { timeout: 5000 }
+      );
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        // 更新内存缓存
+        if (!this.epgCache.has(siteId)) {
+          this.epgCache.set(siteId, new Map());
+        }
+        this.epgCache.get(siteId)!.set(channelId, response.data);
+        
+        return response.data;
+      } else {
+        // 如果API调用失败，从内存缓存获取
+        if (this.epgCache.has(siteId)) {
+          return this.epgCache.get(siteId)!.get(channelId) || [];
+        }
+        return [];
       }
-      return [];
     } catch (error) {
       Logger.error(TAG, 'Failed to get EPG data', error instanceof Error ? error : new Error(String(error)));
+      // 如果API调用失败，从内存缓存获取
+      if (this.epgCache.has(siteId)) {
+        return this.epgCache.get(siteId)!.get(channelId) || [];
+      }
       return [];
     }
   }
@@ -214,10 +300,27 @@ export class LiveRepository {
    */
   public async getGroups(siteId: string): Promise<LiveGroup[]> {
     try {
-      // 从内存缓存获�?      return this.groupCache.get(siteId) || [];
+      // 从真实API获取分组数据
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
+      
+      const response = await httpService.get<LiveGroup[]>(
+        `/api/live/groups/${siteId}`,
+        { timeout: 5000 }
+      );
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        // 更新内存缓存
+        this.groupCache.set(siteId, response.data);
+        return response.data;
+      } else {
+        // 如果API调用失败，从内存缓存获取
+        return this.groupCache.get(siteId) || [];
+      }
     } catch (error) {
       Logger.error(TAG, 'Failed to get groups', error instanceof Error ? error : new Error(String(error)));
-      return [];
+      // 如果API调用失败，从内存缓存获取
+      return this.groupCache.get(siteId) || [];
     }
   }
   

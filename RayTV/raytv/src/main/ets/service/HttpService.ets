@@ -350,7 +350,7 @@ export class HttpService {
         expectDataType: requestConfig.expectDataType
       };
       
-      const response = await httpRequest.downloadFile(url, downloadConfig);
+      const response: http.HttpResponse = await httpRequest.downloadFile(url, downloadConfig);
 
       // 关闭请求对象
       httpRequest.destroy();

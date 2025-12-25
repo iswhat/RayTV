@@ -50,23 +50,51 @@ export class SQLiteHelper {
   private dbManager: DatabaseManager;
   
   /**
-   * 获取对象的键数组（ArkTS兼容方法�?*/
+   * 获取对象的键数组（ArkTS兼容方法）
+   */
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
     try {
       const jsonString = JSON.stringify(obj);
-      const tempObj = JSON.parse(jsonString);
+      // 使用字符串解析来提取键，避免使用Object.keys
       const keys: string[] = [];
+      let inKey = false;
+      let currentKey = '';
+      let isEscaped = false;
       
-      // 使用JSON序列化/反序列化方式获取键
-      const keyString = JSON.stringify(Object.keys(tempObj));
-      return JSON.parse(keyString);
+      // 跳过JSON对象的开始大括号
+      let i = 1;
+      
+      while (i < jsonString.length) {
+        const char = jsonString[i];
+        
+        if (isEscaped) {
+          currentKey += char;
+          isEscaped = false;
+        } else if (char === '\\') {
+          isEscaped = true;
+        } else if (char === '"' && !inKey) {
+          inKey = true;
+          currentKey = '';
+        } else if (char === '"' && inKey) {
+          inKey = false;
+          keys.push(currentKey);
+        } else if (inKey) {
+          currentKey += char;
+        } else if (char === '}') {
+          break;
+        }
+        i++;
+      }
+      
+      return keys;
     } catch {
       return [];
     }
   }
   
   /**
-   * 获取对象的值数组（ArkTS兼容方法�?*/
+   * 获取对象的值数组（ArkTS兼容方法）
+   */
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
     try {
       const keys = this.getObjectKeys(obj);
@@ -120,10 +148,12 @@ export class SQLiteHelper {
       await database.executeSql(sql, bindArgs);
       
       // 获取最后插入的ID
-      const result = await database.querySql(`SELECT last_insert_rowid() as id`);
-      // Fix type handling for querySql result
-      const idIndex = result.columnNames.indexOf('id');
-      const lastInsertRowId = result.firstItem ? (result.firstItem.getLong(idIndex) || 0) : -1;
+      const result: RelationalStore.ResultSet = await database.querySql(`SELECT last_insert_rowid() as id`);
+      let lastInsertRowId = -1;
+      if (result.goToFirstRow()) {
+        const idIndex = result.columnNames.indexOf('id');
+        lastInsertRowId = result.getLong(idIndex) || 0;
+      }
       
       Logger.info(TAG, `Inserted data into ${tableName}, ID: ${lastInsertRowId}`);
       
@@ -228,7 +258,7 @@ export class SQLiteHelper {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value);
+            bindArgs.push(cond.value as ValueType);
           }
         });
       }
@@ -236,8 +266,12 @@ export class SQLiteHelper {
       // 执行更新
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
-      const affectedRows = result.firstItem?.getLong(result.columnNames.indexOf('affected_rows')) || 0;
+      // 获取影响的行�?      const result: RelationalStore.ResultSet = await database.querySql('SELECT changes() as affected_rows');
+      let affectedRows = 0;
+      if (result.goToFirstRow()) {
+        const index = result.columnNames.indexOf('affected_rows');
+        affectedRows = result.getLong(index) || 0;
+      }
       
       Logger.info(TAG, `Updated ${affectedRows} records in ${tableName}`);
       
@@ -293,7 +327,7 @@ export class SQLiteHelper {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value);
+            bindArgs.push(cond.value as ValueType);
           }
         });
       }
@@ -301,8 +335,13 @@ export class SQLiteHelper {
       // 执行删除
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行�?      const result = await database.querySql('SELECT changes() as affected_rows');
-      const affectedRows = result.firstItem?.getLong(result.columnNames.indexOf('affected_rows')) || 0;
+      // 获取影响的行
+      const result: RelationalStore.ResultSet = await database.querySql('SELECT changes() as affected_rows');
+      let affectedRows = 0;
+      if (result.goToFirstRow()) {
+        const idIndex = result.columnNames.indexOf('affected_rows');
+        affectedRows = result.getLong(idIndex) || 0;
+      }
       
       Logger.info(TAG, `Deleted ${affectedRows} records from ${tableName}`);
       
@@ -365,7 +404,7 @@ export class SQLiteHelper {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value);
+            bindArgs.push(cond.value as ValueType);
           }
         });
       }
@@ -387,25 +426,43 @@ export class SQLiteHelper {
       Logger.debug(TAG, `Executing query: ${sql}, args: ${JSON.stringify(bindArgs)}`);
       
       // 执行查询
-      const result = await database.querySql(sql, bindArgs);
+      const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
       
       // 处理结果
       const records: T[] = [];
       while (result.goToNextRow()) {
         const record: DatabaseRecord = {};
-        result.columnNames.forEach((column, index) => {
-          // 根据数据类型获取�?          const value = result.getDouble(index);
-          if (!isNaN(value)) {
-            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
-              record[column] = Math.floor(value);
-            } else {
-              record[column] = value;
-            }
+        const columnNames = result.columnNames;
+        for (let index = 0; index < columnNames.length; index++) {
+          const column = columnNames[index];
+          
+          // 先尝试获取字符串
+          const stringValue = result.getString(index);
+          if (stringValue !== null) {
+            record[column] = stringValue;
           } else {
-            // 尝试获取字符�?            record[column] = result.getString(index);
+            // 尝试获取整数
+            const longValue = result.getLong(index);
+            if (longValue !== null) {
+              record[column] = longValue;
+            } else {
+              // 尝试获取浮点数
+              const doubleValue = result.getDouble(index);
+              if (doubleValue !== null && !isNaN(doubleValue)) {
+                record[column] = doubleValue;
+              } else {
+                // 获取布尔值 - 使用getLong检查
+              const longValue = result.getLong(index);
+              if (longValue !== null) {
+                record[column] = longValue === 1;
+              } else {
+                record[column] = null;
+              }
+              }
+            }
           }
-        });
-        records.push(record);
+        }
+        records.push(record as T);
       }
       
       Logger.info(TAG, `Retrieved ${records.length} records from ${tableName}`);
@@ -472,9 +529,10 @@ export class SQLiteHelper {
         });
       }
       
-      const result = await database.querySql(sql, bindArgs);
-      if (result.firstItem) {
-        const count = result.firstItem.getLong(result.columnNames.indexOf('count'));
+      const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
+      if (result.goToFirstRow()) {
+        const countIndex = result.columnNames.indexOf('count');
+        const count = result.getLong(countIndex);
         return count || 0;
       }
       return 0;
@@ -500,31 +558,49 @@ export class SQLiteHelper {
    * @param bindArgs 绑定参数
    * @returns 查询结果
    */
-  public async executeCustomQuery<T>(sql: string, bindArgs?: ValueType[]): Promise<T[]> {
+  public async executeCustomQuery<T extends Record<string, string | number | boolean | null>>(sql: string, bindArgs?: ValueType[]): Promise<T[]> {
     try {
       const database = this.dbManager.getDatabase();
       
       Logger.debug(TAG, `Executing custom query: ${sql}, args: ${JSON.stringify(bindArgs)}`);
       
-      const result = await database.querySql(sql, bindArgs);
+      const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
       
       // 处理结果
       const records: T[] = [];
       while (result.goToNextRow()) {
-        const record: DatabaseRecord = {};
-        result.columnNames.forEach((column, index) => {
-          // 根据数据类型获取�?          const value = result.getDouble(index);
-          if (!isNaN(value)) {
-            // 如果是整数，转换为整�?            if (Number.isInteger(value)) {
-              record[column] = Math.floor(value);
-            } else {
-              record[column] = value;
-            }
+        const record: Record<string, string | number | boolean | null> = {};
+        const columnNames = result.columnNames;
+        for (let index = 0; index < columnNames.length; index++) {
+          const column = columnNames[index];
+          
+          // 先尝试获取字符串
+          const stringValue = result.getString(index);
+          if (stringValue !== null) {
+            record[column] = stringValue;
           } else {
-            // 尝试获取字符�?            record[column] = result.getString(index);
+            // 尝试获取整数
+            const longValue = result.getLong(index);
+            if (longValue !== null) {
+              record[column] = longValue;
+            } else {
+              // 尝试获取浮点数
+              const doubleValue = result.getDouble(index);
+              if (doubleValue !== null && !isNaN(doubleValue)) {
+                record[column] = doubleValue;
+              } else {
+                // 获取布尔值 - 使用getLong检查
+                const boolLongValue = result.getLong(index);
+                if (boolLongValue !== null) {
+                  record[column] = boolLongValue === 1;
+                } else {
+                  record[column] = null;
+                }
+              }
+            }
           }
-        });
-        records.push(record);
+        }
+        records.push(record as T);
       }
       
       return records;
