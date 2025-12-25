@@ -103,7 +103,7 @@ export class EventBusUtil {
     // 按优先级排序
     this.eventMap[eventName].sort((a, b) => a.priority - b.priority);
 
-    this.logger.debug(`Subscribed to event: ${eventName}, priority: ${priority}, once: ${once}`);
+    Logger.debug('EventBus', `Subscribed to event: ${eventName}, priority: ${priority}, once: ${once}`);
   }
 
   /**
@@ -140,12 +140,12 @@ export class EventBusUtil {
       const index = this.findIndex(this.eventMap[eventName], sub => sub.handler === handler);
       if (index !== -1) {
         this.eventMap[eventName].splice(index, 1);
-        this.logger.debug(`Unsubscribed handler from event: ${eventName}`);
+        Logger.debug('EventBus', `Unsubscribed handler from event: ${eventName}`);
       }
     } else {
       // 取消该事件的所有订阅
       this.eventMap[eventName] = [];
-      this.logger.debug(`Unsubscribed all handlers from event: ${eventName}`);
+      Logger.debug('EventBus', `Unsubscribed all handlers from event: ${eventName}`);
     }
 
     // 如果事件没有订阅者了，删除事件条目
@@ -196,7 +196,7 @@ export class EventBusUtil {
             onceSubscriptions.push(i);
           }
         } catch (error) {
-          this.logger.error(`Error in event handler for ${eventName}:`, error instanceof Error ? error : new Error(String(error)));
+          Logger.error('EventBus', `Error in event handler for ${eventName}:`, error instanceof Error ? error : new Error(String(error)));
         }
       }
 
@@ -225,7 +225,7 @@ export class EventBusUtil {
         }
       }
 
-      this.logger.debug(`Emitted event: ${eventName}, subscribers: ${subscriptions.length}`);
+      Logger.debug('EventBus', `Emitted event: ${eventName}, subscribers: ${subscriptions.length}`);
     } finally {
       this.isPublishing = false;
     }
@@ -290,12 +290,12 @@ export class EventBusUtil {
       
       // 发布事件
       this.emit(eventName, data);
-      this.logger.debug(`Debounced event emitted: ${eventName}`);
+      Logger.debug('EventBus', `Debounced event emitted: ${eventName}`);
     }, wait);
     
     // 存储定时器ID
     this.debounceTimers[debounceKey] = timerId;
-    this.logger.debug(`Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
+    Logger.debug('EventBus', `Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
   }
 
   /**
@@ -318,7 +318,7 @@ export class EventBusUtil {
       }
       this.debounceTimers = newDebounceTimers;
       
-      this.logger.debug(`Debounced timer cleared for key: ${debounceKey}`);
+      Logger.debug('EventBus', `Debounced timer cleared for key: ${debounceKey}`);
     }
   }
 
@@ -327,7 +327,7 @@ export class EventBusUtil {
    */
   public clearAllDebounceTimers(): void {
     try {
-      this.logger.debug('EventBus', 'Clearing all debounce timers');
+      Logger.debug('EventBus', 'Clearing all debounce timers');
       const debounceKeys = Object.keys(this.debounceTimers);
       for (let i = 0; i < debounceKeys.length; i++) {
         const debounceKey = debounceKeys[i];
@@ -336,7 +336,7 @@ export class EventBusUtil {
       }
       this.debounceTimers = {};
     } catch (error) {
-      this.logger.error('Failed to clear debounce timers', error instanceof Error ? error : new Error(String(error)));
+      Logger.error('EventBus', 'Failed to clear debounce timers', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -381,7 +381,7 @@ export class EventBusUtil {
       this.eventMap = {};
       // 同时清除所有防抖定时器
       this.clearAllDebounceTimers();
-      this.logger.debug('All event subscriptions cleared');
+      Logger.debug('EventBus', 'All event subscriptions cleared');
     };
 
     // 如果当前正在发布事件，延迟执行
@@ -398,7 +398,7 @@ export class EventBusUtil {
   public destroy(): void {
     this.clear();
     EventBusUtil.instance = undefined;
-    this.logger.debug('EventBus', 'EventBus instance destroyed');
+    Logger.debug('EventBus', 'EventBus instance destroyed');
   }
 }
 

@@ -522,35 +522,35 @@ export abstract class BaseLoader {
    * 执行分类方法
    */
   public async category(params: CategoryParams): Promise<CrawlerResult<CategoryResult>> {
-    return this.invoke<CategoryResult>('category', params);
+    return this.invoke<CategoryResult>('category', {...params} as Record<string, string | number | boolean>);
   }
 
   /**
    * 执行详情方法
    */
   public async detail(params: DetailParams): Promise<CrawlerResult<DetailResult>> {
-    return this.invoke<DetailResult>('detail', params);
+    return this.invoke<DetailResult>('detail', {...params} as Record<string, string | number | boolean>);
   }
 
   /**
    * 执行搜索方法
    */
   public async search(params: SearchParams): Promise<CrawlerResult<SearchResult>> {
-    return this.invoke<SearchResult>('search', params);
+    return this.invoke<SearchResult>('search', {...params} as Record<string, string | number | boolean>);
   }
 
   /**
    * 执行播放方法
    */
   public async play(params: PlayParams): Promise<CrawlerResult<PlayResult>> {
-    return this.invoke<PlayResult>('play', params);
+    return this.invoke<PlayResult>('play', {...params} as Record<string, string | number | boolean>);
   }
 
   /**
    * 执行直播方法
    */
   public async live(params?: LiveParams): Promise<CrawlerResult<LiveResult>> {
-    return this.invoke<LiveResult>('live', params || {});
+    return this.invoke<LiveResult>('live', {...(params || {})} as Record<string, string | number | boolean>);
   }
 
   /**

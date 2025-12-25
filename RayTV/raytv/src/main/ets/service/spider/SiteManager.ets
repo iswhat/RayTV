@@ -1,6 +1,5 @@
 import Logger from '../../common/util/Logger';
-import { LoaderType } from './loader/BaseLoader';
-import { Site } from '../../data/bean/Site';
+import { LoaderType, Site } from '../../data/bean/Site';
 import { SiteDao } from '../../data/db/dao/SiteDao';
 
 /**
@@ -333,8 +332,8 @@ export class SiteManager {
    * @param loaderType 加载器类型
    * @returns SiteInfo[]
    */
-  public getSitesByType(loaderType: LoaderType): SiteInfo[] {
-    return Array.from(this.sites.values()).filter(site => site.type === loaderType);
+  public getSitesByType(loaderType: string): SiteInfo[] {
+    return Array.from(this.sites.values()).filter(site => site.loaderType === loaderType);
   }
 
   /**

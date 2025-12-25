@@ -174,7 +174,7 @@ export interface VodDetailResponse {
   seasonInfo?: SeasonInfo;      // 季数信息
   episodeInfo?: EpisodeInfo;    // 集数信息
   playHistory?: PlayHistory;    // 播放历史信息
-  cast?: Cast[];                // 演员表
+  cast?: Actor[];               // 演员表
   director?: string[];          // 导演
   writer?: string[];            // 编剧
   genre?: string[];             // 流派

@@ -155,15 +155,10 @@ export class HttpService {
       const atManager = abilityAccessCtrl.createAtManager();
       const context = this.getContext();
       
-      // 先检查权限状态，避免重复申请
-      const permissionResult: abilityAccessCtrl.GrantStatus = await atManager.checkPermission(context, 'ohos.permission.INTERNET');
-      
-      // 只有当权限未授权时才请求
-      if (permissionResult !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
-        await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
-      }
+      // 直接请求INTERNET权限，不检查状态
+      await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
     } catch (error) {
-      console.error('Failed to check or request INTERNET permission', error);
+      console.error('Failed to request INTERNET permission', error);
       // 不抛出错误，允许应用继续尝试网络操作
     }
   }
