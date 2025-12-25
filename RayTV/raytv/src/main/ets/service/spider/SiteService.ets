@@ -328,7 +328,7 @@ export class SiteService implements ISiteService {
       if (site) {
         site.enabled = enabled;
         site.updatedAt = Date.now();
-        await this.siteDao.save(site);
+        await this.siteDao.update(site);
         Logger.info(TAG, `Updated site ${key} enabled: ${enabled}`);
       }
     } catch (error) {
@@ -346,7 +346,7 @@ export class SiteService implements ISiteService {
       if (site) {
         site.order = order;
         site.updatedAt = Date.now();
-        await this.siteDao.save(site);
+        await this.siteDao.update(site);
         Logger.info(TAG, `Updated site ${key} order: ${order}`);
       }
     } catch (error) {

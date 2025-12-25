@@ -59,7 +59,6 @@ export interface BatchEmitEvent {
  */
 export class EventBusUtil {
   private static instance: EventBusUtil | undefined;
-  private logger = Logger.getInstance();
   private eventMap: Record<string, Subscription[]> = {};
   private isPublishing = false;
   private debounceTimers: Record<string, number> = {};

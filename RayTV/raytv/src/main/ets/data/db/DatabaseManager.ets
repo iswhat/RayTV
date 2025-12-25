@@ -309,7 +309,7 @@ export class DatabaseManager {
    * @param context 应用上下�?   */
   public async resetDatabase(context: Context): Promise<void> {
     try {
-      Logger.warn(TAG, 'Resetting database - this will delete all data!');
+      Logger.info(TAG, 'Resetting database - this will delete all data!');
       
       // 关闭现有连接
       this.closeDatabase();

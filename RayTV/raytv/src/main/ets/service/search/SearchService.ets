@@ -630,10 +630,10 @@ export class SearchService {
   ): Promise<SearchResponse> {
     const filters: SearchFilter = {
       types: resultTypes,
-      categories: options?.filters?.categories || [],
-      years: options?.filters?.years || [],
-      regions: options?.filters?.regions || [],
-      languages: options?.filters?.languages || [],
+      categories: options?.filters?.categories || [] as string[],
+      years: options?.filters?.years || [] as number[],
+      regions: options?.filters?.regions || [] as string[],
+      languages: options?.filters?.languages || [] as string[],
       sortBy: options?.filters?.sortBy || 'relevance',
       sortOrder: options?.filters?.sortOrder || 'desc'
     };
@@ -653,7 +653,7 @@ export class SearchService {
     const promises: Promise<SiteSearchResult>[] = sites.map(async (site) => {
       try {
         const results = await Promise.race([
-          this.siteManager.callSiteMethod<Record<string, unknown>[]>(
+          this.siteManager.callSiteMethod<SearchItem[]>(
             site.key,
             'search',
             [keyword, { limit: limitPerSite }],
@@ -673,14 +673,14 @@ export class SearchService {
         };
       } catch (error) {
           Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
-        }return {
-          siteKey: site.key,
-          siteName: site.name,
-          results: [],
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        };
-      }
+          return {
+            siteKey: site.key,
+            siteName: site.name,
+            results: [],
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          };
+        }
     });
 
     return Promise.all(promises);

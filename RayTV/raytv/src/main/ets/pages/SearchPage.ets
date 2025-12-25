@@ -27,8 +27,8 @@ struct SearchPage {
   @State quickResults: SearchResult[] = [];
   @State showHistory: boolean = true;
   @State showHotKeywords: boolean = true;
-  private searchHistoryRepo!: SearchHistoryRepository;
-  private searchService!: SearchService;
+  private searchHistoryRepo: SearchHistoryRepository = SearchHistoryRepository.getInstance();
+  private searchService: SearchService = SearchService.getInstance();
 
   aboutToAppear() {
     // 使用真实的SearchHistoryRepository和SearchService实现
