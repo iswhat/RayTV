@@ -13,7 +13,7 @@
       "@store/*": ["src/main/ets/store/*"]
     },
     "resolveJsonModule": true,
-    "allowJs": false,
+    "allowJs": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -23,6 +23,7 @@
     "useUnknownInCatchVariables": false,
     "alwaysStrict": true,
     "skipLibCheck": true,
+    "checkJs": true,
     "noEmit": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
