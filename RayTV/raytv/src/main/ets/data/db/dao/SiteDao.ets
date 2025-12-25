@@ -4,7 +4,7 @@
 import relationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { SITE_TABLE } from '../TableSchema';
-import { Site } from '../../bean/Site';
+import { Site, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle, SiteType, LoaderType } from '../../bean/Site';
 import Logger from '../../../common/util/Logger';
 import JsonUtil from '../../../common/util/JsonUtil';
 
@@ -396,29 +396,54 @@ export class SiteDao {
           const configItems = configItemsStr ? JsonUtil.parse<SiteConfigItem[]>(configItemsStr) : undefined;
           
           const searchConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SEARCH_CONFIG));
-          const searchConfig = searchConfigStr ? JsonUtil.parse<SiteSearchConfig>(searchConfigStr) : { enabled: false };
+          const searchConfig = searchConfigStr ? JsonUtil.parse<SiteSearchConfig>(searchConfigStr) : {
+            enabled: false,
+            searchDelay: 0,
+            searchLimit: 0,
+            supportAdvancedSearch: false,
+            searchFilters: [],
+            searchCategories: []
+          } as SiteSearchConfig;
           
           const filterConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.FILTER_CONFIG));
-          const filterConfig = filterConfigStr ? JsonUtil.parse<SiteFilterConfig>(filterConfigStr) : { enabled: false };
+          const filterConfig = filterConfigStr ? JsonUtil.parse<SiteFilterConfig>(filterConfigStr) : {
+            enabled: false,
+            filterOptions: {},
+            sortOptions: []
+          } as SiteFilterConfig;
           
           const performanceConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG));
-          const performanceConfig = performanceConfigStr ? JsonUtil.parse<Record<string, number>>(performanceConfigStr) : undefined;
+          const performanceConfig = performanceConfigStr ? JsonUtil.parse<SitePerformanceConfig>(performanceConfigStr) : {
+            timeout: 30000,
+            retryCount: 3,
+            cacheEnabled: true,
+            cacheDuration: 60,
+            concurrency: 5
+          } as SitePerformanceConfig;
           
           const statsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.STATS));
-          const stats = statsStr ? JsonUtil.parse<SiteStats>(statsStr) : { queryCount: 0, errorCount: 0, avgResponseTime: 0 };
+          const stats = statsStr ? JsonUtil.parse<SiteStats>(statsStr) : {
+            queryCount: 0,
+            errorCount: 0,
+            avgResponseTime: 0
+          } as SiteStats;
           
           const lifecycleStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LIFECYCLE));
-          const lifecycle = lifecycleStr ? JsonUtil.parse<SiteLifecycle>(lifecycleStr) : { initialized: false, loading: false, error: false };
+          const lifecycle = lifecycleStr ? JsonUtil.parse<SiteLifecycle>(lifecycleStr) : {
+            initialized: false,
+            loading: false,
+            error: false
+          } as SiteLifecycle;
           
           const tagsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TAGS));
           const tags = tagsStr ? JsonUtil.parse<Array<string>>(tagsStr) : undefined;
           
-          sites.push({
-            key: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)),
-            name: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.NAME)),
+          const site: Site = {
+            key: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)) || '',
+            name: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.NAME)) || '',
             type: (resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TYPE)) as SiteType) || SiteType.MIXED,
             loaderType: (resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOADER_TYPE)) as LoaderType) || LoaderType.JS,
-            api: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.API)),
+            api: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.API)) || '',
             logo: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOGO)),
             description: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.DESCRIPTION)),
             siteAuth,
@@ -428,18 +453,17 @@ export class SiteDao {
             searchConfig,
             filterConfig,
             performanceConfig,
-            version: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.VERSION)) || "1.0.0",
             stats,
             lifecycle,
             enabled: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENABLED)) === 1,
-            order: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ORDER)),
+            order: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ORDER)) || 0,
             group: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.GROUP)),
             tags,
             customCode: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CUSTOM_CODE)),
             sandboxEnabled: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SANDBOX_ENABLED)) === 1,
             allowThirdParty: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY)) === 1,
-            createdAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CREATED_AT)),
-            updatedAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.UPDATED_AT)),
+            createdAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CREATED_AT)) || Date.now(),
+            updatedAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.UPDATED_AT)) || Date.now(),
             lastUsedAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LAST_USED_AT)),
             userAgent: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.USER_AGENT)),
             referer: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.REFERER)),
@@ -447,7 +471,8 @@ export class SiteDao {
             encoding: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENCODING)),
             charset: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CHARSET)),
             certificate: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CERTIFICATE))
-          });
+          };
+          sites.push(site);
         } while (resultSet.goToNextRow());
       }
     } finally {
@@ -479,7 +504,7 @@ export class SiteDao {
       search_config: JSON.stringify(site.searchConfig),
       filter_config: JSON.stringify(site.filterConfig),
       performance_config: JSON.stringify(site.performanceConfig),
-      version: site.version ?? null,
+      version: site.version ? JsonUtil.stringify(site.version) : null,
       stats: JSON.stringify(site.stats),
       lifecycle: JSON.stringify(site.lifecycle),
       enabled: site.enabled ? 1 : 0,

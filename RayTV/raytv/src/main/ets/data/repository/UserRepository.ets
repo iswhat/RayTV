@@ -148,7 +148,8 @@ export class UserRepository {
   /**
    * 设置事件监听�?   */
   private setupEventListeners(): void {
-    // 监听应用退出事件，保存用户状�?    this.eventBus.on('app:exit', async () => {
+    // 监听应用退出事件，保存用户会话
+    this.eventBus.on('app:exit', async () => {
       await this.saveUserSession();
     });
     

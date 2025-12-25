@@ -255,10 +255,13 @@ export class SQLiteHelper {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             // 替换spread运算符，使用传统的for循环
             for (let i = 0; i < cond.value.length; i++) {
-              bindArgs.push(cond.value[i]);
+              bindArgs.push(cond.value[i] as ValueType);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value as ValueType);
+            // 确保cond.value不是数组
+            if (!Array.isArray(cond.value)) {
+              bindArgs.push(cond.value as ValueType);
+            }
           }
         });
       }
@@ -266,10 +269,11 @@ export class SQLiteHelper {
       // 执行更新
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行�?      const result: RelationalStore.ResultSet = await database.querySql('SELECT changes() as affected_rows');
+      // 获取影响的行数
+      const result = await database.querySql('SELECT changes() as affected_rows');
       let affectedRows = 0;
       if (result.goToFirstRow()) {
-        const index = result.columnNames.indexOf('affected_rows');
+        const index = result.getColumnIndex('affected_rows');
         affectedRows = result.getLong(index) || 0;
       }
       
@@ -327,7 +331,10 @@ export class SQLiteHelper {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value as ValueType);
+            // 确保cond.value不是数组
+            if (!Array.isArray(cond.value)) {
+              bindArgs.push(cond.value as ValueType);
+            }
           }
         });
       }
@@ -404,7 +411,10 @@ export class SQLiteHelper {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value as ValueType);
+            // 确保cond.value不是数组
+            if (!Array.isArray(cond.value)) {
+              bindArgs.push(cond.value as ValueType);
+            }
           }
         });
       }
@@ -521,10 +531,13 @@ export class SQLiteHelper {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
             // 替换spread运算符，使用传统的for循环
             for (let i = 0; i < cond.value.length; i++) {
-              bindArgs.push(cond.value[i]);
+              bindArgs.push(cond.value[i] as ValueType);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            bindArgs.push(cond.value);
+            // 确保cond.value是ValueType类型，不是数组
+            if (!Array.isArray(cond.value)) {
+              bindArgs.push(cond.value as ValueType);
+            }
           }
         });
       }

@@ -133,8 +133,6 @@ interface StorageKeys {
  */
 export class SearchHistoryRepository {
   private static instance: SearchHistoryRepository;
-  private storageUtil = StorageUtil.getInstance();
-  private eventBus = EventBusUtil.getInstance();
   
   // 存储键配置
   private storageKeys: StorageKeys = {
@@ -162,6 +160,12 @@ export class SearchHistoryRepository {
   
   // 缓存的收藏搜索
   private cachedFavorites: SearchHistoryItem[] = [];
+
+  // 事件总线实例
+  private eventBus: EventBusUtil = EventBusUtil.getInstance();
+
+  // 存储工具实例
+  private storageUtil: StorageUtil = StorageUtil.getInstance();
 
   /**
    * 私有构造函数
@@ -432,7 +436,7 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory, 
         history,
-        StorageType.DEFAULT
+        StorageType.PREFERENCES
       );
       
       // 清除最近搜索缓存
@@ -684,7 +688,7 @@ export class SearchHistoryRepository {
       await this.storageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
         updatedConfig,
-        StorageType.DEFAULT
+        StorageType.PREFERENCES
       );
       
       // 根据新配置清理数据
@@ -871,18 +875,18 @@ export class SearchHistoryRepository {
         this.storageUtil.setObject(
           this.storageKeys.searchHistory, 
           this.cachedHistory || [],
-          StorageType.DEFAULT
+          StorageType.PREFERENCES
         ),
         this.storageUtil.setObject(
           this.storageKeys.favoriteSearches,
           this.cachedFavorites || [],
-          StorageType.DEFAULT
+          StorageType.PREFERENCES
         ),
-       await this.storageUtil.setObject(
-        this.storageKeys.searchHistoryConfig,
-        this.cachedConfig || this.defaultConfig,
-        StorageType.PREFERENCES
-      );  )
+        this.storageUtil.setObject(
+          this.storageKeys.searchHistoryConfig,
+          this.cachedConfig || this.defaultConfig,
+          StorageType.PREFERENCES
+        )
       ]);
       
       Logger.debug('SearchHistoryRepository', 'Search history data saved');
@@ -915,10 +919,10 @@ export class SearchHistoryRepository {
       if (filteredHistory.length !== history.length) {
         this.cachedHistory = filteredHistory;
         await this.storageUtil.setObject(
-        this.storageKeys.searchHistory,
-        filteredHistory,
-        StorageType.PREFERENCES
-      );
+          this.storageKeys.searchHistory,
+          filteredHistory,
+          StorageType.PREFERENCES
+        );
         
         Logger.info('SearchHistoryRepository', `Cleaned up ${history.length - filteredHistory.length} expired search history items`);
       }
@@ -943,8 +947,8 @@ export class SearchHistoryRepository {
           this.cachedHistory = filteredHistory;
           await this.storageUtil.setObject(
             this.storageKeys.searchHistory,
-          filteredHistory,
-          StorageType.DEFAULT
+            filteredHistory,
+            StorageType.PREFERENCES
           );
         }
       }
@@ -975,14 +979,14 @@ export class SearchHistoryRepository {
           this.cachedHistory = updatedHistory;
           await this.storageUtil.setObject(
             this.storageKeys.favoriteSearches,
-          filteredFavorites,
-          StorageType.DEFAULT
-        );
-        await this.storageUtil.setObject(
-          this.storageKeys.searchHistory,
-          updatedHistory,
-          StorageType.DEFAULT
-        );
+            filteredFavorites,
+            StorageType.PREFERENCES
+          );
+          await this.storageUtil.setObject(
+            this.storageKeys.searchHistory,
+            updatedHistory,
+            StorageType.PREFERENCES
+          );
         }
       }
     } catch (error) {

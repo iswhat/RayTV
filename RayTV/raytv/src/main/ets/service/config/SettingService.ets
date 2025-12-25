@@ -1,5 +1,5 @@
 // SettingService.ets - 设置服务
-// 负责应用配置管理、主题设置、语言切换等功�?
+// 负责应用配置管理、主题设置、语言切换等功能
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -16,10 +16,10 @@ const USER_SETTINGS_KEY_PREFIX = 'user_settings_';
 
 // 设置类型枚举
 export enum SettingType {
-  APPLICATION = 0,     // 应用级设�?
-  USER = 1,            // 用户级设�?
-  DEVICE = 2,          // 设备级设�?
-  CUSTOM = 3           // 自定义设�?
+  APPLICATION = 0,     // 应用级设置
+  USER = 1,            // 用户级设置
+  DEVICE = 2,          // 设备级设置
+  CUSTOM = 3           // 自定义设置
 }
 
 // 主题模式枚举
@@ -53,15 +53,15 @@ export enum PlaybackQuality {
 
 // 字幕大小枚举
 export enum SubtitleSize {
-  SMALL = 'small',     // �?
-  MEDIUM = 'medium',   // �?
-  LARGE = 'large',     // �?
+  SMALL = 'small',     // 小
+  MEDIUM = 'medium',   // 中
+  LARGE = 'large',     // 大
   X_LARGE = 'xlarge'   // 超大
 }
 
 // 字幕样式枚举
 export enum SubtitleStyle {
-  NORMAL = 'normal',   // 普�?
+  NORMAL = 'normal',   // 普通
   BOLD = 'bold',       // 粗体
   ITALIC = 'italic',   // 斜体
   SHADOWED = 'shadowed' // 阴影
@@ -69,10 +69,10 @@ export enum SubtitleStyle {
 
 // 网络类型枚举
 export enum NetworkType {
-  ALL = 0,             // 所有网�?
+  ALL = 0,             // 所有网络
   WIFI_ONLY = 1,       // 仅WiFi
-  MOBILE_ONLY = 2,     // 仅移动网�?
-  NO_MOBILE_HIGH_SPEED = 3 // 非高速移动网�?
+  MOBILE_ONLY = 2,     // 仅移动网络
+  NO_MOBILE_HIGH_SPEED = 3 // 非高速移动网络
 }
 
 // 通知类型枚举
@@ -87,26 +87,26 @@ export enum NotificationCategory {
 // 家长控制级别枚举
 export enum ParentalControlLevel {
   OFF = 0,             // 关闭
-  G = 1,               // 一般观�?
+  G = 1,               // 一般观看
   PG = 2,              // 建议家长指导
-  PG_13 = 3,           // 13岁以�?
-  R = 4,               // 限制�?
-  NC_17 = 5            // 17岁以�?
+  PG_13 = 3,           // 13岁以上
+  R = 4,               // 限制级
+  NC_17 = 5            // 17岁以上
 }
 
-// 设置项接�?
+// 设置项接口
 export interface SettingItem<T> {
   key: string;         // 设置键名
-  value: T;            // 设置�?
+  value: T;            // 设置值
   type: SettingType;   // 设置类型
-  defaultValue: T;     // 默认�?
+  defaultValue: T;     // 默认值
   description?: string; // 设置描述
   minValue?: number;   // 最小值（数值类型）
   maxValue?: number;   // 最大值（数值类型）
-  options?: T[];       // 可选值列�?
+  options?: T[];       // 可选值列表
   readOnly?: boolean;  // 是否只读
-  requiresRestart?: boolean; // 是否需要重�?
-  lastUpdated?: number; // 最后更新时�?
+  requiresRestart?: boolean; // 是否需要重启
+  lastUpdated?: number; // 最后更新时间
 }
 
 // 应用设置接口
@@ -180,7 +180,7 @@ export interface AppSettings {
   enableGestureControl: boolean;
 }
 
-// 设置组接�?
+// 设置组接口
 export interface SettingGroup {
   id: string;
   title: string;
@@ -228,7 +228,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
   downloadPath: '',
   cacheSizeLimit: 1024 * 1024 * 1024 * 10, // 10GB
   autoClearCache: true,
-  cacheClearInterval: 7 * 24 * 60 * 60 * 1000, // 7�?
+  cacheClearInterval: 7 * 24 * 60 * 60 * 1000, // 7天
   
   // 网络相关
   networkTypeForPlayback: NetworkType.ALL,
@@ -262,7 +262,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
   enableHardwareAcceleration: true,
   enableDolbyAudio: false,
   enableHDR: false,
-  screenTimeout: 30000, // 30�?
+  screenTimeout: 30000, // 30秒
   
   // 其他设置
   crashReportingEnabled: true,
@@ -276,7 +276,7 @@ export default class SettingService {
   private static instance: SettingService;
   
   /**
-   * 检查对象是否包含指定属�?
+   * 检查对象是否包含指定属性
    */
   private hasOwnProperty(obj: object, key: string): boolean {
     return Object.getOwnPropertyNames(obj).includes(key);
@@ -295,7 +295,7 @@ export default class SettingService {
   private userSettings: Record<string, AppSettings> = {};
   private isInitialized: boolean = false;
   
-  // 监听�?
+  // 监听器
   private generalListeners: Array<() => void> = [];
   private specificListeners: Map<string, Array<(event: SettingChangeEvent<unknown>) => void>> = new Map();
   private themeListeners: Array<(themeMode: ThemeMode, accentColor: string) => void> = [];
@@ -312,7 +312,7 @@ export default class SettingService {
   }
 
   /**
-   * 构造函�?
+   * 构造函数
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
@@ -321,7 +321,7 @@ export default class SettingService {
   }
 
   /**
-   * 初始化设置服�?
+   * 初始化设置服务
    */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
@@ -338,7 +338,7 @@ export default class SettingService {
       // 加载应用全局设置
       await this.loadSettings();
       
-      // 加载用户设置（如果已登录�?
+      // 加载用户设置（如果已登录）
       const currentUser = this.userService.getCurrentUser();
       if (currentUser && !this.userService.isGuest()) {
         await this.loadUserSettings(currentUser.id);
@@ -348,7 +348,7 @@ export default class SettingService {
       await this.applyTheme();
       await this.applyLanguage();
       
-      // 添加用户变更监听器，以便在用户切换时加载对应的设�?
+      // 添加用户变更监听器，以便在用户切换时加载对应的设置
       this.userService.addUserChangeListener(async (user) => {
         if (user && !this.userService.isGuest()) {
           await this.loadUserSettings(user.id);
@@ -372,11 +372,11 @@ export default class SettingService {
    */
   private async getDefaultDownloadPath(): Promise<string> {
     try {
-      // 这里应该使用应用的文件系统API获取可用的下载目�?
-      // 以下是模拟实�?
+      // 这里应该使用应用的文件系统API获取可用的下载目录
+      // 以下是模拟实现
       return '/storage/emulated/0/Download/RayTV';
     } catch (error) {
-      Logger.error(TAG, `Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}` instanceof Error ? `Failed to get default download path: ${error}` : new Error(String(`Failed to get default download path: ${error}`)))))));
+      Logger.error(TAG, `Failed to get default download path: ${error}`);
       return '/tmp';
     }
   }
@@ -406,33 +406,7 @@ export default class SettingService {
       
       if (savedSettings) {
         this.userSettings[userId] = { ...DEFAULT_APP_SETTINGS, ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` instanceof Error ? ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}` : new Error(String(...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}`)))))));
+        Logger.info(TAG, `User settings loaded for user: ${userId}`);
       }
     } catch (error) {
       Logger.error(TAG, `Failed to load user settings: ${error}`);
@@ -444,7 +418,7 @@ export default class SettingService {
    */
   private async saveSettings(): Promise<void> {
     try {
-      await StorageUtil.setObject(SETTINGS_STORAGE_KEY, this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings : new Error(String(this.appSettings instanceof Error ? this.appSettings : new Error(String(this.appSettings)))))));
+      await StorageUtil.setObject(SETTINGS_STORAGE_KEY, this.appSettings);
       Logger.info(TAG, 'App settings saved to storage');
     } catch (error) {
       Logger.error(TAG, `Failed to save app settings: ${error}`);
@@ -459,7 +433,7 @@ export default class SettingService {
       const userSettings = this.userSettings[userId];
       if (userSettings) {
         const userSettingsKey = `${USER_SETTINGS_KEY_PREFIX}${userId}`;
-        await StorageUtil.setObject(userSettingsKey, userSettings instanceof Error ? userSettings : new Error(String(userSettings instanceof Error ? userSettings instanceof Error ? userSettings : new Error(String(userSettings : new Error(String(userSettings instanceof Error ? userSettings : new Error(String(userSettings instanceof Error ? userSettings instanceof Error ? userSettings : new Error(String(userSettings instanceof Error ? userSettings instanceof Error ? userSettings : new Error(String(userSettings : new Error(String(userSettings instanceof Error ? userSettings : new Error(String(userSettings : new Error(String(userSettings instanceof Error ? userSettings : new Error(String(userSettings instanceof Error ? userSettings instanceof Error ? userSettings : new Error(String(userSettings : new Error(String(userSettings instanceof Error ? userSettings : new Error(String(userSettings)))))));
+        await StorageUtil.setObject(userSettingsKey, userSettings);
         Logger.info(TAG, `User settings saved for user: ${userId}`);
       }
     } catch (error) {
@@ -468,7 +442,7 @@ export default class SettingService {
   }
 
   /**
-   * 获取当前设置（考虑用户设置覆盖�?
+   * 获取当前设置（考虑用户设置覆盖）
    */
   public getSettings(): AppSettings {
     const currentUser = this.userService.getCurrentUser();
@@ -481,7 +455,7 @@ export default class SettingService {
   }
 
   /**
-   * 获取特定设置�?
+   * 获取特定设置值
    */
   public getSetting<K extends keyof AppSettings>(key: K): AppSettings[K] {
     const settings = this.getSettings();
@@ -489,18 +463,18 @@ export default class SettingService {
   }
 
   /**
-   * 设置特定设置�?
+   * 设置特定设置值
    */
-  public async setSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true instanceof Error ? value: AppSettings[K], userInitiated: boolean = true : new Error(String(value: AppSettings[K], userInitiated: boolean = true))))))): Promise<boolean> {
+  public async setSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K], userInitiated: boolean = true): Promise<boolean> {
     try {
       const oldValue = this.getSetting(key);
       
-      // 检查是否需要特殊处�?
+      // 检查是否需要特殊处理
       if (oldValue === value) {
         return true; // 值未变化
       }
       
-      // 确定是应用设置还是用户设�?
+      // 确定是应用设置还是用户设置
       const currentUser = this.userService.getCurrentUser();
       const isUserSetting = currentUser && !this.userService.isGuest();
       
@@ -533,13 +507,13 @@ export default class SettingService {
   }
 
   /**
-   * 批量设置多个设置�?
+   * 批量设置多个设置值
    */
-  public async setMultipleSettings(updates: Partial<AppSettings>, userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true : new Error(String(userInitiated: boolean = true instanceof Error ? userInitiated: boolean = true : new Error(String(userInitiated: boolean = true))))))): Promise<boolean> {
+  public async setMultipleSettings(updates: Partial<AppSettings>, userInitiated: boolean = true): Promise<boolean> {
     try {
-      const changedKeys: Array<{ key: string, oldValue: Record<string, string | number | boolean | null>, newValue: Record<string, string | number | boolean | null> }> = [];
+      const changedKeys: Array<{ key: string, oldValue: unknown, newValue: unknown }> = [];
       
-      // 收集所有要更改的设�?
+      // 收集所有要更改的设置
       const keys = this.getOwnPropertyKeys(updates);
       for (const key of keys) {
         if (this.hasOwnProperty(updates, key)) {
@@ -556,7 +530,7 @@ export default class SettingService {
         return true; // 没有需要更改的设置
       }
       
-      // 确定是应用设置还是用户设�?
+      // 确定是应用设置还是用户设置
       const currentUser = this.userService.getCurrentUser();
       const isUserSetting = currentUser && !this.userService.isGuest();
       
@@ -566,9 +540,9 @@ export default class SettingService {
           if (!this.userSettings[currentUser.id]) {
             this.userSettings[currentUser.id] = { ...DEFAULT_APP_SETTINGS };
           }
-          this.userSettings[currentUser.id][key as keyof AppSettings] = newValue;
+          this.userSettings[currentUser.id][key as keyof AppSettings] = newValue as AppSettings[keyof AppSettings];
         } else {
-          this.appSettings[key as keyof AppSettings] = newValue;
+          this.appSettings[key as keyof AppSettings] = newValue as AppSettings[keyof AppSettings];
         }
       }
       
@@ -582,8 +556,8 @@ export default class SettingService {
       // 触发设置变更事件
       for (const { key, oldValue, newValue } of changedKeys) {
         this.notifySettingChanged(key, oldValue, newValue, userInitiated);
-        // 处理特殊设置�?
-        await this.handleSpecialSetting(key as keyof AppSettings, newValue);
+        // 处理特殊设置项
+        await this.handleSpecialSetting(key as keyof AppSettings, newValue as AppSettings[keyof AppSettings]);
       }
       
       // 触发通用设置变更事件
@@ -598,9 +572,9 @@ export default class SettingService {
   }
 
   /**
-   * 处理需要特殊应用的设置�?
+   * 处理需要特殊应用的设置项
    */
-  private async handleSpecialSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K] : new Error(String(value: AppSettings[K] instanceof Error ? value: AppSettings[K] : new Error(String(value: AppSettings[K]))))))): Promise<void> {
+  private async handleSpecialSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): Promise<void> {
     switch (key) {
       case 'themeMode':
       case 'accentColor':
@@ -634,11 +608,11 @@ export default class SettingService {
       : this.getSetting('accentColor');
     
     try {
-      // 这里应该使用HarmonyOS的主题API来应用主�?
-      // 以下是模拟实�?
+      // 这里应该使用HarmonyOS的主题API来应用主题
+      // 以下是模拟实现
       Logger.info(TAG, `Applying theme: ${themeMode}, accent color: ${accentColor}`);
       
-      // 通知主题监听�?
+      // 通知主题监听器
       this.notifyThemeChanged(themeMode, accentColor);
     } catch (error) {
       Logger.error(TAG, `Failed to apply theme: ${error}`);
@@ -661,10 +635,10 @@ export default class SettingService {
     
     try {
       // 这里应该使用HarmonyOS的语言配置API来应用语言
-      // 以下是模拟实�?
-      Logger.info(TAG, `Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}` : new Error(String(`Applying language: ${language}` instanceof Error ? `Applying language: ${language}` : new Error(String(`Applying language: ${language}`)))))));
+      // 以下是模拟实现
+      Logger.info(TAG, `Applying language: ${language}`);
       
-      // 通知语言监听�?
+      // 通知语言监听器
       this.notifyLanguageChanged(language);
     } catch (error) {
       Logger.error(TAG, `Failed to apply language: ${error}`);
@@ -677,7 +651,7 @@ export default class SettingService {
   private async detectSystemLanguage(): Promise<LanguageCode | null> {
     try {
       // 这里应该使用HarmonyOS的API获取系统语言
-      // 以下是模拟实�?
+      // 以下是模拟实现
       const systemLocale = 'zh_CN'; // 假设获取到的系统语言代码
       
       // 映射系统语言到应用支持的语言
@@ -701,7 +675,7 @@ export default class SettingService {
       
       return null;
     } catch (error) {
-      Logger.error(TAG, `Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}` instanceof Error ? `Failed to detect system language: ${error}` : new Error(String(`Failed to detect system language: ${error}`)))))));
+      Logger.error(TAG, `Failed to detect system language: ${error}`);
       return null;
     }
   }
@@ -711,8 +685,8 @@ export default class SettingService {
    */
   private async validateDownloadPath(path: string): Promise<boolean> {
     try {
-      // 这里应该使用文件系统API验证路径是否有效且可�?
-      // 以下是模拟实�?
+      // 这里应该使用文件系统API验证路径是否有效且可写
+      // 以下是模拟实现
       if (!path || path.length < 3) {
         throw new Error('Invalid download path');
       }
@@ -722,13 +696,13 @@ export default class SettingService {
     } catch (error) {
       Logger.error(TAG, `Invalid download path: ${error}`);
       // 恢复默认路径
-      this.setSetting('downloadPath', await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath( instanceof Error ? await this.getDefaultDownloadPath( : new Error(String(await this.getDefaultDownloadPath())))))));
+      this.setSetting('downloadPath', await this.getDefaultDownloadPath(), false);
       return false;
     }
   }
 
   /**
-   * 重置所有设置为默认�?
+   * 重置所有设置为默认值
    */
   public async resetAllSettings(): Promise<boolean> {
     try {
@@ -761,7 +735,7 @@ export default class SettingService {
   }
 
   /**
-   * 获取设置项的默认�?
+   * 获取设置项的默认值
    */
   public getDefaultSetting<K extends keyof AppSettings>(key: K): AppSettings[K] {
     return DEFAULT_APP_SETTINGS[key];
@@ -796,13 +770,9 @@ export default class SettingService {
    */
   public exportSettings(): string {
     const settings = this.getSettings();
-    const exportData: Record<string, string | number | boolean | null> = { ... };
+    const exportData: Record<string, unknown> = { ...settings };
     
-    return JSON.stringify(exportData, null, 2 instanceof Error ? string | number | boolean | null> = { ... };
-    
-    return JSON.stringify(exportData, null, 2 : new Error(String(string | number | boolean | null> = { ... };
-    
-    return JSON.stringify(exportData, null, 2)));
+    return JSON.stringify(exportData, null, 2);
   }
 
   /**
@@ -812,15 +782,15 @@ export default class SettingService {
     try {
       const importData = JSON.parse(jsonString);
       
-      if (!importData.settings || typeof importData.settings !== 'object') {
+      if (!importData || typeof importData !== 'object') {
         throw new Error('Invalid import data format');
       }
       
-      // 验证导入数据的有效�?
-      await this.validateImportedSettings(importData.settings);
+      // 验证导入数据的有效性
+      await this.validateImportedSettings(importData as Partial<AppSettings>);
       
-      // 应用导入的设�?
-      await this.setMultipleSettings(importData.settings, false);
+      // 应用导入的设置
+      await this.setMultipleSettings(importData as Partial<AppSettings>, false);
       
       Logger.info(TAG, 'Settings imported successfully');
       return true;
@@ -831,15 +801,15 @@ export default class SettingService {
   }
 
   /**
-   * 验证导入的设�?
+   * 验证导入的设置
    */
   private async validateImportedSettings(settings: Partial<AppSettings>): Promise<void> {
     // 验证必需的设置项
-    if (settings.themeMode !== undefined && settings.themeMode !== null && settings.themeMode !== 0) {
+    if (settings.themeMode !== undefined && !Object.values(ThemeMode).includes(settings.themeMode as ThemeMode)) {
       throw new Error('Invalid theme mode in imported settings');
     }
     
-    if (!settings.language && settings.language !== '') {
+    if (settings.language && !Object.values(LanguageCode).includes(settings.language as LanguageCode)) {
       throw new Error('Invalid language in imported settings');
     }
     
@@ -848,7 +818,7 @@ export default class SettingService {
       await this.validateDownloadPath(settings.downloadPath);
     }
     
-    // 验证数值范�?
+    // 验证数值范围
     if (settings.defaultVolume !== undefined && 
         (settings.defaultVolume < 0 || settings.defaultVolume > 100)) {
       throw new Error('Invalid default volume in imported settings');
@@ -866,7 +836,7 @@ export default class SettingService {
   public async applyUserPreferences(preferences: UserPreferences): Promise<void> {
     const settingsToApply: Partial<AppSettings> = {};
     
-    // 映射用户偏好到应用设�?
+    // 映射用户偏好到应用设置
     if (preferences.theme) {
       settingsToApply.themeMode = preferences.theme === 'light' 
         ? ThemeMode.LIGHT 
@@ -898,7 +868,7 @@ export default class SettingService {
     }
     
     if (preferences.downloadQuality) {
-      // 这里可以添加下载质量的映�?
+      // 这里可以添加下载质量的映射
     }
     
     if (preferences.downloadWifiOnly !== undefined) {
@@ -908,22 +878,22 @@ export default class SettingService {
     }
     
     // 应用设置
-    if (this.getObjectKeys(settingsToApply).length > 0) {
-      await this.setMultipleSettings(settingsToApply, false instanceof Error ? false : new Error(String(false instanceof Error ? false instanceof Error ? false : new Error(String(false : new Error(String(false instanceof Error ? false : new Error(String(false instanceof Error ? false instanceof Error ? false : new Error(String(false instanceof Error ? false instanceof Error ? false : new Error(String(false : new Error(String(false instanceof Error ? false : new Error(String(false : new Error(String(false instanceof Error ? false : new Error(String(false instanceof Error ? false instanceof Error ? false : new Error(String(false : new Error(String(false instanceof Error ? false : new Error(String(false)))))));
+    if (this.getOwnPropertyKeys(settingsToApply).length > 0) {
+      await this.setMultipleSettings(settingsToApply, false);
     }
   }
 
   /**
-   * 从配置服务加载设�?
+   * 从配置服务加载设置
    */
   public async loadSettingsFromConfig(): Promise<void> {
     try {
-      // 从配置服务加载关键设�?
+      // 从配置服务加载关键设置
       const themeMode = await this.configService.getConfig<ThemeMode>('themeMode');
       const language = await this.configService.getConfig<LanguageCode>('language');
       const defaultPlaybackQuality = await this.configService.getConfig<PlaybackQuality>('playQuality');
       
-      // 应用这些设置（但不触发用户发起的通知�?
+      // 应用这些设置（但不触发用户发起的通知）
       const settingsToApply: Partial<AppSettings> = {};
       
       if (themeMode !== undefined) {
@@ -938,7 +908,7 @@ export default class SettingService {
         settingsToApply.defaultPlaybackQuality = defaultPlaybackQuality;
       }
       
-      if (this.getObjectKeys(settingsToApply).length > 0) {
+      if (this.getOwnPropertyKeys(settingsToApply).length > 0) {
         await this.setMultipleSettings(settingsToApply, false);
       }
     } catch (error) {
@@ -958,111 +928,7 @@ export default class SettingService {
         description: '自定义应用外观和显示设置',
         icon: 'ic_settings_appearance',
         settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode instanceof Error ? title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode : new Error(String(title: '外观',
-        description: '自定义应用外观和显示设置',
-        icon: 'ic_settings_appearance',
-        settings: [
-          this.createSettingItem('themeMode', currentSettings.themeMode))))))),
+          this.createSettingItem('themeMode', currentSettings.themeMode),
           this.createSettingItem('accentColor', currentSettings.accentColor),
           this.createSettingItem('darkThemeAccentColor', currentSettings.darkThemeAccentColor),
           this.createSettingItem('gridLayoutColumns', currentSettings.gridLayoutColumns),
@@ -1098,7 +964,7 @@ export default class SettingService {
       {
         id: 'network',
         title: '网络',
-        description: '管理网络使用和下载设�?,
+        description: '管理网络使用和下载设置',
         icon: 'ic_settings_network',
         settings: [
           this.createSettingItem('networkTypeForPlayback', currentSettings.networkTypeForPlayback),
@@ -1110,7 +976,7 @@ export default class SettingService {
       {
         id: 'storage',
         title: '存储',
-        description: '管理缓存和下载存�?,
+        description: '管理缓存和下载存储',
         icon: 'ic_settings_storage',
         settings: [
           this.createSettingItem('downloadPath', currentSettings.downloadPath),
@@ -1143,301 +1009,163 @@ export default class SettingService {
   }
 
   /**
-   * 创建设置项对�?
+   * 创建设置项
    */
   private createSettingItem<T>(key: string, value: T): SettingItem<T> {
-    const defaultSettings = DEFAULT_APP_SETTINGS as Record<string, T>;
-    
-    const settingItem: SettingItem<T> = {
+    // 这里需要根据key获取默认值和其他配置
+    // 简化实现，返回基本结构
+    return {
       key,
       value,
-      type: SettingType.USER,
-      defaultValue: defaultSettings[key],
-      lastUpdated: Date.now()
-    };
-    
-    // 根据键名添加一些额外信�?
-    if (key === 'gridLayoutColumns') {
-      settingItem.minValue = 2;
-      settingItem.maxValue = 6;
-    } else if (key === 'defaultVolume') {
-      settingItem.minValue = 0;
-      settingItem.maxValue = 100;
-    } else if (key === 'playbackSpeed') {
-      settingItem.minValue = 0.5;
-      settingItem.maxValue = 3.0;
-    } else if (key === 'themeMode') {
-      settingItem.options = [ThemeMode.LIGHT, ThemeMode.DARK, ThemeMode.AUTO, ThemeMode.SEPia];
-    }
-    
-    return settingItem;
-  }
-
-  /**
-   * 添加设置变更监听�?
-   */
-  public addSettingsChangeListener(listener: () => void): () => void {
-    this.generalListeners.push(listener);
-    
-    // 返回取消监听函数
-    return () => {
-      const index = this.generalListeners.indexOf(listener);
-      if (index > -1) {
-        this.generalListeners.splice(index, 1);
-      }
+      type: SettingType.APPLICATION,
+      defaultValue: value,
     };
   }
 
   /**
-   * 添加特定设置项变更监听器
+   * 通知设置变更
    */
-  public addSettingChangeListener<K extends keyof AppSettings>(
-    key: K,
-    listener: (event: SettingChangeEvent<AppSettings[K]>) => void
-  ): () => void {
-    const keyStr = key as string;
-    if (!this.specificListeners.has(keyStr)) {
-      this.specificListeners.set(keyStr, []);
-    }
-    
-    const listeners = this.specificListeners.get(keyStr)!;
-    listeners.push(listener as (event: SettingChangeEvent<unknown>) => void);
-    
-    // 返回取消监听函数
-    return () => {
-      if (this.specificListeners.has(keyStr)) {
-        const listeners = this.specificListeners.get(keyStr)!;
-        const index = listeners.indexOf(listener as (event: SettingChangeEvent<unknown>) => void);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-        if (listeners.length === 0) {
-          this.specificListeners.delete(keyStr);
-        }
-      }
-    };
-  }
-
-  /**
-   * 添加主题变更监听�?
-   */
-  public addThemeChangeListener(listener: (themeMode: ThemeMode, accentColor: string) => void): () => void {
-    this.themeListeners.push(listener);
-    
-    // 立即通知当前主题
-    const themeMode = this.getSetting('themeMode');
-    const accentColor = themeMode === ThemeMode.DARK 
-      ? this.getSetting('darkThemeAccentColor') 
-      : this.getSetting('accentColor');
-    listener(themeMode, accentColor);
-    
-    // 返回取消监听函数
-    return () => {
-      const index = this.themeListeners.indexOf(listener);
-      if (index > -1) {
-        this.themeListeners.splice(index, 1);
-      }
-    };
-  }
-
-  /**
-   * 添加语言变更监听�?
-   */
-  public addLanguageChangeListener(listener: (language: LanguageCode) => void): () => void {
-    this.languageListeners.push(listener);
-    
-    // 立即通知当前语言
-    let language = this.getSetting('language');
-    if (this.getSetting('autoDetectLanguage')) {
-      // 注意：这里不等待异步检测，使用当前设置
-    }
-    listener(language);
-    
-    // 返回取消监听函数
-    return () => {
-      const index = this.languageListeners.indexOf(listener);
-      if (index > -1) {
-        this.languageListeners.splice(index, 1);
-      }
-    };
-  }
-
-  /**
-   * 通知通用设置变更
-   */
-  private notifySettingsChanged(): void {
-    for (const listener of this.generalListeners) {
-      try {
-        listener();
-      } catch (error) {
-        Logger.error(TAG, `Error in settings listener: ${error}`);
-      }
-    }
-  }
-
-  /**
-   * 通知特定设置项变�?
-   */
-  private notifySettingChanged<T>(
-    key: string, oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   instanceof Error ? oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-   : new Error(String(oldValue: T,
-    newValue: T,
-    userInitiated: boolean
-  ))))))): void {
-    const event: SettingChangeEvent<T> = {
+  private notifySettingChanged(key: string, oldValue: unknown, newValue: unknown, userInitiated: boolean): void {
+    const event: SettingChangeEvent<unknown> = {
       key,
       oldValue,
       newValue,
       timestamp: Date.now(),
-      userInitiated
+      userInitiated,
     };
-    
-    // 通知特定键的监听�?
-    if (this.specificListeners.has(key)) {
-      const listeners = this.specificListeners.get(key)!;
-      for (const listener of listeners) {
+
+    // 触发特定设置的监听器
+    const specificListeners = this.specificListeners.get(key);
+    if (specificListeners) {
+      specificListeners.forEach(listener => {
         try {
           listener(event);
         } catch (error) {
           Logger.error(TAG, `Error in specific setting listener for ${key}: ${error}`);
         }
-      }
+      });
     }
+  }
+
+  /**
+   * 通知所有设置变更
+   */
+  private notifySettingsChanged(): void {
+    this.generalListeners.forEach(listener => {
+      try {
+        listener();
+      } catch (error) {
+        Logger.error(TAG, `Error in general setting listener: ${error}`);
+      }
+    });
   }
 
   /**
    * 通知主题变更
    */
-  private notifyThemeChanged(themeMode: ThemeMode, accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string : new Error(String(accentColor: string instanceof Error ? accentColor: string : new Error(String(accentColor: string))))))): void {
-    for (const listener of this.themeListeners) {
+  private notifyThemeChanged(themeMode: ThemeMode, accentColor: string): void {
+    this.themeListeners.forEach(listener => {
       try {
         listener(themeMode, accentColor);
       } catch (error) {
         Logger.error(TAG, `Error in theme listener: ${error}`);
       }
-    }
+    });
   }
 
   /**
    * 通知语言变更
    */
   private notifyLanguageChanged(language: LanguageCode): void {
-    for (const listener of this.languageListeners) {
+    this.languageListeners.forEach(listener => {
       try {
         listener(language);
       } catch (error) {
-        Logger.error(TAG, `Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}` instanceof Error ? `Error in language listener: ${error}` : new Error(String(`Error in language listener: ${error}`)))))));
+        Logger.error(TAG, `Error in language listener: ${error}`);
+      }
+    });
+  }
+
+  /**
+   * 添加通用设置监听器
+   */
+  public addGeneralListener(listener: () => void): void {
+    this.generalListeners.push(listener);
+  }
+
+  /**
+   * 移除通用设置监听器
+   */
+  public removeGeneralListener(listener: () => void): void {
+    const index = this.generalListeners.indexOf(listener);
+    if (index > -1) {
+      this.generalListeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * 添加特定设置监听器
+   */
+  public addSpecificListener(key: string, listener: (event: SettingChangeEvent<unknown>) => void): void {
+    let listeners = this.specificListeners.get(key);
+    if (!listeners) {
+      listeners = [];
+      this.specificListeners.set(key, listeners);
+    }
+    listeners.push(listener);
+  }
+
+  /**
+   * 移除特定设置监听器
+   */
+  public removeSpecificListener(key: string, listener: (event: SettingChangeEvent<unknown>) => void): void {
+    const listeners = this.specificListeners.get(key);
+    if (listeners) {
+      const index = listeners.indexOf(listener);
+      if (index > -1) {
+        listeners.splice(index, 1);
       }
     }
   }
 
   /**
-   * 清理设置服务
+   * 添加主题监听器
    */
-  public async close(): Promise<void> {
-    try {
-      // 清理监听�?
-      this.generalListeners = [];
-      this.specificListeners = {};
-      this.themeListeners = [];
-      this.languageListeners = [];
-      
-      Logger.info(TAG, 'Setting service closed');
-    } catch (error) {
-      Logger.error(TAG, `Error closing setting service: ${error}`);
+  public addThemeListener(listener: (themeMode: ThemeMode, accentColor: string) => void): void {
+    this.themeListeners.push(listener);
+  }
+
+  /**
+   * 移除主题监听器
+   */
+  public removeThemeListener(listener: (themeMode: ThemeMode, accentColor: string) => void): void {
+    const index = this.themeListeners.indexOf(listener);
+    if (index > -1) {
+      this.themeListeners.splice(index, 1);
     }
   }
-  
+
   /**
-   * 获取对象的所有键
-   * 替代Object.keys，兼容ArkTS语法
+   * 添加语言监听器
    */
-  private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.keys(obj).includes(key)) {
-        keys.push(key);
-      }
+  public addLanguageListener(listener: (language: LanguageCode) => void): void {
+    this.languageListeners.push(listener);
+  }
+
+  /**
+   * 移除语言监听器
+   */
+  public removeLanguageListener(listener: (language: LanguageCode) => void): void {
+    const index = this.languageListeners.indexOf(listener);
+    if (index > -1) {
+      this.languageListeners.splice(index, 1);
     }
-    return keys;
+  }
+
+  /**
+   * 获取对象键，修复TypeScript的Object.keys类型问题
+   */
+  private getObjectKeys<T extends object>(obj: T): Array<keyof T> {
+    return Object.keys(obj) as Array<keyof T>;
   }
 }
-
-

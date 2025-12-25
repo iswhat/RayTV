@@ -128,10 +128,10 @@ class StaticLogger {
     for (let i = 0; i < args.length; i++) {
       message = message.replace(`{${i}}`, String(args[i]));
     }
-    StaticLogger.info(tag, message);
+    Logger.info(tag, message);
   }
 }
 
-// 导出简化版Logger
+// 导出StaticLogger作为默认导出，因为它提供了静态方法
 export default StaticLogger;
-export { Logger }; // 保留原类导出，供需要时使用
+export { Logger, StaticLogger }; // 保留原类导出，供需要时使用

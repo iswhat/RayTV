@@ -1,7 +1,7 @@
 // 数据分析服务
 // 提供用户行为统计、页面访问追踪、播放统计等功能
 
-import StorageUtil from '../../common/util/StorageUtil';
+import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import { HttpService } from '../HttpService';
 
 
@@ -35,9 +35,7 @@ export interface SearchEventParams {
 /**
  * 事件属性类型
  */
-export interface EventProperties {
-  [key: string]: string | number | boolean | null;
-}
+export type EventProperties = Record<string, string | number | boolean | null>;
 
 /**
  * 使用统计摘要
@@ -93,14 +91,15 @@ export class AnalyticsService {
   public async initialize(): Promise<void> {
     // 加载配置
     const defaultConfig: AnalyticsConfig = { enabled: true };
-    const config = await StorageUtil.get<AnalyticsConfig>('analyticsConfig', defaultConfig);
+    const configObj = await StorageUtil.getObject<AnalyticsConfig>('analyticsConfig', StorageType.PREFERENCES);
+    const config = configObj ? configObj : defaultConfig;
     this.isEnabled = config?.enabled ?? defaultConfig.enabled;
 
     // 生成或获取用户ID
     const defaultUserId = this.generateId();
-    const storedUserId = await StorageUtil.getString('userId', defaultUserId);
+    const storedUserId = await StorageUtil.getString('userId', StorageType.PREFERENCES, defaultUserId);
     this.userId = storedUserId || defaultUserId;
-    await StorageUtil.setString('userId', this.userId);
+    await StorageUtil.setString('userId', this.userId, StorageType.PREFERENCES);
 
     // 创建新会话
     this.createNewSession();
@@ -149,7 +148,7 @@ export class AnalyticsService {
     // 创建事件对象，手动合并参数
     const eventProperties: EventProperties = {
       page_name: pageName
-    };
+    } as EventProperties;
     
     // 手动合并params，不使用for..in循环
     if (params) {
@@ -387,7 +386,7 @@ export class AnalyticsService {
   private async saveEventsToLog(events: AnalyticsEvent[]): Promise<void> {
     try {
       const logKey = `analytics_log_${new Date().toISOString().split('T')[0]}`;
-      const existingLogs = await StorageUtil.getString(logKey, '');
+      const existingLogs = await StorageUtil.getString(logKey, StorageType.PREFERENCES, '');
       let newLogs = '';
       for (let i = 0; i < events.length; i++) {
         newLogs += JSON.stringify(events[i]);
@@ -395,7 +394,7 @@ export class AnalyticsService {
           newLogs += '\n';
         }
       }
-      await StorageUtil.setString(logKey, existingLogs + newLogs + '\n');
+      await StorageUtil.setString(logKey, existingLogs + newLogs + '\n', StorageType.PREFERENCES);
     } catch (error) {
       // 保存日志失败
     }
@@ -410,7 +409,7 @@ export class AnalyticsService {
     const config: AnalyticsConfig = {
       enabled: enabled
     };
-    await StorageUtil.set('analyticsConfig', config);
+    await StorageUtil.setObject('analyticsConfig', config, StorageType.PREFERENCES);
   }
 
   /**
@@ -426,9 +425,9 @@ export class AnalyticsService {
   public async clearData(): Promise<void> {
     this.eventQueue = [];
     this.createNewSession();
-    await StorageUtil.remove('userId');
+    await StorageUtil.remove('userId', StorageType.PREFERENCES);
     this.userId = this.generateId();
-    await StorageUtil.setString('userId', this.userId);
+    await StorageUtil.setString('userId', this.userId, StorageType.PREFERENCES);
   }
 
   /**
@@ -437,7 +436,7 @@ export class AnalyticsService {
   public async getUsageSummary(): Promise<UsageSummary> {
     const today = new Date().toISOString().split('T')[0];
     const logKey = `analytics_log_${today}`;
-    const logs = await StorageUtil.getString(logKey, '');
+    const logs = await StorageUtil.getString(logKey, StorageType.PREFERENCES, '');
     
     let totalPlays = 0;
     let totalPages = 0;

@@ -49,9 +49,9 @@ export interface BatchEvent {
 /**
  * 批量发布事件接口
  */
-export interface BatchEmitEvent {
+export interface BatchEmitEvent<T = any> {
   eventName: string;
-  data?: Record<string, string | number | boolean | null>;
+  data?: T;
 }
 
 /**
@@ -168,7 +168,7 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T extends Record<string, string | number | boolean | null>>(
+  public emit<T>(
     eventName: string, 
     data?: T
   ): void {
@@ -189,7 +189,7 @@ export class EventBusUtil {
         const subscription = subscriptions[i];
         
         try {
-          subscription.handler(data);
+          subscription.handler(data as Record<string, string | number | boolean | null>);
           
           // 标记一次性订阅
           if (subscription.once) {
@@ -252,10 +252,10 @@ export class EventBusUtil {
    * 批量发布事件
    * @param events 事件数组
    */
-  public emitBatch(events: BatchEmitEvent[]): void {
+  public emitBatch<T>(events: BatchEmitEvent<T>[]): void {
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
-      this.emit(event.eventName, event.data);
+      this.emit<T>(event.eventName, event.data);
     }
   }
 
@@ -265,7 +265,7 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param wait 等待时间（毫秒）
    */
-  public emitDebounced<T = Record<string, string | number | boolean | null>>(
+  public emitDebounced<T>(
     eventName: string, 
     data?: T, 
     wait: number = 300
@@ -289,7 +289,7 @@ export class EventBusUtil {
       this.debounceTimers = newDebounceTimers;
       
       // 发布事件
-      this.emit(eventName, data);
+      this.emit<T>(eventName, data);
       Logger.debug('EventBus', `Debounced event emitted: ${eventName}`);
     }, wait);
     
@@ -424,7 +424,7 @@ export class EventNamespace {
     once: boolean = false
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.on(fullEventName, handler, priority, once, this.namespace);
+    this.eventBus.on<T>(fullEventName, handler, priority, once, this.namespace);
   }
 
   /**
@@ -435,7 +435,7 @@ export class EventNamespace {
     handler: EventHandler<T>, 
     priority: number = 0
   ): void {
-    this.on(eventName, handler, priority, true);
+    this.on<T>(eventName, handler, priority, true);
   }
 
   /**
@@ -446,7 +446,7 @@ export class EventNamespace {
     handler?: EventHandler<T>
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.off(fullEventName, handler);
+    this.eventBus.off<T>(fullEventName, handler);
   }
 
   /**
@@ -457,7 +457,7 @@ export class EventNamespace {
     data?: T
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.emit(fullEventName, data);
+    this.eventBus.emit<T>(fullEventName, data);
   }
 
   /**
