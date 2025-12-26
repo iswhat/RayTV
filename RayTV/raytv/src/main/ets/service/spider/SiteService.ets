@@ -43,6 +43,28 @@ export interface ExportSite {
   stats: string | number | boolean | null;
 }
 
+// 导入站点数据接口
+export interface ImportSite {
+  key?: string;
+  name?: string;
+  type?: string;
+  url?: string;
+  api?: string;
+  enabled?: boolean;
+  sort?: number;
+  headers?: string | number | boolean | null;
+  siteAuth?: string | number | boolean | null;
+  customCode?: string | null;
+  stats?: string | number | boolean | null;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+// 导入数据接口
+export interface ImportData {
+  sites?: ImportSite[];
+}
+
 const TAG = 'SiteService';
 
 /**
@@ -505,29 +527,6 @@ export class SiteService implements ISiteService {
     };
     
     try {
-      /**
-       * 导入站点数据接口
-       */
-      interface ImportSite {
-        key?: string;
-        name?: string;
-        type?: string;
-        url?: string;
-        api?: string;
-        enabled?: boolean;
-        sort?: number;
-        headers?: string | number | boolean | null;
-        siteAuth?: string | number | boolean | null;
-        customCode?: string | null;
-        stats?: string | number | boolean | null;
-        createdAt?: number;
-        updatedAt?: number;
-      }
-
-      interface ImportData {
-        sites?: ImportSite[];
-      }
-      
       const importData = JsonUtil.parse(data) as ImportData;
       const sites = importData.sites || [];
       

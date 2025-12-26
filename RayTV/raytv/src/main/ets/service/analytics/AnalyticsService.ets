@@ -35,7 +35,9 @@ export interface SearchEventParams {
 /**
  * 事件属性类型
  */
-export type EventProperties = Record<string, string | number | boolean | null>;
+export interface EventProperties {
+  [key: string]: string | number | boolean | null;
+}
 
 /**
  * 使用统计摘要
@@ -148,7 +150,7 @@ export class AnalyticsService {
     // 创建事件对象，手动合并参数
     const eventProperties: EventProperties = {
       page_name: pageName
-    } as EventProperties;
+    };
     
     // 手动合并params，不使用for..in循环
     if (params) {

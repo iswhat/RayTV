@@ -1,11 +1,12 @@
 // 搜索服务
 // 提供全面的搜索功能，包括跨站点搜索、高级过滤、历史记录管理、热门搜索等
 
-import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
+import StorageUtil, { StorageType, JsonData } from '../../common/util/StorageUtil';
 import { SiteManager } from '../spider/SiteManager';
 import { Vod } from '../../data/bean/Vod';
 import { LiveChannel } from '../../data/bean/Live';
 import { AnalyticsService } from '../analytics/AnalyticsService';
+import { HttpService } from '../HttpService';
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import pinyinUtil from '../../common/util/PinyinUtil';
@@ -118,6 +119,15 @@ export interface SearchHistoryItem {
   filters?: SearchFilter;   // 使用的过滤条件
 }
 
+// 添加搜索历史参数接口
+export interface AddSearchHistoryParams {
+  query: string;            // 搜索词
+  resultCount: number;      // 结果数量
+  searchType: SearchType;   // 搜索类型
+  filters?: SearchFilter;   // 使用的过滤条件
+  type?: 'vod' | 'live';    // 兼容旧接口
+}
+
 // 热门搜索项接口
 export interface HotSearchItem {
   id: string;               // 热门搜索ID
@@ -197,7 +207,7 @@ type SearchListener = (response: SearchResponse) => void;
 type SuggestionListener = (suggestions: SearchSuggestionItem[]) => void;
 
 // 站点搜索结果接口
-interface SiteSearchResult {
+export interface SiteSearchResult {
   siteKey: string;
   siteName: string;
   results: VideoItem[];
@@ -206,7 +216,7 @@ interface SiteSearchResult {
 }
 
 // 搜索选项接口
-interface SearchOptions {
+export interface SearchOptions {
   query?: string;
   type?: SearchType;
   page?: number;
@@ -218,7 +228,7 @@ interface SearchOptions {
 }
 
 // 旧版搜索结果项接口
-interface LegacySearchResultItem {
+export interface LegacySearchResultItem {
   id: string;
   title: string;
   cover: string;
@@ -233,7 +243,7 @@ interface LegacySearchResultItem {
 }
 
 // 旧版搜索结果接口
-interface SearchResult {
+export interface SearchResult {
   results: LegacySearchResultItem[];
   total: number;
   successSites: number;
@@ -241,14 +251,14 @@ interface SearchResult {
 }
 
 // 直播搜索结果接口
-interface LiveSearchResult {
+export interface LiveSearchResult {
   channels: LiveChannel[];
   total: number;
   keyword: string;
 }
 
 // 搜索项接口定义
-interface SearchItem {
+export interface SearchItem {
     id?: string;
     vodId?: string;
     title?: string;
@@ -267,7 +277,7 @@ interface SearchItem {
 }
 
 // 视频项接口定义
-interface VideoItem {
+export interface VideoItem {
   id: string;
   title: string;
   cover: string;
@@ -348,28 +358,29 @@ export class SearchService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await StorageUtil.get('search_config') as Partial<SearchConfig> || {};
+      const savedConfig = await StorageUtil.getObject<JsonData>('search_config', StorageType.PREFERENCES);
+      const configObject = savedConfig ? savedConfig.toObject() as Partial<SearchConfig> : {};
       // 合并默认配置和保存的配置
       const mergedConfig: SearchConfig = {
-        enableHistory: savedConfig.enableHistory ?? DEFAULT_SEARCH_CONFIG.enableHistory,
-        enableSuggestions: savedConfig.enableSuggestions ?? DEFAULT_SEARCH_CONFIG.enableSuggestions,
-        enableHotSearches: savedConfig.enableHotSearches ?? DEFAULT_SEARCH_CONFIG.enableHotSearches,
-        maxHistoryItems: savedConfig.maxHistoryItems || DEFAULT_SEARCH_CONFIG.maxHistoryItems,
-        minSearchLength: savedConfig.minSearchLength || DEFAULT_SEARCH_CONFIG.minSearchLength,
-        autoSearchDelay: savedConfig.autoSearchDelay || DEFAULT_SEARCH_CONFIG.autoSearchDelay,
-        saveHistoryOnEnter: savedConfig.saveHistoryOnEnter ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnEnter,
-        saveHistoryOnClick: savedConfig.saveHistoryOnClick ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnClick,
-        highlightResults: savedConfig.highlightResults ?? DEFAULT_SEARCH_CONFIG.highlightResults,
-        searchInDescription: savedConfig.searchInDescription ?? DEFAULT_SEARCH_CONFIG.searchInDescription,
-        timeout: savedConfig.timeout || DEFAULT_SEARCH_CONFIG.timeout,
-        concurrentSites: savedConfig.concurrentSites || DEFAULT_SEARCH_CONFIG.concurrentSites,
-        maxResultsPerSite: savedConfig.maxResultsPerSite || DEFAULT_SEARCH_CONFIG.maxResultsPerSite,
-        enableCache: savedConfig.enableCache ?? DEFAULT_SEARCH_CONFIG.enableCache,
-        cacheExpiry: savedConfig.cacheExpiry || DEFAULT_SEARCH_CONFIG.cacheExpiry,
-        siteBlacklist: savedConfig.siteBlacklist || DEFAULT_SEARCH_CONFIG.siteBlacklist,
-        sortBy: savedConfig.sortBy || DEFAULT_SEARCH_CONFIG.sortBy,
-        sortOrder: savedConfig.sortOrder || DEFAULT_SEARCH_CONFIG.sortOrder,
-        autoScrollToTop: savedConfig.autoScrollToTop ?? DEFAULT_SEARCH_CONFIG.autoScrollToTop
+        enableHistory: configObject.enableHistory ?? DEFAULT_SEARCH_CONFIG.enableHistory,
+        enableSuggestions: configObject.enableSuggestions ?? DEFAULT_SEARCH_CONFIG.enableSuggestions,
+        enableHotSearches: configObject.enableHotSearches ?? DEFAULT_SEARCH_CONFIG.enableHotSearches,
+        maxHistoryItems: configObject.maxHistoryItems || DEFAULT_SEARCH_CONFIG.maxHistoryItems,
+        minSearchLength: configObject.minSearchLength || DEFAULT_SEARCH_CONFIG.minSearchLength,
+        autoSearchDelay: configObject.autoSearchDelay || DEFAULT_SEARCH_CONFIG.autoSearchDelay,
+        saveHistoryOnEnter: configObject.saveHistoryOnEnter ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnEnter,
+        saveHistoryOnClick: configObject.saveHistoryOnClick ?? DEFAULT_SEARCH_CONFIG.saveHistoryOnClick,
+        highlightResults: configObject.highlightResults ?? DEFAULT_SEARCH_CONFIG.highlightResults,
+        searchInDescription: configObject.searchInDescription ?? DEFAULT_SEARCH_CONFIG.searchInDescription,
+        timeout: configObject.timeout || DEFAULT_SEARCH_CONFIG.timeout,
+        concurrentSites: configObject.concurrentSites || DEFAULT_SEARCH_CONFIG.concurrentSites,
+        maxResultsPerSite: configObject.maxResultsPerSite || DEFAULT_SEARCH_CONFIG.maxResultsPerSite,
+        enableCache: configObject.enableCache ?? DEFAULT_SEARCH_CONFIG.enableCache,
+        cacheExpiry: configObject.cacheExpiry || DEFAULT_SEARCH_CONFIG.cacheExpiry,
+        siteBlacklist: configObject.siteBlacklist || DEFAULT_SEARCH_CONFIG.siteBlacklist,
+        sortBy: configObject.sortBy || DEFAULT_SEARCH_CONFIG.sortBy,
+        sortOrder: configObject.sortOrder || DEFAULT_SEARCH_CONFIG.sortOrder,
+        autoScrollToTop: configObject.autoScrollToTop ?? DEFAULT_SEARCH_CONFIG.autoScrollToTop
       };
       this.config = mergedConfig;
     } catch (error) {
@@ -420,17 +431,16 @@ export class SearchService {
       if (this.searchCache.has(cacheKey)) {
         const cachedResult = this.searchCache.get(cacheKey)!;
         await this.addToSearchHistory({
-          query,
+          query: query,
           resultCount: cachedResult.total,
           searchType: type,
-          filters
+          filters: filters
         });
         this.notifySearchCompleted(cachedResult);
         return cachedResult;
       }
 
       // 从真实API获取搜索结果
-      const HttpService = (await import('../HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       // 构建API请求URL和参数
@@ -497,7 +507,7 @@ export class SearchService {
   async searchVod(keyword: string, options?: SearchOptions): Promise<SearchResult> {
     try {
       // 合并搜索选项
-      const searchOptions = {
+      const searchOptions: SearchOptions = {
         query: keyword,
         type: SearchType.ALL,
         filters: {},
@@ -515,7 +525,7 @@ export class SearchService {
       
       for (let i = 0; i < response.items.length; i++) {
         const item = response.items[i];
-        results.push({
+        const legacyItem: LegacySearchResultItem = {
           id: item.id,
           title: item.title,
           cover: '',
@@ -527,15 +537,17 @@ export class SearchService {
           originalUrl: '',
           isFavorite: false,
           siteName: item.siteName || ''
-        });
+        };
+        results.push(legacyItem);
       }
       
-      return {
+      const searchResult: SearchResult = {
         results: results,
         total: response.total,
         successSites: response.successSites || 0,
         totalSites: response.totalSites || 0
       };
+      return searchResult;
     } catch (error) {
       Logger.error(TAG, `VOD搜索失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -608,33 +620,43 @@ export class SearchService {
   /**
    * 按类型搜索内容
    */
-  /**
-   * 按类型搜索内容
-   */
-  interface SearchByTypeOptions {
-    filters?: SearchFilter;
-    page?: number;
-    pageSize?: number;
-  }
-  
   public async searchByType(
     query: string, 
     resultTypes: SearchResultType[],
-    options?: SearchByTypeOptions
+    options?: {
+      filters?: SearchFilter;
+      page?: number;
+      pageSize?: number;
+    }
   ): Promise<SearchResponse> {
-    const filters: SearchFilter = {
+    // 创建默认过滤条件
+    const defaultFilters: SearchFilter = {
       types: resultTypes,
-      categories: options?.filters?.categories || [] as string[],
-      years: options?.filters?.years || [] as number[],
-      regions: options?.filters?.regions || [] as string[],
-      languages: options?.filters?.languages || [] as string[],
-      sortBy: options?.filters?.sortBy || 'relevance',
-      sortOrder: options?.filters?.sortOrder || 'desc'
+      categories: [] as string[],
+      years: [] as number[],
+      regions: [] as string[],
+      languages: [] as string[],
+      sortBy: 'relevance',
+      sortOrder: 'desc'
     };
+    
+    // 合并过滤条件
+    const filters: SearchFilter = {
+      ...defaultFilters,
+      ...options?.filters,
+      types: resultTypes
+    };
+    
+    // 确保数组属性有值
+    filters.categories = filters.categories || [] as string[];
+    filters.years = filters.years || [] as number[];
+    filters.regions = filters.regions || [] as string[];
+    filters.languages = filters.languages || [] as string[];
+    
     return this.search({
-      query,
+      query: query,
       type: SearchType.ALL,
-      filters,
+      filters: filters,
       page: options?.page || 1,
       pageSize: options?.pageSize || 20
     });
@@ -643,44 +665,53 @@ export class SearchService {
   /**
    * 在多个站点中执行搜索
    */
-  interface SiteInfoForSearch {
-    key: string;
-    name: string;
-  }
-  
-  private async searchInSites(keyword: string, sites: SiteInfoForSearch[], limitPerSite: number, timeout: number): Promise<SiteSearchResult[]> {
-    const promises: Promise<SiteSearchResult>[] = sites.map(async (site) => {
-      try {
-        const results = await Promise.race([
-          this.siteManager.callSiteMethod<SearchItem[]>(
+  private async searchInSites(keyword: string, sites: Array<{key: string; name: string}>, limitPerSite: number, timeout: number): Promise<SiteSearchResult[]> {
+    const promises: Promise<SiteSearchResult>[] = [];
+    
+    for (let i = 0; i < sites.length; i++) {
+      const site = sites[i];
+      const promise = (async (site: {key: string; name: string}) => {
+        try {
+          // 创建超时Promise
+          const timeoutPromise = new Promise<SearchItem[]>((_, reject) => {
+            setTimeout(() => reject(new Error('Search timeout')), timeout);
+          });
+          
+          // 创建搜索Promise
+          const searchPromise = this.siteManager.callSiteMethod<SearchItem[]>(
             site.key,
             'search',
-            [keyword, { limit: limitPerSite } as Record<string, number>],
+            [keyword, { limit: limitPerSite }],
             { timeout }
-          ),
-          new Promise<SearchItem[]>((_, reject) => setTimeout(() => reject(new Error('Search timeout')), timeout))
-        ]);
+          );
+          
+          const results = await Promise.race([searchPromise, timeoutPromise]);
 
-        // 转换结果格式
-        const videoItems = this.convertToVideoItems(results, site);
-        
-        return {
-          siteKey: site.key,
-          siteName: site.name,
-          results: videoItems,
-          success: true
-        };
-      } catch (error) {
+          // 转换结果格式
+          const videoItems = this.convertToVideoItems(results, site);
+          
+          const siteResult: SiteSearchResult = {
+            siteKey: site.key,
+            siteName: site.name,
+            results: videoItems,
+            success: true
+          };
+          return siteResult;
+        } catch (error) {
           Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
-          return {
+          const siteResult: SiteSearchResult = {
             siteKey: site.key,
             siteName: site.name,
             results: [],
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error'
           };
+          return siteResult;
         }
-    });
+      })(site);
+      
+      promises.push(promise);
+    }
 
     return Promise.all(promises);
   }
@@ -741,7 +772,7 @@ export class SearchService {
             coverUrl: item.cover,
             rating: item.rating,
             genre: item.tags,
-            siteKey: site.key,
+            siteKey: siteResult.siteKey,
             siteName: siteResult.siteName,
             matchScore: this.calculateMatchScore(item, searchType)
           };
@@ -892,23 +923,43 @@ export class SearchService {
     const allSites = await this.siteManager.getActiveSites();
     
     if (siteKeys.length > 0) {
-      return allSites.filter(site => siteKeys.includes(site.key));
+      const filteredSites: { key: string; supportedFeatures?: string[]; }[] = [];
+      for (let i = 0; i < allSites.length; i++) {
+        const site = allSites[i];
+        if (siteKeys.includes(site.key)) {
+          filteredSites.push(site);
+        }
+      }
+      return filteredSites;
     }
     
     // 返回所有支持搜索的站点
-    return allSites.filter(site => site.supportedFeatures?.includes('search') || true);
+    const searchableSites: { key: string; supportedFeatures?: string[]; }[] = [];
+    for (let i = 0; i < allSites.length; i++) {
+      const site = allSites[i];
+      if (!site.supportedFeatures || this.arrayIncludes(site.supportedFeatures, 'search')) {
+        searchableSites.push(site);
+      }
+    }
+    return searchableSites;
+  }
+  
+  /**
+   * 检查数组是否包含指定元素
+   */
+  private arrayIncludes<T>(array: T[], value: T): boolean {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] === value) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
    * 添加到搜索历史（新版本）
    */
-  private async addToSearchHistory(data: {
-    query: string;
-    resultCount: number;
-    searchType: SearchType;
-    filters?: SearchFilter;
-    type?: 'vod' | 'live';
-  }): Promise<void> {
+  private async addToSearchHistory(data: AddSearchHistoryParams): Promise<void> {
     // 手动解构，避免使用解构赋值语法
     const query = data.query;
     const resultCount = data.resultCount;
@@ -1039,7 +1090,6 @@ export class SearchService {
 
     try {
       // 从API获取热门搜索
-      const HttpService = (await import('../HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       const response = await httpService.get<HotSearchItem[]>('/api/hot-searches', {
         timeout: 5000
@@ -1078,7 +1128,6 @@ export class SearchService {
 
     try {
       // 从API获取搜索建议
-      const HttpService = (await import('../HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       const response = await httpService.get<SearchSuggestionItem[]>(`/api/search-suggestions?keyword=${encodeURIComponent(keyword)}&limit=${limit}`, {
         timeout: 5000
@@ -1208,7 +1257,6 @@ export class SearchService {
   }> {
     // 从API获取搜索统计信息
     try {
-      const HttpService = (await import('../HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       const response = await httpService.get<{
         totalSearches: number;
@@ -1222,7 +1270,7 @@ export class SearchService {
         return response.data;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get search stats: ${error}`);
+      Logger.error(TAG, `Failed to get search stats: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // 返回默认统计信息

@@ -250,7 +250,7 @@ export class HttpService {
       const result: HttpResponse<T> = {
         status: response.responseCode,
         data: this.parseResponseData<T>(response.result as string),
-        headers: this.sanitizeHeaders(response.header as Record<string, string>),
+        headers: this.sanitizeHeaders(response.header as Record<string, string | number | boolean | null>),
         url: ''
       };
 
@@ -392,14 +392,13 @@ export class HttpService {
       return result;
     }
     
-    const headersObj = headers as Record<string, string>;
-    // 使用传统for循环替代解构变量声明
-    const entries = Object.entries(headersObj);
-    for (let i = 0; i < entries.length; i++) {
-      const key = entries[i][0];
-      const value = entries[i][1];
-      if (value !== null && value !== undefined) {
-        result[key] = String(value);
+    // 遍历headers，确保所有值都是字符串类型
+    for (const key in headers) {
+      if (headers.hasOwnProperty(key)) {
+        const value = headers[key];
+        if (value !== null && value !== undefined) {
+          result[key] = String(value);
+        }
       }
     }
     

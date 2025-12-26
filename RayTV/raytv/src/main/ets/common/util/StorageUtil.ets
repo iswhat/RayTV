@@ -308,8 +308,10 @@ export default class StorageUtil {
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async setObject<T extends JsonData>(key: string, value: T | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
-    await StorageUtil.save(key, value, type, expireTime);
+  public static async setObject(key: string, value: Record<string, any> | null | undefined | Record<string, any>[], type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    // 将普通对象转换为JsonDataClass
+    const jsonData = StorageUtil.convertToJsonData(value);
+    await StorageUtil.save(key, jsonData, type, expireTime);
   }
 
   /**

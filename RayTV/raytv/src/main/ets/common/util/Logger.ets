@@ -21,42 +21,34 @@ export interface LoggerExtraData {
 /**
  * 日志工具类
  */
-class Logger {
-  private static _instance: Logger | null = null;
-  private level: LogLevel = LogLevel.INFO;
+export class Logger {
+  private static level: LogLevel = LogLevel.INFO;
 
   private constructor() {
     // 初始化
   }
 
-  public static getInstance(): Logger {
-    if (!Logger._instance) {
-      Logger._instance = new Logger();
-    }
-    return Logger._instance;
-  }
-
-  // 实例方法
-  public debug(message: string): void {
-    if (this.shouldLog(LogLevel.DEBUG)) {
+  // 静态方法
+  public static debug(message: string): void {
+    if (Logger.shouldLog(LogLevel.DEBUG)) {
       console.debug(message);
     }
   }
 
-  public info(message: string): void {
-    if (this.shouldLog(LogLevel.INFO)) {
+  public static info(message: string): void {
+    if (Logger.shouldLog(LogLevel.INFO)) {
       console.info(message);
     }
   }
 
-  public warn(message: string): void {
-    if (this.shouldLog(LogLevel.WARN)) {
+  public static warn(message: string): void {
+    if (Logger.shouldLog(LogLevel.WARN)) {
       console.warn(message);
     }
   }
 
-  public error(message: string, error?: Error): void {
-    if (this.shouldLog(LogLevel.ERROR)) {
+  public static error(message: string, error?: Error): void {
+    if (Logger.shouldLog(LogLevel.ERROR)) {
       console.error(message);
       if (error) {
         console.error(error.message || JSON.stringify(error));
@@ -64,8 +56,8 @@ class Logger {
     }
   }
 
-  public fatal(message: string, error?: Error): void {
-    if (this.shouldLog(LogLevel.FATAL)) {
+  public static fatal(message: string, error?: Error): void {
+    if (Logger.shouldLog(LogLevel.FATAL)) {
       console.error(message);
       if (error) {
         console.error(error.message || JSON.stringify(error));
@@ -73,54 +65,52 @@ class Logger {
     }
   }
 
-  private shouldLog(level: LogLevel): boolean {
+  private static shouldLog(level: LogLevel): boolean {
     const levelOrder = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL];
-    const currentLevelIndex = levelOrder.indexOf(this.level);
+    const currentLevelIndex = levelOrder.indexOf(Logger.level);
     const targetLevelIndex = levelOrder.indexOf(level);
     return targetLevelIndex >= currentLevelIndex;
   }
 
-  public setLevel(level: LogLevel): void {
-    this.level = level;
+  public static setLevel(level: LogLevel): void {
+    Logger.level = level;
   }
 
-  public getLevel(): LogLevel {
-    return this.level;
+  public static getLevel(): LogLevel {
+    return Logger.level;
   }
 }
 
-// 静态方法包装器
+// 静态方法包装器 - 直接导出Logger类作为默认导出，因为它已经是静态方法了
+// 保留StaticLogger类以保持向后兼容性
 class StaticLogger {
-  /**
-   * 获取StaticLogger实例（为了兼容旧代码，实际返回StaticLogger本身）
-   */
-  public static getInstance(): StaticLogger {
-    return StaticLogger;
+  private constructor() {
+    // 私有构造函数，防止外部实例化
   }
 
   public static debug(tag: string, message: string): void {
     const formatted = `[${tag}] ${message}`;
-    Logger.getInstance().debug(formatted);
+    Logger.debug(formatted);
   }
 
   public static info(tag: string, message: string): void {
     const formatted = `[${tag}] ${message}`;
-    Logger.getInstance().info(formatted);
+    Logger.info(formatted);
   }
 
   public static warn(tag: string, message: string): void {
     const formatted = `[${tag}] ${message}`;
-    Logger.getInstance().warn(formatted);
+    Logger.warn(formatted);
   }
 
   public static error(tag: string, message: string, error?: Error): void {
     const formatted = `[${tag}] ${message}`;
-    Logger.getInstance().error(formatted, error);
+    Logger.error(formatted, error);
   }
 
   public static exception(tag: string, error: Error): void {
     const formatted = `[${tag}] ${error.message}`;
-    Logger.getInstance().error(formatted, error);
+    Logger.error(formatted, error);
   }
 
   public static format(tag: string, format: string, ...args: (string | number | boolean | null | undefined)[]): void {
@@ -128,7 +118,7 @@ class StaticLogger {
     for (let i = 0; i < args.length; i++) {
       message = message.replace(`{${i}}`, String(args[i]));
     }
-    Logger.info(tag, message);
+    StaticLogger.info(tag, message);
   }
 }
 

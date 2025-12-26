@@ -49,7 +49,7 @@ export interface BatchEvent {
 /**
  * 批量发布事件接口
  */
-export interface BatchEmitEvent<T = Record<string, string | number | boolean | null>> {
+export interface BatchEmitEvent<T extends Record<string, string | number | boolean | null>> {
   eventName: string;
   data?: T;
 }
@@ -168,7 +168,7 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T>(
+  public emit<T extends Record<string, string | number | boolean | null>>(
     eventName: string, 
     data?: T
   ): void {
@@ -189,7 +189,7 @@ export class EventBusUtil {
         const subscription = subscriptions[i];
         
         try {
-          subscription.handler(data as Record<string, string | number | boolean | null>);
+          subscription.handler(data);
           
           // 标记一次性订阅
           if (subscription.once) {
@@ -252,7 +252,7 @@ export class EventBusUtil {
    * 批量发布事件
    * @param events 事件数组
    */
-  public emitBatch<T>(events: BatchEmitEvent<T>[]): void {
+  public emitBatch<T extends Record<string, string | number | boolean | null>>(events: BatchEmitEvent<T>[]): void {
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
       this.emit<T>(event.eventName, event.data);
@@ -265,7 +265,7 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param wait 等待时间（毫秒）
    */
-  public emitDebounced<T>(
+  public emitDebounced<T extends Record<string, string | number | boolean | null>>(
     eventName: string, 
     data?: T, 
     wait: number = 300

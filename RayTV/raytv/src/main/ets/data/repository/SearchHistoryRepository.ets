@@ -162,10 +162,7 @@ export class SearchHistoryRepository {
   private cachedFavorites: SearchHistoryItem[] = [];
 
   // 事件总线实例
-  private eventBus: EventBusUtil = EventBusUtil.getInstance();
-
-  // 存储工具实例
-  private storageUtil: StorageUtil = StorageUtil.getInstance();
+  private eventBus = EventBusUtil;
 
   /**
    * 私有构造函数
@@ -303,7 +300,7 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录
       this.cachedHistory = history;
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
         StorageType.PREFERENCES
@@ -391,7 +388,7 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录
       this.cachedHistory = history;
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
         StorageType.PREFERENCES
@@ -433,7 +430,7 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录
       this.cachedHistory = history;
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistory, 
         history,
         StorageType.PREFERENCES
@@ -464,7 +461,7 @@ export class SearchHistoryRepository {
    */
   private async clearRecentSearches(): Promise<void> {
     try {
-      await this.storageUtil.remove(this.storageKeys.recentSearches, StorageType.PREFERENCES);
+      await StorageUtil.remove(this.storageKeys.recentSearches, StorageType.PREFERENCES);
     } catch (error) {
       Logger.warn('SearchHistoryRepository', 'Failed to clear recent searches', error as Error);
     }
@@ -519,16 +516,16 @@ export class SearchHistoryRepository {
       this.cachedHistory = history;
       this.cachedFavorites = favorites;
       
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistory,
         history,
-        StorageType.DEFAULT
+        StorageType.PREFERENCES
       );
       
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.favoriteSearches,
         favorites,
-        StorageType.DEFAULT
+        StorageType.PREFERENCES
       );
       
       // 发布收藏状态变更事件
@@ -596,13 +593,13 @@ export class SearchHistoryRepository {
       this.cachedHistory = updatedHistory;
       this.cachedFavorites = [];
       
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistory,
         updatedHistory,
         StorageType.PREFERENCES
       );
       
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.favoriteSearches,
         [],
         StorageType.PREFERENCES
@@ -685,7 +682,7 @@ export class SearchHistoryRepository {
       
       // 保存配置
       this.cachedConfig = updatedConfig;
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
         updatedConfig,
         StorageType.PREFERENCES
@@ -758,7 +755,7 @@ export class SearchHistoryRepository {
         enableRecentSearches: this.defaultConfig.enableRecentSearches,
         enableFavorites: this.defaultConfig.enableFavorites
       };
-      await this.storageUtil.setObject(
+      await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
         this.defaultConfig,
         StorageType.PREFERENCES
@@ -785,7 +782,7 @@ export class SearchHistoryRepository {
    */
   private async loadHistory(): Promise<void> {
     try {
-      const historyResult: SearchHistoryItem[] | null = await this.storageUtil.getObject<SearchHistoryItem[]>(
+      const historyResult: SearchHistoryItem[] | null = await StorageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.searchHistory, 
         StorageType.PREFERENCES
       );
@@ -803,7 +800,7 @@ export class SearchHistoryRepository {
    */
   private async loadFavorites(): Promise<void> {
     try {
-      const favoritesResult: SearchHistoryItem[] | null = await this.storageUtil.getObject<SearchHistoryItem[]>(
+      const favoritesResult: SearchHistoryItem[] | null = await StorageUtil.getObject<SearchHistoryItem[]>(
         this.storageKeys.favoriteSearches, 
         StorageType.PREFERENCES
       );
@@ -821,7 +818,7 @@ export class SearchHistoryRepository {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const configResult: SearchHistoryConfig | null = await this.storageUtil.getObject<SearchHistoryConfig>(
+      const configResult: SearchHistoryConfig | null = await StorageUtil.getObject<SearchHistoryConfig>(
         this.storageKeys.searchHistoryConfig, 
         StorageType.PREFERENCES
       );
@@ -872,17 +869,17 @@ export class SearchHistoryRepository {
   private async saveData(): Promise<void> {
     try {
       await Promise.all([
-        this.storageUtil.setObject(
+        StorageUtil.setObject(
           this.storageKeys.searchHistory, 
           this.cachedHistory || [],
           StorageType.PREFERENCES
         ),
-        this.storageUtil.setObject(
+        StorageUtil.setObject(
           this.storageKeys.favoriteSearches,
           this.cachedFavorites || [],
           StorageType.PREFERENCES
         ),
-        this.storageUtil.setObject(
+        StorageUtil.setObject(
           this.storageKeys.searchHistoryConfig,
           this.cachedConfig || this.defaultConfig,
           StorageType.PREFERENCES
@@ -918,7 +915,7 @@ export class SearchHistoryRepository {
       // 如果有变化，保存更新后的历史记录
       if (filteredHistory.length !== history.length) {
         this.cachedHistory = filteredHistory;
-        await this.storageUtil.setObject(
+        await StorageUtil.setObject(
           this.storageKeys.searchHistory,
           filteredHistory,
           StorageType.PREFERENCES
@@ -945,7 +942,7 @@ export class SearchHistoryRepository {
         if (history.length > newConfig.maxHistoryItems) {
           const filteredHistory = history.slice(0, newConfig.maxHistoryItems);
           this.cachedHistory = filteredHistory;
-          await this.storageUtil.setObject(
+          await StorageUtil.setObject(
             this.storageKeys.searchHistory,
             filteredHistory,
             StorageType.PREFERENCES
@@ -977,12 +974,12 @@ export class SearchHistoryRepository {
           });
           
           this.cachedHistory = updatedHistory;
-          await this.storageUtil.setObject(
+          await StorageUtil.setObject(
             this.storageKeys.favoriteSearches,
             filteredFavorites,
             StorageType.PREFERENCES
           );
-          await this.storageUtil.setObject(
+          await StorageUtil.setObject(
             this.storageKeys.searchHistory,
             updatedHistory,
             StorageType.PREFERENCES
@@ -1079,11 +1076,11 @@ export class SearchHistoryRepository {
         this.validateConfig(mergedConfig);
         this.cachedConfig = mergedConfig;
         
-        await this.storageUtil.setObject(
-        this.storageKeys.searchHistoryConfig,
-        mergedConfig,
-        StorageType.PREFERENCES
-      );
+        await StorageUtil.setObject(
+          this.storageKeys.searchHistoryConfig,
+          mergedConfig,
+          StorageType.PREFERENCES
+        );
       }
       
       // 处理历史记录导入
@@ -1131,11 +1128,11 @@ export class SearchHistoryRepository {
         }
         
         this.cachedHistory = finalHistory;
-        await this.storageUtil.setObject(
-        this.storageKeys.searchHistory,
-        finalHistory,
-        StorageType.PREFERENCES
-      );
+        await StorageUtil.setObject(
+          this.storageKeys.searchHistory,
+          finalHistory,
+          StorageType.PREFERENCES
+        );
       }
       
       // 处理收藏导入
@@ -1187,10 +1184,10 @@ export class SearchHistoryRepository {
         
         this.cachedFavorites = finalFavorites;
         await StorageUtil.setObject(
-        this.storageKeys.favoriteSearches,
-        finalFavorites,
-        StorageType.PREFERENCES
-      );
+          this.storageKeys.favoriteSearches,
+          finalFavorites,
+          StorageType.PREFERENCES
+        );
       }
       
       // 更新历史记录中的收藏状态
