@@ -49,7 +49,7 @@ export interface BatchEvent {
 /**
  * 批量发布事件接口
  */
-export interface BatchEmitEvent<T = any> {
+export interface BatchEmitEvent<T = Record<string, string | number | boolean | null>> {
   eventName: string;
   data?: T;
 }
