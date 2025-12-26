@@ -385,7 +385,7 @@ export class HttpService {
   /**
    * 安全地将header转换为Record<string, string>
    */
-  private sanitizeHeaders(headers: Record<string, any> | null | undefined): Record<string, string> {
+  private sanitizeHeaders(headers: Record<string, string | number | boolean | null> | null | undefined): Record<string, string> {
     const result: Record<string, string> = {};
     
     if (!headers || typeof headers !== 'object') {
