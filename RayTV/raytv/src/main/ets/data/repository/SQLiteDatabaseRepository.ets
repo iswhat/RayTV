@@ -332,9 +332,17 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
           
           if (key) {
             try {
-              const parsedValue = JsonUtil.safeParse<Record<string, string | number | boolean | Record<string, string | number | boolean>>>(value || '');
-              if (parsedValue) {
-                this.configMap.set(`${config_group}:${key}`, parsedValue);
+              if (!value) {
+                const configValue = { value: '' } as ConfigValueObject;
+                this.configMap.set(`${config_group}:${key}`, configValue);
+              } else {
+                const parsedValue = JSON.parse(value) as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+                if (parsedValue && typeof parsedValue === 'object') {
+                  this.configMap.set(`${config_group}:${key}`, parsedValue);
+                } else {
+                  const configValue = { value: value } as ConfigValueObject;
+                  this.configMap.set(`${config_group}:${key}`, configValue);
+                }
               }
             } catch (e) {
               Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
@@ -368,22 +376,22 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       'description': movie.overview || null,
       'releaseDate': movie.releaseDate || null,
       'year': movie.year || null,
-      'genres': JsonUtil.stringify(movie.genres || []),
-      'tags': JsonUtil.stringify(movie.tags || []),
+      'genres': JSON.stringify(movie.genres || []),
+      'tags': JSON.stringify(movie.tags || []),
       'duration': movie.duration || null,
       'totalEpisodes': movie.totalEpisodes || null,
       'currentSeason': movie.currentSeason || null,
       'score': movie.score || null,
-      'directors': JsonUtil.stringify(movie.directors || []),
-      'actors': JsonUtil.stringify(movie.actors || []),
+      'directors': JSON.stringify(movie.directors || []),
+      'actors': JSON.stringify(movie.actors || []),
       'country': movie.countries ? movie.countries.join(',') : null,
       'language': movie.languages ? movie.languages.join(',') : null,
       'plot': movie.overview || null,
       'createTime': Date.now(),
       'updateTime': Date.now(),
-      'videoSources': JsonUtil.stringify(movie.sources || []),
-      'episodes': JsonUtil.stringify(movie.episodes || []),
-      'ratingInfo': movie.ratings ? JsonUtil.stringify(movie.ratings) : null
+      'videoSources': JSON.stringify(movie.sources || []),
+      'episodes': JSON.stringify(movie.episodes || []),
+      'ratingInfo': movie.ratings ? JSON.stringify(movie.ratings) : null
     };
 
       const rowsInserted = await this.rdbStore.insert('movies', valuesBucket);
@@ -424,21 +432,21 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       'description': movie.overview || null,
       'releaseDate': movie.releaseDate || null,
       'year': movie.year || null,
-      'genres': JsonUtil.stringify(movie.genres || []),
-      'tags': JsonUtil.stringify(movie.tags || []),
+      'genres': JSON.stringify(movie.genres || []),
+      'tags': JSON.stringify(movie.tags || []),
       'duration': movie.duration || null,
       'totalEpisodes': movie.totalEpisodes || null,
       'currentSeason': movie.currentSeason || null,
       'score': movie.score || null,
-      'directors': JsonUtil.stringify(movie.directors || []),
-      'actors': JsonUtil.stringify(movie.actors || []),
+      'directors': JSON.stringify(movie.directors || []),
+      'actors': JSON.stringify(movie.actors || []),
       'country': movie.countries ? movie.countries.join(',') : null,
       'language': movie.languages ? movie.languages.join(',') : null,
       'plot': movie.overview || null,
       'updateTime': Date.now(),
-      'videoSources': JsonUtil.stringify(movie.sources || []),
-      'episodes': JsonUtil.stringify(movie.episodes || []),
-      'ratingInfo': movie.ratings ? JsonUtil.stringify(movie.ratings) : null
+      'videoSources': JSON.stringify(movie.sources || []),
+      'episodes': JSON.stringify(movie.episodes || []),
+      'ratingInfo': movie.ratings ? JSON.stringify(movie.ratings) : null
     };
 
       const predicates = new relationalStore.RdbPredicates('movies');
@@ -650,7 +658,10 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
    */
   private safeParseJson<T>(jsonStr: string): T | undefined {
     try {
-      const result = JsonUtil.safeParse<T>(jsonStr);
+      if (!jsonStr) {
+        return undefined;
+      }
+      const result = JSON.parse(jsonStr) as T;
       // 将null转换为undefined，解决类型不匹配问题
       return result === null ? undefined : result;
     } catch (error) {

@@ -35,8 +35,26 @@ export interface SearchEventParams {
 /**
  * 事件属性类型
  */
-export interface EventProperties {
-  [key: string]: string | number | boolean | null;
+export class EventProperties {
+  page_name?: string;
+  video_id?: string;
+  site_key?: string;
+  episode_name?: string;
+  position?: number;
+  duration?: number;
+  quality?: number;
+  keyword?: string;
+  result_count?: number;
+  item_id?: string;
+  item_type?: 'vod' | 'live';
+  error_type?: string;
+  error_message?: string;
+
+  constructor(init?: Partial<EventProperties>) {
+    if (init) {
+      Object.assign(this, init);
+    }
+  }
 }
 
 /**
@@ -144,22 +162,17 @@ export class AnalyticsService {
    * @param pageName 页面名称
    * @param params 额外参数
    */
-  public trackPageView(pageName: string, params?: EventProperties): void {
+  public trackPageView(pageName: string, params?: Partial<EventProperties>): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: EventProperties = {
+    const eventProperties = new EventProperties({
       page_name: pageName
-    };
+    });
     
-    // 手动合并params，不使用for..in循环
+    // 手动合并params
     if (params) {
-      // 使用Object.keys和forEach替代for..in循环
-      const keys = Object.keys(params);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        eventProperties[key] = params[key];
-      }
+      Object.assign(eventProperties, params);
     }
 
     const event: AnalyticsEvent = {
@@ -183,12 +196,12 @@ export class AnalyticsService {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: EventProperties = {
+    const eventProperties = new EventProperties({
       video_id: videoId,
       site_key: siteKey
-    };
+    });
     
-    // 手动合并params，不使用扩展运算符
+    // 手动合并params
     if (params) {
       if (params.episode_name !== undefined) {
         eventProperties.episode_name = params.episode_name;
@@ -200,7 +213,7 @@ export class AnalyticsService {
         eventProperties.duration = params.duration;
       }
       if (params.quality !== undefined) {
-        eventProperties.quality = params.quality;
+        eventProperties.quality = params.quality as unknown as number;
       }
     }
 
@@ -221,23 +234,18 @@ export class AnalyticsService {
    * @param duration 播放时长
    * @param params 额外参数
    */
-  public trackVideoComplete(videoId: string, duration: number, params?: EventProperties): void {
+  public trackVideoComplete(videoId: string, duration: number, params?: Partial<EventProperties>): void {
     if (!this.isEnabled) return;
 
     // 创建事件对象，手动合并参数
-    const eventProperties: EventProperties = {
+    const eventProperties = new EventProperties({
       video_id: videoId,
       duration: duration
-    };
+    });
     
-    // 手动合并params，不使用for..in循环
+    // 手动合并params
     if (params) {
-      // 使用Object.keys和forEach替代for..in循环
-      const keys = Object.keys(params);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        eventProperties[key] = params[key];
-      }
+      Object.assign(eventProperties, params);
     }
 
     const event: AnalyticsEvent = {
@@ -260,11 +268,11 @@ export class AnalyticsService {
   public trackSearch(keyword: string, siteKey?: string, resultCount?: number): void {
     if (!this.isEnabled) return;
 
-    const properties: EventProperties = {
+    const properties = new EventProperties({
       keyword: keyword,
       site_key: siteKey || null,
       result_count: resultCount || null
-    };
+    });
     const event: AnalyticsEvent = {
       eventName: 'search',
       timestamp: Date.now(),
@@ -284,10 +292,10 @@ export class AnalyticsService {
   public trackFavorite(itemId: string, itemType: 'vod' | 'live'): void {
     if (!this.isEnabled) return;
 
-    const properties: EventProperties = {
+    const properties = new EventProperties({
       item_id: itemId,
       item_type: itemType
-    };
+    });
     const event: AnalyticsEvent = {
       eventName: 'favorite',
       timestamp: Date.now(),
@@ -313,16 +321,6 @@ export class AnalyticsService {
       error_type: errorType,
       error_message: message
     };
-    
-    // 手动合并context，不使用for..in循环
-    if (context) {
-      // 使用Object.keys和forEach替代for..in循环
-      const keys = Object.keys(context);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        eventProperties[`context_${key}`] = context[key];
-      }
-    }
 
     const event: AnalyticsEvent = {
       eventName: 'error',

@@ -43,17 +43,21 @@ export default class JsonUtil {
    * @param obj 要拷贝的对象
    * @returns 拷贝后的对象
    */
-  public static deepClone<T>(obj: T): T {
+  public static deepClone<T extends Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>>(obj: T): T {
     if (obj === null || typeof obj !== 'object') {
       return obj;
     }
     
-    const clone = Array.isArray(obj) ? [] as T : {} as T;
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        (clone as Record<string, any>)[key] = JsonUtil.deepClone((obj as Record<string, any>)[key]);
+    const clone: T = Array.isArray(obj) ? [] as T : {} as T;
+    const keys = Object.keys(obj);
+    keys.forEach((key: string) => {
+      const value = obj[key as keyof T];
+      if (value !== null && typeof value === 'object') {
+        clone[key as keyof T] = JsonUtil.deepClone(value as T[keyof T] & (Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>)) as T[keyof T];
+      } else {
+        clone[key as keyof T] = value;
       }
-    }
+    });
     
     return clone;
   }
@@ -64,14 +68,22 @@ export default class JsonUtil {
    * @param source 源对象
    * @returns 合并后的对象
    */
-  public static merge<T extends Record<string, any>, U extends Record<string, any>>(target: T, source: U): T & U {
-    const result = { ...target };
-    for (const key in source) {
-      if (source.hasOwnProperty(key)) {
-        (result as Record<string, any>)[key] = source[key];
-      }
-    }
-    return result as T & U;
+  public static merge<T extends Record<string, string | number | boolean | null | undefined>, U extends Record<string, string | number | boolean | null | undefined>>(target: T, source: U): Record<string, string | number | boolean | null | undefined> {
+    const result: Record<string, string | number | boolean | null | undefined> = {};
+    
+    // 复制target属性
+    const targetKeys = Object.keys(target);
+    targetKeys.forEach((key: string) => {
+      result[key] = target[key as keyof T];
+    });
+    
+    // 复制source属性，覆盖target中的同名属性
+    const sourceKeys = Object.keys(source);
+    sourceKeys.forEach((key: string) => {
+      result[key] = source[key as keyof U];
+    });
+    
+    return result;
   }
 
   /**
@@ -110,12 +122,29 @@ export default class JsonUtil {
    */
   public static filterNullUndefined<T extends Record<string, string | number | boolean | null | undefined>>(obj: T): Record<string, string | number | boolean> {
     const result: Record<string, string | number | boolean> = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key) && obj[key] !== null && obj[key] !== undefined) {
-        result[key] = obj[key] as string | number | boolean;
+    const keys = Object.keys(obj);
+    keys.forEach((key: string) => {
+      const value = obj[key as keyof T];
+      if (value !== null && value !== undefined) {
+        result[key] = value as string | number | boolean;
       }
-    }
+    });
     return result;
+  }
+
+  /**
+   * 安全解析JSON字符串，返回指定类型
+   * @param jsonStr JSON字符串
+   * @returns 解析后的对象，解析失败返回null
+   */
+  public static safeParse<T extends Record<string, string | number | boolean | null>>(jsonStr: string): T | null {
+    try {
+      const parsed = JSON.parse(jsonStr) as T;
+      return parsed;
+    } catch (error) {
+      console.error('JsonUtil: Failed to safe parse JSON string:', error);
+      return null;
+    }
   }
 }
 

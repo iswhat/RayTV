@@ -1,4 +1,4 @@
-import Logger from '../../../common/util/Logger';
+import LoggerUtil from '../../../common/util/Logger';
 import { Site, SiteType, LoaderType } from '../../data/bean/Site';
 import { SiteDao } from '../../data/db/dao/SiteDao';
 import JsonUtil from '../../../common/util/JsonUtil';
@@ -215,10 +215,10 @@ export class SiteService implements ISiteService {
     try {
       // 预加载站点数据
       const sites = await this.getAllSites();
-      Logger.info(TAG, `Initialized with ${sites.length} sites`);
+      LoggerUtil.info(TAG, `Initialized with ${sites.length} sites`);
       this.initialized = true;
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to initialize: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -230,7 +230,7 @@ export class SiteService implements ISiteService {
     try {
       return await this.siteDao.getAll();
     } catch (error) {
-      Logger.error(TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -242,7 +242,7 @@ export class SiteService implements ISiteService {
     try {
       return await this.siteDao.getEnabled();
     } catch (error) {
-      Logger.error(TAG, `Failed to get enabled sites: ${JSON.stringify(error)}`);
+      LoggerUtil.error(TAG, `Failed to get enabled sites: ${JSON.stringify(error)}`);
       return [];
     }
   }
@@ -254,7 +254,7 @@ export class SiteService implements ISiteService {
     try {
       return await this.siteDao.getByType(type);
     } catch (error) {
-      Logger.error(TAG, `Failed to get sites by type ${type}: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to get sites by type ${type}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -266,7 +266,7 @@ export class SiteService implements ISiteService {
     try {
       return await this.siteDao.getByKey(key);
     } catch (error) {
-      Logger.error(TAG, `Failed to get site by key ${key}: ${JSON.stringify(error)}`);
+      LoggerUtil.error(TAG, `Failed to get site by key ${key}: ${JSON.stringify(error)}`);
       return null;
     }
   }
@@ -304,13 +304,13 @@ export class SiteService implements ISiteService {
       const exists = await this.siteDao.exists(site.key);
       if (exists) {
         await this.siteDao.update(site);
-        Logger.info(TAG, `Updated site: ${site.name} (${site.key})`);
+        LoggerUtil.info(TAG, `Updated site: ${site.name} (${site.key})`);
       } else {
         await this.siteDao.insert(site);
-        Logger.info(TAG, `Inserted site: ${site.name} (${site.key})`);
+        LoggerUtil.info(TAG, `Inserted site: ${site.name} (${site.key})`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to save site ${site.name}: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to save site ${site.name}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -321,9 +321,9 @@ export class SiteService implements ISiteService {
   public async batchSaveSites(sites: Site[]): Promise<void> {
     try {
       await this.siteDao.batchInsert(sites);
-      Logger.info(TAG, `Batch inserted ${sites.length} sites`);
+      LoggerUtil.info(TAG, `Batch inserted ${sites.length} sites`);
     } catch (error) {
-      Logger.error(TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -334,9 +334,9 @@ export class SiteService implements ISiteService {
   public async deleteSite(key: string): Promise<void> {
     try {
       await this.siteDao.delete(key);
-      Logger.info(TAG, `Deleted site: ${key}`);
+      LoggerUtil.info(TAG, `Deleted site: ${key}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to delete site ${key}: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to delete site ${key}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -351,10 +351,10 @@ export class SiteService implements ISiteService {
         site.enabled = enabled;
         site.updatedAt = Date.now();
         await this.siteDao.update(site);
-        Logger.info(TAG, `Updated site ${key} enabled: ${enabled}`);
+        LoggerUtil.info(TAG, `Updated site ${key} enabled: ${enabled}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to update site enabled: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to update site enabled: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -369,10 +369,10 @@ export class SiteService implements ISiteService {
         site.order = order;
         site.updatedAt = Date.now();
         await this.siteDao.update(site);
-        Logger.info(TAG, `Updated site ${key} order: ${order}`);
+        LoggerUtil.info(TAG, `Updated site ${key} order: ${order}`);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to update site order: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to update site order: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -383,9 +383,9 @@ export class SiteService implements ISiteService {
   public async updateSiteLastUsed(key: string): Promise<void> {
     try {
       await this.siteDao.updateLastUsed(key);
-      Logger.info(TAG, `Updated site last used: ${key}`);
+      LoggerUtil.info(TAG, `Updated site last used: ${key}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to update site last used: ${JSON.stringify(error)}`);
+      LoggerUtil.error(TAG, `Failed to update site last used: ${JSON.stringify(error)}`);
     }
   }
   
@@ -438,7 +438,7 @@ export class SiteService implements ISiteService {
           await this.saveSite(site);
         }
       } catch (updateError) {
-        Logger.error(TAG, `Failed to update error stats: ${JSON.stringify(updateError)}`);
+        LoggerUtil.error(TAG, `Failed to update error stats: ${JSON.stringify(updateError)}`);
       }
     }
     
@@ -510,7 +510,7 @@ export class SiteService implements ISiteService {
       
       return JsonUtil.stringify(exportConfig, null, 2);
     } catch (error) {
-      Logger.error(TAG, `Failed to export sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to export sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -538,7 +538,7 @@ export class SiteService implements ISiteService {
           if (existing) {
             // 根据导入配置决定是跳过还是覆盖
             stats.skipped++;
-            Logger.info(TAG, `Skipped existing site: ${siteData.key}`);
+            LoggerUtil.info(TAG, `Skipped existing site: ${siteData.key}`);
             continue;
           }
           
@@ -562,16 +562,16 @@ export class SiteService implements ISiteService {
           
           await this.saveSite(site);
           stats.success++;
-          Logger.info(TAG, `Successfully imported site: ${site.key}`);
+          LoggerUtil.info(TAG, `Successfully imported site: ${site.key}`);
           
         } catch (siteError) {
           stats.failed++;
-          Logger.error(TAG, `Failed to import site ${siteData.key}: ${JSON.stringify(siteError)}`);
+          LoggerUtil.error(TAG, `Failed to import site ${siteData.key}: ${JSON.stringify(siteError)}`);
         }
       }
       
     } catch (error) {
-      Logger.error(TAG, `Failed to parse import data: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to parse import data: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
     
@@ -584,9 +584,9 @@ export class SiteService implements ISiteService {
   public async clearAllSites(): Promise<void> {
     try {
       await this.siteDao.clearAll();
-      Logger.info(TAG, 'Cleared all sites');
+      LoggerUtil.info(TAG, 'Cleared all sites');
     } catch (error) {
-      Logger.error(TAG, `Failed to clear all sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to clear all sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }

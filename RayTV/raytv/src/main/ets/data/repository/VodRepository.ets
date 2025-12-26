@@ -10,7 +10,7 @@ import {
   Director
 } from '../bean/Vod';
 import { HistoryItem } from '../../types/commonTypes';
-import Logger from '../../common/util/Logger';
+import LoggerUtil, { Logger } from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'VodRepository';
@@ -60,11 +60,11 @@ export class VodRepository {
    */
   public async cacheVodItem(vodItem: Vod): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.name}`);
+      LoggerUtil.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.name}`);
       // 简化实现，仅记录日志
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to cache VOD item ${vodItem.id}`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to cache VOD item ${vodItem.id}`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -80,7 +80,7 @@ export class VodRepository {
     }
     
     // 简化实现，仅记录日志
-    Logger.info(TAG, `Batch cached ${vodItems.length} VOD items`);
+    LoggerUtil.info(TAG, `Batch cached ${vodItems.length} VOD items`);
     return vodItems.length;
   }
   
@@ -95,7 +95,7 @@ export class VodRepository {
       // 简化实现，返回null
       return null;
     } catch (error) {
-      Logger.error(TAG, `Failed to get cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to get cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
@@ -111,7 +111,7 @@ export class VodRepository {
       // 简化实现，返回false
       return false;
     } catch (error) {
-      Logger.error(TAG, `Failed to check VOD item cache status`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to check VOD item cache status`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -127,7 +127,7 @@ export class VodRepository {
       // 简化实现，返回true
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to remove cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to remove cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -141,7 +141,7 @@ export class VodRepository {
    */
   public async saveVodHistory(vodItem: Vod, episodeIndex: number = 0, progress: number = 0): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Saving VOD history: ${vodItem.name}`);
+      LoggerUtil.debug(TAG, `Saving VOD history: ${vodItem.name}`);
       
       // 使用普通赋值方式替代计算属性名
       const historyData: Record<string, string | number | boolean | null> = {};
@@ -160,7 +160,7 @@ export class VodRepository {
       // 简化实现，仅记录日志
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to save VOD history`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to save VOD history`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -195,7 +195,7 @@ export class VodRepository {
       // 简化实现，仅记录日志
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to update play progress for ${vodId}`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to update play progress for ${vodId}`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -221,7 +221,7 @@ export class VodRepository {
       // 简化实现，返回空数组
       return [];
     } catch (error) {
-      Logger.error(TAG, `Failed to get VOD history`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to get VOD history`, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -254,11 +254,11 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        Logger.error(TAG, `Failed to search VOD: Invalid response format`);
+        LoggerUtil.error(TAG, `Failed to search VOD: Invalid response format`);
         return [];
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to search VOD`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to search VOD`, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -289,11 +289,11 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        Logger.error(TAG, `Failed to get VODs by category: Invalid response format`);
+        LoggerUtil.error(TAG, `Failed to get VODs by category: Invalid response format`);
         return [];
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get VODs by category`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to get VODs by category`, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -324,11 +324,11 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        Logger.error(TAG, `Failed to get VODs by tag: Invalid response format`);
+        LoggerUtil.error(TAG, `Failed to get VODs by tag: Invalid response format`);
         return [];
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get VODs by tag`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to get VODs by tag`, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -340,7 +340,7 @@ export class VodRepository {
    */
   public cacheRecentVods(siteId: string, vodItems: Vod[]): void {
     this.recentVodsCache.set(siteId, vodItems);
-    Logger.debug(TAG, `Cached ${vodItems.length} recent VODs for site ${siteId}`);
+    LoggerUtil.debug(TAG, `Cached ${vodItems.length} recent VODs for site ${siteId}`);
   }
   
   /**
@@ -359,7 +359,7 @@ export class VodRepository {
    */
   public cachePopularVods(siteId: string, vodItems: Vod[]): void {
     this.popularVodsCache.set(siteId, vodItems);
-    Logger.debug(TAG, `Cached ${vodItems.length} popular VODs for site ${siteId}`);
+    LoggerUtil.debug(TAG, `Cached ${vodItems.length} popular VODs for site ${siteId}`);
   }
   
   /**
@@ -378,10 +378,10 @@ export class VodRepository {
   public async clearExpiredCache(): Promise<number> {
     try {
       // 简化实现，返回0
-      Logger.info(TAG, `Cleared 0 expired VOD cache records`);
+      LoggerUtil.info(TAG, `Cleared 0 expired VOD cache records`);
       return 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear expired VOD cache`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to clear expired VOD cache`, error instanceof Error ? error : new Error(String(error)));
       return 0;
     }
   }
@@ -396,10 +396,10 @@ export class VodRepository {
       this.recentVodsCache.clear();
       this.popularVodsCache.clear();
       
-      Logger.info(TAG, `Cleared all VOD cache (0 records)`);
+      LoggerUtil.info(TAG, `Cleared all VOD cache (0 records)`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear all VOD cache`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to clear all VOD cache`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -416,10 +416,10 @@ export class VodRepository {
       }];
       
       // 简化实现，仅记录日志
-      Logger.info(TAG, `Cleared all VOD history (0 records)`);
+      LoggerUtil.info(TAG, `Cleared all VOD history (0 records)`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear VOD history`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to clear VOD history`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -433,7 +433,7 @@ export class VodRepository {
       // 简化实现，返回0
       return 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to estimate VOD cache size`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to estimate VOD cache size`, error instanceof Error ? error : new Error(String(error)));
       return 0;
     }
   }
@@ -453,7 +453,7 @@ export class VodRepository {
       };
       return stats;
     } catch (error) {
-      Logger.error(TAG, `Failed to get VOD cache stats`, error instanceof Error ? error : new Error(String(error)));
+      LoggerUtil.error(TAG, `Failed to get VOD cache stats`, error instanceof Error ? error : new Error(String(error)));
       const stats: CacheStats = {
         totalItems: 0,
         expiredItems: 0,

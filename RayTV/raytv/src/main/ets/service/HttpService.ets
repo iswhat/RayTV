@@ -358,7 +358,7 @@ export class HttpService {
       const downloadResult: DownloadResult = {
         status: response.responseCode,
         filePath,
-        headers: this.sanitizeHeaders(response.header),
+        headers: this.sanitizeHeaders(response.header as Record<string, string | number | boolean | null>),
         fileSize: 0
       };
 
@@ -385,7 +385,7 @@ export class HttpService {
   /**
    * 安全地将header转换为Record<string, string>
    */
-  private sanitizeHeaders(headers: Record<string, string | number | boolean | null> | null | undefined): Record<string, string> {
+  private sanitizeHeaders(headers: Record<string, string | number | boolean | null>): Record<string, string> {
     const result: Record<string, string> = {};
     
     if (!headers || typeof headers !== 'object') {
@@ -393,14 +393,13 @@ export class HttpService {
     }
     
     // 遍历headers，确保所有值都是字符串类型
-    for (const key in headers) {
-      if (headers.hasOwnProperty(key)) {
-        const value = headers[key];
-        if (value !== null && value !== undefined) {
-          result[key] = String(value);
-        }
+    const keys = Object.keys(headers);
+    keys.forEach((key: string) => {
+      const value = headers[key];
+      if (value !== null && value !== undefined) {
+        result[key] = String(value);
       }
-    }
+    });
     
     return result;
   }

@@ -7,7 +7,7 @@ import { Vod } from '../../data/bean/Vod';
 import { LiveChannel } from '../../data/bean/Live';
 import { AnalyticsService } from '../analytics/AnalyticsService';
 import { HttpService } from '../HttpService';
-import Logger from '../../common/util/Logger';
+import LoggerUtil, { Logger } from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import pinyinUtil from '../../common/util/PinyinUtil';
 import { VodRepository } from '../../data/repository/VodRepository';
@@ -333,7 +333,7 @@ export class SearchService {
    */
   async initialize(): Promise<void> {
     try {
-      Logger.info(TAG, 'Initializing search service...');
+      LoggerUtil.info(TAG, 'Initializing search service...');
 
       // 加载配置
       await this.loadConfig();
@@ -347,9 +347,9 @@ export class SearchService {
       }
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Search service initialized successfully');
+      LoggerUtil.info(TAG, 'Search service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize search service: ${error}`);
+      LoggerUtil.error(TAG, `Failed to initialize search service: ${error}`);
     }
   }
 
@@ -384,7 +384,7 @@ export class SearchService {
       };
       this.config = mergedConfig;
     } catch (error) {
-      Logger.error(TAG, `Failed to load search config: ${error}`);
+      LoggerUtil.error(TAG, `Failed to load search config: ${error}`);
       this.config = DEFAULT_SEARCH_CONFIG;
     }
   }
@@ -396,7 +396,7 @@ export class SearchService {
     try {
       await StorageUtil.setObject('search_config', this.config, StorageType.PREFERENCES);
     } catch (error) {
-      Logger.error(TAG, `Failed to save search config: ${error}`);
+      LoggerUtil.error(TAG, `Failed to save search config: ${error}`);
     }
   }
 
@@ -421,7 +421,7 @@ export class SearchService {
     const startTime = Date.now();
     
     try {
-      Logger.info(TAG, `执行搜索: query=${query}, type=${type}, page=${page}, filters=${JSON.stringify(filters)}`);
+      LoggerUtil.info(TAG, `执行搜索: query=${query}, type=${type}, page=${page}, filters=${JSON.stringify(filters)}`);
       
       // 记录搜索事件
       this.analyticsService.trackSearch(query);
@@ -496,7 +496,7 @@ export class SearchService {
       
       return searchResponse;
     } catch (error) {
-      Logger.error(TAG, `搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `搜索失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -549,7 +549,7 @@ export class SearchService {
       };
       return searchResult;
     } catch (error) {
-      Logger.error(TAG, `VOD搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `VOD搜索失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -592,7 +592,7 @@ export class SearchService {
             });
           }
         } catch (error) {
-          Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+          LoggerUtil.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -612,7 +612,7 @@ export class SearchService {
       };
       return result;
     } catch (error) {
-      Logger.error(TAG, `直播频道搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `直播频道搜索失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -632,26 +632,38 @@ export class SearchService {
     // 创建默认过滤条件
     const defaultFilters: SearchFilter = {
       types: resultTypes,
-      categories: [] as string[],
-      years: [] as number[],
-      regions: [] as string[],
-      languages: [] as string[],
+      categories: [],
+      years: [],
+      regions: [],
+      languages: [],
       sortBy: 'relevance',
       sortOrder: 'desc'
     };
     
     // 合并过滤条件
-    const filters: SearchFilter = {
-      ...defaultFilters,
-      ...options?.filters,
-      types: resultTypes
-    };
-    
-    // 确保数组属性有值
-    filters.categories = filters.categories || [] as string[];
-    filters.years = filters.years || [] as number[];
-    filters.regions = filters.regions || [] as string[];
-    filters.languages = filters.languages || [] as string[];
+    const filters: SearchFilter = {} as SearchFilter;
+    // 手动合并默认过滤条件
+    if (defaultFilters) {
+      filters.types = defaultFilters.types;
+      filters.categories = defaultFilters.categories;
+      filters.years = defaultFilters.years;
+      filters.regions = defaultFilters.regions;
+      filters.languages = defaultFilters.languages;
+      filters.sortBy = defaultFilters.sortBy;
+      filters.sortOrder = defaultFilters.sortOrder;
+    }
+    // 手动合并传入的过滤条件
+    if (options?.filters) {
+      if (options.filters.types) filters.types = options.filters.types;
+      if (options.filters.categories) filters.categories = options.filters.categories;
+      if (options.filters.years) filters.years = options.filters.years;
+      if (options.filters.regions) filters.regions = options.filters.regions;
+      if (options.filters.languages) filters.languages = options.filters.languages;
+      if (options.filters.sortBy) filters.sortBy = options.filters.sortBy;
+      if (options.filters.sortOrder) filters.sortOrder = options.filters.sortOrder;
+    }
+    // 确保types始终是resultTypes
+    filters.types = resultTypes;
     
     return this.search({
       query: query,
@@ -698,7 +710,7 @@ export class SearchService {
           };
           return siteResult;
         } catch (error) {
-          Logger.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+          LoggerUtil.warn(TAG, `在站点${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
           const siteResult: SiteSearchResult = {
             siteKey: site.key,
             siteName: site.name,
@@ -745,14 +757,19 @@ export class SearchService {
   }
 
   /**
+   * 搜索结果合并返回接口
+   */
+  interface MergedSearchResult {
+    items: SearchResultItem[];
+    total: number;
+    successSites: number;
+    totalSites: number;
+  }
+  
+  /**
    * 合并并转换搜索结果
    */
-  private mergeAndTransformSearchResults(siteResults: SiteSearchResult[], filters: SearchFilter, searchType: SearchType): { 
-    items: SearchResultItem[], 
-    total: number, 
-    successSites: number, 
-    totalSites: number 
-  } {
+  private mergeAndTransformSearchResults(siteResults: SiteSearchResult[], filters: SearchFilter, searchType: SearchType): MergedSearchResult {
     let allItems: SearchResultItem[] = [];
     let totalCount = 0;
     let successSites = 0;
@@ -794,12 +811,14 @@ export class SearchService {
       allItems = this.addHighlightToResults(allItems);
     }
 
-    return {
+    const result: MergedSearchResult = {
       items: allItems,
       total: allItems.length,
       successSites,
       totalSites: siteResults.length
     };
+    
+    return result;
   }
 
   /**
@@ -886,7 +905,7 @@ export class SearchService {
             break;
           case 'popularity':
             // 这里可以使用viewCount等指标，如果有的话
-            comparison = (b.meta?.viewCount || 0) - (a.meta?.viewCount || 0);
+            comparison = 0;
             break;
           case 'relevance':
           default:
@@ -919,27 +938,25 @@ export class SearchService {
   /**
    * 获取可搜索的站点
    */
-  private async getSearchableSites(siteKeys: string[]): Promise<{ key: string; supportedFeatures?: string[]; }[]> {
+  private async getSearchableSites(siteKeys: string[]): Promise<{ key: string; }[]> {
     const allSites = await this.siteManager.getActiveSites();
     
     if (siteKeys.length > 0) {
-      const filteredSites: { key: string; supportedFeatures?: string[]; }[] = [];
+      const filteredSites: { key: string; }[] = [];
       for (let i = 0; i < allSites.length; i++) {
         const site = allSites[i];
         if (siteKeys.includes(site.key)) {
-          filteredSites.push(site);
+          filteredSites.push({ key: site.key });
         }
       }
       return filteredSites;
     }
     
-    // 返回所有支持搜索的站点
-    const searchableSites: { key: string; supportedFeatures?: string[]; }[] = [];
+    // 返回所有活跃站点
+    const searchableSites: { key: string; }[] = [];
     for (let i = 0; i < allSites.length; i++) {
       const site = allSites[i];
-      if (!site.supportedFeatures || this.arrayIncludes(site.supportedFeatures, 'search')) {
-        searchableSites.push(site);
-      }
+      searchableSites.push({ key: site.key });
     }
     return searchableSites;
   }
@@ -1052,13 +1069,13 @@ export class SearchService {
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      const history = await StorageUtil.getObject<SearchHistoryItem[]>('search_history', StorageType.PREFERENCES) || [];
+      const history = await StorageUtil.getObject<SearchHistoryItem[]>('search_history', StorageType.PREFERENCES);
       // 确保历史记录格式正确
-      this.searchHistory = history.filter(item => {
+      this.searchHistory = history ? history.filter(item => {
         return item && item.keyword && item.timestamp;
-      });
+      }) : [];
     } catch (error) {
-      Logger.error(TAG, `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
       this.searchHistory = [];
     }
   }
@@ -1070,7 +1087,7 @@ export class SearchService {
     try {
       await StorageUtil.setObject('search_history', this.searchHistory, StorageType.PREFERENCES);
     } catch (error) {
-      Logger.error(TAG, `Failed to save search history: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to save search history: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -1100,7 +1117,7 @@ export class SearchService {
         this.lastHotSearchUpdate = Date.now();
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get hot searches: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to get hot searches: ${error instanceof Error ? error.message : String(error)}`);
       // 如果获取失败，使用默认热门搜索
       this.hotSearches = [
         { id: '1', keyword: '热门电影', rank: 1, searchCount: 1000, trend: 'up' },
@@ -1137,7 +1154,7 @@ export class SearchService {
         return response.data;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // 如果API调用失败，返回空数组
@@ -1187,7 +1204,7 @@ export class SearchService {
       try {
         listener(response);
       } catch (error) {
-        Logger.error(TAG, `Failed to notify search listener: ${error}`);
+        LoggerUtil.error(TAG, `Failed to notify search listener: ${error}`);
       }
     }
   }
@@ -1201,7 +1218,7 @@ export class SearchService {
       try {
         listener(suggestions);
       } catch (error) {
-        Logger.error(TAG, `Failed to notify suggestion listener: ${error}`);
+        LoggerUtil.error(TAG, `Failed to notify suggestion listener: ${error}`);
       }
     }
   }
@@ -1244,25 +1261,26 @@ export class SearchService {
    */
   public async updateSiteInfo(siteKey: string, siteInfo: SiteInfo): Promise<void> {
     // 这里可以实现站点信息的更新逻辑
-    Logger.info(TAG, `更新站点信息: ${siteKey}`);
+    LoggerUtil.info(TAG, `更新站点信息: ${siteKey}`);
   }
 
   /**
-   * 获取搜索统计信息
+   * 搜索统计信息接口
    */
-  public async getSearchStats(): Promise<{
+  interface SearchStats {
     totalSearches: number;
     averageResults: number;
     topSearches: string[];
-  }> {
+  }
+  
+  /**
+   * 获取搜索统计信息
+   */
+  public async getSearchStats(): Promise<SearchStats> {
     // 从API获取搜索统计信息
     try {
       const httpService = HttpService.getInstance();
-      const response = await httpService.get<{
-        totalSearches: number;
-        averageResults: number;
-        topSearches: string[];
-      }>('/api/search-stats', {
+      const response = await httpService.get<SearchStats>('/api/search-stats', {
         timeout: 5000
       });
 
@@ -1270,7 +1288,7 @@ export class SearchService {
         return response.data;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to get search stats: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to get search stats: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // 返回默认统计信息

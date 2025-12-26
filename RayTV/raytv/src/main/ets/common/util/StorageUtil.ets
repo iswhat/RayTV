@@ -302,16 +302,65 @@ export default class StorageUtil {
   }
 
   /**
+   * 将普通对象转换为JsonDataClass
+   * @param value 要转换的值
+   * @returns 转换后的JsonDataClass对象
+   */
+  public static convertToJsonData(value: Record<string, string | number | boolean | null | undefined> | null | undefined | Record<string, string | number | boolean | null | undefined>[]): JsonData | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    
+    // 处理数组类型
+    if (Array.isArray(value)) {
+      const arrayData = new JsonDataClass();
+      for (let i = 0; i < value.length; i++) {
+        const item = value[i];
+        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+          const itemData = JsonDataClass.fromObject(item as Record<string, string | number | boolean | object | null>);
+          if (itemData) {
+            arrayData.set(String(i), itemData);
+          }
+        } else if (item !== undefined) {
+          arrayData.set(String(i), item as string | number | boolean | null);
+        }
+      }
+      return arrayData;
+    }
+    
+    // 处理对象类型
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      return JsonDataClass.fromObject(value as Record<string, string | number | boolean | object | null>) || null;
+    }
+    
+    return null;
+  }
+
+  /**
    * 设置对象值
    * @param key 键名
    * @param value 对象值
    * @param type 存储类型
    * @param expireTime 过期时间（毫秒，0表示永不过期）
    */
-  public static async setObject(key: string, value: Record<string, any> | null | undefined | Record<string, any>[], type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
-    // 将普通对象转换为JsonDataClass
-    const jsonData = StorageUtil.convertToJsonData(value);
-    await StorageUtil.save(key, jsonData, type, expireTime);
+  public static async setObject<T extends Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>>(key: string, value: T | null | undefined, type: StorageType = StorageType.PREFERENCES, expireTime: number = 0): Promise<void> {
+    try {
+      // 直接使用JSON.stringify序列化对象
+      const jsonStr = JSON.stringify(value);
+      const dataToSave: StorageData = {
+        value: jsonStr,
+        timestamp: Date.now(),
+        expireTime: expireTime > 0 ? Date.now() + expireTime : 0
+      };
+      await StorageUtil.saveToFileStorage(key, dataToSave);
+      StorageUtil.saveToMemory(key, dataToSave);
+      Logger.info(TAG, `Saved object for key: ${key}, type: ${type}`);
+    } catch (error) {
+      // 安全处理错误信息
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to save object for key ${key}: ${errorMessage}`, error as Error);
+      throw new Error(errorMessage);
+    }
   }
 
   /**
@@ -321,8 +370,27 @@ export default class StorageUtil {
    * @param defaultValue 默认值
    * @returns 读取的对象或默认值
    */
-  public static async getObject<T extends JsonData>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T | null> {
-    return await StorageUtil.get<T>(key, type, defaultValue);
+  public static async getObject<T extends Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>>(key: string, type: StorageType = StorageType.PREFERENCES, defaultValue?: T): Promise<T | null> {
+    try {
+      // 从存储中获取数据
+      const data = await StorageUtil.get<string>(key, type);
+      if (data === null) {
+        return defaultValue !== undefined ? defaultValue : null;
+      }
+      
+      // 尝试解析JSON字符串
+      try {
+        return JSON.parse(data) as T;
+      } catch (parseError) {
+        Logger.error(TAG, `Failed to parse object for key ${key}: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+        return defaultValue !== undefined ? defaultValue : null;
+      }
+    } catch (error) {
+      // 安全处理错误信息
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      Logger.error(TAG, `Failed to get object for key ${key}: ${errorMessage}`, error as Error);
+      return defaultValue !== undefined ? defaultValue : null;
+    }
   }
 
   /**

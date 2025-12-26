@@ -8,7 +8,7 @@ import Logger from './Logger';
 /**
  * 事件处理器类型
  */
-export type EventHandler<T = Record<string, string | number | boolean | null>> = (data?: T) => void;
+export type EventHandler<T = any> = (data?: T) => void;
 
 /**
  * 事件订阅接口
@@ -49,9 +49,9 @@ export interface BatchEvent {
 /**
  * 批量发布事件接口
  */
-export interface BatchEmitEvent<T extends Record<string, string | number | boolean | null>> {
+export interface BatchEmitEvent {
   eventName: string;
-  data?: T;
+  data?: any;
 }
 
 /**
@@ -81,9 +81,9 @@ export class EventBusUtil {
    * @param once 是否一次性订阅（默认false）
    * @param namespace 命名空间
    */
-  public on<T = Record<string, string | number | boolean | null>>(
+  public on(
     eventName: string,
-    handler: EventHandler<T>,
+    handler: EventHandler,
     priority: number = 0,
     once: boolean = false,
     namespace?: string
@@ -93,7 +93,7 @@ export class EventBusUtil {
     }
 
     const subscription: Subscription = {
-      handler: handler as EventHandler,
+      handler: handler,
       priority,
       once,
       namespace
@@ -113,9 +113,9 @@ export class EventBusUtil {
    * @param priority 优先级
    * @param namespace 命名空间
    */
-  public once<T = Record<string, string | number | boolean | null>>(
+  public once(
     eventName: string,
-    handler: EventHandler<T>,
+    handler: EventHandler,
     priority: number = 0,
     namespace?: string
   ): void {
@@ -127,9 +127,9 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param handler 事件处理器（可选，不传则取消该事件的所有订阅）
    */
-  public off<T = Record<string, string | number | boolean | null>>(
+  public off(
     eventName: string, 
-    handler?: EventHandler<T>
+    handler?: EventHandler
   ): void {
     if (!this.eventMap[eventName]) {
       return;
@@ -168,9 +168,9 @@ export class EventBusUtil {
    * @param eventName 事件名称
    * @param data 事件数据
    */
-  public emit<T extends Record<string, string | number | boolean | null>>(
+  public emit(
     eventName: string, 
-    data?: T
+    data?: any
   ): void {
     if (!this.eventMap[eventName]) {
       return;
@@ -252,10 +252,10 @@ export class EventBusUtil {
    * 批量发布事件
    * @param events 事件数组
    */
-  public emitBatch<T extends Record<string, string | number | boolean | null>>(events: BatchEmitEvent<T>[]): void {
+  public emitBatch(events: BatchEmitEvent[]): void {
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
-      this.emit<T>(event.eventName, event.data);
+      this.emit(event.eventName, event.data);
     }
   }
 
@@ -265,9 +265,9 @@ export class EventBusUtil {
    * @param data 事件数据
    * @param wait 等待时间（毫秒）
    */
-  public emitDebounced<T extends Record<string, string | number | boolean | null>>(
+  public emitDebounced(
     eventName: string, 
-    data?: T, 
+    data?: any, 
     wait: number = 300
   ): void {
     const debounceKey = `__debounce_${eventName}`;
@@ -289,7 +289,7 @@ export class EventBusUtil {
       this.debounceTimers = newDebounceTimers;
       
       // 发布事件
-      this.emit<T>(eventName, data);
+      this.emit(eventName, data);
       Logger.debug('EventBus', `Debounced event emitted: ${eventName}`);
     }, wait);
     
@@ -417,47 +417,47 @@ export class EventNamespace {
   /**
    * 订阅命名空间事件
    */
-  public on<T = Record<string, string | number | boolean | null>>(
+  public on(
     eventName: string, 
-    handler: EventHandler<T>, 
+    handler: EventHandler, 
     priority: number = 0, 
     once: boolean = false
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.on<T>(fullEventName, handler, priority, once, this.namespace);
+    this.eventBus.on(fullEventName, handler, priority, once, this.namespace);
   }
 
   /**
    * 一次性订阅命名空间事件
    */
-  public once<T = Record<string, string | number | boolean | null>>(
+  public once(
     eventName: string, 
-    handler: EventHandler<T>, 
+    handler: EventHandler, 
     priority: number = 0
   ): void {
-    this.on<T>(eventName, handler, priority, true);
+    this.on(eventName, handler, priority, true);
   }
 
   /**
    * 取消命名空间事件订阅
    */
-  public off<T = Record<string, string | number | boolean | null>>(
+  public off(
     eventName: string, 
-    handler?: EventHandler<T>
+    handler?: EventHandler
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.off<T>(fullEventName, handler);
+    this.eventBus.off(fullEventName, handler);
   }
 
   /**
    * 发布命名空间事件
    */
-  public emit<T = Record<string, string | number | boolean | null>>(
+  public emit(
     eventName: string, 
-    data?: T
+    data?: any
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
-    this.eventBus.emit<T>(fullEventName, data);
+    this.eventBus.emit(fullEventName, data);
   }
 
   /**

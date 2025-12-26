@@ -73,11 +73,13 @@ export class SiteDao {
    */
   public async update(site: Site): Promise<void> {
     try {
+      const headersStr = site.headers?.headers ? JSON.stringify(site.headers.headers) : null;
+      
       const valuesBucket: relationalStore.ValuesBucket = {
         name: site.name,
         type: site.type,
         api: site.api,
-        headers: site.headers?.headers ? JsonUtil.stringify(Object.entries(site.headers.headers)) : null,
+        headers: headersStr,
         enabled: site.enabled ? 1 : 0,
         order: site.order,
         updated_at: Date.now()
@@ -368,75 +370,194 @@ export class SiteDao {
           let headers: HeadersData | undefined;
           if (headersStr) {
             try {
-              const headersArray = JsonUtil.parse<Array<Array<string>>>(headersStr);
-              const headersRecord: Record<string, string> = {};
-              // 使用传统for循环替代解构变量声明
-              for (let i = 0; i < headersArray.length; i++) {
-                const key = headersArray[i][0];
-                const value = headersArray[i][1];
-                headersRecord[key] = value;
+              const parsedHeaders = JSON.parse(headersStr);
+              let headersRecord: Record<string, string> = {};
+              
+              if (Array.isArray(parsedHeaders)) {
+                // 处理数组格式: [["key", "value"], [...]]
+                for (let i = 0; i < parsedHeaders.length; i++) {
+                  const item = parsedHeaders[i];
+                  if (Array.isArray(item) && item.length >= 2) {
+                    const key = String(item[0]);
+                    const value = String(item[1]);
+                    headersRecord[key] = value;
+                  }
+                }
+              } else if (typeof parsedHeaders === 'object' && parsedHeaders !== null) {
+                // 处理对象格式: {"key": "value"}
+                const keys = Object.keys(parsedHeaders);
+                for (let i = 0; i < keys.length; i++) {
+                  const key = keys[i];
+                  const value = parsedHeaders[key];
+                  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                    headersRecord[key] = String(value);
+                  }
+                }
               }
-              headers = { headers: headersRecord } as HeadersData;
+              
+              if (Object.keys(headersRecord).length > 0) {
+                headers = { headers: headersRecord };
+              } else {
+                headers = undefined;
+              }
             } catch (error) {
-              // If parsing as array fails, try parsing as record
-              const headersRecord = JsonUtil.parse<Record<string, string>>(headersStr);
-              headers = { headers: headersRecord } as HeadersData;
+              // If all parsing fails, set headers to undefined
+              headers = undefined;
             }
           } else {
             headers = undefined;
           }
           
           const configStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CONFIG));
-          const config: Record<string, string | number | boolean> | undefined = configStr ? JsonUtil.parse<Record<string, string | number | boolean>>(configStr) : undefined;
+          let config: Record<string, string | number | boolean> | undefined;
+          if (configStr) {
+            const parsedConfig = JSON.parse(configStr);
+            if (parsedConfig && typeof parsedConfig === 'object') {
+              config = parsedConfig as Record<string, string | number | boolean>;
+            }
+          }
           
           const siteAuthStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SITE_AUTH));
-          const siteAuth = siteAuthStr ? JsonUtil.parse<Record<string, string>>(siteAuthStr) : undefined;
+          let siteAuth: Record<string, string> | undefined;
+          if (siteAuthStr) {
+            const parsedAuth = JSON.parse(siteAuthStr);
+            if (parsedAuth && typeof parsedAuth === 'object') {
+              siteAuth = parsedAuth as Record<string, string>;
+            }
+          }
           
           const configItemsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CONFIG_ITEMS));
-          const configItems = configItemsStr ? JsonUtil.parse<SiteConfigItem[]>(configItemsStr) : undefined;
+          let configItems: SiteConfigItem[] | undefined;
+          if (configItemsStr) {
+            const parsedConfigItems = JSON.parse(configItemsStr);
+            if (Array.isArray(parsedConfigItems)) {
+              configItems = parsedConfigItems as SiteConfigItem[];
+            }
+          }
           
           const searchConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SEARCH_CONFIG));
-          const searchConfig = searchConfigStr ? JsonUtil.parse<SiteSearchConfig>(searchConfigStr) : {
-            enabled: false,
-            searchDelay: 0,
-            searchLimit: 0,
-            supportAdvancedSearch: false,
-            searchFilters: [],
-            searchCategories: []
-          } as SiteSearchConfig;
+          let searchConfig: SiteSearchConfig;
+          if (searchConfigStr) {
+            const parsedSearchConfig = JSON.parse(searchConfigStr);
+            if (parsedSearchConfig && typeof parsedSearchConfig === 'object') {
+              searchConfig = parsedSearchConfig as SiteSearchConfig;
+            } else {
+              searchConfig = {
+                enabled: false,
+                searchDelay: 0,
+                searchLimit: 0,
+                supportAdvancedSearch: false,
+                searchFilters: [],
+                searchCategories: []
+              };
+            }
+          } else {
+            searchConfig = {
+              enabled: false,
+              searchDelay: 0,
+              searchLimit: 0,
+              supportAdvancedSearch: false,
+              searchFilters: [],
+              searchCategories: []
+            };
+          }
           
           const filterConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.FILTER_CONFIG));
-          const filterConfig = filterConfigStr ? JsonUtil.parse<SiteFilterConfig>(filterConfigStr) : {
-            enabled: false,
-            filterOptions: {},
-            sortOptions: []
-          } as SiteFilterConfig;
+          let filterConfig: SiteFilterConfig;
+          if (filterConfigStr) {
+            const parsedFilterConfig = JSON.parse(filterConfigStr);
+            if (parsedFilterConfig && typeof parsedFilterConfig === 'object') {
+              filterConfig = parsedFilterConfig as SiteFilterConfig;
+            } else {
+              filterConfig = {
+                enabled: false,
+                filterOptions: {},
+                sortOptions: []
+              };
+            }
+          } else {
+            filterConfig = {
+              enabled: false,
+              filterOptions: {},
+              sortOptions: []
+            };
+          }
           
           const performanceConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG));
-          const performanceConfig = performanceConfigStr ? JsonUtil.parse<SitePerformanceConfig>(performanceConfigStr) : {
-            timeout: 30000,
-            retryCount: 3,
-            cacheEnabled: true,
-            cacheDuration: 60,
-            concurrency: 5
-          } as SitePerformanceConfig;
+          let performanceConfig: SitePerformanceConfig;
+          if (performanceConfigStr) {
+            const parsedPerformanceConfig = JSON.parse(performanceConfigStr);
+            if (parsedPerformanceConfig && typeof parsedPerformanceConfig === 'object') {
+              performanceConfig = parsedPerformanceConfig as SitePerformanceConfig;
+            } else {
+              performanceConfig = {
+                timeout: 30000,
+                retryCount: 3,
+                cacheEnabled: true,
+                cacheDuration: 60,
+                concurrency: 5
+              };
+            }
+          } else {
+            performanceConfig = {
+              timeout: 30000,
+              retryCount: 3,
+              cacheEnabled: true,
+              cacheDuration: 60,
+              concurrency: 5
+            };
+          }
           
           const statsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.STATS));
-          const stats = statsStr ? JsonUtil.parse<SiteStats>(statsStr) : {
-            queryCount: 0,
-            errorCount: 0,
-            avgResponseTime: 0
-          } as SiteStats;
+          let stats: SiteStats;
+          if (statsStr) {
+            const parsedStats = JSON.parse(statsStr);
+            if (parsedStats && typeof parsedStats === 'object') {
+              stats = parsedStats as SiteStats;
+            } else {
+              stats = {
+                queryCount: 0,
+                errorCount: 0,
+                avgResponseTime: 0
+              };
+            }
+          } else {
+            stats = {
+              queryCount: 0,
+              errorCount: 0,
+              avgResponseTime: 0
+            };
+          }
           
           const lifecycleStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LIFECYCLE));
-          const lifecycle = lifecycleStr ? JsonUtil.parse<SiteLifecycle>(lifecycleStr) : {
-            initialized: false,
-            loading: false,
-            error: false
-          } as SiteLifecycle;
+          let lifecycle: SiteLifecycle;
+          if (lifecycleStr) {
+            const parsedLifecycle = JSON.parse(lifecycleStr);
+            if (parsedLifecycle && typeof parsedLifecycle === 'object') {
+              lifecycle = parsedLifecycle as SiteLifecycle;
+            } else {
+              lifecycle = {
+                initialized: false,
+                loading: false,
+                error: false
+              };
+            }
+          } else {
+            lifecycle = {
+              initialized: false,
+              loading: false,
+              error: false
+            };
+          }
           
           const tagsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TAGS));
-          const tags = tagsStr ? JsonUtil.parse<Array<string>>(tagsStr) : undefined;
+          let tags: string[] | undefined;
+          if (tagsStr) {
+            const parsedTags = JSON.parse(tagsStr);
+            if (Array.isArray(parsedTags)) {
+              tags = parsedTags as string[];
+            }
+          }
           
           const site: Site = {
             key: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)) || '',
@@ -504,7 +625,7 @@ export class SiteDao {
       search_config: JSON.stringify(site.searchConfig),
       filter_config: JSON.stringify(site.filterConfig),
       performance_config: JSON.stringify(site.performanceConfig),
-      version: site.version ? JsonUtil.stringify(site.version) : null,
+      version: site.version ? JSON.stringify(site.version) : null,
       stats: JSON.stringify(site.stats),
       lifecycle: JSON.stringify(site.lifecycle),
       enabled: site.enabled ? 1 : 0,
