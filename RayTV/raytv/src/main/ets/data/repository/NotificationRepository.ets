@@ -1,4 +1,4 @@
-// NotificationRepository - 通知仓库�?// 负责管理应用内通知、系统通知和用户偏好设�?
+﻿// NotificationRepository - 閫氱煡浠撳簱绫?// 璐熻矗绠＄悊搴旂敤鍐呴€氱煡銆佺郴缁熼€氱煡鍜岀敤鎴峰亸濂借缃?
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
@@ -7,29 +7,29 @@ import { LocalStorageType } from '../model/LocalModel';
 import { CacheType } from '../model/CacheModel';
 
 /**
- * 通知类型枚举
+ * 閫氱煡绫诲瀷鏋氫妇
  */
 export enum NotificationType {
-  // 内容通知
+  // 鍐呭閫氱煡
   LIVE_START = 'live_start',
   LIVE_END = 'live_end',
   VIDEO_UPDATED = 'video_updated',
   SERIES_NEW_EPISODE = 'series_new_episode',
   RECOMMENDATION = 'recommendation',
   
-  // 社交通知
+  // 绀句氦閫氱煡
   FOLLOWED_CHANNEL_LIVE = 'followed_channel_live',
   COMMENT_REPLY = 'comment_reply',
   MENTIONED = 'mentioned',
   LIKE = 'like',
   SHARE = 'share',
   
-  // 系统通知
+  // 绯荤粺閫氱煡
   SYSTEM_ANNOUNCEMENT = 'system_announcement',
   MAINTENANCE_ALERT = 'maintenance_alert',
   FEATURE_UPDATE = 'feature_update',
   
-  // 用户相关通知
+  // 鐢ㄦ埛鐩稿叧閫氱煡
   ACCOUNT_VERIFICATION = 'account_verification',
   PASSWORD_CHANGE = 'password_change',
   LOGIN_ACTIVITY = 'login_activity',
@@ -38,20 +38,20 @@ export enum NotificationType {
   PAYMENT_SUCCESS = 'payment_success',
   PAYMENT_FAILED = 'payment_failed',
   
-  // 互动通知
+  // 浜掑姩閫氱煡
   DOWNLOAD_COMPLETE = 'download_complete',
   DOWNLOAD_FAILED = 'download_failed',
   PLAYBACK_ERROR = 'playback_error',
   WATCHLIST_ADD = 'watchlist_add',
   WATCHLIST_REMOVE = 'watchlist_remove',
   
-  // 定制通知
+  // 瀹氬埗閫氱煡
   CUSTOM = 'custom',
   UNKNOWN = 'unknown'
 }
 
 /**
- * 通知优先级枚�? */
+ * 閫氱煡浼樺厛绾ф灇涓? */
 export enum NotificationPriority {
   LOW = 'low',
   MEDIUM = 'medium',
@@ -60,7 +60,7 @@ export enum NotificationPriority {
 }
 
 /**
- * 通知状态枚�? */
+ * 閫氱煡鐘舵€佹灇涓? */
 export enum NotificationStatus {
   NEW = 'new',
   READ = 'read',
@@ -69,7 +69,7 @@ export enum NotificationStatus {
 }
 
 /**
- * 通知内容接口
+ * 閫氱煡鍐呭鎺ュ彛
  */
 export interface NotificationContent {
   title: string;
@@ -84,7 +84,7 @@ export interface NotificationContent {
 }
 
 /**
- * 通知元数据接�? */
+ * 閫氱煡鍏冩暟鎹帴鍙? */
 export interface NotificationMetadata {
   relatedEntityId?: string;
   relatedEntityType?: 'video' | 'live' | 'user' | 'channel' | 'comment';
@@ -102,7 +102,7 @@ export interface NotificationMetadata {
 }
 
 /**
- * 通知接口
+ * 閫氱煡鎺ュ彛
  */
 export interface Notification {
   id: string;
@@ -117,97 +117,97 @@ export interface Notification {
 }
 
 /**
- * 通知配置接口
+ * 閫氱煡閰嶇疆鎺ュ彛
  */
 export interface NotificationConfig {
-  // 通用设置
+  // 閫氱敤璁剧疆
   enableNotifications: boolean;
   enableSound: boolean;
   enableVibration: boolean;
   enableLight: boolean;
   
-  // 类型设置
+  // 绫诲瀷璁剧疆
   enabledTypes: NotificationType[];
   mutedTypes: NotificationType[];
   
-  // 时间段设�?  enableDoNotDisturb: boolean;
+  // 鏃堕棿娈佃缃?  enableDoNotDisturb: boolean;
   doNotDisturbStart: string; // HH:MM
   doNotDisturbEnd: string; // HH:MM
   
-  // 优先级设�?  minPriority: NotificationPriority;
+  // 浼樺厛绾ц缃?  minPriority: NotificationPriority;
   
-  // 高级设置
+  // 楂樼骇璁剧疆
   enableBadgeCount: boolean;
   maxStoredNotifications: number;
   notificationHistoryDays: number;
   
-  // 频道/用户特定设置
+  // 棰戦亾/鐢ㄦ埛鐗瑰畾璁剧疆
   subscribedChannels: string[];
   mutedChannels: string[];
   
-  // 系统通知设置
+  // 绯荤粺閫氱煡璁剧疆
   enableSystemNotifications: boolean;
   enableMaintenanceAlerts: boolean;
   enableFeatureUpdates: boolean;
   
-  // 社交通知设置
+  // 绀句氦閫氱煡璁剧疆
   enableSocialNotifications: boolean;
   enableCommentReplies: boolean;
   enableMentions: boolean;
   enableLikes: boolean;
   enableShares: boolean;
   
-  // 内容通知设置
+  // 鍐呭閫氱煡璁剧疆
   enableLiveNotifications: boolean;
   enableVideoUpdateNotifications: boolean;
   enableRecommendationNotifications: boolean;
   
-  // 用户通知设置
+  // 鐢ㄦ埛閫氱煡璁剧疆
   enableAccountNotifications: boolean;
   enablePaymentNotifications: boolean;
   enableSubscriptionNotifications: boolean;
   
-  // 互动通知设置
+  // 浜掑姩閫氱煡璁剧疆
   enableDownloadNotifications: boolean;
   enableErrorNotifications: boolean;
 }
 
 /**
- * 通知事件类型
+ * 閫氱煡浜嬩欢绫诲瀷
  */
 export const NotificationEventType = {
-  // 通知生命周期事件
+  // 閫氱煡鐢熷懡鍛ㄦ湡浜嬩欢
   RECEIVED: 'notification:received',
   READ: 'notification:read',
   DISMISSED: 'notification:dismissed',
   ARCHIVED: 'notification:archived',
   RESTORED: 'notification:restored',
   
-  // 状态变更事�?  STATUS_CHANGED: 'notification:statusChanged',
+  // 鐘舵€佸彉鏇翠簨浠?  STATUS_CHANGED: 'notification:statusChanged',
   BADGE_COUNT_CHANGED: 'notification:badgeCountChanged',
   
-  // 配置事件
+  // 閰嶇疆浜嬩欢
   CONFIG_CHANGED: 'notification:configChanged',
   DO_NOT_DISTURB_TOGGLED: 'notification:doNotDisturbToggled',
   
-  // 组事�?  GROUP_CREATED: 'notification:groupCreated',
+  // 缁勪簨浠?  GROUP_CREATED: 'notification:groupCreated',
   GROUP_UPDATED: 'notification:groupUpdated',
   
-  // 批量事件
+  // 鎵归噺浜嬩欢
   BATCH_MARKED_READ: 'notification:batchMarkedRead',
   BATCH_DISMISSED: 'notification:batchDismissed',
   BATCH_ARCHIVED: 'notification:batchArchived',
   CLEARED_ALL: 'notification:clearedAll',
   
-  // 过滤事件
+  // 杩囨护浜嬩欢
   FILTER_APPLIED: 'notification:filterApplied',
   
-  // 统计事件
+  // 缁熻浜嬩欢
   STATS_UPDATED: 'notification:statsUpdated'
 } as const;
 
 /**
- * 通知事件数据
+ * 閫氱煡浜嬩欢鏁版嵁
  */
 export interface NotificationEvent {
   type: string;
@@ -224,7 +224,7 @@ export interface NotificationEvent {
 }
 
 /**
- * 通知过滤器接�? */
+ * 閫氱煡杩囨护鍣ㄦ帴鍙? */
 export interface NotificationFilter {
   types?: NotificationType[];
   status?: NotificationStatus[];
@@ -240,7 +240,7 @@ export interface NotificationFilter {
 }
 
 /**
- * 通知统计接口
+ * 閫氱煡缁熻鎺ュ彛
  */
 export interface NotificationStats {
   totalCount: number;
@@ -256,7 +256,7 @@ export interface NotificationStats {
 }
 
 /**
- * 通知组接�? */
+ * 閫氱煡缁勬帴鍙? */
 export interface NotificationGroup {
   id: string;
   title: string;
@@ -272,7 +272,7 @@ export interface NotificationGroup {
 }
 
 /**
- * 通知仓库�? */
+ * 閫氱煡浠撳簱绫? */
 export class NotificationRepository {
   private static instance: NotificationRepository;
   private logger = Logger.getInstance();
@@ -280,7 +280,7 @@ export class NotificationRepository {
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
-  // 存储键配�?  private storageKeys = {
+  // 瀛樺偍閿厤缃?  private storageKeys = {
     notifications: 'notification:notifications',
     config: 'notification:config',
     stats: 'notification:stats',
@@ -288,14 +288,14 @@ export class NotificationRepository {
     badgeCount: 'notification:badgeCount'
   };
   
-  // 缓存键配�?  private cacheKeys = {
+  // 缂撳瓨閿厤缃?  private cacheKeys = {
     notifications: 'notification:notifications',
     config: 'notification:config',
     stats: 'notification:stats',
     groups: 'notification:groups'
   };
   
-  // 默认配置
+  // 榛樿閰嶇疆
   private defaultConfig: NotificationConfig = {
     enableNotifications: true,
     enableSound: true,
@@ -330,7 +330,7 @@ export class NotificationRepository {
     enableErrorNotifications: true
   };
   
-  // 内部状�?  private notifications: Map<string, Notification> = new Map();
+  // 鍐呴儴鐘舵€?  private notifications: Map<string, Notification> = new Map();
   private groups: Map<string, NotificationGroup> = new Map();
   private config: NotificationConfig = this.defaultConfig;
   private stats: NotificationStats = this.createDefaultStats();
@@ -338,14 +338,14 @@ export class NotificationRepository {
   private isInitialized: boolean = false;
   
   /**
-   * 私有构造函�?   */
+   * 绉佹湁鏋勯€犲嚱鏁?   */
   private constructor() {
-    // 初始化事件监听器
+    // 鍒濆鍖栦簨浠剁洃鍚櫒
     this.setupEventListeners();
   }
   
   /**
-   * 获取单例实例
+   * 鑾峰彇鍗曚緥瀹炰緥
    */
   public static getInstance(): NotificationRepository {
     if (!NotificationRepository.instance) {
@@ -355,26 +355,26 @@ export class NotificationRepository {
   }
   
   /**
-   * 初始化仓�?   */
+   * 鍒濆鍖栦粨搴?   */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
     
     try {
-      // 加载配置
+      // 鍔犺浇閰嶇疆
       await this.loadConfig();
       
-      // 加载通知数据
+      // 鍔犺浇閫氱煡鏁版嵁
       await this.loadNotifications();
       
-      // 加载统计信息
+      // 鍔犺浇缁熻淇℃伅
       await this.loadStats();
       
-      // 加载分组信息
+      // 鍔犺浇鍒嗙粍淇℃伅
       await this.loadGroups();
       
-      // 加载徽章计数
+      // 鍔犺浇寰界珷璁℃暟
       await this.loadBadgeCount();
       
       this.isInitialized = true;
@@ -386,9 +386,9 @@ export class NotificationRepository {
   }
   
   /**
-   * 设置事件监听�?   */
+   * 璁剧疆浜嬩欢鐩戝惉鍣?   */
   private setupEventListeners(): void {
-    // 监听应用生命周期事件
+    // 鐩戝惉搴旂敤鐢熷懡鍛ㄦ湡浜嬩欢
     this.eventBus.on('app:foreground', ( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(( instanceof Error ? ( instanceof Error ? ( : new Error(String(( : new Error(String(( instanceof Error ? ( : new Error(String(())))))) => {
       this.handleAppForeground();
     });
@@ -397,7 +397,7 @@ export class NotificationRepository {
       this.handleAppBackground();
     });
     
-    // 监听网络状态变�?    this.eventBus.on('network:online', () => {
+    // 鐩戝惉缃戠粶鐘舵€佸彉鍖?    this.eventBus.on('network:online', () => {
       this.handleNetworkOnline();
     });
     
@@ -405,14 +405,14 @@ export class NotificationRepository {
       this.handleNetworkOffline();
     });
     
-    // 监听存储变化
+    // 鐩戝惉瀛樺偍鍙樺寲
     this.eventBus.on('storage:changed', (event) => {
       this.handleStorageChanged(event);
     });
   }
   
   /**
-   * 创建默认统计信息
+   * 鍒涘缓榛樿缁熻淇℃伅
    */
   private createDefaultStats(): NotificationStats {
     return {
@@ -430,7 +430,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 加载配置
+   * 鍔犺浇閰嶇疆
    */
   private async loadConfig(): Promise<void> {
     try {
@@ -446,12 +446,12 @@ export class NotificationRepository {
         await this.saveConfig();
       }
       
-      // 缓存配置
+      // 缂撳瓨閰嶇疆
       await this.cacheService.set(
         this.cacheKeys.config,
         this.config,
         CacheType.PERSISTENT,
-        3600 // 1小时
+        3600 // 1灏忔椂
       );
     } catch (error) {
       this.Logger.error('Failed to load notification config:', error);
@@ -460,7 +460,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 保存配置
+   * 淇濆瓨閰嶇疆
    */
   private async saveConfig(): Promise<void> {
     try {
@@ -521,7 +521,7 @@ export class NotificationRepository {
         LocalStorageType.PERSISTENT
       )))))));
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheService.set(
         this.cacheKeys.config,
         this.config,
@@ -529,7 +529,7 @@ export class NotificationRepository {
         3600
       );
       
-      // 发布配置变更事件
+      // 鍙戝竷閰嶇疆鍙樻洿浜嬩欢
       this.eventBus.emit(NotificationEventType.CONFIG_CHANGED, {
         type: NotificationEventType.CONFIG_CHANGED,
         timestamp: Date.now(),
@@ -541,7 +541,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 加载通知数据
+   * 鍔犺浇閫氱煡鏁版嵁
    */
   private async loadNotifications(): Promise<void> {
     try {
@@ -582,12 +582,12 @@ export class NotificationRepository {
         });
       }
       
-      // 缓存通知数据
+      // 缂撳瓨閫氱煡鏁版嵁
       await this.cacheService.set(
         this.cacheKeys.notifications,
         Array.from(this.notifications.values()),
         CacheType.PERSISTENT,
-        300 // 5分钟
+        300 // 5鍒嗛挓
       );
     } catch (error) {
       this.Logger.error('Failed to load notifications:', error);
@@ -596,7 +596,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 保存通知数据
+   * 淇濆瓨閫氱煡鏁版嵁
    */
   private async saveNotifications(): Promise<void> {
     try {
@@ -659,7 +659,7 @@ export class NotificationRepository {
         LocalStorageType.PERSISTENT
       )))))));
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheService.set(
         this.cacheKeys.notifications,
         notifications,
@@ -672,7 +672,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 加载统计信息
+   * 鍔犺浇缁熻淇℃伅
    */
   private async loadStats(): Promise<void> {
     try {
@@ -713,12 +713,12 @@ export class NotificationRepository {
         await this.saveStats();
       }
       
-      // 缓存统计信息
+      // 缂撳瓨缁熻淇℃伅
       await this.cacheService.set(
         this.cacheKeys.stats,
         this.stats,
         CacheType.PERSISTENT,
-        600 // 10分钟
+        600 // 10鍒嗛挓
       );
     } catch (error) {
       this.Logger.error('Failed to load notification stats:', error);
@@ -727,7 +727,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 保存统计信息
+   * 淇濆瓨缁熻淇℃伅
    */
   private async saveStats(): Promise<void> {
     try {
@@ -788,7 +788,7 @@ export class NotificationRepository {
         LocalStorageType.PERSISTENT
       )))))));
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheService.set(
         this.cacheKeys.stats,
         this.stats,
@@ -796,7 +796,7 @@ export class NotificationRepository {
         600
       );
       
-      // 发布统计更新事件
+      // 鍙戝竷缁熻鏇存柊浜嬩欢
       this.eventBus.emit(NotificationEventType.STATS_UPDATED, {
         type: NotificationEventType.STATS_UPDATED,
         timestamp: Date.now(),
@@ -808,7 +808,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 加载分组信息
+   * 鍔犺浇鍒嗙粍淇℃伅
    */
   private async loadGroups(): Promise<void> {
     try {
@@ -849,7 +849,7 @@ export class NotificationRepository {
         });
       }
       
-      // 缓存分组信息
+      // 缂撳瓨鍒嗙粍淇℃伅
       await this.cacheService.set(
         this.cacheKeys.groups,
         Array.from(this.groups.values()),
@@ -863,7 +863,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 保存分组信息
+   * 淇濆瓨鍒嗙粍淇℃伅
    */
   private async saveGroups(): Promise<void> {
     try {
@@ -926,7 +926,7 @@ export class NotificationRepository {
         LocalStorageType.PERSISTENT
       )))))));
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheService.set(
         this.cacheKeys.groups,
         groups,
@@ -939,7 +939,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 加载徽章计数
+   * 鍔犺浇寰界珷璁℃暟
    */
   private async loadBadgeCount(): Promise<void> {
     try {
@@ -983,7 +983,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 保存徽章计数
+   * 淇濆瓨寰界珷璁℃暟
    */
   private async saveBadgeCount(): Promise<void> {
     try {
@@ -1044,7 +1044,7 @@ export class NotificationRepository {
         LocalStorageType.PERSISTENT
       )))))));
       
-      // 发布徽章计数变更事件
+      // 鍙戝竷寰界珷璁℃暟鍙樻洿浜嬩欢
       this.eventBus.emit(NotificationEventType.BADGE_COUNT_CHANGED, {
         type: NotificationEventType.BADGE_COUNT_CHANGED,
         timestamp: Date.now(),
@@ -1056,45 +1056,45 @@ export class NotificationRepository {
   }
   
   /**
-   * 处理应用进入前台
+   * 澶勭悊搴旂敤杩涘叆鍓嶅彴
    */
   private handleAppForeground(): void {
     this.logger.debug('NotificationRepository: App entered foreground');
-    // 可以在这里执行一些前台操作，如刷新通知�?  }
+    // 鍙互鍦ㄨ繖閲屾墽琛屼竴浜涘墠鍙版搷浣滐紝濡傚埛鏂伴€氱煡绛?  }
   
   /**
-   * 处理应用进入后台
+   * 澶勭悊搴旂敤杩涘叆鍚庡彴
    */
   private handleAppBackground(): void {
     this.logger.debug('NotificationRepository: App entered background');
-    // 可以在这里执行一些后台操作，如保存数据等
+    // 鍙互鍦ㄨ繖閲屾墽琛屼竴浜涘悗鍙版搷浣滐紝濡備繚瀛樻暟鎹瓑
     this.saveAllData();
   }
   
   /**
-   * 处理网络在线
+   * 澶勭悊缃戠粶鍦ㄧ嚎
    */
   private handleNetworkOnline(): void {
     this.logger.debug('NotificationRepository: Network online');
-    // 可以在这里执行一些网络恢复后的操�?  }
+    // 鍙互鍦ㄨ繖閲屾墽琛屼竴浜涚綉缁滄仮澶嶅悗鐨勬搷浣?  }
   
   /**
-   * 处理网络离线
+   * 澶勭悊缃戠粶绂荤嚎
    */
   private handleNetworkOffline(): void {
     this.logger.debug('NotificationRepository: Network offline');
-    // 可以在这里执行一些网络断开后的操作
+    // 鍙互鍦ㄨ繖閲屾墽琛屼竴浜涚綉缁滄柇寮€鍚庣殑鎿嶄綔
   }
   
   /**
-   * 处理存储变化
+   * 澶勭悊瀛樺偍鍙樺寲
    */
   private handleStorageChanged(event: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): void {
     this.logger.debug('NotificationRepository: Storage changed', event instanceof Error ? event : new Error(String(event instanceof Error ? event instanceof Error ? event : new Error(String(event : new Error(String(event instanceof Error ? event : new Error(String(event)))));
-    // 可以在这里处理存储变化事�?  }
+    // 鍙互鍦ㄨ繖閲屽鐞嗗瓨鍌ㄥ彉鍖栦簨浠?  }
   
   /**
-   * 保存所有数�?   */
+   * 淇濆瓨鎵€鏈夋暟鎹?   */
   private async saveAllData(): Promise<void> {
     try {
       await Promise.all([
@@ -1111,14 +1111,14 @@ export class NotificationRepository {
   }
   
   /**
-   * 获取通知配置
+   * 鑾峰彇閫氱煡閰嶇疆
    */
   public getConfig(): NotificationConfig {
     return { ...this.config };
   }
   
   /**
-   * 更新通知配置
+   * 鏇存柊閫氱煡閰嶇疆
    */
   public async updateConfig(updates: Partial<NotificationConfig>): Promise<void> {
     this.config = { ...this.config, ...updates };
@@ -1152,14 +1152,14 @@ export class NotificationRepository {
   }
   
   /**
-   * 重置通知配置为默认�?   */
+   * 閲嶇疆閫氱煡閰嶇疆涓洪粯璁ゅ€?   */
   public async resetConfig(): Promise<void> {
     this.config = this.defaultConfig;
     await this.saveConfig();
   }
   
   /**
-   * 检查通知类型是否启用
+   * 妫€鏌ラ€氱煡绫诲瀷鏄惁鍚敤
    */
   public isTypeEnabled(type: NotificationType): boolean {
     return this.config.enabledTypes.includes(type) && 
@@ -1167,7 +1167,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 检查是否在免打扰时间段
+   * 妫€鏌ユ槸鍚﹀湪鍏嶆墦鎵版椂闂存
    */
   public isInDoNotDisturb(): boolean {
     if (!this.config.enableDoNotDisturb) {
@@ -1191,7 +1191,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 检查是否可以发送通知
+   * 妫€鏌ユ槸鍚﹀彲浠ュ彂閫侀€氱煡
    */
   public canSendNotification(notification: Notification): boolean {
     if (!this.config.enableNotifications) {
@@ -1214,7 +1214,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 获取优先级级�?   */
+   * 鑾峰彇浼樺厛绾х骇鍒?   */
   private getPriorityLevel(priority: NotificationPriority): number {
     switch (priority) {
       case NotificationPriority.URGENT: return 4;
@@ -1226,7 +1226,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 添加通知
+   * 娣诲姞閫氱煡
    */
   public async addNotification(notification: Notification): Promise<boolean> {
     if (!this.canSendNotification(notification)) {
@@ -1235,31 +1235,31 @@ export class NotificationRepository {
     }
     
     try {
-      // 检查通知是否已存�?      if (this.notifications.has(notification.id)) {
+      // 妫€鏌ラ€氱煡鏄惁宸插瓨鍦?      if (this.notifications.has(notification.id)) {
         this.logger.debug('Notification already exists:', notification.id);
         return false;
       }
       
-      // 添加通知
+      // 娣诲姞閫氱煡
       this.notifications.set(notification.id, notification);
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForNewNotification(notification);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       if (notification.status === NotificationStatus.NEW) {
         this.badgeCount++;
         await this.saveBadgeCount();
       }
       
-      // 更新分组
+      // 鏇存柊鍒嗙粍
       await this.updateGroupsForNotification(notification);
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
-      // 发布通知接收事件
+      // 鍙戝竷閫氱煡鎺ユ敹浜嬩欢
       this.eventBus.emit(NotificationEventType.RECEIVED, {
         type: NotificationEventType.RECEIVED,
         timestamp: Date.now(),
@@ -1275,7 +1275,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 批量添加通知
+   * 鎵归噺娣诲姞閫氱煡
    */
   public async addNotifications(notifications: Notification[]): Promise<number> {
     let successCount = 0;
@@ -1291,39 +1291,39 @@ export class NotificationRepository {
   }
   
   /**
-   * 获取通知
+   * 鑾峰彇閫氱煡
    */
   public getNotification(id: string): Notification | undefined {
     return this.notifications.get(id);
   }
   
   /**
-   * 获取所有通知
+   * 鑾峰彇鎵€鏈夐€氱煡
    */
   public getAllNotifications(): Notification[] {
     return Array.from(this.notifications.values());
   }
   
   /**
-   * 获取过滤后的通知
+   * 鑾峰彇杩囨护鍚庣殑閫氱煡
    */
   public getFilteredNotifications(filter: NotificationFilter): Notification[] {
     let notifications = this.getAllNotifications();
     
-    // 按类型过�?    if (filter.types && filter.types.length > 0) {
+    // 鎸夌被鍨嬭繃婊?    if (filter.types && filter.types.length > 0) {
       notifications = notifications.filter(n => filter.types!.includes(n.type));
     }
     
-    // 按状态过�?    if (filter.status && filter.status.length > 0) {
+    // 鎸夌姸鎬佽繃婊?    if (filter.status && filter.status.length > 0) {
       notifications = notifications.filter(n => filter.status!.includes(n.status));
     }
     
-    // 按优先级过滤
+    // 鎸変紭鍏堢骇杩囨护
     if (filter.priorities && filter.priorities.length > 0) {
       notifications = notifications.filter(n => filter.priorities!.includes(n.priority));
     }
     
-    // 按时间范围过�?    if (filter.startDate) {
+    // 鎸夋椂闂磋寖鍥磋繃婊?    if (filter.startDate) {
       notifications = notifications.filter(n => n.metadata.timestamp >= filter.startDate!);
     }
     
@@ -1331,7 +1331,7 @@ export class NotificationRepository {
       notifications = notifications.filter(n => n.metadata.timestamp <= filter.endDate!);
     }
     
-    // 按搜索词过滤
+    // 鎸夋悳绱㈣瘝杩囨护
     if (filter.searchTerm) {
       const searchTerm = filter.searchTerm.toLowerCase();
       notifications = notifications.filter(n => 
@@ -1340,7 +1340,7 @@ export class NotificationRepository {
       );
     }
     
-    // 按相关实体过�?    if (filter.relatedEntityId) {
+    // 鎸夌浉鍏冲疄浣撹繃婊?    if (filter.relatedEntityId) {
       notifications = notifications.filter(n => n.metadata.relatedEntityId === filter.relatedEntityId);
     }
     
@@ -1348,13 +1348,13 @@ export class NotificationRepository {
       notifications = notifications.filter(n => n.metadata.relatedEntityType === filter.relatedEntityType);
     }
     
-    // 按发送者过�?    if (filter.senderId) {
+    // 鎸夊彂閫佽€呰繃婊?    if (filter.senderId) {
       notifications = notifications.filter(n => n.metadata.senderId === filter.senderId);
     }
     
-    // 排序（按时间倒序�?    notifications.sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.metadata.timestamp - a.metadata.timestamp);
+    // 鎺掑簭锛堟寜鏃堕棿鍊掑簭锛?    notifications.sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.metadata.timestamp - a.metadata.timestamp);
     
-    // 分页
+    // 鍒嗛〉
     if (filter.limit) {
       const offset = filter.offset || 0;
       notifications = notifications.slice(offset, offset + filter.limit);
@@ -1364,7 +1364,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 标记通知为已�?   */
+   * 鏍囪閫氱煡涓哄凡璇?   */
   public async markAsRead(id: string): Promise<boolean> {
     try {
       const notification = this.notifications.get(id);
@@ -1373,25 +1373,25 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.READ) {
-        return true; // 已经是已读状�?      }
+        return true; // 宸茬粡鏄凡璇荤姸鎬?      }
       
-      // 更新状�?      notification.status = NotificationStatus.READ;
+      // 鏇存柊鐘舵€?      notification.status = NotificationStatus.READ;
       notification.readAt = Date.now();
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForStatusChange(notification, NotificationStatus.READ);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       if (this.badgeCount > 0) {
         this.badgeCount--;
         await this.saveBadgeCount();
       }
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
-      // 发布通知已读事件
+      // 鍙戝竷閫氱煡宸茶浜嬩欢
       this.eventBus.emit(NotificationEventType.READ, {
         type: NotificationEventType.READ,
         timestamp: Date.now(),
@@ -1407,7 +1407,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 批量标记为已�?   */
+   * 鎵归噺鏍囪涓哄凡璇?   */
   public async markAsReadBatch(ids: string[]): Promise<number> {
     let successCount = 0;
     
@@ -1418,7 +1418,7 @@ export class NotificationRepository {
     }
     
     if (successCount > 0) {
-      // 发布批量标记已读事件
+      // 鍙戝竷鎵归噺鏍囪宸茶浜嬩欢
       this.eventBus.emit(NotificationEventType.BATCH_MARKED_READ, {
         type: NotificationEventType.BATCH_MARKED_READ,
         timestamp: Date.now( instanceof Error ? {
@@ -1484,7 +1484,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 标记通知为已关闭
+   * 鏍囪閫氱煡涓哄凡鍏抽棴
    */
   public async dismissNotification(id: string): Promise<boolean> {
     try {
@@ -1494,25 +1494,25 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.DISMISSED) {
-        return true; // 已经是已关闭状�?      }
+        return true; // 宸茬粡鏄凡鍏抽棴鐘舵€?      }
       
-      // 更新状�?      notification.status = NotificationStatus.DISMISSED;
+      // 鏇存柊鐘舵€?      notification.status = NotificationStatus.DISMISSED;
       notification.dismissedAt = Date.now();
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForStatusChange(notification, NotificationStatus.DISMISSED);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       if (notification.status === NotificationStatus.NEW && this.badgeCount > 0) {
         this.badgeCount--;
         await this.saveBadgeCount();
       }
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
-      // 发布通知关闭事件
+      // 鍙戝竷閫氱煡鍏抽棴浜嬩欢
       this.eventBus.emit(NotificationEventType.DISMISSED, {
         type: NotificationEventType.DISMISSED,
         timestamp: Date.now(),
@@ -1528,7 +1528,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 批量标记为已关闭
+   * 鎵归噺鏍囪涓哄凡鍏抽棴
    */
   public async dismissNotificationsBatch(ids: string[]): Promise<number> {
     let successCount = 0;
@@ -1540,7 +1540,7 @@ export class NotificationRepository {
     }
     
     if (successCount > 0) {
-      // 发布批量关闭事件
+      // 鍙戝竷鎵归噺鍏抽棴浜嬩欢
       this.eventBus.emit(NotificationEventType.BATCH_DISMISSED, {
         type: NotificationEventType.BATCH_DISMISSED,
         timestamp: Date.now( instanceof Error ? {
@@ -1606,7 +1606,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 归档通知
+   * 褰掓。閫氱煡
    */
   public async archiveNotification(id: string): Promise<boolean> {
     try {
@@ -1616,25 +1616,25 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.ARCHIVED) {
-        return true; // 已经是归档状�?      }
+        return true; // 宸茬粡鏄綊妗ｇ姸鎬?      }
       
-      // 更新状�?      notification.status = NotificationStatus.ARCHIVED;
+      // 鏇存柊鐘舵€?      notification.status = NotificationStatus.ARCHIVED;
       notification.archivedAt = Date.now();
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForStatusChange(notification, NotificationStatus.ARCHIVED);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       if (notification.status === NotificationStatus.NEW && this.badgeCount > 0) {
         this.badgeCount--;
         await this.saveBadgeCount();
       }
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
-      // 发布通知归档事件
+      // 鍙戝竷閫氱煡褰掓。浜嬩欢
       this.eventBus.emit(NotificationEventType.ARCHIVED, {
         type: NotificationEventType.ARCHIVED,
         timestamp: Date.now(),
@@ -1650,7 +1650,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 批量归档通知
+   * 鎵归噺褰掓。閫氱煡
    */
   public async archiveNotificationsBatch(ids: string[]): Promise<number> {
     let successCount = 0;
@@ -1662,7 +1662,7 @@ export class NotificationRepository {
     }
     
     if (successCount > 0) {
-      // 发布批量归档事件
+      // 鍙戝竷鎵归噺褰掓。浜嬩欢
       this.eventBus.emit(NotificationEventType.BATCH_ARCHIVED, {
         type: NotificationEventType.BATCH_ARCHIVED,
         timestamp: Date.now( instanceof Error ? {
@@ -1728,7 +1728,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 恢复通知
+   * 鎭㈠閫氱煡
    */
   public async restoreNotification(id: string): Promise<boolean> {
     try {
@@ -1738,26 +1738,26 @@ export class NotificationRepository {
       }
       
       if (notification.status === NotificationStatus.NEW) {
-        return true; // 已经是新状�?      }
+        return true; // 宸茬粡鏄柊鐘舵€?      }
       
-      // 恢复状�?      const oldStatus = notification.status;
+      // 鎭㈠鐘舵€?      const oldStatus = notification.status;
       notification.status = NotificationStatus.NEW;
       notification.readAt = undefined;
       notification.dismissedAt = undefined;
       notification.archivedAt = undefined;
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForStatusChange(notification, oldStatus, NotificationStatus.NEW);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       this.badgeCount++;
       await this.saveBadgeCount();
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
-      // 发布通知恢复事件
+      // 鍙戝竷閫氱煡鎭㈠浜嬩欢
       this.eventBus.emit(NotificationEventType.RESTORED, {
         type: NotificationEventType.RESTORED,
         timestamp: Date.now(),
@@ -1773,7 +1773,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 删除通知
+   * 鍒犻櫎閫氱煡
    */
   public async deleteNotification(id: string): Promise<boolean> {
     try {
@@ -1782,22 +1782,22 @@ export class NotificationRepository {
         return false;
       }
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStatsForDelete(notification);
       
-      // 更新徽章计数
+      // 鏇存柊寰界珷璁℃暟
       if (notification.status === NotificationStatus.NEW && this.badgeCount > 0) {
         this.badgeCount--;
         await this.saveBadgeCount();
       }
       
-      // 删除通知
+      // 鍒犻櫎閫氱煡
       this.notifications.delete(id);
       
-      // 从分组中移除
+      // 浠庡垎缁勪腑绉婚櫎
       await this.removeNotificationFromGroups(id);
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveStats();
       
@@ -1810,7 +1810,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 批量删除通知
+   * 鎵归噺鍒犻櫎閫氱煡
    */
   public async deleteNotificationsBatch(ids: string[]): Promise<number> {
     let successCount = 0;
@@ -1826,31 +1826,31 @@ export class NotificationRepository {
   }
   
   /**
-   * 清空所有通知
+   * 娓呯┖鎵€鏈夐€氱煡
    */
   public async clearAllNotifications(): Promise<boolean> {
     try {
       const notificationCount = this.notifications.size;
       
-      // 清空所有通知
+      // 娓呯┖鎵€鏈夐€氱煡
       this.notifications.clear();
       
-      // 清空分组
+      // 娓呯┖鍒嗙粍
       this.groups.clear();
       
-      // 重置统计信息
+      // 閲嶇疆缁熻淇℃伅
       this.stats = this.createDefaultStats();
       
-      // 重置徽章计数
+      // 閲嶇疆寰界珷璁℃暟
       this.badgeCount = 0;
       
-      // 保存数据
+      // 淇濆瓨鏁版嵁
       await this.saveNotifications();
       await this.saveGroups();
       await this.saveStats();
       await this.saveBadgeCount();
       
-      // 发布清空事件
+      // 鍙戝竷娓呯┖浜嬩欢
       this.eventBus.emit(NotificationEventType.CLEARED_ALL, {
         type: NotificationEventType.CLEARED_ALL,
         timestamp: Date.now( instanceof Error ? {
@@ -1918,27 +1918,27 @@ export class NotificationRepository {
   }
   
   /**
-   * 更新新通知的统计信�?   */
+   * 鏇存柊鏂伴€氱煡鐨勭粺璁′俊鎭?   */
   private updateStatsForNewNotification(notification: Notification): void {
     this.stats.totalCount++;
     this.stats.newCount++;
     this.stats.lastReceivedTime = Math.max(this.stats.lastReceivedTime, notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp : new Error(String(notification.metadata.timestamp instanceof Error ? notification.metadata.timestamp : new Error(String(notification.metadata.timestamp)))))));
     
-    // 按类型统�?    const typeCount = this.stats.byType.get(notification.type) || 0;
+    // 鎸夌被鍨嬬粺璁?    const typeCount = this.stats.byType.get(notification.type) || 0;
     this.stats.byType.set(notification.type, typeCount + 1);
     
-    // 按优先级统计
+    // 鎸変紭鍏堢骇缁熻
     const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
     this.stats.byPriority.set(notification.priority, priorityCount + 1);
     
-    // 按发送者统�?    if (notification.metadata.senderId) {
+    // 鎸夊彂閫佽€呯粺璁?    if (notification.metadata.senderId) {
       const senderCount = this.stats.bySender.get(notification.metadata.senderId) || 0;
       this.stats.bySender.set(notification.metadata.senderId, senderCount + 1);
     }
   }
   
   /**
-   * 更新状态变更的统计信息
+   * 鏇存柊鐘舵€佸彉鏇寸殑缁熻淇℃伅
    */
   private updateStatsForStatusChange(notification: Notification, newStatus: NotificationStatus): void;
   private updateStatsForStatusChange(notification: Notification, oldStatus: NotificationStatus, newStatus: NotificationStatus): void;
@@ -1946,7 +1946,7 @@ export class NotificationRepository {
     const oldStatus = newStatus ? oldStatusOrNewStatus : notification.status;
     const actualNewStatus = newStatus || oldStatusOrNewStatus;
     
-    // 减少旧状态的计数
+    // 鍑忓皯鏃х姸鎬佺殑璁℃暟
     switch (oldStatus) {
       case NotificationStatus.NEW:
         this.stats.newCount--;
@@ -1962,7 +1962,7 @@ export class NotificationRepository {
         break;
     }
     
-    // 增加新状态的计数
+    // 澧炲姞鏂扮姸鎬佺殑璁℃暟
     switch (actualNewStatus) {
       case NotificationStatus.NEW:
         this.stats.newCount++;
@@ -1981,11 +1981,11 @@ export class NotificationRepository {
   }
   
   /**
-   * 更新删除通知的统计信�?   */
+   * 鏇存柊鍒犻櫎閫氱煡鐨勭粺璁′俊鎭?   */
   private updateStatsForDelete(notification: Notification): void {
     this.stats.totalCount--;
     
-    // 减少状态的计数
+    // 鍑忓皯鐘舵€佺殑璁℃暟
     switch (notification.status) {
       case NotificationStatus.NEW:
         this.stats.newCount--;
@@ -2001,7 +2001,7 @@ export class NotificationRepository {
         break;
     }
     
-    // 减少类型统计
+    // 鍑忓皯绫诲瀷缁熻
     const typeCount = this.stats.byType.get(notification.type) || 0;
     if (typeCount > 1) {
       this.stats.byType.set(notification.type, typeCount - 1);
@@ -2009,14 +2009,14 @@ export class NotificationRepository {
       this.stats.byType.delete(notification.type);
     }
     
-    // 减少优先级统�?    const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
+    // 鍑忓皯浼樺厛绾х粺璁?    const priorityCount = this.stats.byPriority.get(notification.priority) || 0;
     if (priorityCount > 1) {
       this.stats.byPriority.set(notification.priority, priorityCount - 1);
     } else {
       this.stats.byPriority.delete(notification.priority);
     }
     
-    // 减少发送者统�?    if (notification.metadata.senderId) {
+    // 鍑忓皯鍙戦€佽€呯粺璁?    if (notification.metadata.senderId) {
       const senderCount = this.stats.bySender.get(notification.metadata.senderId) || 0;
       if (senderCount > 1) {
         this.stats.bySender.set(notification.metadata.senderId, senderCount - 1);
@@ -2027,9 +2027,9 @@ export class NotificationRepository {
   }
   
   /**
-   * 更新通知的分�?   */
+   * 鏇存柊閫氱煡鐨勫垎缁?   */
   private async updateGroupsForNotification(notification: Notification): Promise<void> {
-    // 根据通知类型和发送者创建或更新分组
+    // 鏍规嵁閫氱煡绫诲瀷鍜屽彂閫佽€呭垱寤烘垨鏇存柊鍒嗙粍
     const groupId = this.generateGroupId(notification);
     
     let group = this.groups.get(groupId);
@@ -2050,7 +2050,7 @@ export class NotificationRepository {
       this.groups.set(groupId, group);
     }
     
-    // 更新分组信息
+    // 鏇存柊鍒嗙粍淇℃伅
     group.notificationIds.push(notification.id);
     group.count++;
     if (notification.status === NotificationStatus.NEW) {
@@ -2058,10 +2058,10 @@ export class NotificationRepository {
     }
     group.timestamp = Math.max(group.timestamp, notification.metadata.timestamp);
     
-    // 保存分组信息
+    // 淇濆瓨鍒嗙粍淇℃伅
     await this.saveGroups();
     
-    // 发布分组更新事件
+    // 鍙戝竷鍒嗙粍鏇存柊浜嬩欢
     this.eventBus.emit(NotificationEventType.GROUP_UPDATED, {
       type: NotificationEventType.GROUP_UPDATED,
       timestamp: Date.now(),
@@ -2070,7 +2070,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 从分组中移除通知
+   * 浠庡垎缁勪腑绉婚櫎閫氱煡
    */
   private async removeNotificationFromGroups(notificationId: string): Promise<void> {
     for (const [groupId, group] of this.groups.entries()) {
@@ -2079,19 +2079,19 @@ export class NotificationRepository {
         group.notificationIds.splice(index, 1);
         group.count--;
         
-        // 如果分组为空，删除分�?        if (group.count === 0) {
+        // 濡傛灉鍒嗙粍涓虹┖锛屽垹闄ゅ垎缁?        if (group.count === 0) {
           this.groups.delete(groupId);
         } else {
-          // 更新新通知计数
+          // 鏇存柊鏂伴€氱煡璁℃暟
           const notification = this.notifications.get(notificationId);
           if (notification && notification.status === NotificationStatus.NEW) {
             group.newCount = Math.max(0, group.newCount - 1);
           }
           
-          // 保存分组信息
+          // 淇濆瓨鍒嗙粍淇℃伅
           await this.saveGroups();
           
-          // 发布分组更新事件
+          // 鍙戝竷鍒嗙粍鏇存柊浜嬩欢
           this.eventBus.emit(NotificationEventType.GROUP_UPDATED, {
             type: NotificationEventType.GROUP_UPDATED,
             timestamp: Date.now(),
@@ -2104,68 +2104,68 @@ export class NotificationRepository {
   }
   
   /**
-   * 生成分组ID
+   * 鐢熸垚鍒嗙粍ID
    */
   private generateGroupId(notification: Notification): string {
     return `${notification.type}:${notification.metadata.senderId || 'system'}:${notification.metadata.relatedEntityId || 'general'}`;
   }
   
   /**
-   * 获取分组标题
+   * 鑾峰彇鍒嗙粍鏍囬
    */
   private getGroupTitle(notification: Notification): string {
     switch (notification.type) {
       case NotificationType.LIVE_START:
-        return '直播开始通知';
+        return '鐩存挱寮€濮嬮€氱煡';
       case NotificationType.COMMENT_REPLY:
-        return '评论回复';
+        return '璇勮鍥炲';
       case NotificationType.MENTIONED:
-        return '提及通知';
+        return '鎻愬強閫氱煡';
       case NotificationType.LIKE:
-        return '点赞通知';
+        return '鐐硅禐閫氱煡';
       case NotificationType.SYSTEM_ANNOUNCEMENT:
-        return '系统公告';
+        return '绯荤粺鍏憡';
       default:
-        return '其他通知';
+        return '鍏朵粬閫氱煡';
     }
   }
   
   /**
-   * 获取分组摘要
+   * 鑾峰彇鍒嗙粍鎽樿
    */
   private getGroupSummary(notification: Notification): string {
-    return `�?{notification.metadata.senderName ? notification.metadata.senderName + '�? : ''}新通知`;
+    return `鏈?{notification.metadata.senderName ? notification.metadata.senderName + '鐨? : ''}鏂伴€氱煡`;
   }
   
   /**
-   * 获取通知统计信息
+   * 鑾峰彇閫氱煡缁熻淇℃伅
    */
   public getStats(): NotificationStats {
     return { ...this.stats };
   }
   
   /**
-   * 获取徽章计数
+   * 鑾峰彇寰界珷璁℃暟
    */
   public getBadgeCount(): number {
     return this.badgeCount;
   }
   
   /**
-   * 获取所有分�?   */
+   * 鑾峰彇鎵€鏈夊垎缁?   */
   public getAllGroups(): NotificationGroup[] {
     return Array.from(this.groups.values());
   }
   
   /**
-   * 获取分组
+   * 鑾峰彇鍒嗙粍
    */
   public getGroup(id: string): NotificationGroup | undefined {
     return this.groups.get(id);
   }
   
   /**
-   * 获取分组中的通知
+   * 鑾峰彇鍒嗙粍涓殑閫氱煡
    */
   public getNotificationsInGroup(groupId: string): Notification[] {
     const group = this.groups.get(groupId);
@@ -2179,7 +2179,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 清理过期通知
+   * 娓呯悊杩囨湡閫氱煡
    */
   public async cleanupExpiredNotifications(): Promise<number> {
     try {
@@ -2202,7 +2202,7 @@ export class NotificationRepository {
   }
   
   /**
-   * 清理旧通知
+   * 娓呯悊鏃ч€氱煡
    */
   public async cleanupOldNotifications(): Promise<number> {
     try {
@@ -2225,39 +2225,39 @@ export class NotificationRepository {
   }
   
   /**
-   * 检查通知是否存在
+   * 妫€鏌ラ€氱煡鏄惁瀛樺湪
    */
   public hasNotification(id: string): boolean {
     return this.notifications.has(id);
   }
   
   /**
-   * 获取通知数量
+   * 鑾峰彇閫氱煡鏁伴噺
    */
   public getNotificationCount(): number {
     return this.notifications.size;
   }
   
   /**
-   * 获取新通知数量
+   * 鑾峰彇鏂伴€氱煡鏁伴噺
    */
   public getNewNotificationCount(): number {
     return this.stats.newCount;
   }
   
   /**
-   * 获取未读通知数量
+   * 鑾峰彇鏈閫氱煡鏁伴噺
    */
   public getUnreadNotificationCount(): number {
-    return this.stats.newCount + this.stats.readCount; // 新通知和已读通知都算未读
+    return this.stats.newCount + this.stats.readCount; // 鏂伴€氱煡鍜屽凡璇婚€氱煡閮界畻鏈
   }
   
   /**
-   * 应用通知过滤�?   */
+   * 搴旂敤閫氱煡杩囨护鍣?   */
   public applyFilter(filter: NotificationFilter): Notification[] {
     const filteredNotifications = this.getFilteredNotifications(filter);
     
-    // 发布过滤应用事件
+    // 鍙戝竷杩囨护搴旂敤浜嬩欢
     this.eventBus.emit(NotificationEventType.FILTER_APPLIED, {
       type: NotificationEventType.FILTER_APPLIED,
       timestamp: Date.now( instanceof Error ? {
@@ -2321,13 +2321,13 @@ export class NotificationRepository {
   }
   
   /**
-   * 关闭仓库
+   * 鍏抽棴浠撳簱
    */
   public async shutdown(): Promise<void> {
     try {
-      // 保存所有数�?      await this.saveAllData();
+      // 淇濆瓨鎵€鏈夋暟鎹?      await this.saveAllData();
       
-      // 清理缓存
+      // 娓呯悊缂撳瓨
       await this.cacheService.delete(this.cacheKeys.notifications);
       await this.cacheService.delete(this.cacheKeys.config);
       await this.cacheService.delete(this.cacheKeys.stats);
@@ -2340,5 +2340,8 @@ export class NotificationRepository {
     }
   }
 }
+
+
+
 
 

@@ -1,19 +1,15 @@
-// CollectionDao.ets - 收藏数据访问对象
-// 负责收藏相关的数据库操作
+// CollectionDao.ets - 收藏数据访问对象 | Collection data access object
+// 实现收藏相关的数据库操作 | Implements collection-related database operations
 
-import Logger from '../../common/util/Logger';
-import { DatabaseManager } from '../db/DatabaseManager';
-import { TableSchema } from '../db/TableSchema';
-import { Collection } from '../bean/Collection';
-import ValuesBucket from '@ohos.data.relationalStore';
-import RelationalPredicates from '@ohos.data.relationalStore';
-import ResultSet from '@ohos.data.relationalStore';
-import Order from '@ohos.data.relationalStore';
-import OrderDirection from '@ohos.data.relationalStore';
+import Logger from '../../../common/util/Logger';
+import { DatabaseManager } from '../DatabaseManager';
+import { TableSchema } from '../TableSchema';
+import { Collection } from '../../bean/Collection';
+import { ValuesBucket, RdbPredicates as RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';
 
 /**
- * 收藏数据访问对象
- * 负责收藏相关的数据库操作
+ * 收藏数据访问对象 | Collection data access object
+ * 实现收藏相关的数据库操作 | Implements collection-related database operations
  */
 export class CollectionDao {
   private readonly TAG: string = 'CollectionDao';
@@ -24,55 +20,58 @@ export class CollectionDao {
   }
 
   /**
-   * 创建收藏�?   */
+   * 创建收藏表 | Create collection table
+   */
   public async createTable(): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
-      // 表结构应该已经在DatabaseManager中创�?      Logger.info(this.TAG, 'Collection table check completed');
+      // 表结构应该已经在DatabaseManager中创建 | Table structure should already be created in DatabaseManager
+      Logger.info(this.TAG, 'Collection table check completed');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create collection table: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to create collection table: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 保存收藏
-   * @param collection 收藏信息
+   * 保存收藏 | Save collection
+   * @param collection 收藏信息 | Collection information
    */
   public async save(collection: Collection): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
       const valuesBucket: ValuesBucket = this.collectionToValuesBucket(collection);
       
-      await db.insert(TableSchema.COLLECTION_TABLE, valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket : new Error(String(valuesBucket instanceof Error ? valuesBucket : new Error(String(valuesBucket)))))));
+      await db.insert(TableSchema.COLLECTION_TABLE, valuesBucket);
       Logger.info(this.TAG, `Collection saved: ${collection.title}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save collection: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to save collection: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 更新收藏
-   * @param collection 收藏信息
+   * 更新收藏 | Update collection
+   * @param collection 收藏信息 | Collection information
    */
   public async update(collection: Collection): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
       const valuesBucket: ValuesBucket = this.collectionToValuesBucket(collection);
-      const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.COLLECTION_ID, collection.id instanceof Error ? collection.id : new Error(String(collection.id instanceof Error ? collection.id instanceof Error ? collection.id : new Error(String(collection.id : new Error(String(collection.id instanceof Error ? collection.id : new Error(String(collection.id instanceof Error ? collection.id instanceof Error ? collection.id : new Error(String(collection.id instanceof Error ? collection.id instanceof Error ? collection.id : new Error(String(collection.id : new Error(String(collection.id instanceof Error ? collection.id : new Error(String(collection.id : new Error(String(collection.id instanceof Error ? collection.id : new Error(String(collection.id instanceof Error ? collection.id instanceof Error ? collection.id : new Error(String(collection.id : new Error(String(collection.id instanceof Error ? collection.id : new Error(String(collection.id)))))));
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
+      predicates.equalTo(TableSchema.COLLECTION_ID, collection.id);
       
-      const rowsAffected = await db.update(TableSchema.COLLECTION_TABLE, valuesBucket, predicates);
+      const rowsAffected = await db.update(valuesBucket, predicates);
       Logger.info(this.TAG, `Collection updated: ${collection.title}, rows affected: ${rowsAffected}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update collection: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to update collection: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 保存或更新收�?   * @param collection 收藏信息
+   * 保存或更新收藏 | Save or update collection
+   * @param collection 收藏信息 | Collection information
    */
   public async saveOrUpdate(collection: Collection): Promise<void> {
     try {
@@ -83,170 +82,157 @@ export class CollectionDao {
         await this.save(collection);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}` instanceof Error ? `Failed to save or update collection: ${error}` : new Error(String(`Failed to save or update collection: ${error}`)))))));
-      throw error;
+      Logger.error(this.TAG, `Failed to save or update collection: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 删除收藏
-   * @param id 收藏ID
+   * 删除收藏 | Delete collection
+   * @param id 收藏ID | Collection ID
    */
   public async delete(id: string): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
       predicates.equalTo(TableSchema.COLLECTION_ID, id);
       
-      const rowsAffected = await db.delete(TableSchema.COLLECTION_TABLE, predicates);
+      const rowsAffected = await db.delete(predicates);
       Logger.info(this.TAG, `Collection deleted: ${id}, rows affected: ${rowsAffected}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete collection: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to delete collection: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 根据ID获取收藏
-   * @param id 收藏ID
-   * @returns 收藏信息或null
+   * 根据ID获取收藏 | Get collection by ID
+   * @param id 收藏ID | Collection ID
+   * @returns 收藏信息或null | Collection information or null
    */
   public async getById(id: string): Promise<Collection | null> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.COLLECTION_ID, id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id instanceof Error ? id instanceof Error ? id : new Error(String(id : new Error(String(id instanceof Error ? id : new Error(String(id)))))));
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
+      predicates.equalTo(TableSchema.COLLECTION_ID, id);
       
-      const resultSet = await db.query(TableSchema.COLLECTION_TABLE, predicates);
+      const resultSet = await db.query(predicates);
       const collections = this.parseResultSet(resultSet);
       
       return collections.length > 0 ? collections[0] : null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get collection by id: ${error}`);
+      Logger.error(this.TAG, `Failed to get collection by id: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
 
   /**
-   * 根据站点和内容ID获取收藏
-   * @param siteKey 站点标识
-   * @param contentId 内容ID
-   * @returns 收藏信息或null
+   * 根据站点和内容ID获取收藏 | Get collection by site and content ID
+   * @param siteKey 站点标识 | Site identifier
+   * @param contentId 内容ID | Content ID
+   * @returns 收藏信息或null | Collection information or null
    */
-  public async getByContent(siteKey: string, contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string))))))): Promise<Collection | null> {
+  public async getByContent(siteKey: string, contentId: string): Promise<Collection | null> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
       predicates.equalTo(TableSchema.COLLECTION_SITE_KEY, siteKey);
       predicates.equalTo(TableSchema.COLLECTION_CONTENT_ID, contentId);
       
-      const resultSet = await db.query(TableSchema.COLLECTION_TABLE, predicates);
+      const resultSet = await db.query(predicates);
       const collections = this.parseResultSet(resultSet);
       
       return collections.length > 0 ? collections[0] : null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get collection by content: ${error}`);
+      Logger.error(this.TAG, `Failed to get collection by content: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
 
   /**
-   * 获取所有收�?   * @param limit 限制数量
-   * @param offset 偏移�?   * @returns 收藏列表
+   * 获取所有收藏 | Get all collections
+   * @param limit 限制数量 | Limit count
+   * @param offset 偏移量 | Offset
+   * @returns 收藏列表 | Collection list
    */
-  public async getAll(limit: number = 100, offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0 : new Error(String(offset: number = 0 instanceof Error ? offset: number = 0 : new Error(String(offset: number = 0))))))): Promise<Collection[]> {
+  public async getAll(limit: number = 100, offset: number = 0): Promise<Collection[]> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
-      const orderSpec = new Order(TableSchema.COLLECTION_TIMESTAMP, OrderDirection.DESC);
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
+      predicates.orderByDesc(TableSchema.COLLECTION_TIMESTAMP);
+      predicates.limit(limit, offset);
       
-      const resultSet = await db.query(
-        TableSchema.COLLECTION_TABLE,
-        predicates,
-        [orderSpec],
-        limit,
-        offset
-      );
-      
+      const resultSet = await db.query(predicates);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get all collections: ${error}`);
+      Logger.error(this.TAG, `Failed to get all collections: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 根据站点获取收藏
-   * @param siteKey 站点标识
-   * @param limit 限制数量
-   * @returns 收藏列表
+   * 根据站点获取收藏 | Get collections by site
+   * @param siteKey 站点标识 | Site identifier
+   * @param limit 限制数量 | Limit count
+   * @returns 收藏列表 | Collection list
    */
-  public async getBySite(siteKey: string, limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100))))))): Promise<Collection[]> {
+  public async getBySite(siteKey: string, limit: number = 100): Promise<Collection[]> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
       predicates.equalTo(TableSchema.COLLECTION_SITE_KEY, siteKey);
-      const orderSpec = new Order(TableSchema.COLLECTION_TIMESTAMP, OrderDirection.DESC);
+      predicates.orderByDesc(TableSchema.COLLECTION_TIMESTAMP);
+      predicates.limit(limit);
       
-      const resultSet = await db.query(
-        TableSchema.COLLECTION_TABLE,
-        predicates,
-        [orderSpec],
-        limit
-      );
-      
+      const resultSet = await db.query(predicates);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get collections by site: ${error}`);
+      Logger.error(this.TAG, `Failed to get collections by site: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 根据类型获取收藏
-   * @param type 内容类型
-   * @param limit 限制数量
-   * @returns 收藏列表
+   * 根据类型获取收藏 | Get collections by type
+   * @param type 内容类型 | Content type
+   * @param limit 限制数量 | Limit count
+   * @returns 收藏列表 | Collection list
    */
-  public async getByType(type: string, limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100 : new Error(String(limit: number = 100 instanceof Error ? limit: number = 100 : new Error(String(limit: number = 100))))))): Promise<Collection[]> {
+  public async getByType(type: string, limit: number = 100): Promise<Collection[]> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
       predicates.equalTo(TableSchema.COLLECTION_TYPE, type);
-      const orderSpec = new Order(TableSchema.COLLECTION_TIMESTAMP, OrderDirection.DESC);
+      predicates.orderByDesc(TableSchema.COLLECTION_TIMESTAMP);
+      predicates.limit(limit);
       
-      const resultSet = await db.query(
-        TableSchema.COLLECTION_TABLE,
-        predicates,
-        [orderSpec],
-        limit
-      );
-      
+      const resultSet = await db.query(predicates);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get collections by type: ${error}`);
+      Logger.error(this.TAG, `Failed to get collections by type: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 检查是否已收藏
-   * @param siteKey 站点标识
-   * @param contentId 内容ID
-   * @returns 是否已收�?   */
-  public async isCollected(siteKey: string, contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string : new Error(String(contentId: string instanceof Error ? contentId: string : new Error(String(contentId: string))))))): Promise<boolean> {
+   * 检查是否已收藏 | Check if already collected
+   * @param siteKey 站点标识 | Site identifier
+   * @param contentId 内容ID | Content ID
+   * @returns 是否已收藏 | Whether it is collected
+   */
+  public async isCollected(siteKey: string, contentId: string): Promise<boolean> {
     try {
       const collection = await this.getByContent(siteKey, contentId);
       return collection !== null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to check if collected: ${error}`);
+      Logger.error(this.TAG, `Failed to check if collected: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
 
   /**
-   * 批量保存收藏
-   * @param collections 收藏列表
+   * 批量保存收藏 | Batch save collections
+   * @param collections 收藏列表 | Collection list
    */
   public async batchSave(collections: Collection[]): Promise<void> {
     try {
@@ -258,56 +244,59 @@ export class CollectionDao {
           await this.saveOrUpdate(collection);
         }
         await db.commit();
-        Logger.info(this.TAG, `Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections` instanceof Error ? `Batch saved ${collections.length} collections` : new Error(String(`Batch saved ${collections.length} collections`)))))));
+        Logger.info(this.TAG, `Batch saved ${collections.length} collections`);
       } catch (error) {
         await db.rollback();
         throw error;
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to batch save collections: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to batch save collections: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 删除站点相关的所有收�?   * @param siteKey 站点标识
+   * 删除站点相关的所有收藏 | Delete all collections for site
+   * @param siteKey 站点标识 | Site identifier
    */
   public async deleteBySite(siteKey: string): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const predicates = new RelationalPredicates();
-      predicates.equalTo(TableSchema.COLLECTION_SITE_KEY, siteKey instanceof Error ? siteKey : new Error(String(siteKey instanceof Error ? siteKey instanceof Error ? siteKey : new Error(String(siteKey : new Error(String(siteKey instanceof Error ? siteKey : new Error(String(siteKey instanceof Error ? siteKey instanceof Error ? siteKey : new Error(String(siteKey instanceof Error ? siteKey instanceof Error ? siteKey : new Error(String(siteKey : new Error(String(siteKey instanceof Error ? siteKey : new Error(String(siteKey : new Error(String(siteKey instanceof Error ? siteKey : new Error(String(siteKey instanceof Error ? siteKey instanceof Error ? siteKey : new Error(String(siteKey : new Error(String(siteKey instanceof Error ? siteKey : new Error(String(siteKey)))))));
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
+      predicates.equalTo(TableSchema.COLLECTION_SITE_KEY, siteKey);
       
-      const rowsAffected = await db.delete(TableSchema.COLLECTION_TABLE, predicates);
+      const rowsAffected = await db.delete(predicates);
       Logger.info(this.TAG, `Deleted ${rowsAffected} collections for site: ${siteKey}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete collections by site: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to delete collections by site: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 清空所有收�?   */
+   * 清空所有收藏 | Clear all collections
+   */
   public async clearAll(): Promise<void> {
     try {
       const db = await this.databaseManager.getDatabase();
-      const rowsAffected = await db.delete(TableSchema.COLLECTION_TABLE);
-      Logger.info(this.TAG, `All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}` instanceof Error ? `All collections cleared, rows affected: ${rowsAffected}` : new Error(String(`All collections cleared, rows affected: ${rowsAffected}`)))))));
+      const predicates = new RelationalPredicates(TableSchema.COLLECTION_TABLE);
+      const rowsAffected = await db.delete(predicates);
+      Logger.info(this.TAG, `All collections cleared, rows affected: ${rowsAffected}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to clear all collections: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to clear all collections: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 获取收藏总数
-   * @returns 收藏总数
+   * 获取收藏总数 | Get collection count
+   * @returns 收藏总数 | Collection count
    */
   public async getCount(): Promise<number> {
     try {
       const db = await this.databaseManager.getDatabase();
       const sql = `SELECT COUNT(*) FROM ${TableSchema.COLLECTION_TABLE}`;
-      const resultSet = await db.querySql(sql, [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([])))))));
+      const resultSet = await db.querySql(sql, []);
       
       let count = 0;
       if (resultSet.rowCount > 0) {
@@ -318,14 +307,15 @@ export class CollectionDao {
       
       return count;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get collection count: ${error}`);
+      Logger.error(this.TAG, `Failed to get collection count: ${error instanceof Error ? error.message : String(error)}`);
       return 0;
     }
   }
 
   /**
-   * 将ResultSet解析为Collection数组
-   * @param resultSet 查询结果�?   * @returns Collection数组
+   * 将ResultSet解析为Collection数组 | Parse ResultSet to Collection array
+   * @param resultSet 查询结果集 | Query result set
+   * @returns Collection数组 | Collection array
    */
   private parseResultSet(resultSet: ResultSet): Collection[] {
     const collections: Collection[] = [];
@@ -335,21 +325,22 @@ export class CollectionDao {
         resultSet.goToFirstRow();
         do {
           const collection: Collection = {
-            id: resultSet.getString(TableSchema.COLLECTION_ID), contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID instanceof Error ? contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID : new Error(String(contentId: resultSet.getString(TableSchema.COLLECTION_CONTENT_ID))))))),
-            title: resultSet.getString(TableSchema.COLLECTION_TITLE),
-            cover: resultSet.getString(TableSchema.COLLECTION_COVER),
-            siteKey: resultSet.getString(TableSchema.COLLECTION_SITE_KEY),
-            siteName: resultSet.getString(TableSchema.COLLECTION_SITE_NAME),
-            url: resultSet.getString(TableSchema.COLLECTION_URL),
-            type: resultSet.getString(TableSchema.COLLECTION_TYPE),
-            timestamp: resultSet.getLong(TableSchema.COLLECTION_TIMESTAMP),
-            extraInfo: this.parseJsonString(resultSet.getString(TableSchema.COLLECTION_EXTRA_INFO))
+            id: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_ID)),
+            contentId: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_CONTENT_ID)),
+            title: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_TITLE)),
+            cover: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_COVER)),
+            siteKey: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_SITE_KEY)),
+            siteName: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_SITE_NAME)),
+            url: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_URL)),
+            type: resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_TYPE)),
+            timestamp: resultSet.getLong(resultSet.getColumnIndex(TableSchema.COLLECTION_TIMESTAMP)),
+            extraInfo: this.parseJsonString(resultSet.getString(resultSet.getColumnIndex(TableSchema.COLLECTION_EXTRA_INFO)))
           };
           collections.push(collection);
         } while (resultSet.goToNextRow());
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to parse result set: ${error}`);
+      Logger.error(this.TAG, `Failed to parse result set: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       resultSet.close();
     }
@@ -358,202 +349,21 @@ export class CollectionDao {
   }
 
   /**
-   * 将Collection对象转换为ValuesBucket
-   * @param collection 收藏信息
+   * 将Collection对象转换为ValuesBucket | Convert Collection object to ValuesBucket
+   * @param collection 收藏信息 | Collection information
    * @returns ValuesBucket
    */
   private collectionToValuesBucket(collection: Collection): ValuesBucket {
     const values: ValuesBucket = {
-      [TableSchema.COLLECTION_ID]: collection.id, [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
+      [TableSchema.COLLECTION_ID]: collection.id,
+      [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
       [TableSchema.COLLECTION_TITLE]: collection.title,
       [TableSchema.COLLECTION_COVER]: collection.cover || '',
       [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
       [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
       [TableSchema.COLLECTION_URL]: collection.url || '',
       [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( instanceof Error ? [TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now( : new Error(String([TableSchema.COLLECTION_CONTENT_ID]: collection.contentId,
-      [TableSchema.COLLECTION_TITLE]: collection.title,
-      [TableSchema.COLLECTION_COVER]: collection.cover || '',
-      [TableSchema.COLLECTION_SITE_KEY]: collection.siteKey || '',
-      [TableSchema.COLLECTION_SITE_NAME]: collection.siteName || '',
-      [TableSchema.COLLECTION_URL]: collection.url || '',
-      [TableSchema.COLLECTION_TYPE]: collection.type || 'video',
-      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now())))))),
+      [TableSchema.COLLECTION_TIMESTAMP]: collection.timestamp || Date.now(),
       [TableSchema.COLLECTION_EXTRA_INFO]: this.stringifyJson(collection.extraInfo || {})
     };
     
@@ -561,39 +371,44 @@ export class CollectionDao {
   }
 
   /**
-   * 解析JSON字符�?   * @param jsonString JSON字符�?   * @returns 解析后的对象
+   * 解析JSON字符串 | Parse JSON string
+   * @param jsonString JSON字符串 | JSON string
+   * @returns 解析后的对象 | Parsed object
    */
   private parseJsonString(jsonString?: string): Record<string, unknown> {
     if (!jsonString) return {};
     try {
       return JSON.parse(jsonString);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to parse JSON string: ${error}`);
+      Logger.error(this.TAG, `Failed to parse JSON string: ${error instanceof Error ? error.message : String(error)}`);
       return {};
     }
   }
 
   /**
-   * 将对象转换为JSON字符�?   * @param obj 要转换的对象
-   * @returns JSON字符�?   */
-  private stringifyJson(obj: Record<string, unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown> instanceof Error ? unknown> instanceof Error ? unknown> : new Error(String(unknown> : new Error(String(unknown> instanceof Error ? unknown> : new Error(String(unknown>))))))): string {
+   * 将对象转换为JSON字符串 | Convert object to JSON string
+   * @param obj 要转换的对象 | Object to convert
+   * @returns JSON字符串 | JSON string
+   */
+  private stringifyJson(obj: Record<string, unknown>): string {
     try {
       return JSON.stringify(obj);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to stringify JSON: ${error}`);
+      Logger.error(this.TAG, `Failed to stringify JSON: ${error instanceof Error ? error.message : String(error)}`);
       return '{}';
     }
   }
 
   /**
-   * 根据条件查询
-   * @param conditions 查询条件
-   * @param params 参数数组
-   * @param orderBy 排序方式
-   * @param limit 限制数量
-   * @param offset 偏移�?   * @returns 查询结果
+   * 根据条件查询 | Query by conditions
+   * @param conditions 查询条件 | Query conditions
+   * @param params 参数数组 | Parameter array
+   * @param orderBy 排序方式 | Order by
+   * @param limit 限制数量 | Limit count
+   * @param offset 偏移量 | Offset
+   * @returns 查询结果 | Query result
    */
-  public async query(conditions: string = '', params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 instanceof Error ? params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0 : new Error(String(params: Record<string, string | number | boolean | null>[] = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0))))))): Promise<Collection[]> {
+  public async query(conditions: string = '', params: Array<string | number | boolean> = [], orderBy: string = `${TableSchema.COLLECTION_TIMESTAMP} DESC`, limit: number = 100, offset: number = 0): Promise<Collection[]> {
     try {
       const db = await this.databaseManager.getDatabase();
       let sql = `SELECT * FROM ${TableSchema.COLLECTION_TABLE}`;
@@ -611,44 +426,30 @@ export class CollectionDao {
       const resultSet = await db.querySql(sql, params);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to query collections: ${error}`);
+      Logger.error(this.TAG, `Failed to query collections: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 查询单条记录
-   * @param options 查询选项
-   * @returns 单条收藏记录或null
+   * 查询单条记录 | Query single record
+   * @param options 查询选项 | Query options
+   * @returns 单条收藏记录或null | Single collection record or null
    */
   public async queryOne(options: {
     conditions?: string;
-    params?: Record<string, string | number | boolean | null>[];
+    params?: Array<string | number | boolean>;
     orderBy?: string;
-  } = {} instanceof Error ? string | number | boolean | null>[];
-    orderBy?: string;
-  } = {} : new Error(String(string | number | boolean | null>[];
-    orderBy?: string;
-  } = {}))): Promise<Collection | null> {
+  } = {}): Promise<Collection | null> {
     try {
       const { conditions = '', params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 instanceof Error ? params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 : new Error(String(params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 instanceof Error ? params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 instanceof Error ? params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 : new Error(String(params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 : new Error(String(params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 instanceof Error ? params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1 : new Error(String(params = [], orderBy = `${TableSchema.COLLECTION_TIMESTAMP} DESC` } = options;
-      const collections = await this.query(conditions, params, orderBy, 1)))));
+      const collections = await this.query(conditions, params, orderBy, 1);
       return collections.length > 0 ? collections[0] : null;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to query one collection: ${error}`);
+      Logger.error(this.TAG, `Failed to query one collection: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
 }
 
 export default CollectionDao;
-
-

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 RayTV. All rights reserved.
  */
 
@@ -7,11 +7,12 @@ import StorageUtil from '@ohos:raytv/src/main/ets/utils/StorageUtil';
 import NetworkUtil from '@ohos:raytv/src/main/ets/utils/NetworkUtil';
 import EventBusUtil from '@ohos:raytv/src/main/ets/utils/EventBusUtil';
 import CacheService from '@ohos:raytv/src/main/ets/service/CacheService';
+import ConfigRepository from './ConfigRepository';
 import { CacheType } from '@ohos:raytv/src/main/ets/service/CacheService';
 import { LocalStorageType } from '@ohos:raytv/src/main/ets/utils/StorageUtil';
 
 /**
- * 搜索类型枚举
+ * 鎼滅储绫诲瀷鏋氫妇
  */
 export enum SearchType {
   ALL = 'all',
@@ -22,7 +23,7 @@ export enum SearchType {
 }
 
 /**
- * 搜索排序枚举
+ * 鎼滅储鎺掑簭鏋氫妇
  */
 export enum SearchSort {
   DEFAULT = 'default',
@@ -35,7 +36,7 @@ export enum SearchSort {
 }
 
 /**
- * 搜索事件类型常量
+ * 鎼滅储浜嬩欢绫诲瀷甯搁噺
  */
 export const SearchEventType = {
   SEARCH_PERFORMED: 'search:performed',
@@ -49,7 +50,7 @@ export const SearchEventType = {
 } as const;
 
 /**
- * 搜索事件接口
+ * 鎼滅储浜嬩欢鎺ュ彛
  */
 export interface SearchEvent {
   query: string;
@@ -62,7 +63,7 @@ export interface SearchEvent {
 }
 
 /**
- * 搜索请求接口
+ * 鎼滅储璇锋眰鎺ュ彛
  */
 export interface SearchRequest {
   query: string;
@@ -74,7 +75,7 @@ export interface SearchRequest {
 }
 
 /**
- * 搜索结果接口
+ * 鎼滅储缁撴灉鎺ュ彛
  */
 export interface SearchResult {
   items: SearchResultItem[];
@@ -85,7 +86,8 @@ export interface SearchResult {
 }
 
 /**
- * 搜索结果项接�? */
+ * 鎼滅储缁撴灉椤规帴鍙?
+ */
 export interface SearchResultItem {
   id: string;
   title: string;
@@ -97,7 +99,7 @@ export interface SearchResultItem {
 }
 
 /**
- * 搜索建议接口
+ * 鎼滅储寤鸿鎺ュ彛
  */
 export interface SearchSuggestion {
   text: string;
@@ -107,7 +109,7 @@ export interface SearchSuggestion {
 }
 
 /**
- * 热门搜索接口
+ * 鐑棬鎼滅储鎺ュ彛
  */
 export interface TrendingSearch {
   query: string;
@@ -117,7 +119,8 @@ export interface TrendingSearch {
 }
 
 /**
- * 搜索历史项接�? */
+ * 鎼滅储鍘嗗彶椤规帴鍙?
+ */
 export interface SearchHistoryItem {
   query: string;
   type: SearchType;
@@ -126,7 +129,8 @@ export interface SearchHistoryItem {
 }
 
 /**
- * 视频信息接口（用于搜索结果项详情�? */
+ * 瑙嗛淇℃伅鎺ュ彛锛堢敤浜庢悳绱㈢粨鏋滈」璇︽儏锛?
+ */
 export interface VideoInfo {
   id: string;
   title: string;
@@ -140,11 +144,13 @@ export interface VideoInfo {
 }
 
 /**
- * 搜索仓库�? */
+ * 鎼滅储浠撳簱
+ */
 export class SearchRepository {
   private static instance: SearchRepository | null = null;
   
-  // 搜索类型枚举�?  private getSearchTypeValues(): SearchType[] {
+  // 鎼滅储绫诲瀷鏋氫妇鍊?
+  private getSearchTypeValues(): SearchType[] {
     return [
       SearchType.ALL,
       SearchType.VIDEO,
@@ -154,7 +160,8 @@ export class SearchRepository {
     ];
   }
   
-  // 搜索排序枚举�?  private getSearchSortValues(): SearchSort[] {
+  // 鎼滅储鎺掑簭鏋氫妇鍊?
+  private getSearchSortValues(): SearchSort[] {
     return [
       SearchSort.DEFAULT,
       SearchSort.LATEST,
@@ -172,16 +179,11 @@ export class SearchRepository {
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
-  // API端点配置
-  private apiEndpoints = {
-    baseUrl: 'https://api.raytv.example.com',
-    search: '/search',
-    suggestions: '/search/suggestions',
-    trending: '/search/trending',
-    popular: '/search/popular'
-  };
+  // API绔偣閰嶇疆锛屼粠閰嶇疆绯荤粺鑾峰彇
+  private apiEndpoints: any;
+  private configRepository: ConfigRepository;
   
-  // 存储和缓存键配置
+  // 瀛樺偍鍜岀紦瀛橀敭閰嶇疆
   private storageKeys = {
     searchHistory: 'search:history',
     searchPreferences: 'search:preferences',
@@ -190,25 +192,31 @@ export class SearchRepository {
     popularSearches: 'search:popular'
   };
   
-  // 搜索配置
+  // 鎼滅储閰嶇疆
   private searchConfig = {
-    maxHistoryItems: 50, // 最大历史记录数
-    historyExpiryDays: 30, // 历史记录过期天数
-    resultCacheDuration: 3600, // 搜索结果缓存时间（秒�?    suggestionsCacheDuration: 300, // 搜索建议缓存时间（秒�?    trendingCacheDuration: 3600, // 热门搜索缓存时间（秒�?    minSearchLength: 1, // 最小搜索长�?    debounceTime: 300 // 搜索防抖时间（毫秒）
+    maxHistoryItems: 50, // 鏈€澶у巻鍙茶褰曟暟
+    historyExpiryDays: 30, // 鍘嗗彶璁板綍杩囨湡澶╂暟
+    resultCacheDuration: 3600, // 鎼滅储缁撴灉缂撳瓨鏃堕棿锛堢锛?
+    suggestionsCacheDuration: 300, // 鎼滅储寤鸿缂撳瓨鏃堕棿锛堢锛?
+    trendingCacheDuration: 3600, // 鐑棬鎼滅储缂撳瓨鏃堕棿锛堢锛?
+    minSearchLength: 1, // 鏈€灏忔悳绱㈤暱搴?
+    debounceTime: 300 // 鎼滅储闃叉姈鏃堕棿锛堟绉掞級
   };
   
-  // 搜索防抖定时�?  private searchDebounceTimer: number | null = null;
+  // 鎼滅储闃叉姈瀹氭椂鍣?
+  private searchDebounceTimer: number | null = null;
 
   /**
-   * 私有构造函�?   */
+   * 绉佹湁鏋勯€犲嚱鏁?   */
   private constructor() {
     this.logger.info('SearchRepository initialized');
+    this.configRepository = ConfigRepository.getInstance();
     this.setupEventListeners();
     this.initialize();
   }
 
   /**
-   * 获取SearchRepository单例实例
+   * 鑾峰彇SearchRepository鍗曚緥瀹炰緥
    */
   public static getInstance(): SearchRepository {
     if (!SearchRepository.instance) {
@@ -218,61 +226,97 @@ export class SearchRepository {
   }
 
   /**
-   * 初始化搜索仓�?   */
+   * 鍒濆鍖朅PI绔偣閰嶇疆
+   */
+  private async initializeApiEndpoints(): Promise<void> {
+    try {
+      // 浠庨厤缃郴缁熻幏鍙朅PI绔偣閰嶇疆
+      const apiConfig = await this.configRepository.getConfig<any>('api_endpoints', {
+        baseUrl: 'https://api.raytv.example.com',
+        search: '/search',
+        suggestions: '/search/suggestions',
+        trending: '/search/trending',
+        popular: '/search/popular'
+      });
+      this.apiEndpoints = apiConfig;
+    } catch (error) {
+      this.logger.error('Failed to initialize API endpoints', error as Error);
+      // 浣跨敤榛樿閰嶇疆
+      this.apiEndpoints = {
+        baseUrl: 'https://api.raytv.example.com',
+        search: '/search',
+        suggestions: '/search/suggestions',
+        trending: '/search/trending',
+        popular: '/search/popular'
+      };
+    }
+  }
+
+  /**
+   * 鍒濆鍖栨悳绱粨搴?   */
   public async initialize(): Promise<void> {
     try {
-      // 清理过期的搜索历�?      await this.cleanupExpiredHistory();
+      // 鍒濆鍖朅PI绔偣閰嶇疆
+      await this.initializeApiEndpoints();
       
-      // 预加载热门搜索（异步�?      this.loadTrendingSearches().catch(err => {
+      // 娓呯悊杩囨湡鐨勬悳绱㈠巻鍙?      await this.cleanupExpiredHistory();
+      
+      // 棰勫姞杞界儹闂ㄦ悳绱紙寮傛锛?      this.loadTrendingSearches().catch(err => {
         this.logger.warn('Failed to preload trending searches', err);
       });
       
       this.logger.info('SearchRepository initialization completed');
     } catch (error) {
-      this.Logger.error('Failed to initialize SearchRepository', error as Error);
+      this.logger.error('Failed to initialize SearchRepository', error as Error);
     }
   }
 
   /**
-   * 设置事件监听�?   */
+   * 璁剧疆浜嬩欢鐩戝惉鍣?
+   */
   private setupEventListeners(): void {
-    // 监听应用退出事件，确保数据持久�?    this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
-      // 清理过期历史记录
+    // 鐩戝惉搴旂敤閫€鍑轰簨浠讹紝纭繚鏁版嵁鎸佷箙鍖?
+    this.eventBus.on('app:exit', async () => {
+      // 娓呯悊杩囨湡鍘嗗彶璁板綍
       await this.cleanupExpiredHistory();
     });
     
-    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
+    // 鐩戝惉缃戠粶鐘舵€佸彉鍖?
+    this.eventBus.on('network:statusChanged', async (status: { isOnline: boolean }) => {
       if (status.isOnline) {
-        // 在线时刷新热门搜�?        await this.loadTrendingSearches();
+        // 鍦ㄧ嚎鏃跺埛鏂扮儹闂ㄦ悳绱?
+        await this.loadTrendingSearches();
       }
     });
   }
 
   /**
-   * 执行搜索
-   * @param request 搜索请求
-   * @param useCache 是否使用缓存
+   * 鎵ц鎼滅储
+   * @param request 鎼滅储璇锋眰
+   * @param useCache 鏄惁浣跨敤缂撳瓨
    */
   public async performSearch(request: SearchRequest, useCache: boolean = true): Promise<SearchResult> {
     try {
-      // 验证搜索请求
+      // 楠岃瘉鎼滅储璇锋眰
       this.validateSearchRequest(request);
       
       const searchId = this.generateSearchId(request);
       
-      // 发布搜索开始事�?      this.eventBus.emit(SearchEventType.SEARCH_PERFORMED, {
+      // 鍙戝竷鎼滅储寮€濮嬩簨浠?
+      this.eventBus.emit(SearchEventType.SEARCH_PERFORMED, {
         query: request.query,
         type: request.type,
         sort: request.sort,
         timestamp: Date.now()
       } as SearchEvent);
       
-      // 尝试从缓存获取结�?      if (useCache) {
+      // 灏濊瘯浠庣紦瀛樿幏鍙栫粨鏋?
+      if (useCache) {
         const cachedResult = await this.getCachedSearchResult(searchId);
         if (cachedResult) {
           this.logger.debug(`Search result loaded from cache for: ${request.query}`);
           
-          // 发布缓存命中事件
+          // 鍙戝竷缂撳瓨鍛戒腑浜嬩欢
           this.eventBus.emit(SearchEventType.SEARCH_CACHED, {
             query: request.query,
             type: request.type,
@@ -281,17 +325,17 @@ export class SearchRepository {
             results: cachedResult
           } as SearchEvent);
           
-          // 更新搜索历史
+          // 鏇存柊鎼滅储鍘嗗彶
           this.addToSearchHistory(request, cachedResult.items.length);
           
           return cachedResult;
         }
       }
       
-      // 构建搜索参数
+      // 鏋勫缓鎼滅储鍙傛暟
       const searchParams = this.buildSearchParams(request);
       
-      // 调用API进行搜索
+      // 璋冪敤API杩涜鎼滅储
       const response = await this.networkUtil.get<SearchResult>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.search}`,
         {
@@ -301,16 +345,16 @@ export class SearchRepository {
       
       const searchResult = response.data;
       
-      // 缓存搜索结果
+      // 缂撳瓨鎼滅储缁撴灉
       await this.cacheSearchResult(searchId, searchResult);
       
-      // 更新搜索历史
+      // 鏇存柊鎼滅储鍘嗗彶
       this.addToSearchHistory(request, searchResult.items.length);
       
-      // 记录用户搜索行为（异步）
+      // 璁板綍鐢ㄦ埛鎼滅储琛屼负锛堝紓姝ワ級
       this.trackSearch(request, searchResult.items.length);
       
-      // 发布搜索完成事件
+      // 鍙戝竷鎼滅储瀹屾垚浜嬩欢
       this.eventBus.emit(SearchEventType.SEARCH_COMPLETED, {
         query: request.query,
         type: request.type,
@@ -323,118 +367,14 @@ export class SearchRepository {
       
       return searchResult;
     } catch (error) {
-      this.Logger.error('Search failed', error as Error);
+      this.logger.error('Search failed', error as Error);
       
-      // 发布搜索错误事件
+      // 鍙戝竷鎼滅储閿欒浜嬩欢
       this.eventBus.emit(SearchEventType.SEARCH_ERROR, {
         query: request.query,
         type: request.type,
         sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( instanceof Error ? {
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now( : new Error(String({
-        query: request.query,
-        type: request.type,
-        sort: request.sort,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       } as SearchEvent);
       
@@ -443,20 +383,21 @@ export class SearchRepository {
   }
 
   /**
-   * 执行防抖搜索
-   * @param request 搜索请求
-   * @param callback 回调函数
+   * 鎵ц闃叉姈鎼滅储
+   * @param request 鎼滅储璇锋眰
+   * @param callback 鍥炶皟鍑芥暟
    */
   public debouncedSearch(
     request: SearchRequest,
     callback: (result: SearchResult | null, error?: Error) => void
   ): void {
-    // 清除之前的定时器
+    // 娓呴櫎涔嬪墠鐨勫畾鏃跺櫒
     if (this.searchDebounceTimer !== null) {
       clearTimeout(this.searchDebounceTimer);
     }
     
-    // 设置新的定时�?    this.searchDebounceTimer = setTimeout(async () => {
+    // 璁剧疆鏂扮殑瀹氭椂鍣?
+    this.searchDebounceTimer = setTimeout(async () => {
       try {
         const result = await this.performSearch(request);
         callback(result);
@@ -469,25 +410,27 @@ export class SearchRepository {
   }
 
   /**
-   * 获取搜索建议
-   * @param query 搜索查询
-   * @param type 搜索类型
+   * 鑾峰彇鎼滅储寤鸿
+   * @param query 鎼滅储鏌ヨ
+   * @param type 鎼滅储绫诲瀷
    */
   public async getSearchSuggestions(query: string, type?: SearchType): Promise<SearchSuggestion[]> {
     try {
-      // 验证查询长度
+      // 楠岃瘉鏌ヨ闀垮害
       if (query.trim().length < this.searchConfig.minSearchLength) {
         return [];
       }
       
-      // 生成缓存�?      const cacheKey = `search:suggestions:${query}:${type || 'all'}`;
+      // 鐢熸垚缂撳瓨閿?
+      const cacheKey = `search:suggestions:${query}:${type || 'all'}`;
       
-      // 尝试从缓存获�?      const cachedSuggestions = await this.cacheService.getCache<SearchSuggestion[]>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?
+      const cachedSuggestions = await this.cacheService.getCache<SearchSuggestion[]>(cacheKey);
       if (cachedSuggestions) {
         return cachedSuggestions;
       }
       
-      // 构建建议参数
+      // 鏋勫缓寤鸿鍙傛暟
       const params: Record<string, unknown> = {
         q: query.trim(),
         limit: 10
@@ -497,7 +440,7 @@ export class SearchRepository {
         params.type = type;
       }
       
-      // 调用API获取建议
+      // 璋冪敤API鑾峰彇寤鸿
       const response = await this.networkUtil.get<SearchSuggestion[]>(
         `${this.apiEndpoints.baseUrl}${this.apiEndpoints.suggestions}`,
         {
@@ -507,7 +450,8 @@ export class SearchRepository {
       
       const suggestions = response.data;
       
-      // 获取用户搜索历史，标记最近搜�?      const history = await this.getSearchHistory();
+      // 鑾峰彇鐢ㄦ埛鎼滅储鍘嗗彶锛屾爣璁版渶杩戞悳绱?
+      const history = await this.getSearchHistory();
       suggestions.forEach(suggestion => {
         const recent = history.find(h => 
           h.query.toLowerCase() === suggestion.text.toLowerCase() && 
@@ -516,7 +460,7 @@ export class SearchRepository {
         suggestion.recent = !!recent;
       });
       
-      // 缓存建议结果
+      // 缂撳瓨寤鸿缁撴灉
       await this.cacheService.setCache(
         cacheKey,
         suggestions,
@@ -526,7 +470,7 @@ export class SearchRepository {
         }
       );
       
-      // 发布建议加载事件
+      // 鍙戝竷寤鸿鍔犺浇浜嬩欢
       this.eventBus.emit(SearchEventType.SEARCH_SUGGESTIONS_LOADED, {
         query,
         type,
@@ -537,26 +481,27 @@ export class SearchRepository {
     } catch (error) {
       this.logger.warn('Failed to get search suggestions', error as Error);
       
-      // 失败时尝试从本地历史生成建议
+      // 澶辫触鏃跺皾璇曚粠鏈湴鍘嗗彶鐢熸垚寤鸿
       return this.generateLocalSuggestions(query, type);
     }
   }
 
   /**
-   * 获取热门搜索
+   * 鑾峰彇鐑棬鎼滅储
    */
   public async getTrendingSearches(): Promise<TrendingSearch[]> {
-    // 首先尝试从缓存或内存获取
+    // 棣栧厛灏濊瘯浠庣紦瀛樻垨鍐呭瓨鑾峰彇
     const cached = await this.cacheService.getCache<TrendingSearch[]>(this.storageKeys.trendingSearches);
     if (cached) {
       return cached;
     }
     
-    // 缓存未命中，加载新数�?    return this.loadTrendingSearches();
+    // 缂撳瓨鏈懡涓紝鍔犺浇鏂版暟鎹?
+    return this.loadTrendingSearches();
   }
 
   /**
-   * 加载热门搜索
+   * 鍔犺浇鐑棬鎼滅储
    */
   private async loadTrendingSearches(): Promise<TrendingSearch[]> {
     try {
@@ -572,7 +517,7 @@ export class SearchRepository {
       
       const trendingSearches = response.data;
       
-      // 缓存热门搜索
+      // 缂撳瓨鐑棬鎼滅储
       await this.cacheService.setCache(
         this.storageKeys.trendingSearches,
         trendingSearches,
@@ -582,22 +527,23 @@ export class SearchRepository {
         }
       );
       
-      // 发布热门搜索加载事件
+      // 鍙戝竷鐑棬鎼滅储鍔犺浇浜嬩欢
       this.eventBus.emit(SearchEventType.TRENDING_SEARCHES_LOADED, trendingSearches);
       
       return trendingSearches;
     } catch (error) {
       this.logger.warn('Failed to load trending searches', error as Error);
       
-      // 尝试从本地存储获取缓存的热门搜索
+      // 灏濊瘯浠庢湰鍦板瓨鍌ㄨ幏鍙栫紦瀛樼殑鐑棬鎼滅储
       return await this.cacheService.getCache<TrendingSearch[]>(this.storageKeys.trendingSearches) || [];
     }
   }
 
   /**
-   * 获取搜索历史
-   * @param limit 限制数量
-   * @param type 筛选类�?   */
+   * 鑾峰彇鎼滅储鍘嗗彶
+   * @param limit 闄愬埗鏁伴噺
+   * @param type 绛涢€夌被鍨?
+   */
   public async getSearchHistory(limit?: number, type?: SearchType): Promise<SearchHistoryItem[]> {
     try {
       const history = await this.storageUtil.getObject<SearchHistoryItem[]>(
@@ -605,108 +551,63 @@ export class SearchRepository {
         LocalStorageType.DEFAULT
       ) || [];
       
-      // 筛选类�?      let filtered = history;
+      // 绛涢€夌被鍨?
+      let filtered = history;
       if (type) {
         filtered = history.filter(item => item.type === type);
       }
       
-      // 排序（最新的在前�?      filtered.sort((a, b) => b.timestamp - a.timestamp);
+      // 鎺掑簭锛堟渶鏂扮殑鍦ㄥ墠锛?
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
       
-      // 限制数量
+      // 闄愬埗鏁伴噺
       if (limit && limit > 0) {
         filtered = filtered.slice(0, limit);
       }
       
       return filtered;
     } catch (error) {
-      this.Logger.error('Failed to get search history', error as Error);
+      this.logger.error('Failed to get search history', error as Error);
       return [];
     }
   }
 
   /**
-   * 清除搜索历史
-   * @param type 可选的类型筛�?   */
+   * 娓呴櫎鎼滅储鍘嗗彶
+   * @param type 鍙€夌殑绫诲瀷绛涢€?
+   */
   public async clearSearchHistory(type?: SearchType): Promise<void> {
     try {
       if (type) {
-        // 清除特定类型的历�?        const history = await this.getSearchHistory();
+        // 娓呴櫎鐗瑰畾绫诲瀷鐨勫巻鍙?
+        const history = await this.getSearchHistory();
         const filteredHistory = history.filter(item => item.type !== type);
         await this.storageUtil.setObject(
-          this.storageKeys.searchHistory, filteredHistory,
+          this.storageKeys.searchHistory, 
+          filteredHistory,
           LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-         instanceof Error ? filteredHistory,
-          LocalStorageType.DEFAULT
-         : new Error(String(filteredHistory,
-          LocalStorageType.DEFAULT
-        )))))));
+        );
       } else {
-        // 清除所有历�?        await this.storageUtil.remove(this.storageKeys.searchHistory, LocalStorageType.DEFAULT);
+        // 娓呴櫎鎵€鏈夊巻鍙?
+        await this.storageUtil.remove(this.storageKeys.searchHistory, LocalStorageType.DEFAULT);
       }
       
-      // 发布历史清除事件
+      // 鍙戝竷鍘嗗彶娓呴櫎浜嬩欢
       this.eventBus.emit(SearchEventType.SEARCH_HISTORY_CLEARED, { type });
       
       this.logger.info(`Search history cleared${type ? ` for type ${type}` : ''}`);
     } catch (error) {
-      this.Logger.error('Failed to clear search history', error as Error);
+      this.logger.error('Failed to clear search history', error as Error);
       throw error;
     }
   }
 
   /**
-   * 从搜索历史中移除特定�?   * @param query 搜索查询
-   * @param type 搜索类型
+   * 浠庢悳绱㈠巻鍙蹭腑绉婚櫎鐗瑰畾椤?
+   * @param query 鎼滅储鏌ヨ
+   * @param type 鎼滅储绫诲瀷
    */
-  public async removeFromSearchHistory(query: string, type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType))))))): Promise<void> {
+  public async removeFromSearchHistory(query: string, type: SearchType): Promise<void> {
     try {
       const history = await this.getSearchHistory();
       const filteredHistory = history.filter(
@@ -721,31 +622,35 @@ export class SearchRepository {
       
       this.logger.info(`Removed item from search history: ${query}`);
     } catch (error) {
-      this.Logger.error('Failed to remove item from search history', error as Error);
+      this.logger.error('Failed to remove item from search history', error as Error);
     }
   }
 
   /**
-   * 根据ID获取搜索结果项详�?   * @param id 搜索结果项ID
-   * @param type 搜索结果项类�?   */
-  public async getSearchResultItemById(id: string, type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType : new Error(String(type: SearchType instanceof Error ? type: SearchType : new Error(String(type: SearchType))))))): Promise<SearchResultItem | null> {
+   * 鏍规嵁ID鑾峰彇鎼滅储缁撴灉椤硅鎯?
+   * @param id 鎼滅储缁撴灉椤笽D
+   * @param type 鎼滅储缁撴灉椤圭被鍨?
+   */
+  public async getSearchResultItemById(id: string, type: SearchType): Promise<SearchResultItem | null> {
     try {
-      // 构建缓存�?      const cacheKey = `search:item:${type}:${id}`;
+      // 鏋勫缓缂撳瓨閿?
+      const cacheKey = `search:item:${type}:${id}`;
       
-      // 尝试从缓存获�?      let item = await this.cacheService.getCache<SearchResultItem>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?
+      let item = await this.cacheService.getCache<SearchResultItem>(cacheKey);
       if (item) {
         return item;
       }
       
-      // 缓存未命中，根据类型获取详情
+      // 缂撳瓨鏈懡涓紝鏍规嵁绫诲瀷鑾峰彇璇︽儏
       switch (type) {
         case SearchType.VIDEO:
-          // 调用视频详情API
+          // 璋冪敤瑙嗛璇︽儏API
           const response = await this.networkUtil.get<VideoInfo>(
             `${this.apiEndpoints.baseUrl}/videos/${id}`
           );
           
-          // 转换为搜索结果项格式
+          // 杞崲涓烘悳绱㈢粨鏋滈」鏍煎紡
           item = {
             id: response.data.id,
             title: response.data.title,
@@ -763,12 +668,12 @@ export class SearchRepository {
           break;
           
         case SearchType.LIVE:
-          // 调用直播详情API
+          // 璋冪敤鐩存挱璇︽儏API
           const liveResponse = await this.networkUtil.get(
             `${this.apiEndpoints.baseUrl}/live/${id}`
           );
           
-          // 转换为搜索结果项格式
+          // 杞崲涓烘悳绱㈢粨鏋滈」鏍煎紡
           item = {
             id: liveResponse.data.id,
             title: liveResponse.data.title,
@@ -787,26 +692,27 @@ export class SearchRepository {
           return null;
       }
       
-      // 缓存结果�?      if (item) {
+      // 缂撳瓨缁撴灉椤?
+      if (item) {
         await this.cacheService.setCache(
           cacheKey,
           item,
           {
             type: CacheType.MEMORY,
-            expiry: 3600 * 1000 // 1小时
+            expiry: 3600 * 1000 // 1灏忔椂
           }
         );
       }
       
       return item;
     } catch (error) {
-      this.Logger.error(`Failed to get search result item by ID: ${id}`, error as Error);
+      this.logger.error(`Failed to get search result item by ID: ${id}`, error as Error);
       return null;
     }
   }
 
   /**
-   * 验证搜索请求
+   * 楠岃瘉鎼滅储璇锋眰
    */
   private validateSearchRequest(request: SearchRequest): void {
     const errors: string[] = [];
@@ -832,12 +738,12 @@ export class SearchRepository {
     }
     
     if (errors.length > 0) {
-      throw new Error(errors.join(', ' instanceof Error ? ' : new Error(String(' instanceof Error ? ' instanceof Error ? ' : new Error(String(' : new Error(String(' instanceof Error ? ' : new Error(String(' instanceof Error ? ' instanceof Error ? ' : new Error(String(' instanceof Error ? ' instanceof Error ? ' : new Error(String(' : new Error(String(' instanceof Error ? ' : new Error(String(' : new Error(String(' instanceof Error ? ' : new Error(String(' instanceof Error ? ' instanceof Error ? ' : new Error(String(' : new Error(String(' instanceof Error ? ' : new Error(String('))))))));
+      throw new Error(errors.join(', '));
     }
   }
 
   /**
-   * 构建搜索参数
+   * 鏋勫缓鎼滅储鍙傛暟
    */
   private buildSearchParams(request: SearchRequest): Record<string, unknown> {
     const params: Record<string, unknown> = {
@@ -848,7 +754,7 @@ export class SearchRepository {
       pageSize: request.pageSize
     };
     
-    // 添加过滤条件
+    // 娣诲姞杩囨护鏉′欢
     if (request.filters) {
       Object.entries(request.filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -861,7 +767,7 @@ export class SearchRepository {
   }
 
   /**
-   * 生成搜索ID（用于缓存）
+   * 鐢熸垚鎼滅储ID锛堢敤浜庣紦瀛橈級
    */
   private generateSearchId(request: SearchRequest): string {
     const filtersString = request.filters ? 
@@ -871,7 +777,8 @@ export class SearchRepository {
   }
 
   /**
-   * 获取缓存的搜索结�?   */
+   * 鑾峰彇缂撳瓨鐨勬悳绱㈢粨鏋?
+   */
   private async getCachedSearchResult(searchId: string): Promise<SearchResult | null> {
     try {
       return await this.cacheService.getCache<SearchResult>(searchId);
@@ -882,7 +789,7 @@ export class SearchRepository {
   }
 
   /**
-   * 缓存搜索结果
+   * 缂撳瓨鎼滅储缁撴灉
    */
   private async cacheSearchResult(searchId: string, result: SearchResult): Promise<void> {
     try {
@@ -900,36 +807,40 @@ export class SearchRepository {
   }
 
   /**
-   * 添加到搜索历�?   */
+   * 娣诲姞鍒版悳绱㈠巻鍙?
+   */
   private async addToSearchHistory(request: SearchRequest, resultCount: number): Promise<void> {
     try {
-      // 生成历史记录�?      const historyItem: SearchHistoryItem = {
+      // 鐢熸垚鍘嗗彶璁板綍椤?
+      const historyItem: SearchHistoryItem = {
         query: request.query.trim(),
         type: request.type,
         timestamp: Date.now(),
         resultCount
       };
       
-      // 获取现有历史
+      // 鑾峰彇鐜版湁鍘嗗彶
       const history = await this.getSearchHistory();
       
-      // 移除重复项（如果存在相同的查询和类型�?      const filteredHistory = history.filter(
+      // 绉婚櫎閲嶅椤癸紙濡傛灉瀛樺湪鐩稿悓鐨勬煡璇㈠拰绫诲瀷锛?
+      const filteredHistory = history.filter(
         item => !(item.query.toLowerCase() === historyItem.query.toLowerCase() && item.type === historyItem.type)
       );
       
-      // 添加新项到开�?      filteredHistory.unshift(historyItem);
+      // 娣诲姞鏂伴」鍒板紑澶?
+      filteredHistory.unshift(historyItem);
       
-      // 限制历史记录数量
+      // 闄愬埗鍘嗗彶璁板綍鏁伴噺
       const limitedHistory = filteredHistory.slice(0, this.searchConfig.maxHistoryItems);
       
-      // 保存历史记录
+      // 淇濆瓨鍘嗗彶璁板綍
       await this.storageUtil.setObject(
         this.storageKeys.searchHistory,
         limitedHistory,
         LocalStorageType.DEFAULT
       );
       
-      // 发布历史添加事件
+      // 鍙戝竷鍘嗗彶娣诲姞浜嬩欢
       this.eventBus.emit(SearchEventType.SEARCH_HISTORY_ADDED, historyItem);
     } catch (error) {
       this.logger.warn('Failed to add to search history', error as Error);
@@ -937,13 +848,14 @@ export class SearchRepository {
   }
 
   /**
-   * 清理过期的搜索历�?   */
+   * 娓呯悊杩囨湡鐨勬悳绱㈠巻鍙?
+   */
   private async cleanupExpiredHistory(): Promise<void> {
     try {
       const history = await this.getSearchHistory();
       const expiryTime = Date.now() - (this.searchConfig.historyExpiryDays * 24 * 60 * 60 * 1000);
       
-      // 过滤掉过期的历史记录
+      // 杩囨护鎺夎繃鏈熺殑鍘嗗彶璁板綍
       const validHistory = history.filter(item => item.timestamp > expiryTime);
       
       if (validHistory.length !== history.length) {
@@ -961,14 +873,14 @@ export class SearchRepository {
   }
 
   /**
-   * 生成本地搜索建议（当API失败时）
+   * 鐢熸垚鏈湴鎼滅储寤鸿锛堝綋API澶辫触鏃讹級
    */
   private async generateLocalSuggestions(query: string, type?: SearchType): Promise<SearchSuggestion[]> {
     try {
       const history = await this.getSearchHistory(20, type);
       const lowerQuery = query.toLowerCase();
       
-      // 从历史记录中匹配建议
+      // 浠庡巻鍙茶褰曚腑鍖归厤寤鸿
       const suggestions: SearchSuggestion[] = history
         .filter(item => item.query.toLowerCase().includes(lowerQuery))
         .map(item => ({
@@ -978,7 +890,8 @@ export class SearchRepository {
           recent: true
         }));
       
-      // 去重并限制数�?      const uniqueSuggestions = this.deduplicateSuggestions(suggestions).slice(0, 5);
+      // 鍘婚噸骞堕檺鍒舵暟閲?
+      const uniqueSuggestions = this.deduplicateSuggestions(suggestions).slice(0, 5);
       
       return uniqueSuggestions;
     } catch (error) {
@@ -988,7 +901,7 @@ export class SearchRepository {
   }
 
   /**
-   * 去重搜索建议
+   * 鍘婚噸鎼滅储寤鸿
    */
   private deduplicateSuggestions(suggestions: SearchSuggestion[]): SearchSuggestion[] {
     const seen = new Set<string>();
@@ -1003,20 +916,21 @@ export class SearchRepository {
   }
 
   /**
-   * 跟踪搜索行为（用于分析）
+   * 璺熻釜鎼滅储琛屼负锛堢敤浜庡垎鏋愶級
    */
   private trackSearch(request: SearchRequest, resultCount: number): void {
     try {
-      // 这里可以添加搜索行为分析逻辑
-      // 例如发送搜索统计信息到分析服务�?      
+      // 杩欓噷鍙互娣诲姞鎼滅储琛屼负鍒嗘瀽閫昏緫
+      // 渚嬪鍙戦€佹悳绱㈢粺璁′俊鎭埌鍒嗘瀽鏈嶅姟
       this.logger.debug(`Tracking search: ${request.query}, results: ${resultCount}`);
     } catch (error) {
-      // 分析失败不影响搜索功�?      this.logger.warn('Failed to track search', error as Error);
+      // 鍒嗘瀽澶辫触涓嶅奖鍝嶆悳绱㈠姛鑳?
+      this.logger.warn('Failed to track search', error as Error);
     }
   }
 
   /**
-   * 获取搜索统计信息
+   * 鑾峰彇鎼滅储缁熻淇℃伅
    */
   public async getSearchStatistics(): Promise<{
     totalSearches: number;
@@ -1027,13 +941,14 @@ export class SearchRepository {
     try {
       const history = await this.getSearchHistory();
       
-      // 计算统计信息
+      // 璁＄畻缁熻淇℃伅
       const totalSearches = history.length;
       
-      // 最�?天的搜索�?      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      // 鏈€杩?澶╃殑鎼滅储
+      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
       const recentSearches = history.filter(item => item.timestamp > weekAgo).length;
       
-      // 最常搜索的类型
+      // 鏈€甯告悳绱㈢殑绫诲瀷
       const typeCount: Record<string, number> = {};
       history.forEach(item => {
         typeCount[item.type] = (typeCount[item.type] || 0) + 1;
@@ -1049,7 +964,8 @@ export class SearchRepository {
         }
       });
       
-      // 平均结果�?      const resultsSum = history.reduce((sum, item) => sum + (item.resultCount || 0), 0);
+      // 骞冲潎缁撴灉鏁?
+      const resultsSum = history.reduce((sum, item) => sum + (item.resultCount || 0), 0);
       const averageResults = history.length > 0 ? resultsSum / history.length : 0;
       
       return {
@@ -1059,11 +975,12 @@ export class SearchRepository {
         averageResults
       };
     } catch (error) {
-      this.Logger.error('Failed to get search statistics', error as Error);
+      this.logger.error('Failed to get search statistics', error as Error);
       
-      // 返回默认统计信息
+      // 杩斿洖榛樿缁熻淇℃伅
       return {
-        totalSearches: 0, recentSearches: 0,
+        totalSearches: 0,
+        recentSearches: 0,
         mostSearchedType: null,
         averageResults: 0
       };
@@ -1071,241 +988,8 @@ export class SearchRepository {
   }
 }
 
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
+// 瀵煎嚭榛樿瀹炰緥
+export default SearchRepository.getInstance();
 
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( instanceof Error ? recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance( : new Error(String(recentSearches: 0,
-        mostSearchedType: null,
-        averageResults: 0
-      };
-    }
-  }
-}
-
-// 导出默认实例
-export default SearchRepository.getInstance()))))));
 
 

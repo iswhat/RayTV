@@ -1,362 +1,271 @@
-// SiteDao.ets - 站点数据访问对象
-// 负责站点数据的增删改查操作
-
+// SiteDao.ets - 站点数据访问对象 | Site data access object
+// 实现站点数据的增删改查操作 | Implements CRUD operations for site data
 import relationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from '../DatabaseManager';
 import { SITE_TABLE } from '../TableSchema';
-import { Site, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle, SiteType, LoaderType } from '../../bean/Site';
-import Logger from '../../../common/util/Logger';
+import { Site, SiteAuth, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle, SiteHeaders, SiteType, LoaderType } from '../../bean/Site';
+import LoggerUtil from '../../../common/util/Logger';
 import JsonUtil from '../../../common/util/JsonUtil';
 
-/**
- * 头信息数据接口
- */
-interface HeadersData {
-  headers?: Record<string, string>;
-}
+
 
 /**
- * 站点数据访问对象
+ * 站点数据访问对象 | Site data access object
  */
 export class SiteDao {
   private readonly TAG: string = 'SiteDao';
   private dbManager: DatabaseManager;
   
   /**
-   * 构造函数
+   * 构造函数 | Constructor
    */
   constructor() {
     this.dbManager = DatabaseManager.getInstance();
   }
   
   /**
-   * 插入站点
-   * @param site 站点信息
+   * 插入站点 | Insert site
+   * @param site 站点信息 | Site information
    * @returns Promise<void>
    */
   public async insert(site: Site): Promise<void> {
     try {
       const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
       await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
-      Logger.info(this.TAG, `Inserted site: ${site.name} (${site.key})`);
+      LoggerUtil.info(this.TAG, `Inserted site: ${site.name} (${site.key})`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to insert site: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to insert site: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 批量插入站点
-   * @param sites 站点列表
+   * 批量插入站点 | Batch insert sites
+   * @param sites 站点列表 | Site list
    * @returns Promise<void>
    */
   public async batchInsert(sites: Site[]): Promise<void> {
+    if (!sites || sites.length === 0) {
+      return;
+    }
+    
     try {
-      await this.dbManager.executeTransaction(async (connection) => {
-        for (const site of sites) {
-          const valuesBucket = this.createValuesBucket(site);
-          await connection.insert(SITE_TABLE.NAME, valuesBucket);
-          Logger.debug(this.TAG, `Batch inserted site: ${site.name}`);
-        }
-      });
-      Logger.info(this.TAG, `Successfully batch inserted ${sites.length} sites`);
+      for (const site of sites) {
+        const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
+        await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
+      }
+      LoggerUtil.info(this.TAG, `Batch inserted ${sites.length} sites`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to batch insert sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 更新站点
-   * @param site 站点信息
+   * 更新站点 | Update site
+   * @param site 站点信息 | Site information
    * @returns Promise<void>
    */
   public async update(site: Site): Promise<void> {
     try {
-      const headersStr = site.headers?.headers ? JSON.stringify(site.headers.headers) : null;
-      
-      const valuesBucket: relationalStore.ValuesBucket = {
-        name: site.name,
-        type: site.type,
-        api: site.api,
-        headers: headersStr,
-        enabled: site.enabled ? 1 : 0,
-        order: site.order,
-        updated_at: Date.now()
-      };
-      
+      const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, site.key);
-      
-      const count = await this.dbManager.getDatabase().update(valuesBucket, predicates);
-      if (count > 0) {
-        Logger.info(this.TAG, `Updated site: ${site.name} (${site.key})`);
-      } else {
-        Logger.warn(this.TAG, `Site not found for update: ${site.key}`);
-      }
+      await this.dbManager.getDatabase().update(valuesBucket, predicates);
+      LoggerUtil.info(this.TAG, `Updated site: ${site.name} (${site.key})`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to update site: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to update site: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 删除站点
-   * @param key 站点key
+   * 删除站点 | Delete site
+   * @param key 站点key | Site key
    * @returns Promise<void>
    */
   public async delete(key: string): Promise<void> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      
-      const count = await this.dbManager.getDatabase().delete(predicates);
-      if (count > 0) {
-        Logger.info(this.TAG, `Deleted site: ${key}`);
-      } else {
-        Logger.warn(this.TAG, `Site not found for deletion: ${key}`);
-      }
+      await this.dbManager.getDatabase().delete(predicates);
+      LoggerUtil.info(this.TAG, `Deleted site: ${key}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to delete site: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to delete site: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 清空所有站点
-   * @returns Promise<void>
-   */
-  public async clearAll(): Promise<void> {
-    try {
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      const count = await this.dbManager.getDatabase().delete(predicates);
-      Logger.info(this.TAG, `Cleared all ${count} sites`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to clear all sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 获取所有站点
-   * @returns Promise<Site[]> 站点列表
+   * 获取所有站点 | Get all sites
+   * @returns Promise<Site[]>
    */
   public async getAll(): Promise<Site[]> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.orderByAsc(SITE_TABLE.COLUMNS.ORDER);
-      
       const resultSet = await this.dbManager.getDatabase().query(predicates);
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 获取启用的站点
-   * @returns Promise<Site[]> 启用的站点列表
+   * 根据key获取站点 | Get site by key
+   * @param key 站点key | Site key
+   * @returns Promise<Site | undefined>
    */
-  public async getEnabled(): Promise<Site[]> {
-    try {
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.ENABLED, 1);
-      predicates.orderByAsc(SITE_TABLE.COLUMNS.ORDER);
-      
-      const resultSet = await this.dbManager.getDatabase().query(predicates);
-      return this.parseResultSet(resultSet);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to get enabled sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 根据类型获取站点
-   * @param type 站点类型
-   * @returns Promise<Site[]> 指定类型的站点列表
-   */
-  public async getByType(type: string): Promise<Site[]> {
-    try {
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.TYPE, type);
-      predicates.equalTo(SITE_TABLE.COLUMNS.ENABLED, 1);
-      predicates.orderByAsc(SITE_TABLE.COLUMNS.ORDER);
-      
-      const resultSet = await this.dbManager.getDatabase().query(predicates);
-      return this.parseResultSet(resultSet);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to get sites by type: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 根据key获取站点
-   * @param key 站点key
-   * @returns Promise<Site | null> 站点信息，不存在则返回null
-   */
-  public async getByKey(key: string): Promise<Site | null> {
+  public async getByKey(key: string): Promise<Site | undefined> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      
       const resultSet = await this.dbManager.getDatabase().query(predicates);
       const sites = this.parseResultSet(resultSet);
-      return sites.length > 0 ? sites[0] : null;
+      return sites.length > 0 ? sites[0] : undefined;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get site by key: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to get site by key: ${key}, error: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 批量更新站点启用状态
-   * @param keys 站点key列表
-   * @param enabled 是否启用
-   * @returns Promise<void>
+   * 根据类型获取站点 | Get sites by type
+   * @param type 站点类型 | Site type
+   * @returns Promise<Site[]>
    */
-  public async batchUpdateEnabled(keys: string[], enabled: boolean): Promise<void> {
-    try {
-      if (keys.length === 0) {
-        return;
-      }
-      
-      // 使用Record类型创建valuesBucket，避免使用计算属性名
-      const valuesBucket: Record<string, number> = {};
-      valuesBucket[SITE_TABLE.COLUMNS.ENABLED] = enabled ? 1 : 0;
-      valuesBucket[SITE_TABLE.COLUMNS.UPDATED_AT] = Date.now();
-      
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.in(SITE_TABLE.COLUMNS.KEY, keys);
-      
-      const count = await this.dbManager.getDatabase().update(valuesBucket, predicates);
-      Logger.info(this.TAG, `Updated enabled status for ${count} sites`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to batch update enabled status: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 更新站点顺序
-   * @param key 站点key
-   * @param order 新的顺序
-   * @returns Promise<void>
-   */
-  public async updateOrder(key: string, order: number): Promise<void> {
-    try {
-      // 使用Record类型创建valuesBucket，避免使用计算属性名
-      const valuesBucket: Record<string, number> = {};
-      valuesBucket[SITE_TABLE.COLUMNS.ORDER] = order;
-      valuesBucket[SITE_TABLE.COLUMNS.UPDATED_AT] = Date.now();
-      
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      
-      await this.dbManager.getDatabase().update(valuesBucket, predicates);
-      Logger.info(this.TAG, `Updated order for site ${key} to ${order}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to update site order: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 更新站点最后使用时间
-   * @param key 站点key
-   * @returns Promise<void>
-   */
-  public async updateLastUsed(key: string): Promise<void> {
-    try {
-      // 使用Record类型创建valuesBucket，避免使用计算属性名
-      const valuesBucket: Record<string, number> = {};
-      valuesBucket[SITE_TABLE.COLUMNS.LAST_USED_AT] = Date.now();
-      valuesBucket[SITE_TABLE.COLUMNS.UPDATED_AT] = Date.now();
-      
-      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      
-      await this.dbManager.getDatabase().update(valuesBucket, predicates);
-      Logger.info(this.TAG, `Updated last used time for site ${key}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to update site last used time: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-  
-  /**
-   * 检查站点是否存在
-   * @param key 站点key
-   * @returns Promise<boolean> 是否存在
-   */
-  public async exists(key: string): Promise<boolean> {
+  public async getByType(type: SiteType): Promise<Site[]> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      predicates.limitAs(1);
-      
+      predicates.equalTo(SITE_TABLE.COLUMNS.TYPE, type).orderByAsc(SITE_TABLE.COLUMNS.ORDER);
       const resultSet = await this.dbManager.getDatabase().query(predicates);
-      const exists = resultSet.rowCount > 0;
-      resultSet.close();
-      return exists;
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to check if site exists: ${error instanceof Error ? error.message : String(error)}`);
-      return false;
-    }
-  }
-  
-  /**
-   * 搜索站点
-   * @param keyword 搜索关键词
-   * @returns Promise<Site[]> 匹配的站点列表
-   */
-  public async search(keyword: string): Promise<Site[]> {
-    try {
-      const sql = `
-        SELECT * FROM ${SITE_TABLE.NAME}
-        WHERE ${SITE_TABLE.COLUMNS.NAME} LIKE ? OR ${SITE_TABLE.COLUMNS.KEY} LIKE ?
-        ORDER BY ${SITE_TABLE.COLUMNS.ORDER} ASC
-      `;
-      
-      const bindArgs: Array<string | number | boolean | null> = [`%${keyword}%`, `%${keyword}%`];
-      const resultSet = await this.dbManager.getDatabase().querySql(sql, bindArgs);
-      
       return this.parseResultSet(resultSet);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to search sites: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(this.TAG, `Failed to get sites by type: ${type}, error: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 获取站点数量
-   * @returns Promise<number> 站点数量
+   * 启用/禁用站点 | Enable/disable site
+   * @param key 站点key | Site key
+   * @param enabled 是否启用 | Whether to enable
+   * @returns Promise<void>
    */
-  public async getCount(): Promise<number> {
+  public async enableSite(key: string, enabled: boolean): Promise<void> {
     try {
-      const sql = `SELECT COUNT(*) FROM ${SITE_TABLE.NAME}`;
-      const resultSet = await this.dbManager.getDatabase().querySql(sql);
-      
-      let count = 0;
-      if (resultSet.rowCount > 0) {
-        resultSet.goToFirstRow();
-        count = resultSet.getLong(0);
-      }
-      
-      resultSet.close();
-      return count;
+      const valuesBucket: relationalStore.ValuesBucket = {};
+      valuesBucket[SITE_TABLE.COLUMNS.ENABLED] = enabled ? 1 : 0;
+      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
+      predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
+      await this.dbManager.getDatabase().update(valuesBucket, predicates);
+      LoggerUtil.info(this.TAG, `${enabled ? 'Enabled' : 'Disabled'} site: ${key}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to get site count: ${error instanceof Error ? error.message : String(error)}`);
-      return 0;
+      LoggerUtil.error(this.TAG, `Failed to ${enabled ? 'enable' : 'disable'} site: ${key}, error: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
   /**
-   * 解析结果集
-   * @param resultSet 查询结果集
-   * @returns Site[] 站点列表
+   * 更新站点顺序 | Update site order
+   * @param sites 站点列表 | Site list
+   * @returns Promise<void>
+   */
+  public async updateOrder(sites: Site[]): Promise<void> {
+    if (!sites || sites.length === 0) {
+      return;
+    }
+    
+    try {
+      for (let i = 0; i < sites.length; i++) {
+        const valuesBucket: relationalStore.ValuesBucket = {};
+        valuesBucket[SITE_TABLE.COLUMNS.ORDER] = i;
+        const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
+        predicates.equalTo(SITE_TABLE.COLUMNS.KEY, sites[i].key);
+        await this.dbManager.getDatabase().update(valuesBucket, predicates);
+      }
+      LoggerUtil.info(this.TAG, `Updated order for ${sites.length} sites`);
+    } catch (error) {
+      LoggerUtil.error(this.TAG, `Failed to update site order: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+  
+  /**
+   * 删除所有站点 | Delete all sites
+   * @returns Promise<void>
+   */
+  public async deleteAll(): Promise<void> {
+    try {
+      const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
+      await this.dbManager.getDatabase().delete(predicates);
+      LoggerUtil.info(this.TAG, `Deleted all sites`);
+    } catch (error) {
+      LoggerUtil.error(this.TAG, `Failed to delete all sites: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+  
+  /**
+   * 创建值桶 | Create values bucket
+   * @param site 站点信息 | Site information
+   * @returns relationalStore.ValuesBucket 值桶 | Values bucket
+   */
+  private createValuesBucket(site: Site): relationalStore.ValuesBucket {
+    const headersStr = site.headers && site.headers.headers ? JSON.stringify(site.headers.headers) : null;
+    const configStr = site.config ? JSON.stringify(site.config) : null;
+    const siteAuthStr = site.siteAuth ? JSON.stringify(site.siteAuth) : null;
+    const configItemsStr = site.configItems ? JSON.stringify(site.configItems) : null;
+    const searchConfigStr = site.searchConfig ? JSON.stringify(site.searchConfig) : null;
+    const filterConfigStr = site.filterConfig ? JSON.stringify(site.filterConfig) : null;
+    const performanceConfigStr = site.performanceConfig ? JSON.stringify(site.performanceConfig) : null;
+    const statsStr = site.stats ? JSON.stringify(site.stats) : null;
+    const lifecycleStr = site.lifecycle ? JSON.stringify(site.lifecycle) : null;
+    const tagsStr = site.tags ? JSON.stringify(site.tags) : null;
+    
+    // 使用明确的属性名创建ValuesBucket，确保所有属性都有默认值 | Create ValuesBucket with explicit property names, ensuring all properties have default values
+    const valuesBucket: relationalStore.ValuesBucket = {};
+    valuesBucket.key = site.key || '';
+    valuesBucket.name = site.name || '';
+    valuesBucket.type = site.type || '';
+    valuesBucket.loaderType = site.loaderType || '';
+    valuesBucket.api = site.api || '';
+    valuesBucket.logo = site.logo || '';
+    valuesBucket.description = site.description || '';
+    valuesBucket.headers = headersStr || '';
+    valuesBucket.config = configStr || '';
+    valuesBucket.siteAuth = siteAuthStr || '';
+    valuesBucket.configItems = configItemsStr || '';
+    valuesBucket.searchConfig = searchConfigStr || '';
+    valuesBucket.filterConfig = filterConfigStr || '';
+    valuesBucket.performanceConfig = performanceConfigStr || '';
+    valuesBucket.stats = statsStr || '';
+    valuesBucket.lifecycle = lifecycleStr || '';
+    valuesBucket.enabled = site.enabled ? 1 : 0;
+    valuesBucket.order = site.order || 0;
+    valuesBucket.group = site.group || '';
+    valuesBucket.tags = tagsStr || '';
+    valuesBucket.customCode = site.customCode || '';
+    valuesBucket.sandboxEnabled = site.sandboxEnabled ? 1 : 0;
+    valuesBucket.allowThirdParty = site.allowThirdParty ? 1 : 0;
+    valuesBucket.createdAt = site.createdAt || Date.now();
+    valuesBucket.updatedAt = Date.now();
+    valuesBucket.lastUsedAt = site.lastUsedAt || 0;
+    valuesBucket.userAgent = site.userAgent || '';
+    valuesBucket.referer = site.referer || '';
+    valuesBucket.proxy = site.proxy || '';
+    valuesBucket.encoding = site.encoding || '';
+    valuesBucket.charset = site.charset || '';
+    valuesBucket.certificate = site.certificate || '';
+    
+    return valuesBucket;
+  }
+  
+  /**
+   * 解析结果集 | Parse result set
+   * @param resultSet 结果集 | Result set
+   * @returns Site[] 站点列表 | Site list
    * @private
    */
   private parseResultSet(resultSet: relationalStore.ResultSet): Site[] {
@@ -366,284 +275,278 @@ export class SiteDao {
       if (resultSet.rowCount > 0) {
         resultSet.goToFirstRow();
         do {
+          // 解析所有字段 | Parse all fields
+          const key = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)) || '';
+          const name = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.NAME)) || '';
+          const type = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TYPE)) as SiteType || SiteType.VOD;
+          const loaderType = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOADER_TYPE)) as LoaderType || LoaderType.JS;
+          const api = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.API)) || '';
+          const logo = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOGO)) || '';
+          const description = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.DESCRIPTION)) || '';
+          const enabled = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENABLED)) > 0;
+          const order = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ORDER)) || 0;
+          const group = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.GROUP)) || '';
+          const customCode = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CUSTOM_CODE)) || '';
+          const sandboxEnabled = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SANDBOX_ENABLED)) > 0;
+          const allowThirdParty = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY)) > 0;
+          const createdAt = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CREATED_AT)) || Date.now();
+          const updatedAt = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.UPDATED_AT)) || Date.now();
+          const lastUsedAt = resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LAST_USED_AT)) || 0;
+          const userAgent = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.USER_AGENT)) || '';
+          const referer = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.REFERER)) || '';
+          const proxy = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.PROXY)) || '';
+          const encoding = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENCODING)) || '';
+          const charset = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CHARSET)) || '';
+          const certificate = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CERTIFICATE)) || '';
+          
+          // 解析headers | Parse headers
           const headersStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.HEADERS));
-          let headers: HeadersData | undefined;
+          let headers: SiteHeaders | undefined;
           if (headersStr) {
             try {
-              const parsedHeaders = JSON.parse(headersStr);
+              const parsedHeaders = JSON.parse(headersStr) as Record<string, string> | Array<Array<string>>;
               let headersRecord: Record<string, string> = {};
               
               if (Array.isArray(parsedHeaders)) {
-                // 处理数组格式: [["key", "value"], [...]]
+                // 处理数组格式: [['key', 'value'], ...] | Handle array format: [['key', 'value'], ...]
                 for (let i = 0; i < parsedHeaders.length; i++) {
-                  const item = parsedHeaders[i];
-                  if (Array.isArray(item) && item.length >= 2) {
-                    const key = String(item[0]);
-                    const value = String(item[1]);
-                    headersRecord[key] = value;
+                  const headerItem = parsedHeaders[i];
+                  if (Array.isArray(headerItem) && headerItem.length >= 2) {
+                    const headerKey = String(headerItem[0]);
+                    const headerValue = String(headerItem[1]);
+                    headersRecord[headerKey] = headerValue;
                   }
                 }
               } else if (typeof parsedHeaders === 'object' && parsedHeaders !== null) {
-                // 处理对象格式: {"key": "value"}
+                // 处理对象格式 | Handle object format
                 const keys = Object.keys(parsedHeaders);
                 for (let i = 0; i < keys.length; i++) {
-                  const key = keys[i];
-                  const value = parsedHeaders[key];
-                  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-                    headersRecord[key] = String(value);
-                  }
+                  const headerKey = keys[i];
+                  const headerValue = String(parsedHeaders[headerKey]);
+                  headersRecord[headerKey] = headerValue;
                 }
               }
               
-              if (Object.keys(headersRecord).length > 0) {
-                headers = { headers: headersRecord };
-              } else {
-                headers = undefined;
-              }
-            } catch (error) {
-              // If all parsing fails, set headers to undefined
-              headers = undefined;
+              headers = { headers: headersRecord } as SiteHeaders;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse headers: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            headers = undefined;
           }
           
+          // 解析config | Parse config
           const configStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CONFIG));
-          let config: Record<string, string | number | boolean> | undefined;
+          let config: Record<string, string | number | boolean | null> | undefined;
           if (configStr) {
-            const parsedConfig = JSON.parse(configStr);
-            if (parsedConfig && typeof parsedConfig === 'object') {
-              config = parsedConfig as Record<string, string | number | boolean>;
+            try {
+              config = JSON.parse(configStr) as Record<string, string | number | boolean | null>;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse config: ${e instanceof Error ? e.message : String(e)}`);
             }
           }
           
+          // 解析siteAuth | Parse siteAuth
           const siteAuthStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SITE_AUTH));
-          let siteAuth: Record<string, string> | undefined;
+          let siteAuth: SiteAuth | undefined;
           if (siteAuthStr) {
-            const parsedAuth = JSON.parse(siteAuthStr);
-            if (parsedAuth && typeof parsedAuth === 'object') {
-              siteAuth = parsedAuth as Record<string, string>;
+            try {
+              siteAuth = JSON.parse(siteAuthStr) as SiteAuth;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse siteAuth: ${e instanceof Error ? e.message : String(e)}`);
             }
           }
           
+          // 解析configItems | Parse configItems
           const configItemsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CONFIG_ITEMS));
           let configItems: SiteConfigItem[] | undefined;
           if (configItemsStr) {
-            const parsedConfigItems = JSON.parse(configItemsStr);
-            if (Array.isArray(parsedConfigItems)) {
-              configItems = parsedConfigItems as SiteConfigItem[];
+            try {
+              configItems = JSON.parse(configItemsStr) as SiteConfigItem[];
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse configItems: ${e instanceof Error ? e.message : String(e)}`);
             }
           }
           
+          // 解析searchConfig | Parse searchConfig
           const searchConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SEARCH_CONFIG));
-          let searchConfig: SiteSearchConfig;
+          let searchConfig: SiteSearchConfig | undefined;
           if (searchConfigStr) {
-            const parsedSearchConfig = JSON.parse(searchConfigStr);
-            if (parsedSearchConfig && typeof parsedSearchConfig === 'object') {
-              searchConfig = parsedSearchConfig as SiteSearchConfig;
-            } else {
-              searchConfig = {
-                enabled: false,
-                searchDelay: 0,
-                searchLimit: 0,
-                supportAdvancedSearch: false,
-                searchFilters: [],
-                searchCategories: []
-              };
+            try {
+              searchConfig = JSON.parse(searchConfigStr) as SiteSearchConfig;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse searchConfig: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            searchConfig = {
-              enabled: false,
-              searchDelay: 0,
-              searchLimit: 0,
-              supportAdvancedSearch: false,
-              searchFilters: [],
-              searchCategories: []
-            };
           }
           
+          // 解析filterConfig | Parse filterConfig
           const filterConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.FILTER_CONFIG));
-          let filterConfig: SiteFilterConfig;
+          let filterConfig: SiteFilterConfig | undefined;
           if (filterConfigStr) {
-            const parsedFilterConfig = JSON.parse(filterConfigStr);
-            if (parsedFilterConfig && typeof parsedFilterConfig === 'object') {
-              filterConfig = parsedFilterConfig as SiteFilterConfig;
-            } else {
-              filterConfig = {
-                enabled: false,
-                filterOptions: {},
-                sortOptions: []
-              };
+            try {
+              filterConfig = JSON.parse(filterConfigStr) as SiteFilterConfig;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse filterConfig: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            filterConfig = {
-              enabled: false,
-              filterOptions: {},
-              sortOptions: []
-            };
           }
           
+          // 解析performanceConfig | Parse performanceConfig
           const performanceConfigStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG));
-          let performanceConfig: SitePerformanceConfig;
+          let performanceConfig: SitePerformanceConfig | undefined;
           if (performanceConfigStr) {
-            const parsedPerformanceConfig = JSON.parse(performanceConfigStr);
-            if (parsedPerformanceConfig && typeof parsedPerformanceConfig === 'object') {
-              performanceConfig = parsedPerformanceConfig as SitePerformanceConfig;
-            } else {
-              performanceConfig = {
-                timeout: 30000,
-                retryCount: 3,
-                cacheEnabled: true,
-                cacheDuration: 60,
-                concurrency: 5
-              };
+            try {
+              performanceConfig = JSON.parse(performanceConfigStr) as SitePerformanceConfig;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse performanceConfig: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            performanceConfig = {
-              timeout: 30000,
-              retryCount: 3,
-              cacheEnabled: true,
-              cacheDuration: 60,
-              concurrency: 5
-            };
           }
           
+          // 解析stats | Parse stats
           const statsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.STATS));
-          let stats: SiteStats;
+          let stats: SiteStats | undefined;
           if (statsStr) {
-            const parsedStats = JSON.parse(statsStr);
-            if (parsedStats && typeof parsedStats === 'object') {
-              stats = parsedStats as SiteStats;
-            } else {
-              stats = {
-                queryCount: 0,
-                errorCount: 0,
-                avgResponseTime: 0
-              };
+            try {
+              stats = JSON.parse(statsStr) as SiteStats;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse stats: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            stats = {
-              queryCount: 0,
-              errorCount: 0,
-              avgResponseTime: 0
-            };
           }
           
+          // 解析lifecycle | Parse lifecycle
           const lifecycleStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LIFECYCLE));
-          let lifecycle: SiteLifecycle;
+          let lifecycle: SiteLifecycle | undefined;
           if (lifecycleStr) {
-            const parsedLifecycle = JSON.parse(lifecycleStr);
-            if (parsedLifecycle && typeof parsedLifecycle === 'object') {
-              lifecycle = parsedLifecycle as SiteLifecycle;
-            } else {
-              lifecycle = {
-                initialized: false,
-                loading: false,
-                error: false
-              };
+            try {
+              lifecycle = JSON.parse(lifecycleStr) as SiteLifecycle;
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse lifecycle: ${e instanceof Error ? e.message : String(e)}`);
             }
-          } else {
-            lifecycle = {
-              initialized: false,
-              loading: false,
-              error: false
-            };
           }
           
+          // 解析tags | Parse tags
           const tagsStr = resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TAGS));
           let tags: string[] | undefined;
           if (tagsStr) {
-            const parsedTags = JSON.parse(tagsStr);
-            if (Array.isArray(parsedTags)) {
-              tags = parsedTags as string[];
+            try {
+              tags = JSON.parse(tagsStr) as string[];
+            } catch (e) {
+              LoggerUtil.error(this.TAG, `Failed to parse tags: ${e instanceof Error ? e.message : String(e)}`);
             }
           }
           
+          // 创建Site对象 | Create Site object
+          // 处理config对象，移除null值 | Process config object, remove null values
+          let cleanedConfig: Record<string, string | number | boolean> = {};
+          if (config) {
+            const entries = Object.entries(config);
+            for (let i = 0; i < entries.length; i++) {
+              const entry = entries[i];
+              const key = entry[0];
+              const value = entry[1];
+              if (value !== null) {
+                cleanedConfig[key] = value as string | number | boolean;
+              }
+            }
+          }
+          
+          // 使用Site接口创建对象，确保所有属性都有明确类型 | Create object using Site interface, ensuring all properties have explicit types
+          let siteHeaders: SiteHeaders;
+          if (headers) {
+            siteHeaders = headers;
+          } else {
+            // 创建符合SiteHeaders接口的默认对象 | Create default object that conforms to SiteHeaders interface
+            siteHeaders = { headers: {} } as SiteHeaders;
+          }
+          
+          let siteAuthObj: SiteAuth;
+          if (siteAuth) {
+            siteAuthObj = siteAuth as SiteAuth;
+          } else {
+            siteAuthObj = {} as SiteAuth;
+          }
+          
+          let siteSearchConfig: SiteSearchConfig;
+          if (searchConfig) {
+            siteSearchConfig = searchConfig as SiteSearchConfig;
+          } else {
+            siteSearchConfig = { enabled: false } as SiteSearchConfig;
+          }
+          
+          let siteFilterConfig: SiteFilterConfig;
+          if (filterConfig) {
+            siteFilterConfig = filterConfig as SiteFilterConfig;
+          } else {
+            siteFilterConfig = { enabled: false } as SiteFilterConfig;
+          }
+          
+          let sitePerformanceConfig: SitePerformanceConfig;
+          if (performanceConfig) {
+            sitePerformanceConfig = performanceConfig as SitePerformanceConfig;
+          } else {
+            sitePerformanceConfig = {} as SitePerformanceConfig;
+          }
+          
+          let siteStats: SiteStats;
+          if (stats) {
+            siteStats = stats as SiteStats;
+          } else {
+            siteStats = { queryCount: 0, errorCount: 0, avgResponseTime: 0 } as SiteStats;
+          }
+          
+          let siteLifecycle: SiteLifecycle;
+          if (lifecycle) {
+            siteLifecycle = lifecycle as SiteLifecycle;
+          } else {
+            siteLifecycle = { initialized: false, loading: false, error: false } as SiteLifecycle;
+          }
+          
           const site: Site = {
-            key: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.KEY)) || '',
-            name: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.NAME)) || '',
-            type: (resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.TYPE)) as SiteType) || SiteType.MIXED,
-            loaderType: (resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOADER_TYPE)) as LoaderType) || LoaderType.JS,
-            api: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.API)) || '',
-            logo: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LOGO)),
-            description: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.DESCRIPTION)),
-            siteAuth,
-            headers,
-            config,
-            configItems,
-            searchConfig,
-            filterConfig,
-            performanceConfig,
-            stats,
-            lifecycle,
-            enabled: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENABLED)) === 1,
-            order: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ORDER)) || 0,
-            group: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.GROUP)),
-            tags,
-            customCode: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CUSTOM_CODE)),
-            sandboxEnabled: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.SANDBOX_ENABLED)) === 1,
-            allowThirdParty: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY)) === 1,
-            createdAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CREATED_AT)) || Date.now(),
-            updatedAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.UPDATED_AT)) || Date.now(),
-            lastUsedAt: resultSet.getLong(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.LAST_USED_AT)),
-            userAgent: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.USER_AGENT)),
-            referer: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.REFERER)),
-            proxy: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.PROXY)),
-            encoding: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.ENCODING)),
-            charset: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CHARSET)),
-            certificate: resultSet.getString(resultSet.getColumnIndex(SITE_TABLE.COLUMNS.CERTIFICATE))
+            key,
+            name,
+            type,
+            loaderType,
+            api,
+            logo,
+            description,
+            headers: siteHeaders,
+            config: cleanedConfig,
+            siteAuth: siteAuthObj,
+            configItems: configItems || [],
+            searchConfig: siteSearchConfig,
+            filterConfig: siteFilterConfig,
+            performanceConfig: sitePerformanceConfig,
+            stats: siteStats,
+            lifecycle: siteLifecycle,
+            enabled,
+            order,
+            group,
+            tags: tags || [],
+            customCode,
+            sandboxEnabled,
+            allowThirdParty,
+            createdAt,
+            updatedAt,
+            lastUsedAt,
+            userAgent,
+            referer,
+            proxy,
+            encoding,
+            charset,
+            certificate
           };
+          
           sites.push(site);
         } while (resultSet.goToNextRow());
       }
-    } finally {
+      
       resultSet.close();
+    } catch (error) {
+      LoggerUtil.error(this.TAG, `Failed to parse result set: ${error instanceof Error ? error.message : String(error)}`);
+      try {
+        resultSet.close();
+      } catch (closeError) {
+        // 忽略关闭错误 | Ignore close error
+      }
     }
     
     return sites;
-  }
-  
-  /**
-   * 创建值桶
-   * @param site 站点信息
-   * @returns relationalStore.ValuesBucket 值桶
-   * @private
-   */
-  private createValuesBucket(site: Site): relationalStore.ValuesBucket {
-    return {
-      key: site.key ?? '',
-      name: site.name ?? '',
-      type: site.type ?? '',
-      loader_type: site.loaderType ?? '',
-      api: site.api ?? '',
-      logo: site.logo ?? null,
-      description: site.description ?? null,
-      site_auth: site.siteAuth ? JSON.stringify(site.siteAuth) : null,
-      headers: site.headers ? JSON.stringify(site.headers) : null,
-      config: site.config ? JSON.stringify(site.config) : null,
-      config_items: site.configItems ? JSON.stringify(site.configItems) : null,
-      search_config: JSON.stringify(site.searchConfig),
-      filter_config: JSON.stringify(site.filterConfig),
-      performance_config: JSON.stringify(site.performanceConfig),
-      version: site.version ? JSON.stringify(site.version) : null,
-      stats: JSON.stringify(site.stats),
-      lifecycle: JSON.stringify(site.lifecycle),
-      enabled: site.enabled ? 1 : 0,
-      order: site.order ?? 0,
-      group: site.group ?? null,
-      tags: site.tags ? JSON.stringify(site.tags) : null,
-      custom_code: site.customCode ?? null,
-      sandbox_enabled: site.sandboxEnabled ? 1 : 0,
-      allow_third_party: site.allowThirdParty ? 1 : 0,
-      created_at: site.createdAt ?? Date.now(),
-      updated_at: site.updatedAt ?? Date.now(),
-      last_used_at: site.lastUsedAt ?? null,
-      user_agent: site.userAgent ?? null,
-      referer: site.referer ?? null,
-      proxy: site.proxy ?? null,
-      encoding: site.encoding ?? null,
-      charset: site.charset ?? null,
-      certificate: site.certificate ?? null
-    };
   }
 }

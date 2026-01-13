@@ -2,7 +2,7 @@ import Logger from '../../common/util/Logger';
 import fs from '@ohos.file.fs';
 
 /**
- * 缓存项接口
+ * 缓存项接口 | Cache item interface
  */
 export interface CacheItem {
   data: Record<string, string | number | boolean | null> | string | number | boolean | null;
@@ -12,18 +12,18 @@ export interface CacheItem {
 }
 
 /**
- * 缓存配置接口
+ * 缓存配置接口 | Cache config interface
  */
 export interface CacheConfig {
-  maxSize?: number; // 最大缓存大小（字节）
-  defaultExpiry?: number; // 默认过期时间（毫秒）
-  cleanupInterval?: number; // 清理间隔（毫秒）
-  enabled?: boolean; // 是否启用缓存
+  maxSize?: number; // 最大缓存大小（字节）| Max cache size (bytes)
+  defaultExpiry?: number; // 默认过期时间（秒）| Default expiry time (seconds)
+  cleanupInterval?: number; // 清理间隔（秒）| Cleanup interval (seconds)
+  enabled?: boolean; // 是否启用缓存 | Whether to enable cache
 }
 
 /**
- * 缓存管理器
- * 实现爬虫结果的本地缓存，支持缓存过期策略和清理机制
+ * 缓存管理器 | Cache manager
+ * 实现爬取结果的本地缓存，支持缓存过期判断和清理机制
  */
 export class CacheManager {
   private readonly TAG: string = 'CacheManager';
@@ -36,17 +36,17 @@ export class CacheManager {
   private cleanupTimer: number | null = null;
 
   /**
-   * 默认缓存配置
+   * 默认缓存配置 | Default cache config
    */
   private static readonly DEFAULT_CONFIG: CacheConfig = {
     maxSize: 100 * 1024 * 1024, // 100MB
-    defaultExpiry: 3600 * 1000, // 1小时
-    cleanupInterval: 300000, // 5分钟
+    defaultExpiry: 3600 * 1000, // 1小时 | 1 hour
+    cleanupInterval: 300000, // 5分钟 | 5 minutes
     enabled: true
   };
 
   /**
-   * 获取单例实例
+   * 获取单例实例 | Get singleton instance
    * @returns CacheManager
    */
   public static getInstance(): CacheManager {
@@ -57,12 +57,12 @@ export class CacheManager {
   }
 
   /**
-   * 构造函数
+   * 构造函数 | Constructor
    * 私有构造函数防止外部实例化
    */
   private constructor() {
     this.fsManager = fs;
-    // 避免对象展开操作符，显式赋值确保类型安全
+    // 避免对象展开操作符，显式构造配置确保类型安全
     this.config = {
       maxSize: CacheManager.DEFAULT_CONFIG.maxSize,
       defaultExpiry: CacheManager.DEFAULT_CONFIG.defaultExpiry,
@@ -74,7 +74,7 @@ export class CacheManager {
   }
 
   /**
-   * 初始化缓存管理器
+   * 初始化缓存管理器 | Initialize cache manager
    * @private
    */
   private initialize(): void {
@@ -101,8 +101,8 @@ export class CacheManager {
   }
 
   /**
-   * 设置缓存配置
-   * @param config 缓存配置
+   * 设置缓存配置 | Set cache config
+   * @param config 缓存配置 | Cache config
    */
   public setConfig(config: CacheConfig): void {
     // 避免对象展开操作符，显式合并配置确保类型安全
@@ -114,20 +114,20 @@ export class CacheManager {
     };
     Logger.info(this.TAG, `Updated cache config`, { config: this.config });
     
-    // 重新启动清理定时器
+    // 閲嶆柊鍚姩娓呯悊瀹氭椂鍣?
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
     }
     this.startCleanupTimer();
     
-    // 如果缓存大小超限，立即清理
+    // 濡傛灉缂撳瓨澶у皬瓒呴檺锛岀珛鍗虫竻鐞?
     this.cleanupExcessCache();
   }
 
   /**
-   * 获取缓存
-   * @param key 缓存键
-   * @returns 缓存数据或null
+   * 获取缓存 | Get cache
+   * @param key 缓存键 | Cache key
+   * @returns 缓存数据或null | Cache data or null
    */
   public get(key: string): Record<string, string | number | boolean | null> | string | number | boolean | null {
     if (!this.config.enabled) {
@@ -135,34 +135,34 @@ export class CacheManager {
     }
 
     try {
-      // 首先从内存缓存中获取
+      // 棣栧厛浠庡唴瀛樼紦瀛樹腑鑾峰彇
       const cacheItem = this.memoryCache.get(key);
       
       if (cacheItem) {
-        // 检查是否过期
+        // 妫€鏌ユ槸鍚﹁繃鏈?
         if (!this.isExpired(cacheItem)) {
           Logger.debug(this.TAG, `Cache hit for key: ${key} (memory)`, { key });
           return cacheItem.data;
         } else {
-          // 过期则移除
+          // 杩囨湡鍒欑Щ闄?
           this.remove(key);
         }
       }
       
-      // 从文件系统获取
+      // 浠庢枃浠剁郴缁熻幏鍙?
       const filePath = this.getCacheFilePath(key);
       try {
         const fileContent = await this.fsManager.readText(filePath);
         const fileCacheItem: CacheItem = JSON.parse(fileContent);
         
-        // 检查是否过期
+        // 妫€鏌ユ槸鍚﹁繃鏈?
         if (!this.isExpired(fileCacheItem)) {
-          // 加载到内存缓存
+          // 鍔犺浇鍒板唴瀛樼紦瀛?
           this.memoryCache.set(key, fileCacheItem);
           Logger.debug(this.TAG, `Cache hit for key: ${key} (disk)`);
           return fileCacheItem.data;
         } else {
-          // 过期则删除文件
+          // 杩囨湡鍒欏垹闄ゆ枃浠?
           this.fsManager.unlinkSync(filePath);
         }
       }
@@ -176,10 +176,10 @@ export class CacheManager {
   }
 
   /**
-   * 设置缓存
-   * @param key 缓存键
-   * @param data 缓存数据
-   * @param expiry 过期时间（毫秒，可选）
+   * 设置缓存 | Set cache
+   * @param key 缓存键 | Cache key
+   * @param data 缓存数据 | Cache data
+   * @param expiry 过期时间（秒，可选）| Expiry time (seconds, optional)
    * @returns boolean
    */
   public set(key: string, data: Record<string, string | number | boolean | null> | string | number | boolean | null, expiry?: number): boolean {
@@ -192,8 +192,8 @@ export class CacheManager {
       const dataString = JSON.stringify(data);
       const size = dataString.length;
       
-      // 检查数据大小是否超过限制
-      if (size > this.config.maxSize! * 0.1) { // 不缓存超过最大缓存10%的数据
+      // 妫€鏌ユ暟鎹ぇ灏忔槸鍚﹁秴杩囬檺鍒?
+      if (size > this.config.maxSize! * 0.1) { // 涓嶇紦瀛樿秴杩囨渶澶х紦瀛?0%鐨勬暟鎹?
         Logger.warn(this.TAG, `Data too large for caching: ${size} bytes`);
         return false;
       }
@@ -205,17 +205,17 @@ export class CacheManager {
         size
       };
       
-      // 更新总大小
+      // 鏇存柊鎬诲ぇ灏?
       this.updateTotalSize(key, size);
       
-      // 保存到内存缓存
+      // 淇濆瓨鍒板唴瀛樼紦瀛?
       this.memoryCache.set(key, cacheItem);
       
-      // 保存到文件系统
+      // 淇濆瓨鍒版枃浠剁郴缁?
       const filePath = this.getCacheFilePath(key);
       await this.fsManager.writeText(filePath, JSON.stringify(cacheItem));
       
-      // 检查并清理超出大小限制的缓存
+      // 妫€鏌ュ苟娓呯悊瓒呭嚭澶у皬闄愬埗鐨勭紦瀛?
       this.cleanupExcessCache();
       
       Logger.debug(this.TAG, `Cached data for key: ${key}`, { key, size, expiry: expiryTime });
@@ -227,8 +227,8 @@ export class CacheManager {
   }
 
   /**
-   * 移除缓存
-   * @param key 缓存键
+   * 删除缓存 | Remove cache
+   * @param key 缓存键 | Cache key
    * @returns boolean
    */
   public remove(key: string): boolean {
@@ -258,7 +258,7 @@ export class CacheManager {
   }
 
   /**
-   * 清空所有缓存
+   * 清空所有缓存 | Clear all cache
    * @returns boolean
    */
   public clear(): boolean {
@@ -299,8 +299,8 @@ export class CacheManager {
   }
 
   /**
-   * 清空站点相关的所有缓存
-   * @param siteKey 站点唯一标识
+   * 清空站点相关的所有缓存 | Clear all cache related to site
+   * @param siteKey 站点唯一标识 | Site unique identifier
    * @returns boolean
    */
   public clearSiteCache(siteKey: string): boolean {
@@ -314,12 +314,12 @@ export class CacheManager {
         }
       }
       
-      // 移除内存缓存
+      // 删除内存缓存
       for (const key of keysToRemove) {
         this.remove(key);
       }
       
-      // 移除文件系统中的缓存
+      // 删除文件系统中的缓存
       const files = this.fsManager.listSync(this.cacheDir).files as string[];
       if (files) {
         for (const file of files) {
@@ -338,15 +338,15 @@ export class CacheManager {
   }
 
   /**
-   * 获取缓存大小
-   * @returns number 缓存大小（字节）
+   * 获取缓存大小 | Get cache size
+   * @returns number 缓存大小（字节）| Cache size (bytes)
    */
   public getCacheSize(): number {
     return this.totalSize;
   }
 
   /**
-   * 获取缓存项数量
+   * 获取缓存项数量 | Get cache item count
    * @returns number
    */
   public getCacheCount(): number {
@@ -354,8 +354,8 @@ export class CacheManager {
   }
 
   /**
-   * 检查缓存是否存在且未过期
-   * @param key 缓存键
+   * 检查缓存是否存在且未过期 | Check if cache exists and not expired
+   * @param key 缓存键 | Cache key
    * @returns boolean
    */
   public has(key: string): boolean {
@@ -363,10 +363,10 @@ export class CacheManager {
   }
 
   /**
-   * 生成爬虫方法的缓存键
-   * @param siteKey 站点唯一标识
-   * @param method 方法名称
-   * @param params 方法参数
+   * 生成爬取方法的缓存键 | Generate cache key for crawl method
+   * @param siteKey 站点唯一标识 | Site unique identifier
+   * @param method 方法名称 | Method name
+   * @param params 方法参数 | Method parameters
    * @returns string
    */
   public generateCacheKey(siteKey: string, method: string, params: Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null): string {
@@ -376,7 +376,7 @@ export class CacheManager {
   }
 
   /**
-   * 启动清理定时器
+   * 启动清理定时器 | Start cleanup timer
    * @private
    */
   private startCleanupTimer(): void {
@@ -390,7 +390,7 @@ export class CacheManager {
   }
 
   /**
-   * 清理过期缓存
+   * 清理过期缓存 | Cleanup expired cache
    * @private
    */
   private cleanupExpiredCache(): void {
@@ -398,7 +398,7 @@ export class CacheManager {
       const keysToRemove: string[] = [];
       const currentTime = Date.now();
       
-      // 清理内存缓存 - 使用普通变量声明替代解构
+      // 娓呯悊鍐呭瓨缂撳瓨 - 浣跨敤鏅€氬彉閲忓０鏄庢浛浠ｈВ鏋?
       const entries = this.memoryCache.entries();
       let entry = entries.next();
       while (!entry.done) {
@@ -413,7 +413,7 @@ export class CacheManager {
       
       for (const key of keysToRemove) {
         this.memoryCache.delete(key);
-        // 同时删除文件系统中的缓存
+        // 鍚屾椂鍒犻櫎鏂囦欢绯荤粺涓殑缂撳瓨
         const filePath = this.getCacheFilePath(key);
         if (this.fsManager.existsSync(filePath)) {
           this.fsManager.unlinkSync(filePath);
@@ -429,13 +429,13 @@ export class CacheManager {
   }
 
   /**
-   * 清理超出大小限制的缓存
+   * 清理超出大小限制的缓存 | Cleanup excess cache
    * @private
    */
   private cleanupExcessCache(): void {
     if (this.totalSize > this.config.maxSize!) {
       try {
-        // 按时间排序缓存项 - 使用普通函数替代解构
+        // 按时间排序缓存项 - 使用标准方法解决问题
         const sortedItems = Array.from(this.memoryCache.entries())
           .sort((entryA, entryB) => {
             const a = entryA[1];
@@ -443,15 +443,15 @@ export class CacheManager {
             return a.timestamp - b.timestamp;
           });
         
-        // 移除最旧的缓存项，直到总大小在限制内
+        // 删除最早的缓存项，直到总大小在限制内
         let removedSize = 0;
         let removedCount = 0;
         
-        // 使用普通变量声明替代解构
+        // 使用标准变量明确解决问题
         for (const entry of sortedItems) {
           const key = entry[0];
           const item = entry[1];
-          if (this.totalSize - removedSize <= this.config.maxSize! * 0.8) { // 保留20%的空间
+          if (this.totalSize - removedSize <= this.config.maxSize! * 0.8) { // 预留20%的空间
             break;
           }
           
@@ -475,8 +475,8 @@ export class CacheManager {
   }
 
   /**
-   * 检查缓存项是否过期
-   * @param item 缓存项
+   * 妫€鏌ョ紦瀛橀」鏄惁杩囨湡
+   * @param item 缂撳瓨椤?
    * @returns boolean
    * @private
    */
@@ -485,9 +485,9 @@ export class CacheManager {
   }
 
   /**
-   * 更新总缓存大小
-   * @param key 缓存键
-   * @param newSize 新的大小
+   * 鏇存柊鎬荤紦瀛樺ぇ灏?
+   * @param key 缂撳瓨閿?
+   * @param newSize 鏂扮殑澶у皬
    * @private
    */
   private updateTotalSize(key: string, newSize: number): void {
@@ -499,18 +499,18 @@ export class CacheManager {
   }
 
   /**
-   * 获取缓存目录
+   * 鑾峰彇缂撳瓨鐩綍
    * @returns string
    * @private
    */
   private getCacheDirectory(): string {
-    // 使用应用缓存目录
+    // 浣跨敤搴旂敤缂撳瓨鐩綍
     return `/cache/raytv/spider`;
   }
 
   /**
-   * 获取缓存文件路径
-   * @param key 缓存键
+   * 鑾峰彇缂撳瓨鏂囦欢璺緞
+   * @param key 缂撳瓨閿?
    * @returns string
    * @private
    */
@@ -520,8 +520,8 @@ export class CacheManager {
   }
 
   /**
-   * 获取缓存键的哈希值
-   * @param key 缓存键
+   * 鑾峰彇缂撳瓨閿殑鍝堝笇鍊?
+   * @param key 缂撳瓨閿?
    * @returns string
    * @private
    */
@@ -530,8 +530,8 @@ export class CacheManager {
   }
 
   /**
-   * 生成参数的哈希值
-   * @param params 方法参数
+   * 鐢熸垚鍙傛暟鐨勫搱甯屽€?
+   * @param params 鏂规硶鍙傛暟
    * @returns string
    * @private
    */
@@ -546,9 +546,9 @@ export class CacheManager {
   }
   
   /**
-   * 简单的字符串哈希生成函数
-   * @param str 输入字符串
-   * @returns 哈希值字符串
+   * 绠€鍗曠殑瀛楃涓插搱甯岀敓鎴愬嚱鏁?
+   * @param str 杈撳叆瀛楃涓?
+   * @returns 鍝堝笇鍊煎瓧绗︿覆
    * @private
    */
   private generateHash(str: string): string {
@@ -558,42 +558,42 @@ export class CacheManager {
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // 转换为32位整数
+      hash = hash & hash; // 杞崲涓?2浣嶆暣鏁?
     }
     
-    // 转换为16进制字符串
+    // 杞崲涓?6杩涘埗瀛楃涓?
     return Math.abs(hash).toString(16);
   }
 
   /**
-   * 获取对象的所有键
-   * @param obj 输入对象
-   * @returns 键数组
+   * 鑾峰彇瀵硅薄鐨勬墍鏈夐敭
+   * @param obj 杈撳叆瀵硅薄
+   * @returns 閿暟缁?
    * @private
    */
   private getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
-    // 直接使用Object.keys获取键，避免for-in循环和原型链操作
+    // 鐩存帴浣跨敤Object.keys鑾峰彇閿紝閬垮厤for-in寰幆鍜屽師鍨嬮摼鎿嶄綔
     return Object.keys(obj);
   }
 
   /**
-   * 排序参数对象，确保相同内容的参数生成相同的哈希值
-   * @param params 方法参数
-   * @returns 排序后的参数
+   * 鎺掑簭鍙傛暟瀵硅薄锛岀‘淇濈浉鍚屽唴瀹圭殑鍙傛暟鐢熸垚鐩稿悓鐨勫搱甯屽€?
+   * @param params 鏂规硶鍙傛暟
+   * @returns 鎺掑簭鍚庣殑鍙傛暟
    * @private
    */
   private sortParams(params: Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null): Record<string, string | number | boolean | null> | string[] | number[] | boolean[] | string | number | boolean | null {
-    // 处理基本类型和null
+    // 澶勭悊鍩烘湰绫诲瀷鍜宯ull
     if (typeof params !== 'object' || params === null) {
       return params;
     }
     
-    // 处理数组
+    // 澶勭悊鏁扮粍
     if (Array.isArray(params)) {
-      // 确保类型安全，避免unknown类型的递归
+      // 纭繚绫诲瀷瀹夊叏锛岄伩鍏島nknown绫诲瀷鐨勯€掑綊
       const typedArray = params as (string | number | boolean | null)[];
       return typedArray.map(item => {
-        // 仅对对象类型进行递归排序
+        // 浠呭瀵硅薄绫诲瀷杩涜閫掑綊鎺掑簭
         if (typeof item === 'object' && item !== null) {
           if (Array.isArray(item)) {
             return this.sortParams(item as string[] | number[] | boolean[]);
@@ -605,13 +605,13 @@ export class CacheManager {
       }) as string[] | number[] | boolean[];
     }
     
-    // 处理对象
+    // 澶勭悊瀵硅薄
     const sorted: Record<string, string | number | boolean | null> = {};
     const paramObj = params as Record<string, string | number | boolean | null>;
     
     this.getObjectKeys(paramObj).sort().forEach(key => {
       const value = paramObj[key];
-      // 仅对对象类型进行递归排序
+      // 浠呭瀵硅薄绫诲瀷杩涜閫掑綊鎺掑簭
       if (typeof value === 'object' && value !== null) {
         if (Array.isArray(value)) {
           sorted[key] = this.sortParams(value as string[] | number[] | boolean[]);
@@ -626,3 +626,5 @@ export class CacheManager {
     return sorted;
   }
 }
+
+

@@ -1,1199 +1,371 @@
-// ValidatorUtil - 验证工具�?// 提供数据验证相关的工具函数，包括邮箱、手机号、URL等验�?
+/**
+ * ValidatorUtil - 验证工具类 Validation utility class
+ * 提供数据验证相关的工具函数，包括邮箱、手机号、URL等验证 Provides data validation utility functions, including email, phone number, URL validation
+ */
+
 import Logger from './Logger';
 
 /**
- * 验证工具�? */
+ * 验证工具类 Validation utility class
+ */
 export class ValidatorUtil {
-  private static instance: ValidatorUtil;
-  private logger = Logger.getInstance();
+  private static readonly TAG: string = 'ValidatorUtil';
 
   /**
-   * 私有构造函�?   */
-  private constructor() {
-    this.logger.info('ValidatorUtil initialized');
-  }
-
-  /**
-   * 获取验证器单�?   */
-  public static getInstance(): ValidatorUtil {
-    if (!ValidatorUtil.instance) {
-      ValidatorUtil.instance = new ValidatorUtil();
-    }
-    return ValidatorUtil.instance;
-  }
-  
-  /**
-   * 检查对象是否包含指定属�?   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
+   * 验证邮箱是否有效 Validates if email is valid
+   * @param email 邮箱地址 Email address
+   * @returns 是否有效 Is valid
    */
-  private static hasOwnProperty<T extends object>(obj: T, key: string): boolean {
-    return Object.getOwnPropertyNames(obj).includes(key);
-  }
-
-  /**
-   * 获取对象的所有键
-   * 替代Object.keys，兼容ArkTS语法
-   */
-  private static getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      // 安全检查属性是否存在，使用ArkTS兼容的方�?      if (typeof obj === 'object' && obj !== null && ValidatorUtil.hasOwnProperty(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
-  }
-  
-  /**
-   * 获取对象的所有�?   * 替代Object.values，兼容ArkTS语法
-   */
-  private static getObjectValues<T extends object>(obj: T): T[keyof T][] {
-    const values: T[keyof T][] = [];
-    for (const key in obj) {
-      // 安全检查属性是否存在，使用ArkTS兼容的方�?      if (typeof obj === 'object' && obj !== null && ValidatorUtil.hasOwnProperty(obj, key)) {
-        values.push(obj[key]);
-      }
-    }
-    return values;
-  }
-
-  /**
-   * 验证邮箱格式
-   * @param email 邮箱地址
-   */
-  public isValidEmail(email: string): boolean {
-    try {
-      if (!email || typeof email !== 'string') {
-        return false;
-      }
-
-      // 标准邮箱格式验证正则表达�?      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    } catch (error) {
-      this.Logger.error('Failed to validate email', error as Error);
+  public static isValidEmail(email: string): boolean {
+    if (!email) {
       return false;
     }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
   }
 
   /**
-   * 验证手机号格式（支持中国手机号）
-   * @param phone 手机�?   * @param countryCode 国家代码
+   * 验证手机号是否有效 Validates if phone number is valid
+   * @param phone 手机号 Phone number
+   * @returns 是否有效 Is valid
    */
-  public isValidPhone(phone: string, countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN' instanceof Error ? countryCode: string = 'CN' : new Error(String(countryCode: string = 'CN'))))))): boolean {
-    try {
-      if (!phone || typeof phone !== 'string') {
-        return false;
-      }
-
-      // 移除国家代码前缀和空�?      const cleanedPhone = phone.replace(/[+\s-]/g, '');
-
-      // 中国手机号验�?      if (countryCode === 'CN') {
-        const cnPhoneRegex = /^1[3-9]\d{9}$/;
-        return cnPhoneRegex.test(cleanedPhone);
-      }
-      
-      // 简单的国际手机号验证（10-15位数字）
-      const generalPhoneRegex = /^\d{10,15}$/;
-      return generalPhoneRegex.test(cleanedPhone);
-    } catch (error) {
-      this.Logger.error('Failed to validate phone number', error as Error);
+  public static isValidPhone(phone: string): boolean {
+    if (!phone) {
       return false;
     }
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    return phoneRegex.test(phone);
   }
 
   /**
-   * 验证URL格式
-   * @param url URL地址
+   * 验证URL是否有效 Validates if URL is valid
+   * @param url URL地址 URL address
+   * @returns 是否有效 Is valid
    */
-  public isValidUrl(url: string): boolean {
-    try {
-      if (!url || typeof url !== 'string') {
-        return false;
-      }
-
-      // 简单的URL验证
-      const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2, 6} instanceof Error ? 6} : new Error(String(6} instanceof Error ? 6} instanceof Error ? 6} : new Error(String(6} : new Error(String(6} instanceof Error ? 6} : new Error(String(6} instanceof Error ? 6} instanceof Error ? 6} : new Error(String(6} instanceof Error ? 6} instanceof Error ? 6} : new Error(String(6} : new Error(String(6} instanceof Error ? 6} : new Error(String(6} : new Error(String(6} instanceof Error ? 6} : new Error(String(6} instanceof Error ? 6} instanceof Error ? 6} : new Error(String(6} : new Error(String(6} instanceof Error ? 6} : new Error(String(6})))))))([\/\w .-]*)*\/?$/;
-      return urlRegex.test(url);
-    } catch (error) {
-      this.Logger.error('Failed to validate URL', error as Error);
+  public static isValidUrl(url: string): boolean {
+    if (!url) {
       return false;
     }
+    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    return urlRegex.test(url);
   }
 
   /**
-   * 验证IPv4地址
-   * @param ip IP地址
+   * 验证IP地址是否有效 Validates if IP address is valid
+   * @param ip IP地址 IP address
+   * @returns 是否有效 Is valid
    */
-  public isValidIpv4(ip: string): boolean {
-    try {
-      if (!ip || typeof ip !== 'string') {
-        return false;
-      }
-
-      const ipv4Regex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-      return ipv4Regex.test(ip);
-    } catch (error) {
-      this.logger.error('Failed to validate IPv4 address', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+  public static isValidIp(ip: string): boolean {
+    if (!ip) {
       return false;
     }
+    const ipv4Regex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipv4Regex.test(ip);
   }
 
   /**
-   * 验证是否为有效数�?   * @param value �?   * @param options 验证选项
+   * 验证数字是否有效 Validates if number is valid
+   * @param value 值 Value
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
    */
-  public isValidNumber(value: Record<string, string | number | boolean | null>, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
-    try {
-      const num = Number(value);
-
-      if (isNaN(num)) {
-        return false;
-      }
-
-      // 检查是否为整数
-      if (options.integer && !Number.isInteger(num)) {
-        return false;
-      }
-
-      // 检查最小�?      if (options.min !== undefined && num < options.min) {
-        return false;
-      }
-
-      // 检查最大�?      if (options.max !== undefined && num > options.max) {
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      this.Logger.error('Failed to validate number', error as Error);
+  public static isValidNumber(value: any, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
+    const num = Number(value);
+    if (isNaN(num)) {
       return false;
     }
+
+    if (options.integer && !Number.isInteger(num)) {
+      return false;
+    }
+
+    if (options.min !== undefined && num < options.min) {
+      return false;
+    }
+
+    if (options.max !== undefined && num > options.max) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
-   * 验证字符串长�?   * @param str 字符�?   * @param min 最小长�?   * @param max 最大长�?   */
-  public isValidLength(str: string, min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity instanceof Error ? min: number = 0, max: number = Infinity : new Error(String(min: number = 0, max: number = Infinity))))))): boolean {
-    try {
-      if (typeof str !== 'string') {
-        return false;
-      }
-
-      const length = str.length;
-      return length >= min && length <= max;
-    } catch (error) {
-      this.Logger.error('Failed to validate string length', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证密码强度
-   * @param password 密码
-   * @param options 验证选项
+   * 验证字符串长度是否有效 Validates if string length is valid
+   * @param value 字符串 String
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
    */
-  public isValidPassword(password: string, options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    requireUppercase?: boolean;
-    requireLowercase?: boolean;
-    requireNumber?: boolean;
-    requireSpecial?: boolean;
-  } = {}))))))): boolean {
-    try {
-      if (!password || typeof password !== 'string') {
-        return false;
-      }
-
-      const minLength = options.minLength ?? 8;
-      const requireUppercase = options.requireUppercase ?? true;
-      const requireLowercase = options.requireLowercase ?? true;
-      const requireNumber = options.requireNumber ?? true;
-      const requireSpecial = options.requireSpecial ?? true;
-
-      // 检查最小长�?      if (password.length < minLength) {
-        return false;
-      }
-
-      // 检查大写字�?      if (requireUppercase && !/[A-Z]/.test(password)) {
-        return false;
-      }
-
-      // 检查小写字�?      if (requireLowercase && !/[a-z]/.test(password)) {
-        return false;
-      }
-
-      // 检查数�?      if (requireNumber && !/[0-9]/.test(password)) {
-        return false;
-      }
-
-      // 检查特殊字�?      if (requireSpecial && !/[^A-Za-z0-9]/.test(password)) {
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      this.Logger.error('Failed to validate password strength', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证用户�?   * @param username 用户�?   * @param options 验证选项
-   */
-  public isValidUsername(username: string, options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} instanceof Error ? options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {} : new Error(String(options: {
-    minLength?: number;
-    maxLength?: number;
-    allowUnderscore?: boolean;
-    allowHyphen?: boolean;
-  } = {}))))))): boolean {
-    try {
-      if (!username || typeof username !== 'string') {
-        return false;
-      }
-
-      const minLength = options.minLength ?? 3;
-      const maxLength = options.maxLength ?? 20;
-      const allowUnderscore = options.allowUnderscore ?? true;
-      const allowHyphen = options.allowHyphen ?? true;
-
-      // 检查长�?      if (username.length < minLength || username.length > maxLength) {
-        return false;
-      }
-
-      // 检查第一个字符是否是字母或数�?      const firstChar = username[0];
-      const isFirstCharValid = (firstChar >= 'a' && firstChar <= 'z') || 
-                            (firstChar >= 'A' && firstChar <= 'Z') || 
-                            (firstChar >= '0' && firstChar <= '9');
-      if (!isFirstCharValid) {
-        return false;
-      }
-      
-      // 检查最后一个字符是否是字母或数�?      const lastChar = username[username.length - 1];
-      const isLastCharValid = (lastChar >= 'a' && lastChar <= 'z') || 
-                            (lastChar >= 'A' && lastChar <= 'Z') || 
-                            (lastChar >= '0' && lastChar <= '9');
-      if (!isLastCharValid) {
-        return false;
-      }
-      
-      // 检查所有字符是否符合要�?      for (let i = 0; i < username.length; i++) {
-        const char = username[i];
-        const isLetter = (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
-        const isDigit = (char >= '0' && char <= '9');
-        const isUnderscore = char === '_';
-        const isHyphen = allowHyphen && char === '-';
-        
-        if (!(isLetter || isDigit || isUnderscore || isHyphen)) {
-          return false;
-        }
-      }
-      
-      return true;
-    } catch (error) {
-      this.Logger.error('Failed to validate username', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证身份证号（支持中国大陆）
-   * @param idNumber 身份证号
-   */
-  public isValidIdCard(idNumber: string): boolean {
-    try {
-      if (!idNumber || typeof idNumber !== 'string') {
-        return false;
-      }
-
-      // 简单的18位身份证号格式验�?      const idCardRegex = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9Xx]$/;
-      if (!idCardRegex.test(idNumber)) {
-        return false;
-      }
-
-      // 这里可以添加更复杂的校验码验证逻辑
-      return true;
-    } catch (error) {
-      this.logger.error('Failed to validate ID card number', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
-      return false;
-    }
-  }
-
-  /**
-   * 验证日期是否有效
-   * @param date 日期
-   */
-  public isValidDate(date: Record<string, string | number | boolean | null>): boolean {
-    try {
-      const d = new Date(date);
-      return !isNaN(d.getTime());
-    } catch (error) {
-      this.Logger.error('Failed to validate date', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证是否为空�?   * @param value �?   */
-  public isEmpty(value: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): boolean {
+  public static isValidLength(value: string, options: { min?: number; max?: number } = {}): boolean {
     if (value === null || value === undefined) {
+      return false;
+    }
+
+    const length = value.length;
+
+    if (options.min !== undefined && length < options.min) {
+      return false;
+    }
+
+    if (options.max !== undefined && length > options.max) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 验证密码是否符合要求 Validates if password meets requirements
+   * @param password 密码 Password
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
+   */
+  public static isValidPassword(password: string, options: {
+    minLength?: number;
+    requireUppercase?: boolean;
+    requireLowercase?: boolean;
+    requireNumber?: boolean;
+    requireSpecial?: boolean;
+  } = {}): boolean {
+    if (!password) {
+      return false;
+    }
+
+    const minLength = options.minLength ?? 8;
+    const requireUppercase = options.requireUppercase ?? true;
+    const requireLowercase = options.requireLowercase ?? true;
+    const requireNumber = options.requireNumber ?? true;
+    const requireSpecial = options.requireSpecial ?? true;
+
+    if (password.length < minLength) {
+      return false;
+    }
+
+    if (requireUppercase && !/[A-Z]/.test(password)) {
+      return false;
+    }
+
+    if (requireLowercase && !/[a-z]/.test(password)) {
+      return false;
+    }
+
+    if (requireNumber && !/\d/.test(password)) {
+      return false;
+    }
+
+    if (requireSpecial && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 验证用户名是否有效 Validates if username is valid
+   * @param username 用户名 Username
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
+   */
+  public static isValidUsername(username: string, options: {
+    minLength?: number;
+    maxLength?: number;
+    allowUnderscore?: boolean;
+    allowHyphen?: boolean;
+  } = {}): boolean {
+    if (!username) {
+      return false;
+    }
+
+    const minLength = options.minLength ?? 3;
+    const maxLength = options.maxLength ?? 20;
+    const allowUnderscore = options.allowUnderscore ?? true;
+    const allowHyphen = options.allowHyphen ?? true;
+
+    if (username.length < minLength || username.length > maxLength) {
+      return false;
+    }
+
+    // 构建正则表达式 Build regular expression
+    let regexPattern = '^[a-zA-Z0-9';
+    if (allowUnderscore) regexPattern += '_';
+    if (allowHyphen) regexPattern += '-';
+    regexPattern += ']+$';
+
+    const usernameRegex = new RegExp(regexPattern);
+    return usernameRegex.test(username);
+  }
+
+  /**
+   * 验证日期是否有效 Validates if date is valid
+   * @param date 日期 Date
+   * @returns 是否有效 Is valid
+   */
+  public static isValidDate(date: Date | string): boolean {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d instanceof Date && !isNaN(d.getTime());
+  }
+
+  /**
+   * 验证图片URL是否有效 Validates if image URL is valid
+   * @param url 图片URL Image URL
+   * @returns 是否有效 Is valid
+   */
+  public static isValidImageUrl(url: string): boolean {
+    if (!this.isValidUrl(url)) {
+      return false;
+    }
+
+    // 支持的图片格式 Supported image formats
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i;
+    return imageExtensions.test(url);
+  }
+
+  /**
+   * 验证视频URL是否有效 Validates if video URL is valid
+   * @param url 视频URL Video URL
+   * @returns 是否有效 Is valid
+   */
+  public static isValidVideoUrl(url: string): boolean {
+    if (!this.isValidUrl(url)) {
+      return false;
+    }
+
+    // 支持的视频格式 Supported video formats
+    const videoExtensions = /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i;
+    return videoExtensions.test(url);
+  }
+
+  /**
+   * 验证音频URL是否有效 Validates if audio URL is valid
+   * @param url 音频URL Audio URL
+   * @returns 是否有效 Is valid
+   */
+  public static isValidAudioUrl(url: string): boolean {
+    if (!this.isValidUrl(url)) {
+      return false;
+    }
+
+    // 支持的音频格式 Supported audio formats
+    const audioExtensions = /\.(mp3|wav|ogg|flac|aac|m4a)$/i;
+    return audioExtensions.test(url);
+  }
+
+  /**
+   * 获取文件扩展名 Gets file extension
+   * @param fileName 文件名 File name
+   * @returns 文件扩展名 File extension
+   */
+  public static getFileExtension(fileName: string): string {
+    if (!fileName) {
+      return '';
+    }
+
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      return '';
+    }
+
+    return fileName.substring(lastDotIndex + 1).toLowerCase();
+  }
+
+  /**
+   * 验证文件大小是否符合要求 Validates if file size meets requirements
+   * @param size 文件大小（字节） File size in bytes
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
+   */
+  public static isValidFileSize(size: number, options: { maxSize?: number } = {}): boolean {
+    if (size < 0) {
+      return false;
+    }
+
+    if (options.maxSize !== undefined && size > options.maxSize) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 验证数组是否有效 Validates if array is valid
+   * @param arr 数组 Array
+   * @param options 验证选项 Validation options
+   * @returns 是否有效 Is valid
+   */
+  public static isValidArray(arr: any[], options: { minLength?: number; maxLength?: number } = {}): boolean {
+    if (!Array.isArray(arr)) {
+      return false;
+    }
+
+    const length = arr.length;
+
+    if (options.minLength !== undefined && length < options.minLength) {
+      return false;
+    }
+
+    if (options.maxLength !== undefined && length > options.maxLength) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 验证对象是否为空 Validates if object is empty
+   * @param obj 对象 Object
+   * @returns 是否为空 Is empty
+   */
+  public static isEmptyObject(obj: any): boolean {
+    if (obj === null || obj === undefined) {
       return true;
     }
 
-    if (typeof value === 'string') {
-      return value.trim().length === 0;
-    }
-
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    }
-
-    if (typeof value === 'object') {
-      return this.getObjectKeys(value).length === 0;
-    }
-
-    return false;
-  }
-
-  /**
-   * 验证是否为有效的JSON字符�?   * @param str 字符�?   */
-  public isValidJSON(str: string): boolean {
-    try {
-      if (typeof str !== 'string') {
-        return false;
-      }
-
-      JSON.parse(str);
-      return true;
-    } catch (error) {
+    if (typeof obj !== 'object') {
       return false;
     }
+
+    if (Array.isArray(obj)) {
+      return obj.length === 0;
+    }
+
+    return Object.keys(obj).length === 0;
   }
 
   /**
-   * 验证文件扩展�?   * @param fileName 文件�?   * @param allowedExtensions 允许的扩展名列表
+   * 验证字符串是否为纯数字 Validates if string is pure number
+   * @param str 字符串 String
+   * @returns 是否为纯数字 Is pure number
    */
-  public isValidFileExtension(fileName: string, allowedExtensions: string[] instanceof Error ? allowedExtensions: string[] : new Error(String(allowedExtensions: string[] instanceof Error ? allowedExtensions: string[] instanceof Error ? allowedExtensions: string[] : new Error(String(allowedExtensions: string[] : new Error(String(allowedExtensions: string[] instanceof Error ? allowedExtensions: string[] : new Error(String(allowedExtensions: string[]))))): boolean {
-    try {
-      if (!fileName || typeof fileName !== 'string') {
-        return false;
-      }
-
-      const extension = fileName.split('.').pop()?.toLowerCase();
-      if (!extension) {
-        return false;
-      }
-
-      const normalizedExtensions = allowedExtensions.map(ext => ext.toLowerCase().replace(/^\./, ''));
-      return normalizedExtensions.includes(extension);
-    } catch (error) {
-      this.Logger.error('Failed to validate file extension', error as Error);
+  public static isPureNumber(str: string): boolean {
+    if (!str) {
       return false;
     }
+    return /^\d+$/.test(str);
   }
 
   /**
-   * 验证文件大小
-   * @param size 文件大小（字节）
-   * @param maxSize 最大大小（字节�?   */
-  public isValidFileSize(size: number, maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number : new Error(String(maxSize: number instanceof Error ? maxSize: number : new Error(String(maxSize: number))))))): boolean {
-    try {
-      if (typeof size !== 'number' || typeof maxSize !== 'number') {
-        return false;
-      }
-
-      return size <= maxSize && size >= 0;
-    } catch (error) {
-      this.Logger.error('Failed to validate file size', error as Error);
+   * 验证字符串是否为纯字母 Validates if string is pure letter
+   * @param str 字符串 String
+   * @returns 是否为纯字母 Is pure letter
+   */
+  public static isPureLetter(str: string): boolean {
+    if (!str) {
       return false;
     }
+    return /^[a-zA-Z]+$/.test(str);
   }
 
   /**
-   * 验证是否为有效的时间�?   * @param timestamp 时间�?   */
-  public isValidTimestamp(timestamp: number): boolean {
-    try {
-      if (typeof timestamp !== 'number') {
-        return false;
-      }
-
-      return timestamp >= 0 && Number.isFinite(timestamp) && new Date(timestamp).getTime() === timestamp;
-    } catch (error) {
-      this.logger.error('Failed to validate timestamp', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+   * 验证字符串是否为字母数字组合 Validates if string is alphanumeric
+   * @param str 字符串 String
+   * @returns 是否为字母数字组合 Is alphanumeric
+   */
+  public static isAlphanumeric(str: string): boolean {
+    if (!str) {
       return false;
     }
-  }
-
-  /**
-   * 验证颜色格式（支持hex、rgb、rgba�?   * @param color 颜色�?   */
-  public isValidColor(color: string): boolean {
-    try {
-      if (!color || typeof color !== 'string') {
-        return false;
-      }
-
-      // 检查hex格式
-      const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/;
-      if (hexRegex.test(color)) {
-        return true;
-      }
-
-      // 检查rgb格式
-      const rgbRegex = /^rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)$/;
-      if (rgbRegex.test(color)) {
-        return true;
-      }
-
-      // 检查rgba格式
-      const rgbaRegex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*([01]\.?\d*)\)$/;
-      if (rgbaRegex.test(color)) {
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      this.Logger.error('Failed to validate color', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证MAC地址
-   * @param mac MAC地址
-   */
-  public isValidMacAddress(mac: string): boolean {
-    try {
-      if (!mac || typeof mac !== 'string') {
-        return false;
-      }
-
-      const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-      return macRegex.test(mac);
-    } catch (error) {
-      this.logger.error('Failed to validate MAC address', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
-      return false;
-    }
-  }
-
-  /**
-   * 验证车牌号（中国�?   * @param plateNumber 车牌�?   */
-  public isValidPlateNumber(plateNumber: string): boolean {
-    try {
-      if (!plateNumber || typeof plateNumber !== 'string') {
-        return false;
-      }
-
-      // 简单的中国车牌号格式验�?      const plateRegex = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/;
-      return plateRegex.test(plateNumber);
-    } catch (error) {
-      this.Logger.error('Failed to validate plate number', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证邮政编码（中国）
-   * @param postalCode 邮政编码
-   */
-  public isValidPostalCode(postalCode: string): boolean {
-    try {
-      if (!postalCode || typeof postalCode !== 'string') {
-        return false;
-      }
-
-      const postalRegex = /^[1-9]\d{5}$/;
-      return postalRegex.test(postalCode);
-    } catch (error) {
-      this.logger.error('Failed to validate postal code', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
-      return false;
-    }
-  }
-
-  /**
-   * 验证银行卡号
-   * @param cardNumber 银行卡号
-   */
-  public isValidBankCard(cardNumber: string): boolean {
-    try {
-      if (!cardNumber || typeof cardNumber !== 'string') {
-        return false;
-      }
-
-      // 移除空格和连字符
-      const cleanedNumber = cardNumber.replace(/[\s-]/g, '');
-
-      // 检查是否为纯数字且长度�?3-19位之�?      const bankCardRegex = /^\d{13,19}$/;
-      if (!bankCardRegex.test(cleanedNumber)) {
-        return false;
-      }
-
-      // Luhn算法验证
-      return this.luhnCheck(cleanedNumber);
-    } catch (error) {
-      this.Logger.error('Failed to validate bank card number', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * Luhn算法验证函数
-   * @param number 数字字符�?   */
-  private luhnCheck(number: string): boolean {
-    let sum = 0;
-    let isEven = false;
-
-    for (let i = number.length - 1; i >= 0; i--) {
-      let digit = parseInt(number.charAt(i), 10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10 instanceof Error ? 10 instanceof Error ? 10 : new Error(String(10 : new Error(String(10 instanceof Error ? 10 : new Error(String(10)))))));
-
-      if (isEven) {
-        digit *= 2;
-        if (digit > 9) {
-          digit -= 9;
-        }
-      }
-
-      sum += digit;
-      isEven = !isEven;
-    }
-
-    return sum % 10 === 0;
-  }
-
-  /**
-   * 验证是否为有效对�?   * @param obj 对象
-   */
-  public isValidObject(obj: Record<string, string | number | boolean | null>): boolean {
-    try {
-      return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
-    } catch (error) {
-      this.Logger.error('Failed to validate object', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证是否为有效数�?   * @param arr 数组
-   * @param options 验证选项
-   */
-  public isValidArray(arr: Record<string, string | number | boolean | null>, options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? string | number | boolean | null>, options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} : new Error(String(string | number | boolean | null>, options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {} instanceof Error ? options: { minLength?: number; maxLength?: number } = {} : new Error(String(options: { minLength?: number; maxLength?: number } = {}))))))): boolean {
-    try {
-      if (!Array.isArray(arr)) {
-        return false;
-      }
-
-      const minLength = options.minLength ?? 0;
-      const maxLength = options.maxLength ?? Infinity;
-      return arr.length >= minLength && arr.length <= maxLength;
-    } catch (error) {
-      this.Logger.error('Failed to validate array', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 验证是否为有效函�?   * @param fn 函数
-   */
-  public isValidFunction(fn: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null> : new Error(String(string | number | boolean | null>))): boolean {
-    try {
-      return typeof fn === 'function';
-    } catch (error) {
-      this.Logger.error('Failed to validate function', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))));
-      return false;
-    }
-  }
-
-  /**
-   * 验证URL参数是否有效
-   * @param params URL参数对象
-   */
-  public isValidUrlParams(params: Record<string, unknown> instanceof Error ? unknown> : new Error(String(unknown>))): boolean {
-    try {
-      if (!this.isValidObject(params)) {
-        return false;
-      }
-
-      // 检查参数值是否有�?      for (const value of this.getObjectValues(params)) {
-        if (value === undefined || typeof value === 'function' || this.isValidObject(value) || Array.isArray(value)) {
-          return false;
-        }
-      }
-
-      return true;
-    } catch (error) {
-      this.Logger.error('Failed to validate URL params', error as Error);
-      return false;
-    }
-  }
-
-  /**
-   * 综合验证对象
-   * @param obj 要验证的对象
-   * @param schema 验证模式
-   */
-  public validateObject(obj: Record<string, string | number | boolean | null>, schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? string | number | boolean | null>, schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(string | number | boolean | null>, schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null> instanceof Error ? schema: Record<string, (value: Record<string, string | number | boolean | null> : new Error(String(schema: Record<string, (value: Record<string, string | number | boolean | null>))))))) => boolean>): { isValid: boolean; errors: string[] } {
-    try {
-      if (!this.isValidObject(obj)) {
-        return { isValid: false, errors: ['Invalid object'] };
-      }
-
-      const errors: string[] = [];
-
-      for (const [key, validator] of Object.entries(schema)) {
-        if (!validator(obj[key])) {
-          errors.push(`Invalid value for field: ${key}`);
-        }
-      }
-
-      return { isValid: errors.length === 0, errors };
-    } catch (error) {
-      this.Logger.error('Failed to validate object', error as Error);
-      return { isValid: false, errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> instanceof Error ? errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null> : new Error(String(errors: ['Validation error'] };
-    }
-  }
-
-  /**
-   * 验证两个值是否相等（深度比较�?   * @param value1 �?
-   * @param value2 �?
-   */
-  public isEqual(value1: Record<string, string | number | boolean | null>, value2: Record<string, string | number | boolean | null>))))))): boolean {
-    try {
-      // 处理基本类型和null/undefined
-      if (value1 === value2) {
-        return true;
-      }
-
-      // 处理对象类型
-      if (this.isValidObject(value1) && this.isValidObject(value2)) {
-        const keys1 = this.getObjectKeys(value1);
-         const keys2 = this.getObjectKeys(value2);
-
-        if (keys1.length !== keys2.length) {
-          return false;
-        }
-
-        for (const key of keys1) {
-          if (!keys2.includes(key) || !this.isEqual(value1[key], value2[key])) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      // 处理数组类型
-      if (Array.isArray(value1) && Array.isArray(value2)) {
-        if (value1.length !== value2.length) {
-          return false;
-        }
-
-        for (let i = 0; i < value1.length; i++) {
-          if (!this.isEqual(value1[i], value2[i])) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      this.logger.error('Failed to compare values', error as Error);
-      return false;
-    }
+    return /^[a-zA-Z0-9]+$/.test(str);
   }
 }
 
-// 导出默认实例
-export default ValidatorUtil.getInstance();
-
-
+export default ValidatorUtil;

@@ -1,12 +1,15 @@
-// ArkTSUtils.ets - ArkTS兼容工具函数�?// 提供符合ArkTS语法规范的通用工具函数集合
+// ArkTSUtils.ets - ArkTS兼容工具函数库 ArkTS compatible utility functions library
+// Provides common utility functions that conform to ArkTS syntax rules
 
 /**
- * ArkTS兼容工具函数�? * 该模块提供了一组经过优化和兼容处理的工具函数，确保在ArkTS环境中正常工�? */
+ * ArkTS兼容工具函数库 ArkTS compatible utility functions library
+ * This module provides a set of optimized and compatibility-handled utility functions, ensuring smooth operation in ArkTS environment
+ */
 
-// 导出类型定义
+// Export type definitions
 export * from './types/ArkTSBaseTypes';
 
-// 导出工具函数
+// Export utility functions
 export * as TypeUtils from './TypeUtils';
 export * as ObjectUtils from './ObjectUtils';
 export * as ArrayUtils from './ArrayUtils';
@@ -15,46 +18,52 @@ export * as ErrorUtils from './ErrorUtils';
 export * as AssertUtils from './AssertUtils';
 
 /**
- * ArkTS兼容工具库主�? * 提供统一的工具函数访问入�? */
+ * ArkTS兼容工具库主类 ArkTS compatible utility library main class
+ * Provides unified utility functions access entry
+ */
 export default class ArkTSUtils {
   /**
-   * 类型相关工具函数
+   * 类型相关工具函数 Type related utility functions
    */
   public static get Type() {
     return TypeUtils;
   }
 
   /**
-   * 对象相关工具函数
+   * 对象相关工具函数 Object related utility functions
    */
   public static get Object() {
     return ObjectUtils;
   }
 
   /**
-   * 数组相关工具函数
+   * 数组相关工具函数 Array related utility functions
    */
   public static get Array() {
     return ArrayUtils;
   }
 
   /**
-   * 字符串相关工具函�?   */
+   * 字符串相关工具函数 String related utility functions
+   */
   public static get String() {
     return StringUtils;
   }
 
   /**
-   * 错误处理相关工具函数
+   * 错误处理相关工具函数 Error handling related utility functions
    */
   public static get Error() {
     return ErrorUtils;
   }
 
   /**
-   * 断言相关工具函数
+   * 断言相关工具函数 Assert related utility functions
    */
   public static get Assert() {
     return AssertUtils;
   }
 }
+
+
+

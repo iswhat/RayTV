@@ -1,11 +1,11 @@
-// Simple test script for SiteManager
+// Simple test script for SiteManager | SiteManager测试脚本
 const fs = require('fs');
 const path = require('path');
 
 console.log('=== SiteManager Test ===');
 console.log('Testing SiteManager implementation...');
 
-// Read the SiteManager file to check syntax
+// Read the SiteManager file to check syntax | 读取SiteManager文件检查语法
 const siteManagerPath = path.join(__dirname, 'src/main/ets/service/spider/SiteManager.ets');
 
 try {

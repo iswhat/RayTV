@@ -1,48 +1,21 @@
-// TypeSafeUtil - 类型安全工具类
-// 提供统一的类型检查、转换和错误处理方法
+/**
+ * TypeSafetyHelper - 类型安全辅助工具类 Type safety helper class
+ * 提供类型安全检查和转换的辅助方法 Provides helper methods for type safety checking and conversion
+ */
 
-export default class TypeSafeUtil {
-  /**
-   * 安全地将值转换为对象
-   * @param value 要转换的值
-   * @returns 转换后的对象，失败时返回空对象
-   */
-  public static asObject(value: unknown): Record<string, unknown> {
-    if (value === null || value === undefined) {
-      return {};
-    }
-    if (typeof value === 'object' && !Array.isArray(value)) {
-      return value as Record<string, unknown>;
-    }
-    try {
-      return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  }
+/**
+ * 类型安全辅助工具类 Type safety helper class
+ */
+export class TypeSafetyHelper {
+  private static readonly TAG: string = 'TypeSafetyHelper';
 
   /**
-   * 安全地将值转换为数组
-   * @param value 要转换的值
-   * @returns 转换后的数组，失败时返回空数组
+   * 安全地将值转换为字符串 Safely converts value to string
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的字符串 Converted string
    */
-  public static asArray<T>(value: unknown): T[] {
-    if (Array.isArray(value)) {
-      return value as T[];
-    }
-    if (value === null || value === undefined) {
-      return [];
-    }
-    return [value as T];
-  }
-
-  /**
-   * 安全地将值转换为字符串
-   * @param value 要转换的值
-   * @param defaultValue 默认值
-   * @returns 转换后的字符串
-   */
-  public static asString(value: unknown, defaultValue: string = ''): string {
+  public static safeString(value: any, defaultValue: string = ''): string {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -50,12 +23,12 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地将值转换为数字
-   * @param value 要转换的值
-   * @param defaultValue 默认值
-   * @returns 转换后的数字
+   * 安全地将值转换为数字 Safely converts value to number
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的数字 Converted number
    */
-  public static asNumber(value: unknown, defaultValue: number = 0): number {
+  public static safeNumber(value: any, defaultValue: number = 0): number {
     if (value === null || value === undefined) {
       return defaultValue;
     }
@@ -64,294 +37,352 @@ export default class TypeSafeUtil {
   }
 
   /**
-   * 安全地将值转换为布尔值
-   * @param value 要转换的值
-   * @returns 转换后的布尔值
+   * 安全地将值转换为布尔值 Safely converts value to boolean
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的布尔值 Converted boolean
    */
-  public static asBoolean(value: unknown): boolean {
+  public static safeBoolean(value: any, defaultValue: boolean = false): boolean {
     if (value === null || value === undefined) {
-      return false;
-    }
-    if (typeof value === 'boolean') {
-      return value;
-    }
-    if (typeof value === 'string') {
-      return value.toLowerCase() === 'true' || value === '1';
+      return defaultValue;
     }
     return Boolean(value);
   }
 
   /**
-   * 安全地访问对象属性
-   * @param obj 对象
-   * @param key 属性名
-   * @param defaultValue 默认值
-   * @returns 属性值或默认值
+   * 安全地将值转换为数组 Safely converts value to array
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的数组 Converted array
    */
-  public static safeGet<T>(
-    obj: unknown,
-    key: string | number,
-    defaultValue: T
-  ): T {
-    const safeObj = TypeSafeUtil.asObject(obj);
-    const value = safeObj[key];
-    return value !== undefined ? (value as T) : defaultValue;
+  public static safeArray<T>(value: any, defaultValue: T[] = []): T[] {
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+    return Array.isArray(value) ? value : defaultValue;
   }
 
   /**
-   * 安全地设置对象属性
-   * @param obj 对象
-   * @param key 属性名
-   * @param value 属性值
-   * @returns 更新后的对象
+   * 安全地将值转换为对象 Safely converts value to object
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的对象 Converted object
    */
-  public static safeSet<T>(
-    obj: T,
-    key: string | number,
-    value: unknown
-  ): T {
-    const safeObj = TypeSafeUtil.asObject(obj);
-    safeObj[key] = value;
-    return safeObj as T;
+  public static safeObject<T extends Record<string, any>>(value: any, defaultValue: T = {} as T): T {
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      return value as T;
+    }
+    return defaultValue;
   }
 
   /**
-   * 创建安全的错误对象
-   * @param message 错误消息
-   * @param cause 错误原因
-   * @returns Error对象
+   * 安全地获取对象属性 Safely gets object property
+   * @param obj 目标对象 Target object
+   * @param path 属性路径 Property path
+   * @param defaultValue 默认值 Default value
+   * @returns 属性值或默认值 Property value or default value
+   */
+  public static safeGet<T = any>(obj: Record<string, any>, path: string | string[], defaultValue?: T): T | undefined {
+    if (!obj || typeof obj !== 'object') {
+      return defaultValue;
+    }
+
+    const keys: string[] = Array.isArray(path) ? path : path.split('.');
+    let current: any = obj;
+
+    for (const key of keys) {
+      if (current === null || current === undefined || !Reflect.has(current, key)) {
+        return defaultValue;
+      }
+      current = current[key];
+    }
+
+    return current;
+  }
+
+  /**
+   * 安全地设置对象属性 Safely sets object property
+   * @param obj 目标对象 Target object
+   * @param path 属性路径 Property path
+   * @param value 属性值 Property value
+   * @returns 是否设置成功 Whether set successfully
+   */
+  public static safeSet(obj: Record<string, any>, path: string | string[], value: any): boolean {
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
+
+    const keys: string[] = Array.isArray(path) ? path : path.split('.');
+    let current: any = obj;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!current[key]) {
+        current[key] = {};
+      }
+      if (typeof current[key] !== 'object') {
+        return false;
+      }
+      current = current[key];
+    }
+
+    const lastKey = keys[keys.length - 1];
+    current[lastKey] = value;
+    return true;
+  }
+
+  /**
+   * 安全地调用函数 Safely calls function
+   * @param fn 要调用的函数 Function to call
+   * @param thisArg this上下文 This context
+   * @param args 函数参数 Function arguments
+   * @param defaultValue 默认返回值 Default return value
+   * @returns 函数返回值或默认值 Function return value or default value
+   */
+  public static safeCall<T = any>(fn: any, thisArg: any, args: any[], defaultValue?: T): T | undefined {
+    if (typeof fn !== 'function') {
+      return defaultValue;
+    }
+    return fn.apply(thisArg, args);
+  }
+
+  /**
+   * 安全地创建错误对象 Safely creates error object
+   * @param message 错误消息 Error message
+   * @param cause 错误原因 Error cause
+   * @returns 错误对象 Error object
    */
   public static safeError(message: string, cause?: unknown): Error {
     const error = new Error(message);
     if (cause) {
-      // 使用对象展开操作符安全地设置cause属性
-      Object.assign(error, { cause });
+      (error as any).cause = cause;
     }
     return error;
   }
 
   /**
-   * 安全地检查对象是否有指定属性
-   * @param obj 对象
-   * @param key 属性名
-   * @returns 是否有该属性
+   * 安全地获取枚举值 Safely gets enum value
+   * @param enumObj 枚举对象 Enum object
+   * @param value 枚举值 Enum value
+   * @param defaultValue 默认值 Default value
+   * @returns 有效的枚举值或默认值 Valid enum value or default value
    */
-  public static hasProperty(obj: unknown, key: string | number): boolean {
-    if (obj === null || obj === undefined) {
-      return false;
-    }
-    if (typeof obj !== 'object') {
-      return false;
-    }
-    return Object.hasOwnProperty.call(obj, key);
-  }
-
-  /**
-   * 获取对象的所有键
-   * @param obj 对象
-   * @returns 键数组
-   */
-  public static getObjectKeys(obj: unknown): string[] {
-    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
-      return [];
-    }
-    return Object.keys(obj);
-  }
-
-  /**
-   * 获取对象的所有值
-   * @param obj 对象
-   * @returns 值数组
-   */
-  public static getObjectValues<T>(obj: unknown): T[] {
-    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
-      return [];
-    }
-    return Object.values(obj) as T[];
-  }
-
-  /**
-   * 获取对象的所有键值对
-   * @param obj 对象
-   * @returns 键值对数组
-   */
-  public static getObjectEntries<T>(
-    obj: unknown
-  ): [string, T][] {
-    if (obj === null || obj === undefined || typeof obj !== 'object' || Array.isArray(obj)) {
-      return [];
-    }
-    return Object.entries(obj) as [string, T][];
-  }
-
-  /**
-   * 安全地合并多个对象
-   * @param target 目标对象
-   * @param sources 源对象
-   * @returns 合并后的对象
-   */
-  public static mergeObjects<T extends Record<string, unknown>>(
-    target: T,
-    ...sources: Record<string, unknown>[]
-  ): T {
-    const result: Record<string, unknown> = { ...target };
-    
-    sources.forEach(source => {
-      const safeSource = TypeSafeUtil.asObject(source);
-      Object.keys(safeSource).forEach(key => {
-        const sourceValue = safeSource[key];
-        const targetValue = result[key];
-        
-        // 如果两边都是对象，递归合并
-        if (typeof sourceValue === 'object' && 
-            sourceValue !== null && 
-            !Array.isArray(sourceValue) &&
-            typeof targetValue === 'object' &&
-            targetValue !== null &&
-            !Array.isArray(targetValue)) {
-          result[key] = TypeSafeUtil.mergeObjects(
-            targetValue as Record<string, unknown>,
-            sourceValue as Record<string, unknown>
-          );
-        } else {
-          result[key] = sourceValue;
-        }
-      });
-    });
-    
-    return result as T;
-  }
-
-  /**
-   * 安全地深拷贝对象
-   * @param value 要拷贝的值
-   * @returns 拷贝后的新值
-   */
-  public static deepClone<T>(value: T): T {
+  public static safeEnum<T extends Record<string, any>>(enumObj: T, value: any, defaultValue: T[keyof T]): T[keyof T] {
     if (value === null || value === undefined) {
-      return value;
-    }
-    
-    // 处理基本类型
-    if (typeof value !== 'object') {
-      return value;
-    }
-    
-    // 处理日期
-    if (value instanceof Date) {
-      return new Date(value.getTime()) as T;
-    }
-    
-    // 处理数组
-    if (Array.isArray(value)) {
-      return value.map(item => TypeSafeUtil.deepClone(item)) as T;
-    }
-    
-    // 处理对象
-    const cloned: Record<string, unknown> = {};
-    Object.keys(value as Record<string, unknown>).forEach(key => {
-      cloned[key] = TypeSafeUtil.deepClone(
-        (value as Record<string, unknown>)[key]
-      );
-    });
-    
-    return cloned as T;
-  }
-
-  /**
-   * 类型守卫：检查值是否为对象
-   * @param value 要检查的值
-   * @returns 是否为对象
-   */
-  public static isObject(value: unknown): value is Record<string, unknown> {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
-  }
-
-  /**
-   * 类型守卫：检查值是否为数组
-   * @param value 要检查的值
-   * @returns 是否为数组
-   */
-  public static isArray<T>(value: unknown): value is T[] {
-    return Array.isArray(value);
-  }
-
-  /**
-   * 类型守卫：检查值是否为函数
-   * @param value 要检查的值
-   * @returns 是否为函数
-   */
-  public static isFunction(value: unknown): value is Function {
-    return typeof value === 'function';
-  }
-
-  /**
-   * 类型守卫：检查值是否为字符串
-   * @param value 要检查的值
-   * @returns 是否为字符串
-   */
-  public static isString(value: unknown): value is string {
-    return typeof value === 'string';
-  }
-
-  /**
-   * 类型守卫：检查值是否为数字
-   * @param value 要检查的值
-   * @returns 是否为数字
-   */
-  public static isNumber(value: unknown): value is number {
-    return typeof value === 'number';
-  }
-
-  /**
-   * 类型守卫：检查值是否为布尔值
-   * @param value 要检查的值
-   * @returns 是否为布尔值
-   */
-  public static isBoolean(value: unknown): value is boolean {
-    return typeof value === 'boolean';
-  }
-
-  /**
-   * 类型守卫：检查值是否为null或undefined
-   * @param value 要检查的值
-   * @returns 是否为null或undefined
-   */
-  public static isNullOrUndefined(value: unknown): value is null | undefined {
-    return value === null || value === undefined;
-  }
-
-  /**
-   * 安全地进行类型断言
-   * @param value 要断言的值
-   * @param typeGuard 类型守卫函数
-   * @param defaultValue 默认值
-   * @returns 断言后的值或默认值
-   */
-  public static safeAssert<T>(
-    value: unknown,
-    typeGuard: (v: unknown) => v is T,
-    defaultValue: T
-  ): T {
-    return typeGuard(value) ? value : defaultValue;
-  }
-
-  /**
-   * 安全地执行函数
-   * @param fn 要执行的函数
-   * @param defaultValue 默认值
-   * @param args 函数参数
-   * @returns 函数执行结果或默认值
-   */
-  public static safeExecute<T>(
-    fn: (...args: Array<unknown>) => T,
-    defaultValue: T,
-    ...args: Array<unknown>
-  ): T {
-    try {
-      return TypeSafeUtil.isFunction(fn) ? fn(...args) : defaultValue;
-    } catch {
       return defaultValue;
     }
+    return Object.values(enumObj).includes(value) ? value : defaultValue;
+  }
+
+  /**
+   * 安全地转换为日期对象 Safely converts to date object
+   * @param value 要转换的值 Value to convert
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的日期对象或默认值 Converted date object or default value
+   */
+  public static safeDate(value: any, defaultValue: Date = new Date()): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? defaultValue : date;
+  }
+
+  /**
+   * 安全地检查值是否为指定类型 Safely checks if value is of specified type
+   * @param value 要检查的值 Value to check
+   * @param type 类型字符串 Type string
+   * @returns 是否为指定类型 Whether it is of specified type
+   */
+  public static isType(value: any, type: string): boolean {
+    if (type === 'null') {
+      return value === null;
+    }
+    if (type === 'undefined') {
+      return value === undefined;
+    }
+    if (type === 'array') {
+      return Array.isArray(value);
+    }
+    if (type === 'date') {
+      return value instanceof Date && !isNaN(value.getTime());
+    }
+    if (type === 'error') {
+      return value instanceof Error;
+    }
+    return typeof value === type;
+  }
+
+  /**
+   * 安全地获取数组元素 Safely gets array element
+   * @param array 数组 Array
+   * @param index 索引 Index
+   * @param defaultValue 默认值 Default value
+   * @returns 数组元素或默认值 Array element or default value
+   */
+  public static safeArrayElement<T>(array: T[], index: number, defaultValue?: T): T | undefined {
+    if (!Array.isArray(array) || index < 0 || index >= array.length) {
+      return defaultValue;
+    }
+    return array[index];
+  }
+
+  /**
+   * 安全地获取Map值 Safely gets Map value
+   * @param map Map对象 Map object
+   * @param key 键 Key
+   * @param defaultValue 默认值 Default value
+   * @returns Map值或默认值 Map value or default value
+   */
+  public static safeMapGet<K, V>(map: Map<K, V>, key: K, defaultValue?: V): V | undefined {
+    if (!(map instanceof Map)) {
+      return defaultValue;
+    }
+    return map.has(key) ? map.get(key) : defaultValue;
+  }
+
+  /**
+   * 安全地获取Set元素是否存在 Safely checks if Set contains element
+   * @param set Set对象 Set object
+   * @param value 值 Value
+   * @returns 是否存在 Whether it exists
+   */
+  public static safeSetHas<T>(set: Set<T>, value: T): boolean {
+    if (!(set instanceof Set)) {
+      return false;
+    }
+    return set.has(value);
+  }
+
+  /**
+   * 安全地将值转换为指定类型 Safely converts value to specified type
+   * @param value 要转换的值 Value to convert
+   * @param type 类型字符串 Type string
+   * @param defaultValue 默认值 Default value
+   * @returns 转换后的类型或默认值 Converted type or default value
+   */
+  public static safeConvert<T>(value: any, type: string, defaultValue: T): T {
+    switch (type) {
+      case 'string':
+        return this.safeString(value, defaultValue as unknown as string) as unknown as T;
+      case 'number':
+        return this.safeNumber(value, defaultValue as unknown as number) as unknown as T;
+      case 'boolean':
+        return this.safeBoolean(value, defaultValue as unknown as boolean) as unknown as T;
+      case 'array':
+        return this.safeArray(value, defaultValue as unknown as any[]) as unknown as T;
+      case 'object':
+        return this.safeObject(value, defaultValue as unknown as Record<string, any>) as unknown as T;
+      case 'date':
+        return this.safeDate(value, defaultValue as unknown as Date) as unknown as T;
+      default:
+        return defaultValue;
+    }
+  }
+
+  /**
+   * 安全地执行异步函数 Safely executes async function
+   * @param fn 异步函数 Async function
+   * @param args 函数参数 Function arguments
+   * @param options 选项 Options
+   * @returns 执行结果 Execution result
+   */
+  public static async safeAsyncExecute<T>(
+    fn: (...args: any[]) => Promise<T>,
+    args: any[],
+    options: {
+      onError?: (error: Error) => void;
+      defaultValue?: T;
+    } = {}
+  ): Promise<T | undefined> {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      if (options.onError) {
+        options.onError(err);
+      }
+      return options.defaultValue;
+    }
+  }
+
+  /**
+   * 安全地访问可选链属性 Safely accesses optional chaining property
+   * @param obj 目标对象 Target object
+   * @param path 属性路径 Property path
+   * @param defaultValue 默认值 Default value
+   * @returns 属性值或默认值 Property value or default value
+   */
+  public static optionalChain<T = any>(obj: Record<string, any>, path: string, defaultValue?: T): T | undefined {
+    if (!obj || typeof obj !== 'object') {
+      return defaultValue;
+    }
+    return path.split('.').reduce((acc, key) => {
+      return acc && acc[key] !== undefined ? acc[key] : defaultValue;
+    }, obj) as T | undefined;
+  }
+
+  /**
+   * 安全地合并对象 Safely merges objects
+   * @param target 目标对象 Target object
+   * @param sources 源对象 Source objects
+   * @returns 合并后的对象 Merged object
+   */
+  public static safeMerge<T extends Record<string, any>>(
+    target: T,
+    ...sources: Record<string, any>[]
+  ): T {
+    if (!sources.length) {
+      return target;
+    }
+    const merged = { ...target };
+    for (const source of sources) {
+      if (source && typeof source === 'object') {
+        for (const key in source) {
+          if (source.hasOwnProperty(key)) {
+            const sourceValue = source[key];
+            const targetValue = merged[key];
+            if (typeof targetValue === 'object' && targetValue !== null && typeof sourceValue === 'object' && sourceValue !== null) {
+              merged[key] = this.safeMerge(targetValue as Record<string, any>, sourceValue as Record<string, any>);
+            } else {
+              merged[key] = sourceValue;
+            }
+          }
+        }
+      }
+    }
+    return merged as T;
+  }
+
+  /**
+   * 安全地克隆对象 Safely clones object
+   * @param obj 要克隆的对象 Object to clone
+   * @returns 克隆后的对象 Cloned object
+   */
+  public static safeClone<T>(obj: T): T {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    if (obj instanceof Date) {
+      return new Date(obj.getTime()) as unknown as T;
+    }
+    if (Array.isArray(obj)) {
+      return [...obj.map(item => this.safeClone(item))] as unknown as T;
+    }
+    if (typeof obj === 'object') {
+      const clonedObj: any = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          clonedObj[key] = this.safeClone(obj[key]);
+        }
+      }
+      return clonedObj as T;
+    }
+    return obj;
   }
 }
+
+export default TypeSafetyHelper;

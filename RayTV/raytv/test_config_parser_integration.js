@@ -1,8 +1,8 @@
-// 集成测试脚本，验证ConfigParser能够正确解析csp_Gz360站点
+// 集成测试脚本，验证ConfigParser能够正确解析csp_Gz360站点 | Integration test script to verify ConfigParser can correctly parse csp_Gz360 site
 const fs = require('fs');
 const path = require('path');
 
-// 简单模拟ConfigParser的parseSites方法
+// 简单模拟ConfigParser的parseSites方法 | Simple mock of ConfigParser's parseSites method
 function parseSites(configContent) {
   // 移除单行注释
   let clean = configContent.replace(/\/\/.*$/gm, '');
@@ -23,7 +23,7 @@ function parseSites(configContent) {
   }
 }
 
-// 尝试只解析sites数组
+// 尝试只解析sites数组 | Try to parse only the sites array
 function parseSitesArray(content) {
   try {
     // 查找sites数组的开始位置

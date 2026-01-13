@@ -1,5 +1,5 @@
 // VideoDto - 视频相关数据传输对象
-// 定义视频、直播、播放等相关的数据传输对�?
+// 定义视频、剧集、直播等相关的数据传输对象
 
 /**
  * 视频类型枚举
@@ -11,7 +11,7 @@ export enum VideoType {
   MOVIE = 'movie',
   
   /**
-   * 电视�?
+   * 电视剧
    */
   TV_SHOW = 'tv_show',
   
@@ -21,7 +21,7 @@ export enum VideoType {
   EPISODE = 'episode',
   
   /**
-   * 纪录�?
+   * 纪录片
    */
   DOCUMENTARY = 'documentary',
   
@@ -36,7 +36,7 @@ export enum VideoType {
   VARIETY = 'variety',
   
   /**
-   * 短视�?
+   * 短视频
    */
   SHORT_VIDEO = 'short_video',
   
@@ -56,7 +56,7 @@ export enum VideoType {
  */
 export enum VideoQuality {
   /**
-   * 超低�?(144p)
+   * 超低清 (144p)
    */
   QUALITY_144P = '144p',
   
@@ -162,7 +162,7 @@ export enum VideoFormat {
 }
 
 /**
- * 视频源接�?
+ * 视频源接口
  */
 export interface VideoSource {
   /**
@@ -171,7 +171,7 @@ export interface VideoSource {
   id: string;
   
   /**
-   * 源名�?
+   * 源名称
    */
   name: string;
   
@@ -206,12 +206,12 @@ export interface VideoSource {
   audioCodec?: string;
   
   /**
-   * 分辨率宽�?
+   * 分辨率宽度
    */
   width?: number;
   
   /**
-   * 分辨率高�?
+   * 分辨率高度
    */
   height?: number;
   
@@ -221,22 +221,22 @@ export interface VideoSource {
   frameRate?: number;
   
   /**
-   * 比特率（Kbps�?
+   * 码率（Kbps）
    */
   bitrate?: number;
   
   /**
-   * 是否为本地文�?
+   * 是否为本地文件
    */
   isLocal: boolean;
   
   /**
-   * 是否为HLS�?
+   * 是否为HLS流
    */
   isHls?: boolean;
   
   /**
-   * 是否为DASH�?
+   * 是否为DASH流
    */
   isDash?: boolean;
   
@@ -251,7 +251,7 @@ export interface VideoSource {
   requiresVip?: boolean;
   
   /**
-   * 可用状�?
+   * 可用状态
    */
   available: boolean;
 }
@@ -271,7 +271,7 @@ export interface VideoInfo {
   title: string;
   
   /**
-   * 视频副标�?
+   * 视频副标题
    */
   subtitle?: string;
   
@@ -336,7 +336,7 @@ export interface VideoInfo {
   ratingCount?: number;
   
   /**
-   * 持续时间（秒�?
+   * 总时长（秒）
    */
   duration?: number;
   
@@ -361,7 +361,7 @@ export interface VideoInfo {
   favoriteCount?: number;
   
   /**
-   * 评论数量
+   * 评论次数
    */
   commentCount?: number;
   
@@ -381,12 +381,12 @@ export interface VideoInfo {
   relatedVideos?: string[];
   
   /**
-   * 是否收藏
+   * 是否已收藏
    */
   isFavorite?: boolean;
   
   /**
-   * 播放进度（秒�?
+   * 播放进度（秒）
    */
   playProgress?: number;
 }
@@ -421,7 +421,7 @@ export interface SubtitleInfo {
   format: string;
   
   /**
-   * 是否为强制字�?
+   * 是否为强制字幕
    */
   forced?: boolean;
   
@@ -431,7 +431,7 @@ export interface SubtitleInfo {
   encoding?: string;
   
   /**
-   * 是否为外部字�?
+   * 是否为外部字幕
    */
   isExternal?: boolean;
   
@@ -461,7 +461,7 @@ export interface PlayHistory {
   videoTitle: string;
   
   /**
-   * 播放进度（秒�?
+   * 播放进度（秒）
    */
   progress: number;
   
@@ -471,7 +471,7 @@ export interface PlayHistory {
   totalDuration: number;
   
   /**
-   * 最后播放时�?
+   * 最后播放时间
    */
   lastPlayedAt: number;
   
@@ -481,7 +481,7 @@ export interface PlayHistory {
   playCount: number;
   
   /**
-   * 使用的视频源ID
+   * 使用的播放器源ID
    */
   sourceId?: string;
   
@@ -536,7 +536,7 @@ export interface FavoriteInfo {
   category?: string;
   
   /**
-   * 评分�?-5�?
+   * 评分（1-5）
    */
   rating?: number;
   
@@ -552,7 +552,7 @@ export interface FavoriteInfo {
 }
 
 /**
- * 电视剧信息接�?
+ * 电视剧信息接口
  */
 export interface TvShowInfo extends VideoInfo {
   /**
@@ -561,33 +561,33 @@ export interface TvShowInfo extends VideoInfo {
   seasons: TvSeasonInfo[];
   
   /**
-   * 总季�?
+   * 总季数
    */
   totalSeasons: number;
   
   /**
-   * 总集�?
+   * 总集数
    */
   totalEpisodes: number;
   
   /**
-   * 是否完结
+   * 是否已完结
    */
   ended: boolean;
   
   /**
-   * 首播日期
+   * 首播时间
    */
   firstAired?: string;
   
   /**
-   * 完结日期
+   * 完结时间
    */
   lastAired?: string;
 }
 
 /**
- * 季信息接�?
+ * 季信息接口
  */
 export interface TvSeasonInfo {
   /**
@@ -601,7 +601,7 @@ export interface TvSeasonInfo {
   seasonNumber: number;
   
   /**
-   * 季标�?
+   * 季标题
    */
   title?: string;
   
@@ -611,7 +611,7 @@ export interface TvSeasonInfo {
   coverUrl?: string;
   
   /**
-   * 简�?
+   * 简介
    */
   description?: string;
   
@@ -626,13 +626,13 @@ export interface TvSeasonInfo {
   episodes: TvEpisodeInfo[];
   
   /**
-   * 总集�?
+   * 总集数
    */
   totalEpisodes: number;
 }
 
 /**
- * 集信息接�?
+ * 剧集信息接口
  */
 export interface TvEpisodeInfo extends VideoInfo {
   /**
@@ -641,7 +641,7 @@ export interface TvEpisodeInfo extends VideoInfo {
   id: string;
   
   /**
-   * 剧集编号
+   * 集数编号
    */
   episodeNumber: number;
   
@@ -701,12 +701,12 @@ export interface LiveChannelInfo {
   group: string;
   
   /**
-   * 直播�?
+   * 直播流
    */
   streamUrl: string;
   
   /**
-   * 备用直播�?
+   * 备用直播流
    */
   backupUrls?: string[];
   
@@ -716,7 +716,7 @@ export interface LiveChannelInfo {
   currentProgram?: LiveProgramInfo;
   
   /**
-   * 下一个节�?
+   * 下一个节目
    */
   nextProgram?: LiveProgramInfo;
   
@@ -736,7 +736,7 @@ export interface LiveChannelInfo {
   language?: string;
   
   /**
-   * 是否收藏
+   * 是否已收藏
    */
   isFavorite?: boolean;
   
@@ -746,7 +746,7 @@ export interface LiveChannelInfo {
   sortWeight: number;
   
   /**
-   * 清晰�?
+   * 清晰度
    */
   quality?: VideoQuality;
 }
@@ -771,7 +771,7 @@ export interface LiveProgramInfo {
   description?: string;
   
   /**
-   * 开始时�?
+   * 开始时间
    */
   startTime: number;
   
@@ -811,7 +811,7 @@ export interface PlaybackControlParams {
   sourceId?: string;
   
   /**
-   * 起始播放位置（秒�?
+   * 开始播放位置（秒）
    */
   startTime?: number;
   
@@ -852,16 +852,16 @@ export interface PlaybackControlParams {
 }
 
 /**
- * 视频播放状态接�?
+ * 播放状态接口
  */
 export interface PlaybackState {
   /**
-   * 播放状�?
+   * 播放状态
    */
   state: 'idle' | 'loading' | 'playing' | 'paused' | 'stopped' | 'error';
   
   /**
-   * 当前播放位置（秒�?
+   * 当前播放位置（秒）
    */
   currentTime: number;
   
@@ -871,7 +871,7 @@ export interface PlaybackState {
   duration: number;
   
   /**
-   * 播放进度百分�?
+   * 播放进度百分比
    */
   progress: number;
   
@@ -891,17 +891,17 @@ export interface PlaybackState {
   muted: boolean;
   
   /**
-   * 是否缓冲�?
+   * 是否缓冲中
    */
   isBuffering: boolean;
   
   /**
-   * 缓冲百分�?
+   * 缓冲百分比
    */
   bufferPercentage: number;
   
   /**
-   * 当前清晰�?
+   * 当前清晰度
    */
   currentQuality?: VideoQuality;
   
@@ -936,12 +936,12 @@ export interface VideoStats {
   completeCount: number;
   
   /**
-   * 平均观看时长（秒�?
+   * 平均观看时长（秒）
    */
   avgWatchTime: number;
   
   /**
-   * 平均完成�?
+   * 平均完成率
    */
   avgCompletionRate: number;
   
@@ -961,12 +961,12 @@ export interface VideoStats {
   likeCount: number;
   
   /**
-   * 踩次�?
+   * 踩次数
    */
   dislikeCount: number;
   
   /**
-   * 最近播放人�?
+   * 最近观看人数
    */
   recentViewers: number;
 }
@@ -1011,17 +1011,17 @@ export interface VideoComment {
   createdAt: number;
   
   /**
-   * 点赞�?
+   * 点赞数
    */
   likeCount: number;
   
   /**
-   * 回复�?
+   * 回复数
    */
   replyCount: number;
   
   /**
-   * 评分�?-5�?
+   * 评分（1-5）
    */
   rating?: number;
   

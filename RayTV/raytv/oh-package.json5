@@ -10,10 +10,13 @@
     "dev": "hvigor assembleHap --hot-reload-build"
   },
   "dependencies": {
+    // Note: HarmonyOS system APIs (starting with @kit and @ohos) do not need to be declared in package.json
     // 注意：HarmonyOS系统API（以@kit和@ohos开头）不需要在package.json中声明
+    // These APIs are automatically loaded from the SDK during compilation
     // 这些API会在编译时自动从SDK中加载
   },
   "devDependencies": {
+    // Note: @ohos prefix system APIs do not need to be declared here, they are automatically loaded from the SDK during compilation
     // @ohos前缀的系统API不需要在此声明，会在编译时自动从SDK加载
   }
 }

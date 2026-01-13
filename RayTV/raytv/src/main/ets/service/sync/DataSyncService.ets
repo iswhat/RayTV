@@ -1,5 +1,5 @@
-// DataSyncService.ets - 数据同步服务
-// 负责协调本地数据库、网络数据和分布式数据之间的同步
+﻿// DataSyncService.ets - 数据同步服务 | Data sync service
+// 负责协调本地数据库、网络数据和分布式数据之间的同步 | Responsible for coordinating synchronization between local database, network data, and distributed data
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
@@ -7,17 +7,17 @@ import ModernDistributedDataService from './ModernDistributedDataService';
 import { SyncDataType } from './ModernDistributedDataService';
 import { Serializable } from '../../types/commonTypes';
 
-// 常量定义
+// 常量定义 | Constant definition
 const TAG = 'DataSyncService';
 
-// 同步方向枚举
+// 同步方向枚举 | Sync direction enum
 export enum SyncDirection {
-  UPLOAD = 'upload',         // 上传（本�?>远程�?
-  DOWNLOAD = 'download',     // 下载（远�?>本地�?
-  BIDIRECTIONAL = 'bidirectional' // 双向同步
+  UPLOAD = 'upload',         // 上传（本地→远程） | Upload (local → remote)
+  DOWNLOAD = 'download',     // 下载（远程→本地） | Download (remote → local)
+  BIDIRECTIONAL = 'bidirectional' // 双向同步 | Bidirectional sync
 }
 
-// 同步状态枚�?
+// 同步状态枚举 | Sync state enum
 export enum SyncState {
   IDLE = 'idle',
   PENDING = 'pending',
@@ -28,35 +28,35 @@ export enum SyncState {
   CONFLICT = 'conflict'
 }
 
-// 同步策略枚举
+// 同步策略枚举 | Sync strategy enum
 export enum SyncStrategy {
-  TIMESTAMP_BASED = 'timestamp_based', // 基于时间�?
-  VERSION_BASED = 'version_based',     // 基于版本�?
-  CHECKSUM_BASED = 'checksum_based',   // 基于校验�?
-  FULL_SYNC = 'full_sync'             // 全量同步
+  TIMESTAMP_BASED = 'timestamp_based', // 基于时间戳 | Based on timestamp
+  VERSION_BASED = 'version_based',     // 基于版本号 | Based on version
+  CHECKSUM_BASED = 'checksum_based',   // 基于校验和 | Based on checksum
+  FULL_SYNC = 'full_sync'             // 全量同步 | Full sync
 }
 
-// 数据同步配置接口
+// 数据同步配置接口 | Data sync config interface
 export interface DataSyncConfig {
-  enabled: boolean;               // 是否启用同步
-  autoSync: boolean;              // 是否自动同步
-  syncInterval: number;           // 同步间隔（秒�?
-  syncStrategy: SyncStrategy;     // 同步策略
-  syncDirection: SyncDirection;   // 同步方向
-  syncOnStart: boolean;           // 应用启动时同�?
-  syncOnNetworkChange: boolean;   // 网络变化时同�?
-  syncOnAppBackground: boolean;   // 应用后台时同�?
-  allowCellularSync: boolean;     // 允许蜂窝网络同步
-  maxSyncRetry: number;           // 最大重试次�?
-  retryInterval: number;          // 重试间隔（秒�?
-  batchSize: number;              // 批量同步大小
+  enabled: boolean;               // 是否启用同步 | Whether to enable sync
+  autoSync: boolean;              // 是否自动同步 | Whether to enable auto sync
+  syncInterval: number;           // 同步间隔（秒） | Sync interval (seconds)
+  syncStrategy: SyncStrategy;     // 同步策略 | Sync strategy
+  syncDirection: SyncDirection;   // 同步方向 | Sync direction
+  syncOnStart: boolean;           // 应用启动时同步 | Sync on app start
+  syncOnNetworkChange: boolean;   // 网络变化时同步 | Sync on network change
+  syncOnAppBackground: boolean;   // 应用后台时同步 | Sync on app background
+  allowCellularSync: boolean;     // 允许蜂窝网络同步 | Allow cellular network sync
+  maxSyncRetry: number;           // 最大重试次数 | Maximum retry count
+  retryInterval: number;          // 重试间隔（秒） | Retry interval (seconds)
+  batchSize: number;              // 批量同步大小 | Batch sync size
 }
 
-// 默认数据同步配置
+// 默认数据同步配置 | Default data sync config
 export const DEFAULT_DATA_SYNC_CONFIG: DataSyncConfig = {
   enabled: true,
   autoSync: true,
-  syncInterval: 300, // 5分钟
+  syncInterval: 300, // 5分钟 | 5 minutes
   syncStrategy: SyncStrategy.TIMESTAMP_BASED,
   syncDirection: SyncDirection.BIDIRECTIONAL,
   syncOnStart: true,
@@ -64,91 +64,91 @@ export const DEFAULT_DATA_SYNC_CONFIG: DataSyncConfig = {
   syncOnAppBackground: true,
   allowCellularSync: false,
   maxSyncRetry: 3,
-  retryInterval: 60, // 1分钟
+  retryInterval: 60, // 1分钟 | 1 minute
   batchSize: 100
 };
 
-// 同步任务接口
+// 同步任务接口 | Sync task interface
 export interface SyncTask {
-  id: string;                     // 任务ID
-  dataType: string;               // 数据类型
-  direction: SyncDirection;       // 同步方向
-  priority: number;               // 优先级（0-100�?
-  startTime?: number;             // 开始时�?
-  endTime?: number;               // 结束时间
-  state: SyncState;               // 状�?
-  progress: number;               // 进度�?-100�?
-  totalCount?: number;            // 总数�?
-  successCount?: number;          // 成功数量
-  failedCount?: number;           // 失败数量
-  error?: string;                 // 错误信息
-  retryCount: number;             // 重试次数
+  id: string;                     // 任务ID | Task ID
+  dataType: string;               // 数据类型 | Data type
+  direction: SyncDirection;       // 同步方向 | Sync direction
+  priority: number;               // 优先级（0-100） | Priority (0-100)
+  startTime?: number;             // 开始时间 | Start time
+  endTime?: number;               // 结束时间 | End time
+  state: SyncState;               // 状态 | State
+  progress: number;               // 进度（0-100） | Progress (0-100)
+  totalCount?: number;            // 总数量 | Total count
+  successCount?: number;          // 成功数量 | Success count
+  failedCount?: number;           // 失败数量 | Failed count
+  error?: string;                 // 错误信息 | Error message
+  retryCount: number;             // 重试次数 | Retry count
 }
 
-// 通用同步实体接口
+// 通用同步实体接口 | Common sync entity interface
 export interface SyncEntity {
-  id: string;                     // 实体ID
-  timestamp?: number;             // 时间�?
-  version?: number;               // 版本�?
-  checksum?: string;              // 校验�?
-  extraData?: Record<string, Serializable>; // 其他属�?
+  id: string;                     // 实体ID | Entity ID
+  timestamp?: number;             // 时间戳 | Timestamp
+  version?: number;               // 版本号 | Version
+  checksum?: string;              // 校验和 | Checksum
+  extraData?: Record<string, Serializable>; // 其他属性 | Other properties
 }
 
-// 同步记录接口
+// 同步记录接口 | Sync record interface
 export interface SyncRecord {
-  id: string;                     // 记录ID
-  syncTime: number;               // 同步时间
-  duration: number;               // 持续时间（毫秒）
-  direction: SyncDirection;       // 同步方向
-  totalRecords: number;           // 总记录数
-  syncedRecords: number;          // 同步成功记录�?
-  failedRecords: number;          // 失败记录�?
-  conflictRecords: number;        // 冲突记录�?
-  networkType?: string;           // 网络类型
-  batteryLevel?: number;          // 电池电量
-  success: boolean;               // 是否成功
-  errorMessage?: string;          // 错误信息
+  id: string;                     // 记录ID | Record ID
+  syncTime: number;               // 同步时间 | Sync time
+  duration: number;               // 持续时间（毫秒） | Duration (milliseconds)
+  direction: SyncDirection;       // 同步方向 | Sync direction
+  totalRecords: number;           // 总记录数 | Total records
+  syncedRecords: number;          // 同步成功记录数 | Synced records count
+  failedRecords: number;          // 失败记录数 | Failed records count
+  conflictRecords: number;        // 冲突记录数 | Conflict records count
+  networkType?: string;           // 网络类型 | Network type
+  batteryLevel?: number;          // 电池电量 | Battery level
+  success: boolean;               // 是否成功 | Whether successful
+  errorMessage?: string;          // 错误信息 | Error message
 }
 
-// 数据变更记录接口
+// 数据变更记录接口 | Data change record interface
 export interface DataChange {
-  entityId: string;               // 实体ID
-  entityType: string;             // 实体类型
-  operation: 'create' | 'update' | 'delete'; // 操作类型
-  timestamp: number;              // 时间�?
-  data?: Record<string, Serializable>; // 数据内容
-  version?: number;               // 版本�?
-  checksum?: string;              // 校验�?
+  entityId: string;               // 实体ID | Entity ID
+  entityType: string;             // 实体类型 | Entity type
+  operation: 'create' | 'update' | 'delete'; // 操作类型 | Operation type
+  timestamp: number;              // 时间戳 | Timestamp
+  data?: Record<string, Serializable>; // 数据内容 | Data content
+  version?: number;               // 版本号 | Version
+  checksum?: string;              // 校验和 | Checksum
 }
 
-// 同步冲突接口
+// 同步冲突接口 | Sync conflict interface
 export interface SyncConflict {
-  entityId: string;               // 实体ID
-  entityType: string;             // 实体类型
-  localData: Record<string, unknown>;                 // 本地数据
-  remoteData: Record<string, unknown>;                // 远程数据
-  resolved: boolean;              // 是否已解�?
-  resolution?: 'local' | 'remote' | 'merged'; // 解决方式
+  entityId: string;               // 实体ID | Entity ID
+  entityType: string;             // 实体类型 | Entity type
+  localData: Record<string, Serializable>;                 // 本地数据 | Local data
+  remoteData: Record<string, Serializable>;                // 远程数据 | Remote data
+  resolved: boolean;              // 是否已解决 | Whether resolved
+  resolution?: 'local' | 'remote' | 'merged'; // 解决方式 | Resolution method
 }
 
-// 同步监听器回调类�?
+// 同步监听器回调类型 | Sync listener callback type
 type SyncListener = (task: SyncTask) => void;
 
-// 数据提供者接口（适配器模式）
+// 数据提供器接口（适配器模式） | Data provider interface (adapter pattern)
 export interface DataProvider {
   getDataType(): string;
-  fetchData(params?: Record<string, unknown>): Promise<Record<string, unknown>[]>;
-  saveData(data: Record<string, unknown>[]): Promise<boolean>;
-  updateData(data: Record<string, unknown>[]): Promise<boolean>;
+  fetchData(params?: Record<string, string | number | boolean | null>): Promise<Record<string, string | number | boolean | null>[]>;
+  saveData(data: Record<string, string | number | boolean | null>[]): Promise<boolean>;
+  updateData(data: Record<string, string | number | boolean | null>[]): Promise<boolean>;
   deleteData(ids: string[]): Promise<boolean>;
   getLastSyncTime(): Promise<number>;
   setLastSyncTime(timestamp: number): Promise<void>;
   getChanges(sinceTime: number): Promise<DataChange[]>;
-  getEntityById(id: string): Promise<Record<string, unknown> | null>;
+  getEntityById(id: string): Promise<Record<string, string | number | boolean | null> | null>;
   getSyncVersion(): Promise<string>;
 }
 
-// 同步事件枚举
+// 同步事件枚举 | Sync event enum
 export enum SyncEvent {
   SYNC_STARTED = 'sync_started',
   SYNC_PROGRESS = 'sync_progress',
@@ -160,7 +160,7 @@ export enum SyncEvent {
   AUTO_SYNC_STOPPED = 'auto_sync_stopped'
 }
 
-// 同步事件监听回调类型
+// 同步事件监听回调类型 | Sync event listener callback type
 type SyncEventListener = (event: SyncEvent, data: Record<string, string | number | boolean | null>) => void;
 
 export default class DataSyncService {
@@ -181,6 +181,7 @@ export default class DataSyncService {
 
   /**
    * 获取单例实例
+   * Get singleton instance
    */
   public static getInstance(): DataSyncService {
     if (!DataSyncService.instance) {
@@ -190,8 +191,10 @@ export default class DataSyncService {
   }
   
   /**
-   * 获取对象的所有�?
-   * 替代Object.values，兼容ArkTS语法
+   * 获取对象的所有值
+   * 替代Object.values，适配ArkTS语法
+   * Get all values of object
+   * Alternative to Object.values, adapted for ArkTS syntax
    */
   private getObjectValues<T extends object>(obj: T): string[] {
     const values: string[] = [];
@@ -204,7 +207,8 @@ export default class DataSyncService {
   }
 
   /**
-   * 构造函�?
+   * 构造函数
+   * Constructor
    */
   private constructor() {
     this.configService = ConfigService.getInstance();
@@ -212,8 +216,10 @@ export default class DataSyncService {
   }
 
   /**
-   * 初始化数据同步服�?
-   * @param context 应用上下�?
+   * 初始化数据同步服务
+   * @param context 应用上下文
+   * Initialize data sync service
+   * @param context Application context
    */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
@@ -235,18 +241,18 @@ export default class DataSyncService {
         this.startAutoSync();
       }
       
-      // 如果启用了启动时同步，执行同�?
+      // 如果启用了启动时同步，执行同步
       if (this.config.syncOnStart && this.config.enabled) {
         this.synchronizeAll().catch(error => {
           Logger.error(TAG, `Failed to sync on start: ${error}`);
         });
       }
       
-      // 注册分布式数据监�?
+      // 注册分布式数据监听
       this.registerDistributedDataListeners();
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully' instanceof Error ? 'Data sync service initialized successfully' : new Error(String('Data sync service initialized successfully')))))));
+      Logger.info(TAG, 'Data sync service initialized successfully');
     } catch (error: Error) {
       Logger.error(TAG, `Failed to initialize data sync service: ${JSON.stringify(error)}`);
       throw error;
@@ -255,10 +261,11 @@ export default class DataSyncService {
 
   /**
    * 加载配置
+   * Load config
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('dataSyncConfig', DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG instanceof Error ? DEFAULT_DATA_SYNC_CONFIG : new Error(String(DEFAULT_DATA_SYNC_CONFIG)))))));
+      const savedConfig = await this.configService.getConfig('dataSyncConfig', DEFAULT_DATA_SYNC_CONFIG);
       if (savedConfig) {
         this.config = { ...DEFAULT_DATA_SYNC_CONFIG, ...savedConfig };
       }
@@ -269,37 +276,12 @@ export default class DataSyncService {
 
   /**
    * 保存配置
+   * Save config
    */
   public async saveConfig(config: Partial<DataSyncConfig>): Promise<void> {
     try {
       this.config = { ...this.config, ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config instanceof Error ? ...config };
-      await this.configService.setConfig('dataSyncConfig', this.config : new Error(String(...config };
-      await this.configService.setConfig('dataSyncConfig', this.config)))))));
+      await this.configService.setConfig('dataSyncConfig', this.config);
       
       // 根据配置调整自动同步
       if (this.config.autoSync && this.config.enabled) {
@@ -315,6 +297,7 @@ export default class DataSyncService {
 
   /**
    * 获取配置
+   * Get config
    */
   public getConfig(): DataSyncConfig {
     return { ...this.config };
@@ -322,10 +305,11 @@ export default class DataSyncService {
 
   /**
    * 加载同步记录
+   * Load sync records
    */
   private async loadSyncRecords(): Promise<void> {
     try {
-      const records = await this.configService.getConfig<SyncRecord[]>('syncRecords', [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([])))))));
+      const records = await this.configService.getConfig<SyncRecord[]>('syncRecords', []);
       this.syncRecords = records;
       Logger.info(TAG, `Loaded ${this.syncRecords.length} sync records`);
     } catch (error: Error) {
@@ -335,19 +319,21 @@ export default class DataSyncService {
 
   /**
    * 保存同步记录
+   * Save sync records
    */
   private async saveSyncRecords(): Promise<void> {
     try {
-      // 只保留最�?00条记�?
+      // 只保留最新100条记录
       const recentRecords = this.syncRecords.slice(-100);
-      await this.configService.setConfig('syncRecords', recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords : new Error(String(recentRecords instanceof Error ? recentRecords : new Error(String(recentRecords)))))));
+      await this.configService.setConfig('syncRecords', recentRecords);
     } catch (error: Error) {
       Logger.error(TAG, `Failed to save sync records: ${error}`);
     }
   }
 
   /**
-   * 注册分布式数据监�?
+   * 注册分布式数据监听器
+   * Register distributed data listeners
    */
   private registerDistributedDataListeners(): void {
     // 监听所有数据类型的变化
@@ -355,8 +341,8 @@ export default class DataSyncService {
     
     syncDataTypes.forEach(dataType => {
       this.distributedDataService.addDataChangeListener(
-        dataType, (key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId : new Error(String((key, data, deviceId instanceof Error ? (key, data, deviceId : new Error(String((key, data, deviceId))))))) => {
-          // 当接收到分布式数据变化时，更新本地数�?
+        dataType, (key, data, deviceId) => {
+          // 当接收到分布式数据变化时，更新本地数据
           this.handleRemoteDataChange(dataType, key, data, deviceId).catch(error => {
             Logger.error(TAG, `Failed to handle remote data change: ${error}`);
           });
@@ -368,15 +354,15 @@ export default class DataSyncService {
   /**
    * 处理远程数据变化
    */
-  private async handleRemoteDataChange(dataType: SyncDataType, key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string instanceof Error ? key: string, data: Record<string, unknown>, deviceId: string : new Error(String(key: string, data: Record<string, unknown>, deviceId: string))))))): Promise<void> {
-    // 获取对应的本地数据提供�?
+  private async handleRemoteDataChange(dataType: SyncDataType, key: string, data: Record<string, string | number | boolean | null>, deviceId: string): Promise<void> {
+    // 获取对应的本地数据提供器
     const provider = this.dataProviders.get(dataType);
     if (!provider) {
       Logger.warn(TAG, `No data provider for type: ${dataType}`);
       return;
     }
 
-    // 检查是否需要同�?
+    // 检查是否需要同步
     if (!this.config.enabled) {
       return;
     }
@@ -404,9 +390,9 @@ export default class DataSyncService {
   }
 
   /**
-   * 基于时间戳同�?
+   * 基于时间戳同步
    */
-  private async syncByTimestamp(provider: DataProvider, remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string instanceof Error ? remoteData: Record<string, unknown>, deviceId: string : new Error(String(remoteData: Record<string, unknown>, deviceId: string))))))): Promise<void> {
+  private async syncByTimestamp(provider: DataProvider, remoteData: Record<string, unknown>, deviceId: string): Promise<void> {
     const entityId = remoteData.id as string;
     const remoteTimestamp = (remoteData.timestamp as number) || Date.now();
     
@@ -420,7 +406,7 @@ export default class DataSyncService {
       const localTimestamp = localData.timestamp || 0;
       
       if (remoteTimestamp > localTimestamp) {
-        // 远程数据更新，覆盖本�?
+        // 远程数据更新，覆盖本地
         await provider.updateData([remoteData]);
       } else if (remoteTimestamp < localTimestamp) {
         // 本地数据更新，同步到远程
@@ -433,7 +419,7 @@ export default class DataSyncService {
           );
         }
       } else {
-        // 时间戳相同，检查是否存在冲�?
+        // 时间戳相同，检查是否存在冲突
         const isConflict = this.checkConflict(localData, remoteData);
         if (isConflict) {
           await this.handleConflict(entityId, provider.getDataType(), localData, remoteData);
@@ -443,7 +429,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 基于版本号同�?
+   * 基于版本号同步
    */
   private async syncByVersion(provider: DataProvider, remoteData: SyncEntity, deviceId: string): Promise<void> {
     const entityId = remoteData.id as string;
@@ -477,7 +463,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 基于校验和同�?
+   * 基于校验和同步
    */
   private async syncByChecksum(provider: DataProvider, remoteData: SyncEntity, deviceId: string): Promise<void> {
     const entityId = remoteData.id as string;
@@ -491,14 +477,14 @@ export default class DataSyncService {
       const remoteChecksum = remoteData.checksum || this.calculateChecksum(remoteData);
       
       if (localChecksum !== remoteChecksum) {
-        // 数据不匹配，处理冲突
+        // 数据不一致，处理冲突
         await this.handleConflict(entityId, provider.getDataType(), localData, remoteData);
       }
     }
   }
 
   /**
-   * 检查冲�?
+   * 检查冲突
    */
   private checkConflict(localData: SyncEntity, remoteData: SyncEntity): boolean {
     // 简单比较：如果数据字符串表示不同，则认为有冲突
@@ -517,13 +503,13 @@ export default class DataSyncService {
       resolved: false
     };
     
-    // 添加到冲突队�?
+    // 添加到冲突队列
     this.conflictQueue.push(conflict);
     
-    // 通知冲突检测事�?
+    // 通知冲突检测事件
     this.notifyEvent(SyncEvent.CONFLICT_DETECTED, conflict);
     
-    // 默认使用时间戳解决冲�?
+    // 默认使用时间戳解决冲突
     const localTimestamp = (localData.timestamp as number) || 0;
     const remoteTimestamp = (remoteData.timestamp as number) || 0;
     
@@ -557,7 +543,7 @@ export default class DataSyncService {
           await provider.updateData([conflict.remoteData]);
           break;
         case 'merged':
-          // 合并数据（简单实现，实际需要更复杂的合并逻辑�?
+          // 合并数据（简单实现，实际需要更复杂的合并逻辑）
           const mergedData = this.mergeData(conflict.localData, conflict.remoteData);
           await provider.updateData([mergedData]);
           break;
@@ -573,11 +559,11 @@ export default class DataSyncService {
   /**
    * 合并数据
    */
-  private mergeData(localData: SyncEntity, remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity : new Error(String(remoteData: SyncEntity instanceof Error ? remoteData: SyncEntity : new Error(String(remoteData: SyncEntity))))))): SyncEntity {
-    // 简单合并：优先保留本地数据，补充远程数据的新字�?
-    const merged: Record<string, string | number | boolean | null> = { ... };
+  private mergeData(localData: SyncEntity, remoteData: SyncEntity): SyncEntity {
+    // 简单合并：优先保留本地数据，填充远程数据的空字段
+    const merged: Record<string, string | number | boolean | null> = { ...localData };
     
-    // 保留更新时间�?
+    // 保留最新时间戳
     const localTimestamp = (localData.timestamp as number) || 0;
     const remoteTimestamp = (remoteData.timestamp as number) || 0;
     merged.timestamp = Math.max(localTimestamp, remoteTimestamp);
@@ -586,11 +572,11 @@ export default class DataSyncService {
   }
 
   /**
-   * 计算校验�?
+   * 计算校验和
    */
   private calculateChecksum(data: SyncEntity): string {
-    // 简单实现：使用JSON字符串的长度作为校验�?
-    // 实际应用中应该使用更安全的哈希算�?
+    // 简单实现：使用JSON字符串的长度作为校验和
+    // 实际应用中应该使用更安全的哈希计算方法
     const dataStr = JSON.stringify(data);
     let checksum = 0;
     for (let i = 0; i < dataStr.length; i++) {
@@ -600,13 +586,13 @@ export default class DataSyncService {
   }
 
   /**
-   * 注册数据提供�?
+   * 注册数据提供器
    */
   public registerDataProvider(provider: DataProvider): void {
     const dataType = provider.getDataType();
     this.dataProviders.set(dataType, provider);
     
-    // 初始化变更队�?
+    // 初始化变更队列
     if (!this.pendingChanges.has(dataType)) {
       this.pendingChanges.set(dataType, []);
     }
@@ -615,7 +601,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 注销数据提供�?
+   * 注销数据提供器
    */
   public unregisterDataProvider(dataType: string): void {
     this.dataProviders.delete(dataType);
@@ -624,7 +610,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 开始自动同�?
+   * 开始自动同步
    */
   private startAutoSync(): void {
     this.stopAutoSync();
@@ -636,7 +622,7 @@ export default class DataSyncService {
       } catch (error: Error) {
         Logger.error(TAG, `Auto sync failed: ${error}`);
       } finally {
-        this.notifyEvent(SyncEvent.AUTO_SYNC_STOPPED, null instanceof Error ? null : new Error(String(null instanceof Error ? null instanceof Error ? null : new Error(String(null : new Error(String(null instanceof Error ? null : new Error(String(null instanceof Error ? null instanceof Error ? null : new Error(String(null instanceof Error ? null instanceof Error ? null : new Error(String(null : new Error(String(null instanceof Error ? null : new Error(String(null : new Error(String(null instanceof Error ? null : new Error(String(null instanceof Error ? null instanceof Error ? null : new Error(String(null : new Error(String(null instanceof Error ? null : new Error(String(null)))))));
+        this.notifyEvent(SyncEvent.AUTO_SYNC_STOPPED, null);
       }
     }, this.config.syncInterval * 1000);
     
@@ -655,7 +641,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 同步所有数据类�?
+   * 同步所有数据类型
    */
   public async synchronizeAll(): Promise<void> {
     if (!this.config.enabled || this.isRunning) {
@@ -668,12 +654,12 @@ export default class DataSyncService {
     try {
       Logger.info(TAG, 'Starting full data synchronization...');
       
-      // 遍历所有注册的数据提供�?
+      // 遍历所有注册的数据提供器
       const tasks = Array.from(this.dataProviders.keys()).map(dataType => 
         this.synchronizeDataType(dataType)
       );
       
-      // 并行执行所有同步任�?
+      // 并行执行所有同步任务
       await Promise.all(tasks);
       
       // 记录同步结果
@@ -682,7 +668,7 @@ export default class DataSyncService {
         syncTime: startTime,
         duration,
         direction: this.config.syncDirection,
-        totalRecords: 0, // 需要根据实际同步情况统�?
+        totalRecords: 0, // 需要根据实际同步情况统计
         syncedRecords: 0,
         failedRecords: 0,
         conflictRecords: 0,
@@ -693,199 +679,18 @@ export default class DataSyncService {
     } catch (error: Error) {
       Logger.error(TAG, `Full data synchronization failed: ${error}`);
       
-      // 记录失败的同�?
+      // 记录失败的同步
       const duration = Date.now() - startTime;
       await this.saveSyncRecord({
-        syncTime: startTime, duration,
+        syncTime: startTime,
+        duration,
         direction: this.config.syncDirection,
         totalRecords: 0,
         syncedRecords: 0,
         failedRecords: 0,
         conflictRecords: 0,
         success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error instanceof Error ? duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error : new Error(String(duration,
-        direction: this.config.syncDirection,
-        totalRecords: 0,
-        syncedRecords: 0,
-        failedRecords: 0,
-        conflictRecords: 0,
-        success: false,
-        errorMessage: String(error)))))))
+        errorMessage: String(error)
       });
     } finally {
       this.isRunning = false;
@@ -893,7 +698,7 @@ export default class DataSyncService {
   }
 
   /**
-   * 同步特定数据类型
+   * 同步指定数据类型
    */
   public async synchronizeDataType(dataType: string): Promise<void> {
     const provider = this.dataProviders.get(dataType);
@@ -931,7 +736,7 @@ export default class DataSyncService {
         await this.downloadData(provider, task);
       }
       
-      // 更新任务状�?
+      // 更新任务状态
       task.state = SyncState.COMPLETED;
       task.progress = 100;
       task.endTime = Date.now();
@@ -947,7 +752,7 @@ export default class DataSyncService {
       task.endTime = Date.now();
       
       this.notifyTaskUpdate(task);
-      this.notifyEvent(SyncEvent.SYNC_FAILED, task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task)))))));
+      this.notifyEvent(SyncEvent.SYNC_FAILED, task);
       
       // 处理重试
       if (task.retryCount < this.config.maxSyncRetry) {
@@ -955,10 +760,10 @@ export default class DataSyncService {
         await this.retrySync(task);
       }
     } finally {
-      // 从活跃任务中移除
+      // 从活动任务中删除
       setTimeout(() => {
         this.syncTasks.delete(task.id);
-      }, 60000); // 1分钟后移�?
+      }, 60000); // 1分钟后删除
     }
   }
 
@@ -998,14 +803,14 @@ export default class DataSyncService {
       this.notifyTaskUpdate(task);
     }
     
-    // 更新最后同步时�?
+    // 更新最后同步时间
     await provider.setLastSyncTime(Date.now());
   }
 
   /**
    * 下载数据
    */
-  private async downloadData(provider: DataProvider, task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask : new Error(String(task: SyncTask instanceof Error ? task: SyncTask : new Error(String(task: SyncTask))))))): Promise<void> {
+  private async downloadData(provider: DataProvider, task: SyncTask): Promise<void> {
     // TODO: 从分布式存储下载数据
     // 这里需要实现从分布式数据服务获取数据并保存到本地的逻辑
     Logger.debug(TAG, `Downloading data for type: ${provider.getDataType()}`);
@@ -1014,7 +819,7 @@ export default class DataSyncService {
     for (let progress = 10; progress <= 90; progress += 10) {
       task.progress = progress;
       this.notifyTaskUpdate(task);
-      // 短暂延迟模拟同步过程
+      // 短暂暂停模拟同步过程
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
@@ -1042,7 +847,7 @@ export default class DataSyncService {
     const { entityType } = change;
     
     if (!this.pendingChanges.has(entityType)) {
-      this.pendingChanges.set(entityType, [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([] instanceof Error ? [] instanceof Error ? [] : new Error(String([] : new Error(String([] instanceof Error ? [] : new Error(String([])))))));
+      this.pendingChanges.set(entityType, []);
     }
     
     this.pendingChanges.get(entityType)!.push(change);
@@ -1118,7 +923,7 @@ export default class DataSyncService {
     }
     
     // 通知进度事件
-    this.notifyEvent(SyncEvent.SYNC_PROGRESS, task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task instanceof Error ? task instanceof Error ? task : new Error(String(task : new Error(String(task instanceof Error ? task : new Error(String(task)))))));
+    this.notifyEvent(SyncEvent.SYNC_PROGRESS, task);
   }
 
   /**
@@ -1197,14 +1002,12 @@ export default class DataSyncService {
 
     this.stopAutoSync();
     
-    // 保存所有数�?
+    // 保存所有数据
     this.saveSyncRecords().catch(error => {
-      Logger.error(TAG, `Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}` instanceof Error ? `Error saving sync records on close: ${error}` : new Error(String(`Error saving sync records on close: ${error}`)))))));
+      Logger.error(TAG, `Error saving sync records on close: ${error}`);
     });
 
     this.isInitialized = false;
     Logger.info(TAG, 'Data sync service closed');
   }
 }
-
-

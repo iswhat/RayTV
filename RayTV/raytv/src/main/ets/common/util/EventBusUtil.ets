@@ -1,42 +1,42 @@
-/**
- * 事件总线工具类
- * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能
+﻿/**
+ * 事件总线工具类 // Event Bus Utility Class
+ * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能 // Provides unified event publishing and subscription mechanism, supporting namespaces, debouncing, batch operations, etc.
  */
 
 import Logger from './Logger';
 
 /**
- * 事件处理器类型
+ * 事件处理器类型 // Event Handler Type
  */
-export type EventHandler<T = any> = (data?: T) => void;
+export type EventHandler<T = Record<string, string | number | boolean | null | undefined>> = (data?: T) => void;
 
 /**
- * 事件订阅接口
+ * 事件订阅接口 // Event Subscription Interface
  */
 export interface Subscription {
   /**
-   * 事件处理器
+   * 事件处理器 // Event handler
    */
   handler: EventHandler;
   
   /**
-   * 优先级（数值越小优先级越高）
+   * 优先级（数字越小优先级越高）// Priority (smaller number means higher priority)
    */
   priority: number;
   
   /**
-   * 是否一次性订阅
+   * 是否一次性订阅 // Whether it's a one-time subscription
    */
   once: boolean;
   
   /**
-   * 命名空间
+   * 命名空间 // Namespace
    */
   namespace?: string;
 }
 
 /**
- * 批量订阅事件接口
+ * 批量订阅事件接口 // Batch Subscribe Event Interface
  */
 export interface BatchEvent {
   eventName: string;
@@ -47,15 +47,15 @@ export interface BatchEvent {
 }
 
 /**
- * 批量发布事件接口
+ * 批量发布事件接口 // Batch Emit Event Interface
  */
 export interface BatchEmitEvent {
   eventName: string;
-  data?: any;
+  data?: Record<string, string | number | boolean | null | undefined>;
 }
 
 /**
- * 事件总线工具类
+ * 事件总线工具类 // Event Bus Utility Class
  */
 export class EventBusUtil {
   private static instance: EventBusUtil | undefined;
@@ -64,7 +64,7 @@ export class EventBusUtil {
   private debounceTimers: Record<string, number> = {};
 
   /**
-   * 获取单例实例
+   * 获取单例实例 // Get singleton instance
    */
   public static getInstance(): EventBusUtil {
     if (!EventBusUtil.instance) {
@@ -74,12 +74,12 @@ export class EventBusUtil {
   }
 
   /**
-   * 订阅事件
-   * @param eventName 事件名称
-   * @param handler 事件处理器
-   * @param priority 优先级（默认0）
-   * @param once 是否一次性订阅（默认false）
-   * @param namespace 命名空间
+   * 订阅事件 // Subscribe to event
+   * @param eventName 事件名称 // Event name
+   * @param handler 事件处理器 // Event handler
+   * @param priority 优先级（默认0）// Priority (default 0)
+   * @param once 是否一次性订阅（默认false）// Whether it's a one-time subscription (default false)
+   * @param namespace 命名空间 // Namespace
    */
   public on(
     eventName: string,
@@ -100,18 +100,18 @@ export class EventBusUtil {
     };
 
     this.eventMap[eventName].push(subscription);
-    // 按优先级排序
+    // 按优先级排序 // Sort by priority
     this.eventMap[eventName].sort((a, b) => a.priority - b.priority);
 
     Logger.debug('EventBus', `Subscribed to event: ${eventName}, priority: ${priority}, once: ${once}`);
   }
 
   /**
-   * 一次性订阅事件
-   * @param eventName 事件名称
-   * @param handler 事件处理器
-   * @param priority 优先级
-   * @param namespace 命名空间
+   * 一次性订阅事件 // Subscribe to event once
+   * @param eventName 事件名称 // Event name
+   * @param handler 事件处理器 // Event handler
+   * @param priority 优先级 // Priority
+   * @param namespace 命名空间 // Namespace
    */
   public once(
     eventName: string,
@@ -123,9 +123,9 @@ export class EventBusUtil {
   }
 
   /**
-   * 取消事件订阅
-   * @param eventName 事件名称
-   * @param handler 事件处理器（可选，不传则取消该事件的所有订阅）
+   * 取消事件订阅 // Unsubscribe from event
+   * @param eventName 事件名称 // Event name
+   * @param handler 事件处理器（可选，不传则取消该事件的所有订阅）// Event handler (optional, if not passed, cancel all subscriptions for this event)
    */
   public off(
     eventName: string, 
@@ -136,21 +136,21 @@ export class EventBusUtil {
     }
 
     if (handler) {
-      // 取消特定处理器的订阅
+      // 取消指定处理器的订阅 // Cancel subscription for specified handler
       const index = this.findIndex(this.eventMap[eventName], sub => sub.handler === handler);
       if (index !== -1) {
         this.eventMap[eventName].splice(index, 1);
         Logger.debug('EventBus', `Unsubscribed handler from event: ${eventName}`);
       }
     } else {
-      // 取消该事件的所有订阅
+      // 取消该事件的所有订阅 // Cancel all subscriptions for this event
       this.eventMap[eventName] = [];
       Logger.debug('EventBus', `Unsubscribed all handlers from event: ${eventName}`);
     }
 
-    // 如果事件没有订阅者了，删除事件条目
+    // 如果事件没有订阅者了，删除事件条目 // If event has no subscribers, delete event entry
     if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
-      // 创建新对象，排除当前事件
+      // 创建新对象，移除当前事件 // Create new object, remove current event
       const newEventMap: Record<string, Subscription[]> = {};
       const keys = Object.keys(this.eventMap);
       for (let i = 0; i < keys.length; i++) {
@@ -164,34 +164,34 @@ export class EventBusUtil {
   }
 
   /**
-   * 发布事件
-   * @param eventName 事件名称
-   * @param data 事件数据
+   * 发布事件 // Publish event
+   * @param eventName 事件名称 // Event name
+   * @param data 事件数据 // Event data
    */
-  public emit(
+  public emit<T extends Record<string, string | number | boolean | null | undefined>>(
     eventName: string, 
-    data?: any
+    data?: T
   ): void {
     if (!this.eventMap[eventName]) {
       return;
     }
 
-    // 防止在事件处理过程中修改订阅列表
+    // 防止在事件处理过程中修改订阅列表 // Prevent modifying subscription list during event processing
     this.isPublishing = true;
 
     try {
-      // 复制订阅列表，避免在遍历过程中修改
+      // 复制订阅列表，避免在遍历过程中修改 // Copy subscription list to avoid modification during traversal
       const subscriptions = this.eventMap[eventName].slice();
       const onceSubscriptions: number[] = [];
 
-      // 执行所有订阅者
+      // 执行所有订阅者 // Execute all subscribers
       for (let i = 0; i < subscriptions.length; i++) {
         const subscription = subscriptions[i];
         
         try {
           subscription.handler(data);
           
-          // 标记一次性订阅
+          // 标记一次性订阅 // Mark one-time subscription
           if (subscription.once) {
             onceSubscriptions.push(i);
           }
@@ -200,9 +200,9 @@ export class EventBusUtil {
         }
       }
 
-      // 移除一次性订阅
+      // 移除一次性订阅 // Remove one-time subscriptions
       if (onceSubscriptions.length > 0) {
-        // 从后往前删除，避免索引变化
+        // 从后往前删除，避免索引变化 // Delete from back to front to avoid index changes
         for (let i = onceSubscriptions.length - 1; i >= 0; i--) {
           const index = onceSubscriptions[i];
           if (this.eventMap[eventName]) {
@@ -210,9 +210,9 @@ export class EventBusUtil {
           }
         }
         
-        // 如果事件没有订阅者了，删除事件条目
+        // 如果事件没有订阅者了，删除事件条目 // If event has no subscribers, delete event entry
         if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
-          // 创建新对象，排除当前事件
+          // 创建新对象，移除当前事件 // Create new object, remove current event
           const newEventMap: Record<string, Subscription[]> = {};
           const keys = Object.keys(this.eventMap);
           for (let i = 0; i < keys.length; i++) {
@@ -232,8 +232,8 @@ export class EventBusUtil {
   }
 
   /**
-   * 批量订阅事件
-   * @param events 事件配置数组
+   * 批量订阅事件 // Batch subscribe to events
+   * @param events 事件配置数组 // Event configuration array
    */
   public onBatch(events: BatchEvent[]): void {
     for (let i = 0; i < events.length; i++) {
@@ -249,8 +249,8 @@ export class EventBusUtil {
   }
 
   /**
-   * 批量发布事件
-   * @param events 事件数组
+   * 批量发布事件 // Batch publish events
+   * @param events 事件数组 // Event array
    */
   public emitBatch(events: BatchEmitEvent[]): void {
     for (let i = 0; i < events.length; i++) {
@@ -260,24 +260,24 @@ export class EventBusUtil {
   }
 
   /**
-   * 防抖事件发布
-   * @param eventName 事件名称
-   * @param data 事件数据
-   * @param wait 等待时间（毫秒）
+   * 防抖事件发布 // Debounce event publishing
+   * @param eventName 事件名称 // Event name
+   * @param data 事件数据 // Event data
+   * @param wait 等待时间（毫秒）// Wait time (milliseconds)
    */
-  public emitDebounced(
+  public emitDebounced<T extends Record<string, string | number | boolean | null | undefined>>(
     eventName: string, 
-    data?: any, 
+    data?: T, 
     wait: number = 300
   ): void {
     const debounceKey = `__debounce_${eventName}`;
     
-    // 清除之前的定时器
+    // 清除之前的定时器 // Clear previous timer
     this.clearDebounceTimer(debounceKey);
     
-    // 创建新的定时器
+    // 创建新的定时器 // Create new timer
     const timerId = setTimeout(() => {
-      // 清除定时器引用
+      // 清除定时器引用 // Clear timer reference
       const newDebounceTimers: Record<string, number> = {};
       const keys = Object.keys(this.debounceTimers);
       for (let i = 0; i < keys.length; i++) {
@@ -288,26 +288,26 @@ export class EventBusUtil {
       }
       this.debounceTimers = newDebounceTimers;
       
-      // 发布事件
+      // 发布事件 // Publish event
       this.emit(eventName, data);
       Logger.debug('EventBus', `Debounced event emitted: ${eventName}`);
     }, wait);
     
-    // 存储定时器ID
+    // 存储定时器ID // Store timer ID
     this.debounceTimers[debounceKey] = timerId;
     Logger.debug('EventBus', `Debounced event scheduled: ${eventName}, wait: ${wait}ms`);
   }
 
   /**
-   * 清除指定事件的防抖定时器
-   * @param debounceKey 防抖键
+   * 清除指定事件的防抖定时器 // Clear debounce timer for specified event
+   * @param debounceKey 防抖键 // Debounce key
    */
   private clearDebounceTimer(debounceKey: string): void {
     if (this.debounceTimers[debounceKey]) {
       const timerId = this.debounceTimers[debounceKey];
       clearTimeout(timerId);
       
-      // 创建新对象，排除当前防抖键
+      // 创建新对象，移除当前防抖键 // Create new object, remove current debounce key
       const newDebounceTimers: Record<string, number> = {};
       const keys = Object.keys(this.debounceTimers);
       for (let i = 0; i < keys.length; i++) {
@@ -323,7 +323,7 @@ export class EventBusUtil {
   }
 
   /**
-   * 清除所有防抖定时器
+   * 清除所有防抖定时器 // Clear all debounce timers
    */
   public clearAllDebounceTimers(): void {
     try {
@@ -341,10 +341,10 @@ export class EventBusUtil {
   }
 
   /**
-   * 查找数组中元素的索引（兼容ES5的findIndex实现）
-   * @param array 数组
-   * @param predicate 断言函数
-   * @returns 索引，未找到返回-1
+   * 查找数组中元素的索引（对ES5的findIndex实现）// Find index of element in array (ES5 findIndex implementation)
+   * @param array 数组 // Array
+   * @param predicate 回调函数 // Callback function
+   * @returns 索引，未找到返回-1 // Index, returns -1 if not found
    */
   private findIndex<T>(array: T[], predicate: (item: T) => boolean): number {
     for (let i = 0; i < array.length; i++) {
@@ -356,35 +356,35 @@ export class EventBusUtil {
   }
 
   /**
-   * 检查是否有特定事件的订阅者
-   * @param eventName 事件名称
-   * @returns 是否有订阅者
+   * 检查是否有指定事件的订阅者 // Check if there are subscribers for specified event
+   * @param eventName 事件名称 // Event name
+   * @returns 是否有订阅者 // Whether there are subscribers
    */
   public hasSubscribers(eventName: string): boolean {
     return !!this.eventMap[eventName] && this.eventMap[eventName].length > 0;
   }
 
   /**
-   * 获取所有事件名称
-   * @returns 事件名称数组
+   * 获取所有事件名称 // Get all event names
+   * @returns 事件名称数组 // Event name array
    */
   public getEventNames(): string[] {
     return Object.keys(this.eventMap);
   }
 
   /**
-   * 清空所有事件订阅
+   * 清空所有事件订阅 // Clear all event subscriptions
    */
   public clear(): void {
-    // 创建操作函数
+    // 创建操作函数 // Create operation function
     const clearAll = (): void => {
       this.eventMap = {};
-      // 同时清除所有防抖定时器
+      // 同时清除所有防抖定时器 // Also clear all debounce timers
       this.clearAllDebounceTimers();
       Logger.debug('EventBus', 'All event subscriptions cleared');
     };
 
-    // 如果当前正在发布事件，延迟执行
+    // 如果当前正在发布事件，延迟执行 // If currently publishing events, execute with delay
     if (this.isPublishing) {
       setTimeout(clearAll, 0);
     } else {
@@ -393,7 +393,7 @@ export class EventBusUtil {
   }
 
   /**
-   * 销毁事件总线实例
+   * 销毁事件总线实例 // Destroy event bus instance
    */
   public destroy(): void {
     this.clear();
@@ -403,7 +403,7 @@ export class EventBusUtil {
 }
 
 /**
- * 事件命名空间类
+ * 事件命名空间类 // Event Namespace Class
  */
 export class EventNamespace {
   private namespace: string;
@@ -415,7 +415,7 @@ export class EventNamespace {
   }
 
   /**
-   * 订阅命名空间事件
+   * 订阅命名空间事件 // Subscribe to namespace event
    */
   public on(
     eventName: string, 
@@ -428,7 +428,7 @@ export class EventNamespace {
   }
 
   /**
-   * 一次性订阅命名空间事件
+   * 一次性订阅命名空间事件 // Subscribe to namespace event once
    */
   public once(
     eventName: string, 
@@ -439,7 +439,7 @@ export class EventNamespace {
   }
 
   /**
-   * 取消命名空间事件订阅
+   * 取消命名空间事件订阅 // Unsubscribe from namespace event
    */
   public off(
     eventName: string, 
@@ -450,24 +450,24 @@ export class EventNamespace {
   }
 
   /**
-   * 发布命名空间事件
+   * 发布命名空间事件 // Publish namespace event
    */
-  public emit(
+  public emit<T extends Record<string, string | number | boolean | null | undefined>>(
     eventName: string, 
-    data?: any
+    data?: T
   ): void {
     const fullEventName = `${this.namespace}:${eventName}`;
     this.eventBus.emit(fullEventName, data);
   }
 
   /**
-   * 清空命名空间下的所有事件订阅
+   * 清空命名空间下的所有事件订阅 // Clear all event subscriptions under namespace
    */
   public clear(): void {
     const allEvents = this.eventBus.getEventNames();
     const namespaceEvents: string[] = [];
     
-    // 收集命名空间下的所有事件
+    // 收集命名空间下的所有事件 // Collect all events under namespace
     for (let i = 0; i < allEvents.length; i++) {
       const event = allEvents[i];
       if (event.startsWith(`${this.namespace}:`)) {
@@ -475,7 +475,7 @@ export class EventNamespace {
       }
     }
     
-    // 取消所有命名空间下的事件订阅
+    // 取消所有命名空间下的事件订阅 // Unsubscribe all events under namespace
     for (let i = 0; i < namespaceEvents.length; i++) {
       const event = namespaceEvents[i];
       this.eventBus.off(event);
@@ -484,38 +484,38 @@ export class EventNamespace {
 }
 
 /**
- * 全局事件类型枚举
+ * 全局事件类型枚举 // Global Event Type Enum
  */
 export enum GlobalEventType {
-  // 应用事件
+  // 应用事件 // App events
   APP_START = 'app:start',
   APP_READY = 'app:ready',
   APP_PAUSE = 'app:pause',
   APP_RESUME = 'app:resume',
   APP_STOP = 'app:stop',
   
-  // 网络事件
+  // 网络事件 // Network events
   NETWORK_CONNECTED = 'network:connected',
   NETWORK_DISCONNECTED = 'network:disconnected',
   NETWORK_CHANGED = 'network:changed',
   
-  // 用户事件
+  // 用户事件 // User events
   USER_LOGIN = 'user:login',
   USER_LOGOUT = 'user:logout',
   USER_PROFILE_UPDATED = 'user:profile_updated',
   
-  // 播放事件
+  // 播放事件 // Playback events
   PLAYBACK_START = 'playback:start',
   PLAYBACK_PAUSE = 'playback:pause',
   PLAYBACK_STOP = 'playback:stop',
   PLAYBACK_COMPLETE = 'playback:complete',
   PLAYBACK_ERROR = 'playback:error',
   
-  // 数据同步事件
+  // 数据同步事件 // Data sync events
   DATA_SYNC_START = 'data_sync:start',
   DATA_SYNC_COMPLETE = 'data_sync:complete',
   DATA_SYNC_ERROR = 'data_sync:error'
 }
 
-// 导出默认实例
+// 导出默认实例 // Export default instance
 export default EventBusUtil.getInstance();

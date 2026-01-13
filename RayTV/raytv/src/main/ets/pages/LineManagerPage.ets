@@ -1,11 +1,10 @@
-// LineManagerPage.ets - 线路管理页面
-// 实现线路列表展示和切换功能
-
+// LineManagerPage.ets | 线路管理页面 | Line management page
+// 实现线路列表展示和编辑功能 | Implement line list display and editing functionality
 import Logger from '../common/util/Logger';
 import LineManagerPageStyles from './LineManagerPageStyles';
 
 /**
- * 线路信息接口
+ * 线路信息接口 | Line information interface
  */
 interface LineInfo {
   id: string;
@@ -17,14 +16,14 @@ interface LineInfo {
 }
 
 /**
- * 线路管理页面组件
+ * 线路管理页面组件 | Line management page component
  */
 @Entry
 @Component
 struct LineManagerPage {
   private readonly TAG: string = 'LineManagerPage';
   
-  // 状态管理
+  // 状态管理 | State management
   @State lines: LineInfo[] = [
     { id: '1', name: '默认线路', url: 'https://example.com/api', isCurrent: true, description: '默认使用的线路' },
     { id: '2', name: '备用线路1', url: 'https://backup1.example.com/api', isCurrent: false, description: '备用线路1' },
@@ -32,10 +31,10 @@ struct LineManagerPage {
   ];
   
   /**
-   * 切换当前线路
+   * 切换当前线路 | Switch current line
    */
   private switchLine(lineId: string) {
-    // 更新线路状态
+    // 更新线路状态 | Update line status
     this.lines = this.lines.map(line => ({
       ...line,
       isCurrent: line.id === lineId
@@ -44,7 +43,7 @@ struct LineManagerPage {
   }
   
   /**
-   * 渲染线路项
+   * 渲染线路项 | Render line item
    */
   @Builder
   renderLineItem(line: LineInfo) {
@@ -114,11 +113,11 @@ struct LineManagerPage {
   }
   
   /**
-   * 组件构建
+   * 组件构建 | Component build
    */
   build() {
     Column() {
-      // 页面标题
+      // 页面标题 | Page title
       Text('线路管理')
         .fontSize(24)
         .fontWeight(700)
@@ -126,7 +125,7 @@ struct LineManagerPage {
         .margin({ top: 20, bottom: 10 })
         .textAlign(TextAlign.Center)
       
-      // 线路列表
+      // 线路列表 | Line list
       Scroll() {
         Column() {
           ForEach(this.lines, (line: LineInfo) => {
@@ -136,7 +135,7 @@ struct LineManagerPage {
       }
       .flexGrow(1)
       
-      // 添加线路按钮
+      // 添加线路按钮 | Add line button
       Button('添加线路')
         .backgroundColor('#4CAF50')
         .fontColor('#fff')

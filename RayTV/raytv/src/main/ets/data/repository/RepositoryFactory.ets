@@ -1,19 +1,18 @@
-// RepositoryFactory - 仓库工厂类
+// RepositoryFactory - 仓库工厂类 | Repository factory class
 import Logger from '../../common/util/Logger';
 import DatabaseRepository from './DatabaseRepository';
 import SQLiteDatabaseRepository from './SQLiteDatabaseRepository';
 import NetworkRepository from './NetworkRepository';
 import DefaultNetworkRepository from './DefaultNetworkRepository';
+import { FactoryBase } from '../../common/base/FactoryBase';
 
-const TAG = 'RepositoryFactory';
-
-// 定义具有close方法的仓库接口
+// 定义具有close方法的组件接口 | Define component interface with close method
 interface ClosableRepository {
   close?: () => Promise<void>;
 }
 
 /**
- * Repository类型枚举
+ * Repository类型枚举 | Repository type enum
  */
 export enum RepositoryType {
   DATABASE,
@@ -21,147 +20,104 @@ export enum RepositoryType {
 }
 
 /**
- * Repository工厂类
- * 负责创建和管理各种Repository的实现
+ * Repository工厂类 | Repository factory class
+ * 负责创建和管理各种Repository的实现 | Responsible for creating and managing various Repository implementations
  */
-export default class RepositoryFactory {
-  private static instance: RepositoryFactory | null;
-  private repositoryMap: Map<RepositoryType, DatabaseRepository | NetworkRepository> = new Map();
-  private isInitialized: boolean = false;
+export default class RepositoryFactory extends FactoryBase<RepositoryType, DatabaseRepository | NetworkRepository> {
+  protected readonly TAG: string = 'RepositoryFactory';
 
   /**
-   * 私有构造函数
-   */
-  private constructor() {}
-
-  /**
-   * 获取单例实例
-   * @returns RepositoryFactory实例
-   */
-  public static getInstance(): RepositoryFactory {
-    if (!RepositoryFactory.instance) {
-      RepositoryFactory.instance = new RepositoryFactory();
-    }
-    return RepositoryFactory.instance;
+ * 私有构造函数 | Private constructor
+ */
+  private constructor() {
+    super();
   }
 
   /**
-   * 初始化所有仓库
-   * @returns 是否初始化成功
-   */
+ * 初始化所有仓库 | Initialize all repositories
+ * @returns 是否初始化成功 | Whether initialization succeeded
+ */
   public async initialize(): Promise<boolean> {
     try {
       if (this.isInitialized) {
-        Logger.info(TAG, 'Repositories already initialized');
+        Logger.info(this.TAG, 'Repositories already initialized');
         return true;
       }
 
-      Logger.info(TAG, 'Initializing repositories...');
+      Logger.info(this.TAG, 'Initializing repositories...');
 
-      // 初始化数据库仓库
+      // 初始化数据库仓库 | Initialize database repository
       const databaseRepository = new SQLiteDatabaseRepository();
-      // 注意：SQLiteDatabaseRepository需要先设置context，这里暂时跳过初始化
-      // 在实际使用前需要调用setContext并initialize
-      this.repositoryMap.set(RepositoryType.DATABASE, databaseRepository);
-      Logger.info(TAG, 'Database repository created (needs specific initialization)');
+      // 注意：SQLiteDatabaseRepository需要先设置context，这里暂时仅初始化
+      // 在实际使用前需要调用getContext并initialize
+      this.instanceMap.set(RepositoryType.DATABASE, databaseRepository as DatabaseRepository);
+      Logger.info(this.TAG, 'Database repository created (needs specific initialization)');
 
-      // 初始化网络仓库（这里使用默认配置，实际使用时需要提供具体配置）
+      // 初始化网络仓库（这里使用默认配置，实际使用时需要提供具体配置）| Initialize network repository (using default config here, specific config needed in actual use)
       const networkRepository = new DefaultNetworkRepository();
-      // 注意：DefaultNetworkRepository需要先设置config，这里暂时跳过初始化
+      // 注意：DefaultNetworkRepository需要先设置config，这里暂时仅初始化
       // 在使用网络仓库之前，需要调用setConfig并initialize
-      this.repositoryMap.set(RepositoryType.NETWORK, networkRepository);
-      Logger.info(TAG, 'Network repository created (needs specific initialization)');
+      this.instanceMap.set(RepositoryType.NETWORK, networkRepository);
+      Logger.info(this.TAG, 'Network repository created (needs specific initialization)');
 
       this.isInitialized = true;
-      Logger.info(TAG, 'All repositories initialized successfully');
+      Logger.info(this.TAG, 'All repositories initialized successfully');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize repositories: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(this.TAG, `Failed to initialize repositories: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
 
   /**
-   * 获取数据库仓库实例
-   * @returns DatabaseRepository实例
-   */
+ * 获取数据库仓库实例 | Get database repository instance
+ * @returns DatabaseRepository实例 | DatabaseRepository instance
+ */
   public getDatabaseRepository(): DatabaseRepository {
-    const repository = this.repositoryMap.get(RepositoryType.DATABASE);
-    if (!repository) {
-      throw new Error('Database repository not initialized. Call initialize() first.');
-    }
-    return repository as DatabaseRepository;
+    return this.getInstance(RepositoryType.DATABASE) as DatabaseRepository;
   }
 
   /**
-   * 获取网络仓库实例
-   * @returns NetworkRepository实例
-   */
+ * 获取网络仓库实例 | Get network repository instance
+ * @returns NetworkRepository实例 | NetworkRepository instance
+ */
   public getNetworkRepository(): NetworkRepository {
-    const repository = this.repositoryMap.get(RepositoryType.NETWORK);
-    if (!repository) {
-      throw new Error('Network repository not initialized. Call initialize() first.');
-    }
-    return repository as NetworkRepository;
+    return this.getInstance(RepositoryType.NETWORK) as NetworkRepository;
   }
 
   /**
-   * 设置自定义仓库实例
-   * @param type 仓库类型
-   * @param repository 仓库实例
-   */
+ * 设置自定义仓库实例 | Set custom repository instance
+ * @param type 仓库类型 | Repository type
+ * @param repository 仓库实例 | Repository instance
+ */
   public setRepository(type: RepositoryType, repository: DatabaseRepository | NetworkRepository): void {
-    this.repositoryMap.set(type, repository);
-    Logger.info(TAG, `Custom repository set for type: ${type}`);
+    this.setInstance(type, repository);
   }
 
   /**
-   * 检查仓库是否初始化
-   * @param type 仓库类型
-   * @returns 是否初始化
-   */
+ * 检查仓库是否初始化 | Check if repository is initialized
+ * @param type 仓库类型 | Repository type
+ * @returns 是否初始化 | Whether initialized
+ */
   public isRepositoryInitialized(type: RepositoryType): boolean {
-    return this.repositoryMap.has(type);
+    return this.isInstanceInitialized(type);
   }
 
   /**
-   * 关闭所有仓库资源
-   */
+ * 关闭所有仓库资源 | Close all repository resources
+ */
   public async close(): Promise<void> {
     try {
-      Logger.info(TAG, 'Closing repositories...');
+      Logger.info(this.TAG, 'Closing repositories...');
 
-      // 关闭数据库仓库
-    const dbRepository = this.repositoryMap.get(RepositoryType.DATABASE);
-    // 使用类型断言确保只在有close方法的对象上调用
-    if (dbRepository) {
-      const repo = dbRepository as ClosableRepository;
-      if (typeof repo.close === 'function') {
-        await repo.close();
-        Logger.info(TAG, 'Database repository closed');
-      }
-    }
-
-      // 清理仓库映射
-      this.repositoryMap.clear();
-      this.isInitialized = false;
+      // 调用父类的close方法关闭仓库实例 | Call parent class close method to close repository instances
+      await super.close();
       
-      Logger.info(TAG, 'All repositories closed successfully');
+      Logger.info(this.TAG, 'All repositories closed successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to close repositories: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(this.TAG, `Failed to close repositories: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-
-  /**
-   * 重置工厂（主要用于测试）
-   */
-  public static reset(): void {
-    if (RepositoryFactory.instance) {
-      RepositoryFactory.instance.close().catch((error: Error) => {
-        Logger.error(TAG, `Error during factory reset: ${error.message}`);
-      });
-      RepositoryFactory.instance = null;
-    }
-    Logger.info(TAG, 'Repository factory reset');
   }
 }
+
+

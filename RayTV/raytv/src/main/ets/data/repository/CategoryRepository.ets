@@ -1,4 +1,5 @@
-// CategoryRepository - 分类仓库�?// 负责管理视频和直播的分类数据
+﻿// CategoryRepository - 鍒嗙被浠撳簱
+// 璐熻矗绠＄悊瑙嗛鍜岀洿鎾殑鍒嗙被鏁版嵁
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -9,7 +10,7 @@ import { LocalStorageType } from '../model/LocalModel';
 import { CacheType, CachePolicy } from '../model/CacheModel';
 
 /**
- * 分类类型枚举
+ * 鍒嗙被绫诲瀷鏋氫妇
  */
 export enum CategoryType {
   VIDEO = 'video',
@@ -27,7 +28,8 @@ export enum CategoryType {
 }
 
 /**
- * 分类可见性枚�? */
+ * 鍒嗙被鍙鎬ф灇涓?
+ */
 export enum CategoryVisibility {
   PUBLIC = 'public',
   PRIVATE = 'private',
@@ -37,7 +39,7 @@ export enum CategoryVisibility {
 }
 
 /**
- * 分类排序类型枚举
+ * 鍒嗙被鎺掑簭绫诲瀷鏋氫妇
  */
 export enum CategorySortType {
   NAME_ASC = 'name_asc',
@@ -50,7 +52,7 @@ export enum CategorySortType {
 }
 
 /**
- * 分类图标类型枚举
+ * 鍒嗙被鍥炬爣绫诲瀷鏋氫妇
  */
 export enum CategoryIconType {
   ICON_FONT = 'icon_font',
@@ -62,99 +64,115 @@ export enum CategoryIconType {
 }
 
 /**
- * 分类图标接口
+ * 鍒嗙被鍥炬爣鎺ュ彛
  */
 export interface CategoryIcon {
   type: CategoryIconType;
-  value: string; // 图标名称、图片URL或emoji
+  value: string; // 鍥炬爣鍚嶇О銆佸浘鐗嘦RL鎴杄moji
   color?: string;
   backgroundColor?: string;
   size?: number;
 }
 
 /**
- * 分类元数据接�? */
+ * 鍒嗙被鍏冩暟鎹帴鍙?
+ */
 export interface CategoryMetadata {
-  viewCount: number; // 浏览次数
-  contentCount: number; // 内容数量
-  followerCount: number; // 关注者数�?  isFollowing?: boolean; // 当前用户是否关注
-  isFeatured?: boolean; // 是否精�?  lastUpdated: number; // 最后更新时�?  createdAt: number; // 创建时间
-  updatedBy?: string; // 更新者ID
-  createdBy?: string; // 创建者ID
-  parentCategoryId?: string; // 父分类ID
-  childCategoryIds?: string[]; // 子分类ID列表
-  relatedCategoryIds?: string[]; // 相关分类ID列表
-  allowedUserIds?: string[]; // 允许访问的用户ID列表（私有分类）
-  restrictedCountries?: string[]; // 限制访问的国家列�?  tags?: string[]; // 分类标签
-  description?: string; // 详细描述
-  coverImageUrl?: string; // 封面图片URL
-  bannerImageUrl?: string; // 横幅图片URL
-  icon?: CategoryIcon; // 分类图标
+  viewCount: number; // 娴忚娆℃暟
+  contentCount: number; // 鍐呭鏁伴噺
+  followerCount: number; // 鍏虫敞鑰呮暟閲?
+  isFollowing?: boolean; // 褰撳墠鐢ㄦ埛鏄惁鍏虫敞
+  isFeatured?: boolean; // 鏄惁绮鹃€?
+  lastUpdated: number; // 鏈€鍚庢洿鏂版椂闂?
+  createdAt: number; // 鍒涘缓鏃堕棿
+  updatedBy?: string; // 鏇存柊鑰匢D
+  createdBy?: string; // 鍒涘缓鑰匢D
+  parentCategoryId?: string; // 鐖跺垎绫籌D
+  childCategoryIds?: string[]; // 瀛愬垎绫籌D鍒楄〃
+  relatedCategoryIds?: string[]; // 鐩稿叧鍒嗙被ID鍒楄〃
+  allowedUserIds?: string[]; // 鍏佽璁块棶鐨勭敤鎴稩D鍒楄〃锛堢鏈夊垎绫伙級
+  restrictedCountries?: string[]; // 闄愬埗璁块棶鐨勫浗瀹跺垪琛?
+  tags?: string[]; // 鍒嗙被鏍囩
+  description?: string; // 璇︾粏鎻忚堪
+  coverImageUrl?: string; // 灏侀潰鍥剧墖URL
+  bannerImageUrl?: string; // 妯箙鍥剧墖URL
+  icon?: CategoryIcon; // 鍒嗙被鍥炬爣
 }
 
 /**
- * 分类接口
+ * 鍒嗙被鎺ュ彛
  */
 export interface Category {
-  id: string; // 分类ID
-  name: string; // 分类名称
-  type: CategoryType; // 分类类型
-  visibility: CategoryVisibility; // 可见�?  slug: string; // URL友好的标�?  metadata: CategoryMetadata; // 元数�?  orderIndex?: number; // 排序索引
-  status: 'active' | 'inactive' | 'pending' | 'deprecated'; // 状�?  localization?: Record<string, { // 本地化数�?    name: string;
+  id: string; // 鍒嗙被ID
+  name: string; // 鍒嗙被鍚嶇О
+  type: CategoryType; // 鍒嗙被绫诲瀷
+  visibility: CategoryVisibility; // 鍙鎬?
+  slug: string; // URL鍙嬪ソ鐨勬爣璇?
+  metadata: CategoryMetadata; // 鍏冩暟鎹?
+  orderIndex?: number; // 鎺掑簭绱㈠紩
+  status: 'active' | 'inactive' | 'pending' | 'deprecated'; // 鐘舵€?
+  localization?: Record<string, { // 鏈湴鍖栨暟鎹?
+    name: string;
     description?: string;
     slug?: string;
   }>;
 }
 
 /**
- * 分类组接�? */
+ * 鍒嗙被缁勬帴鍙?
+ */
 export interface CategoryGroup {
-  id: string; // 组ID
-  name: string; // 组名�?  description?: string; // 组描�?  categoryIds: string[]; // 分类ID列表
-  orderIndex?: number; // 排序索引
-  isExpanded?: boolean; // 是否展开
-  icon?: CategoryIcon; // 组图�?  createdAt: number; // 创建时间
-  updatedAt: number; // 更新时间
+  id: string; // 缁処D
+  name: string; // 缁勫悕绉?
+  description?: string; // 缁勬弿杩?
+  categoryIds: string[]; // 鍒嗙被ID鍒楄〃
+  orderIndex?: number; // 鎺掑簭绱㈠紩
+  isExpanded?: boolean; // 鏄惁灞曞紑
+  icon?: CategoryIcon; // 缁勫浘鏍?
+  createdAt: number; // 鍒涘缓鏃堕棿
+  updatedAt: number; // 鏇存柊鏃堕棿
 }
 
 /**
- * 分类事件类型
+ * 鍒嗙被浜嬩欢绫诲瀷
  */
 export const CategoryEventType = {
-  // 分类生命周期事件
+  // 鍒嗙被鐢熷懡鍛ㄦ湡浜嬩欢
   CREATED: 'category:created',
   UPDATED: 'category:updated',
   DELETED: 'category:deleted',
   ACTIVATED: 'category:activated',
   DEACTIVATED: 'category:deactivated',
   
-  // 状态变更事�?  VISIBILITY_CHANGED: 'category:visibilityChanged',
+  // 鐘舵€佸彉鏇翠簨浠?
+  VISIBILITY_CHANGED: 'category:visibilityChanged',
   FOLLOWED: 'category:followed',
   UNFOLLOWED: 'category:unfollowed',
   
-  // 内容事件
+  // 鍐呭浜嬩欢
   CONTENT_ADDED: 'category:contentAdded',
   CONTENT_REMOVED: 'category:contentRemoved',
   CONTENT_COUNT_CHANGED: 'category:contentCountChanged',
   
-  // 组事�?  GROUP_CREATED: 'category:groupCreated',
+  // 缁勪簨浠?
+  GROUP_CREATED: 'category:groupCreated',
   GROUP_UPDATED: 'category:groupUpdated',
   GROUP_DELETED: 'category:groupDeleted',
   
-  // 批量事件
+  // 鎵归噺浜嬩欢
   BATCH_UPDATED: 'category:batchUpdated',
   REORDERED: 'category:reordered',
   
-  // 加载事件
+  // 鍔犺浇浜嬩欢
   LOADED: 'category:loaded',
   SYNCED: 'category:synced',
   
-  // 错误事件
+  // 閿欒浜嬩欢
   ERROR: 'category:error'
 } as const;
 
 /**
- * 分类事件数据
+ * 鍒嗙被浜嬩欢鏁版嵁
  */
 export interface CategoryEvent {
   type: string;
@@ -172,29 +190,42 @@ export interface CategoryEvent {
 }
 
 /**
- * 分类过滤条件接口
+ * 鍒嗙被杩囨护鏉′欢鎺ュ彛
  */
 export interface CategoryFilter {
-  types?: CategoryType[]; // 分类类型
-  visibility?: CategoryVisibility[]; // 可见�?  searchTerm?: string; // 搜索�?  parentId?: string; // 父分类ID
-  childOf?: string; // 子分类筛�?  status?: string[]; // 状�?  featured?: boolean; // 是否精�?  followed?: boolean; // 是否已关�?  contentCountMin?: number; // 内容数量下限
-  contentCountMax?: number; // 内容数量上限
-  tags?: string[]; // 标签筛�?  sortBy?: CategorySortType; // 排序方式
-  limit?: number; // 数量限制
-  offset?: number; // 偏移�?  lang?: string; // 语言筛�?  region?: string; // 地区筛�?}
-
-/**
- * 分类请求接口
- */
-export interface CategoryRequest {
-  filter?: CategoryFilter;
-  includeMetadata?: boolean; // 是否包含元数�?  includeGroups?: boolean; // 是否包含分组
-  includeLocalization?: boolean; // 是否包含本地�?  includeChildCategories?: boolean; // 是否包含子分�?  includeContentCount?: boolean; // 是否包含内容计数
-  cachePolicy?: CachePolicy; // 缓存策略
+  types?: CategoryType[]; // 鍒嗙被绫诲瀷
+  visibility?: CategoryVisibility[]; // 鍙鎬?
+  searchTerm?: string; // 鎼滅储璇?
+  parentId?: string; // 鐖跺垎绫籌D
+  childOf?: string; // 瀛愬垎绫荤瓫閫?
+  status?: string[]; // 鐘舵€?
+  featured?: boolean; // 鏄惁绮鹃€?
+  followed?: boolean; // 鏄惁宸插叧娉?
+  contentCountMin?: number; // 鍐呭鏁伴噺涓嬮檺
+  contentCountMax?: number; // 鍐呭鏁伴噺涓婇檺
+  tags?: string[]; // 鏍囩绛涢€?
+  sortBy?: CategorySortType; // 鎺掑簭鏂瑰紡
+  limit?: number; // 鏁伴噺闄愬埗
+  offset?: number; // 鍋忕Щ閲?
+  lang?: string; // 璇█绛涢€?
+  region?: string; // 鍦板尯绛涢€?
 }
 
 /**
- * 分类响应接口
+ * 鍒嗙被璇锋眰鎺ュ彛
+ */
+export interface CategoryRequest {
+  filter?: CategoryFilter;
+  includeMetadata?: boolean; // 鏄惁鍖呭惈鍏冩暟鎹?
+  includeGroups?: boolean; // 鏄惁鍖呭惈鍒嗙粍
+  includeLocalization?: boolean; // 鏄惁鍖呭惈鏈湴鍖?
+  includeChildCategories?: boolean; // 鏄惁鍖呭惈瀛愬垎绫?
+  includeContentCount?: boolean; // 鏄惁鍖呭惈鍐呭璁℃暟
+  cachePolicy?: CachePolicy; // 缂撳瓨绛栫暐
+}
+
+/**
+ * 鍒嗙被鍝嶅簲鎺ュ彛
  */
 export interface CategoryResponse {
   categories: Category[];
@@ -206,7 +237,7 @@ export interface CategoryResponse {
 }
 
 /**
- * 分类统计接口
+ * 鍒嗙被缁熻鎺ュ彛
  */
 export interface CategoryStats {
   totalCategories: number;
@@ -220,17 +251,19 @@ export interface CategoryStats {
 }
 
 /**
- * 分类存储配置接口
+ * 鍒嗙被瀛樺偍閰嶇疆鎺ュ彛
  */
 export interface CategoryStorageConfig {
-  cacheTTL: number; // 缓存过期时间（毫秒）
-  maxCacheItems: number; // 最大缓存项�?  persistCategories: boolean; // 是否持久化分�?  autoSync: boolean; // 是否自动同步
-  syncInterval: number; // 同步间隔（毫秒）
-  offlineMode: boolean; // 离线模式
+  cacheTTL: number; // 缂撳瓨杩囨湡鏃堕棿锛堟绉掞級
+  maxCacheItems: number; // 鏈€澶х紦瀛橀」鏁?
+  persistCategories: boolean; // 鏄惁鎸佷箙鍖栧垎绫?
+  autoSync: boolean; // 鏄惁鑷姩鍚屾
+  syncInterval: number; // 鍚屾闂撮殧锛堟绉掞級
+  offlineMode: boolean; // 绂荤嚎妯″紡
 }
 
 /**
- * 分类仓库�? */
+ * 鍒嗙被浠撳簱 */
 export class CategoryRepository {
   private static instance: CategoryRepository;
   private logger = Logger.getInstance();
@@ -239,7 +272,8 @@ export class CategoryRepository {
   private eventBus = EventBusUtil.getInstance();
   private cacheService = CacheService.getInstance();
   
-  // 存储键配�?  private storageKeys = {
+  // 瀛樺偍閿厤缃?
+  private storageKeys = {
     categories: 'category:categories',
     groups: 'category:groups',
     stats: 'category:stats',
@@ -249,26 +283,26 @@ export class CategoryRepository {
     customOrder: 'category:customOrder'
   };
   
-  // 默认存储配置
+  // 榛樿瀛樺偍閰嶇疆
   private defaultStorageConfig: CategoryStorageConfig = {
-    cacheTTL: 3600000, // 1小时
+    cacheTTL: 3600000, // 1灏忔椂
     maxCacheItems: 1000,
     persistCategories: true,
     autoSync: true,
-    syncInterval: 1800000, // 30分钟
+    syncInterval: 1800000, // 30鍒嗛挓
     offlineMode: false
   };
   
-  // 存储配置
+  // 瀛樺偍閰嶇疆
   private storageConfig: CategoryStorageConfig = { ...this.defaultStorageConfig };
   
-  // 分类数据存储
+  // 鍒嗙被鏁版嵁瀛樺偍
   private categories: Map<string, Category> = new Map();
   private groups: Map<string, CategoryGroup> = new Map();
   private followedCategories: Set<string> = new Set();
   private customOrder: Map<string, number> = new Map();
   
-  // 统计信息
+  // 缁熻淇℃伅
   private stats: CategoryStats = {
     totalCategories: 0,
     activeCategories: 0,
@@ -280,21 +314,24 @@ export class CategoryRepository {
     lastUpdated: 0
   };
   
-  // 同步状�?  private lastSyncTime: number = 0;
+  // 鍚屾鐘舵€?
+  private lastSyncTime: number = 0;
   private isSyncing: boolean = false;
   private syncTimer: number | null = null;
   
-  // 初始化状�?  private initialized: boolean = false;
+  // 鍒濆鍖栫姸鎬?
+  private initialized: boolean = false;
   
   /**
-   * 私有构造函�?   */
+   * 绉佹湁鏋勯€犲嚱鏁?
+   */
   private constructor() {
     this.logger.info('CategoryRepository initialized');
     this.setupEventListeners();
   }
 
   /**
-   * 获取CategoryRepository单例实例
+   * 鑾峰彇CategoryRepository鍗曚緥瀹炰緥
    */
   public static getInstance(): CategoryRepository {
     if (!CategoryRepository.instance) {
@@ -304,7 +341,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 初始化分类仓�?   * @param config 存储配置
+   * 鍒濆鍖栧垎绫讳粨搴?  * @param config 瀛樺偍閰嶇疆
    */
   public async initialize(config?: Partial<CategoryStorageConfig>): Promise<void> {
     try {
@@ -313,15 +350,15 @@ export class CategoryRepository {
         return;
       }
       
-      // 更新配置
+      // 鏇存柊閰嶇疆
       if (config) {
         this.storageConfig = { ...this.storageConfig, ...config };
       }
       
-      // 加载本地数据
+      // 鍔犺浇鏈湴鏁版嵁
       await this.loadLocalData();
       
-      // 启动自动同步
+      // 鍚姩鑷姩鍚屾
       if (this.storageConfig.autoSync) {
         this.startAutoSync();
       }
@@ -333,16 +370,16 @@ export class CategoryRepository {
         offlineMode: this.storageConfig.offlineMode
       });
       
-      // 发布加载完成事件
+      // 鍙戝竷鍔犺浇瀹屾垚浜嬩欢
       this.eventBus.emit(CategoryEventType.LOADED, {
         type: CategoryEventType.LOADED,
         timestamp: Date.now(),
         categories: Array.from(this.categories.values())
       });
     } catch (error) {
-      this.Logger.error('Failed to initialize CategoryRepository', error as Error);
+      this.logger.error('Failed to initialize CategoryRepository', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -404,9 +441,9 @@ export class CategoryRepository {
   }
 
   /**
-   * 设置事件监听�?   */
+   * 璁剧疆浜嬩欢鐩戝惉鍣?   */
   private setupEventListeners(): void {
-    // 监听网络状态变�?    this.eventBus.on('network:online', () => {
+    // 鐩戝惉缃戠粶鐘舵€佸彉鍖?    this.eventBus.on('network:online', () => {
       this.onNetworkOnline();
     });
     
@@ -414,17 +451,17 @@ export class CategoryRepository {
       this.onNetworkOffline();
     });
     
-    // 监听应用退出事�?    this.eventBus.on('app:exit', async () => {
+    // 鐩戝惉搴旂敤閫€鍑轰簨浠?    this.eventBus.on('app:exit', async () => {
       await this.shutdown();
     });
   }
 
   /**
-   * 加载本地数据
+   * 鍔犺浇鏈湴鏁版嵁
    */
   private async loadLocalData(): Promise<void> {
     try {
-      // 加载分类数据
+      // 鍔犺浇鍒嗙被鏁版嵁
       const categoriesData = await this.storageUtil.get(LocalStorageType.CATEGORIES);
       if (categoriesData) {
         const categories = JSON.parse(categoriesData) as Category[];
@@ -434,7 +471,7 @@ export class CategoryRepository {
         });
       }
       
-      // 加载分组数据
+      // 鍔犺浇鍒嗙粍鏁版嵁
       const groupsData = await this.storageUtil.get(LocalStorageType.CATEGORY_GROUPS);
       if (groupsData) {
         const groups = JSON.parse(groupsData) as CategoryGroup[];
@@ -444,14 +481,14 @@ export class CategoryRepository {
         });
       }
       
-      // 加载关注分类
+      // 鍔犺浇鍏虫敞鍒嗙被
       const followedData = await this.storageUtil.get(LocalStorageType.FOLLOWED_CATEGORIES);
       if (followedData) {
         const followed = JSON.parse(followedData) as string[];
         this.followedCategories = new Set(followed);
       }
       
-      // 加载自定义排�?      const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
+      // 鍔犺浇鑷畾涔夋帓搴?     const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
       if (orderData) {
         const order = JSON.parse(orderData) as Record<string, number>;
         this.customOrder.clear();
@@ -460,18 +497,18 @@ export class CategoryRepository {
         });
       }
       
-      // 加载统计信息
+      // 鍔犺浇缁熻淇℃伅
       const statsData = await this.storageUtil.get(LocalStorageType.CATEGORY_STATS);
       if (statsData) {
         this.stats = JSON.parse(statsData) as CategoryStats;
       }
       
-      // 加载最后同步时�?      const syncTimeData = await this.storageUtil.get(LocalStorageType.LAST_SYNC_TIME);
+      // 鍔犺浇鏈€鍚庡悓姝ユ椂闂?     const syncTimeData = await this.storageUtil.get(LocalStorageType.LAST_SYNC_TIME);
       if (syncTimeData) {
         this.lastSyncTime = parseInt(syncTimeData);
       }
       
-      // 更新统计信息
+      // 鏇存柊缁熻淇℃伅
       this.updateStats();
       
       this.logger.info('Local category data loaded', {
@@ -485,7 +522,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 保存本地数据
+   * 淇濆瓨鏈湴鏁版嵁
    */
   private async saveLocalData(): Promise<void> {
     if (!this.storageConfig.persistCategories) {
@@ -493,40 +530,42 @@ export class CategoryRepository {
     }
     
     try {
-      // 保存分类数据
+      // 淇濆瓨鍒嗙被鏁版嵁
       const categories = Array.from(this.categories.values());
       await this.storageUtil.set(
         LocalStorageType.CATEGORIES,
         JSON.stringify(categories)
       );
       
-      // 保存分组数据
+      // 淇濆瓨鍒嗙粍鏁版嵁
       const groups = Array.from(this.groups.values());
       await this.storageUtil.set(
         LocalStorageType.CATEGORY_GROUPS,
         JSON.stringify(groups)
       );
       
-      // 保存关注分类
+      // 淇濆瓨鍏虫敞鍒嗙被
       const followed = Array.from(this.followedCategories);
       await this.storageUtil.set(
         LocalStorageType.FOLLOWED_CATEGORIES,
         JSON.stringify(followed)
       );
       
-      // 保存自定义排�?      const order = Object.fromEntries(this.customOrder);
+      // 淇濆瓨鑷畾涔夋帓搴?
+      const order = Object.fromEntries(this.customOrder);
       await this.storageUtil.set(
         LocalStorageType.CATEGORY_CUSTOM_ORDER,
         JSON.stringify(order)
       );
       
-      // 保存统计信息
+      // 淇濆瓨缁熻淇℃伅
       await this.storageUtil.set(
         LocalStorageType.CATEGORY_STATS,
         JSON.stringify(this.stats)
       );
       
-      // 保存最后同步时�?      await this.storageUtil.set(
+      // 淇濆瓨鏈€鍚庡悓姝ユ椂闂?
+      await this.storageUtil.set(
         LocalStorageType.LAST_SYNC_TIME,
         this.lastSyncTime.toString()
       );
@@ -538,7 +577,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 启动自动同步
+   * 鍚姩鑷姩鍚屾
    */
   private startAutoSync(): void {
     if (this.syncTimer) {
@@ -553,7 +592,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 停止自动同步
+   * 鍋滄鑷姩鍚屾
    */
   private stopAutoSync(): void {
     if (this.syncTimer) {
@@ -563,7 +602,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 检查是否需要同�?   */
+   * 妫€鏌ユ槸鍚﹂渶瑕佸悓姝?  */
   private shouldSync(): boolean {
     const now = Date.now();
     const timeSinceLastSync = now - this.lastSyncTime;
@@ -571,7 +610,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 网络在线处理
+   * 缃戠粶鍦ㄧ嚎澶勭悊
    */
   private onNetworkOnline(): void {
     this.logger.info('Network online, checking for category sync');
@@ -582,7 +621,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 网络离线处理
+   * 缃戠粶绂荤嚎澶勭悊
    */
   private onNetworkOffline(): void {
     this.logger.info('Network offline, category sync paused');
@@ -590,7 +629,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 同步分类数据
+   * 鍚屾鍒嗙被鏁版嵁
    */
   public async syncCategories(): Promise<void> {
     if (this.isSyncing) {
@@ -608,24 +647,24 @@ export class CategoryRepository {
     try {
       this.logger.info('Starting category sync');
       
-      // 从API获取分类数据
+      // 浠嶢PI鑾峰彇鍒嗙被鏁版嵁
       const response = await this.fetchCategoriesFromAPI();
       
       if (response) {
-        // 更新分类数据
+        // 鏇存柊鍒嗙被鏁版嵁
         await this.updateCategories(response.categories);
         
-        // 更新分组数据
+        // 鏇存柊鍒嗙粍鏁版嵁
         if (response.groups) {
           await this.updateGroups(response.groups);
         }
         
-        // 更新最后同步时�?        this.lastSyncTime = Date.now();
+        // 鏇存柊鏈€鍚庡悓姝ユ椂闂?       this.lastSyncTime = Date.now();
         
-        // 保存本地数据
+        // 淇濆瓨鏈湴鏁版嵁
         await this.saveLocalData();
         
-        // 发布同步完成事件
+        // 鍙戝竷鍚屾瀹屾垚浜嬩欢
         this.eventBus.emit(CategoryEventType.SYNCED, {
           type: CategoryEventType.SYNCED,
           timestamp: this.lastSyncTime,
@@ -640,9 +679,9 @@ export class CategoryRepository {
         });
       }
     } catch (error) {
-      this.Logger.error('Category sync failed', error as Error);
+      this.logger.error('Category sync failed', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -706,21 +745,22 @@ export class CategoryRepository {
   }
 
   /**
-   * 从API获取分类数据
+   * 浠嶢PI鑾峰彇鍒嗙被鏁版嵁
    */
   private async fetchCategoriesFromAPI(): Promise<CategoryResponse | null> {
     try {
-      // 构建请求URL
+      // 鏋勫缓璇锋眰URL
       const url = '/api/categories';
       const cacheKey = `categories:${Date.now()}`;
       
-      // 尝试从缓存获�?      const cachedResponse = await this.cacheService.getCache<CategoryResponse>(cacheKey);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?
+      const cachedResponse = await this.cacheService.getCache<CategoryResponse>(cacheKey);
       if (cachedResponse) {
         this.logger.debug('Category data loaded from cache');
         return { ...cachedResponse, cacheHit: true };
       }
       
-      // 从真实API获取
+      // 浠庣湡瀹濧PI鑾峰彇
       const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
@@ -731,7 +771,7 @@ export class CategoryRepository {
       if (response.status === 200 && response.data) {
         const categoryResponse = response.data;
         
-        // 缓存响应数据
+        // 缂撳瓨鍝嶅簲鏁版嵁
         await this.cacheService.setCache(cacheKey, categoryResponse, {
           expiry: this.storageConfig.cacheTTL,
           type: CacheType.MEMORY_DISK,
@@ -743,13 +783,13 @@ export class CategoryRepository {
       
       return null;
     } catch (error) {
-      this.Logger.error('Failed to fetch categories from API', error as Error);
-      throw error;
+      this.logger.error('Failed to fetch categories from API', error as Error);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 更新分类数据
+   * 鏇存柊鍒嗙被鏁版嵁
    */
   private async updateCategories(newCategories: Category[]): Promise<void> {
     const updatedCategories: Category[] = [];
@@ -759,7 +799,7 @@ export class CategoryRepository {
       const existingCategory = this.categories.get(newCategory.id);
       
       if (existingCategory) {
-        // 更新现有分类
+        // 鏇存柊鐜版湁鍒嗙被
         const updatedCategory: Record<string, string | number | boolean | null> = { ... };
         this.categories.set(newCategory.id, updatedCategory instanceof Error ? ...newCategory };
         this.categories.set(newCategory.id, updatedCategory : new Error(String(...newCategory };
@@ -790,12 +830,12 @@ export class CategoryRepository {
         this.categories.set(newCategory.id, updatedCategory)))))));
         updatedCategories.push(updatedCategory);
       } else {
-        // 添加新分�?        this.categories.set(newCategory.id, newCategory);
+        // 娣诲姞鏂板垎绫?       this.categories.set(newCategory.id, newCategory);
         createdCategories.push(newCategory);
       }
     }
     
-    // 发布事件
+    // 鍙戝竷浜嬩欢
     if (createdCategories.length > 0) {
       this.eventBus.emit(CategoryEventType.CREATED, {
         type: CategoryEventType.CREATED,
@@ -812,12 +852,12 @@ export class CategoryRepository {
       });
     }
     
-    // 更新统计信息
+    // 鏇存柊缁熻淇℃伅
     this.updateStats();
   }
 
   /**
-   * 更新分组数据
+   * 鏇存柊鍒嗙粍鏁版嵁
    */
   private async updateGroups(newGroups: CategoryGroup[]): Promise<void> {
     const updatedGroups: CategoryGroup[] = [];
@@ -827,17 +867,17 @@ export class CategoryRepository {
       const existingGroup = this.groups.get(newGroup.id);
       
       if (existingGroup) {
-        // 更新现有分组
+        // 鏇存柊鐜版湁鍒嗙粍
         const updatedGroup: Record<string, string | number | boolean | null> = { ... };
         this.groups.set(newGroup.id, updatedGroup);
         updatedGroups.push(updatedGroup);
       } else {
-        // 添加新分�?        this.groups.set(newGroup.id, newGroup);
+        // 娣诲姞鏂板垎缁?       this.groups.set(newGroup.id, newGroup);
         createdGroups.push(newGroup);
       }
     }
     
-    // 发布事件
+    // 鍙戝竷浜嬩欢
     if (createdGroups.length > 0) {
       this.eventBus.emit(CategoryEventType.GROUP_CREATED, {
         type: CategoryEventType.GROUP_CREATED,
@@ -856,12 +896,12 @@ export class CategoryRepository {
   }
 
   /**
-   * 更新统计信息
+   * 鏇存柊缁熻淇℃伅
    */
   private updateStats(): void {
     const now = Date.now();
     
-    // 重置统计信息
+    // 閲嶇疆缁熻淇℃伅
     this.stats = {
       totalCategories: this.categories.size,
       activeCategories: 0,
@@ -873,28 +913,28 @@ export class CategoryRepository {
       lastUpdated: now
     };
     
-    // 计算统计信息
+    // 璁＄畻缁熻淇℃伅
     for (const category of this.categories.values()) {
-      // 按类型统�?      const typeCount = this.stats.byType.get(category.type) || 0;
+      // 鎸夌被鍨嬬粺璁?     const typeCount = this.stats.byType.get(category.type) || 0;
       this.stats.byType.set(category.type, typeCount + 1);
       
-      // 按可见性统�?      const visibilityCount = this.stats.byVisibility.get(category.visibility) || 0;
+      // 鎸夊彲瑙佹€х粺璁?     const visibilityCount = this.stats.byVisibility.get(category.visibility) || 0;
       this.stats.byVisibility.set(category.visibility, visibilityCount + 1);
       
-      // 统计活跃分类
+      // 缁熻娲昏穬鍒嗙被
       if (category.status === 'active') {
         this.stats.activeCategories++;
       }
       
-      // 统计精选分�?      if (category.metadata.isFeatured) {
+      // 缁熻绮鹃€夊垎绫?     if (category.metadata.isFeatured) {
         this.stats.featuredCategories++;
       }
       
-      // 统计内容总数
+      // 缁熻鍐呭鎬绘暟
       this.stats.totalContentCount += category.metadata.contentCount;
     }
     
-    // 发布统计更新事件
+    // 鍙戝竷缁熻鏇存柊浜嬩欢
     this.eventBus.emit(CategoryEventType.CONTENT_COUNT_CHANGED, {
       type: CategoryEventType.CONTENT_COUNT_CHANGED,
       timestamp: now,
@@ -903,8 +943,8 @@ export class CategoryRepository {
   }
 
   /**
-   * 获取分类列表
-   * @param request 分类请求
+   * 鑾峰彇鍒嗙被鍒楄〃
+   * @param request 鍒嗙被璇锋眰
    */
   public async getCategories(request?: CategoryRequest): Promise<CategoryResponse> {
     if (!this.initialized) {
@@ -912,25 +952,25 @@ export class CategoryRepository {
     }
     
     try {
-      // 检查是否需要同�?      if (this.shouldSync() && !this.isSyncing) {
+      // 妫€鏌ユ槸鍚﹂渶瑕佸悓姝?     if (this.shouldSync() && !this.isSyncing) {
         this.syncCategories();
       }
       
-      // 获取所有分�?      let categories = Array.from(this.categories.values());
+      // 鑾峰彇鎵€鏈夊垎绫?     let categories = Array.from(this.categories.values());
       
-      // 应用过滤�?      if (request?.filter) {
+      // 搴旂敤杩囨护鏉′欢      if (request?.filter) {
         categories = this.filterCategories(categories, request.filter);
       }
       
-      // 应用排序
+      // 搴旂敤鎺掑簭
       categories = this.sortCategories(categories, request?.filter?.sortBy);
       
-      // 应用分页
+      // 搴旂敤鍒嗛〉
       const limit = request?.filter?.limit || 50;
       const offset = request?.filter?.offset || 0;
       const paginatedCategories = categories.slice(offset, offset + limit);
       
-      // 构建响应
+      // 鏋勫缓鍝嶅簲
       const response: CategoryResponse = {
         categories: paginatedCategories,
         totalCount: categories.length,
@@ -938,7 +978,7 @@ export class CategoryRepository {
         timestamp: Date.now()
       };
       
-      // 包含分组信息
+      // 鍖呭惈鍒嗙粍淇℃伅
       if (request?.includeGroups) {
         response.groups = Array.from(this.groups.values());
       }
@@ -953,7 +993,7 @@ export class CategoryRepository {
     } catch (error) {
       this.Logger.error('Failed to get categories', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1012,13 +1052,13 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 根据ID获取分类
-   * @param id 分类ID
+   * 鏍规嵁ID鑾峰彇鍒嗙被
+   * @param id 鍒嗙被ID
    */
   public getCategoryById(id: string): Category | null {
     if (!this.initialized) {
@@ -1029,8 +1069,8 @@ export class CategoryRepository {
   }
 
   /**
-   * 根据slug获取分类
-   * @param slug 分类slug
+   * 鏍规嵁slug鑾峰彇鍒嗙被
+   * @param slug 鍒嗙被slug
    */
   public getCategoryBySlug(slug: string): Category | null {
     if (!this.initialized) {
@@ -1047,7 +1087,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 获取分类组列�?   */
+   * 鑾峰彇鍒嗙被缁勫垪琛?  */
   public getCategoryGroups(): CategoryGroup[] {
     if (!this.initialized) {
       throw new Error('CategoryRepository not initialized');
@@ -1057,15 +1097,15 @@ export class CategoryRepository {
   }
 
   /**
-   * 获取分类统计信息
+   * 鑾峰彇鍒嗙被缁熻淇℃伅
    */
   public getCategoryStats(): CategoryStats {
     return { ...this.stats };
   }
 
   /**
-   * 关注分类
-   * @param categoryId 分类ID
+   * 鍏虫敞鍒嗙被
+   * @param categoryId 鍒嗙被ID
    */
   public async followCategory(categoryId: string): Promise<void> {
     if (!this.initialized) {
@@ -1078,16 +1118,16 @@ export class CategoryRepository {
         throw new Error(`Category not found: ${categoryId}`);
       }
       
-      // 添加关注
+      // 娣诲姞鍏虫敞
       this.followedCategories.add(categoryId);
       
-      // 更新分类元数�?      category.metadata.isFollowing = true;
+      // 鏇存柊鍒嗙被鍏冩暟鎹?     category.metadata.isFollowing = true;
       category.metadata.followerCount++;
       
-      // 保存本地数据
+      // 淇濆瓨鏈湴鏁版嵁
       await this.saveLocalData();
       
-      // 发布关注事件
+      // 鍙戝竷鍏虫敞浜嬩欢
       this.eventBus.emit(CategoryEventType.FOLLOWED, {
         type: CategoryEventType.FOLLOWED,
         timestamp: Date.now(),
@@ -1097,9 +1137,9 @@ export class CategoryRepository {
       
       this.logger.info(`Category followed: ${category.name}`);
     } catch (error) {
-      this.Logger.error(`Failed to follow category: ${categoryId}`, error as Error);
+      this.logger.error(`Failed to follow category: ${categoryId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1158,13 +1198,13 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 取消关注分类
-   * @param categoryId 分类ID
+   * 鍙栨秷鍏虫敞鍒嗙被
+   * @param categoryId 鍒嗙被ID
    */
   public async unfollowCategory(categoryId: string): Promise<void> {
     if (!this.initialized) {
@@ -1177,16 +1217,16 @@ export class CategoryRepository {
         throw new Error(`Category not found: ${categoryId}`);
       }
       
-      // 移除关注
+      // 绉婚櫎鍏虫敞
       this.followedCategories.delete(categoryId);
       
-      // 更新分类元数�?      category.metadata.isFollowing = false;
+      // 鏇存柊鍒嗙被鍏冩暟鎹?     category.metadata.isFollowing = false;
       category.metadata.followerCount = Math.max(0, category.metadata.followerCount - 1);
       
-      // 保存本地数据
+      // 淇濆瓨鏈湴鏁版嵁
       await this.saveLocalData();
       
-      // 发布取消关注事件
+      // 鍙戝竷鍙栨秷鍏虫敞浜嬩欢
       this.eventBus.emit(CategoryEventType.UNFOLLOWED, {
         type: CategoryEventType.UNFOLLOWED,
         timestamp: Date.now(),
@@ -1198,7 +1238,7 @@ export class CategoryRepository {
     } catch (error) {
       this.Logger.error(`Failed to unfollow category: ${categoryId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1257,13 +1297,13 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 检查是否已关注分类
-   * @param categoryId 分类ID
+   * 妫€鏌ユ槸鍚﹀凡鍏虫敞鍒嗙被
+   * @param categoryId 鍒嗙被ID
    */
   public isCategoryFollowed(categoryId: string): boolean {
     if (!this.initialized) {
@@ -1274,7 +1314,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 获取已关注的分类列表
+   * 鑾峰彇宸插叧娉ㄧ殑鍒嗙被鍒楄〃
    */
   public getFollowedCategories(): Category[] {
     if (!this.initialized) {
@@ -1294,8 +1334,8 @@ export class CategoryRepository {
   }
 
   /**
-   * 设置分类自定义排�?   * @param categoryId 分类ID
-   * @param orderIndex 排序索引
+   * 璁剧疆鍒嗙被鑷畾涔夋帓搴?  * @param categoryId 鍒嗙被ID
+   * @param orderIndex 鎺掑簭绱㈠紩
    */
   public async setCategoryOrder(categoryId: string, orderIndex: number): Promise<void> {
     if (!this.initialized) {
@@ -1308,14 +1348,14 @@ export class CategoryRepository {
         throw new Error(`Category not found: ${categoryId}`);
       }
       
-      // 更新排序索引
+      // 鏇存柊鎺掑簭绱㈠紩
       this.customOrder.set(categoryId, orderIndex);
       category.orderIndex = orderIndex;
       
-      // 保存本地数据
+      // 淇濆瓨鏈湴鏁版嵁
       await this.saveLocalData();
       
-      // 发布重新排序事件
+      // 鍙戝竷閲嶆柊鎺掑簭浜嬩欢
       this.eventBus.emit(CategoryEventType.REORDERED, {
         type: CategoryEventType.REORDERED,
         timestamp: Date.now(),
@@ -1327,7 +1367,7 @@ export class CategoryRepository {
     } catch (error) {
       this.Logger.error(`Failed to set category order: ${categoryId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1386,13 +1426,13 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 批量更新分类
-   * @param categories 分类列表
+   * 鎵归噺鏇存柊鍒嗙被
+   * @param categories 鍒嗙被鍒楄〃
    */
   public async updateCategoriesBatch(categories: Category[]): Promise<void> {
     if (!this.initialized) {
@@ -1406,20 +1446,20 @@ export class CategoryRepository {
         const existingCategory = this.categories.get(category.id);
         
         if (existingCategory) {
-          // 更新现有分类
+          // 鏇存柊鐜版湁鍒嗙被
           const updatedCategory: Record<string, string | number | boolean | null> = { ... };
           this.categories.set(category.id, updatedCategory);
           updatedCategories.push(updatedCategory);
         } else {
-          // 添加新分�?          this.categories.set(category.id, category);
+          // 娣诲姞鏂板垎绫?         this.categories.set(category.id, category);
           updatedCategories.push(category);
         }
       }
       
-      // 保存本地数据
+      // 淇濆瓨鏈湴鏁版嵁
       await this.saveLocalData();
       
-      // 发布批量更新事件
+      // 鍙戝竷鎵归噺鏇存柊浜嬩欢
       this.eventBus.emit(CategoryEventType.BATCH_UPDATED, {
         type: CategoryEventType.BATCH_UPDATED,
         timestamp: Date.now(),
@@ -1430,7 +1470,7 @@ export class CategoryRepository {
     } catch (error) {
       this.Logger.error('Failed to update categories batch', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1489,24 +1529,24 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 过滤分类
+   * 杩囨护鍒嗙被
    */
   private filterCategories(categories: Category[], filter: CategoryFilter): Category[] {
     return categories.filter(category => {
-      // 检查类�?      if (filter.types && filter.types.length > 0 && !filter.types.includes(category.type)) {
+      // 妫€鏌ョ被鍨?     if (filter.types && filter.types.length > 0 && !filter.types.includes(category.type)) {
         return false;
       }
       
-      // 检查可见�?      if (filter.visibility && filter.visibility.length > 0 && !filter.visibility.includes(category.visibility)) {
+      // 妫€鏌ュ彲瑙佹€?     if (filter.visibility && filter.visibility.length > 0 && !filter.visibility.includes(category.visibility)) {
         return false;
       }
       
-      // 检查搜索词
+      // 妫€鏌ユ悳绱㈣瘝
       if (filter.searchTerm) {
         const searchTerm = filter.searchTerm.toLowerCase();
         const nameMatch = category.name.toLowerCase().includes(searchTerm);
@@ -1518,29 +1558,29 @@ export class CategoryRepository {
         }
       }
       
-      // 检查父分类ID
+      // 妫€鏌ョ埗鍒嗙被ID
       if (filter.parentId && category.metadata.parentCategoryId !== filter.parentId) {
         return false;
       }
       
-      // 检查子分类
+      // 妫€鏌ュ瓙鍒嗙被
       if (filter.childOf && (!category.metadata.childCategoryIds || !category.metadata.childCategoryIds.includes(filter.childOf))) {
         return false;
       }
       
-      // 检查状�?      if (filter.status && filter.status.length > 0 && !filter.status.includes(category.status)) {
+      // 妫€鏌ョ姸鎬?     if (filter.status && filter.status.length > 0 && !filter.status.includes(category.status)) {
         return false;
       }
       
-      // 检查精选状�?      if (filter.featured !== undefined && category.metadata.isFeatured !== filter.featured) {
+      // 妫€鏌ョ簿閫夌姸鎬?     if (filter.featured !== undefined && category.metadata.isFeatured !== filter.featured) {
         return false;
       }
       
-      // 检查关注状�?      if (filter.followed !== undefined && this.followedCategories.has(category.id) !== filter.followed) {
+      // 妫€鏌ュ叧娉ㄧ姸鎬?     if (filter.followed !== undefined && this.followedCategories.has(category.id) !== filter.followed) {
         return false;
       }
       
-      // 检查内容数量范�?      if (filter.contentCountMin && category.metadata.contentCount < filter.contentCountMin) {
+      // 妫€鏌ュ唴瀹规暟閲忚寖鍥?     if (filter.contentCountMin && category.metadata.contentCount < filter.contentCountMin) {
         return false;
       }
       
@@ -1548,19 +1588,19 @@ export class CategoryRepository {
         return false;
       }
       
-      // 检查标�?      if (filter.tags && filter.tags.length > 0) {
+      // 妫€鏌ユ爣绛?     if (filter.tags && filter.tags.length > 0) {
         const hasMatchingTag = filter.tags.some(tag => category.metadata.tags?.includes(tag));
         if (!hasMatchingTag) {
           return false;
         }
       }
       
-      // 检查语言
+      // 妫€鏌ヨ瑷€
       if (filter.lang && category.localization && !category.localization[filter.lang]) {
         return false;
       }
       
-      // 检查地�?      if (filter.region && category.metadata.restrictedCountries?.includes(filter.region)) {
+      // 妫€鏌ュ湴鍖?     if (filter.region && category.metadata.restrictedCountries?.includes(filter.region)) {
         return false;
       }
       
@@ -1569,7 +1609,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 排序分类
+   * 鎺掑簭鍒嗙被
    */
   private sortCategories(categories: Category[], sortBy?: CategorySortType): Category[] {
     if (!sortBy) {
@@ -1588,7 +1628,7 @@ export class CategoryRepository {
           return (b.metadata.viewCount || 0) - (a.metadata.viewCount || 0);
         
         case CategorySortType.TRENDING:
-          // 简化实现：基于最后更新时�?          return (b.metadata.lastUpdated || 0) - (a.metadata.lastUpdated || 0);
+          // 绠€鍖栧疄鐜帮細鍩轰簬鏈€鍚庢洿鏂版椂闂?         return (b.metadata.lastUpdated || 0) - (a.metadata.lastUpdated || 0);
         
         case CategorySortType.RECENTLY_ADDED:
           return (b.metadata.createdAt || 0) - (a.metadata.createdAt || 0);
@@ -1608,7 +1648,7 @@ export class CategoryRepository {
   }
 
   /**
-   * 关闭分类仓库
+   * 鍏抽棴鍒嗙被浠撳簱
    */
   public async shutdown(): Promise<void> {
     if (!this.initialized) {
@@ -1616,13 +1656,13 @@ export class CategoryRepository {
     }
     
     try {
-      // 停止自动同步
+      // 鍋滄鑷姩鍚屾
       this.stopAutoSync();
       
-      // 保存本地数据
+      // 淇濆瓨鏈湴鏁版嵁
       await this.saveLocalData();
       
-      // 清空数据
+      // 娓呯┖鏁版嵁
       this.categories.clear();
       this.groups.clear();
       this.followedCategories.clear();
@@ -1633,7 +1673,7 @@ export class CategoryRepository {
     } catch (error) {
       this.Logger.error('Failed to shutdown CategoryRepository', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(CategoryEventType.ERROR, {
         type: CategoryEventType.ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1692,9 +1732,12 @@ export class CategoryRepository {
         error: error as Error
       });
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 }
+
+
+
 
 

@@ -1,8 +1,8 @@
-// TableSchema.ets - 数据库表结构定义
-// 定义RayTV应用的所有数据库表结构和字段常量
+// TableSchema.ets - 数据库表结构定义 | Database Table Structure Definition
+// 定义RayTV应用的所有数据库表结构和字段常量 | Define all database table structures and field constants for RayTV application
 
 /**
- * 站点表列定义
+ * 站点表列定义 | Site table column definitions
  */
 export interface SiteColumns {
   KEY: string;
@@ -41,7 +41,7 @@ export interface SiteColumns {
 }
 
 /**
- * 历史记录表列定义
+ * 历史记录表列定义 | History table column definitions
  */
 export interface HistoryColumns {
   ID: string;
@@ -90,7 +90,7 @@ export interface HistoryColumns {
 }
 
 /**
- * 收藏表列定义
+ * 收藏表列定义 | Collection table column definitions
  */
 export interface KeepColumns {
   ID: string;
@@ -116,7 +116,7 @@ export interface KeepColumns {
 }
 
 /**
- * 配置表列定义
+ * 配置表列定义 | Configuration table column definitions
  */
 export interface ConfigColumns {
   ID: string;
@@ -138,7 +138,7 @@ export interface ConfigColumns {
 }
 
 /**
- * 收藏文件夹表列定义
+ * 收藏文件夹表列定义 | Collection folder table column definitions
  */
 export interface KeepFolderColumns {
   ID: string;
@@ -155,7 +155,7 @@ export interface KeepFolderColumns {
 }
 
 /**
- * 搜索历史表列定义
+ * 搜索历史表列定义 | Search history table column definitions
  */
 export interface SearchHistoryColumns {
   ID: string;
@@ -168,7 +168,7 @@ export interface SearchHistoryColumns {
 }
 
 /**
- * 线路表列定义
+ * 线路表列定义 | Line table column definitions
  */
 export interface LineColumns {
   ID: string;
@@ -186,7 +186,7 @@ export interface LineColumns {
 }
 
 /**
- * 订阅表列定义
+ * 订阅表列定义 | Subscription table column definitions
  */
 export interface SubscriptionColumns {
   ID: string;
@@ -201,7 +201,7 @@ export interface SubscriptionColumns {
 }
 
 /**
- * 直播频道表列定义
+ * 直播频道表列定义 | Live channel table column definitions
  */
 export interface LiveChannelColumns {
   ID: string;
@@ -233,7 +233,7 @@ export interface LiveChannelColumns {
 }
 
 /**
- * 直播分组表列定义
+ * 直播分组表列定义 | Live group table column definitions
  */
 export interface LiveGroupColumns {
   ID: string;
@@ -248,7 +248,7 @@ export interface LiveGroupColumns {
 }
 
 /**
- * 表结构接口定义
+ * 表定义接口 | Table definition interface
  */
 export interface TableDefinition<T> {
   NAME: string;
@@ -257,7 +257,7 @@ export interface TableDefinition<T> {
 }
 
 /**
- * 站点表定义
+ * 站点表定义 | Site table definition
  */
 export const SITE_TABLE: TableDefinition<SiteColumns> = {
   NAME: 'site',
@@ -336,7 +336,7 @@ export const SITE_TABLE: TableDefinition<SiteColumns> = {
 };
 
 /**
- * 历史记录表定义
+ * 历史记录表定义 | History table definition
  */
 export const HISTORY_TABLE: TableDefinition<HistoryColumns> = {
   NAME: 'history',
@@ -433,10 +433,10 @@ export const HISTORY_TABLE: TableDefinition<HistoryColumns> = {
     PLAYBACK_NOTES: 'playback_notes',
     WATCH_TIME_LIST: 'watch_time_list'
   }
-}
+};
 
 /**
- * 收藏表定义
+ * 收藏表定义 | Collection table definition
  */
 export const KEEP_TABLE: TableDefinition<KeepColumns> = {
   NAME: 'keep',
@@ -487,10 +487,10 @@ export const KEEP_TABLE: TableDefinition<KeepColumns> = {
     NOTES: 'notes',
     PROGRESS: 'progress'
   }
-}
+};
 
 /**
- * 配置表定义
+ * 配置表定义 | Configuration table definition
  */
 export const CONFIG_TABLE: TableDefinition<ConfigColumns> = {
   NAME: 'config',
@@ -532,10 +532,10 @@ export const CONFIG_TABLE: TableDefinition<ConfigColumns> = {
     CUSTOM_SETTINGS: 'custom_settings',
     IS_DEFAULT: 'is_default'
   }
-}
+};
 
 /**
- * 收藏文件夹表定义
+ * 收藏文件夹表定义 | Collection folder table definition
  */
 export const KEEP_FOLDER_TABLE: TableDefinition<KeepFolderColumns> = {
   NAME: 'keep_folder',
@@ -567,10 +567,10 @@ export const KEEP_FOLDER_TABLE: TableDefinition<KeepFolderColumns> = {
     UPDATED_AT: 'updated_at',
     IS_DEFAULT: 'is_default'
   }
-}
+};
 
 /**
- * 搜索历史表定义
+ * 搜索历史表定义 | Search history table definition
  */
 export const SEARCH_HISTORY_TABLE: TableDefinition<SearchHistoryColumns> = {
   NAME: 'search_history',
@@ -594,10 +594,10 @@ export const SEARCH_HISTORY_TABLE: TableDefinition<SearchHistoryColumns> = {
     RESULT_COUNT: 'result_count',
     IS_FAVORITE: 'is_favorite'
   }
-}
+};
 
 /**
- * 线路表定义
+ * 线路表定义 | Line table definition
  */
 export const LINE_TABLE: TableDefinition<LineColumns> = {
   NAME: 'line',
@@ -631,10 +631,10 @@ export const LINE_TABLE: TableDefinition<LineColumns> = {
     CACHE_TIME: 'cache_time',
     RESPONSE_TIME: 'response_time'
   }
-}
+};
 
 /**
- * 订阅表定义
+ * 订阅表定义 | Subscription table definition
  */
 export const SUBSCRIPTION_TABLE: TableDefinition<SubscriptionColumns> = {
   NAME: 'subscription',
@@ -662,10 +662,10 @@ export const SUBSCRIPTION_TABLE: TableDefinition<SubscriptionColumns> = {
     ENABLED: 'enabled',
     CURRENT: 'current'
   }
-}
+};
 
 /**
- * 直播频道表定义
+ * 直播频道表定义 | Live channel table definition
  */
 export const LIVE_CHANNEL_TABLE: TableDefinition<LiveChannelColumns> = {
   NAME: 'live_channel',
@@ -727,10 +727,10 @@ export const LIVE_CHANNEL_TABLE: TableDefinition<LiveChannelColumns> = {
     UPDATED_AT: 'updated_at',
     USER_CONFIG: 'user_config'
   }
-}
+};
 
 /**
- * 直播分组表定义
+ * 直播分组表定义 | Live group table definition
  */
 export const LIVE_GROUP_TABLE: TableDefinition<LiveGroupColumns> = {
   NAME: 'live_group',
@@ -758,46 +758,10 @@ export const LIVE_GROUP_TABLE: TableDefinition<LiveGroupColumns> = {
     CREATED_AT: 'created_at',
     UPDATED_AT: 'updated_at'
   }
-}
+};
 
 /**
- * 获取所有表的创建SQL语句
- */
-export function getAllTables(): string[] {
-  return [
-    SITE_TABLE.CREATE_SQL,
-    HISTORY_TABLE.CREATE_SQL,
-    KEEP_TABLE.CREATE_SQL,
-    CONFIG_TABLE.CREATE_SQL,
-    KEEP_FOLDER_TABLE.CREATE_SQL,
-    SEARCH_HISTORY_TABLE.CREATE_SQL,
-    LINE_TABLE.CREATE_SQL,
-    SUBSCRIPTION_TABLE.CREATE_SQL,
-    LIVE_CHANNEL_TABLE.CREATE_SQL,
-    LIVE_GROUP_TABLE.CREATE_SQL
-  ];
-}
-
-/**
- * 获取所有表名
- */
-export function getAllTableNames(): string[] {
-  return [
-    SITE_TABLE.NAME,
-    HISTORY_TABLE.NAME,
-    KEEP_TABLE.NAME,
-    CONFIG_TABLE.NAME,
-    KEEP_FOLDER_TABLE.NAME,
-    SEARCH_HISTORY_TABLE.NAME,
-    LINE_TABLE.NAME,
-    SUBSCRIPTION_TABLE.NAME,
-    LIVE_CHANNEL_TABLE.NAME,
-    LIVE_GROUP_TABLE.NAME
-  ];
-}
-
-/**
- * 索引创建SQL语句接口
+ * 索引创建SQL语句接口 | Index creation SQL statement interface
  */
 export interface IndexDefinition {
   SITE_TYPE_INDEX: string;
@@ -820,71 +784,71 @@ export interface IndexDefinition {
 }
 
 /**
- * 索引创建SQL语句
+ * 索引创建SQL语句 | Index creation SQL statements
  */
 export const INDEXES: IndexDefinition = {
-  // 站点表索引
+  // 站点表索引 | Site table indexes
   SITE_TYPE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_type ON site(type);',
   SITE_ENABLED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_enabled ON site(enabled);',
   SITE_LAST_USED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_site_last_used ON site(last_used_at);',
   
-  // 历史记录表索引
+  // 历史记录索引 | History table indexes
   HISTORY_SOURCE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_source ON history(source_key);',
   HISTORY_CONTENT_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_content ON history(content_id, content_type);',
   HISTORY_LAST_PLAYED_INDEX: 'CREATE INDEX IF NOT EXISTS idx_history_last_played ON history(last_played_at);',
   
-  // 收藏表索引
+  // 收藏表索引 | Collection table indexes
   KEEP_SOURCE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_source ON keep(source_key);',
   KEEP_CONTENT_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_content ON keep(content_id, content_type);',
   KEEP_FOLDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_keep_folder ON keep(folder_id);',
   
-  // 搜索历史表索引
+  // 搜索历史索引 | Search history indexes
   SEARCH_HISTORY_KEYWORD_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_keyword ON search_history(keyword);',
   SEARCH_HISTORY_TIME_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_time ON search_history(search_time);',
   SEARCH_HISTORY_FAVORITE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_search_favorite ON search_history(is_favorite);',
   
-  // 直播频道表索引
+  // 直播频道索引 | Live channel indexes
   LIVE_CHANNEL_GROUP_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_group ON live_channel(group_id);',
   LIVE_CHANNEL_FAVORITE_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_favorite ON live_channel(is_favorite);',
   LIVE_CHANNEL_NAME_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_channel_name ON live_channel(name);',
   
-  // 直播分组表索引
+  // 直播分组索引 | Live group indexes
   LIVE_GROUP_ORDER_INDEX: 'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");',
   
-  // Array of all index creation SQL statements (used by DatabaseManager)
+  // 所有索引创建语句 | All index creation statements
   CREATE_INDEXES: [
-    // Site table indexes
+    // 站点表索引 | Site table indexes
     'CREATE INDEX IF NOT EXISTS idx_site_type ON site(type);',
     'CREATE INDEX IF NOT EXISTS idx_site_enabled ON site(enabled);',
     'CREATE INDEX IF NOT EXISTS idx_site_last_used ON site(last_used_at);',
     
-    // History table indexes
+    // 历史记录索引 | History table indexes
     'CREATE INDEX IF NOT EXISTS idx_history_source ON history(source_key);',
     'CREATE INDEX IF NOT EXISTS idx_history_content ON history(content_id, content_type);',
     'CREATE INDEX IF NOT EXISTS idx_history_last_played ON history(last_played_at);',
     
-    // Keep table indexes
+    // 收藏表索引 | Collection table indexes
     'CREATE INDEX IF NOT EXISTS idx_keep_source ON keep(source_key);',
     'CREATE INDEX IF NOT EXISTS idx_keep_content ON keep(content_id, content_type);',
     'CREATE INDEX IF NOT EXISTS idx_keep_folder ON keep(folder_id);',
     
-    // Search history table indexes
+    // 搜索历史索引 | Search history indexes
     'CREATE INDEX IF NOT EXISTS idx_search_keyword ON search_history(keyword);',
     'CREATE INDEX IF NOT EXISTS idx_search_time ON search_history(search_time);',
     'CREATE INDEX IF NOT EXISTS idx_search_favorite ON search_history(is_favorite);',
     
-    // Live channel table indexes
+    // 直播频道索引 | Live channel indexes
     'CREATE INDEX IF NOT EXISTS idx_live_channel_group ON live_channel(group_id);',
     'CREATE INDEX IF NOT EXISTS idx_live_channel_favorite ON live_channel(is_favorite);',
     'CREATE INDEX IF NOT EXISTS idx_live_channel_name ON live_channel(name);',
     
-    // Live group table index
+    // 直播分组索引 | Live group indexes
     'CREATE INDEX IF NOT EXISTS idx_live_group_order ON live_group("order");'
   ]
-}
+};
 
 /**
- * 数据库版本信息
+ * 数据库版本信息 | Database version information
  */
 export interface DatabaseInfo {
   VERSION: number;
@@ -892,8 +856,47 @@ export interface DatabaseInfo {
   DESCRIPTION: string;
 }
 
+/**
+ * 数据库信息 | Database information
+ */
 export const DATABASE_INFO: DatabaseInfo = {
   VERSION: 1,
   NAME: 'raytv.db',
   DESCRIPTION: 'RayTV应用数据库'
 };
+
+/**
+ * 获取所有表的创建SQL语句 | Get all table creation SQL statements
+ */
+export function getAllTables(): string[] {
+  return [
+    SITE_TABLE.CREATE_SQL,
+    HISTORY_TABLE.CREATE_SQL,
+    KEEP_TABLE.CREATE_SQL,
+    CONFIG_TABLE.CREATE_SQL,
+    KEEP_FOLDER_TABLE.CREATE_SQL,
+    SEARCH_HISTORY_TABLE.CREATE_SQL,
+    LINE_TABLE.CREATE_SQL,
+    SUBSCRIPTION_TABLE.CREATE_SQL,
+    LIVE_CHANNEL_TABLE.CREATE_SQL,
+    LIVE_GROUP_TABLE.CREATE_SQL
+  ];
+}
+
+/**
+ * 获取所有表名 | Get all table names
+ */
+export function getAllTableNames(): string[] {
+  return [
+    SITE_TABLE.NAME,
+    HISTORY_TABLE.NAME,
+    KEEP_TABLE.NAME,
+    CONFIG_TABLE.NAME,
+    KEEP_FOLDER_TABLE.NAME,
+    SEARCH_HISTORY_TABLE.NAME,
+    LINE_TABLE.NAME,
+    SUBSCRIPTION_TABLE.NAME,
+    LIVE_CHANNEL_TABLE.NAME,
+    LIVE_GROUP_TABLE.NAME
+  ];
+}

@@ -1,30 +1,32 @@
-// ArkTSBaseTypes.ets - ArkTS兼容的基础类型定义
+// ArkTSBaseTypes.ets - ArkTS兼容的基本类型定义 ArkTS compatible basic type definitions
 
 /**
- * 基础类型工具函数
- * 提供ArkTS环境中常用的类型定义和工具函�? */
-
-/**
- * 定义Any类型，替代TypeScript的any，在ArkTS中提供更安全的类型使�? */
-export type SafeAny = unknown;
-
-/**
- * 定义函数类型，避免使用Function关键�? */
-export type SafeFunction = (...args: Record<string, string | number | boolean | null>[]) => unknown;
-
-/**
- * 定义Async函数类型
+ * 基础类型工具函数 Basic type utility functions
+ * 提供ArkTS环境中常用的类型定义和辅助函数 Provides common type definitions and helper functions in ArkTS environment
  */
-export type SafeAsyncFunction = (...args: Record<string, string | number | boolean | null>[]) => Promise<unknown>;
+/**
+ * 定义Any类型，对应TypeScript的any，在ArkTS中提供更安全的类型使用 Defines Any type, corresponding to TypeScript's any, provides safer type usage in ArkTS
+ */
+export type SafeAny = string | number | boolean | object | null | undefined;
+/**
+ * 定义函数类型，避免使用function关键字 Defines function type, avoids using function keyword
+ */
+export type SafeFunction = (...args: (string | number | boolean | object | null | undefined)[]) => void;
 
 /**
- * 安全对象类型，替代索引签�? */
+ * 定义Async函数类型 Defines Async function type
+ */
+export type SafeAsyncFunction = (...args: (string | number | boolean | object | null | undefined)[]) => Promise<void>;
+
+/**
+ * 安全对象类型，包含索引签名 Safe object type, includes index signature
+ */
 export interface SafeObject {
   [key: string]: string | number | boolean | object | null | undefined;
 }
 
 /**
- * 键值对类型
+ * 键值对类型 Key-value pair type
  */
 export interface KeyValuePair<K, V> {
   key: K;
@@ -32,7 +34,8 @@ export interface KeyValuePair<K, V> {
 }
 
 /**
- * 可序列化的数据类�? */
+ * 可序列化的数据类型 Serializable data type
+ */
 export type SerializableData = 
   | string
   | number
@@ -42,7 +45,8 @@ export type SerializableData =
   | Record<string, SerializableData>;
 
 /**
- * 结果类型，包含成功和失败两种状�? */
+ * 结果类型，包含成功和失败两种状态 Result type, includes success and failure states
+ */
 export interface Result<T, E = Error> {
   success: boolean;
   data?: T;
@@ -50,11 +54,12 @@ export interface Result<T, E = Error> {
 }
 
 /**
- * 可选值类�? */
+ * 可选类型 Optional type
+ */
 export type Optional<T> = T | undefined | null;
 
 /**
- * 非空值类型断言函数
+ * 非空类型断言函数 Non-null type assertion function
  */
 export function assertNotNull<T>(value: Optional<T>): asserts value is T {
   if (value === null || value === undefined) {
@@ -63,9 +68,12 @@ export function assertNotNull<T>(value: Optional<T>): asserts value is T {
 }
 
 /**
- * 类型守卫函数：检查值是否为非null和非undefined
+ * 类型守卫函数：检查值是否为非null和非undefined Type guard function: checks if value is non-null and non-undefined
  */
 export function isNonNull<T>(value: Optional<T>): value is T {
   return value !== null && value !== undefined;
 }
+
+
+
 

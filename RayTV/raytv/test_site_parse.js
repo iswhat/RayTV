@@ -1,11 +1,11 @@
-// 简化的测试脚本，用于验证站点配置解析功能
-// 直接使用JavaScript来解析JSON配置
+// 简化的测试脚本，用于验证站点配置解析功能 | Simplified test script to verify site configuration parsing
+// 直接使用JavaScript来解析JSON配置 | Directly use JavaScript to parse JSON configuration
 const fs = require('fs');
 
-// 读取配置文件内容
+// 读取配置文件内容 | Read configuration file content
 const configContent = fs.readFileSync('d:\\tv\\RayTV\\a.json', 'utf-8');
 
-// 清理JSON中的注释
+// 清理JSON中的注释 | Clean comments in JSON
 function cleanJson(jsonContent) {
   // 移除单行注释
   let clean = jsonContent.replace(/\/\/.*$/gm, '');

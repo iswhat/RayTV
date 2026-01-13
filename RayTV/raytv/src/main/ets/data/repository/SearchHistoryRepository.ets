@@ -1,12 +1,12 @@
-// SearchHistoryRepository - 搜索历史仓库
-// 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等
+﻿// SearchHistoryRepository - 搜索历史仓库 | Search history repository
+// 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等 | Manages user search history data, including saving, retrieving, deleting search records, etc.
 
 import LoggerUtil from '../../common/util/Logger';
 import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
 
 /**
- * 搜索记录类型枚举
+ * 搜索记录类型枚举 | Search record type enumeration
  */
 export enum SearchType {
   VIDEO = 'video',
@@ -18,33 +18,33 @@ export enum SearchType {
 }
 
 /**
- * 搜索历史记录接口
+ * 搜索历史记录接口 | Search history record interface
  */
 export interface SearchHistoryItem {
-  id: string; // 唯一标识符
-  query: string; // 搜索关键词
-  type: SearchType; // 搜索类型
-  timestamp: number; // 搜索时间戳
-  resultCount?: number; // 搜索结果数量
-  selected?: boolean; // 是否被选中
-  isFavorite?: boolean; // 是否为收藏的搜索词
-  category?: string; // 搜索分类（可选）
+  id: string; // 唯一标识符 | Unique identifier
+  query: string; // 搜索关键词 | Search keyword
+  type: SearchType; // 搜索类型 | Search type
+  timestamp: number; // 搜索时间戳 | Search timestamp
+  resultCount?: number; // 搜索结果数量 | Search result count
+  selected?: boolean; // 是否已被选中 | Whether selected
+  isFavorite?: boolean; // 是否为收藏的搜索词 | Whether it is a favorite search term
+  category?: string; // 搜索分类（可选） | Search category (optional)
 }
 
 /**
- * 搜索历史配置接口
+ * 搜索历史配置接口 | Search history configuration interface
  */
 export interface SearchHistoryConfig {
-  maxHistoryItems: number; // 最大历史记录数量
-  maxFavoriteItems: number; // 最大收藏搜索词数量
-  autoClearDays?: number; // 自动清除天数（可选）
-  enableAutoComplete: boolean; // 是否启用自动完成
-  enableRecentSearches: boolean; // 是否启用最近搜索
-  enableFavorites: boolean; // 是否启用收藏功能
+  maxHistoryItems: number; // 最大历史记录数量 | Maximum history items count
+  maxFavoriteItems: number; // 最大收藏搜索词数量 | Maximum favorite searches count
+  autoClearDays?: number; // 自动清除天数（可选） | Auto clear days (optional)
+  enableAutoComplete: boolean; // 是否启用自动完成 | Whether to enable auto complete
+  enableRecentSearches: boolean; // 是否启用最近搜索 | Whether to enable recent searches
+  enableFavorites: boolean; // 是否启用收藏功能 | Whether to enable favorites feature
 }
 
 /**
- * 搜索历史事件类型接口
+ * 搜索历史事件类型接口 | Search history event type interface
  */
 export interface SearchHistoryEventTypeInterface {
   readonly SEARCH_HISTORY_ADDED: string;
@@ -56,7 +56,7 @@ export interface SearchHistoryEventTypeInterface {
 }
 
 /**
- * 搜索历史事件类型
+ * 搜索历史事件类型 | Search history event type
  */
 export const SearchHistoryEventType: SearchHistoryEventTypeInterface = {
   SEARCH_HISTORY_ADDED: 'searchHistory:added',
@@ -68,8 +68,8 @@ export const SearchHistoryEventType: SearchHistoryEventTypeInterface = {
 };
 
 /**
-   * 搜索历史事件数据
-   */
+ * 搜索历史事件数据 | Search history event data
+ */
 export interface SearchHistoryEvent {
   type: string;
   timestamp: number;
@@ -78,8 +78,8 @@ export interface SearchHistoryEvent {
 }
 
 /**
-   * 搜索历史导出数据接口
-   */
+ * 搜索历史导出数据接口 | Search history export data interface
+ */
 export interface SearchHistoryExportData {
   history: SearchHistoryItem[];
   favorites: SearchHistoryItem[];
@@ -88,21 +88,21 @@ export interface SearchHistoryExportData {
 }
 
 /**
- * 删除事件数据接口
+ * 删除事件数据接口 | Delete event data interface
  */
 export interface DeleteEventData {
   id: string;
 }
 
 /**
- * 清除事件数据接口
+ * 清除事件数据接口 | Clear event data interface
  */
 export interface ClearEventData {
   type: string;
 }
 
 /**
- * 收藏切换事件数据接口
+ * 收藏切换事件数据接口 | Favorite toggle event data interface
  */
 export interface FavoriteToggleEventData {
   item: SearchHistoryItem;
@@ -110,7 +110,7 @@ export interface FavoriteToggleEventData {
 }
 
 /**
- * 搜索历史导入数据接口
+ * 搜索历史导入数据接口 | Search history import data interface
  */
 export interface SearchHistoryImportData {
   history?: SearchHistoryItem[];
@@ -119,7 +119,7 @@ export interface SearchHistoryImportData {
 }
 
 /**
- * 存储键配置接口
+ * 存储键值映射 | Storage keys mapping
  */
 interface StorageKeys {
   searchHistory: string;
@@ -129,12 +129,12 @@ interface StorageKeys {
 }
 
 /**
- * 搜索历史仓库
+ * 搜索历史仓库 | Search history repository
  */
 export class SearchHistoryRepository {
   private static instance: SearchHistoryRepository;
   
-  // 存储键配置
+  // 存储键值映射 | Storage keys mapping
   private storageKeys: StorageKeys = {
     searchHistory: 'search:history',
     favoriteSearches: 'search:favorites',
@@ -142,7 +142,7 @@ export class SearchHistoryRepository {
     recentSearches: 'search:recent'
   };
   
-  // 默认配置
+  // 默认配置 | Default configuration
   private defaultConfig: SearchHistoryConfig = {
     maxHistoryItems: 100,
     maxFavoriteItems: 20,
@@ -152,20 +152,20 @@ export class SearchHistoryRepository {
     enableFavorites: true
   };
   
-  // 缓存的配置
+  // 缓存的配置 | Cached configuration
   private cachedConfig: SearchHistoryConfig = this.defaultConfig;
   
-  // 缓存的历史记录
+  // 缓存的历史记录 | Cached history records
   private cachedHistory: SearchHistoryItem[] = [];
   
-  // 缓存的收藏搜索
+  // 缓存的收藏搜索 | Cached favorite searches
   private cachedFavorites: SearchHistoryItem[] = [];
 
-  // 事件总线实例
+  // 事件总线实例 | Event bus instance
   private eventBus = EventBusUtil;
 
   /**
-   * 私有构造函数
+   * 私有构造函数 | Private constructor
    */
   private constructor() {
     LoggerUtil.info('SearchHistoryRepository', 'SearchHistoryRepository initialized');
@@ -174,7 +174,7 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 获取SearchHistoryRepository单例实例
+   * 获取SearchHistoryRepository单例实例 | Get SearchHistoryRepository singleton instance
    */
   public static getInstance(): SearchHistoryRepository {
     if (!SearchHistoryRepository.instance) {
@@ -184,51 +184,51 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 初始化搜索历史仓库
+   * 初始化搜索历史仓库 | Initialize search history repository
    */
   public async initialize(): Promise<void> {
     try {
-      // 加载配置
+      // 加载配置 | Load configuration
       await this.loadConfig();
       
-      // 初始化缓存
+      // 初始化缓存 | Initialize cache
       await this.loadHistory();
       await this.loadFavorites();
       
-      // 检查并清理过期历史记录
+      // 检查并清理过期历史记录 | Check and cleanup expired history records
       await this.cleanupExpiredHistory();
       
       LoggerUtil.info('SearchHistoryRepository', 'SearchHistoryRepository initialization completed');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to initialize SearchHistoryRepository', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to initialize SearchHistoryRepository: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 设置事件监听器
+   * 设置事件监听器 | Set up event listeners
    */
   private setupEventListeners(): void {
-    // 监听用户登录/登出事件
+    // 监听用户登录/登出事件 | Listen for user login/logout events
     this.eventBus.on('user:logout', async () => {
-      // 登出时清除用户相关的搜索历史（如果配置允许）
+      // 登出时清除用户相关的搜索历史（如果配置允许） | Clear user-related search history on logout (if config allows)
       if (this.cachedConfig?.enableRecentSearches) {
         await this.clearRecentSearches();
       }
     });
     
-    // 监听应用退出事件
+    // 监听应用退出事件 | Listen for app exit events
     this.eventBus.on('app:exit', async () => {
-      // 应用退出时保存数据
+      // 应用退出时保存数据 | Save data when app exits
       await this.saveData();
     });
   }
 
   /**
-   * 保存搜索记录
-   * @param query 搜索关键词
-   * @param type 搜索类型
-   * @param resultCount 搜索结果数量
-   * @param category 搜索分类
+   * 保存搜索记录 | Save search record
+   * @param query 搜索关键词 | Search keyword
+   * @param type 搜索类型 | Search type
+   * @param resultCount 搜索结果数量 | Search result count
+   * @param category 搜索分类 | Search category
    */
   public async saveSearch(
     query: string, 
@@ -237,23 +237,23 @@ export class SearchHistoryRepository {
     category?: string
   ): Promise<SearchHistoryItem> {
     try {
-      // 验证输入
+      // 验证输入 | Validate input
       if (!query || query.trim().length === 0) {
         throw new Error('Search query cannot be empty');
       }
       
-      // 去除多余空格并转小写
+      // 移除多余空格并转为小写 | Remove extra spaces and convert to lowercase
       const trimmedQuery = query.trim().toLowerCase();
       
-      // 检查关键词长度
+      // 检查关键词长度 | Check keyword length
       if (trimmedQuery.length > 100) {
         throw new Error('Search query too long (maximum 100 characters)');
       }
       
-      // 加载配置
+      // 加载配置 | Load configuration
       const config = await this.getConfig();
       
-      // 检查是否启用搜索历史
+      // 检查是否启用搜索历史 | Check if search history is enabled
       if (!config.enableRecentSearches) {
         return {
           id: this.generateId(),
@@ -265,10 +265,10 @@ export class SearchHistoryRepository {
         };
       }
       
-      // 加载现有历史记录
+      // 加载现有历史记录 | Load existing history records
       let history = await this.getHistory();
       
-      // 检查是否已存在相同的搜索记录
+      // 检查是否已存在相同的搜索记录 | Check if same search record already exists
       const existingIndex = history.findIndex(
         item => item.query === trimmedQuery && item.type === type
       );
@@ -284,21 +284,21 @@ export class SearchHistoryRepository {
       };
       
       if (existingIndex >= 0) {
-        // 更新现有记录
+        // 更新现有记录 | Update existing record
         const existingItem = history[existingIndex];
         newItem.isFavorite = existingItem.isFavorite;
         history.splice(existingIndex, 1);
       }
       
-      // 添加到历史记录开头
+      // 添加到历史记录开头 | Add to the beginning of history records
       history.unshift(newItem);
       
-      // 限制历史记录数量
+      // 限制历史记录数量 | Limit history records count
       if (history.length > config.maxHistoryItems) {
         history = history.slice(0, config.maxHistoryItems);
       }
       
-      // 保存更新后的历史记录
+      // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
       await StorageUtil.setObject(
         this.storageKeys.searchHistory,
@@ -306,86 +306,82 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 发布搜索历史添加事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED, {
-        type: SearchHistoryEventType.SEARCH_HISTORY_ADDED,
-        timestamp: Date.now(),
-        data: newItem
-      });
+      // 发布搜索历史添加事件 | Publish search history added event
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED);
       
       LoggerUtil.debug('SearchHistoryRepository', `Search history saved: "${trimmedQuery}" (type: ${type})`);
       
       return newItem;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to save search history', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to save search history: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 获取搜索历史记录
-   * @param type 可选的搜索类型过滤
-   * @param limit 可选的返回数量限制
+   * 获取搜索历史记录 | Get search history records
+   * @param type 可选的搜索类型过滤 | Optional search type filter
+   * @param limit 可选的返回数量限制 | Optional return count limit
    */
   public async getHistory(type?: SearchType, limit?: number): Promise<SearchHistoryItem[]> {
     try {
-      // 如果缓存为空，加载数据
+      // 如果缓存为空，加载数据 | If cache is empty, load data
       if (!this.cachedHistory) {
         await this.loadHistory();
       }
       
       let history = [...this.cachedHistory];
       
-      // 按类型过滤
+      // 按类型过滤 | Filter by type
       if (type && type !== SearchType.ALL) {
         history = history.filter(item => item.type === type);
       }
       
-      // 限制返回数量
+      // 限制返回数量 | Limit return count
       if (limit && limit > 0) {
         history = history.slice(0, limit);
       }
       
       return history;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to get search history', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to get search history: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 获取最近的搜索记录
-   * @param count 返回数量
+   * 获取最近的搜索记录 | Get recent search records
+   * @param count 返回数量 | Return count
    */
   public async getRecentSearches(count: number = 10): Promise<SearchHistoryItem[]> {
     try {
       return await this.getHistory(SearchType.ALL, Math.max(1, Math.min(count, 50)));
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', 'Failed to get recent searches', error as Error);
+      LoggerUtil.warn('SearchHistoryRepository', `Failed to get recent searches: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 删除搜索历史记录
-   * @param id 搜索记录ID
+   * 删除搜索历史记录 | Delete search history record
+   * @param id 搜索记录ID | Search record ID
    */
   public async deleteSearchHistory(id: string): Promise<boolean> {
     try {
-      // 加载历史记录
+      // 加载历史记录 | Load history records
       let history = await this.getHistory();
       
-      // 查找并删除记录
+      // 查找并删除记录 | Find and delete record
       const initialLength = history.length;
       history = history.filter(item => item.id !== id);
       
-      // 检查是否删除了记录
+      // 检查是否删除了记录 | Check if record was deleted
       if (history.length === initialLength) {
         LoggerUtil.debug('SearchHistoryRepository', `Search history item with ID ${id} not found`);
         return false;
       }
       
-      // 保存更新后的历史记录
+      // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
       await StorageUtil.setObject(
         this.storageKeys.searchHistory,
@@ -393,39 +389,33 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 发布搜索历史删除事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED, {
-        type: SearchHistoryEventType.SEARCH_HISTORY_DELETED,
-        timestamp: Date.now(),
-        data: {
-          id
-        }
-      });
+      // 发布搜索历史删除事件 | Publish search history deleted event
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED);
       
       LoggerUtil.debug('SearchHistoryRepository', `Search history item deleted: ${id}`);
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to delete search history item ${id}`, error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to delete search history item ${id}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 清除所有搜索历史
-   * @param type 可选的搜索类型过滤
+   * 清除所有搜索历史 | Clear all search history
+   * @param type 可选的搜索类型过滤 | Optional search type filter
    */
   public async clearSearchHistory(type?: SearchType): Promise<boolean> {
     try {
       let history: SearchHistoryItem[] = [];
       
-      // 如果指定了类型，只清除该类型的记录
+      // 如果指定了类型，只清除该类型的记录 | If type is specified, only clear records of that type
       if (type && type !== SearchType.ALL) {
         const allHistory = await this.getHistory();
         history = allHistory.filter(item => item.type !== type && item.isFavorite);
       }
       
-      // 保存更新后的历史记录
+      // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
       await StorageUtil.setObject(
         this.storageKeys.searchHistory, 
@@ -433,55 +423,51 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 清除最近搜索缓存
+      // 清除最近搜索缓存 | Clear recent searches cache
       await this.clearRecentSearches();
       
-      // 发布搜索历史清除事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED, {
-        type: SearchHistoryEventType.SEARCH_HISTORY_CLEARED,
-        timestamp: Date.now(),
-        data: { type: type || '' }
-      });
+      // 发布搜索历史清除事件 | Publish search history cleared event
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED);
       
       LoggerUtil.info('SearchHistoryRepository', `Search history cleared${type ? ` for type: ${type}` : ''}`);
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to clear search history', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to clear search history: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
 
   /**
-   * 清除最近搜索记录
+   * 清除最近搜索记录 | Clear recent search records
    */
   private async clearRecentSearches(): Promise<void> {
     try {
       await StorageUtil.remove(this.storageKeys.recentSearches, StorageType.PREFERENCES);
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', 'Failed to clear recent searches', error as Error);
+      LoggerUtil.warn('SearchHistoryRepository', `Failed to clear recent searches: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 切换搜索收藏状态
-   * @param id 搜索记录ID
+   * 切换搜索收藏状态 | Toggle search favorite status
+   * @param id 搜索记录ID | Search record ID
    */
   public async toggleFavorite(id: string): Promise<SearchHistoryItem | null> {
     try {
-      // 加载配置
+      // 加载配置 | Load configuration
       const config = await this.getConfig();
       
-      // 检查是否启用收藏功能
+      // 检查是否启用收藏功能 | Check if favorites feature is enabled
       if (!config.enableFavorites) {
         throw new Error('Favorites feature is disabled');
       }
       
-      // 加载历史记录和收藏
+      // 加载历史记录和收藏 | Load history records and favorites
       let history = await this.getHistory();
       let favorites = await this.getFavorites();
       
-      // 查找搜索记录
+      // 查找搜索记录 | Find search record
       const itemIndex = history.findIndex(item => item.id === id);
       if (itemIndex === -1) {
         throw new Error('Search history item not found');
@@ -491,12 +477,12 @@ export class SearchHistoryRepository {
       const isCurrentlyFavorite = item.isFavorite || false;
       
       if (isCurrentlyFavorite) {
-        // 取消收藏
+        // 取消收藏 | Remove from favorites
         item.isFavorite = false;
         favorites = favorites.filter(fav => fav.id !== id);
       } else {
-        // 添加收藏
-        // 检查收藏数量限制
+        // 添加收藏 | Add to favorites
+        // 检查收藏数量限制 | Check favorites count limit
         if (favorites.length >= config.maxFavoriteItems) {
           throw new Error(`Maximum number of favorite searches (${config.maxFavoriteItems}) reached`);
         }
@@ -505,10 +491,10 @@ export class SearchHistoryRepository {
         favorites.push(item);
       }
       
-      // 更新历史记录
+      // 更新历史记录 | Update history record
       history[itemIndex] = item;
       
-      // 保存更新后的数据
+      // 保存更新后的数据 | Save updated data
       this.cachedHistory = history;
       this.cachedFavorites = favorites;
       
@@ -524,51 +510,44 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 发布收藏状态变更事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED, {
-        type: SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED,
-        timestamp: Date.now(),
-        data: {
-          item,
-          isFavorite: item.isFavorite || false
-        }
-      });
+      // 发布收藏状态变更事件 | Publish favorite status changed event
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED);
       
       LoggerUtil.debug('SearchHistoryRepository', `Search favorite toggled: ${id}, favorite: ${item.isFavorite}`);
       
       return item;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to toggle favorite for search history item ${id}`, error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to toggle favorite for search history item ${id}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 获取收藏的搜索记录
+   * 获取收藏的搜索记录 | Get favorite search records
    */
   public async getFavorites(): Promise<SearchHistoryItem[]> {
     try {
-      // 如果缓存为空，加载数据
+      // 如果缓存为空，加载数据 | If cache is empty, load data
       if (!this.cachedFavorites) {
         await this.loadFavorites();
       }
       
       return Array.from(this.cachedFavorites);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to get favorite searches', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to get favorite searches: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 清除所有收藏
+   * 清除所有收藏 | Clear all favorites
    */
   public async clearFavorites(): Promise<boolean> {
     try {
-      // 加载历史记录
+      // 加载历史记录 | Load history records
       const history = await this.getHistory();
       
-      // 移除所有收藏标记
+      // 移除所有收藏标记 | Remove all favorite markers
       const updatedHistory = history.map(item => {
         const updatedItem: SearchHistoryItem = {
           id: item.id,
@@ -583,7 +562,7 @@ export class SearchHistoryRepository {
         return updatedItem;
       });
       
-      // 保存更新后的历史记录
+      // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = updatedHistory;
       this.cachedFavorites = [];
       
@@ -603,16 +582,16 @@ export class SearchHistoryRepository {
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to clear favorite searches', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to clear favorite searches: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
 
   /**
-   * 获取搜索建议（基于历史记录）
-   * @param query 搜索关键词前缀
-   * @param type 可选的搜索类型过滤
-   * @param limit 返回数量限制
+   * 获取搜索建议（基于历史记录） | Get search suggestions (based on history)
+   * @param query 搜索关键词前缀 | Search keyword prefix
+   * @param type 可选的搜索类型过滤 | Optional search type filter
+   * @param limit 返回数量限制 | Return count limit
    */
   public async getSuggestions(
     query: string, 
@@ -620,48 +599,48 @@ export class SearchHistoryRepository {
     limit: number = 10
   ): Promise<string[]> {
     try {
-      // 验证输入
+      // 验证输入 | Validate input
       if (!query || query.trim().length === 0) {
         return [];
       }
       
       const trimmedQuery = query.trim().toLowerCase();
       
-      // 加载配置
+      // 加载配置 | Load configuration
       const config = await this.getConfig();
       
-      // 检查是否启用自动完成
+      // 检查是否启用自动完成 | Check if auto complete is enabled
       if (!config.enableAutoComplete) {
         return [];
       }
       
-      // 获取历史记录
+      // 获取历史记录 | Get history records
       const history = await this.getHistory(type);
       
-      // 过滤匹配的搜索词
+      // 处理匹配的搜索词 | Process matching search terms
       const suggestions = history
         .filter(item => item.query.includes(trimmedQuery))
         .map(item => item.query)
-        .filter((suggestion, index, self) => self.indexOf(suggestion) === index) // 去重
-        .slice(0, Math.max(1, Math.min(limit, 50))); // 限制数量
+        .filter((suggestion, index, self) => self.indexOf(suggestion) === index) // 去重 | Remove duplicates
+        .slice(0, Math.max(1, Math.min(limit, 50))); // 限制数量 | Limit count
       
       return suggestions;
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', 'Failed to get search suggestions', error as Error);
+      LoggerUtil.warn('SearchHistoryRepository', `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * 设置搜索历史配置
-   * @param config 配置对象
+   * 设置搜索历史配置 | Set search history configuration
+   * @param config 配置对象 | Configuration object
    */
   public async setConfig(config: Partial<SearchHistoryConfig>): Promise<SearchHistoryConfig> {
     try {
-      // 获取当前配置
+      // 获取当前配置 | Get current configuration
       const currentConfig = await this.getConfig();
       
-      // 合并新配置
+      // 合并新配置 | Merge new configuration
       const updatedConfig: SearchHistoryConfig = {
         maxHistoryItems: config.maxHistoryItems ?? currentConfig.maxHistoryItems,
         maxFavoriteItems: config.maxFavoriteItems ?? currentConfig.maxFavoriteItems,
@@ -671,10 +650,10 @@ export class SearchHistoryRepository {
         enableFavorites: config.enableFavorites ?? currentConfig.enableFavorites
       };
       
-      // 验证配置
+      // 验证配置 | Validate configuration
       this.validateConfig(updatedConfig);
       
-      // 保存配置
+      // 保存配置 | Save configuration
       this.cachedConfig = updatedConfig;
       await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
@@ -682,36 +661,32 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 根据新配置清理数据
+      // 根据新配置清理数据 | Clean up data based on new configuration
       await this.applyConfigChanges(currentConfig, updatedConfig);
       
-      // 发布配置变更事件
-      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED, {
-        type: SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED,
-        timestamp: Date.now(),
-        data: updatedConfig
-      });
+      // 发布配置变更事件 | Publish configuration changed event
+      this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED);
       
       LoggerUtil.info('SearchHistoryRepository', 'Search history configuration updated');
       
       return updatedConfig;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to set search history config', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to set search history config: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 获取搜索历史配置
+   * 获取搜索历史配置 | Get search history configuration
    */
   public async getConfig(): Promise<SearchHistoryConfig> {
     try {
-      // 如果缓存为空，加载配置
+      // 如果缓存为空，加载配置 | If cache is empty, load configuration
       if (!this.cachedConfig) {
         await this.loadConfig();
       }
       
-      // 使用手动属性复制代替Object.assign
+      // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
       return {
         maxHistoryItems: this.cachedConfig!.maxHistoryItems,
         maxFavoriteItems: this.cachedConfig!.maxFavoriteItems,
@@ -721,8 +696,8 @@ export class SearchHistoryRepository {
         enableFavorites: this.cachedConfig!.enableFavorites
       };
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to get search history config', error as Error);
-      // 使用手动属性复制代替Object.assign
+      LoggerUtil.error('SearchHistoryRepository', `Failed to get search history config: ${error instanceof Error ? error.message : String(error)}`);
+      // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
       return {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
         maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
@@ -735,11 +710,11 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 重置搜索历史配置到默认值
+   * 重置搜索历史配置到默认值 | Reset search history configuration to default value
    */
   public async resetConfig(): Promise<SearchHistoryConfig> {
     try {
-      // 保存默认配置
+      // 保存默认配置 | Save default configuration
       this.cachedConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
         maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
@@ -765,13 +740,13 @@ export class SearchHistoryRepository {
         enableFavorites: this.defaultConfig.enableFavorites
       };
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to reset search history config', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to reset search history config: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 加载历史记录
+   * 加载历史记录 | Load history records
    */
   private async loadHistory(): Promise<void> {
     try {
@@ -783,13 +758,13 @@ export class SearchHistoryRepository {
       this.cachedHistory = historyResult || [];
       LoggerUtil.debug('SearchHistoryRepository', `Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to load search history', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
       this.cachedHistory = [];
     }
   }
 
   /**
-   * 加载收藏搜索
+   * 加载收藏搜索 | Load favorite searches
    */
   private async loadFavorites(): Promise<void> {
     try {
@@ -801,13 +776,13 @@ export class SearchHistoryRepository {
       this.cachedFavorites = favoritesResult || [];
       LoggerUtil.debug('SearchHistoryRepository', `Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to load favorite searches', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to load favorite searches: ${error instanceof Error ? error.message : String(error)}`);
       this.cachedFavorites = [];
     }
   }
 
   /**
-   * 加载配置
+   * 加载配置 | Load configuration
    */
   private async loadConfig(): Promise<void> {
     try {
@@ -816,7 +791,7 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      // 使用手动属性复制代替Object.assign
+      // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
       if (configResult) {
         this.cachedConfig = {
           maxHistoryItems: configResult.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
@@ -827,7 +802,7 @@ export class SearchHistoryRepository {
           enableFavorites: configResult.enableFavorites ?? this.defaultConfig.enableFavorites
         };
       } else {
-        // 使用手动属性复制代替Object.assign和扩展运算符
+        // 使用手动属性复制替代Object.assign和扩展运算符 | Use manual property copy instead of Object.assign and spread operator
         this.cachedConfig = {
           maxHistoryItems: this.defaultConfig.maxHistoryItems,
           maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
@@ -838,13 +813,13 @@ export class SearchHistoryRepository {
         };
       }
       
-      // 验证配置
+      // 验证配置 | Validate configuration
       this.validateConfig(this.cachedConfig);
       
       LoggerUtil.debug('SearchHistoryRepository', 'Search history configuration loaded');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to load search history config', error as Error);
-      // 使用手动属性复制代替扩展运算符
+      LoggerUtil.error('SearchHistoryRepository', `Failed to load search history config: ${error instanceof Error ? error.message : String(error)}`);
+      // 使用手动属性复制替代扩展运算符 | Use manual property copy instead of spread operator
       this.cachedConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
         maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
@@ -857,7 +832,7 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 保存所有数据
+   * 保存所有数据 | Save all data
    */
   private async saveData(): Promise<void> {
     try {
@@ -881,18 +856,18 @@ export class SearchHistoryRepository {
       
       LoggerUtil.debug('SearchHistoryRepository', 'Search history data saved');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to save search history data', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to save search history data: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 清理过期的历史记录
+   * 清理过期的历史记录 | Cleanup expired history records
    */
   private async cleanupExpiredHistory(): Promise<void> {
     try {
       const config = await this.getConfig();
       
-      // 检查是否启用自动清理
+      // 检查是否启用自动清理 | Check if auto cleanup is enabled
       if (!config.autoClearDays || config.autoClearDays <= 0) {
         return;
       }
@@ -900,12 +875,12 @@ export class SearchHistoryRepository {
       const expirationTime = Date.now() - (config.autoClearDays * 24 * 60 * 60 * 1000);
       const history = await this.getHistory();
       
-      // 过滤出未过期且不是收藏的记录
+      // 过滤出未过期且不是收藏的记录 | Filter out expired and non-favorite records
       const filteredHistory = history.filter(
         item => item.timestamp > expirationTime || item.isFavorite
       );
       
-      // 如果有变化，保存更新后的历史记录
+      // 如果有变化，保存更新后的历史记录 | If there are changes, save updated history records
       if (filteredHistory.length !== history.length) {
         this.cachedHistory = filteredHistory;
         await StorageUtil.setObject(
@@ -917,19 +892,19 @@ export class SearchHistoryRepository {
         LoggerUtil.info('SearchHistoryRepository', `Cleaned up ${history.length - filteredHistory.length} expired search history items`);
       }
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', 'Failed to cleanup expired search history', error as Error);
+      LoggerUtil.warn('SearchHistoryRepository', `Failed to cleanup expired search history: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 应用配置变更
+   * 应用配置变更 | Apply configuration changes
    */
   private async applyConfigChanges(
     oldConfig: SearchHistoryConfig,
     newConfig: SearchHistoryConfig
   ): Promise<void> {
     try {
-      // 检查历史记录数量限制是否改变
+      // 检查历史记录数量限制是否改变 | Check if history items count limit changed
       if (oldConfig.maxHistoryItems !== newConfig.maxHistoryItems) {
         const history = await this.getHistory();
         if (history.length > newConfig.maxHistoryItems) {
@@ -943,14 +918,14 @@ export class SearchHistoryRepository {
         }
       }
       
-      // 检查收藏数量限制是否改变
+      // 检查收藏数量限制是否改变 | Check if favorite items count limit changed
       if (oldConfig.maxFavoriteItems !== newConfig.maxFavoriteItems) {
         const favorites = await this.getFavorites();
         if (favorites.length > newConfig.maxFavoriteItems) {
           const filteredFavorites = favorites.slice(0, newConfig.maxFavoriteItems);
           this.cachedFavorites = filteredFavorites;
           
-          // 更新历史记录中的收藏状态
+          // 更新历史记录中的收藏状态 | Update favorite status in history records
           const history = await this.getHistory();
           const updatedHistory = history.map(item => {
             const updatedItem: SearchHistoryItem = {
@@ -980,12 +955,12 @@ export class SearchHistoryRepository {
         }
       }
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', 'Failed to apply config changes', error as Error);
+      LoggerUtil.warn('SearchHistoryRepository', `Failed to apply config changes: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 验证配置
+   * 验证配置 | Validate configuration
    */
   private validateConfig(config: SearchHistoryConfig): void {
     const errors: string[] = [];
@@ -1008,14 +983,14 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 生成唯一ID
+   * 生成唯一ID | Generate unique ID
    */
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * 导出搜索历史数据
+   * 导出搜索历史数据 | Export search history data
    */
   public async exportData(): Promise<SearchHistoryExportData> {
     try {
@@ -1030,32 +1005,32 @@ export class SearchHistoryRepository {
       
       return data;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to export search history data', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to export search history data: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 导入搜索历史数据
-   * @param data 导入的数据
-   * @param merge 是否合并（true）或覆盖（false）
+   * 导入搜索历史数据 | Import search history data
+   * @param data 导入的数据 | Data to import
+   * @param merge 是否合并（true）或覆盖（false） | Whether to merge (true) or overwrite (false)
    */
   public async importData(
     data: SearchHistoryImportData, 
     merge: boolean = true
   ): Promise<void> {
     try {
-      // 验证导入数据
+      // 验证导入数据 | Validate import data
       if (!data || (!data.history && !data.favorites && !data.config)) {
         throw new Error('No valid data to import');
       }
       
-      // 获取当前配置
+      // 获取当前配置 | Get current configuration
       const currentConfig = await this.getConfig();
       
-      // 处理配置导入
+      // 处理配置导入 | Process configuration import
       if (data.config) {
-        // 使用手动合并替代扩展运算符
+        // 使用手动合并替代扩展运算符 | Use manual merge instead of spread operator
         const baseConfig = merge ? currentConfig : this.defaultConfig;
         const mergedConfig: SearchHistoryConfig = {
           maxHistoryItems: data.config.maxHistoryItems ?? baseConfig.maxHistoryItems,
@@ -1076,7 +1051,7 @@ export class SearchHistoryRepository {
         );
       }
       
-      // 处理历史记录导入
+      // 处理历史记录导入 | Process history records import
       if (data.history && Array.isArray(data.history)) {
         const processedHistory = data.history
           .filter(item => this.isValidHistoryItem(item))
@@ -1085,22 +1060,22 @@ export class SearchHistoryRepository {
         let finalHistory: SearchHistoryItem[];
         
         if (merge) {
-          // 合并历史记录
+          // 合并历史记录 | Merge history records
           const currentHistory = await this.getHistory();
           const historyMap = new Map<string, SearchHistoryItem>();
           
-          // 添加现有记录
+          // 添加现有记录 | Add existing records
           currentHistory.forEach(item => {
             historyMap.set(`${item.query}-${item.type}`, item);
           });
           
-          // 合并新记录（新记录优先级更高）
+          // 合并新记录（新记录优先级高） | Merge new records (new records have higher priority)
           processedHistory.forEach(item => {
             const key = `${item.query}-${item.type}`;
             const existingItem = historyMap.get(key);
             
             if (existingItem) {
-              // 保留收藏状态
+              // 保留收藏状态 | Preserve favorite status
               item.isFavorite = existingItem.isFavorite;
             }
             
@@ -1110,12 +1085,12 @@ export class SearchHistoryRepository {
           finalHistory = Array.from(historyMap.values())
             .sort((a, b) => b.timestamp - a.timestamp);
         } else {
-          // 覆盖历史记录
+          // 覆盖历史记录 | Overwrite history records
           finalHistory = processedHistory
             .sort((a, b) => b.timestamp - a.timestamp);
         }
         
-        // 应用数量限制
+        // 应用数量限制 | Apply count limit
         if (finalHistory.length > currentConfig.maxHistoryItems) {
           finalHistory = finalHistory.slice(0, currentConfig.maxHistoryItems);
         }
@@ -1128,7 +1103,7 @@ export class SearchHistoryRepository {
         );
       }
       
-      // 处理收藏导入
+      // 处理收藏导入 | Process favorites import
       if (data.favorites && Array.isArray(data.favorites)) {
         const processedFavorites = data.favorites
           .filter(item => this.isValidHistoryItem(item))
@@ -1150,27 +1125,27 @@ export class SearchHistoryRepository {
         let finalFavorites: SearchHistoryItem[];
         
         if (merge) {
-          // 合并收藏
+          // 合并收藏 | Merge favorites
           const currentFavorites = await this.getFavorites();
           const favoriteMap = new Map<string, SearchHistoryItem>();
           
-          // 添加现有收藏
+          // 添加现有收藏 | Add existing favorites
           currentFavorites.forEach(item => {
             favoriteMap.set(`${item.query}-${item.type}`, item);
           });
           
-          // 合并新收藏
+          // 合并新收藏 | Merge new favorites
           processedFavorites.forEach(item => {
             favoriteMap.set(`${item.query}-${item.type}`, item);
           });
           
           finalFavorites = Array.from(favoriteMap.values());
         } else {
-          // 覆盖收藏
+          // 覆盖收藏 | Overwrite favorites
           finalFavorites = processedFavorites;
         }
         
-        // 应用数量限制
+        // 应用数量限制 | Apply count limit
         if (finalFavorites.length > currentConfig.maxFavoriteItems) {
           finalFavorites = finalFavorites.slice(0, currentConfig.maxFavoriteItems);
         }
@@ -1183,7 +1158,7 @@ export class SearchHistoryRepository {
         );
       }
       
-      // 更新历史记录中的收藏状态
+      // 更新历史记录中的收藏状态 | Update favorite status in history records
       if (data.favorites) {
         const history = await this.getHistory();
         const favorites = await this.getFavorites();
@@ -1204,20 +1179,20 @@ export class SearchHistoryRepository {
         this.cachedHistory = updatedHistory;
         await StorageUtil.setObject(
           this.storageKeys.searchHistory,
-        updatedHistory,
-        StorageType.PREFERENCES
+          updatedHistory,
+          StorageType.PREFERENCES
         );
       }
       
       LoggerUtil.info('SearchHistoryRepository', 'Search history data imported successfully');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', 'Failed to import search history data', error as Error);
+      LoggerUtil.error('SearchHistoryRepository', `Failed to import search history data: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
   /**
-   * 验证历史记录项
+   * 验证历史记录项目 | Validate history record item
    */
   private isValidHistoryItem(item: SearchHistoryItem): boolean {
     return !!item && 
@@ -1230,7 +1205,7 @@ export class SearchHistoryRepository {
   }
 
   /**
-   * 规范化历史记录项
+   * 规范化历史记录项目 | Normalize history record item
    */
   private normalizeHistoryItem(item: SearchHistoryItem): SearchHistoryItem {
     const normalizedType: SearchType = 
@@ -1249,3 +1224,7 @@ export class SearchHistoryRepository {
     };
   }
 }
+
+
+
+

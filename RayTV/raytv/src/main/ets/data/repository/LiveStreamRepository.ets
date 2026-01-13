@@ -1,4 +1,4 @@
-// LiveStreamRepository - 直播数据仓库�?// 负责管理直播流相关数据，包括直播列表、直播详情、关注、观看统计等
+﻿﻿// LiveStreamRepository - 鐩存挱鏁版嵁浠撳簱绫?// 璐熻矗绠＄悊鐩存挱娴佺浉鍏虫暟鎹紝鍖呮嫭鐩存挱鍒楄〃銆佺洿鎾鎯呫€佸叧娉ㄣ€佽鐪嬬粺璁＄瓑
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -16,7 +16,7 @@ import { CacheType } from '../model/CacheModel';
 import { UserRepository } from './UserRepository';
 
 /**
- * 直播状态枚�? */
+ * 鐩存挱鐘舵€佹灇涓? */
 export enum LiveStatus {
   OFFLINE = 'offline',
   LIVE = 'live',
@@ -27,7 +27,7 @@ export enum LiveStatus {
 }
 
 /**
- * 直播类型枚举
+ * 鐩存挱绫诲瀷鏋氫妇
  */
 export enum LiveStreamType {
   GAME = 'game',
@@ -40,7 +40,7 @@ export enum LiveStreamType {
 }
 
 /**
- * 直播流信息接�? */
+ * 鐩存挱娴佷俊鎭帴鍙? */
 export interface LiveStreamInfo extends VideoInfo {
   liveStatus: LiveStatus;
   streamType: LiveStreamType;
@@ -52,7 +52,7 @@ export interface LiveStreamInfo extends VideoInfo {
   startTime?: number;
   endTime?: number;
   scheduledStartTime?: number;
-  streamKey?: string; // 仅对主播可见
+  streamKey?: string; // 浠呭涓绘挱鍙
   chatEnabled: boolean;
   isFollowing?: boolean;
   broadcasterInfo: {
@@ -70,7 +70,7 @@ export interface LiveStreamInfo extends VideoInfo {
 }
 
 /**
- * 直播聊天消息
+ * 鐩存挱鑱婂ぉ娑堟伅
  */
 export interface LiveChat {
   id: string;
@@ -87,7 +87,7 @@ export interface LiveChat {
 }
 
 /**
- * 直播列表请求参数
+ * 鐩存挱鍒楄〃璇锋眰鍙傛暟
  */
 export interface LiveStreamListRequest {
   status?: LiveStatus;
@@ -102,7 +102,7 @@ export interface LiveStreamListRequest {
 }
 
 /**
- * 直播列表响应
+ * 鐩存挱鍒楄〃鍝嶅簲
  */
 export interface LiveStreamListResponse {
   streams: LiveStreamInfo[];
@@ -113,7 +113,7 @@ export interface LiveStreamListResponse {
 }
 
 /**
- * 直播统计信息
+ * 鐩存挱缁熻淇℃伅
  */
 export interface LiveStreamStatistics {
   currentViewerCount: number;
@@ -128,7 +128,7 @@ export interface LiveStreamStatistics {
 }
 
 /**
- * 直播公告
+ * 鐩存挱鍏憡
  */
 export interface LiveAnnouncement {
   id: string;
@@ -141,7 +141,7 @@ export interface LiveAnnouncement {
 }
 
 /**
- * 直播事件类型
+ * 鐩存挱浜嬩欢绫诲瀷
  */
 export const LiveStreamEventType = {
   LIVE_STREAM_LOADED: 'livestream:loaded',
@@ -157,7 +157,7 @@ export const LiveStreamEventType = {
 } as const;
 
 /**
- * 直播事件数据
+ * 鐩存挱浜嬩欢鏁版嵁
  */
 export interface LiveStreamEvent {
   streamId: string;
@@ -168,7 +168,7 @@ export interface LiveStreamEvent {
 }
 
 /**
- * 关注状态变更事件数�? */
+ * 鍏虫敞鐘舵€佸彉鏇翠簨浠舵暟鎹? */
 export interface FollowChangeEvent extends LiveStreamEvent {
   followed: boolean;
   userId: string;
@@ -176,14 +176,14 @@ export interface FollowChangeEvent extends LiveStreamEvent {
 }
 
 /**
- * 直播聊天事件数据
+ * 鐩存挱鑱婂ぉ浜嬩欢鏁版嵁
  */
 export interface ChatEvent extends LiveStreamEvent {
   chat: LiveChat;
 }
 
 /**
- * 直播数据仓库�? */
+ * 鐩存挱鏁版嵁浠撳簱绫? */
 export class LiveStreamRepository {
   private static instance: LiveStreamRepository;
   private logger = Logger.getInstance();
@@ -193,7 +193,7 @@ export class LiveStreamRepository {
   private cacheService = CacheService.getInstance();
   private userRepository = UserRepository.getInstance();
   
-  // API端点配置
+  // API绔偣閰嶇疆
   private apiEndpoints = {
     baseUrl: 'https://api.raytv.example.com',
     liveStreams: '/live/streams',
@@ -208,7 +208,7 @@ export class LiveStreamRepository {
     liveStreamAnnouncements: '/live/announcements'
   };
   
-  // 存储和缓存键配置
+  // 瀛樺偍鍜岀紦瀛橀敭閰嶇疆
   private storageKeys = {
     liveStreamCache: 'livestream:cache:',
     liveStreamListCache: 'livestream:list:',
@@ -219,21 +219,21 @@ export class LiveStreamRepository {
     watchedStreams: 'livestream:watched'
   };
   
-  // 直播配置
+  // 鐩存挱閰嶇疆
   private liveConfig = {
-    liveStreamDetailCacheDuration: 60, // 直播详情缓存时间（秒�? 较短以保持实时�?    liveStreamListCacheDuration: 30, // 直播列表缓存时间（秒�?    liveChatCacheDuration: 3600, // 直播聊天缓存时间（秒�?    maxFollowedBroadcasters: 500, // 最大关注主播数
-    viewerCountUpdateInterval: 5000, // 观看人数更新间隔（毫秒）
-    chatMessageBatchSize: 50, // 聊天消息批量获取数量
-    featuredStreamsCacheDuration: 300 // 精选直播缓存时间（秒）
+    liveStreamDetailCacheDuration: 60, // 鐩存挱璇︽儏缂撳瓨鏃堕棿锛堢锛? 杈冪煭浠ヤ繚鎸佸疄鏃舵€?    liveStreamListCacheDuration: 30, // 鐩存挱鍒楄〃缂撳瓨鏃堕棿锛堢锛?    liveChatCacheDuration: 3600, // 鐩存挱鑱婂ぉ缂撳瓨鏃堕棿锛堢锛?    maxFollowedBroadcasters: 500, // 鏈€澶у叧娉ㄤ富鎾暟
+    viewerCountUpdateInterval: 5000, // 瑙傜湅浜烘暟鏇存柊闂撮殧锛堟绉掞級
+    chatMessageBatchSize: 50, // 鑱婂ぉ娑堟伅鎵归噺鑾峰彇鏁伴噺
+    featuredStreamsCacheDuration: 300 // 绮鹃€夌洿鎾紦瀛樻椂闂达紙绉掞級
   };
   
-  // 当前活跃的直播观看会�?  private activeWatchSessions: Map<string, {
+  // 褰撳墠娲昏穬鐨勭洿鎾鐪嬩細璇?  private activeWatchSessions: Map<string, {
     startTime: number;
     lastHeartbeat: number;
   }> = new Map();
 
   /**
-   * 私有构造函�?   */
+   * 绉佹湁鏋勯€犲嚱鏁?   */
   private constructor() {
     this.logger.info('LiveStreamRepository initialized');
     this.setupEventListeners();
@@ -241,7 +241,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取LiveStreamRepository单例实例
+   * 鑾峰彇LiveStreamRepository鍗曚緥瀹炰緥
    */
   public static getInstance(): LiveStreamRepository {
     if (!LiveStreamRepository.instance) {
@@ -251,18 +251,18 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 初始化直播仓�?   */
+   * 鍒濆鍖栫洿鎾粨搴?   */
   public async initialize(): Promise<void> {
     try {
-      // 预加载精选直播（异步�?      this.loadFeaturedStreams().catch(err => {
+      // 棰勫姞杞界簿閫夌洿鎾紙寮傛锛?      this.loadFeaturedStreams().catch(err => {
         this.logger.warn('Failed to preload featured streams', err);
       });
       
-      // 预加载热门直播（异步�?      this.loadTrendingStreams().catch(err => {
+      // 棰勫姞杞界儹闂ㄧ洿鎾紙寮傛锛?      this.loadTrendingStreams().catch(err => {
         this.logger.warn('Failed to preload trending streams', err);
       });
       
-      // 启动心跳检�?      this.startHeartbeatCheck();
+      // 鍚姩蹇冭烦妫€娴?      this.startHeartbeatCheck();
       
       this.logger.info('LiveStreamRepository initialization completed');
     } catch (error) {
@@ -271,16 +271,16 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 设置事件监听�?   */
+   * 璁剧疆浜嬩欢鐩戝惉鍣?   */
   private setupEventListeners(): void {
-    // 监听应用退出事件，清理观看会话
+    // 鐩戝惉搴旂敤閫€鍑轰簨浠讹紝娓呯悊瑙傜湅浼氳瘽
     this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
       await this.cleanupWatchSessions();
     });
     
-    // 监听网络状态变�?    this.eventBus.on('network:statusChanged', async (status?: { isOnline: boolean }) => {
+    // 鐩戝惉缃戠粶鐘舵€佸彉鍖?    this.eventBus.on('network:statusChanged', async (status?: { isOnline: boolean }) => {
       if (status?.isOnline) {
-        // 在线时刷新精选和热门直播
+        // 鍦ㄧ嚎鏃跺埛鏂扮簿閫夊拰鐑棬鐩存挱
         this.loadFeaturedStreams().catch(err => {
           this.logger.warn('Failed to refresh featured streams after network recovery', err);
         });
@@ -290,53 +290,53 @@ export class LiveStreamRepository {
       }
     });
     
-    // 监听用户登录状态变�?    this.eventBus.on('user:login', async () => {
-      // 用户登录后加载关注的直播
+    // 鐩戝惉鐢ㄦ埛鐧诲綍鐘舵€佸彉鍖?    this.eventBus.on('user:login', async () => {
+      // 鐢ㄦ埛鐧诲綍鍚庡姞杞藉叧娉ㄧ殑鐩存挱
       this.loadFollowedStreams().catch(err => {
         this.logger.warn('Failed to load followed streams after login', err);
       });
     });
     
-    // 监听用户登出事件
+    // 鐩戝惉鐢ㄦ埛鐧诲嚭浜嬩欢
     this.eventBus.on('user:logout', async () => {
-      // 用户登出后清理关注的直播数据
+      // 鐢ㄦ埛鐧诲嚭鍚庢竻鐞嗗叧娉ㄧ殑鐩存挱鏁版嵁
       await this.clearFollowedStreams();
     });
   }
 
   /**
-   * 启动心跳检�?   */
+   * 鍚姩蹇冭烦妫€娴?   */
   private startHeartbeatCheck(): void {
-    // �?0秒检查一次观看会话的心跳
+    // 姣?0绉掓鏌ヤ竴娆¤鐪嬩細璇濈殑蹇冭烦
     setInterval(() => {
       this.checkHeartbeats();
     }, 30000);
   }
 
   /**
-   * 检查观看会话心�?   */
+   * 妫€鏌ヨ鐪嬩細璇濆績璺?   */
   private checkHeartbeats(): void {
     const now = Date.now();
-    const timeoutThreshold = 60000; // 60秒超�?    
+    const timeoutThreshold = 60000; // 60绉掕秴鏃?    
     for (const [streamId, session] of this.activeWatchSessions) {
       if (now - session.lastHeartbeat > timeoutThreshold) {
-        // 心跳超时，清理会�?        this.activeWatchSessions.delete(streamId);
+        // 蹇冭烦瓒呮椂锛屾竻鐞嗕細璇?        this.activeWatchSessions.delete(streamId);
         this.logger.debug(`Watch session timeout for stream: ${streamId}`);
       }
     }
   }
 
   /**
-   * 清理观看会话
+   * 娓呯悊瑙傜湅浼氳瘽
    */
   private async cleanupWatchSessions(): Promise<void> {
     try {
-      // 保存观看历史
+      // 淇濆瓨瑙傜湅鍘嗗彶
       for (const [streamId, session] of this.activeWatchSessions) {
         await this.saveWatchHistory(streamId, session.startTime, Date.now());
       }
       
-      // 清空活跃会话
+      // 娓呯┖娲昏穬浼氳瘽
       this.activeWatchSessions.clear();
       
       this.logger.info('Watch sessions cleaned up');
@@ -346,20 +346,20 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 保存观看历史
+   * 淇濆瓨瑙傜湅鍘嗗彶
    */
   private async saveWatchHistory(streamId: string, startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number))))))): Promise<void> {
     try {
       const watchDuration = endTime - startTime;
       
-      // 只保存观看时间超�?0秒的记录
+      // 鍙繚瀛樿鐪嬫椂闂磋秴杩?0绉掔殑璁板綍
       if (watchDuration < 30000) {
         return;
       }
       
       const watchHistory: Record<string, string | number | boolean | null> = { ... };
       
-      // 保存到本地存�?      await this.storageUtil.setItem(
+      // 淇濆瓨鍒版湰鍦板瓨鍌?      await this.storageUtil.setItem(
         LocalStorageType.WATCH_HISTORY,
         this.storageKeys.watchedStreams,
         watchHistory
@@ -372,13 +372,13 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取直播列表
+   * 鑾峰彇鐩存挱鍒楄〃
    */
   public async getLiveStreams(request: LiveStreamListRequest): Promise<LiveStreamListResponse> {
     try {
-      // 生成缓存�?      const cacheKey = this.generateListCacheKey(request);
+      // 鐢熸垚缂撳瓨閿?      const cacheKey = this.generateListCacheKey(request);
       
-      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamListResponse>(
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveStreamListResponse>(
         CacheType.LIVE_STREAM_LIST, cacheKey
        instanceof Error ? cacheKey
        : new Error(String(cacheKey
@@ -413,10 +413,10 @@ export class LiveStreamRepository {
         return cachedData.data;
       }
       
-      // 从API获取
+      // 浠嶢PI鑾峰彇
       const response = await this.fetchLiveStreamsFromAPI(request);
       
-      // 缓存结果
+      // 缂撳瓨缁撴灉
       await this.cacheService.set(
         CacheType.LIVE_STREAM_LIST,
         cacheKey,
@@ -424,7 +424,7 @@ export class LiveStreamRepository {
         this.liveConfig.liveStreamListCacheDuration
       );
       
-      // 发布事件
+      // 鍙戝竷浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_LIST_LOADED, {
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
         timestamp: Date.now(),
@@ -437,7 +437,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error('Failed to get live streams', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -501,7 +501,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 从API获取直播列表
+   * 浠嶢PI鑾峰彇鐩存挱鍒楄〃
    */
   private async fetchLiveStreamsFromAPI(request: LiveStreamListRequest): Promise<LiveStreamListResponse> {
     const params = new URLSearchParams();
@@ -528,7 +528,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 生成列表缓存�?   */
+   * 鐢熸垚鍒楄〃缂撳瓨閿?   */
   private generateListCacheKey(request: LiveStreamListRequest): string {
     const keyParts = [
       request.status || 'all',
@@ -546,19 +546,19 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 检查缓存是否过�?   */
+   * 妫€鏌ョ紦瀛樻槸鍚﹁繃鏈?   */
   private isCacheExpired(timestamp: number, duration: number): boolean {
     return Date.now() - timestamp > duration * 1000;
   }
 
   /**
-   * 获取直播详情
+   * 鑾峰彇鐩存挱璇︽儏
    */
   public async getLiveStreamDetail(streamId: string): Promise<LiveStreamInfo> {
     try {
-      // 生成缓存�?      const cacheKey = `${this.storageKeys.liveStreamCache}${streamId}`;
+      // 鐢熸垚缂撳瓨閿?      const cacheKey = `${this.storageKeys.liveStreamCache}${streamId}`;
       
-      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo>(
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveStreamInfo>(
         CacheType.LIVE_STREAM_DETAIL,
         cacheKey
       );
@@ -568,10 +568,10 @@ export class LiveStreamRepository {
         return cachedData.data;
       }
       
-      // 从API获取
+      // 浠嶢PI鑾峰彇
       const stream = await this.fetchLiveStreamDetailFromAPI(streamId);
       
-      // 缓存结果
+      // 缂撳瓨缁撴灉
       await this.cacheService.set(
         CacheType.LIVE_STREAM_DETAIL,
         cacheKey,
@@ -579,7 +579,7 @@ export class LiveStreamRepository {
         this.liveConfig.liveStreamDetailCacheDuration
       );
       
-      // 发布事件
+      // 鍙戝竷浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_LOADED, {
         type: LiveStreamEventType.LIVE_STREAM_LOADED,
         timestamp: Date.now(),
@@ -592,7 +592,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to get live stream detail: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -656,7 +656,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 从API获取直播详情
+   * 浠嶢PI鑾峰彇鐩存挱璇︽儏
    */
   private async fetchLiveStreamDetailFromAPI(streamId: string): Promise<LiveStreamInfo> {
     const url = `${this.apiEndpoints.baseUrl}${this.apiEndpoints.liveStreamDetail.replace(':id', streamId)}`;
@@ -671,7 +671,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 关注/取消关注直播
+   * 鍏虫敞/鍙栨秷鍏虫敞鐩存挱
    */
   public async followLiveStream(streamId: string, follow: boolean): Promise<void> {
     try {
@@ -688,9 +688,9 @@ export class LiveStreamRepository {
         throw new Error(`Failed to ${follow ? 'follow' : 'unfollow'} live stream: ${response.error}`);
       }
       
-      // 更新本地关注状�?      await this.updateLocalFollowStatus(streamId, follow, user.id);
+      // 鏇存柊鏈湴鍏虫敞鐘舵€?      await this.updateLocalFollowStatus(streamId, follow, user.id);
       
-      // 发布事件
+      // 鍙戝竷浜嬩欢
       this.eventBus.emit(follow ? LiveStreamEventType.LIVE_STREAM_FOLLOWED : LiveStreamEventType.LIVE_STREAM_UNFOLLOWED, {
         type: follow ? LiveStreamEventType.LIVE_STREAM_FOLLOWED : LiveStreamEventType.LIVE_STREAM_UNFOLLOWED,
         timestamp: Date.now(),
@@ -705,7 +705,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to ${follow ? 'follow' : 'unfollow'} live stream: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -769,25 +769,25 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 更新本地关注状�?   */
+   * 鏇存柊鏈湴鍏虫敞鐘舵€?   */
   private async updateLocalFollowStatus(streamId: string, follow: boolean, userId: string): Promise<void> {
     try {
-      // 获取当前关注的直播列�?      const followedStreams = await this.getFollowedStreams();
+      // 鑾峰彇褰撳墠鍏虫敞鐨勭洿鎾垪琛?      const followedStreams = await this.getFollowedStreams();
       
       if (follow) {
-        // 添加关注
+        // 娣诲姞鍏虫敞
         if (!followedStreams.includes(streamId)) {
           followedStreams.push(streamId);
         }
       } else {
-        // 取消关注
+        // 鍙栨秷鍏虫敞
         const index = followedStreams.indexOf(streamId);
         if (index > -1) {
           followedStreams.splice(index, 1);
         }
       }
       
-      // 保存到本地存�?      await this.storageUtil.setItem(
+      // 淇濆瓨鍒版湰鍦板瓨鍌?      await this.storageUtil.setItem(
         LocalStorageType.FOLLOWED_STREAMS,
         this.storageKeys.followedBroadcasters,
         followedStreams
@@ -801,7 +801,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取关注的直播列�?   */
+   * 鑾峰彇鍏虫敞鐨勭洿鎾垪琛?   */
   public async getFollowedStreams(): Promise<string[]> {
     try {
       const followedStreams = await this.storageUtil.getItem<string[]>(
@@ -842,12 +842,12 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 加载关注的直�?   */
+   * 鍔犺浇鍏虫敞鐨勭洿鎾?   */
   private async loadFollowedStreams(): Promise<void> {
     try {
       const followedStreams = await this.getFollowedStreams();
       
-      // 发布事件
+      // 鍙戝竷浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_LIST_LOADED, {
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
         timestamp: Date.now( instanceof Error ? {
@@ -913,7 +913,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 清理关注的直播数�?   */
+   * 娓呯悊鍏虫敞鐨勭洿鎾暟鎹?   */
   private async clearFollowedStreams(): Promise<void> {
     try {
       await this.storageUtil.removeItem(
@@ -953,12 +953,12 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 加载精选直�?   */
+   * 鍔犺浇绮鹃€夌洿鎾?   */
   private async loadFeaturedStreams(): Promise<void> {
     try {
       const cacheKey = this.storageKeys.featuredStreams;
       
-      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
         CacheType.FEATURED_STREAMS, cacheKey
        instanceof Error ? cacheKey
        : new Error(String(cacheKey
@@ -993,14 +993,14 @@ export class LiveStreamRepository {
         return;
       }
       
-      // 从API获取
+      // 浠嶢PI鑾峰彇
       const url = `${this.apiEndpoints.baseUrl}${this.apiEndpoints.featuredStreams}`;
       const response = await this.networkUtil.get(url);
       
       if (response.success) {
         const featuredStreams = response.data as LiveStreamInfo[];
         
-        // 缓存结果
+        // 缂撳瓨缁撴灉
         await this.cacheService.set(
           CacheType.FEATURED_STREAMS,
           cacheKey,
@@ -1008,7 +1008,7 @@ export class LiveStreamRepository {
           this.liveConfig.featuredStreamsCacheDuration
         );
         
-        // 发布事件
+        // 鍙戝竷浜嬩欢
         this.eventBus.emit(LiveStreamEventType.FEATURED_LIVE_STREAMS_UPDATED, {
           type: LiveStreamEventType.FEATURED_LIVE_STREAMS_UPDATED,
           timestamp: Date.now(),
@@ -1023,13 +1023,13 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 加载热门直播
+   * 鍔犺浇鐑棬鐩存挱
    */
   private async loadTrendingStreams(): Promise<void> {
     try {
       const cacheKey = this.storageKeys.trendingStreams;
       
-      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveStreamInfo[]>(
         CacheType.TRENDING_STREAMS,
         cacheKey
       );
@@ -1039,14 +1039,14 @@ export class LiveStreamRepository {
         return;
       }
       
-      // 从API获取
+      // 浠嶢PI鑾峰彇
       const url = `${this.apiEndpoints.baseUrl}${this.apiEndpoints.trendingStreams}`;
       const response = await this.networkUtil.get(url);
       
       if (response.success) {
         const trendingStreams = response.data as LiveStreamInfo[];
         
-        // 缓存结果
+        // 缂撳瓨缁撴灉
         await this.cacheService.set(
           CacheType.TRENDING_STREAMS,
           cacheKey,
@@ -1054,7 +1054,7 @@ export class LiveStreamRepository {
           this.liveConfig.featuredStreamsCacheDuration
         );
         
-        // 发布事件
+        // 鍙戝竷浜嬩欢
         this.eventBus.emit(LiveStreamEventType.FEATURED_LIVE_STREAMS_UPDATED, {
           type: LiveStreamEventType.FEATURED_LIVE_STREAMS_UPDATED,
           timestamp: Date.now(),
@@ -1069,15 +1069,15 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取直播聊天消息
+   * 鑾峰彇鐩存挱鑱婂ぉ娑堟伅
    */
   public async getLiveChat(streamId: string, limit?: number): Promise<LiveChat[]> {
     try {
       const actualLimit = limit || this.liveConfig.chatMessageBatchSize;
       
-      // 生成缓存�?      const cacheKey = `${this.storageKeys.liveStreamChatCache}${streamId}:${actualLimit}`;
+      // 鐢熸垚缂撳瓨閿?      const cacheKey = `${this.storageKeys.liveStreamChatCache}${streamId}:${actualLimit}`;
       
-      // 尝试从缓存获�?      const cachedData = await this.cacheService.get<LiveChat[]>(
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveChat[]>(
         CacheType.LIVE_CHAT,
         cacheKey
       );
@@ -1087,7 +1087,7 @@ export class LiveStreamRepository {
         return cachedData.data;
       }
       
-      // 从API获取
+      // 浠嶢PI鑾峰彇
       const url = `${this.apiEndpoints.baseUrl}${this.apiEndpoints.liveStreamChat.replace(':id', streamId)}?limit=${actualLimit}`;
       const response = await this.networkUtil.get(url);
       
@@ -1097,7 +1097,7 @@ export class LiveStreamRepository {
       
       const chatMessages = response.data as LiveChat[];
       
-      // 缓存结果
+      // 缂撳瓨缁撴灉
       await this.cacheService.set(
         CacheType.LIVE_CHAT,
         cacheKey,
@@ -1105,7 +1105,7 @@ export class LiveStreamRepository {
         this.liveConfig.liveChatCacheDuration
       );
       
-      // 发布事件
+      // 鍙戝竷浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_CHAT_RECEIVED, {
         type: LiveStreamEventType.LIVE_CHAT_RECEIVED,
         timestamp: Date.now(),
@@ -1118,7 +1118,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to get live chat: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1182,7 +1182,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 发送聊天消�?   */
+   * 鍙戦€佽亰澶╂秷鎭?   */
   public async sendChatMessage(streamId: string, message: string): Promise<void> {
     try {
       const user = this.userRepository.getCurrentUser();
@@ -1206,7 +1206,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to send chat message: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1270,7 +1270,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 开始观看直�?   */
+   * 寮€濮嬭鐪嬬洿鎾?   */
   public startWatching(streamId: string): void {
     const now = Date.now();
     this.activeWatchSessions.set(streamId, {
@@ -1282,7 +1282,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 更新观看心跳
+   * 鏇存柊瑙傜湅蹇冭烦
    */
   public updateHeartbeat(streamId: string): void {
     const session = this.activeWatchSessions.get(streamId);
@@ -1293,7 +1293,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 停止观看直播
+   * 鍋滄瑙傜湅鐩存挱
    */
   public async stopWatching(streamId: string): Promise<void> {
     const session = this.activeWatchSessions.get(streamId);
@@ -1305,7 +1305,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取直播统计信息
+   * 鑾峰彇鐩存挱缁熻淇℃伅
    */
   public async getLiveStreamStatistics(streamId: string): Promise<LiveStreamStatistics> {
     try {
@@ -1321,7 +1321,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to get live stream statistics: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1385,7 +1385,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取直播公告
+   * 鑾峰彇鐩存挱鍏憡
    */
   public async getLiveAnnouncements(streamId: string): Promise<LiveAnnouncement[]> {
     try {
@@ -1401,7 +1401,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to get live announcements: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1465,7 +1465,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 搜索直播
+   * 鎼滅储鐩存挱
    */
   public async searchLiveStreams(query: string, filters?: {
     type?: LiveStreamType;
@@ -1498,7 +1498,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to search live streams: "${query}"`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1562,12 +1562,12 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 检查直播状�?   */
+   * 妫€鏌ョ洿鎾姸鎬?   */
   public async checkLiveStreamStatus(streamId: string): Promise<LiveStatus> {
     try {
       const stream = await this.getLiveStreamDetail(streamId);
       
-      // 发布状态更新事�?      this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED, {
+      // 鍙戝竷鐘舵€佹洿鏂颁簨浠?      this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED, {
         type: LiveStreamEventType.LIVE_STREAM_STATUS_CHANGED,
         timestamp: Date.now(),
         data: { streamId, status: stream.liveStatus }
@@ -1577,7 +1577,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error(`Failed to check live stream status: ${streamId}`, error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1641,7 +1641,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取直播分类
+   * 鑾峰彇鐩存挱鍒嗙被
    */
   public async getLiveStreamCategories(): Promise<{ id: string; name: string; count: number }[]> {
     try {
@@ -1657,7 +1657,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error('Failed to get live stream categories', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1721,18 +1721,18 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 获取推荐的直�?   */
+   * 鑾峰彇鎺ㄨ崘鐨勭洿鎾?   */
   public async getRecommendedLiveStreams(limit: number = 10): Promise<LiveStreamInfo[]> {
     try {
-      // 基于用户观看历史和关注的主播推荐
+      // 鍩轰簬鐢ㄦ埛瑙傜湅鍘嗗彶鍜屽叧娉ㄧ殑涓绘挱鎺ㄨ崘
       const user = this.userRepository.getCurrentUser();
       if (!user) {
         return [];
       }
       
-      // 获取用户关注的直�?      const followedStreams = await this.getFollowedStreams();
+      // 鑾峰彇鐢ㄦ埛鍏虫敞鐨勭洿鎾?      const followedStreams = await this.getFollowedStreams();
       
-      // 获取热门直播作为备�?      const trendingRequest: LiveStreamListRequest = {
+      // 鑾峰彇鐑棬鐩存挱浣滀负澶囬€?      const trendingRequest: LiveStreamListRequest = {
         page: 1,
         pageSize: limit * 2,
         sortBy: 'trending'
@@ -1740,7 +1740,7 @@ export class LiveStreamRepository {
       
       const trendingResponse = await this.getLiveStreams(trendingRequest);
       
-      // 优先推荐关注的直�?      const recommended: LiveStreamInfo[] = [];
+      // 浼樺厛鎺ㄨ崘鍏虫敞鐨勭洿鎾?      const recommended: LiveStreamInfo[] = [];
       
       for (const streamId of followedStreams) {
         if (recommended.length >= limit) break;
@@ -1751,11 +1751,11 @@ export class LiveStreamRepository {
             recommended.push(stream);
           }
         } catch (error) {
-          // 忽略获取失败的直�?          this.logger.warn(`Failed to get recommended stream detail: ${streamId}`, error as Error);
+          // 蹇界暐鑾峰彇澶辫触鐨勭洿鎾?          this.logger.warn(`Failed to get recommended stream detail: ${streamId}`, error as Error);
         }
       }
       
-      // 如果关注的不够，补充热门直播
+      // 濡傛灉鍏虫敞鐨勪笉澶燂紝琛ュ厖鐑棬鐩存挱
       if (recommended.length < limit) {
         const remaining = limit - recommended.length;
         const trendingStreams = trendingResponse.streams.slice(0, remaining);
@@ -1768,7 +1768,7 @@ export class LiveStreamRepository {
     } catch (error) {
       this.Logger.error('Failed to get recommended live streams', error as Error);
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now( instanceof Error ? {
@@ -1832,7 +1832,7 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 清理过期缓存
+   * 娓呯悊杩囨湡缂撳瓨
    */
   public async cleanupExpiredCache(): Promise<void> {
     try {
@@ -1844,22 +1844,22 @@ export class LiveStreamRepository {
   }
 
   /**
-   * 关闭直播仓库
+   * 鍏抽棴鐩存挱浠撳簱
    */
   public async shutdown(): Promise<void> {
     try {
-      // 清理观看会话
+      // 娓呯悊瑙傜湅浼氳瘽
       await this.cleanupWatchSessions();
       
-      // 清理缓存
+      // 娓呯悊缂撳瓨
       await this.cleanupExpiredCache();
       
-      // 停止心跳检�?      // 注意：在ArkTS中，setInterval返回的timer需要手动清�?      // 这里需要根据实际实现来清理定时�?      
+      // 鍋滄蹇冭烦妫€娴?      // 娉ㄦ剰锛氬湪ArkTS涓紝setInterval杩斿洖鐨則imer闇€瑕佹墜鍔ㄦ竻鐞?      // 杩欓噷闇€瑕佹牴鎹疄闄呭疄鐜版潵娓呯悊瀹氭椂鍣?      
       this.logger.info('LiveStreamRepository shutdown');
     } catch (error) {
       this.logger.error('Failed to shutdown LiveStreamRepository', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
       
-      // 发布错误事件
+      // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
         timestamp: Date.now(),
@@ -1870,6 +1870,9 @@ export class LiveStreamRepository {
     }
   }
 }
+
+
+
 
 
 

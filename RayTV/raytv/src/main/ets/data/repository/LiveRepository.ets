@@ -1,5 +1,5 @@
-// LiveRepository.ets - 直播内容数据仓库
-// 负责直播内容的缓存、管理和播放历史记录
+﻿// LiveRepository.ets - 鐩存挱鍐呭鏁版嵁浠撳簱
+// 璐熻矗鐩存挱鍐呭鐨勭紦瀛樸€佺鐞嗗拰鎾斁鍘嗗彶璁板綍
 
 import { SQLiteHelper, QueryCondition, SortOption } from '../db/SQLiteHelper';
 import { LIVE_CHANNEL_TABLE, LIVE_GROUP_TABLE } from '../db/TableSchema';
@@ -14,17 +14,18 @@ import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'LiveRepository';
 
-// 缓存过期时间（毫秒）
-const CHANNEL_CACHE_EXPIRY = 7200000; // 2小时
-const EPG_CACHE_EXPIRY = 3600000; // 1小时
+// 缂撳瓨杩囨湡鏃堕棿锛堟绉掞級
+const CHANNEL_CACHE_EXPIRY = 7200000; // 2灏忔椂
+const EPG_CACHE_EXPIRY = 3600000; // 1灏忔椂
 
-// 批量操作的批次大�?const BATCH_SIZE = 200;
+// 鎵归噺鎿嶄綔鐨勬壒娆″ぇ灏?
+const BATCH_SIZE = 200;
 
 export class LiveRepository {
   private static instance: LiveRepository;
   private storageUtil: StorageUtil;
   
-  // 内存缓存
+  // 鍐呭瓨缂撳瓨
   private channelCache: Map<string, Map<string, LiveChannel>> = new Map(); // siteId -> channelId -> LiveChannel
   private groupCache: Map<string, LiveGroup[]> = new Map(); // siteId -> LiveGroup[]
   private epgCache: Map<string, Map<string, EpgItem[]>> = new Map(); // siteId -> channelId -> EpgItem[]
@@ -34,7 +35,7 @@ export class LiveRepository {
   }
   
   /**
-   * 获取直播仓库单例实例
+   * 鑾峰彇鐩存挱浠撳簱鍗曚緥瀹炰緥
    */
   public static getInstance(): LiveRepository {
     if (!LiveRepository.instance) {
@@ -44,11 +45,12 @@ export class LiveRepository {
   }
   
   /**
-   * 初始化直播仓�?   */
+   * 鍒濆鍖栫洿鎾粨搴?
+   */
   public async init(): Promise<void> {
     try {
       Logger.info(TAG, 'Initializing LiveRepository', {});
-      // 简化实现，仅记录日志
+      // 绠€鍖栧疄鐜帮紝浠呰褰曟棩蹇?
     } catch (error) {
       Logger.error(TAG, 'Failed to initialize LiveRepository', error instanceof Error ? error : new Error(String(error)));
       throw error;
@@ -56,16 +58,16 @@ export class LiveRepository {
   }
   
   /**
-   * 保存直播频道数据
-   * @param siteId 站点ID
-   * @param channels 频道列表
-   * @returns 是否保存成功
+   * 淇濆瓨鐩存挱棰戦亾鏁版嵁
+   * @param siteId 绔欑偣ID
+   * @param channels 棰戦亾鍒楄〃
+   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async saveChannels(siteId: string, channels: LiveChannel[]): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving ${channels.length} channels for site ${siteId}`, {});
       
-      // 简化实现，仅更新内存缓存
+      // 绠€鍖栧疄鐜帮紝浠呮洿鏂板唴瀛樼紦瀛?
       if (!this.channelCache.has(siteId)) {
         this.channelCache.set(siteId, new Map());
       }
@@ -83,13 +85,13 @@ export class LiveRepository {
   }
   
   /**
-   * 获取直播频道列表
-   * @param siteId 站点ID
-   * @returns 频道列表
+   * 鑾峰彇鐩存挱棰戦亾鍒楄〃
+   * @param siteId 绔欑偣ID
+   * @returns 棰戦亾鍒楄〃
    */
   public async getChannels(siteId: string): Promise<LiveChannel[]> {
     try {
-      // 从真实API获取频道数据
+      // 浠庣湡瀹濧PI鑾峰彇棰戦亾鏁版嵁
       const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
@@ -99,7 +101,7 @@ export class LiveRepository {
       );
       
       if (response.status === 200 && Array.isArray(response.data)) {
-        // 更新内存缓存
+        // 鏇存柊鍐呭瓨缂撳瓨
         if (!this.channelCache.has(siteId)) {
           this.channelCache.set(siteId, new Map());
         }
@@ -111,7 +113,7 @@ export class LiveRepository {
         
         return response.data;
       } else {
-        // 如果API调用失败，从内存缓存获取
+        // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
         if (this.channelCache.has(siteId)) {
           return Array.from(this.channelCache.get(siteId)!.values());
         }
@@ -119,7 +121,7 @@ export class LiveRepository {
       }
     } catch (error) {
       Logger.error(TAG, 'Failed to get channels', error instanceof Error ? error : new Error(String(error)));
-      // 如果API调用失败，从内存缓存获取
+      // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
       if (this.channelCache.has(siteId)) {
         return Array.from(this.channelCache.get(siteId)!.values());
       }
@@ -128,14 +130,15 @@ export class LiveRepository {
   }
   
   /**
-   * 根据ID获取直播频道
-   * @param siteId 站点ID
-   * @param channelId 频道ID
-   * @returns 直播频道或null
+   * 鏍规嵁ID鑾峰彇鐩存挱棰戦亾
+   * @param siteId 绔欑偣ID
+   * @param channelId 棰戦亾ID
+   * @returns 鐩存挱棰戦亾鎴杗ull
    */
   public async getChannelById(siteId: string, channelId: string): Promise<LiveChannel | null> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
+      // 浠庡唴瀛樼紦瀛樿幏鍙?
+      if (this.channelCache.has(siteId)) {
         return this.channelCache.get(siteId)!.get(channelId) || null;
       }
       return null;
@@ -146,13 +149,14 @@ export class LiveRepository {
   }
   
   /**
-   * 搜索直播频道
-   * @param keyword 搜索关键�?   * @param siteId 站点ID（可选）
-   * @returns 搜索结果
+   * 鎼滅储鐩存挱棰戦亾
+   * @param keyword 鎼滅储鍏抽敭璇?
+   * @param siteId 绔欑偣ID锛堝彲閫夛級
+   * @returns 鎼滅储缁撴灉
    */
   public async searchChannels(keyword: string, siteId?: string): Promise<LiveChannel[]> {
     try {
-      // 从真实API获取搜索结果
+      // 浠庣湡瀹濧PI鑾峰彇鎼滅储缁撴灉
       const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
@@ -169,7 +173,7 @@ export class LiveRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        // 如果API调用失败，从内存缓存搜索
+        // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鎼滅储
         const results: LiveChannel[] = [];
         
         const siteIds = siteId ? [siteId] : Array.from(this.channelCache.keys());
@@ -188,7 +192,7 @@ export class LiveRepository {
       }
     } catch (error) {
       Logger.error(TAG, 'Failed to search channels', error instanceof Error ? error : new Error(String(error)));
-      // 如果API调用失败，从内存缓存搜索
+      // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鎼滅储
       const results: LiveChannel[] = [];
       
       const siteIds = siteId ? [siteId] : Array.from(this.channelCache.keys());
@@ -208,17 +212,17 @@ export class LiveRepository {
   }
   
   /**
-   * 保存EPG数据
-   * @param siteId 站点ID
-   * @param channelId 频道ID
-   * @param epgItems EPG节目列表
-   * @returns 是否保存成功
+   * 淇濆瓨EPG鏁版嵁
+   * @param siteId 绔欑偣ID
+   * @param channelId 棰戦亾ID
+   * @param epgItems EPG鑺傜洰鍒楄〃
+   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async saveEpgData(siteId: string, channelId: string, epgItems: EpgItem[]): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving ${epgItems.length} EPG items for channel ${channelId}`, {});
       
-      // 简化实现，仅更新内存缓存
+      // 绠€鍖栧疄鐜帮紝浠呮洿鏂板唴瀛樼紦瀛?
       if (!this.epgCache.has(siteId)) {
         this.epgCache.set(siteId, new Map());
       }
@@ -232,14 +236,14 @@ export class LiveRepository {
   }
   
   /**
-   * 获取EPG数据
-   * @param siteId 站点ID
-   * @param channelId 频道ID
-   * @returns EPG节目列表
+   * 鑾峰彇EPG鏁版嵁
+   * @param siteId 绔欑偣ID
+   * @param channelId 棰戦亾ID
+   * @returns EPG鑺傜洰鍒楄〃
    */
   public async getEpgData(siteId: string, channelId: string): Promise<EpgItem[]> {
     try {
-      // 从真实API获取EPG数据
+      // 浠庣湡瀹濧PI鑾峰彇EPG鏁版嵁
       const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
@@ -249,7 +253,7 @@ export class LiveRepository {
       );
       
       if (response.status === 200 && Array.isArray(response.data)) {
-        // 更新内存缓存
+        // 鏇存柊鍐呭瓨缂撳瓨
         if (!this.epgCache.has(siteId)) {
           this.epgCache.set(siteId, new Map());
         }
@@ -257,7 +261,7 @@ export class LiveRepository {
         
         return response.data;
       } else {
-        // 如果API调用失败，从内存缓存获取
+        // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
         if (this.epgCache.has(siteId)) {
           return this.epgCache.get(siteId)!.get(channelId) || [];
         }
@@ -265,7 +269,7 @@ export class LiveRepository {
       }
     } catch (error) {
       Logger.error(TAG, 'Failed to get EPG data', error instanceof Error ? error : new Error(String(error)));
-      // 如果API调用失败，从内存缓存获取
+      // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
       if (this.epgCache.has(siteId)) {
         return this.epgCache.get(siteId)!.get(channelId) || [];
       }
@@ -274,16 +278,16 @@ export class LiveRepository {
   }
   
   /**
-   * 保存直播分组
-   * @param siteId 站点ID
-   * @param groups 分组列表
-   * @returns 是否保存成功
+   * 淇濆瓨鐩存挱鍒嗙粍
+   * @param siteId 绔欑偣ID
+   * @param groups 鍒嗙粍鍒楄〃
+   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async saveGroups(siteId: string, groups: LiveGroup[]): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving ${groups.length} groups for site ${siteId}`, {});
       
-      // 简化实现，仅更新内存缓存
+      // 绠€鍖栧疄鐜帮紝浠呮洿鏂板唴瀛樼紦瀛?
       this.groupCache.set(siteId, groups);
       
       return true;
@@ -294,13 +298,13 @@ export class LiveRepository {
   }
   
   /**
-   * 获取直播分组列表
-   * @param siteId 站点ID
-   * @returns 分组列表
+   * 鑾峰彇鐩存挱鍒嗙粍鍒楄〃
+   * @param siteId 绔欑偣ID
+   * @returns 鍒嗙粍鍒楄〃
    */
   public async getGroups(siteId: string): Promise<LiveGroup[]> {
     try {
-      // 从真实API获取分组数据
+      // 浠庣湡瀹濧PI鑾峰彇鍒嗙粍鏁版嵁
       const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
@@ -310,29 +314,30 @@ export class LiveRepository {
       );
       
       if (response.status === 200 && Array.isArray(response.data)) {
-        // 更新内存缓存
+        // 鏇存柊鍐呭瓨缂撳瓨
         this.groupCache.set(siteId, response.data);
         return response.data;
       } else {
-        // 如果API调用失败，从内存缓存获取
+        // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
         return this.groupCache.get(siteId) || [];
       }
     } catch (error) {
       Logger.error(TAG, 'Failed to get groups', error instanceof Error ? error : new Error(String(error)));
-      // 如果API调用失败，从内存缓存获取
+      // 濡傛灉API璋冪敤澶辫触锛屼粠鍐呭瓨缂撳瓨鑾峰彇
       return this.groupCache.get(siteId) || [];
     }
   }
   
   /**
-   * 根据ID获取直播分组
-   * @param siteId 站点ID
-   * @param groupId 分组ID
-   * @returns 分组或null
+   * 鏍规嵁ID鑾峰彇鐩存挱鍒嗙粍
+   * @param siteId 绔欑偣ID
+   * @param groupId 鍒嗙粍ID
+   * @returns 鍒嗙粍鎴杗ull
    */
   public async getGroupById(siteId: string, groupId: string): Promise<LiveGroup | null> {
     try {
-      // 从内存缓存获�?      const groups = this.groupCache.get(siteId);
+      // 浠庡唴瀛樼紦瀛樿幏鍙?
+      const groups = this.groupCache.get(siteId);
       if (groups) {
         return groups.find(group => group.id === groupId) || null;
       }
@@ -344,13 +349,15 @@ export class LiveRepository {
   }
   
   /**
-   * 保存频道到收�?   * @param siteId 站点ID
-   * @param channelId 频道ID
-   * @returns 是否保存成功
+   * 淇濆瓨棰戦亾鍒版敹钘?
+   * @param siteId 绔欑偣ID
+   * @param channelId 棰戦亾ID
+   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async addChannelToFavorites(siteId: string, channelId: string): Promise<boolean> {
     try {
-      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
+      // 绠€鍖栧疄鐜帮紝浠呮洿鏂板唴瀛樼紦瀛?
+      if (this.channelCache.has(siteId)) {
         const channel = this.channelCache.get(siteId)!.get(channelId);
         if (channel) {
           channel.isFavorite = true;
@@ -365,14 +372,15 @@ export class LiveRepository {
   }
   
   /**
-   * 从收藏中移除频道
-   * @param siteId 站点ID
-   * @param channelId 频道ID
-   * @returns 是否移除成功
+   * 浠庢敹钘忎腑绉婚櫎棰戦亾
+   * @param siteId 绔欑偣ID
+   * @param channelId 棰戦亾ID
+   * @returns 鏄惁绉婚櫎鎴愬姛
    */
   public async removeChannelFromFavorites(siteId: string, channelId: string): Promise<boolean> {
     try {
-      // 简化实现，仅更新内存缓�?      if (this.channelCache.has(siteId)) {
+      // 绠€鍖栧疄鐜帮紝浠呮洿鏂板唴瀛樼紦瀛?
+      if (this.channelCache.has(siteId)) {
         const channel = this.channelCache.get(siteId)!.get(channelId);
         if (channel) {
           channel.isFavorite = false;
@@ -387,11 +395,14 @@ export class LiveRepository {
   }
   
   /**
-   * 获取收藏的频道列�?   * @param siteId 站点ID
-   * @returns 收藏的频道列�?   */
+   * 鑾峰彇鏀惰棌鐨勯閬撳垪琛?
+   * @param siteId 绔欑偣ID
+   * @returns 鏀惰棌鐨勯閬撳垪琛?
+   */
   public async getFavoriteChannels(siteId: string): Promise<LiveChannel[]> {
     try {
-      // 从内存缓存获�?      if (this.channelCache.has(siteId)) {
+      // 浠庡唴瀛樼紦瀛樿幏鍙?
+      if (this.channelCache.has(siteId)) {
         return Array.from(this.channelCache.get(siteId)!.values())
           .filter(channel => channel.isFavorite);
       }
@@ -403,14 +414,15 @@ export class LiveRepository {
   }
   
   /**
-   * 清除指定站点的所有数�?   * @param siteId 站点ID
-   * @returns 是否清除成功
+   * 娓呴櫎鎸囧畾绔欑偣鐨勬墍鏈夋暟鎹?
+   * @param siteId 绔欑偣ID
+   * @returns 鏄惁娓呴櫎鎴愬姛
    */
   public async clearSiteData(siteId: string): Promise<boolean> {
     try {
       Logger.info(TAG, `Clearing all data for site ${siteId}`, {});
       
-      // 清空内存缓存
+      // 娓呯┖鍐呭瓨缂撳瓨
       this.channelCache.delete(siteId);
       this.groupCache.delete(siteId);
       this.epgCache.delete(siteId);
@@ -423,13 +435,14 @@ export class LiveRepository {
   }
   
   /**
-   * 清除所有数�?   * @returns 是否清除成功
+   * 娓呴櫎鎵€鏈夋暟鎹?
+   * @returns 鏄惁娓呴櫎鎴愬姛
    */
   public async clearAllData(): Promise<boolean> {
     try {
       Logger.info(TAG, 'Clearing all live data', {});
       
-      // 清空所有内存缓存
+      // 娓呯┖鎵€鏈夊唴瀛樼紦瀛?
       this.channelCache.clear();
       this.groupCache.clear();
       this.epgCache.clear();
@@ -442,7 +455,7 @@ export class LiveRepository {
   }
   
   /**
-   * 获取缓存统计信息
+   * 鑾峰彇缂撳瓨缁熻淇℃伅
    */
   public getCacheStats(): {
     totalChannels: number;
@@ -453,7 +466,7 @@ export class LiveRepository {
     let totalGroups = 0;
     let totalEpgEntries = 0;
     
-    // 统计内存缓存
+    // 缁熻鍐呭瓨缂撳瓨
     for (const channelMap of this.channelCache.values()) {
       totalChannels += channelMap.size;
     }
@@ -475,3 +488,6 @@ export class LiveRepository {
     };
   }
 }
+
+
+

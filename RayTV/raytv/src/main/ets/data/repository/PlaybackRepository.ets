@@ -1,13 +1,13 @@
-// 播放仓库�?- 管理播放相关的数据操�?import Logger from '../utils/Logger';
-import StorageUtil from '../utils/StorageUtil';
-import NetworkUtil from '../utils/NetworkUtil';
-import EventBusUtil from '../utils/EventBusUtil';
-import CacheService from '../service/CacheService';
+﻿// 鎾斁浠撳簱- 绠＄悊鎾斁鐩稿叧鐨勬暟鎹搷浣?import Logger from '../../common/util/Logger';
+import StorageUtil from '../../common/util/StorageUtil';
+import NetworkUtil from '../../common/util/NetworkUtil';
+import EventBusUtil from '../../common/util/EventBusUtil';
+import CacheService from '../../service/CacheService';
 import UserRepository from './UserRepository';
 import VideoRepository from './VideoRepository';
-import { LocalStorageType, CacheType } from '../model/commonTypes';
+import { LocalStorageType, CacheType } from '../../types/commonTypes';
 
-// 播放状态枚�?export enum PlaybackState {
+// 鎾斁鐘舵€佹灇涓?export enum PlaybackState {
   IDLE = 'idle',
   LOADING = 'loading',
   PLAYING = 'playing',
@@ -17,7 +17,7 @@ import { LocalStorageType, CacheType } from '../model/commonTypes';
   ERROR = 'error'
 }
 
-// 视频质量枚举
+// 瑙嗛璐ㄩ噺鏋氫妇
 export enum VideoQuality {
   LOW = 'low',
   MEDIUM = 'medium',
@@ -27,7 +27,7 @@ export enum VideoQuality {
   UHD = 'uhd'
 }
 
-// 播放速度枚举
+// 鎾斁閫熷害鏋氫妇
 export enum PlaybackSpeed {
   QUARTER = 0.25,
   HALF = 0.5,
@@ -37,14 +37,14 @@ export enum PlaybackSpeed {
   DOUBLE = 2.0
 }
 
-// 播放模式枚举
+// 鎾斁妯″紡鏋氫妇
 export enum PlaybackMode {
   DEFAULT = 'default',
   LOOP = 'loop',
   SHUFFLE = 'shuffle'
 }
 
-// 音频轨道接口
+// 闊抽杞ㄩ亾鎺ュ彛
 export interface AudioTrack {
   id: string;
   language: string;
@@ -52,7 +52,7 @@ export interface AudioTrack {
   isDefault: boolean;
 }
 
-// 字幕轨道接口
+// 瀛楀箷杞ㄩ亾鎺ュ彛
 export interface SubtitleTrack {
   id: string;
   language: string;
@@ -60,14 +60,14 @@ export interface SubtitleTrack {
   isDefault: boolean;
 }
 
-// 播放事件接口
+// 鎾斁浜嬩欢鎺ュ彛
 export interface PlaybackEvent {
   type: string;
   timestamp: number;
   data?: Record<string, unknown>;
 }
 
-// 播放历史项接�?export interface PlaybackHistoryItem {
+// 鎾斁鍘嗗彶椤规帴鍙?export interface PlaybackHistoryItem {
   contentId: string;
   contentType: 'video' | 'live';
   title: string;
@@ -75,12 +75,12 @@ export interface PlaybackEvent {
   channelId?: string;
   channelName?: string;
   duration: number;
-  position: number; // 最后观看位�?  lastPlayedAt: number;
+  position: number; // 鏈€鍚庤鐪嬩綅缃?  lastPlayedAt: number;
   playCount: number;
   isCompleted: boolean;
 }
 
-// 播放设置接口
+// 鎾斁璁剧疆鎺ュ彛
 export interface PlaybackSettings {
   defaultQuality: VideoQuality;
   defaultSpeed: PlaybackSpeed;
@@ -101,7 +101,7 @@ export interface PlaybackSettings {
   lastUpdated: number;
 }
 
-// 播放统计接口
+// 鎾斁缁熻鎺ュ彛
 export interface PlaybackStats {
   totalWatchTime: number;
   totalPlayCount: number;
@@ -115,7 +115,7 @@ export interface PlaybackStats {
   lastUpdated: number;
 }
 
-// 当前播放状态接�?export interface CurrentPlaybackState {
+// 褰撳墠鎾斁鐘舵€佹帴鍙?export interface CurrentPlaybackState {
   contentId?: string;
   contentTitle?: string;
   contentType?: 'video' | 'live';
@@ -130,9 +130,9 @@ export interface PlaybackStats {
   bufferPercent: number;
   isMuted: boolean;
   volume: number;
-  currentTime: number; // 状态记录时�?}
+  currentTime: number; // 鐘舵€佽褰曟椂闂?}
 
-// 播放队列项接�?export interface PlaybackQueueItem {
+// 鎾斁闃熷垪椤规帴鍙?export interface PlaybackQueueItem {
   contentId: string;
   contentType: 'video' | 'live';
   title: string;
@@ -152,7 +152,7 @@ export class PlaybackRepository {
   private readonly userRepository: UserRepository;
   private readonly videoRepository: VideoRepository;
   
-  // 存储键名
+  // 瀛樺偍閿悕
   private readonly storageKeys = {
     playbackSettings: 'playback_settings',
     playbackHistory: 'playback_history',
@@ -162,22 +162,22 @@ export class PlaybackRepository {
     lastWatchPosition: 'last_watch_position'
   };
   
-  // 数据缓存
+  // 鏁版嵁缂撳瓨
   private playbackSettings: PlaybackSettings;
   private playbackHistory: Map<string, PlaybackHistoryItem>; // key: contentId
   private playbackStats: PlaybackStats;
   private currentPlaybackState: CurrentPlaybackState;
   private playbackQueue: PlaybackQueueItem[];
   
-  // 过滤器缓�?  private filterCache: Map<string, unknown[]>;
+  // 杩囨护鍣ㄧ紦瀛?  private filterCache: Map<string, unknown[]>;
   
-  // 自动保存间隔（毫秒）
-  private readonly autoSaveInterval = 30000; // 30�?  
-  // 自动保存计时�?  private autoSaveTimer: number | null = null;
+  // 鑷姩淇濆瓨闂撮殧锛堟绉掞級
+  private readonly autoSaveInterval = 30000; // 30绉?  
+  // 鑷姩淇濆瓨璁℃椂鍣?  private autoSaveTimer: number | null = null;
   
-  // 最大历史记录数�?  private readonly maxHistoryItems = 100;
+  // 鏈€澶у巻鍙茶褰曟暟閲?  private readonly maxHistoryItems = 100;
   
-  // 最大队列长�?  private readonly maxQueueLength = 50;
+  // 鏈€澶ч槦鍒楅暱搴?  private readonly maxQueueLength = 50;
   
   private constructor() {
     this.logger = Logger.getInstance();
@@ -188,18 +188,18 @@ export class PlaybackRepository {
     this.userRepository = UserRepository.getInstance();
     this.videoRepository = VideoRepository.getInstance();
     
-    // 初始化默认数�?    this.playbackSettings = this.getDefaultSettings();
+    // 鍒濆鍖栭粯璁ゆ暟鎹?    this.playbackSettings = this.getDefaultSettings();
     this.playbackHistory = new Map();
     this.playbackStats = this.getEmptyStats();
     this.currentPlaybackState = this.getEmptyPlaybackState();
     this.playbackQueue = [];
     this.filterCache = new Map();
     
-    // 初始�?    this.initialize();
+    // 鍒濆鍖?    this.initialize();
   }
   
   /**
-   * 获取实例
+   * 鑾峰彇瀹炰緥
    */
   public static getInstance(): PlaybackRepository {
     if (!PlaybackRepository.instance) {
@@ -209,17 +209,17 @@ export class PlaybackRepository {
   }
   
   /**
-   * 检查对象是否包含指定属�?   * 替代Object.prototype.hasOwnProperty.call，兼容ArkTS语法
+   * 妫€鏌ュ璞℃槸鍚﹀寘鍚寚瀹氬睘鎬?   * 鏇夸唬Object.prototype.hasOwnProperty.call锛屽吋瀹笰rkTS璇硶
    */
   private hasOwnProperty<T extends object>(obj: T, key: string): boolean {
     return Object.getOwnPropertyNames(obj).includes(key);
   }
 
   /**
-   * 获取对象的所有�?   * 替代Object.values，兼容ArkTS语法
+   * 鑾峰彇瀵硅薄鐨勬墍鏈夊€?   * 鏇夸唬Object.values锛屽吋瀹笰rkTS璇硶
    */
-  private getObjectValues<T extends object>(obj: T): Record<string, string | number | boolean | null>[] {
-    const values: Record<string, string | number | boolean | null>[] = [];
+  private getObjectValues<T extends object>(obj: T): any[] {
+    const values: any[] = [];
     for (const key in obj) {
       if (this.hasOwnProperty(obj, key)) {
         values.push(obj[key]);
@@ -229,38 +229,39 @@ export class PlaybackRepository {
   }
   
   /**
-   * 初始�?   */
+   * 鍒濆鍖?   */
   public async initialize(): Promise<void> {
     try {
-      // 加载设置
+      // 鍔犺浇璁剧疆
       await this.loadSettings();
       
-      // 加载历史记录
+      // 鍔犺浇鍘嗗彶璁板綍
       await this.loadHistory();
       
-      // 加载统计
+      // 鍔犺浇缁熻
       await this.loadStats();
       
-      // 加载当前播放状�?      await this.loadCurrentPlaybackState();
+      // 鍔犺浇褰撳墠鎾斁鐘舵€?      await this.loadCurrentPlaybackState();
       
-      // 加载播放队列
+      // 鍔犺浇鎾斁闃熷垪
       await this.loadPlaybackQueue();
       
-      // 启动自动保存
+      // 鍚姩鑷姩淇濆瓨
       this.startAutoSave();
       
       this.logger.info(`PlaybackRepository initialized with ${this.playbackHistory.size} history items`);
     } catch (error) {
-      this.Logger.error('Failed to initialize PlaybackRepository', error as Error);
+      this.logger.error('Failed to initialize PlaybackRepository', error as Error);
     }
   }
   
   /**
-   * 获取默认设置
+   * 鑾峰彇榛樿璁剧疆
    */
   private getDefaultSettings(): PlaybackSettings {
     return {
-      defaultQuality: VideoQuality.HIGH, defaultSpeed: PlaybackSpeed.NORMAL,
+      defaultQuality: VideoQuality.HIGH,
+      defaultSpeed: PlaybackSpeed.NORMAL,
       autoPlay: true,
       autoResume: true,
       rememberPosition: true,
@@ -275,418 +276,28 @@ export class PlaybackRepository {
       subtitleColor: '#FFFFFF',
       subtitleBackgroundColor: 'transparent',
       subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( instanceof Error ? defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now( : new Error(String(defaultSpeed: PlaybackSpeed.NORMAL,
-      autoPlay: true,
-      autoResume: true,
-      rememberPosition: true,
-      playNextAutomatically: true,
-      enableHardwareAcceleration: true,
-      enableBackgroundPlayback: true,
-      enableDataSaving: false,
-      preferredAudioLanguage: 'en',
-      preferredSubtitleLanguage: 'en',
-      subtitleEnabled: false,
-      subtitleSize: 16,
-      subtitleColor: '#FFFFFF',
-      subtitleBackgroundColor: 'transparent',
-      subtitleFont: 'default',
-      lastUpdated: Date.now()))))))
+      lastUpdated: Date.now()
     };
   }
   
   /**
-   * 获取空的统计数据
+   * 鑾峰彇绌虹殑缁熻鏁版嵁
    */
   private getEmptyStats(): PlaybackStats {
     const byQuality = new Map<VideoQuality, number>();
     const bySpeed = new Map<PlaybackSpeed, number>();
     const byContentType = new Map<'video' | 'live', number>();
     
-    // 初始化画质统�?    this.getObjectValues(VideoQuality).forEach(quality => {
+    // 鍒濆鍖栫敾璐ㄧ粺璁?    this.getObjectValues(VideoQuality).forEach(quality => {
       byQuality.set(quality, 0);
     });
     
-    // 初始化播放速度统计
+    // 鍒濆鍖栨挱鏀鹃€熷害缁熻
     this.getObjectValues(PlaybackSpeed).forEach(speed => {
       bySpeed.set(speed, 0);
     });
     
-    // 初始化内容类型统�?    byContentType.set('video', 0);
+    // 鍒濆鍖栧唴瀹圭被鍨嬬粺璁?    byContentType.set('video', 0);
     byContentType.set('live', 0);
     
     return {
@@ -704,7 +315,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 获取空的播放状�?   */
+   * 鑾峰彇绌虹殑鎾斁鐘舵€?   */
   private getEmptyPlaybackState(): CurrentPlaybackState {
     return {
       state: PlaybackState.IDLE,
@@ -721,7 +332,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 加载设置
+   * 鍔犺浇璁剧疆
    */
   private async loadSettings(): Promise<void> {
     try {
@@ -734,112 +345,36 @@ export class PlaybackRepository {
         this.playbackSettings = { ...this.getDefaultSettings(), ...settings };
       }
     } catch (error) {
-      this.Logger.error('Failed to load playback settings', error as Error);
+      this.logger.error('Failed to load playback settings', error as Error);
       this.playbackSettings = this.getDefaultSettings();
     }
   }
   
   /**
-   * 保存设置
+   * 淇濆瓨璁剧疆
    */
   private async saveSettings(): Promise<void> {
     try {
       this.playbackSettings.lastUpdated = Date.now();
       await this.storageUtil.setObject(
-        this.storageKeys.playbackSettings, this.playbackSettings,
+        this.storageKeys.playbackSettings,
+        this.playbackSettings,
         LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackSettings,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackSettings,
-        LocalStorageType.DEFAULT
-      )))))));
+      );
     } catch (error) {
-      this.Logger.error('Failed to save playback settings', error as Error);
+      this.logger.error('Failed to save playback settings', error as Error);
     }
   }
   
   /**
-   * 加载历史记录
+   * 鍔犺浇鍘嗗彶璁板綍
    */
   private async loadHistory(): Promise<void> {
     try {
       const historyData = await this.storageUtil.getObject<PlaybackHistoryItem[]>(
-        this.storageKeys.playbackHistory, LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-      )))))));
+        this.storageKeys.playbackHistory,
+        LocalStorageType.DEFAULT
+      );
       
       if (historyData) {
         historyData.forEach(item => {
@@ -847,18 +382,18 @@ export class PlaybackRepository {
         });
       }
     } catch (error) {
-      this.Logger.error('Failed to load playback history', error as Error);
+      this.logger.error('Failed to load playback history', error as Error);
       this.playbackHistory.clear();
     }
   }
   
   /**
-   * 保存历史记录
+   * 淇濆瓨鍘嗗彶璁板綍
    */
   private async saveHistory(): Promise<void> {
     try {
-      // 转换为数组并按最后播放时间排�?      const historyArray = Array.from(this.playbackHistory.values())
-        .sort((a, b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b instanceof Error ? b instanceof Error ? b : new Error(String(b : new Error(String(b instanceof Error ? b : new Error(String(b))))))) => b.lastPlayedAt - a.lastPlayedAt)
+      // 杞崲涓烘暟缁勫苟鎸夋渶鍚庢挱鏀炬椂闂存帓搴?      const historyArray = Array.from(this.playbackHistory.values())
+        .sort((a, b) => b.lastPlayedAt - a.lastPlayedAt)
         .slice(0, this.maxHistoryItems);
       
       await this.storageUtil.setObject(
@@ -867,342 +402,114 @@ export class PlaybackRepository {
         LocalStorageType.DEFAULT
       );
     } catch (error) {
-      this.Logger.error('Failed to save playback history', error as Error);
+      this.logger.error('Failed to save playback history', error as Error);
     }
   }
   
   /**
-   * 加载统计
+   * 鍔犺浇缁熻
    */
   private async loadStats(): Promise<void> {
     try {
       const stats = await this.storageUtil.getObject<PlaybackStats>(
-        this.storageKeys.playbackStats, LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-      )))))));
+        this.storageKeys.playbackStats,
+        LocalStorageType.DEFAULT
+      );
       
       if (stats) {
         this.playbackStats = { ...this.getEmptyStats(), ...stats };
       }
     } catch (error) {
-      this.Logger.error('Failed to load playback stats', error as Error);
+      this.logger.error('Failed to load playback stats', error as Error);
       this.playbackStats = this.getEmptyStats();
     }
   }
   
   /**
-   * 保存统计
+   * 淇濆瓨缁熻
    */
   private async saveStats(): Promise<void> {
     try {
       this.playbackStats.lastUpdated = Date.now();
       await this.storageUtil.setObject(
-        this.storageKeys.playbackStats, this.playbackStats,
+        this.storageKeys.playbackStats,
+        this.playbackStats,
         LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackStats,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackStats,
-        LocalStorageType.DEFAULT
-      )))))));
+      );
     } catch (error) {
-      this.Logger.error('Failed to save playback stats', error as Error);
+      this.logger.error('Failed to save playback stats', error as Error);
     }
   }
   
   /**
-   * 加载当前播放状�?   */
+   * 鍔犺浇褰撳墠鎾斁鐘舵€?   */
   private async loadCurrentPlaybackState(): Promise<void> {
     try {
       const state = await this.storageUtil.getObject<CurrentPlaybackState>(
-        this.storageKeys.currentPlaybackState, LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-      )))))));
+        this.storageKeys.currentPlaybackState,
+        LocalStorageType.DEFAULT
+      );
       
       if (state) {
         this.currentPlaybackState = { ...this.getEmptyPlaybackState(), ...state };
       }
     } catch (error) {
-      this.Logger.error('Failed to load current playback state', error as Error);
+      this.logger.error('Failed to load current playback state', error as Error);
       this.currentPlaybackState = this.getEmptyPlaybackState();
     }
   }
   
   /**
-   * 保存当前播放状�?   */
+   * 淇濆瓨褰撳墠鎾斁鐘舵€?   */
   private async saveCurrentPlaybackState(): Promise<void> {
     try {
       this.currentPlaybackState.currentTime = Date.now();
       await this.storageUtil.setObject(
-        this.storageKeys.currentPlaybackState, this.currentPlaybackState,
+        this.storageKeys.currentPlaybackState,
+        this.currentPlaybackState,
         LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.currentPlaybackState,
-        LocalStorageType.DEFAULT
-      )))))));
+      );
     } catch (error) {
-      this.Logger.error('Failed to save current playback state', error as Error);
+      this.logger.error('Failed to save current playback state', error as Error);
     }
   }
   
   /**
-   * 加载播放队列
+   * 鍔犺浇鎾斁闃熷垪
    */
   private async loadPlaybackQueue(): Promise<void> {
     try {
       const queue = await this.storageUtil.getObject<PlaybackQueueItem[]>(
-        this.storageKeys.playbackQueue, LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-       instanceof Error ? LocalStorageType.DEFAULT
-       : new Error(String(LocalStorageType.DEFAULT
-      )))))));
+        this.storageKeys.playbackQueue,
+        LocalStorageType.DEFAULT
+      );
       
       if (queue) {
         this.playbackQueue = queue.slice(0, this.maxQueueLength);
       }
     } catch (error) {
-      this.Logger.error('Failed to load playback queue', error as Error);
+      this.logger.error('Failed to load playback queue', error as Error);
       this.playbackQueue = [];
     }
   }
   
   /**
-   * 保存播放队列
+   * 淇濆瓨鎾斁闃熷垪
    */
   private async savePlaybackQueue(): Promise<void> {
     try {
       await this.storageUtil.setObject(
-        this.storageKeys.playbackQueue, this.playbackQueue,
+        this.storageKeys.playbackQueue,
+        this.playbackQueue,
         LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-       instanceof Error ? this.playbackQueue,
-        LocalStorageType.DEFAULT
-       : new Error(String(this.playbackQueue,
-        LocalStorageType.DEFAULT
-      )))))));
+      );
     } catch (error) {
-      this.Logger.error('Failed to save playback queue', error as Error);
+      this.logger.error('Failed to save playback queue', error as Error);
     }
   }
   
   /**
-   * 启动自动保存
+   * 鍚姩鑷姩淇濆瓨
    */
   private startAutoSave(): void {
     if (this.autoSaveTimer) {
@@ -1211,11 +518,11 @@ export class PlaybackRepository {
     
     this.autoSaveTimer = setInterval(() => {
       this.autoSave();
-    }, this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval : new Error(String(this.autoSaveInterval instanceof Error ? this.autoSaveInterval : new Error(String(this.autoSaveInterval))))))) as unknown as number;
+    }, this.autoSaveInterval);
   }
   
   /**
-   * 自动保存
+   * 鑷姩淇濆瓨
    */
   private async autoSave(): Promise<void> {
     try {
@@ -1229,60 +536,34 @@ export class PlaybackRepository {
       
       this.logger.debug('Playback data auto-saved');
     } catch (error) {
-      this.Logger.error('Failed to auto-save playback data', error as Error);
+      this.logger.error('Failed to auto-save playback data', error as Error);
     }
   }
   
   /**
-   * 获取播放设置
+   * 鑾峰彇鎾斁璁剧疆
    */
   public getPlaybackSettings(): PlaybackSettings {
     return { ...this.playbackSettings };
   }
   
   /**
-   * 更新播放设置
+   * 鏇存柊鎾斁璁剧疆
    */
   public async updatePlaybackSettings(settings: Partial<PlaybackSettings>): Promise<void> {
     this.playbackSettings = { ...this.playbackSettings, ...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now( instanceof Error ? ...settings };
-    this.playbackSettings.lastUpdated = Date.now( : new Error(String(...settings };
-    this.playbackSettings.lastUpdated = Date.now()))))));
+    this.playbackSettings.lastUpdated = Date.now();
     
     await this.saveSettings();
     
-    // 发布设置更新事件
+    // 鍙戝竷璁剧疆鏇存柊浜嬩欢
     this.eventBus.publish('playback_settings_updated', {
       settings: this.playbackSettings
     });
   }
   
   /**
-   * 获取播放历史
+   * 鑾峰彇鎾斁鍘嗗彶
    */
   public getPlaybackHistory(): PlaybackHistoryItem[] {
     return Array.from(this.playbackHistory.values())
@@ -1290,7 +571,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 添加播放历史记录
+   * 娣诲姞鎾斁鍘嗗彶璁板綍
    */
   public async addPlaybackHistory(item: Omit<PlaybackHistoryItem, 'playCount' | 'lastPlayedAt' | 'isCompleted'>): Promise<void> {
     const existingItem = this.playbackHistory.get(item.contentId);
@@ -1300,18 +581,18 @@ export class PlaybackRepository {
       ...item,
       playCount: (existingItem?.playCount || 0) + 1,
       lastPlayedAt: now,
-      isCompleted: item.position >= item.duration * 0.95 // 观看进度超过95%视为完成
+      isCompleted: item.position >= item.duration * 0.95 // 瑙傜湅杩涘害瓒呰繃95%瑙嗕负瀹屾垚
     };
     
     this.playbackHistory.set(item.contentId, historyItem);
     
-    // 更新统计
+    // 鏇存柊缁熻
     this.updateStats(historyItem);
     
-    // 保存历史记录
+    // 淇濆瓨鍘嗗彶璁板綍
     await this.saveHistory();
     
-    // 发布历史记录更新事件
+    // 鍙戝竷鍘嗗彶璁板綍鏇存柊浜嬩欢
     this.eventBus.publish('playback_history_updated', {
       item: historyItem,
       action: 'add'
@@ -1319,7 +600,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 更新播放历史记录
+   * 鏇存柊鎾斁鍘嗗彶璁板綍
    */
   public async updatePlaybackHistory(contentId: string, updates: Partial<PlaybackHistoryItem>): Promise<void> {
     const existingItem = this.playbackHistory.get(contentId);
@@ -1327,12 +608,15 @@ export class PlaybackRepository {
       return;
     }
     
-    const updatedItem: Record<string, string | number | boolean | null> = { ... };
+    const updatedItem: PlaybackHistoryItem = { 
+      ...existingItem, 
+      ...updates 
+    };
     this.playbackHistory.set(contentId, updatedItem);
     
     await this.saveHistory();
     
-    // 发布历史记录更新事件
+    // 鍙戝竷鍘嗗彶璁板綍鏇存柊浜嬩欢
     this.eventBus.publish('playback_history_updated', {
       item: updatedItem,
       action: 'update'
@@ -1340,7 +624,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 删除播放历史记录
+   * 鍒犻櫎鎾斁鍘嗗彶璁板綍
    */
   public async deletePlaybackHistory(contentId: string): Promise<void> {
     const deletedItem = this.playbackHistory.get(contentId);
@@ -1352,7 +636,7 @@ export class PlaybackRepository {
     
     await this.saveHistory();
     
-    // 发布历史记录更新事件
+    // 鍙戝竷鍘嗗彶璁板綍鏇存柊浜嬩欢
     this.eventBus.publish('playback_history_updated', {
       item: deletedItem,
       action: 'delete'
@@ -1360,7 +644,7 @@ export class PlaybackRepository {
   }
   
   /**
-   * 清空播放历史记录
+   * 娓呯┖鎾斁鍘嗗彶璁板綍
    */
   public async clearPlaybackHistory(): Promise<void> {
     const deletedItems = Array.from(this.playbackHistory.values());
@@ -1368,28 +652,28 @@ export class PlaybackRepository {
     
     await this.saveHistory();
     
-    // 发布历史记录更新事件
+    // 鍙戝竷鍘嗗彶璁板綍鏇存柊浜嬩欢
     this.eventBus.publish('playback_history_cleared', {
       deletedCount: deletedItems.length
     });
   }
   
   /**
-   * 获取播放统计
+   * 鑾峰彇鎾斁缁熻
    */
   public getPlaybackStats(): PlaybackStats {
     return { ...this.playbackStats };
   }
   
   /**
-   * 更新统计信息
+   * 鏇存柊缁熻淇℃伅
    */
   private updateStats(historyItem: PlaybackHistoryItem): void {
-    // 更新总播放时�?    this.playbackStats.totalWatchTime += historyItem.duration;
+    // 鏇存柊鎬绘挱鏀炬椂闂?    this.playbackStats.totalWatchTime += historyItem.duration;
     
-    // 更新总播放次�?    this.playbackStats.totalPlayCount++;
+    // 鏇存柊鎬绘挱鏀炬鏁?    this.playbackStats.totalPlayCount++;
     
-    // 更新观看视频数量
+    // 鏇存柊瑙傜湅瑙嗛鏁伴噺
     if (historyItem.contentType === 'video') {
       this.playbackStats.watchedVideos++;
       if (historyItem.isCompleted) {
@@ -1397,28 +681,28 @@ export class PlaybackRepository {
       }
     }
     
-    // 更新画质统计
+    // 鏇存柊鐢昏川缁熻
     const quality = this.currentPlaybackState.quality;
     this.playbackStats.byQuality.set(quality, (this.playbackStats.byQuality.get(quality) || 0) + 1);
     
-    // 更新播放速度统计
+    // 鏇存柊鎾斁閫熷害缁熻
     const speed = this.currentPlaybackState.speed;
     this.playbackStats.bySpeed.set(speed, (this.playbackStats.bySpeed.get(speed) || 0) + 1);
     
-    // 更新内容类型统计
+    // 鏇存柊鍐呭绫诲瀷缁熻
     this.playbackStats.byContentType.set(historyItem.contentType, 
       (this.playbackStats.byContentType.get(historyItem.contentType) || 0) + 1);
     
-    // 更新最喜欢的画质和速度
+    // 鏇存柊鏈€鍠滄鐨勭敾璐ㄥ拰閫熷害
     this.updateFavoriteStats();
     
     this.playbackStats.lastUpdated = Date.now();
   }
   
   /**
-   * 更新最喜欢的统�?   */
+   * 鏇存柊鏈€鍠滄鐨勭粺璁?   */
   private updateFavoriteStats(): void {
-    // 找到最常用的画�?    let maxQualityCount = 0;
+    // 鎵惧埌鏈€甯哥敤鐨勭敾璐?    let maxQualityCount = 0;
     let favoriteQuality = VideoQuality.HIGH;
     
     this.playbackStats.byQuality.forEach((count, quality) => {
@@ -1427,8 +711,9 @@ export class PlaybackRepository {
         favoriteQuality = quality;
       }
     });
+    this.playbackStats.favoriteQuality = favoriteQuality;
     
-    // 找到最常用的播放速度
+    // 鎵惧埌鏈€甯哥敤鐨勬挱鏀鹃€熷害
     let maxSpeedCount = 0;
     let favoriteSpeed = PlaybackSpeed.NORMAL;
     
@@ -1438,222 +723,123 @@ export class PlaybackRepository {
         favoriteSpeed = speed;
       }
     });
-    
-    this.playbackStats.favoriteQuality = favoriteQuality;
     this.playbackStats.favoriteSpeed = favoriteSpeed;
   }
   
   /**
-   * 获取当前播放状�?   */
+   * 鑾峰彇褰撳墠鎾斁鐘舵€?   */
   public getCurrentPlaybackState(): CurrentPlaybackState {
     return { ...this.currentPlaybackState };
   }
   
   /**
-   * 更新当前播放状�?   */
+   * 鏇存柊褰撳墠鎾斁鐘舵€?   */
   public async updateCurrentPlaybackState(state: Partial<CurrentPlaybackState>): Promise<void> {
     this.currentPlaybackState = { ...this.currentPlaybackState, ...state };
     this.currentPlaybackState.currentTime = Date.now();
     
     await this.saveCurrentPlaybackState();
     
-    // 发布播放状态更新事�?    this.eventBus.publish('playback_state_updated', {
+    // 鍙戝竷鎾斁鐘舵€佹洿鏂颁簨浠?    this.eventBus.publish('playback_state_updated', {
       state: this.currentPlaybackState
     });
   }
   
   /**
-   * 获取播放队列
+   * 鑾峰彇鎾斁闃熷垪
    */
   public getPlaybackQueue(): PlaybackQueueItem[] {
     return [...this.playbackQueue];
   }
   
   /**
-   * 添加项目到播放队�?   */
+   * 娣诲姞鍒版挱鏀鹃槦鍒?   */
   public async addToPlaybackQueue(item: PlaybackQueueItem): Promise<void> {
-    // 检查是否已在队列中
-    const existingIndex = this.playbackQueue.findIndex(q => q.contentId === item.contentId);
+    // 妫€鏌ラ槦鍒椾腑鏄惁宸插瓨鍦?    const existingIndex = this.playbackQueue.findIndex(queueItem => queueItem.contentId === item.contentId);
     if (existingIndex >= 0) {
-      // 如果已存在，移动到队列末�?      this.playbackQueue.splice(existingIndex, 1);
+      // 绉婚櫎宸插瓨鍦ㄧ殑椤?      this.playbackQueue.splice(existingIndex, 1);
     }
     
-    this.playbackQueue.push(item);
+    // 娣诲姞鍒伴槦鍒楁湯灏?    this.playbackQueue.push(item);
     
-    // 限制队列长度
+    // 闄愬埗闃熷垪闀垮害
     if (this.playbackQueue.length > this.maxQueueLength) {
-      this.playbackQueue = this.playbackQueue.slice(-this.maxQueueLength);
+      this.playbackQueue.shift();
     }
     
     await this.savePlaybackQueue();
     
-    // 发布队列更新事件
+    // 鍙戝竷闃熷垪鏇存柊浜嬩欢
     this.eventBus.publish('playback_queue_updated', {
-      action: 'add',
-      item
+      queue: this.playbackQueue,
+      action: 'add'
     });
   }
   
   /**
-   * 从播放队列中移除项目
+   * 浠庢挱鏀鹃槦鍒椾腑绉婚櫎
    */
   public async removeFromPlaybackQueue(contentId: string): Promise<void> {
     const index = this.playbackQueue.findIndex(item => item.contentId === contentId);
     if (index >= 0) {
-      const removedItem = this.playbackQueue.splice(index, 1)[0];
+      this.playbackQueue.splice(index, 1);
       
       await this.savePlaybackQueue();
       
-      // 发布队列更新事件
+      // 鍙戝竷闃熷垪鏇存柊浜嬩欢
       this.eventBus.publish('playback_queue_updated', {
-        action: 'remove',
-        item: removedItem
+        queue: this.playbackQueue,
+        action: 'remove'
       });
     }
   }
   
   /**
-   * 清空播放队列
+   * 娓呯┖鎾斁闃熷垪
    */
   public async clearPlaybackQueue(): Promise<void> {
-    const clearedItems = [...this.playbackQueue];
     this.playbackQueue = [];
     
     await this.savePlaybackQueue();
     
-    // 发布队列更新事件
+    // 鍙戝竷闃熷垪鏇存柊浜嬩欢
     this.eventBus.publish('playback_queue_cleared', {
-      clearedCount: clearedItems.length
+      queue: this.playbackQueue
     });
   }
   
   /**
-   * 重新排序播放队列
-   */
-  public async reorderPlaybackQueue(contentIds: string[]): Promise<void> {
-    const newQueue: PlaybackQueueItem[] = [];
-    
-    // 按照新的顺序重新构建队列
-    contentIds.forEach(contentId => {
-      const item = this.playbackQueue.find(q => q.contentId === contentId);
-      if (item) {
-        newQueue.push(item);
-      }
-    });
-    
-    // 添加不在新顺序中的项�?    this.playbackQueue.forEach(item => {
-      if (!contentIds.includes(item.contentId)) {
-        newQueue.push(item);
-      }
-    });
-    
-    this.playbackQueue = newQueue;
-    
-    await this.savePlaybackQueue();
-    
-    // 发布队列更新事件
-    this.eventBus.publish('playback_queue_reordered', {
-      newOrder: contentIds
-    });
-  }
-  
-  /**
-   * 获取下一个播放项�?   */
-  public getNextPlaybackItem(): PlaybackQueueItem | null {
-    if (this.playbackQueue.length === 0) {
-      return null;
-    }
-    
-    // 根据播放模式返回下一个项�?    switch (this.currentPlaybackState.mode) {
-      case PlaybackMode.LOOP:
-        // 循环播放：返回队列中的第一个项�?        return this.playbackQueue[0];
-        
-      case PlaybackMode.SHUFFLE:
-        // 随机播放：随机返回一个项�?        const randomIndex = Math.floor(Math.random() * this.playbackQueue.length);
-        return this.playbackQueue[randomIndex];
-        
-      case PlaybackMode.DEFAULT:
-      default:
-        // 默认模式：返回队列中的第一个项�?        return this.playbackQueue[0];
+   * 娓呯┖鎵€鏈夋暟鎹?   */
+  public async clearAllData(): Promise<void> {
+    try {
+      // 娓呯┖鍐呭瓨缂撳瓨
+      this.playbackHistory.clear();
+      this.playbackStats = this.getEmptyStats();
+      this.currentPlaybackState = this.getEmptyPlaybackState();
+      this.playbackQueue = [];
+      
+      // 淇濆瓨鍒板瓨鍌?      await Promise.all([
+        this.saveHistory(),
+        this.saveStats(),
+        this.saveCurrentPlaybackState(),
+        this.savePlaybackQueue()
+      ]);
+      
+      this.logger.info('Cleared all playback data');
+    } catch (error) {
+      this.logger.error('Failed to clear all playback data', error as Error);
+      throw error;
     }
   }
   
   /**
-   * 搜索播放历史
+   * 閲婃斁璧勬簮
    */
-  public searchPlaybackHistory(query: string): PlaybackHistoryItem[] {
-    const searchTerm = query.toLowerCase();
-    return this.getPlaybackHistory().filter(item => 
-      item.title.toLowerCase().includes(searchTerm) ||
-      (item.channelName && item.channelName.toLowerCase().includes(searchTerm))
-    );
-  }
-  
-  /**
-   * 获取最近观看的项目
-   */
-  public getRecentPlaybackHistory(limit: number = 10): PlaybackHistoryItem[] {
-    return this.getPlaybackHistory().slice(0, limit);
-  }
-  
-  /**
-   * 获取最常观看的项目
-   */
-  public getMostWatchedPlaybackHistory(limit: number = 10): PlaybackHistoryItem[] {
-    return Array.from(this.playbackHistory.values())
-      .sort((a, b) => b.playCount - a.playCount)
-      .slice(0, limit);
-  }
-  
-  /**
-   * 获取完成的项�?   */
-  public getCompletedPlaybackHistory(): PlaybackHistoryItem[] {
-    return this.getPlaybackHistory().filter(item => item.isCompleted);
-  }
-  
-  /**
-   * 获取未完成的项目
-   */
-  public getIncompletePlaybackHistory(): PlaybackHistoryItem[] {
-    return this.getPlaybackHistory().filter(item => !item.isCompleted);
-  }
-  
-  /**
-   * 清理过期数据
-   */
-  public async cleanupExpiredData(): Promise<void> {
-    const now = Date.now();
-    const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000); // 30天前
-    
-    // 清理30天前的历史记�?    let cleanedCount = 0;
-    this.playbackHistory.forEach((item, contentId) => {
-      if (item.lastPlayedAt < thirtyDaysAgo) {
-        this.playbackHistory.delete(contentId);
-        cleanedCount++;
-      }
-    });
-    
-    if (cleanedCount > 0) {
-      await this.saveHistory();
-      this.logger.info(`Cleaned ${cleanedCount} expired playback history items`);
-    }
-    
-    // 清理过滤器缓�?    this.filterCache.clear();
-  }
-  
-  /**
-   * 关闭仓库
-   */
-  public async shutdown(): Promise<void> {
-    // 停止自动保存
+  public release(): void {
     if (this.autoSaveTimer) {
       clearInterval(this.autoSaveTimer);
       this.autoSaveTimer = null;
     }
-    
-    // 执行最后一次保�?    await this.autoSave();
-    
-    this.logger.info('PlaybackRepository shutdown completed');
   }
 }
 

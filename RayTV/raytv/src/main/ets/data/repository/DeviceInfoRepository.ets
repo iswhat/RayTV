@@ -1,5 +1,5 @@
-// DeviceInfoRepository.ets - 设备信息数据仓库
-// 负责设备信息的收集、存储和管理
+﻿// DeviceInfoRepository.ets - 璁惧淇℃伅鏁版嵁浠撳簱
+// 璐熻矗璁惧淇℃伅鐨勬敹闆嗐€佸瓨鍌ㄥ拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { DeviceInfo, DeviceType, DeviceCapability, DeviceNetworkInfo } from '../bean/DeviceInfo';
@@ -10,41 +10,38 @@ import BusinessError from '@ohos.base';
 
 const TAG = 'DeviceInfoRepository';
 
-// 模拟编解码器检测类
+// 妯℃嫙缂栬В鐮佸櫒妫€娴嬬被
 class MockCodecDetector {
   /**
-   * 模拟获取编解码器列表
+   * 妯℃嫙鑾峰彇缂栬В鐮佸櫒鍒楄〃
    */
   static async getCodecList(codecName: string): Promise<string[]> {
     Logger.info(TAG, `Checking support for codec: ${codecName}`);
     
-    // 模拟编解码器支持检测
-    const supportedCodecs: Record<string, string[]> = {
-      // 视频编解码器
+    // 妯℃嫙缂栬В鐮佸櫒鏀寔妫€娴?    const supportedCodecs: Record<string, string[]> = {
+      // 瑙嗛缂栬В鐮佸櫒
       'h264': ['h264'],
       'h265': ['h265'],
       'vp8': ['vp8'],
       'vp9': ['vp9'],
-      'av1': [], // 模拟不支持AV1
+      'av1': [], // 妯℃嫙涓嶆敮鎸丄V1
       'mpeg4': ['mpeg4'],
       
-      // 音频编解码器
+      // 闊抽缂栬В鐮佸櫒
       'aac': ['aac'],
       'mp3': ['mp3'],
       'opus': ['opus'],
       'flac': ['flac'],
       'vorbis': ['vorbis'],
-      'ac3': [], // 模拟不支持AC3
-      'eac3': []  // 模拟不支持EAC3
+      'ac3': [], // 妯℃嫙涓嶆敮鎸丄C3
+      'eac3': []  // 妯℃嫙涓嶆敮鎸丒AC3
     };
     
-    // 返回模拟的编解码器列表
-    return supportedCodecs[codecName.toLowerCase()] || [];
+    // 杩斿洖妯℃嫙鐨勭紪瑙ｇ爜鍣ㄥ垪琛?    return supportedCodecs[codecName.toLowerCase()] || [];
   }
 }
 
-// 设备信息键常量
-export const DeviceInfoKeys: Record<string, string> = {
+// 璁惧淇℃伅閿父閲?export const DeviceInfoKeys: Record<string, string> = {
   DEVICE_ID: 'device_id',
   DEVICE_NAME: 'device_name',
   DEVICE_TYPE: 'device_type',
@@ -65,8 +62,7 @@ export const DeviceInfoKeys: Record<string, string> = {
   FIRST_USE_TIME: 'first_use_time'
 };
 
-// 设备信息表定义
-const DEVICE_INFO_TABLE = {
+// 璁惧淇℃伅琛ㄥ畾涔?const DEVICE_INFO_TABLE = {
   TABLE_NAME: 'device_info',
   COLUMNS: {
     KEY: 'key',
@@ -88,7 +84,7 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取设备信息仓库单例实例
+   * 鑾峰彇璁惧淇℃伅浠撳簱鍗曚緥瀹炰緥
    */
   public static getInstance(): DeviceInfoRepository {
     if (!DeviceInfoRepository.instance) {
@@ -98,9 +94,7 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 初始化设备信息仓库
-   * 加载已存储的设备信息并收集当前设备信息
-   */
+   * 鍒濆鍖栬澶囦俊鎭粨搴?   * 鍔犺浇宸插瓨鍌ㄧ殑璁惧淇℃伅骞舵敹闆嗗綋鍓嶈澶囦俊鎭?   */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
@@ -109,14 +103,13 @@ export class DeviceInfoRepository {
     try {
       Logger.info(TAG, 'Initializing device info repository');
       
-      // 加载已存储的设备信息
+      // 鍔犺浇宸插瓨鍌ㄧ殑璁惧淇℃伅
       await this.loadStoredDeviceInfo();
       
-      // 收集当前设备信息
+      // 鏀堕泦褰撳墠璁惧淇℃伅
       await this.collectDeviceInfo();
       
-      // 检查首次使用时间
-      await this.checkFirstUseTime();
+      // 妫€鏌ラ娆′娇鐢ㄦ椂闂?      await this.checkFirstUseTime();
       
       this.isInitialized = true;
       Logger.info(TAG, 'Device info repository initialized successfully');
@@ -127,12 +120,11 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 从数据库加载已存储的设备信息
+   * 浠庢暟鎹簱鍔犺浇宸插瓨鍌ㄧ殑璁惧淇℃伅
    */
   private async loadStoredDeviceInfo(): Promise<void> {
     try {
-      // 从数据库查询所有设备信息记录
-      const records = await this.sqliteHelper.query(DEVICE_INFO_TABLE.TABLE_NAME, ['*']);
+      // 浠庢暟鎹簱鏌ヨ鎵€鏈夎澶囦俊鎭褰?      const records = await this.sqliteHelper.query(DEVICE_INFO_TABLE.TABLE_NAME, ['*']);
       
       for (const record of records) {
         const key = record[DEVICE_INFO_TABLE.COLUMNS.KEY];
@@ -159,47 +151,46 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 收集当前设备信息
-   * 在HarmonyOS环境下，可以通过相关API获取设备信息
+   * 鏀堕泦褰撳墠璁惧淇℃伅
+   * 鍦℉armonyOS鐜涓嬶紝鍙互閫氳繃鐩稿叧API鑾峰彇璁惧淇℃伅
    */
   private async collectDeviceInfo(): Promise<void> {
     try {
-      // 使用HarmonyOS API获取设备信息
+      // 浣跨敤HarmonyOS API鑾峰彇璁惧淇℃伅
       const collectedInfo: Record<string, Serializable> = {
-        // 设备基础信息
+        // 璁惧鍩虹淇℃伅
         [DeviceInfoKeys.DEVICE_TYPE]: DeviceType.SMART_TV,
         [DeviceInfoKeys.DEVICE_MODEL]: this.getSafeValue(DeviceInfoKeys.DEVICE_MODEL, 'Unknown Model'),
         [DeviceInfoKeys.DEVICE_BRAND]: this.getSafeValue(DeviceInfoKeys.DEVICE_BRAND, 'Unknown Brand'),
         [DeviceInfoKeys.OS_VERSION]: this.getSafeValue(DeviceInfoKeys.OS_VERSION, '1.0.0'),
         [DeviceInfoKeys.APP_VERSION]: this.getSafeValue(DeviceInfoKeys.APP_VERSION, '1.0.0'),
         
-        // 设备能力 - 使用模拟编解码器检测
-        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
+        // 璁惧鑳藉姏 - 浣跨敤妯℃嫙缂栬В鐮佸櫒妫€娴?        [DeviceInfoKeys.SUPPORTED_VIDEO_CODECS]: await this.detectSupportedVideoCodecs(),
         [DeviceInfoKeys.SUPPORTED_AUDIO_CODECS]: await this.detectSupportedAudioCodecs(),
         [DeviceInfoKeys.MAX_RESOLUTION]: await this.detectMaxResolution(),
         [DeviceInfoKeys.HDR_SUPPORTED]: await this.detectHDRSupport(),
         [DeviceInfoKeys.DOLBY_ATMOS_SUPPORTED]: await this.detectDolbySupport(),
         
-        // 屏幕信息
+        // 灞忓箷淇℃伅
         [DeviceInfoKeys.SCREEN_WIDTH]: this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920),
         [DeviceInfoKeys.SCREEN_HEIGHT]: this.getSafeValue(DeviceInfoKeys.SCREEN_HEIGHT, 1080),
         [DeviceInfoKeys.SCREEN_DPI]: this.getSafeValue(DeviceInfoKeys.SCREEN_DPI, 96),
         
-        // 更新时间
+        // 鏇存柊鏃堕棿
         [DeviceInfoKeys.LAST_UPDATED]: Date.now()
       };
       
-      // 创建或更新设备唯一标识
+      // 鍒涘缓鎴栨洿鏂拌澶囧敮涓€鏍囪瘑
       const deviceId = await this.getOrCreateDeviceId();
       collectedInfo[DeviceInfoKeys.DEVICE_ID] = deviceId;
       collectedInfo[DeviceInfoKeys.DEVICE_NAME] = `${collectedInfo[DeviceInfoKeys.DEVICE_BRAND]} ${collectedInfo[DeviceInfoKeys.DEVICE_MODEL]}`;
       
-      // 保存收集到的设备信息
+      // 淇濆瓨鏀堕泦鍒扮殑璁惧淇℃伅
       for (const [key, value] of Object.entries(collectedInfo)) {
         await this.setDeviceInfo(key, value);
       }
       
-      // 构建完整的DeviceInfo对象
+      // 鏋勫缓瀹屾暣鐨凞eviceInfo瀵硅薄
       this.buildDeviceInfoObject();
       
       Logger.info(TAG, `Device info collected: ${deviceId}`);
@@ -210,17 +201,17 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取或创建设备唯一标识
+   * 鑾峰彇鎴栧垱寤鸿澶囧敮涓€鏍囪瘑
    */
   private async getOrCreateDeviceId(): Promise<string> {
     try {
-      // 尝试从存储中获取设备ID
+      // 灏濊瘯浠庡瓨鍌ㄤ腑鑾峰彇璁惧ID
       let deviceId = await this.getDeviceInfo<string>(DeviceInfoKeys.DEVICE_ID);
       
       if (!deviceId) {
-        // 如果不存在，生成新的设备ID
+        // 濡傛灉涓嶅瓨鍦紝鐢熸垚鏂扮殑璁惧ID
         deviceId = this.generateDeviceId();
-        // 使用安全存储保存设备ID
+        // 浣跨敤瀹夊叏瀛樺偍淇濆瓨璁惧ID
         await this.setDeviceInfo(DeviceInfoKeys.DEVICE_ID, deviceId);
         
         Logger.info(TAG, `Created new device ID: ${deviceId}`);
@@ -235,7 +226,7 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 生成设备唯一标识
+   * 鐢熸垚璁惧鍞竴鏍囪瘑
    */
   private generateDeviceId(): string {
     const timestamp = Date.now();
@@ -244,14 +235,13 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 检查首次使用时间
-   */
+   * 妫€鏌ラ娆′娇鐢ㄦ椂闂?   */
   private async checkFirstUseTime(): Promise<void> {
     try {
       const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME);
       
       if (!firstUseTime) {
-        // 记录首次使用时间
+        // 璁板綍棣栨浣跨敤鏃堕棿
         const now = Date.now();
         await this.setDeviceInfo(DeviceInfoKeys.FIRST_USE_TIME, now);
         Logger.info(TAG, `First use time recorded: ${now}`);
@@ -263,7 +253,7 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 构建完整的DeviceInfo对象
+   * 鏋勫缓瀹屾暣鐨凞eviceInfo瀵硅薄
    */
   private buildDeviceInfoObject(): void {
     try {
@@ -302,17 +292,14 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 保存设备信息
-   * @param key 信息键
-   * @param value 信息值
-   * @returns 是否保存成功
+   * 淇濆瓨璁惧淇℃伅
+   * @param key 淇℃伅閿?   * @param value 淇℃伅鍊?   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async setDeviceInfo(key: string, value: Serializable): Promise<boolean> {
     try {
       Logger.debug(TAG, `Setting device info: ${key}`);
       
-      // 序列化值
-      const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      // 搴忓垪鍖栧€?      const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
       const isObject = typeof value === 'object';
       
       const infoData: Record<string, string | number | boolean | null> = {
@@ -322,11 +309,11 @@ export class DeviceInfoRepository {
         [DEVICE_INFO_TABLE.COLUMNS.UPDATED_AT]: Date.now()
       };
       
-      // 检查是否已存在
+      // 妫€鏌ユ槸鍚﹀凡瀛樺湪
       const exists = await this.hasDeviceInfo(key);
       
       if (exists) {
-        // 更新现有记录
+        // 鏇存柊鐜版湁璁板綍
         const conditions: QueryCondition[] = [{
           column: DEVICE_INFO_TABLE.COLUMNS.KEY,
           value: key
@@ -334,17 +321,16 @@ export class DeviceInfoRepository {
         const result = await this.sqliteHelper.update(DEVICE_INFO_TABLE.TABLE_NAME, infoData, conditions);
         
         if (result.success) {
-          // 更新缓存
+          // 鏇存柊缂撳瓨
           this.deviceInfoCache.set(key, value);
         }
         
         return result.success;
       } else {
-        // 插入新记录
-        const result = await this.sqliteHelper.insert(DEVICE_INFO_TABLE.TABLE_NAME, infoData);
+        // 鎻掑叆鏂拌褰?        const result = await this.sqliteHelper.insert(DEVICE_INFO_TABLE.TABLE_NAME, infoData);
         
         if (result.success) {
-          // 更新缓存
+          // 鏇存柊缂撳瓨
           this.deviceInfoCache.set(key, value);
         }
         
@@ -358,19 +344,15 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取设备信息
-   * @param key 信息键
-   * @param defaultValue 默认值
-   * @returns 设备信息值或默认值
-   */
+   * 鑾峰彇璁惧淇℃伅
+   * @param key 淇℃伅閿?   * @param defaultValue 榛樿鍊?   * @returns 璁惧淇℃伅鍊兼垨榛樿鍊?   */
   public async getDeviceInfo<T = Serializable>(key: string, defaultValue?: T): Promise<T | null> {
     try {
-      // 优先从缓存获取
-      if (this.deviceInfoCache.has(key)) {
+      // 浼樺厛浠庣紦瀛樿幏鍙?      if (this.deviceInfoCache.has(key)) {
         return this.deviceInfoCache.get(key) as T;
       }
       
-      // 从数据库查询
+      // 浠庢暟鎹簱鏌ヨ
       const conditions: QueryCondition[] = [{
         column: DEVICE_INFO_TABLE.COLUMNS.KEY,
         value: key
@@ -398,7 +380,7 @@ export class DeviceInfoRepository {
         }
       }
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       this.deviceInfoCache.set(key, value);
       
       return value as T;
@@ -410,19 +392,13 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 从缓存获取设备信息（安全版本）
-   * @param key 信息键
-   * @param defaultValue 默认值
-   * @returns 设备信息值或默认值
-   */
+   * 浠庣紦瀛樿幏鍙栬澶囦俊鎭紙瀹夊叏鐗堟湰锛?   * @param key 淇℃伅閿?   * @param defaultValue 榛樿鍊?   * @returns 璁惧淇℃伅鍊兼垨榛樿鍊?   */
   private getSafeValue<T>(key: string, defaultValue: T): T {
     return this.deviceInfoCache.get(key) as T || defaultValue;
   }
   
   /**
-   * 检查设备信息是否存在
-   * @param key 信息键
-   * @returns 是否存在
+   * 妫€鏌ヨ澶囦俊鎭槸鍚﹀瓨鍦?   * @param key 淇℃伅閿?   * @returns 鏄惁瀛樺湪
    */
   public async hasDeviceInfo(key: string): Promise<boolean> {
     try {
@@ -444,9 +420,8 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 删除设备信息
-   * @param key 信息键
-   * @returns 是否删除成功
+   * 鍒犻櫎璁惧淇℃伅
+   * @param key 淇℃伅閿?   * @returns 鏄惁鍒犻櫎鎴愬姛
    */
   public async removeDeviceInfo(key: string): Promise<boolean> {
     try {
@@ -472,8 +447,7 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取完整的设备信息对象
-   */
+   * 鑾峰彇瀹屾暣鐨勮澶囦俊鎭璞?   */
   public async getFullDeviceInfo(): Promise<DeviceInfo | null> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -487,14 +461,14 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取设备ID
+   * 鑾峰彇璁惧ID
    */
   public async getDeviceId(): Promise<string> {
     return await this.getOrCreateDeviceId();
   }
   
   /**
-   * 获取设备能力
+   * 鑾峰彇璁惧鑳藉姏
    */
   public async getDeviceCapabilities(): Promise<DeviceCapability | null> {
     if (!this.isInitialized) {
@@ -505,35 +479,32 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 更新网络信息
-   * @param networkInfo 网络信息
+   * 鏇存柊缃戠粶淇℃伅
+   * @param networkInfo 缃戠粶淇℃伅
    */
   public async updateNetworkInfo(networkInfo: DeviceNetworkInfo): Promise<boolean> {
     return await this.setDeviceInfo(DeviceInfoKeys.NETWORK_INFO, networkInfo);
   }
   
   /**
-   * 获取网络信息
+   * 鑾峰彇缃戠粶淇℃伅
    */
   public async getNetworkInfo(): Promise<DeviceNetworkInfo | null> {
     return await this.getDeviceInfo<DeviceNetworkInfo>(DeviceInfoKeys.NETWORK_INFO);
   }
   
   /**
-   * 检测设备支持的视频编解码器
+   * 妫€娴嬭澶囨敮鎸佺殑瑙嗛缂栬В鐮佸櫒
    */
   private async detectSupportedVideoCodecs(): Promise<string[]> {
     try {
-      // 常见视频编解码器列表
+      // 甯歌瑙嗛缂栬В鐮佸櫒鍒楄〃
       const videoCodecs = ['h264', 'h265', 'vp8', 'vp9', 'av1', 'mpeg4'];
       const supportedCodecs: string[] = [];
       
-      // 使用模拟编解码器检测
-      for (const codecName of videoCodecs) {
+      // 浣跨敤妯℃嫙缂栬В鐮佸櫒妫€娴?      for (const codecName of videoCodecs) {
         try {
-          // 检查是否支持该编解码器的解码能力
-          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
-          if (isSupported) {
+          // 妫€鏌ユ槸鍚︽敮鎸佽缂栬В鐮佸櫒鐨勮В鐮佽兘鍔?          const isSupported = await this.checkCodecSupport(codecName, 0); // 0琛ㄧず瑙ｇ爜鍣ㄦā寮?          if (isSupported) {
             supportedCodecs.push(codecName);
           }
         } catch (error) {
@@ -542,30 +513,25 @@ export class DeviceInfoRepository {
         }
       }
       
-      // 如果模拟检测失败，回退到基本编解码器列表
-      return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
+      // 濡傛灉妯℃嫙妫€娴嬪け璐ワ紝鍥為€€鍒板熀鏈紪瑙ｇ爜鍣ㄥ垪琛?      return supportedCodecs.length > 0 ? supportedCodecs : ['h264', 'h265', 'vp9'];
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to detect video codecs: ${errorMsg}`);
-      return ['h264', 'h265', 'vp9']; // 默认回退值
-    }
+      return ['h264', 'h265', 'vp9']; // 榛樿鍥為€€鍊?    }
   }
   
   /**
-   * 检测设备支持的音频编解码器
+   * 妫€娴嬭澶囨敮鎸佺殑闊抽缂栬В鐮佸櫒
    */
   private async detectSupportedAudioCodecs(): Promise<string[]> {
     try {
-      // 常见音频编解码器列表
+      // 甯歌闊抽缂栬В鐮佸櫒鍒楄〃
       const audioCodecs = ['aac', 'mp3', 'opus', 'flac', 'vorbis', 'ac3', 'eac3'];
       const supportedCodecs: string[] = [];
       
-      // 使用模拟编解码器检测
-      for (const codecName of audioCodecs) {
+      // 浣跨敤妯℃嫙缂栬В鐮佸櫒妫€娴?      for (const codecName of audioCodecs) {
         try {
-          // 检查是否支持该编解码器的解码能力
-          const isSupported = await this.checkCodecSupport(codecName, 0); // 0表示解码器模式
-          if (isSupported) {
+          // 妫€鏌ユ槸鍚︽敮鎸佽缂栬В鐮佸櫒鐨勮В鐮佽兘鍔?          const isSupported = await this.checkCodecSupport(codecName, 0); // 0琛ㄧず瑙ｇ爜鍣ㄦā寮?          if (isSupported) {
             supportedCodecs.push(codecName);
           }
         } catch (error) {
@@ -574,22 +540,19 @@ export class DeviceInfoRepository {
         }
       }
       
-      // 如果模拟检测失败，回退到基本编解码器列表
-      return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
+      // 濡傛灉妯℃嫙妫€娴嬪け璐ワ紝鍥為€€鍒板熀鏈紪瑙ｇ爜鍣ㄥ垪琛?      return supportedCodecs.length > 0 ? supportedCodecs : ['aac', 'mp3', 'opus'];
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to detect audio codecs: ${errorMsg}`);
-      return ['aac', 'mp3', 'opus']; // 默认回退值
-    }
+      return ['aac', 'mp3', 'opus']; // 榛樿鍥為€€鍊?    }
   }
   
   /**
-   * 检测设备最大支持的分辨率
-   */
+   * 妫€娴嬭澶囨渶澶ф敮鎸佺殑鍒嗚鲸鐜?   */
   private async detectMaxResolution(): Promise<string> {
     try {
-      // 这里可以添加实际的分辨率检测逻辑
-      // 暂时根据设备屏幕尺寸进行估算
+      // 杩欓噷鍙互娣诲姞瀹為檯鐨勫垎杈ㄧ巼妫€娴嬮€昏緫
+      // 鏆傛椂鏍规嵁璁惧灞忓箷灏哄杩涜浼扮畻
       const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
       
       if (screenWidth >= 3840) {
@@ -604,47 +567,41 @@ export class DeviceInfoRepository {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to detect max resolution: ${errorMsg}`);
-      return '1080p'; // 默认回退值
-    }
+      return '1080p'; // 榛樿鍥為€€鍊?    }
   }
   
   /**
-   * 检测设备是否支持HDR
+   * 妫€娴嬭澶囨槸鍚︽敮鎸丠DR
    */
   private async detectHDRSupport(): Promise<boolean> {
     try {
-      // 这里可以使用系统API检测HDR支持
-      // 暂时返回基于屏幕分辨率的估算值
-      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
-      return screenWidth >= 3840; // 假设4K屏幕通常支持HDR
+      // 杩欓噷鍙互浣跨敤绯荤粺API妫€娴婬DR鏀寔
+      // 鏆傛椂杩斿洖鍩轰簬灞忓箷鍒嗚鲸鐜囩殑浼扮畻鍊?      const screenWidth = this.getSafeValue(DeviceInfoKeys.SCREEN_WIDTH, 1920);
+      return screenWidth >= 3840; // 鍋囪4K灞忓箷閫氬父鏀寔HDR
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to detect HDR support: ${errorMsg}`);
-      return false; // 默认不支持
-    }
+      return false; // 榛樿涓嶆敮鎸?    }
   }
   
   /**
-   * 检测设备是否支持Dolby Atmos
+   * 妫€娴嬭澶囨槸鍚︽敮鎸丏olby Atmos
    */
   private async detectDolbySupport(): Promise<boolean> {
     try {
-      // 这里可以使用音频API检测Dolby支持
-      // 暂时返回一个默认值
-      return false; // 默认不支持，实际应用中需要使用系统API检测
-    } catch (error) {
+      // 杩欓噷鍙互浣跨敤闊抽API妫€娴婦olby鏀寔
+      // 鏆傛椂杩斿洖涓€涓粯璁ゅ€?      return false; // 榛樿涓嶆敮鎸侊紝瀹為檯搴旂敤涓渶瑕佷娇鐢ㄧ郴缁烝PI妫€娴?    } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       Logger.error(TAG, `Failed to detect Dolby support: ${errorMsg}`);
-      return false; // 默认不支持
-    }
+      return false; // 榛樿涓嶆敮鎸?    }
   }
   
   /**
-   * 检查特定编解码器的支持情况
+   * 妫€鏌ョ壒瀹氱紪瑙ｇ爜鍣ㄧ殑鏀寔鎯呭喌
    */
   private async checkCodecSupport(codecName: string, mode: number): Promise<boolean> {
     try {
-      // 使用模拟编解码器检测器查询编解码器信息
+      // 浣跨敤妯℃嫙缂栬В鐮佸櫒妫€娴嬪櫒鏌ヨ缂栬В鐮佸櫒淇℃伅
       const codecInfos = await MockCodecDetector.getCodecList(codecName);
       return codecInfos.length > 0;
     } catch (error) {
@@ -655,8 +612,8 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 检查设备是否支持指定的视频编解码器
-   * @param codec 视频编解码器
+   * 妫€鏌ヨ澶囨槸鍚︽敮鎸佹寚瀹氱殑瑙嗛缂栬В鐮佸櫒
+   * @param codec 瑙嗛缂栬В鐮佸櫒
    */
   public async isVideoCodecSupported(codec: string): Promise<boolean> {
     const codecs = await this.getDeviceInfo<string[]>(DeviceInfoKeys.SUPPORTED_VIDEO_CODECS, []);
@@ -664,8 +621,8 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 检查设备是否支持指定的音频编解码器
-   * @param codec 音频编解码器
+   * 妫€鏌ヨ澶囨槸鍚︽敮鎸佹寚瀹氱殑闊抽缂栬В鐮佸櫒
+   * @param codec 闊抽缂栬В鐮佸櫒
    */
   public async isAudioCodecSupported(codec: string): Promise<boolean> {
     const codecs = await this.getDeviceInfo<string[]>(DeviceInfoKeys.SUPPORTED_AUDIO_CODECS, []);
@@ -673,32 +630,29 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 更新应用版本信息
-   * @param appVersion 应用版本
+   * 鏇存柊搴旂敤鐗堟湰淇℃伅
+   * @param appVersion 搴旂敤鐗堟湰
    */
   public async updateAppVersion(appVersion: string): Promise<boolean> {
     return await this.setDeviceInfo(DeviceInfoKeys.APP_VERSION, appVersion);
   }
   
   /**
-   * 清空所有设备信息（谨慎使用）
-   */
+   * 娓呯┖鎵€鏈夎澶囦俊鎭紙璋ㄦ厧浣跨敤锛?   */
   public async clearAllDeviceInfo(): Promise<boolean> {
     try {
       Logger.warning(TAG, 'Clearing all device info');
       
-      // 保留设备ID和首次使用时间
-      const deviceId = await this.getDeviceId();
+      // 淇濈暀璁惧ID鍜岄娆′娇鐢ㄦ椂闂?      const deviceId = await this.getDeviceId();
       const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME);
       
-      // 删除数据库中的所有记录
-      await this.sqliteHelper.delete(DEVICE_INFO_TABLE.TABLE_NAME);
+      // 鍒犻櫎鏁版嵁搴撲腑鐨勬墍鏈夎褰?      await this.sqliteHelper.delete(DEVICE_INFO_TABLE.TABLE_NAME);
       
-      // 清空缓存
+      // 娓呯┖缂撳瓨
       this.deviceInfoCache.clear();
       this.deviceInfo = null;
       
-      // 重新保存重要信息
+      // 閲嶆柊淇濆瓨閲嶈淇℃伅
       if (deviceId) {
         await this.setDeviceInfo(DeviceInfoKeys.DEVICE_ID, deviceId);
       }
@@ -706,7 +660,7 @@ export class DeviceInfoRepository {
         await this.setDeviceInfo(DeviceInfoKeys.FIRST_USE_TIME, firstUseTime);
       }
       
-      // 重新收集设备信息
+      // 閲嶆柊鏀堕泦璁惧淇℃伅
       await this.collectDeviceInfo();
       
       Logger.info(TAG, 'All device info cleared and reinitialized');
@@ -719,12 +673,11 @@ export class DeviceInfoRepository {
   }
   
   /**
-   * 获取设备使用统计信息
+   * 鑾峰彇璁惧浣跨敤缁熻淇℃伅
    */
   public async getUsageStatistics(): Promise<{
-    deviceAge: number; // 设备使用天数
-    lastActive: number; // 最后活跃时间
-  }> {
+    deviceAge: number; // 璁惧浣跨敤澶╂暟
+    lastActive: number; // 鏈€鍚庢椿璺冩椂闂?  }> {
     try {
       const firstUseTime = await this.getDeviceInfo<number>(DeviceInfoKeys.FIRST_USE_TIME, Date.now());
       const lastUpdated = await this.getDeviceInfo<number>(DeviceInfoKeys.LAST_UPDATED, Date.now());
@@ -746,3 +699,5 @@ export class DeviceInfoRepository {
     }
   }
 }
+
+

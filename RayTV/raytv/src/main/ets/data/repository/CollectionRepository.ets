@@ -1,5 +1,5 @@
-// CollectionRepository.ets - 收藏数据仓库
-// 负责收藏内容相关数据的存储、读取和管理
+﻿// CollectionRepository.ets - 鏀惰棌鏁版嵁浠撳簱
+// 璐熻矗鏀惰棌鍐呭鐩稿叧鏁版嵁鐨勫瓨鍌ㄣ€佽鍙栧拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { COLLECTION_TABLE, COLLECTION_FOLDER_TABLE } from '../db/TableSchema';
@@ -52,7 +52,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取收藏仓库单例实例
+   * 鑾峰彇鏀惰棌浠撳簱鍗曚緥瀹炰緥
    */
   public static getInstance(): CollectionRepository {
     if (!CollectionRepository.instance) {
@@ -62,16 +62,13 @@ export class CollectionRepository {
   }
   
   /**
-   * 添加收藏项
-   * @param item 收藏项
-   * @returns 是否添加成功
+   * 娣诲姞鏀惰棌椤?   * @param item 鏀惰棌椤?   * @returns 鏄惁娣诲姞鎴愬姛
    */
   public async addCollection(item: CollectionItem): Promise<boolean> {
     try {
       Logger.debug(TAG, `Adding collection: ${item.title}`);
       
-      // 检查是否已存在相同内容的收藏
-      if (await this.isContentCollected(item.contentType, item.contentId)) {
+      // 妫€鏌ユ槸鍚﹀凡瀛樺湪鐩稿悓鍐呭鐨勬敹钘?      if (await this.isContentCollected(item.contentType, item.contentId)) {
         Logger.warn(TAG, `Content already collected: ${item.contentId}`);
         return false;
       }
@@ -98,7 +95,7 @@ export class CollectionRepository {
       if (insertResult.success && insertResult.lastInsertRowId) {
         item.id = insertResult.lastInsertRowId.toString();
         
-        // 更新缓存
+        // 鏇存柊缂撳瓨
         await this.cacheCollectionItem(item);
         await this.invalidateCollectionListCache();
         
@@ -114,9 +111,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 更新收藏项
-   * @param item 收藏项
-   * @returns 是否更新成功
+   * 鏇存柊鏀惰棌椤?   * @param item 鏀惰棌椤?   * @returns 鏄惁鏇存柊鎴愬姛
    */
   public async updateCollection(item: CollectionItem): Promise<boolean> {
     try {
@@ -150,7 +145,7 @@ export class CollectionRepository {
       const updateResult = await this.sqliteHelper.update(COLLECTION_TABLE.TABLE_NAME, collectionData, conditions);
       
       if (updateResult.success) {
-        // 更新缓存
+        // 鏇存柊缂撳瓨
         await this.cacheCollectionItem(item);
         await this.invalidateCollectionListCache();
         
@@ -166,9 +161,8 @@ export class CollectionRepository {
   }
   
   /**
-   * 删除收藏项
-   * @param collectionId 收藏项ID
-   * @returns 是否删除成功
+   * 鍒犻櫎鏀惰棌椤?   * @param collectionId 鏀惰棌椤笽D
+   * @returns 鏄惁鍒犻櫎鎴愬姛
    */
   public async removeCollection(collectionId: string): Promise<boolean> {
     try {
@@ -182,7 +176,7 @@ export class CollectionRepository {
       const deleteResult = await this.sqliteHelper.delete(COLLECTION_TABLE.TABLE_NAME, conditions);
       
       if (deleteResult.success) {
-        // 清除缓存
+        // 娓呴櫎缂撳瓨
         await this.removeCachedCollectionItem(collectionId);
         await this.invalidateCollectionListCache();
         
@@ -198,10 +192,8 @@ export class CollectionRepository {
   }
   
   /**
-   * 批量删除收藏项
-   * @param collectionIds 收藏项ID列表
-   * @returns 删除成功的数量
-   */
+   * 鎵归噺鍒犻櫎鏀惰棌椤?   * @param collectionIds 鏀惰棌椤笽D鍒楄〃
+   * @returns 鍒犻櫎鎴愬姛鐨勬暟閲?   */
   public async batchRemoveCollections(collectionIds: string[]): Promise<number> {
     if (!collectionIds || collectionIds.length === 0) {
       return 0;
@@ -219,7 +211,7 @@ export class CollectionRepository {
       const deleteResult = await this.sqliteHelper.delete(COLLECTION_TABLE.TABLE_NAME, conditions);
       
       if (deleteResult.success) {
-        // 清除缓存
+        // 娓呴櫎缂撳瓨
         for (const id of collectionIds) {
           await this.removeCachedCollectionItem(id);
         }
@@ -237,23 +229,20 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取所有收藏项
-   * @param sortType 排序类型
-   * @param limit 限制数量
-   * @param offset 偏移量
-   * @returns 收藏项列表
-   */
+   * 鑾峰彇鎵€鏈夋敹钘忛」
+   * @param sortType 鎺掑簭绫诲瀷
+   * @param limit 闄愬埗鏁伴噺
+   * @param offset 鍋忕Щ閲?   * @returns 鏀惰棌椤瑰垪琛?   */
   public async getAllCollections(
     sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC,
     limit: number = 50,
     offset: number = 0
   ): Promise<CollectionItem[]> {
     try {
-      // 构建排序选项
+      // 鏋勫缓鎺掑簭閫夐」
       const sortOptions = this.buildSortOptions(sortType);
       
-      // 查询数据库
-      const collectionRecords = await this.sqliteHelper.query(
+      // 鏌ヨ鏁版嵁搴?      const collectionRecords = await this.sqliteHelper.query(
         COLLECTION_TABLE.TABLE_NAME,
         ['*'],
         undefined,
@@ -262,7 +251,7 @@ export class CollectionRepository {
         offset
       );
       
-      // 转换为CollectionItem对象
+      // 杞崲涓篊ollectionItem瀵硅薄
       const collections = this.convertToCollectionObjects(collectionRecords);
       
       Logger.info(TAG, `Retrieved ${collections.length} collections`);
@@ -275,21 +264,18 @@ export class CollectionRepository {
   }
   
   /**
-   * 根据ID获取收藏项
-   * @param collectionId 收藏项ID
-   * @returns 收藏项或null
+   * 鏍规嵁ID鑾峰彇鏀惰棌椤?   * @param collectionId 鏀惰棌椤笽D
+   * @returns 鏀惰棌椤规垨null
    */
   public async getCollectionById(collectionId: string): Promise<CollectionItem | null> {
     try {
-      // 尝试从缓存获取
-      const cachedItem = await this.getCachedCollectionItem(collectionId);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedItem = await this.getCachedCollectionItem(collectionId);
       if (cachedItem) {
         Logger.debug(TAG, `Returning collection ${collectionId} from cache`);
         return cachedItem;
       }
       
-      // 查询数据库
-      const conditions: QueryCondition[] = [{
+      // 鏌ヨ鏁版嵁搴?      const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.ID,
         value: collectionId
       }];
@@ -304,10 +290,10 @@ export class CollectionRepository {
         return null;
       }
       
-      // 转换为CollectionItem对象
+      // 杞崲涓篊ollectionItem瀵硅薄
       const collection = this.convertToCollectionObject(collectionRecord);
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheCollectionItem(collection);
       
       return collection;
@@ -319,11 +305,10 @@ export class CollectionRepository {
   }
   
   /**
-   * 根据内容ID检查是否已收藏
-   * @param contentType 内容类型
-   * @param contentId 内容ID
-   * @returns 是否已收藏
-   */
+   * 鏍规嵁鍐呭ID妫€鏌ユ槸鍚﹀凡鏀惰棌
+   * @param contentType 鍐呭绫诲瀷
+   * @param contentId 鍐呭ID
+   * @returns 鏄惁宸叉敹钘?   */
   public async isContentCollected(contentType: string, contentId: string): Promise<boolean> {
     try {
       const conditions: QueryCondition[] = [{
@@ -343,10 +328,9 @@ export class CollectionRepository {
   }
   
   /**
-   * 根据内容ID获取收藏项
-   * @param contentType 内容类型
-   * @param contentId 内容ID
-   * @returns 收藏项或null
+   * 鏍规嵁鍐呭ID鑾峰彇鏀惰棌椤?   * @param contentType 鍐呭绫诲瀷
+   * @param contentId 鍐呭ID
+   * @returns 鏀惰棌椤规垨null
    */
   public async getCollectionByContent(contentType: string, contentId: string): Promise<CollectionItem | null> {
     try {
@@ -377,11 +361,9 @@ export class CollectionRepository {
   }
   
   /**
-   * 按文件夹获取收藏项
-   * @param folderId 文件夹ID
-   * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * 鎸夋枃浠跺す鑾峰彇鏀惰棌椤?   * @param folderId 鏂囦欢澶笽D
+   * @param sortType 鎺掑簭绫诲瀷
+   * @returns 鏀惰棌椤瑰垪琛?   */
   public async getCollectionsByFolder(
     folderId: string, 
     sortType: CollectionSortType = CollectionSortType.TITLE_ASC
@@ -412,17 +394,16 @@ export class CollectionRepository {
   }
   
   /**
-   * 按标签获取收藏项
-   * @param tag 标签
-   * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * 鎸夋爣绛捐幏鍙栨敹钘忛」
+   * @param tag 鏍囩
+   * @param sortType 鎺掑簭绫诲瀷
+   * @returns 鏀惰棌椤瑰垪琛?   */
   public async getCollectionsByTag(
     tag: string, 
     sortType: CollectionSortType = CollectionSortType.CREATE_TIME_DESC
   ): Promise<CollectionItem[]> {
     try {
-      // 使用LIKE查询包含指定标签的收藏项
+      // 浣跨敤LIKE鏌ヨ鍖呭惈鎸囧畾鏍囩鐨勬敹钘忛」
       const conditions: QueryCondition[] = [{
         column: COLLECTION_TABLE.COLUMNS.TAGS,
         operator: 'LIKE',
@@ -438,7 +419,7 @@ export class CollectionRepository {
         sortOptions
       );
       
-      // 过滤出确实包含指定标签的项（避免LIKE匹配不准确）
+      // 杩囨护鍑虹‘瀹炲寘鍚寚瀹氭爣绛剧殑椤癸紙閬垮厤LIKE鍖归厤涓嶅噯纭級
       const collections = this.convertToCollectionObjects(collectionRecords).filter(item => 
         item.tags?.includes(tag)
       );
@@ -453,11 +434,10 @@ export class CollectionRepository {
   }
   
   /**
-   * 按类型获取收藏项
-   * @param contentType 内容类型
-   * @param sortType 排序类型
-   * @returns 收藏项列表
-   */
+   * 鎸夌被鍨嬭幏鍙栨敹钘忛」
+   * @param contentType 鍐呭绫诲瀷
+   * @param sortType 鎺掑簭绫诲瀷
+   * @returns 鏀惰棌椤瑰垪琛?   */
   public async getCollectionsByContentType(
     contentType: string, 
     sortType: CollectionSortType = CollectionSortType.TITLE_ASC
@@ -488,8 +468,8 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取收藏项总数
-   * @returns 收藏项总数
+   * 鑾峰彇鏀惰棌椤规€绘暟
+   * @returns 鏀惰棌椤规€绘暟
    */
   public async getCollectionCount(): Promise<number> {
     try {
@@ -502,9 +482,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 创建收藏文件夹
-   * @param folder 文件夹信息
-   * @returns 是否创建成功
+   * 鍒涘缓鏀惰棌鏂囦欢澶?   * @param folder 鏂囦欢澶逛俊鎭?   * @returns 鏄惁鍒涘缓鎴愬姛
    */
   public async createFolder(folder: CollectionFolder): Promise<boolean> {
     try {
@@ -536,9 +514,7 @@ export class CollectionRepository {
   }
   
   /**
-   * 更新收藏文件夹
-   * @param folder 文件夹信息
-   * @returns 是否更新成功
+   * 鏇存柊鏀惰棌鏂囦欢澶?   * @param folder 鏂囦欢澶逛俊鎭?   * @returns 鏄惁鏇存柊鎴愬姛
    */
   public async updateFolder(folder: CollectionFolder): Promise<boolean> {
     try {
@@ -577,16 +553,14 @@ export class CollectionRepository {
   }
   
   /**
-   * 删除收藏文件夹
-   * @param folderId 文件夹ID
-   * @returns 是否删除成功
+   * 鍒犻櫎鏀惰棌鏂囦欢澶?   * @param folderId 鏂囦欢澶笽D
+   * @returns 鏄惁鍒犻櫎鎴愬姛
    */
   public async deleteFolder(folderId: string): Promise<boolean> {
     try {
       Logger.debug(TAG, `Deleting collection folder: ${folderId}`);
       
-      // 首先将该文件夹下的收藏项移到根目录
-      const updateResult = await this.sqliteHelper.update(
+      // 棣栧厛灏嗚鏂囦欢澶逛笅鐨勬敹钘忛」绉诲埌鏍圭洰褰?      const updateResult = await this.sqliteHelper.update(
         COLLECTION_TABLE.TABLE_NAME,
         { [COLLECTION_TABLE.COLUMNS.FOLDER_ID]: null },
         [{ column: COLLECTION_TABLE.COLUMNS.FOLDER_ID, value: folderId }]
@@ -597,8 +571,7 @@ export class CollectionRepository {
         return false;
       }
       
-      // 然后删除文件夹
-      const conditions: QueryCondition[] = [{
+      // 鐒跺悗鍒犻櫎鏂囦欢澶?      const conditions: QueryCondition[] = [{
         column: COLLECTION_FOLDER_TABLE.COLUMNS.ID,
         value: folderId
       }];
@@ -619,9 +592,8 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取所有收藏文件夹
-   * @returns 文件夹列表
-   */
+   * 鑾峰彇鎵€鏈夋敹钘忔枃浠跺す
+   * @returns 鏂囦欢澶瑰垪琛?   */
   public async getAllFolders(): Promise<CollectionFolder[]> {
     try {
       const sortOptions = [{
@@ -662,10 +634,9 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取文件夹中的收藏项数量
-   * @param folderId 文件夹ID
-   * @returns 收藏项数量
-   */
+   * 鑾峰彇鏂囦欢澶逛腑鐨勬敹钘忛」鏁伴噺
+   * @param folderId 鏂囦欢澶笽D
+   * @returns 鏀惰棌椤规暟閲?   */
   public async getFolderItemCount(folderId: string): Promise<number> {
     try {
       const conditions: QueryCondition[] = [{
@@ -682,9 +653,9 @@ export class CollectionRepository {
   }
   
   /**
-   * 构建排序选项
-   * @param sortType 排序类型
-   * @returns 排序选项数组
+   * 鏋勫缓鎺掑簭閫夐」
+   * @param sortType 鎺掑簭绫诲瀷
+   * @returns 鎺掑簭閫夐」鏁扮粍
    */
   private buildSortOptions(sortType: CollectionSortType): Array<{ column: string; order: 'ASC' | 'DESC' }> {
     switch (sortType) {
@@ -710,9 +681,8 @@ export class CollectionRepository {
   }
   
   /**
-   * 将数据库记录转换为CollectionItem对象
-   * @param record 数据库记录
-   * @returns CollectionItem对象
+   * 灏嗘暟鎹簱璁板綍杞崲涓篊ollectionItem瀵硅薄
+   * @param record 鏁版嵁搴撹褰?   * @returns CollectionItem瀵硅薄
    */
   private convertToCollectionObject(record: Record<string, Serializable>): CollectionItem {
     const tags = record[COLLECTION_TABLE.COLUMNS.TAGS] ? record[COLLECTION_TABLE.COLUMNS.TAGS].split(',') : [];
@@ -738,23 +708,20 @@ export class CollectionRepository {
   }
   
   /**
-   * 将数据库记录数组转换为CollectionItem对象数组
-   * @param records 数据库记录数组
-   * @returns CollectionItem对象数组
+   * 灏嗘暟鎹簱璁板綍鏁扮粍杞崲涓篊ollectionItem瀵硅薄鏁扮粍
+   * @param records 鏁版嵁搴撹褰曟暟缁?   * @returns CollectionItem瀵硅薄鏁扮粍
    */
   private convertToCollectionObjects(records: Record<string, Serializable>[]): CollectionItem[] {
     return records.map(record => this.convertToCollectionObject(record));
   }
   
   /**
-   * 缓存收藏项
-   * @param item 收藏项
-   */
+   * 缂撳瓨鏀惰棌椤?   * @param item 鏀惰棌椤?   */
   private async cacheCollectionItem(item: CollectionItem): Promise<void> {
     if (!item.id) return;
     
     try {
-      // 这里可以添加缓存逻辑，使用StorageUtil
+      // 杩欓噷鍙互娣诲姞缂撳瓨閫昏緫锛屼娇鐢⊿torageUtil
       await StorageUtil.save(`${COLLECTION_CACHE_PREFIX}${item.id}`, item);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -763,13 +730,13 @@ export class CollectionRepository {
   }
   
   /**
-   * 获取缓存的收藏项
-   * @param itemId 收藏项ID
-   * @returns 收藏项或null
+   * 鑾峰彇缂撳瓨鐨勬敹钘忛」
+   * @param itemId 鏀惰棌椤笽D
+   * @returns 鏀惰棌椤规垨null
    */
   private async getCachedCollectionItem(itemId: string): Promise<CollectionItem | null> {
     try {
-      // 这里可以添加获取缓存逻辑，使用StorageUtil
+      // 杩欓噷鍙互娣诲姞鑾峰彇缂撳瓨閫昏緫锛屼娇鐢⊿torageUtil
       return await StorageUtil.get<CollectionItem>(`${COLLECTION_CACHE_PREFIX}${itemId}`);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -779,12 +746,12 @@ export class CollectionRepository {
   }
   
   /**
-   * 移除缓存的收藏项
-   * @param itemId 收藏项ID
+   * 绉婚櫎缂撳瓨鐨勬敹钘忛」
+   * @param itemId 鏀惰棌椤笽D
    */
   private async removeCachedCollectionItem(itemId: string): Promise<void> {
     try {
-      // 这里可以添加移除缓存逻辑，使用StorageUtil
+      // 杩欓噷鍙互娣诲姞绉婚櫎缂撳瓨閫昏緫锛屼娇鐢⊿torageUtil
       await StorageUtil.remove(`${COLLECTION_CACHE_PREFIX}${itemId}`);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -793,11 +760,10 @@ export class CollectionRepository {
   }
   
   /**
-   * 使收藏列表缓存失效
-   */
+   * 浣挎敹钘忓垪琛ㄧ紦瀛樺け鏁?   */
   private async invalidateCollectionListCache(): Promise<void> {
     try {
-      // 这里可以添加使列表缓存失效的逻辑，使用StorageUtil
+      // 杩欓噷鍙互娣诲姞浣垮垪琛ㄧ紦瀛樺け鏁堢殑閫昏緫锛屼娇鐢⊿torageUtil
       await StorageUtil.remove(COLLECTION_LIST_CACHE);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -805,3 +771,5 @@ export class CollectionRepository {
     }
   }
 }
+
+

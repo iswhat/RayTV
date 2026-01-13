@@ -1,5 +1,4 @@
-// 推荐仓库 - 管理内容推荐算法和数据
-import Logger from '../../common/util/Logger';
+﻿// 鎺ㄨ崘浠撳簱 - 绠＄悊鍐呭鎺ㄨ崘绠楁硶鍜屾暟鎹?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
@@ -9,7 +8,7 @@ import SearchHistoryRepository from './SearchHistoryRepository';
 import { LocalStorageType, CacheType } from '../model/commonTypes';
 import { Serializable } from '../../types/commonTypes';
 
-// 推荐类型枚举
+// 鎺ㄨ崘绫诲瀷鏋氫妇
 export enum RecommendationType {
   PERSONALIZED = 'personalized',
   TRENDING = 'trending',
@@ -24,14 +23,14 @@ export enum RecommendationType {
   LIVE_NOW = 'live_now'
 }
 
-// 推荐项目接口
+// 鎺ㄨ崘椤圭洰鎺ュ彛
 export interface RecommendationItem {
   id: string;
   type: 'video' | 'live' | 'playlist';
-  data: Record<string, Serializable>; // 使用通用类型替代具体类型
-  reason?: string; // 推荐理由
-  score: number; // 推荐分数
-  tags: string[]; // 相关标签
+  data: Record<string, Serializable>; // 浣跨敤閫氱敤绫诲瀷鏇夸唬鍏蜂綋绫诲瀷
+  reason?: string; // 鎺ㄨ崘鐞嗙敱
+  score: number; // 鎺ㄨ崘鍒嗘暟
+  tags: string[]; // 鐩稿叧鏍囩
   category?: string;
   viewCount?: number;
   isPremium?: boolean;
@@ -39,14 +38,14 @@ export interface RecommendationItem {
   releaseDate?: number;
 }
 
-// 推荐请求参数接口
+// 鎺ㄨ崘璇锋眰鍙傛暟鎺ュ彛
 export interface RecommendationRequest {
   type: RecommendationType;
   limit?: number;
   offset?: number;
   category?: string;
   tags?: string[];
-  videoId?: string; // 用于相似推荐
+  videoId?: string; // 鐢ㄤ簬鐩镐技鎺ㄨ崘
   userId?: string;
   contentTypes?: ('video' | 'live' | 'playlist')[];
   excludeIds?: string[];
@@ -55,7 +54,7 @@ export interface RecommendationRequest {
   sortBy?: 'score' | 'date' | 'popularity';
 }
 
-// 推荐响应接口
+// 鎺ㄨ崘鍝嶅簲鎺ュ彛
 export interface RecommendationResponse {
   items: RecommendationItem[];
   total: number;
@@ -68,11 +67,11 @@ export interface RecommendationResponse {
   };
 }
 
-// 推荐配置接口
+// 鎺ㄨ崘閰嶇疆鎺ュ彛
 export interface RecommendationConfig {
   enablePersonalization: boolean;
   minWatchHistoryForPersonalization: number;
-  cacheDuration: Record<string, number>; // 使用Record替代枚举映射
+  cacheDuration: Record<string, number>; // 浣跨敤Record鏇夸唬鏋氫妇鏄犲皠
   pageSize: number;
   maxRecommendationsPerRequest: number;
   enableOfflineRecommendations: boolean;
@@ -87,7 +86,7 @@ export interface RecommendationConfig {
   };
 }
 
-// 推荐事件类型常量
+// 鎺ㄨ崘浜嬩欢绫诲瀷甯搁噺
 export const RecommendationEventType = {
   RECOMMENDATIONS_LOADED: 'recommendation:loaded',
   RECOMMENDATIONS_FAILED: 'recommendation:failed',
@@ -97,7 +96,7 @@ export const RecommendationEventType = {
   USER_PREFERENCES_UPDATED: 'recommendation:userPreferencesUpdated'
 } as const;
 
-// 推荐事件数据接口
+// 鎺ㄨ崘浜嬩欢鏁版嵁鎺ュ彛
 export interface RecommendationEvent {
   type: string;
   timestamp: number;
@@ -105,7 +104,7 @@ export interface RecommendationEvent {
   error?: Error;
 }
 
-// 用户偏好接口
+// 鐢ㄦ埛鍋忓ソ鎺ュ彛
 export interface UserPreferences {
   preferredCategories: string[];
   preferredTags: string[];
@@ -132,7 +131,7 @@ export class RecommendationRepository {
   private readonly userRepository: UserRepository;
   private readonly searchHistoryRepository: SearchHistoryRepository;
   
-  // API端点配置
+  // API绔偣閰嶇疆
   private readonly apiEndpoints = {
     baseUrl: 'https://api.raytv.example.com',
     recommendations: '/recommendations',
@@ -143,8 +142,7 @@ export class RecommendationRepository {
     userPreferences: '/user/preferences'
   };
   
-  // 存储键配置
-  private readonly storageKeys = {
+  // 瀛樺偍閿厤缃?  private readonly storageKeys = {
     userPreferences: 'recommendation:userPreferences',
     recommendationCache: 'recommendation:cache:',
     watchHistory: 'recommendation:watchHistory',
@@ -153,7 +151,7 @@ export class RecommendationRepository {
     continueWatching: 'recommendation:continueWatching'
   };
   
-  // 默认配置
+  // 榛樿閰嶇疆
   private readonly defaultConfig: RecommendationConfig = {
     enablePersonalization: true,
     minWatchHistoryForPersonalization: 5,
@@ -184,15 +182,12 @@ export class RecommendationRepository {
     }
   };
   
-  // 缓存的配置
-  private cachedConfig: RecommendationConfig | null = null;
+  // 缂撳瓨鐨勯厤缃?  private cachedConfig: RecommendationConfig | null = null;
   
-  // 缓存的用户偏好
-  private cachedUserPreferences: UserPreferences | null = null;
+  // 缂撳瓨鐨勭敤鎴峰亸濂?  private cachedUserPreferences: UserPreferences | null = null;
 
   /**
-   * 私有构造函数
-   */
+   * 绉佹湁鏋勯€犲嚱鏁?   */
   private constructor() {
     this.logger = Logger.getInstance();
     this.storageUtil = StorageUtil.getInstance();
@@ -208,7 +203,7 @@ export class RecommendationRepository {
   }
 
   /**
-   * 获取RecommendationRepository单例实例
+   * 鑾峰彇RecommendationRepository鍗曚緥瀹炰緥
    */
   public static getInstance(): RecommendationRepository {
     if (!RecommendationRepository.instance) {
@@ -218,8 +213,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取推荐类型枚举的所有值
-   * 替代Object.values，兼容ArkTS语法
+   * 鑾峰彇鎺ㄨ崘绫诲瀷鏋氫妇鐨勬墍鏈夊€?   * 鏇夸唬Object.values锛屽吋瀹笰rkTS璇硶
    */
   private getRecommendationTypeValues(): string[] {
     return [
@@ -238,17 +232,16 @@ export class RecommendationRepository {
   }
 
   /**
-   * 初始化推荐仓库
-   */
+   * 鍒濆鍖栨帹鑽愪粨搴?   */
   public async initialize(): Promise<void> {
     try {
-      // 加载配置
+      // 鍔犺浇閰嶇疆
       await this.loadConfig();
       
-      // 加载用户偏好
+      // 鍔犺浇鐢ㄦ埛鍋忓ソ
       await this.loadUserPreferences();
       
-      // 预加载一些基础推荐数据（异步）
+      // 棰勫姞杞戒竴浜涘熀纭€鎺ㄨ崘鏁版嵁锛堝紓姝ワ級
       this.preloadRecommendations().catch(err => {
         this.logger.warn('Failed to preload recommendations', err);
       });
@@ -260,39 +253,35 @@ export class RecommendationRepository {
   }
 
   /**
-   * 设置事件监听器
-   */
+   * 璁剧疆浜嬩欢鐩戝惉鍣?   */
   private setupEventListeners(): void {
-    // 监听用户登录/登出事件
+    // 鐩戝惉鐢ㄦ埛鐧诲綍/鐧诲嚭浜嬩欢
     this.eventBus.on('user:login', async () => {
-      // 登录后加载用户偏好
-      await this.loadUserPreferences();
+      // 鐧诲綍鍚庡姞杞界敤鎴峰亸濂?      await this.loadUserPreferences();
       
-      // 清除个性化推荐缓存
+      // 娓呴櫎涓€у寲鎺ㄨ崘缂撳瓨
       await this.clearCache(RecommendationType.PERSONALIZED);
     });
     
     this.eventBus.on('user:logout', async () => {
-      // 登出时重置用户偏好
-      this.cachedUserPreferences = null;
+      // 鐧诲嚭鏃堕噸缃敤鎴峰亸濂?      this.cachedUserPreferences = null;
     });
     
-    // 监听播放进度更新事件
+    // 鐩戝惉鎾斁杩涘害鏇存柊浜嬩欢
     this.eventBus.on('playback:progressUpdated', async (data: Record<string, unknown>) => {
       if (data.videoId && data.progress) {
         await this.updateWatchHistory(data.videoId as string, data.progress as number, data.duration as number);
       }
     });
     
-    // 监听搜索历史更新事件
+    // 鐩戝惉鎼滅储鍘嗗彶鏇存柊浜嬩欢
     this.eventBus.on('search:historyUpdated', async () => {
-      // 清除基于搜索历史的推荐缓存
-      await this.clearCache(RecommendationType.BASED_ON_WATCH_HISTORY);
+      // 娓呴櫎鍩轰簬鎼滅储鍘嗗彶鐨勬帹鑽愮紦瀛?      await this.clearCache(RecommendationType.BASED_ON_WATCH_HISTORY);
     });
   }
   
   /**
-   * 加载配置
+   * 鍔犺浇閰嶇疆
    */
   private async loadConfig(): Promise<void> {
     try {
@@ -314,7 +303,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 保存配置
+   * 淇濆瓨閰嶇疆
    */
   private async saveConfig(): Promise<void> {
     try {
@@ -329,7 +318,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 加载用户偏好
+   * 鍔犺浇鐢ㄦ埛鍋忓ソ
    */
   private async loadUserPreferences(): Promise<void> {
     try {
@@ -347,7 +336,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 保存用户偏好
+   * 淇濆瓨鐢ㄦ埛鍋忓ソ
    */
   private async saveUserPreferences(): Promise<void> {
     try {
@@ -365,7 +354,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 更新观看历史
+   * 鏇存柊瑙傜湅鍘嗗彶
    */
   private async updateWatchHistory(videoId: string, progress: number, duration: number): Promise<void> {
     try {
@@ -386,7 +375,7 @@ export class RecommendationRepository {
         LocalStorageType.DEFAULT
       );
       
-      // 发布观看历史更新事件
+      // 鍙戝竷瑙傜湅鍘嗗彶鏇存柊浜嬩欢
       this.eventBus.publish('recommendation:watchHistoryUpdated', {
         videoId,
         progress,
@@ -398,17 +387,15 @@ export class RecommendationRepository {
   }
   
   /**
-   * 预加载推荐数据
-   */
+   * 棰勫姞杞芥帹鑽愭暟鎹?   */
   private async preloadRecommendations(): Promise<void> {
     try {
-      // 预加载热门推荐
-      await this.getRecommendations({
+      // 棰勫姞杞界儹闂ㄦ帹鑽?      await this.getRecommendations({
         type: RecommendationType.TRENDING, 
         limit: 10
       });
       
-      // 预加载新发布内容
+      // 棰勫姞杞芥柊鍙戝竷鍐呭
       await this.getRecommendations({
         type: RecommendationType.NEW_RELEASES,
         limit: 10
@@ -421,12 +408,11 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取推荐内容
+   * 鑾峰彇鎺ㄨ崘鍐呭
    */
   public async getRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
     try {
-      // 检查缓存
-      const cacheKey = this.getCacheKey(request);
+      // 妫€鏌ョ紦瀛?      const cacheKey = this.getCacheKey(request);
       const cachedResponse = await this.cacheService.get<RecommendationResponse>(cacheKey, CacheType.RECOMMENDATION);
       
       if (cachedResponse) {
@@ -440,14 +426,14 @@ export class RecommendationRepository {
         };
       }
       
-      // 从服务器获取推荐
+      // 浠庢湇鍔″櫒鑾峰彇鎺ㄨ崘
       const response = await this.fetchRecommendationsFromServer(request);
       
-      // 缓存响应
+      // 缂撳瓨鍝嶅簲
       const cacheDuration = this.cachedConfig?.cacheDuration[request.type] || 300;
       await this.cacheService.set(cacheKey, response, CacheType.RECOMMENDATION, cacheDuration);
       
-      // 发布推荐加载成功事件
+      // 鍙戝竷鎺ㄨ崘鍔犺浇鎴愬姛浜嬩欢
       this.eventBus.publish(RecommendationEventType.RECOMMENDATIONS_LOADED, {
         type: request.type,
         count: response.items.length,
@@ -456,19 +442,18 @@ export class RecommendationRepository {
       
       return response;
     } catch (error) {
-      // 发布推荐加载失败事件
+      // 鍙戝竷鎺ㄨ崘鍔犺浇澶辫触浜嬩欢
       this.eventBus.publish(RecommendationEventType.RECOMMENDATIONS_FAILED, {
         type: request.type,
         error: error as Error
       });
       
-      // 尝试从离线缓存获取
-      return await this.getOfflineRecommendations(request);
+      // 灏濊瘯浠庣绾跨紦瀛樿幏鍙?      return await this.getOfflineRecommendations(request);
     }
   }
   
   /**
-   * 从服务器获取推荐
+   * 浠庢湇鍔″櫒鑾峰彇鎺ㄨ崘
    */
   private async fetchRecommendationsFromServer(request: RecommendationRequest): Promise<RecommendationResponse> {
     const url = this.buildRecommendationUrl(request);
@@ -489,7 +474,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 构建推荐URL
+   * 鏋勫缓鎺ㄨ崘URL
    */
   private buildRecommendationUrl(request: RecommendationRequest): string {
     const baseUrl = this.apiEndpoints.baseUrl;
@@ -527,14 +512,13 @@ export class RecommendationRepository {
   }
   
   /**
-   * 构建请求头
-   */
+   * 鏋勫缓璇锋眰澶?   */
   private buildRequestHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     };
     
-    // 添加用户认证信息
+    // 娣诲姞鐢ㄦ埛璁よ瘉淇℃伅
     const currentUser = this.userRepository.getCurrentUser();
     if (currentUser && currentUser.token) {
       headers['Authorization'] = `Bearer ${currentUser.token}`;
@@ -544,7 +528,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 解析推荐响应
+   * 瑙ｆ瀽鎺ㄨ崘鍝嶅簲
    */
   private parseRecommendationResponse(data: Record<string, Serializable>, request: RecommendationRequest): RecommendationResponse {
     return {
@@ -561,7 +545,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取离线推荐
+   * 鑾峰彇绂荤嚎鎺ㄨ崘
    */
   private async getOfflineRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
     try {
@@ -571,8 +555,7 @@ export class RecommendationRepository {
       );
       
       if (offlineData) {
-        // 过滤离线数据以匹配请求类型
-        const filteredItems = offlineData.items.filter(item => {
+        // 杩囨护绂荤嚎鏁版嵁浠ュ尮閰嶈姹傜被鍨?        const filteredItems = offlineData.items.filter(item => {
           if (request.contentTypes && !request.contentTypes.includes(item.type)) {
             return false;
           }
@@ -603,8 +586,7 @@ export class RecommendationRepository {
       this.logger.warn('Failed to get offline recommendations', error as Error);
     }
     
-    // 返回空响应作为后备
-    return {
+    // 杩斿洖绌哄搷搴斾綔涓哄悗澶?    return {
       items: [],
       total: 0,
       type: request.type,
@@ -617,8 +599,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取缓存键
-   */
+   * 鑾峰彇缂撳瓨閿?   */
   private getCacheKey(request: RecommendationRequest): string {
     const keyParts = [
       request.type,
@@ -639,17 +620,15 @@ export class RecommendationRepository {
   }
   
   /**
-   * 清除缓存
+   * 娓呴櫎缂撳瓨
    */
   public async clearCache(type?: RecommendationType): Promise<void> {
     try {
       if (type) {
-        // 清除特定类型的缓存
-        const cacheKey = this.getCacheKey({ type, limit: 0 });
+        // 娓呴櫎鐗瑰畾绫诲瀷鐨勭紦瀛?        const cacheKey = this.getCacheKey({ type, limit: 0 });
         await this.cacheService.delete(cacheKey, CacheType.RECOMMENDATION);
       } else {
-        // 清除所有推荐缓存
-        const cacheKeys = this.getRecommendationTypeValues().map(t => 
+        // 娓呴櫎鎵€鏈夋帹鑽愮紦瀛?        const cacheKeys = this.getRecommendationTypeValues().map(t => 
           this.getCacheKey({ type: t as RecommendationType, limit: 0 })
         );
         
@@ -665,14 +644,14 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取用户偏好
+   * 鑾峰彇鐢ㄦ埛鍋忓ソ
    */
   public getUserPreferences(): UserPreferences | null {
     return this.cachedUserPreferences ? { ...this.cachedUserPreferences } : null;
   }
   
   /**
-   * 更新用户偏好
+   * 鏇存柊鐢ㄦ埛鍋忓ソ
    */
   public async updateUserPreferences(preferences: Partial<UserPreferences>): Promise<void> {
     if (!this.cachedUserPreferences) {
@@ -691,21 +670,21 @@ export class RecommendationRepository {
     
     await this.saveUserPreferences();
     
-    // 发布用户偏好更新事件
+    // 鍙戝竷鐢ㄦ埛鍋忓ソ鏇存柊浜嬩欢
     this.eventBus.publish(RecommendationEventType.USER_PREFERENCES_UPDATED, {
       preferences: this.cachedUserPreferences
     });
   }
   
   /**
-   * 获取推荐配置
+   * 鑾峰彇鎺ㄨ崘閰嶇疆
    */
   public getRecommendationConfig(): RecommendationConfig {
     return this.cachedConfig ? { ...this.cachedConfig } : this.defaultConfig;
   }
   
   /**
-   * 更新推荐配置
+   * 鏇存柊鎺ㄨ崘閰嶇疆
    */
   public async updateRecommendationConfig(config: Partial<RecommendationConfig>): Promise<void> {
     if (!this.cachedConfig) {
@@ -716,14 +695,14 @@ export class RecommendationRepository {
     
     await this.saveConfig();
     
-    // 发布配置更新事件
+    // 鍙戝竷閰嶇疆鏇存柊浜嬩欢
     this.eventBus.publish(RecommendationEventType.RECOMMENDATION_CONFIG_CHANGED, {
       config: this.cachedConfig
     });
   }
   
   /**
-   * 获取继续观看推荐
+   * 鑾峰彇缁х画瑙傜湅鎺ㄨ崘
    */
   public async getContinueWatching(): Promise<RecommendationItem[]> {
     try {
@@ -736,16 +715,15 @@ export class RecommendationRepository {
         return [];
       }
       
-      // 过滤出未完成的观看记录
-      const continueWatchingItems: RecommendationItem[] = [];
+      // 杩囨护鍑烘湭瀹屾垚鐨勮鐪嬭褰?      const continueWatchingItems: RecommendationItem[] = [];
       
       for (const [videoId, history] of Object.entries(watchHistory)) {
-        if (history.progress < history.duration * 0.9) { // 进度小于90%的视为未完成
+        if (history.progress < history.duration * 0.9) { // 杩涘害灏忎簬90%鐨勮涓烘湭瀹屾垚
           continueWatchingItems.push({
             id: videoId,
             type: 'video',
             data: { id: videoId, progress: history.progress, duration: history.duration },
-            reason: '继续观看',
+            reason: '缁х画瑙傜湅',
             score: 0.8,
             tags: ['continue-watching'],
             category: 'continue-watching'
@@ -753,22 +731,21 @@ export class RecommendationRepository {
         }
       }
       
-      // 按时间戳排序，最新的在前
+      // 鎸夋椂闂存埑鎺掑簭锛屾渶鏂扮殑鍦ㄥ墠
       continueWatchingItems.sort((a, b) => {
         const aTime = watchHistory[a.id]?.timestamp || 0;
         const bTime = watchHistory[b.id]?.timestamp || 0;
         return bTime - aTime;
       });
       
-      return continueWatchingItems.slice(0, 10); // 最多返回10个
-    } catch (error) {
+      return continueWatchingItems.slice(0, 10); // 鏈€澶氳繑鍥?0涓?    } catch (error) {
       this.logger.error('Failed to get continue watching items', error as Error);
       return [];
     }
   }
   
   /**
-   * 获取相似内容推荐
+   * 鑾峰彇鐩镐技鍐呭鎺ㄨ崘
    */
   public async getSimilarContent(videoId: string, limit: number = 10): Promise<RecommendationItem[]> {
     try {
@@ -786,7 +763,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取热门推荐
+   * 鑾峰彇鐑棬鎺ㄨ崘
    */
   public async getTrending(limit: number = 20): Promise<RecommendationItem[]> {
     try {
@@ -803,8 +780,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 获取新发布内容
-   */
+   * 鑾峰彇鏂板彂甯冨唴瀹?   */
   public async getNewReleases(limit: number = 20): Promise<RecommendationItem[]> {
     try {
       const response = await this.getRecommendations({
@@ -820,7 +796,7 @@ export class RecommendationRepository {
   }
   
   /**
-   * 保存离线推荐数据
+   * 淇濆瓨绂荤嚎鎺ㄨ崘鏁版嵁
    */
   public async saveOfflineRecommendations(recommendations: RecommendationItem[]): Promise<void> {
     try {
@@ -844,12 +820,11 @@ export class RecommendationRepository {
   }
   
   /**
-   * 清理过期数据
+   * 娓呯悊杩囨湡鏁版嵁
    */
   public async cleanupExpiredData(): Promise<void> {
     try {
-      // 清理过期的观看历史（30天前）
-      const watchHistory = await this.storageUtil.getObject<Record<string, { progress: number; duration: number; timestamp: number }>>(
+      // 娓呯悊杩囨湡鐨勮鐪嬪巻鍙诧紙30澶╁墠锛?      const watchHistory = await this.storageUtil.getObject<Record<string, { progress: number; duration: number; timestamp: number }>>(
         this.storageKeys.watchHistory,
         LocalStorageType.DEFAULT
       );
@@ -875,8 +850,7 @@ export class RecommendationRepository {
         }
       }
       
-      // 清理过期的推荐缓存
-      await this.clearCache();
+      // 娓呯悊杩囨湡鐨勬帹鑽愮紦瀛?      await this.clearCache();
       
     } catch (error) {
       this.logger.error('Failed to cleanup expired data', error as Error);
@@ -884,15 +858,16 @@ export class RecommendationRepository {
   }
   
   /**
-   * 关闭仓库
+   * 鍏抽棴浠撳簱
    */
   public async shutdown(): Promise<void> {
     try {
-      // 保存当前状态
-      await this.saveConfig();
+      // 淇濆瓨褰撳墠鐘舵€?      await this.saveConfig();
       await this.saveUserPreferences();
     } catch (error) {
       this.logger.error('Failed to shutdown RecommendationRepository', error as Error);
     }
   }
 }
+
+

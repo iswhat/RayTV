@@ -1,34 +1,51 @@
-// DatabaseManager.ets - 数据库管理器
-// 实现基于HarmonyOS RelationalStore的数据库连接和管理
+/**
+ * DatabaseManager - 数据库管理器
+ * 实现基于HarmonyOS RelationalStore的数据库连接和管理
+ */
 import relationalStore from '@ohos.data.relationalStore';
 import Context from '@ohos.ability.featureAbility';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
 import Logger from '../../common/util/Logger';
 
-// 定义接口，用于类型安全
+/**
+ * Database information interface | 数据库信息接口
+ */
 export interface DatabaseInfo {
-  name: string;
-  version: number;
+  name: string; // Database name | 数据库名称
+  version: number; // Database version | 数据库版本
 }
 
+/**
+ * Migration result interface | 迁移结果接口
+ */
 export interface MigrationResult {
-  success: boolean;
-  message?: string;
+  success: boolean; // Whether successful | 是否成功
+  message?: string; // Message | 消息
 }
 
+/**
+ * Transaction result interface | 事务结果接口
+ */
 export interface TransactionResult {
-  success: boolean;
-  affectedRows?: number;
+  success: boolean; // Whether successful | 是否成功
+  affectedRows?: number; // Affected rows | 受影响的行数
 }
 
+/**
+ * Database size information interface | 数据库大小信息接口
+ */
 export interface DatabaseSizeInfo {
-  pageCount: number;
-  pageSize: number;
-  totalSize: number;
+  pageCount: number; // Page count | 页数
+  pageSize: number; // Page size | 页大小
+  totalSize: number; // Total size | 总大小
 }
 
 const TAG = 'DatabaseManager';
 
+/**
+ * DatabaseManager - Database Manager | 数据库管理器
+ * Implement database connection and management based on HarmonyOS RelationalStore | 实现基于HarmonyOS RelationalStore的数据库连接和管理
+ */
 export class DatabaseManager {
   private static instance: DatabaseManager;
   private database: relationalStore.RdbStore | null = null;
@@ -38,7 +55,8 @@ export class DatabaseManager {
   private constructor() {}
   
   /**
-   * 获取数据库管理器单例实例
+   * Get database manager singleton instance | 获取数据库管理器单例实例
+   * @returns Database manager instance | 数据库管理器实例
    */
   public static getInstance(): DatabaseManager {
     if (!DatabaseManager.instance) {
@@ -49,7 +67,8 @@ export class DatabaseManager {
   
   /**
    * 初始化数据库
-   * @param context 应用上下�?   */
+   * @param context 应用上下文
+   */
   public async initDatabase(context: Context): Promise<void> {
     // 如果已经初始化或正在初始化，返回现有Promise
     if (this.isInitialized) {
@@ -67,18 +86,20 @@ export class DatabaseManager {
   
   /**
    * 实际的初始化逻辑
+   * @param context 应用上下文
    */
   private async doInitialize(context: Context): Promise<void> {
     try {
       Logger.info(TAG, 'Starting database initialization');
       
       // 使用默认安全级别
-    const config: relationalStore.StoreConfig = {
-      name: DATABASE_INFO.NAME,
-      securityLevel: relationalStore.SecurityLevel.S2
-    };
+      const config: relationalStore.StoreConfig = {
+        name: DATABASE_INFO.NAME,
+        securityLevel: relationalStore.SecurityLevel.S2
+      };
       
-      // 获取数据库连�?      this.database = await relationalStore.getRdbStore(context, config);
+      // 获取数据库连接
+      this.database = await relationalStore.getRdbStore(context, config);
       
       // 创建表和索引
       await this.createTables();
@@ -99,7 +120,7 @@ export class DatabaseManager {
   }
   
   /**
-   * 创建数据库表
+   * Create database tables | 创建数据库表
    */
   private async createTables(): Promise<void> {
     const db = this.database;
@@ -124,7 +145,7 @@ export class DatabaseManager {
   }
   
   /**
-   * 创建索引
+   * Create indexes | 创建索引
    */
   private async createIndexes(): Promise<void> {
     const db = this.database;
@@ -148,7 +169,8 @@ export class DatabaseManager {
   }
   
   /**
-   * 检查数据库版本并执行迁�?   */
+   * 检查数据库版本并执行迁移
+   */
   private async checkDatabaseVersion(): Promise<void> {
     const db = this.database;
     if (!db) {
@@ -172,10 +194,10 @@ export class DatabaseManager {
       
       Logger.info(TAG, `Current database version: ${currentVersion}, Target version: ${DATABASE_INFO.VERSION}`);
       
-      // 如果需要升级
+      // 如果需要升级 If upgrade is needed
       if (currentVersion < DATABASE_INFO.VERSION) {
         await this.migrateDatabase(currentVersion, DATABASE_INFO.VERSION);
-        // 更新版本信息
+        // 更新版本信息 Update version information
         await db.executeSql(
           'INSERT OR REPLACE INTO database_meta (id, version, last_updated) VALUES (1, ?, ?)',
           [DATABASE_INFO.VERSION, Date.now()]
@@ -191,7 +213,9 @@ export class DatabaseManager {
   }
   
   /**
-   * 执行数据库迁�?   * @param fromVersion 源版�?   * @param toVersion 目标版本
+   * 执行数据库迁移
+   * @param fromVersion 源版本
+   * @param toVersion 目标版本
    */
   private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
     const database = this.database;
@@ -210,7 +234,7 @@ export class DatabaseManager {
           // 这里可以根据不同的版本执行不同的迁移脚本
           // 例如：执行ALTER TABLE语句、数据转换等
           
-          // 示例：如果需要创建元数据表（首次迁移时）
+          // 示例：如果需要创建元数据表(第一次迁移时)
           if (version === 1) {
             await db.executeSql(
               'CREATE TABLE IF NOT EXISTS database_meta (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, last_updated INTEGER NOT NULL)',
@@ -230,7 +254,8 @@ export class DatabaseManager {
   }
   
   /**
-   * 获取数据库实�?   * @returns RdbStore实例
+   * 获取数据库实例
+   * @returns RdbStore实例
    */
   public getDatabase(): relationalStore.RdbStore {
     if (!this.database) {
@@ -278,10 +303,13 @@ export class DatabaseManager {
   }
   
   /**
-   * 关闭数据�?   */
+   * 关闭数据库
+   */
   public closeDatabase(): void {
     if (this.database) {
-      // 在HarmonyOS中，RdbStore会自动管理连接关�?      // 这里主要是重置状�?      this.database = null;
+      // 在HarmonyOS中，RdbStore会自动管理连接生命周期
+      // 这里主要是重置状态
+      this.database = null;
       this.isInitialized = false;
       Logger.info(TAG, 'Database connection closed');
     }
@@ -296,7 +324,9 @@ export class DatabaseManager {
   }
   
   /**
-   * 获取数据库信�?   * @returns 数据库信�?   */
+   * 获取数据库信息
+   * @returns 数据库信息
+   */
   public getDatabaseInfo(): DatabaseInfo {
     return {
       name: DATABASE_INFO.NAME,
@@ -305,19 +335,22 @@ export class DatabaseManager {
   }
   
   /**
-   * 清空数据库（删除所有表并重建）
-   * @param context 应用上下�?   */
+   * 重置数据库(删除所有表并重建)
+   * @param context 应用上下文
+   */
   public async resetDatabase(context: Context): Promise<void> {
     try {
       Logger.info(TAG, 'Resetting database - this will delete all data!');
       
-      // 关闭现有连接
+      // 关闭现有连接 Close existing connection
       this.closeDatabase();
       
-      // 删除数据库文�?      await context.deleteDatabase(DATABASE_INFO.NAME);
+      // 删除数据库文件 Delete database file
+      await context.deleteDatabase(DATABASE_INFO.NAME);
       Logger.info(TAG, 'Database file deleted');
       
-      // 重新初始�?      await this.initDatabase(context);
+      // 重新初始化 Reinitialize
+      await this.initDatabase(context);
       Logger.info(TAG, 'Database reset completed successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to reset database: ${JSON.stringify(error)}`);
@@ -326,7 +359,8 @@ export class DatabaseManager {
   }
   
   /**
-   * 获取数据库大小信�?   * @returns 数据库大小（字节数）
+   * 获取数据库大小信息
+   * @returns 数据库大小(字节数)
    */
   public async getDatabaseSize(): Promise<number> {
     if (!this.database) {
@@ -337,7 +371,7 @@ export class DatabaseManager {
     try {
       Logger.debug(TAG, 'Getting database size');
       
-      // 使用PRAGMA page_count和page_size查询数据库大小
+      // 使用PRAGMA page_count和page_size查询数据库大小 Query database size using PRAGMA page_count and page_size
       const pageCountResult: relationalStore.ResultSet = await this.database.querySql('PRAGMA page_count', []);
       let pageCount = 0;
       if (pageCountResult.goToFirstRow()) {
@@ -363,7 +397,8 @@ export class DatabaseManager {
   }
   
   /**
-   * 优化数据�?   */
+   * 优化数据库
+   */
   public async optimizeDatabase(): Promise<void> {
     if (!this.database) {
       Logger.error(TAG, 'Failed to optimize database: Database not initialized');
@@ -371,7 +406,8 @@ export class DatabaseManager {
     }
     
     try {
-      // 在SQLite中，VACUUM命令可以优化数据�?      await this.executeSql('VACUUM');
+      // 在SQLite中，VACUUM命令可以优化数据库 In SQLite, VACUUM command can optimize database
+      await this.executeSql('VACUUM');
       Logger.info(TAG, 'Database optimized successfully');
     } catch (error) {
       Logger.error(TAG, `Failed to optimize database: ${JSON.stringify(error)}`);

@@ -1,4 +1,5 @@
-// Index.ets - 应用主入口页�?import { Stack } from '@kit.ArkUI';
+// Index.ets | 应用主入口页面 | Application main entry page
+import { Stack } from '@kit.ArkUI';
 import HomePage from './HomePage';
 
 @Entry

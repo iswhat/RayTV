@@ -1,11 +1,12 @@
 /**
- * JSON工具类，提供安全的JSON序列化和反序列化功能
+ * JSON utility class | JSON工具类
+ * Provides safe JSON serialization and deserialization functionality | 提供安全的JSON序列化和反序列化功能
  */
 export default class JsonUtil {
   /**
-   * 安全地解析JSON字符串
-   * @param jsonStr JSON字符串
-   * @returns 解析后的对象，解析失败返回null
+   * Safely parses JSON string | 安全地解析JSON字符串
+   * @param jsonStr JSON string | JSON字符串
+   * @returns Parsed object, null if parsing fails | 解析后的对象，解析失败返回null
    */
   public static parse(jsonStr: string): Record<string, string | number | boolean | null> | null {
     try {
@@ -21,10 +22,10 @@ export default class JsonUtil {
   }
 
   /**
-   * 安全地序列化对象为JSON字符串
-   * @param obj 要序列化的对象
-   * @param space 缩进空格数，默认不缩进
-   * @returns JSON字符串，序列化失败返回空字符串
+   * Safely serializes object to JSON string | 安全地序列化对象为JSON字符串
+   * @param obj Object to serialize | 要序列化的对象
+   * @param space Indentation spaces, default no indentation | 缩进格式数，默认不缩进
+   * @returns JSON string, empty string if serialization fails | JSON字符串，序列化失败返回空字符串
    */
   public static stringify(obj: Record<string, string | number | boolean | null | undefined> | null | undefined, space?: number): string {
     try {
@@ -39,61 +40,66 @@ export default class JsonUtil {
   }
 
   /**
-   * 深拷贝对象
-   * @param obj 要拷贝的对象
-   * @returns 拷贝后的对象
+   * Safely parses JSON array | 安全地解析JSON数组
+   * @param jsonStr JSON string | JSON字符串
+   * @returns Parsed array, empty array if parsing fails | 解析后的数组，解析失败返回空数组
    */
-  public static deepClone<T extends Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') {
+  public static parseArray<T>(jsonStr: string): T[] {
+    try {
+      const parsed = JSON.parse(jsonStr) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed as T[];
+      }
+      return [];
+    } catch (error) {
+      console.error('JsonUtil: Failed to parse JSON array:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Deep clones object | 深克隆对象
+   * @param obj Object to clone | 要克隆的对象
+   * @returns Cloned object | 克隆后的对象
+   */
+  public static deepClone<T>(obj: T): T {
+    try {
+      return JSON.parse(JSON.stringify(obj)) as T;
+    } catch (error) {
+      console.error('JsonUtil: Failed to deep clone object:', error);
       return obj;
     }
-    
-    const clone: T = Array.isArray(obj) ? [] as T : {} as T;
-    const keys = Object.keys(obj);
-    keys.forEach((key: string) => {
-      const value = obj[key as keyof T];
-      if (value !== null && typeof value === 'object') {
-        clone[key as keyof T] = JsonUtil.deepClone(value as T[keyof T] & (Record<string, string | number | boolean | null | undefined> | Array<string | number | boolean | null | undefined>)) as T[keyof T];
-      } else {
-        clone[key as keyof T] = value;
-      }
-    });
-    
-    return clone;
   }
 
   /**
-   * 合并两个对象
-   * @param target 目标对象
-   * @param source 源对象
-   * @returns 合并后的对象
+   * Merges two JSON objects | 合并两个JSON对象
+   * @param target Target object | 目标对象
+   * @param source Source object | 源对象
+   * @returns Merged object | 合并后的对象
    */
-  public static merge<T extends Record<string, string | number | boolean | null | undefined>, U extends Record<string, string | number | boolean | null | undefined>>(target: T, source: U): Record<string, string | number | boolean | null | undefined> {
-    const result: Record<string, string | number | boolean | null | undefined> = {};
-    
-    // 复制target属性
-    const targetKeys = Object.keys(target);
-    targetKeys.forEach((key: string) => {
-      result[key] = target[key as keyof T];
-    });
-    
-    // 复制source属性，覆盖target中的同名属性
-    const sourceKeys = Object.keys(source);
-    sourceKeys.forEach((key: string) => {
-      result[key] = source[key as keyof U];
-    });
-    
-    return result;
-  }
-
-  /**
-   * 检查字符串是否为有效的JSON
-   * @param str 要检查的字符串
-   * @returns 是否为有效JSON
-   */
-  public static isValidJSON(str: string): boolean {
+  public static merge(target: Record<string, string | number | boolean | null>, source: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
     try {
-      JSON.parse(str);
+      const merged = { ...target };
+      for (const key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          merged[key] = source[key];
+        }
+      }
+      return merged;
+    } catch (error) {
+      console.error('JsonUtil: Failed to merge objects:', error);
+      return target;
+    }
+  }
+
+  /**
+   * Checks if string is valid JSON | 检查字符串是否为有效的JSON
+   * @param jsonStr String to check | 要检查的字符串
+   * @returns Is valid JSON | 是否为有效的JSON
+   */
+  public static isValidJson(jsonStr: string): boolean {
+    try {
+      JSON.parse(jsonStr);
       return true;
     } catch {
       return false;
@@ -101,77 +107,50 @@ export default class JsonUtil {
   }
 
   /**
-   * 美化JSON字符串
-   * @param jsonStr JSON字符串
-   * @param indent 缩进空格数，默认2
-   * @returns 美化后的JSON字符串
+   * Formats JSON string | 格式化JSON字符串
+   * @param jsonStr JSON string | JSON字符串
+   * @param indent Indentation spaces, default 2 | 缩进空格数，默认2
+   * @returns Formatted JSON string | 格式化后的JSON字符串
    */
-  public static prettyPrint(jsonStr: string, indent: number = 2): string {
+  public static format(jsonStr: string, indent: number = 2): string {
     try {
-      const parsed = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
+      const parsed = JSON.parse(jsonStr) as unknown;
       return JSON.stringify(parsed, null, indent);
-    } catch {
+    } catch (error) {
+      console.error('JsonUtil: Failed to format JSON string:', error);
       return jsonStr;
     }
   }
 
   /**
-   * 过滤对象中的null和undefined值
-   * @param obj 要过滤的对象
-   * @returns 过滤后的对象
+   * Compresses JSON string | 压缩JSON字符串
+   * @param jsonStr JSON string | JSON字符串
+   * @returns Compressed JSON string | 压缩后的JSON字符串
    */
-  public static filterNullUndefined<T extends Record<string, string | number | boolean | null | undefined>>(obj: T): Record<string, string | number | boolean> {
-    const result: Record<string, string | number | boolean> = {};
-    const keys = Object.keys(obj);
-    keys.forEach((key: string) => {
-      const value = obj[key as keyof T];
-      if (value !== null && value !== undefined) {
-        result[key] = value as string | number | boolean;
-      }
-    });
-    return result;
+  public static compress(jsonStr: string): string {
+    try {
+      const parsed = JSON.parse(jsonStr) as unknown;
+      return JSON.stringify(parsed);
+    } catch (error) {
+      console.error('JsonUtil: Failed to compress JSON string:', error);
+      return jsonStr;
+    }
   }
 
   /**
-   * 安全解析JSON字符串，返回指定类型
-   * @param jsonStr JSON字符串
-   * @returns 解析后的对象，解析失败返回null
+   * Extracts specific field from JSON string | 从JSON字符串中提取指定字段
+   * @param jsonStr JSON string | JSON字符串
+   * @param field Field name to extract | 要提取的字段名
+   * @returns Extracted field value, undefined if extraction fails | 提取的字段值，提取失败返回undefined
    */
-  public static safeParse<T extends Record<string, string | number | boolean | null>>(jsonStr: string): T | null {
+  public static extractField(jsonStr: string, field: string): string | number | boolean | null | undefined {
     try {
-      const parsed = JSON.parse(jsonStr) as T;
-      return parsed;
+      const parsed = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
+      return parsed[field];
     } catch (error) {
-      console.error('JsonUtil: Failed to safe parse JSON string:', error);
-      return null;
+      console.error('JsonUtil: Failed to extract field from JSON string:', error);
+      return undefined;
     }
   }
 }
 
-/**
- * 安全的JSON序列化函数
- * @param value 要序列化的对象
- * @returns JSON字符串
- */
-export function safeStringify(value: Record<string, string | number | boolean | null>): string {
-  return JsonUtil.stringify(value);
-}
-
-/**
- * 快速解析JSON字符串
- * @param jsonStr JSON字符串
- * @returns 解析后的对象
- */
-export function quickParse(jsonStr: string): Record<string, string | number | boolean | null> {
-  const result = JsonUtil.parse(jsonStr);
-  return result || {};
-}
-
-/**
- * 检查JSON字符串是否有效
- * @param str 要检查的字符串
- * @returns 是否为有效JSON
- */
-export function isValidJSON(str: string): boolean {
-  return JsonUtil.isValidJSON(str);
-}

@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-01-04T09:56:45.675Z",
+  "keyword": "百变星君",
+  "rayTv": {
+    "site": {
+      "key": "drpy_js_豆瓣",
+      "name": "搜索 | 豆瓣[js]",
+      "type": 3,
+      "api": "./lib/drpy2.min.js",
+      "ext": "./js/drpy.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "changeable": 0
+    },
+    "keyword": "百变星君",
+    "timestamp": 1767520598561,
+    "results": [
+      {
+        "id": "raytv_1",
+        "type": "movie",
+        "title": "百变星君",
+        "coverUrl": "https://img1.doubanio.com/view/photo/s_ratio_poster/public/p1363981561.jpg",
+        "rating": 8.5,
+        "genre": [
+          "喜剧",
+          "科幻"
+        ],
+        "siteKey": "drpy_js_豆瓣",
+        "siteName": "搜索 | 豆瓣[js]"
+      }
+    ],
+    "total": 1,
+    "successSites": 1,
+    "totalSites": 1,
+    "searchTime": 500
+  },
+  "android": {
+    "site": {
+      "key": "drpy_js_豆瓣",
+      "name": "搜索 | 豆瓣[js]",
+      "type": 3,
+      "api": "./lib/drpy2.min.js",
+      "ext": "./js/drpy.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "changeable": 0
+    },
+    "keyword": "百变星君",
+    "timestamp": 1767520605673,
+    "results": [
+      {
+        "id": "android_1",
+        "title": "百变星君",
+        "cover": "https://img1.doubanio.com/view/photo/s_ratio_poster/public/p1363981561.jpg",
+        "rating": 8.5,
+        "updateInfo": "已完结",
+        "tags": [
+          "喜剧",
+          "科幻"
+        ],
+        "category": "电影",
+        "siteKey": "drpy_js_豆瓣",
+        "siteName": "搜索 | 豆瓣[js]"
+      }
+    ],
+    "total": 1,
+    "success": true
+  },
+  "comparison": {
+    "sameKeyword": true,
+    "sameTotalResults": true,
+    "rayTvResultCount": 1,
+    "androidResultCount": 1
+  }
+}

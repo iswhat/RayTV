@@ -1,575 +1,256 @@
-/**
- * 爬虫加载器基类
- * 定义爬虫加载器的核心接口和抽象方法
- */
-
+// BaseLoader.ets - 加载器基类 Loader base class
+// 实现站点脚本的加载和执行 Implements loading and execution of site scripts
 import Logger from '../../../common/util/Logger';
-import { Site, LoaderType } from '../../data/bean/Site';
+import { Site } from '../../../data/bean/Site';
+import { HttpService } from '../../HttpService';
+import { SiteSpider } from '../CrawlerService';
 
-// 方法参数接口定义
-export interface CategoryParams {
-  url: string;
-  page?: number;
-  pageSize?: number;
-  filters?: Record<string, string | number | boolean>;
+/**
+ * 加载器类型枚举 Loader type enum
+ */
+export enum LoaderType {
+  JS = 'js',
+  PYTHON = 'py',
+  JAR = 'jar'
 }
 
-export interface DetailParams {
-  url: string;
-}
-
-export interface SearchParams {
-  keyword: string;
-  page?: number;
-  pageSize?: number;
-}
-
-export interface PlayParams {
-  url: string;
-  source?: string;
-  episode?: string;
-}
-
-export interface LiveParams {
-  category?: string;
-}
-
-// 结果类型接口
-export interface CrawlerResult<T> {
-  code: number;
-  message: string;
-  data?: T;
-}
-
-export interface CategoryItem {
-  id?: string;
-  name?: string;
-  url?: string;
-  icon?: string;
-}
-
-export interface RecommendationItem {
-  id?: string;
-  title?: string;
-  cover?: string;
-  url?: string;
-  type?: string;
-}
-
-export interface BannerItem {
-  id?: string;
-  title?: string;
-  image?: string;
-  url?: string;
-  type?: string;
-}
-
-export interface HomeResult {
-  categories?: CategoryItem[];
-  recommendations?: RecommendationItem[];
-  banners?: BannerItem[];
-}
-
-export interface MediaItem {
-  id?: string;
-  title?: string;
-  cover?: string;
-  url?: string;
-  type?: string;
-  source?: string;
-  updateInfo?: string;
-  playCount?: number;
-}
-
-export interface CategoryResult {
-  items?: MediaItem[];
-  total?: number;
-  hasMore?: boolean;
-  page?: number;
-}
-
-export interface SourceItem {
-  id?: string;
-  name?: string;
-  url?: string;
-}
-
-export interface EpisodeItem {
-  id?: string;
-  title?: string;
-  url?: string;
-  episode?: string;
-  isCurrent?: boolean;
-}
-
-export interface DetailResult {
-  title?: string;
-  cover?: string;
-  description?: string;
-  sources?: SourceItem[];
-  episodes?: EpisodeItem[];
-}
-
-export interface SearchResult {
-  items?: MediaItem[];
-  total?: number;
-  hasMore?: boolean;
-  page?: number;
-}
-
-export interface PlayResult {
-  urls?: string[];
-  source?: string;
-  episode?: string;
-}
-
-export interface LiveChannel {
-  id?: string;
-  title?: string;
-  cover?: string;
-  url?: string;
-  category?: string;
-  online?: boolean;
-  siteKey?: string;
-  siteName?: string;
-}
-
-export interface LiveResult {
-  categories?: CategoryItem[];
-  channels?: LiveChannel[];
-}
-
-// 加载器状态接口
-export interface LoaderStatus {
-  initialized: boolean;
-  destroyed: boolean;
-  errorCount: number;
-  maxErrorCount: number;
-  initializedTime: number;
-  lastInvokeTime: number;
+/**
+ * 脚本执行上下文 Script execution context
+ */
+export interface ScriptContext {
   site: Site;
+  http: typeof HttpService.getInstance;
+  logger: typeof Logger;
+  [key: string]: any;
 }
 
-// 站点更新配置接口
-export interface SiteAuthConfig {
-  username?: string;
-  password?: string;
-  token?: string;
-}
-
-export interface SiteConfigItem {
-  key?: string;
-  value?: string | number | boolean;
-  type?: string;
-  label?: string;
-  required?: boolean;
-}
-
-export interface SitePerformanceConfig {
+/**
+ * 加载器选项接口 Loader options interface
+ */
+export interface LoaderOptions {
   timeout?: number;
   retryCount?: number;
-  concurrency?: number;
-}
-
-export interface SiteLifecycleConfig {
-  initDelay?: number;
-  destroyDelay?: number;
-}
-
-export interface SiteCertificateConfig {
-  cert?: string;
-  key?: string;
-  ca?: string;
-}
-
-export interface SiteUpdateConfig {
-  key?: string;
-  name?: string;
-  url?: string;
-  type?: string;
-  loaderType?: string;
-  api?: string;
-  logo?: string;
-  description?: string;
-  siteAuth?: SiteAuthConfig;
-  headers?: Record<string, string>;
-  config?: Record<string, string | number | boolean>;
-  configItems?: SiteConfigItem[];
-  searchConfig?: Record<string, string | number | boolean>;       
-  filterConfig?: Record<string, string | number | boolean>;       
-  performanceConfig?: SitePerformanceConfig;
-  version?: string;
-  stats?: Record<string, string | number | boolean>;
-  lifecycle?: SiteLifecycleConfig;
-  enabled?: boolean;
-  order?: number;
-  group?: string;
-  tags?: string[];
-  customCode?: string;
   sandboxEnabled?: boolean;
   allowThirdParty?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-  lastUsedAt?: number;
-  userAgent?: string;
-  referer?: string;
-  proxy?: boolean;
-  encoding?: string;
-  charset?: string;
-  certificate?: SiteCertificateConfig;
 }
 
+/**
+ * 加载器基类 Loader base class
+ */
 export abstract class BaseLoader {
-  protected readonly TAG: string = `BaseLoader-${this.constructor.name}`;
+  protected readonly TAG: string = 'BaseLoader';
   protected site: Site;
-  protected isInitialized: boolean = false;
-  protected isDestroyed: boolean = false;
-  protected errorCount: number = 0;
-  protected maxErrorCount: number = 5;
-  protected initializedTime: number = 0;
-  protected lastInvokeTime: number = 0;
+  protected options: LoaderOptions;
+  protected loaded: boolean = false;
+  protected scriptContent: string = '';
+  protected scriptContext: ScriptContext;
+  protected httpService: HttpService;
 
   /**
-   * 构造函数
-   * @param site 站点信息
+   * 构造函数 Constructor
+   * @param site 站点信息 Site information
+   * @param options 加载器选项 Loader options
    */
-  constructor(site: Site) {
+  constructor(site: Site, options: LoaderOptions = {}) {
     this.site = site;
-    Logger.info(this.TAG, `Creating loader for site: ${site.name} (${site.key})`);
+    this.options = {
+      timeout: 30000,
+      retryCount: 3,
+      sandboxEnabled: true,
+      allowThirdParty: false,
+      ...options
+    };
+    this.httpService = HttpService.getInstance();
+    this.scriptContext = {
+      site: this.site,
+      http: HttpService.getInstance,
+      logger: Logger
+    };
   }
 
   /**
-   * 初始化加载器
-   * @returns Promise<boolean> 初始化是否成功
+   * 加载脚本 Load script
+   * @returns Promise<boolean> 加载是否成功 Whether loading is successful
    */
-  public async init(): Promise<boolean> {
-    if (this.isDestroyed) {
-      Logger.error(this.TAG, 'Cannot initialize destroyed loader');
+  public async load(): Promise<boolean> {
+    if (this.loaded) {
+      Logger.info(this.TAG, `Script for site ${this.site.key} is already loaded`);
+      return true;
+    }
+
+    try {
+      Logger.info(this.TAG, `Loading script for site: ${this.site.key}`);
+      
+      // 下载脚本内容 Download script content
+      await this.downloadScript();
+      
+      // 初始化脚本上下文 Initialize script context
+      await this.initializeContext();
+      
+      // 执行脚本 Execute script
+      await this.executeScript();
+      
+      this.loaded = true;
+      Logger.info(this.TAG, `Script loaded successfully for site: ${this.site.key}`);
+      return true;
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to load script for site ${this.site.key}:`, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
-    
-    if (!this.isInitialized) {
-      try {
-        Logger.info(this.TAG, `Initializing loader for site: ${this.site.name}`);
-        await this.onInit();
-        this.isInitialized = true;
-        this.initializedTime = Date.now();
-        this.errorCount = 0;
-        Logger.info(this.TAG, `Loader initialized successfully for site: ${this.site.name}`);
-        return true;
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to initialize loader: ${(error as Error).message}`);
-        this.handleError();
-        return false;
+  }
+
+  /**
+   * 下载脚本内容 Download script content
+   * @returns Promise<void>
+   */
+  protected async downloadScript(): Promise<void> {
+    try {
+      // 如果site.api是URL，下载脚本内容 If site.api is URL, download script content
+      if (this.site.api && (this.site.api.startsWith('http://') || this.site.api.startsWith('https://'))) {
+        Logger.info(this.TAG, `Downloading script from: ${this.site.api}`);
+        const response = await this.httpService.get(this.site.api, {
+          timeout: this.options.timeout
+        });
+        this.scriptContent = response.data as string;
+      } else if (this.site.api) {
+        // 如果site.api是脚本内容，直接使用 If site.api is script content, use it directly
+        this.scriptContent = this.site.api;
+      } else {
+        throw new Error('No script content or URL provided');
+      }
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to download script:`, error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+
+  /**
+   * 初始化脚本上下文 Initialize script context
+   * @returns Promise<void>
+   */
+  protected async initializeContext(): Promise<void> {
+    // 初始化脚本上下文，子类可重写此方法添加更多上下文对象 Initialize script context, subclass can override this method to add more context objects
+    Logger.debug(this.TAG, `Initializing script context for site: ${this.site.key}`);
+  }
+
+  /**
+   * 执行脚本 Execute script
+   * @returns Promise<void>
+   */
+  protected abstract executeScript(): Promise<void>;
+
+  /**
+   * 调用脚本方法 Call script method
+   * @param methodName 方法名称 Method name
+   * @param args 方法参数 Method arguments
+   * @returns Promise<any> 方法返回值 Method return value
+   */
+  public abstract callMethod(methodName: string, args: Array<any>): Promise<any>;
+
+  /**
+   * 创建爬虫实例 Create spider instance
+   * @returns Promise<SiteSpider> 爬虫实例 Spider instance
+   */
+  public async createSpider(): Promise<SiteSpider> {
+    if (!this.loaded) {
+      const success = await this.load();
+      if (!success) {
+        throw new Error(`Failed to load script for site: ${this.site.key}`);
       }
     }
+
+    return this.createSpiderImpl();
+  }
+
+  /**
+   * 创建爬虫实例实现 Create spider instance implementation
+   * @returns SiteSpider 爬虫实例 Spider instance
+   */
+  protected abstract createSpiderImpl(): SiteSpider;
+
+  /**
+   * 释放资源 Release resources
+   */
+  public async destroy(): Promise<void> {
+    Logger.info(this.TAG, `Destroying loader for site: ${this.site.key}`);
+    this.loaded = false;
+    this.scriptContent = '';
+    // 子类可以重写此方法清理更多资源 Subclass can override this method to clean up more resources
+  }
+
+  /**
+   * 检查加载器是否已加载 Check if loader is loaded
+   * @returns boolean 是否已加载 Whether loaded
+   */
+  public isLoaded(): boolean {
+    return this.loaded;
+  }
+
+  /**
+   * 获取加载器类型 Get loader type
+   * @returns string 加载器类型 Loader type
+   */
+  public abstract getType(): string;
+
+  /**
+   * 验证脚本内容 Validate script content
+   * @param scriptContent 脚本内容 Script content
+   * @returns boolean 是否有效 Whether valid
+   */
+  protected validateScriptContent(scriptContent: string): boolean {
+    if (!scriptContent || scriptContent.trim().length === 0) {
+      Logger.error(this.TAG, 'Empty script content');
+      return false;
+    }
+
+    // 子类可以重写此方法添加更多验证规则 Subclass can override this method to add more validation rules
     return true;
   }
 
   /**
-   * 销毁加载器，释放资源
+   * 获取脚本执行上下文 Get script execution context
+   * @returns ScriptContext 脚本执行上下文 Script execution context
    */
-  public async destroy(): Promise<void> {
-    if (!this.isDestroyed) {
-      try {
-        Logger.info(this.TAG, `Destroying loader for site: ${this.site.name}`);
-        await this.onDestroy();
-        this.isDestroyed = true;
-        this.isInitialized = false;
-        Logger.info(this.TAG, `Loader destroyed successfully for site: ${this.site.name}`);
-      } catch (error) {
-        Logger.error(this.TAG, `Failed to destroy loader: ${(error as Error).message}`);
-      }
-    }
+  protected getScriptContext(): ScriptContext {
+    return this.scriptContext;
+  }
+}
+
+/**
+ * 空加载器，用于处理不支持的加载器类型 Empty loader, used to handle unsupported loader types
+ */
+export class EmptyLoader extends BaseLoader {
+  public executeScript(): Promise<void> {
+    return Promise.resolve();
   }
 
-  /**
-   * 调用爬虫方法
-   * @param method 方法名称
-   * @param params 方法参数
-   * @returns Promise<CrawlerResult<T>> 方法执行结果
-   */
-  public async invoke<T>(method: string, params: Record<string, string | number | boolean | null> = {}): Promise<CrawlerResult<T>> {
-    try {
-      // 检查状态
-      if (this.isDestroyed) {
-        return this.createErrorResult<T>('Cannot invoke method on destroyed loader');
-      }
-      
-      // 自动初始化
-      if (!this.isInitialized) {
-        const initialized = await this.init();
-        if (!initialized) {
-          return this.createErrorResult<T>('Loader initialization failed');
-        }
-      }
-      
-      // 验证方法
-      if (!this.validateMethod(method)) {
-        return this.createErrorResult<T>(`Method ${method} not supported`);
-      }
-      
-      this.lastInvokeTime = Date.now();
-      Logger.debug(this.TAG, `Invoking method: ${method} with params: ${JSON.stringify(params)}`);
-      
-      const result = await this.onInvoke<T>(method, params);
-      this.errorCount = 0; // 重置错误计数
-      
-      Logger.debug(this.TAG, `Method ${method} executed successfully for site: ${this.site.name}`);
-      return this.createSuccessResult(result);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to invoke method ${method}: ${(error as Error).message}`);
-      this.handleError();
-      return this.createErrorResult<T>((error as Error).message);
-    }
+  public callMethod(methodName: string, args: Array<any>): Promise<any> {
+    Logger.warn(this.TAG, `EmptyLoader: Method ${methodName} called with args: ${JSON.stringify(args)}`);
+    return Promise.resolve(null);
   }
 
-  /**
-   * 获取站点信息
-   * @returns Site 站点信息
-   */
-  public getSite(): Site {
-    // 使用手动属性复制代替Object.assign
+  protected createSpiderImpl(): SiteSpider {
     return {
-      key: this.site.key,
-      name: this.site.name,
-      url: this.site.url,
-      type: this.site.type,
-      loaderType: this.site.loaderType,
-      api: this.site.api,
-      logo: this.site.logo,
-      description: this.site.description,
-      siteAuth: this.site.siteAuth,
-      headers: this.site.headers,
-      config: this.site.config,
-      configItems: this.site.configItems,
-      searchConfig: this.site.searchConfig,
-      filterConfig: this.site.filterConfig,
-      performanceConfig: this.site.performanceConfig,
-      version: this.site.version,
-      stats: this.site.stats,
-      lifecycle: this.site.lifecycle,
-      enabled: this.site.enabled,
-      order: this.site.order,
-      group: this.site.group,
-      tags: this.site.tags,
-      customCode: this.site.customCode,
-      sandboxEnabled: this.site.sandboxEnabled,
-      allowThirdParty: this.site.allowThirdParty,
-      createdAt: this.site.createdAt,
-      updatedAt: this.site.updatedAt,
-      lastUsedAt: this.site.lastUsedAt,
-      userAgent: this.site.userAgent,
-      referer: this.site.referer,
-      proxy: this.site.proxy,
-      encoding: this.site.encoding,
-      charset: this.site.charset,
-      certificate: this.site.certificate
+      getSiteInfo: async () => this.site,
+      getRecommendList: async () => [],
+      getHotList: async () => [],
+      getLatestList: async () => [],
+      getCategories: async () => [],
+      getCategoryList: async () => [],
+      search: async () => [],
+      getDetail: async () => ({
+        id: '',
+        title: '未知标题',
+        cover: '',
+        description: '暂无描述',
+        playSources: [],
+        episodes: []
+      }),
+      getPlayUrl: async () => ''
     };
   }
 
-  /**
-   * 更新站点配置
-   * @param config 新的配置
-   */
-  public updateConfig(config: SiteUpdateConfig): void {
-    // 使用手动属性复制
-    this.site = {
-      key: config.key ?? this.site.key,
-      name: config.name ?? this.site.name,
-      url: config.url ?? this.site.url,
-      type: config.type ?? this.site.type,
-      loaderType: config.loaderType ?? this.site.loaderType,
-      api: config.api ?? this.site.api,
-      logo: config.logo ?? this.site.logo,
-      description: config.description ?? this.site.description,
-      siteAuth: config.siteAuth ?? this.site.siteAuth,
-      headers: config.headers ?? this.site.headers,
-      config: config.config ?? this.site.config,
-      configItems: config.configItems ?? this.site.configItems,
-      searchConfig: config.searchConfig ?? this.site.searchConfig,
-      filterConfig: config.filterConfig ?? this.site.filterConfig,
-      performanceConfig: config.performanceConfig ?? this.site.performanceConfig,
-      version: config.version ?? this.site.version,
-      stats: config.stats ?? this.site.stats,
-      lifecycle: config.lifecycle ?? this.site.lifecycle,
-      enabled: config.enabled ?? this.site.enabled,
-      order: config.order ?? this.site.order,
-      group: config.group ?? this.site.group,
-      tags: config.tags ?? this.site.tags,
-      customCode: config.customCode ?? this.site.customCode,
-      sandboxEnabled: config.sandboxEnabled ?? this.site.sandboxEnabled,
-      allowThirdParty: config.allowThirdParty ?? this.site.allowThirdParty,
-      createdAt: config.createdAt ?? this.site.createdAt,
-      updatedAt: config.updatedAt ?? this.site.updatedAt,
-      lastUsedAt: config.lastUsedAt ?? this.site.lastUsedAt,
-      userAgent: config.userAgent ?? this.site.userAgent,
-      referer: config.referer ?? this.site.referer,
-      proxy: config.proxy ?? this.site.proxy,
-      encoding: config.encoding ?? this.site.encoding,
-      charset: config.charset ?? this.site.charset,
-      certificate: config.certificate ?? this.site.certificate
-    };
-    Logger.info(this.TAG, `Site config updated for ${this.site.name}`);
+  public getType(): string {
+    return 'empty';
   }
-
-  /**
-   * 获取加载器类型
-   * @returns LoaderType 加载器类型
-   */
-  public getLoaderType(): LoaderType {
-    return this.site.loaderType as LoaderType;
-  }
-
-  /**
-   * 检查是否已初始化
-   * @returns boolean 是否已初始化
-   */
-  public getInitialized(): boolean {
-    return this.isInitialized;
-  }
-
-  /**
-   * 检查是否已销毁
-   * @returns boolean 是否已销毁
-   */
-  public getDestroyed(): boolean {
-    return this.isDestroyed;
-  }
-
-  /**
-   * 检查是否可用
-   * @returns boolean 是否可用
-   */
-  public isAvailable(): boolean {
-    return !this.isDestroyed && this.errorCount < this.maxErrorCount;
-  }
-
-  /**
-   * 获取加载器状态
-   */
-  public getStatus(): LoaderStatus {
-    return {
-      initialized: this.isInitialized,
-      destroyed: this.isDestroyed,
-      errorCount: this.errorCount,
-      maxErrorCount: this.maxErrorCount,
-      initializedTime: this.initializedTime,
-      lastInvokeTime: this.lastInvokeTime,
-      site: this.site
-    };
-  }
-
-  /**
-   * 重置错误计数
-   */
-  public resetErrorCount(): void {
-    this.errorCount = 0;
-  }
-
-  /**
-   * 验证方法名称
-   * @param method 方法名称
-   * @returns boolean 方法是否有效
-   */
-  protected validateMethod(method: string): boolean {
-    const validMethods = ['home', 'category', 'detail', 'search', 'play', 'live'];
-    return validMethods.includes(method);
-  }
-
-  /**
-   * 处理错误
-   */
-  protected handleError(): void {
-    this.errorCount++;
-    Logger.warn(this.TAG, `Site ${this.site.key} error count: ${this.errorCount}/${this.maxErrorCount}`);
-    
-    if (this.errorCount >= this.maxErrorCount) {
-      Logger.error(this.TAG, `Site ${this.site.key} reached max error count, disabling...`);
-    }
-  }
-
-  /**
-   * 创建成功结果
-   */
-  protected createSuccessResult<T>(data: T): CrawlerResult<T> {
-    return {
-      code: 200,
-      message: 'success',
-      data
-    };
-  }
-
-  /**
-   * 创建错误结果
-   */
-  protected createErrorResult<T>(message: string, data?: T): CrawlerResult<T> {
-    return {
-      code: 500,
-      message,
-      data: data as T
-    };
-  }
-
-  /**
-   * 执行首页方法
-   */
-  public async home(): Promise<CrawlerResult<HomeResult>> {
-    return this.invoke<HomeResult>('home');
-  }
-
-  /**
-   * 执行分类方法
-   */
-  public async category(params: CategoryParams): Promise<CrawlerResult<CategoryResult>> {
-    return this.invoke<CategoryResult>('category', {...params} as Record<string, string | number | boolean>);
-  }
-
-  /**
-   * 执行详情方法
-   */
-  public async detail(params: DetailParams): Promise<CrawlerResult<DetailResult>> {
-    return this.invoke<DetailResult>('detail', {...params} as Record<string, string | number | boolean>);
-  }
-
-  /**
-   * 执行搜索方法
-   */
-  public async search(params: SearchParams): Promise<CrawlerResult<SearchResult>> {
-    return this.invoke<SearchResult>('search', {...params} as Record<string, string | number | boolean>);
-  }
-
-  /**
-   * 执行播放方法
-   */
-  public async play(params: PlayParams): Promise<CrawlerResult<PlayResult>> {
-    return this.invoke<PlayResult>('play', {...params} as Record<string, string | number | boolean>);
-  }
-
-  /**
-   * 执行直播方法
-   */
-  public async live(params?: LiveParams): Promise<CrawlerResult<LiveResult>> {
-    return this.invoke<LiveResult>('live', {...(params || {})} as Record<string, string | number | boolean>);
-  }
-
-  /**
-   * 初始化方法（由子类实现）
-   * @protected
-   */
-  protected abstract onInit(): Promise<void>;
-
-  /**
-   * 方法调用（由子类实现）
-   * @param method 方法名称
-   * @param params 方法参数
-   * @protected
-   */
-  protected abstract onInvoke<T>(method: string, params: Record<string, string | number | boolean | null>): Promise<T>;
-
-  /**
-   * 销毁方法（由子类实现）
-   * @protected
-   */
-  protected abstract onDestroy(): Promise<void>;
 }

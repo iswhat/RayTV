@@ -1,7 +1,7 @@
 /**
- * LineManagerPage样式定义
+ * LineManagerPage样式定义 - LineManagerPage style definition
  */
-// 使用ArkTS样式系统
+// 使用ArkTS样式系统 - Use ArkTS style system
 
 export default {
   container: {
@@ -302,3 +302,6 @@ export default {
     paddingVertical: 32,
   },
 }
+
+
+

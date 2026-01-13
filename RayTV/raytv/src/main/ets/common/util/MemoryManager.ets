@@ -1,25 +1,25 @@
-// MemoryManager - 内存管理工具�?import Logger from './Logger';
+﻿// MemoryManager - 鍐呭瓨绠＄悊宸ュ叿绫?import Logger from './Logger';
 
 const TAG = 'MemoryManager';
 
 /**
- * 内存管理工具�? * 提供内存使用监控、内存限制检查等功能
+ * 鍐呭瓨绠＄悊宸ュ叿绫? * 鎻愪緵鍐呭瓨浣跨敤鐩戞帶銆佸唴瀛橀檺鍒舵鏌ョ瓑鍔熻兘
  */
 export default class MemoryManager {
   private static instance: MemoryManager;
-  private maxMemoryUsage: number = 0.8; // 最大内存使用率 80%
-  private checkInterval: number = 30000; // 30秒检查一�?  private lastCheckTime: number = 0;
+  private maxMemoryUsage: number = 0.8; // 鏈€澶у唴瀛樹娇鐢ㄧ巼 80%
+  private checkInterval: number = 30000; // 30绉掓鏌ヤ竴娆?  private lastCheckTime: number = 0;
   private memoryUsageHistory: number[] = [];
 
   /**
-   * 私有构造函�?   */
+   * 绉佹湁鏋勯€犲嚱鏁?   */
   private constructor() {
     Logger.info(TAG, 'MemoryManager initialized');
     this.startPeriodicCheck();
   }
 
   /**
-   * 获取单例实例
+   * 鑾峰彇鍗曚緥瀹炰緥
    */
   public static getInstance(): MemoryManager {
     if (!MemoryManager.instance) {
@@ -29,8 +29,8 @@ export default class MemoryManager {
   }
 
   /**
-   * 设置最大内存使用率
-   * @param usage 内存使用率阈�?(0-1)
+   * 璁剧疆鏈€澶у唴瀛樹娇鐢ㄧ巼
+   * @param usage 鍐呭瓨浣跨敤鐜囬槇鍊?(0-1)
    */
   public setMaxMemoryUsage(usage: number): void {
     if (usage > 0 && usage <= 1) {
@@ -40,12 +40,12 @@ export default class MemoryManager {
   }
 
   /**
-   * 检查内存可用�?   * @returns 是否有足够内存可�?   */
+   * 妫€鏌ュ唴瀛樺彲鐢ㄦ€?   * @returns 鏄惁鏈夎冻澶熷唴瀛樺彲鐢?   */
   public checkMemoryAvailability(): boolean {
     try {
       const currentUsage = this.getCurrentMemoryUsage();
       
-      // 记录内存使用历史
+      // 璁板綍鍐呭瓨浣跨敤鍘嗗彶
       this.recordMemoryUsage(currentUsage);
       
       const result = currentUsage < this.maxMemoryUsage;
@@ -57,18 +57,18 @@ export default class MemoryManager {
       return result;
     } catch (error) {
       Logger.error(TAG, `Failed to check memory availability: ${error}`);
-      // 出错时默认返回true，避免应用崩�?      return true;
+      // 鍑洪敊鏃堕粯璁よ繑鍥瀟rue锛岄伩鍏嶅簲鐢ㄥ穿婧?      return true;
     }
   }
 
   /**
-   * 获取当前内存使用情况
-   * @returns 内存使用�?(0-1)
+   * 鑾峰彇褰撳墠鍐呭瓨浣跨敤鎯呭喌
+   * @returns 鍐呭瓨浣跨敤鐜?(0-1)
    */
   public getCurrentMemoryUsage(): number {
     try {
-      // 在HarmonyOS中，可以使用系统API获取内存信息
-      // 这里提供一个模拟实现，实际使用时需要替换为真实的系统API调用
+      // 鍦℉armonyOS涓紝鍙互浣跨敤绯荤粺API鑾峰彇鍐呭瓨淇℃伅
+      // 杩欓噷鎻愪緵涓€涓ā鎷熷疄鐜帮紝瀹為檯浣跨敤鏃堕渶瑕佹浛鎹负鐪熷疄鐨勭郴缁烝PI璋冪敤
       const totalMemory = this.getTotalMemory();
       const freeMemory = this.getFreeMemory();
       
@@ -80,49 +80,49 @@ export default class MemoryManager {
       return usedMemory / totalMemory;
     } catch (error) {
       Logger.error(TAG, `Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}` instanceof Error ? `Failed to get current memory usage: ${error}` : new Error(String(`Failed to get current memory usage: ${error}`)))))));
-      return 0.5; // 默认返回50%使用�?    }
+      return 0.5; // 榛樿杩斿洖50%浣跨敤鐜?    }
   }
 
   /**
-   * 获取总内存大�?   * @returns 总内存字节数
+   * 鑾峰彇鎬诲唴瀛樺ぇ灏?   * @returns 鎬诲唴瀛樺瓧鑺傛暟
    */
   private getTotalMemory(): number {
     try {
-      // 模拟实现，实际应使用系统API
-      // 在HarmonyOS中，可以通过@ohos.systemCapability资源获取
-      return 8 * 1024 * 1024 * 1024; // 假设8GB内存
+      // 妯℃嫙瀹炵幇锛屽疄闄呭簲浣跨敤绯荤粺API
+      // 鍦℉armonyOS涓紝鍙互閫氳繃@ohos.systemCapability璧勬簮鑾峰彇
+      return 8 * 1024 * 1024 * 1024; // 鍋囪8GB鍐呭瓨
     } catch (error) {
       Logger.error(TAG, `Failed to get total memory: ${error}`);
-      return 4 * 1024 * 1024 * 1024; // 默认4GB
+      return 4 * 1024 * 1024 * 1024; // 榛樿4GB
     }
   }
 
   /**
-   * 获取可用内存大小
-   * @returns 可用内存字节�?   */
+   * 鑾峰彇鍙敤鍐呭瓨澶у皬
+   * @returns 鍙敤鍐呭瓨瀛楄妭鏁?   */
   private getFreeMemory(): number {
     try {
-      // 模拟实现，实际应使用系统API
-      // 在HarmonyOS中，可以通过@ohos.systemCapability资源获取
+      // 妯℃嫙瀹炵幇锛屽疄闄呭簲浣跨敤绯荤粺API
+      // 鍦℉armonyOS涓紝鍙互閫氳繃@ohos.systemCapability璧勬簮鑾峰彇
       const total = this.getTotalMemory();
-      return total * 0.4; // 假设40%可用
+      return total * 0.4; // 鍋囪40%鍙敤
     } catch (error) {
       Logger.error(TAG, `Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}` instanceof Error ? `Failed to get free memory: ${error}` : new Error(String(`Failed to get free memory: ${error}`)))))));
-      return 2 * 1024 * 1024 * 1024; // 默认2GB
+      return 2 * 1024 * 1024 * 1024; // 榛樿2GB
     }
   }
 
   /**
-   * 记录内存使用情况
-   * @param usage 当前内存使用�?   */
+   * 璁板綍鍐呭瓨浣跨敤鎯呭喌
+   * @param usage 褰撳墠鍐呭瓨浣跨敤鐜?   */
   private recordMemoryUsage(usage: number): void {
     this.memoryUsageHistory.push(usage);
     
-    // 只保留最�?00条记�?    if (this.memoryUsageHistory.length > 100) {
+    // 鍙繚鐣欐渶杩?00鏉¤褰?    if (this.memoryUsageHistory.length > 100) {
       this.memoryUsageHistory.shift();
     }
     
-    // 定期记录平均内存使用情况
+    // 瀹氭湡璁板綍骞冲潎鍐呭瓨浣跨敤鎯呭喌
     const now = Date.now();
     if (now - this.lastCheckTime > this.checkInterval) {
       this.lastCheckTime = now;
@@ -131,7 +131,7 @@ export default class MemoryManager {
   }
 
   /**
-   * 记录平均内存使用情况
+   * 璁板綍骞冲潎鍐呭瓨浣跨敤鎯呭喌
    */
   private logAverageMemoryUsage(): void {
     if (this.memoryUsageHistory.length === 0) return;
@@ -143,7 +143,7 @@ export default class MemoryManager {
   }
 
   /**
-   * 开始定期检查内存使用情�?   */
+   * 寮€濮嬪畾鏈熸鏌ュ唴瀛樹娇鐢ㄦ儏鍐?   */
   private startPeriodicCheck(): void {
     setInterval(() => {
       try {
@@ -160,16 +160,16 @@ export default class MemoryManager {
   }
 
   /**
-   * 清理内存（如果可能）
+   * 娓呯悊鍐呭瓨锛堝鏋滃彲鑳斤級
    */
   public clearMemory(): void {
     try {
       Logger.info(TAG, 'Attempting to clear memory');
       
-      // HarmonyOS中不支持直接调用垃圾回收
-      // 移除对globalThis.gc的依赖，使用系统推荐的内存管理方�?      Logger.info(TAG, 'Memory cleanup performed (HarmonyOS compatible)');
+      // HarmonyOS涓笉鏀寔鐩存帴璋冪敤鍨冨溇鍥炴敹
+      // 绉婚櫎瀵筭lobalThis.gc鐨勪緷璧栵紝浣跨敤绯荤粺鎺ㄨ崘鐨勫唴瀛樼鐞嗘柟寮?      Logger.info(TAG, 'Memory cleanup performed (HarmonyOS compatible)');
       
-      // 清理历史记录
+      // 娓呯悊鍘嗗彶璁板綍
       this.memoryUsageHistory = [];
     } catch (error) {
       Logger.error(TAG, `Failed to clear memory: ${error}`);
@@ -177,8 +177,8 @@ export default class MemoryManager {
   }
 
   /**
-   * 获取内存使用统计信息
-   * @returns 内存使用统计
+   * 鑾峰彇鍐呭瓨浣跨敤缁熻淇℃伅
+   * @returns 鍐呭瓨浣跨敤缁熻
    */
   public getMemoryStats(): {
     currentUsage: number;
@@ -194,7 +194,7 @@ export default class MemoryManager {
     if (this.memoryUsageHistory.length > 0) {
       const sum = this.memoryUsageHistory.reduce((acc, val instanceof Error ? val : new Error(String(val instanceof Error ? val instanceof Error ? val : new Error(String(val : new Error(String(val instanceof Error ? val : new Error(String(val instanceof Error ? val instanceof Error ? val : new Error(String(val instanceof Error ? val instanceof Error ? val : new Error(String(val : new Error(String(val instanceof Error ? val : new Error(String(val : new Error(String(val instanceof Error ? val : new Error(String(val instanceof Error ? val instanceof Error ? val : new Error(String(val : new Error(String(val instanceof Error ? val : new Error(String(val))))))) => acc + val, 0);
       average = sum / this.memoryUsageHistory.length;
-      // ArkTS兼容：使用直接调用替代apply
+      // ArkTS鍏煎锛氫娇鐢ㄧ洿鎺ヨ皟鐢ㄦ浛浠pply
       max = Math.max(...this.memoryUsageHistory);
       min = Math.min(...this.memoryUsageHistory);
     } else {
@@ -211,5 +211,8 @@ export default class MemoryManager {
     };
   }
 }
+
+
+
 
 

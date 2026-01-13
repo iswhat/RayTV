@@ -5,11 +5,11 @@ import HistoryService from '../../service/media/HistoryService';
 import { SiteService } from './spider/SiteService';
 import { ConfigManager } from './ConfigManager';
 import { HistoryManager } from './HistoryManager';
-
-const TAG = 'ServiceFactory';
+import { FactoryBase } from '../../../common/base/FactoryBase';
 
 /**
- * 服务类型枚举
+ * 服务类型定义
+ * Service type definition
  */
 export enum ServiceType {
   CONFIG,
@@ -21,181 +21,197 @@ export enum ServiceType {
 
 /**
  * 服务实例类型联合
+ * Service instance type union
  */
 export type ServiceInstance = ConfigService | HistoryService | SiteService | ConfigManager | HistoryManager;
 
 /**
- * 服务工厂�? * 负责创建和管理各种服务的实例
+ * 服务工厂类
+ * 负责创建和管理各种服务的实例
+ * Service factory class
+ * Responsible for creating and managing instances of various services
  */
-export default class ServiceFactory {
-  private static instance: ServiceFactory | null = null;
-  private serviceMap: Map<ServiceType, ServiceInstance> = new Map();
-  private isInitialized: boolean = false;
+export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInstance> {
+  protected readonly TAG: string = 'ServiceFactory';
 
   /**
-   * 私有构造函�?   */
-  private constructor() {}
-
-  /**
-   * 获取单例实例
-   * @returns ServiceFactory实例
+   * 私有构造函数
+   * Private constructor
    */
-  public static getInstance(): ServiceFactory {
-    if (!ServiceFactory.instance) {
-      ServiceFactory.instance = new ServiceFactory();
-    }
-    return ServiceFactory.instance;
+  private constructor() {
+    super();
   }
 
   /**
-   * 初始化所有服�?   * @returns 是否初始化成�?   */
+   * 初始化所有服务
+   * 初始化所有服务
+   * @returns 是否初始化成功
+   * @returns Whether initialization is successful
+   */
   public async initialize(): Promise<boolean> {
     try {
       if (this.isInitialized) {
-        Logger.info(TAG, 'Services already initialized');
+        Logger.info(this.TAG, 'Services already initialized');
         return true;
       }
 
-      Logger.info(TAG, 'Initializing services...');
+      Logger.info(this.TAG, 'Initializing services...');
 
       const repoInitResult = await RepositoryFactory.getInstance().initialize();
 
       if (!repoInitResult) {
-        Logger.error(TAG, 'Failed to initialize repository factory');
+        Logger.error(this.TAG, 'Failed to initialize repository factory');
         return false;
       }
 
-      // 初始化配置服�?      const configService = ConfigService.getInstance();
+      // 初始化配置服务
+      // Initialize config service
+      const configService = ConfigService.getInstance();
       await configService.initializeConfig();
-      this.serviceMap.set(ServiceType.CONFIG, configService);
-      Logger.info(TAG, 'ConfigService initialized successfully');
+      this.instanceMap.set(ServiceType.CONFIG, configService);
+      Logger.info(this.TAG, 'ConfigService initialized successfully');
 
-      // 初始化历史服�?      const historyService = HistoryService.getInstance();
-      this.serviceMap.set(ServiceType.HISTORY, historyService);
-      Logger.info(TAG, 'HistoryService initialized successfully');
+      // 初始化历史服务
+      // Initialize history service
+      const historyService = HistoryService.getInstance();
+      this.instanceMap.set(ServiceType.HISTORY, historyService);
+      Logger.info(this.TAG, 'HistoryService initialized successfully');
 
-      // 初始化站点服�?      const siteService = SiteService.getInstance();
+      // 初始化站点服务
+      // Initialize site service
+      const siteService = SiteService.getInstance();
       await siteService.initialize();
-      this.serviceMap.set(ServiceType.SITE, siteService);
-      Logger.info(TAG, 'SiteService initialized successfully');
+      this.instanceMap.set(ServiceType.SITE, siteService);
+      Logger.info(this.TAG, 'SiteService initialized successfully');
 
-      // 初始化配置管理器（适配器）
+      // 初始化配置管理器（依赖项）
+      // Initialize config manager (dependency)
       const configManager = ConfigManager.getInstance();
       await configManager.initialize();
-      this.serviceMap.set(ServiceType.CONFIG_MANAGER, configManager);
-      Logger.info(TAG, 'ConfigManager initialized successfully');
+      this.instanceMap.set(ServiceType.CONFIG_MANAGER, configManager);
+      Logger.info(this.TAG, 'ConfigManager initialized successfully');
 
-      // 初始化历史管理器（适配器）
+      // 初始化历史管理器（依赖项）
+      // Initialize history manager (dependency)
       const historyManager = HistoryManager.getInstance();
       await historyManager.initialize();
-      this.serviceMap.set(ServiceType.HISTORY_MANAGER, historyManager);
-      Logger.info(TAG, 'HistoryManager initialized successfully');
+      this.instanceMap.set(ServiceType.HISTORY_MANAGER, historyManager);
+      Logger.info(this.TAG, 'HistoryManager initialized successfully');
 
       this.isInitialized = true;
-      Logger.info(TAG, 'All services initialized successfully');
+      Logger.info(this.TAG, 'All services initialized successfully');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize services: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(this.TAG, `Failed to initialize services: ${error instanceof Error ? error.message : String(error)}`);
       return false;
     }
   }
 
   /**
    * 获取配置服务实例
+   * Get config service instance
    * @returns ConfigService实例
+   * @returns ConfigService instance
    */
   public getConfigService(): ConfigService {
-    return this.getService(ServiceType.CONFIG);
+    return this.getInstance(ServiceType.CONFIG) as ConfigService;
   }
 
   /**
    * 获取历史服务实例
+   * Get history service instance
    * @returns HistoryService实例
+   * @returns HistoryService instance
    */
   public getHistoryService(): HistoryService {
-    return this.getService(ServiceType.HISTORY);
+    return this.getInstance(ServiceType.HISTORY) as HistoryService;
   }
 
   /**
    * 获取站点服务实例
+   * Get site service instance
    * @returns SiteService实例
+   * @returns SiteService instance
    */
   public getSiteService(): SiteService {
-    return this.getService(ServiceType.SITE);
+    return this.getInstance(ServiceType.SITE) as SiteService;
   }
 
   /**
-   * 获取配置管理器实�?   * @returns ConfigManager实例
+   * 获取配置管理器实例
+   * Get config manager instance
+   * @returns ConfigManager实例
+   * @returns ConfigManager instance
    */
   public getConfigManager(): ConfigManager {
-    return this.getService(ServiceType.CONFIG_MANAGER);
+    return this.getInstance(ServiceType.CONFIG_MANAGER) as ConfigManager;
   }
 
   /**
-   * 获取历史管理器实�?   * @returns HistoryManager实例
+   * 获取历史管理器实例
+   * Get history manager instance
+   * @returns HistoryManager实例
+   * @returns HistoryManager instance
    */
   public getHistoryManager(): HistoryManager {
-    return this.getService(ServiceType.HISTORY_MANAGER);
+    return this.getInstance(ServiceType.HISTORY_MANAGER) as HistoryManager;
   }
 
   /**
-   * 获取指定类型的服务实�?   * @param type 服务类型
+   * 获取指定类型的服务实例
+   * Get service instance of specified type
+   * @param type 服务类型
+   * @param type Service type
    * @returns 服务实例
+   * @returns Service instance
    */
   private getService<T>(type: ServiceType): T {
-    const service = this.serviceMap.get(type);
-    if (!service) {
-      throw new Error(`Service of type ${type} not initialized. Call initialize() first.`);
-    }
-    return service as T;
+    return this.getInstance(type) as T;
   }
 
   /**
-   * 设置自定义服务实�?   * @param type 服务类型
+   * 设置自定义服务实例
+   * Set custom service instance
+   * @param type 服务类型
+   * @param type Service type
    * @param service 服务实例
+   * @param service Service instance
    */
   public setService(type: ServiceType, service: ServiceInstance): void {
-    this.serviceMap.set(type, service);
-    Logger.info(TAG, `Custom service set for type: ${type}`);
+    this.setInstance(type, service);
   }
 
   /**
    * 检查服务是否初始化
+   * Check if service is initialized
    * @param type 服务类型
-   * @returns 是否初始�?   */
+   * @param type Service type
+   * @returns 是否已初始化
+   * @returns Whether initialized
+   */
   public isServiceInitialized(type: ServiceType): boolean {
-    return this.serviceMap.has(type);
+    return this.isInstanceInitialized(type);
   }
 
   /**
-   * 关闭所有服务资�?   */
+   * 关闭所有服务资源
+   * Close all service resources
+   */
   public async close(): Promise<void> {
     try {
-      Logger.info(TAG, 'Closing services...');
+      Logger.info(this.TAG, 'Closing services...');
 
-      // 清理服务映射
-      this.serviceMap.clear();
-      this.isInitialized = false;
+      // 调用父类的close方法关闭服务实例
+      // Call parent class close method to close service instances
+      await super.close();
       
-      // 关闭仓库资源
+      // 关闭数据库资源
+      // Close database resources
       await RepositoryFactory.getInstance().close();
       
-      Logger.info(TAG, 'All services closed successfully');
+      Logger.info(this.TAG, 'All services closed successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to close services: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(this.TAG, `Failed to close services: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-
-  /**
-   * 重置工厂（主要用于测试）
-   */
-  public static reset(): void {
-    if (ServiceFactory.instance) {
-      ServiceFactory.instance.close().catch(error => {
-        Logger.error(TAG, `Error during factory reset: ${error instanceof Error ? error.message : String(error)}`);
-      });
-      ServiceFactory.instance = null;
-    }
-    Logger.info(TAG, 'Service factory reset');
   }
 }

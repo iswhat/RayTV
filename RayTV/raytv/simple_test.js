@@ -1,6 +1,6 @@
-// 简单测试脚本，验证csp_Gz360站点配置
+// 简单测试脚本，验证csp_Gz360站点配置 | Simple test script to verify csp_Gz360 site configuration
 
-// 直接从配置文件中提取csp_Gz360站点的配置
+// 直接从配置文件中提取csp_Gz360站点的配置 | Directly extract csp_Gz360 site configuration from config file
 const fs = require('fs');
 
 console.log('=== 简单配置测试 ===');

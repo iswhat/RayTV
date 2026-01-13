@@ -1,33 +1,32 @@
-// StorageUtils.ets - ArkTS兼容的存储工具函�?
+// StorageUtils.ets - ArkTS兼容的存储工具函数 ArkTS compatible storage utility functions
 
 /**
- * 存储工具函数
- * 提供ArkTS环境中安全的数据持久化操作功�?
+ * 存储工具函数 Storage utility functions
+ * 提供ArkTS环境中安全的数据持久化操作功能 Provides safe data persistence operation functionality in ArkTS environment
  */
 import { Optional, SafeAny } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
 import StringUtils from './StringUtils';
 
 /**
- * 存储工具函数集合
+ * 存储工具函数集合 Storage utility functions collection
  */
 export const StorageUtils = {
   /**
-   * 检查是否支持本地存�?
+   * 检查是否支持本地存储 Checks if local storage is supported
    */
   isSupported(): boolean {
     try {
-      // 检查是否存在localStorage对象
+      // 检查是否存在localStorage对象 Checks if localStorage object exists
       return typeof localStorage !== 'undefined';
     } catch (e) {
       return false;
     }
   },
-
   /**
-   * 设置存储�?
+   * 设置存储项 Sets storage item
    */
-  setItem(key: string, value: SafeAny): boolean {
+  setItem(key: string, value: string | number | boolean | object | null | undefined): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
       return false;
     }
@@ -43,7 +42,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取存储�?
+   * 获取存储项 Gets storage item
    */
   getItem<T = string>(key: string): T | null {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -57,11 +56,11 @@ export const StorageUtils = {
         return null;
       }
       
-      // 尝试解析JSON，如果失败则返回原始字符�?
+      // 尝试解析JSON，如果失败则返回null Tries to parse JSON, returns null if failed
       try {
         return JSON.parse(value) as T;
       } catch {
-        // 当JSON解析失败时，返回null而不是进行不安全的类型转�?
+        // 当JSON解析失败时，返回null而不是进行不安全的类型转换 When JSON parsing fails, returns null instead of unsafe type conversion
         return null as unknown as T;
       }
     } catch (e) {
@@ -71,14 +70,14 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取字符串类型存储项
+   * 获取字符串类型存储项 Gets string type storage item
    */
   getString(key: string): string | null {
     return StorageUtils.getItem<string>(key);
   },
 
   /**
-   * 获取数字类型存储�?
+   * 获取数字类型存储项 Gets number type storage item
    */
   getNumber(key: string): number | null {
     const value = StorageUtils.getItem(key);
@@ -86,7 +85,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取布尔类型存储�?
+   * 获取布尔类型存储项 Gets boolean type storage item
    */
   getBoolean(key: string): boolean | null {
     const value = StorageUtils.getItem(key);
@@ -94,7 +93,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取对象类型存储�?
+   * 获取对象类型存储项 Gets object type storage item
    */
   getObject<T>(key: string): T | null {
     const value = StorageUtils.getItem<T>(key);
@@ -102,7 +101,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取数组类型存储�?
+   * 获取数组类型存储项 Gets array type storage item
    */
   getArray<T>(key: string): T[] | null {
     const value = StorageUtils.getItem<T[]>(key);
@@ -110,7 +109,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 移除存储�?
+   * 删除存储项 Removes storage item
    */
   removeItem(key: string): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -127,7 +126,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 清空所有存储项
+   * 清空所有存储项 Clears all storage items
    */
   clear(): boolean {
     if (!StorageUtils.isSupported()) {
@@ -144,7 +143,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 检查是否存在指定的存储�?
+   * 检查是否存在指定的存储项 Checks if specified storage item exists
    */
   hasItem(key: string): boolean {
     if (!StorageUtils.isSupported() || StringUtils.isEmpty(key)) {
@@ -160,7 +159,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取存储项数�?
+   * 获取存储项数量 Gets storage item count
    */
   getLength(): number {
     if (!StorageUtils.isSupported()) {
@@ -176,7 +175,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取指定索引位置的存储项键名
+   * 获取指定索引位置的存储项键名 Gets storage item key at specified index
    */
   getKey(index: number): string | null {
     if (!StorageUtils.isSupported() || !TypeUtils.isNumber(index) || index < 0) {
@@ -192,7 +191,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取所有存储项的键名列�?
+   * 获取所有存储项的键名列表 Gets list of all storage item keys
    */
   getAllKeys(): string[] {
     const keys: string[] = [];
@@ -218,7 +217,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取所有存储项
+   * 获取所有存储项 Gets all storage items
    */
   getAllItems(): Record<string, SafeAny> {
     const items: Record<string, SafeAny> = {};
@@ -242,7 +241,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量设置存储�?
+   * 批量设置存储项 Sets multiple storage items
    */
   setMultiple(items: Record<string, SafeAny>): boolean {
     if (!StorageUtils.isSupported() || !TypeUtils.isObject(items)) {
@@ -270,7 +269,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量获取存储�?
+   * 批量获取存储项 Gets multiple storage items
    */
   getMultiple(keys: string[]): Record<string, SafeAny> {
     const items: Record<string, SafeAny> = {};
@@ -294,7 +293,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 批量移除存储�?
+   * 批量删除存储项 Removes multiple storage items
    */
   removeMultiple(keys: string[]): boolean {
     if (!StorageUtils.isSupported() || !Array.isArray(keys)) {
@@ -319,7 +318,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 获取存储使用情况（近似值）
+   * 获取存储使用情况（近似值）Gets storage usage (approximate value)
    */
   getStorageUsage(): number {
     if (!StorageUtils.isSupported()) {
@@ -335,12 +334,12 @@ export const StorageUtils = {
         const value = localStorage.getItem(key);
         
         if (value) {
-          // 估算字符串大小（UTF-16编码，每个字�?字节�?
+          // 计算字符串大小（UTF-16编码，每个字符2字节）Calculates string size (UTF-16 encoding, 2 bytes per character)
           size += (key.length + value.length) * 2;
         }
       }
       
-      return size; // 返回字节�?
+      return size; // 返回字节数 Returns number of bytes
     } catch (e) {
       console.error('StorageUtils.getStorageUsage error:', e);
       return 0;
@@ -348,7 +347,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 创建带命名空间的存储�?
+   * 创建带命名空间的存储键 Creates namespaced storage key
    */
   createNamespacedKey(namespace: string, key: string): string {
     if (StringUtils.isEmpty(namespace)) {
@@ -359,7 +358,7 @@ export const StorageUtils = {
   },
 
   /**
-   * 创建命名空间存储
+   * 创建命名空间存储 Creates namespaced storage
    */
   createNamespacedStorage(namespace: string): typeof StorageUtils {
     if (StringUtils.isEmpty(namespace)) {
@@ -368,7 +367,7 @@ export const StorageUtils = {
     
     const createNamespacedMethod = (originalMethod: Function) => {
       return function(this: typeof StorageUtils, ...args: SafeAny[]) {
-        // 如果第一个参数是字符串键名，则添加命名空�?
+        // 如果第一个参数是字符串键名，则添加命名空间 If first parameter is string key, add namespace
         if (args.length > 0 && TypeUtils.isString(args[0])) {
           args[0] = StorageUtils.createNamespacedKey(namespace, args[0]);
         }
@@ -393,3 +392,6 @@ export const StorageUtils = {
 };
 
 export default StorageUtils;
+
+
+

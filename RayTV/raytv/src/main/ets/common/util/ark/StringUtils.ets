@@ -1,22 +1,27 @@
-// StringUtils.ets - ArkTS兼容的字符串工具函数
+// StringUtils.ets - ArkTS兼容的字符串工具函数 ArkTS compatible string utility functions
 
 /**
- * 字符串工具函�? * 提供ArkTS环境中安全的字符串操作功�? */
+ * 字符串工具函数 String utility functions
+ * 提供ArkTS环境中安全的字符串操作功能 Provides safe string manipulation functionality in ArkTS environment
+ */
 import { Optional } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
 import ArrayUtils from './ArrayUtils';
 
 /**
- * 字符串工具函数集�? */
+ * 字符串工具函数集合 String utility functions collection
+ */
 export const StringUtils = {
   /**
-   * 检查值是否为字符�?   */
-  isString(value: Record<string, string | number | boolean | null>): boolean {
+   * 检查值是否为字符串 Checks if value is a string
+   */
+  isString(value: any): boolean {
     return TypeUtils.isString(value);
   },
 
   /**
-   * 获取字符串长�?   */
+   * 获取字符串长度 Gets string length
+   */
   length(str: Optional<string>): number {
     if (str === null || str === undefined) {
       return 0;
@@ -26,21 +31,22 @@ export const StringUtils = {
   },
 
   /**
-   * 检查字符串是否为空
+   * 检查字符串是否为空 Checks if string is empty
    */
   isEmpty(str: Optional<string>): boolean {
     return str === null || str === undefined || str.trim().length === 0;
   },
 
   /**
-   * 检查字符串是否非空
+   * 检查字符串是否非空 Checks if string is not empty
    */
   isNotEmpty(str: Optional<string>): boolean {
     return !StringUtils.isEmpty(str);
   },
 
   /**
-   * 字符串截取函�?   * 替代String.prototype.substring
+   * 字符串截取函数 String substring function
+   * 替代String.prototype.substring Replaces String.prototype.substring
    */
   substring(str: Optional<string>, start: number, end?: number): string {
     if (str === null || str === undefined) {
@@ -54,7 +60,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串截断函�?   */
+   * 字符串截断函数 String truncate function
+   */
   truncate(str: Optional<string>, maxLength: number, suffix: string = '...'): string {
     if (StringUtils.isEmpty(str)) {
       return str || '';
@@ -75,8 +82,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串转小写函数
-   * 替代String.prototype.toLowerCase
+   * 字符串转小写函数 String to lowercase function
+   * 替代String.prototype.toLowerCase Replaces String.prototype.toLowerCase
    */
   toLowerCase(str: Optional<string>): string {
     if (str === null || str === undefined) {
@@ -87,8 +94,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串转大写函数
-   * 替代String.prototype.toUpperCase
+   * 字符串转大写函数 String to uppercase function
+   * 替代String.prototype.toUpperCase Replaces String.prototype.toUpperCase
    */
   toUpperCase(str: Optional<string>): string {
     if (str === null || str === undefined) {
@@ -99,7 +106,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串去除首尾空格函�?   * 替代String.prototype.trim
+   * 字符串去除首尾空格函数 String trim function
+   * 替代String.prototype.trim Replaces String.prototype.trim
    */
   trim(str: Optional<string>): string {
     if (str === null || str === undefined) {
@@ -110,7 +118,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串分割函�?   * 替代String.prototype.split
+   * 字符串分割函数 String split function
+   * 替代String.prototype.split Replaces String.prototype.split
    */
   split(str: Optional<string>, separator: string | RegExp, limit?: number): string[] {
     if (str === null || str === undefined) {
@@ -127,7 +136,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串连接函�?   * 替代String.prototype.join
+   * 字符串连接函数 String join function
+   * 替代String.prototype.join Replaces String.prototype.join
    */
   join(separator: string, ...parts: Optional<string>[]): string {
     const nonEmptyParts: string[] = [];
@@ -143,7 +153,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串包含检查函�?   * 替代String.prototype.includes
+   * 字符串包含检查函数 String includes check function
+   * 替代String.prototype.includes Replaces String.prototype.includes
    */
   includes(str: Optional<string>, searchString: string, position?: number): boolean {
     if (str === null || str === undefined) {
@@ -154,7 +165,7 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串包含检查函数（忽略大小写）
+   * 字符串包含检查函数（忽略大小写）String includes check function (ignore case)
    */
   containsIgnoreCase(str: Optional<string>, searchStr: string): boolean {
     if (StringUtils.isEmpty(str) || StringUtils.isEmpty(searchStr)) {
@@ -168,7 +179,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串开头检查函�?   * 替代String.prototype.startsWith
+   * 字符串开始检查函数 String starts with check function
+   * 替代String.prototype.startsWith Replaces String.prototype.startsWith
    */
   startsWith(str: Optional<string>, searchString: string, position?: number): boolean {
     if (str === null || str === undefined) {
@@ -179,7 +191,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串结尾检查函�?   * 替代String.prototype.endsWith
+   * 字符串结束检查函数 String ends with check function
+   * 替代String.prototype.endsWith Replaces String.prototype.endsWith
    */
   endsWith(str: Optional<string>, searchString: string, length?: number): boolean {
     if (str === null || str === undefined) {
@@ -190,7 +203,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串查找函�?   * 替代String.prototype.indexOf
+   * 字符串查找函数 String indexOf function
+   * 替代String.prototype.indexOf Replaces String.prototype.indexOf
    */
   indexOf(str: Optional<string>, searchValue: string, fromIndex?: number): number {
     if (str === null || str === undefined) {
@@ -201,7 +215,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串最后查找函�?   * 替代String.prototype.lastIndexOf
+   * 字符串最后查找函数 String lastIndexOf function
+   * 替代String.prototype.lastIndexOf Replaces String.prototype.lastIndexOf
    */
   lastIndexOf(str: Optional<string>, searchValue: string, fromIndex?: number): number {
     if (str === null || str === undefined) {
@@ -212,7 +227,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串替换函�?   * 替代String.prototype.replace
+   * 字符串替换函数 String replace function
+   * 替代String.prototype.replace Replaces String.prototype.replace
    */
   replace(str: Optional<string>, searchValue: string | RegExp, replaceValue: string): string {
     if (str === null || str === undefined) {
@@ -223,19 +239,22 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串全部替换函�?   * 替代String.prototype.replaceAll
+   * 字符串全部替换函数 String replace all function
+   * 替代String.prototype.replaceAll Replaces String.prototype.replaceAll
    */
   replaceAll(str: Optional<string>, searchValue: string, replaceValue: string): string {
     if (str === null || str === undefined) {
       return '';
     }
     
-    // 使用正则表达式实现全部替�?    const regex = new RegExp(searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    // 使用正则表达式实现全部替换 Uses regular expression to implement full replacement
+    const regex = new RegExp(searchValue.replace(/[.*+?^${}()|[\\]/g, '\\$&'), 'g');
     return str.replace(regex, replaceValue);
   },
 
   /**
-   * 字符串填充函�?   * 替代String.prototype.padStart
+   * 字符串前填充函数 String pad start function
+   * 替代String.prototype.padStart Replaces String.prototype.padStart
    */
   padStart(str: Optional<string>, targetLength: number, padString: string = ' '): string {
     if (str === null || str === undefined) {
@@ -246,7 +265,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串填充函�?   * 替代String.prototype.padEnd
+   * 字符串后填充函数 String pad end function
+   * 替代String.prototype.padEnd Replaces String.prototype.padEnd
    */
   padEnd(str: Optional<string>, targetLength: number, padString: string = ' '): string {
     if (str === null || str === undefined) {
@@ -257,8 +277,8 @@ export const StringUtils = {
   },
 
   /**
-   * 字符串转数组函数
-   * 替代String.prototype.split('')
+   * 字符串转数组函数 String to array function
+   * 替代String.prototype.split('') Replaces String.prototype.split('')
    */
   toCharArray(str: Optional<string>): string[] {
     if (str === null || str === undefined) {
@@ -275,7 +295,8 @@ export const StringUtils = {
   },
 
   /**
-   * 首字母大写函�?   */
+   * 首字母大写函数 Capitalize first letter function
+   */
   capitalize(str: Optional<string>): string {
     if (StringUtils.isEmpty(str)) {
       return str || '';
@@ -285,7 +306,7 @@ export const StringUtils = {
   },
 
   /**
-   * 驼峰命名转下划线命名函数
+   * 驼峰命名转下划线命名函数 Camel case to snake case function
    */
   camelToSnake(str: Optional<string>): string {
     if (StringUtils.isEmpty(str)) {
@@ -298,7 +319,7 @@ export const StringUtils = {
   },
 
   /**
-   * 下划线命名转驼峰命名函数
+   * 下划线命名转驼峰命名函数 Snake case to camel case function
    */
   snakeToCamel(str: Optional<string>): string {
     if (StringUtils.isEmpty(str)) {
@@ -309,7 +330,8 @@ export const StringUtils = {
   },
 
   /**
-   * 生成随机字符串函�?   */
+   * 生成随机字符串函数 Generate random string function
+   */
   generateRandomString(length: number = 16): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -323,7 +345,8 @@ export const StringUtils = {
   },
 
   /**
-   * 格式化文件大小函�?   */
+   * 格式化文件大小函数 Format file size function
+   */
   formatFileSize(bytes: number, decimals: number = 2): string {
     if (bytes === 0) {
       return '0 B';
@@ -338,4 +361,7 @@ export const StringUtils = {
 };
 
 export default StringUtils;
+
+
+
 

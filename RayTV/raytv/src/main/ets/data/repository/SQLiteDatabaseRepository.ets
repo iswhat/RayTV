@@ -1,17 +1,18 @@
-// SQLiteDatabaseRepository - SQLite数据库实现类
-import Logger from '../../common/util/Logger';
+﻿// SQLiteDatabaseRepository - SQLite数据库实现类 | SQLite database implementation class
+import LoggerUtil from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import DatabaseRepository, {
   DatabaseResult,
   DatabaseStatus,
   PaginationParams,
   PaginatedResult,
-  ConfigValue
+  ConfigValue,
+  MovieFilter
 } from './DatabaseRepository';
-import Movie, { MovieConstructorParams } from '../model/Movie';
+import Movie, { MovieConstructorParams, VideoType, VideoSource, Episode, RatingInfo } from '../model/Movie';
 import User from '../model/User';
 import History from '../model/History';
-import SearchResult, { ResultType } from '../model/SearchResult';
+import SearchResult from '../model/SearchResult';
 import relationalStore from '@ohos.data.relationalStore';
 import BusinessError from '@ohos.base';
 import common from '@ohos.app.ability.common';
@@ -20,301 +21,139 @@ const TAG = 'SQLiteDatabaseRepository';
 const DATABASE_NAME = 'raytv.db';
 const DATABASE_VERSION = 1;
 
-// 配置值类型接口
-interface ConfigValueObject {
+// 配置值类型接口 | Config value type interface
+export interface ConfigValueObject {
   value: string;
-  // ArkTS不支持索引签名，移除索引签名
+}
+
+// 网站信息接口定义 | Site information interface definition
+export interface SiteInfo {
+  siteId: string;
+  name: string;
+  baseUrl: string;
+  icon?: string;
+  description?: string;
+  enabled?: boolean;
+  weight?: number;
+  extraInfo?: Record<string, string | number | boolean | null | undefined>;
+}
+
+// 网站数据接口定义 | Site data interface definition
+export interface Site {
+  siteId: string;
+  name: string;
+  baseUrl: string;
+  icon: string | null;
+  description: string | null;
+  enabled: boolean;
+  weight: number;
+  createTime: number;
+  updateTime: number;
+  extraInfo: Record<string, string | number | boolean | null | undefined> | null;
 }
 
 /**
- * SQLite数据库实现类
- * 实现了DatabaseRepository接口，提供基于SQLite的数据库操作功能
+ * SQLite数据库实现类 | SQLite database implementation class
+ * 实现DatabaseRepository接口，提供基于SQLite的数据库操作能力 | Implements DatabaseRepository interface, provides SQLite-based database operation capabilities
  */
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, ConfigValueObject | Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置
+  private configMap: Map<string, ConfigValueObject | Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置 | Used for caching configs
   private context: common.UIAbilityContext | null = null;
 
   /**
-   * 设置上下文
-   */
+ * 设置上下文 | Set context
+ */
   setContext(context: common.UIAbilityContext): void {
     this.context = context;
   }
 
   /**
-   * 初始化数据库
-   */
+ * 创建RdbPredicates实例 | Create RdbPredicates instance
+ */
+  private createPredicates(table: string): relationalStore.RdbPredicates {
+    return new relationalStore.RdbPredicates(table);
+  }
+
+  /**
+ * 初始化数据库 | Initialize database
+ */
   async initialize(): Promise<DatabaseResult<void>> {
     try {
-      Logger.info(TAG, 'Initializing database...');
-      
       if (!this.context) {
-        throw new Error('Context not set. Call setContext() before initialize().');
+        throw new Error('Context not set');
       }
 
-      const config: relationalStore.StoreConfig = {
+      const storeConfig: relationalStore.StoreConfig = {
         name: DATABASE_NAME,
         securityLevel: relationalStore.SecurityLevel.S1
       };
 
-      // 创建或打开数据库
-      const rdbStore = await relationalStore.getRdbStore(this.context, config);
-      
-      // 检查是否需要创建或升级数据库
-      // RDBStore的version属性是只读的，不需要手动设置
-      const currentVersion: number = 1; // 初始版本设为1
-      if (currentVersion === 0) {
-        await this.onCreateDatabase(rdbStore);
-      } else if (currentVersion < DATABASE_VERSION) {
-        await this.onUpgradeDatabase(rdbStore, currentVersion, DATABASE_VERSION);
-      }
-
-      this.rdbStore = rdbStore;
+      // 打开数据库连接 | Open database connection
+      this.rdbStore = await relationalStore.getRdbStore(this.context, storeConfig);
       this.status = DatabaseStatus.READY;
       
-      // 预加载配置缓存
+      // 加载配置缓存 | Load config cache
       await this.loadConfigCache();
-      
-      // 清理过期缓存
-      await this.clearExpiredCache();
-      
-      Logger.info(TAG, 'Database initialized successfully');
-      return {
-        success: true
+
+      LoggerUtil.info(TAG, 'Database initialized successfully');
+      const result: DatabaseResult<void> = {
+        success: true,
+        data: undefined
       };
+      return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize database: ${error instanceof Error ? error.message : String(error)}`);
       this.status = DatabaseStatus.ERROR;
-      return {
-        success: false, 
+      LoggerUtil.error(TAG, `Failed to initialize database: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<void> = {
+        success: false,
         error: error instanceof Error ? error : new Error(String(error)),
-        message: 'Database initialization failed'
+        message: 'Failed to initialize database'
       };
+      return result;
     }
   }
 
   /**
-   * 获取数据库状态
-   */
+ * 获取数据库状态 | Get database status
+ */
   getStatus(): DatabaseStatus {
     return this.status;
   }
 
   /**
-   * 关闭数据库
-   */
+ * 关闭数据库连接 | Close database connection
+ */
   async close(): Promise<DatabaseResult<void>> {
     try {
-      if (this.status === DatabaseStatus.CLOSED || this.status === DatabaseStatus.CLOSING) {
-        return { success: true };
-      }
-
-      this.status = DatabaseStatus.CLOSING;
-      
       if (this.rdbStore) {
-        // RDB不提供显式关闭方法，由系统管理
+        // 关闭数据库连接 | Close database connection
+        // ArkTS没有直接的rdbStore关闭方法，由系统管理 | ArkTS has no direct close method for rdbStore, managed by system
         this.rdbStore = null;
+        this.status = DatabaseStatus.CLOSED;
+        LoggerUtil.info(TAG, 'Database connection closed successfully');
       }
 
-      this.status = DatabaseStatus.CLOSED;
-      this.configMap.clear();
-      
-      Logger.info(TAG, 'Database closed successfully');
-      return { success: true };
-    } catch (error) {
-      Logger.error(TAG, `Failed to close database: ${error instanceof Error ? error.message : String(error)}`);
-      return {
-        success: false, 
-        error: error instanceof Error ? error : new Error(String(error)),
-        message: 'Database closing failed'
+      const result: DatabaseResult<void> = {
+        success: true,
+        data: undefined
       };
-    }
-  }
-
-  /**
-   * 创建数据库表
-   */
-  private async onCreateDatabase(rdb: relationalStore.RdbStore): Promise<void> {
-    try {
-      Logger.info(TAG, 'Creating database tables...');
-      
-      // 创建电影表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS movies (
-          id TEXT PRIMARY KEY,
-          title TEXT NOT NULL,
-          originalTitle TEXT,
-          type INTEGER NOT NULL,
-          coverUrl TEXT,
-          backdropUrl TEXT,
-          description TEXT,
-          releaseDate TEXT,
-          year INTEGER,
-          genres TEXT,
-          tags TEXT,
-          duration INTEGER,
-          totalEpisodes INTEGER,
-          currentSeason INTEGER,
-          score REAL,
-          directors TEXT,
-          actors TEXT,
-          studio TEXT,
-          country TEXT,
-          language TEXT,
-          plot TEXT,
-          status INTEGER,
-          createTime INTEGER,
-          updateTime INTEGER,
-          sourceId TEXT,
-          sourceName TEXT,
-          quality TEXT,
-          videoSources TEXT,
-          episodes TEXT,
-          ratingInfo TEXT,
-          extraInfo TEXT
-        );
-      `);
-
-      // 创建用户表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS users (
-          id TEXT PRIMARY KEY,
-          username TEXT NOT NULL UNIQUE,
-          nickname TEXT,
-          avatarUrl TEXT,
-          email TEXT,
-          phone TEXT,
-          role INTEGER DEFAULT 0,
-          isGuest INTEGER DEFAULT 0,
-          preferences TEXT,
-          lastLoginTime INTEGER,
-          createTime INTEGER,
-          updateTime INTEGER,
-          deviceInfo TEXT,
-          watchTime INTEGER DEFAULT 0,
-          themeMode TEXT,
-          interfaceLanguage TEXT,
-          subtitleLanguage TEXT,
-          audioLanguage TEXT,
-          playMode INTEGER,
-          playbackSpeed REAL,
-          autoPlay INTEGER DEFAULT 1
-        );
-      `);
-
-      // 创建观看历史表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS history (
-          id TEXT PRIMARY KEY,
-          userId TEXT NOT NULL,
-          contentId TEXT NOT NULL,
-          contentType TEXT NOT NULL,
-          contentTitle TEXT NOT NULL,
-          coverUrl TEXT,
-          lastWatchTime INTEGER NOT NULL,
-          watchProgress INTEGER DEFAULT 0,
-          totalDuration INTEGER DEFAULT 0,
-          currentEpisodeIndex INTEGER DEFAULT 0,
-          currentSeason INTEGER DEFAULT 1,
-          playCount INTEGER DEFAULT 0,
-          sourceId TEXT,
-          sourceName TEXT,
-          extraInfo TEXT,
-          FOREIGN KEY (userId) REFERENCES users(id)
-        );
-      `);
-
-      // 创建收藏表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS favorites (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          userId TEXT NOT NULL,
-          movieId TEXT NOT NULL,
-          collectionName TEXT DEFAULT '默认收藏',
-          addTime INTEGER NOT NULL,
-          FOREIGN KEY (userId) REFERENCES users(id),
-          FOREIGN KEY (movieId) REFERENCES movies(id),
-          UNIQUE(userId, movieId)
-        );
-      `);
-
-      // 创建搜索历史表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS search_history (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          userId TEXT NOT NULL,
-          keyword TEXT NOT NULL,
-          searchTime INTEGER NOT NULL,
-          FOREIGN KEY (userId) REFERENCES users(id)
-        );
-      `);
-
-      // 创建缓存表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS cache (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          key TEXT NOT NULL UNIQUE,
-          value TEXT NOT NULL,
-          expireTime INTEGER,
-          createTime INTEGER NOT NULL,
-          updateTime INTEGER NOT NULL
-        );
-      `);
-
-      // 创建配置表
-      await rdb.executeSql(`
-        CREATE TABLE IF NOT EXISTS config (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          key TEXT NOT NULL,
-          value TEXT NOT NULL,
-          config_group TEXT DEFAULT 'default',
-          createTime INTEGER NOT NULL,
-          updateTime INTEGER NOT NULL,
-          UNIQUE(key, config_group)
-        );
-      `);
-
-      Logger.info(TAG, 'Database tables created successfully');
+      return result;
     } catch (error) {
-      Logger.error(TAG, `Failed to create database tables: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      LoggerUtil.error(TAG, `Failed to close database connection: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<void> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to close database connection'
+      };
+      return result;
     }
   }
 
   /**
-   * 数据库升级
-   */
-  private async onUpgradeDatabase(rdb: relationalStore.RdbStore, oldVersion: number, newVersion: number): Promise<void> {
-    try {
-      Logger.info(TAG, `Upgrading database from version ${oldVersion} to ${newVersion}`);
-      
-      // 这里可以添加数据库升级逻辑
-      // 例如添加新表、修改表结构、添加新字段等
-      
-      // 示例：从版本1升级到版本2
-      if (oldVersion === 1 && newVersion >= 2) {
-        // 添加新表或修改表结构
-        Logger.info(TAG, 'Applying database upgrade from version 1 to 2');
-      }
-      
-      // 示例：从版本2升级到版本3
-      if (oldVersion === 2 && newVersion >= 3) {
-        // 添加新表或修改表结构
-        Logger.info(TAG, 'Applying database upgrade from version 2 to 3');
-      }
-      
-      Logger.info(TAG, 'Database upgrade completed successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to upgrade database: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
-    }
-  }
-
-  /**
-   * 加载配置缓存
-   */
+ * 加载配置缓存 | Load config cache
+ */
   private async loadConfigCache(): Promise<void> {
     try {
       if (!this.rdbStore) {
@@ -345,7 +184,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
                 }
               }
             } catch (e) {
-              Logger.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
+              LoggerUtil.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
               const configValue = { value: value || '' } as ConfigValueObject;
               this.configMap.set(`${config_group}:${key}`, configValue);
             }
@@ -354,11 +193,11 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         resultSet.close();
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load config cache: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to load config cache: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
-  // ========== 电影相关实现 ==========
+  // ========== 电影相关实现 | Movie-related implementation ==========
 
   async addMovie(movie: Movie): Promise<DatabaseResult<string>> {
     try {
@@ -366,38 +205,44 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Database not initialized');
       }
 
+      // 确保movie对象不为null，防止null安全错误 | Ensure movie object is not null, prevent null safety error
+      if (!movie) {
+        throw new Error('Movie object cannot be null');
+      }
+      
+      // 使用明确的ValuesBucket类型，确保所有属性都是支持的类型 | Use explicit ValuesBucket type, ensure all properties are supported types
       const valuesBucket: relationalStore.ValuesBucket = {
-      'id': movie.id,
-      'title': movie.title,
-      'originalTitle': movie.originalTitle || null,
-      'type': movie.type,
-      'coverUrl': movie.coverUrl || null,
-      'backdropUrl': movie.backdropUrl || null,
-      'description': movie.overview || null,
-      'releaseDate': movie.releaseDate || null,
-      'year': movie.year || null,
-      'genres': JSON.stringify(movie.genres || []),
-      'tags': JSON.stringify(movie.tags || []),
-      'duration': movie.duration || null,
-      'totalEpisodes': movie.totalEpisodes || null,
-      'currentSeason': movie.currentSeason || null,
-      'score': movie.score || null,
-      'directors': JSON.stringify(movie.directors || []),
-      'actors': JSON.stringify(movie.actors || []),
-      'country': movie.countries ? movie.countries.join(',') : null,
-      'language': movie.languages ? movie.languages.join(',') : null,
-      'plot': movie.overview || null,
-      'createTime': Date.now(),
-      'updateTime': Date.now(),
-      'videoSources': JSON.stringify(movie.sources || []),
-      'episodes': JSON.stringify(movie.episodes || []),
-      'ratingInfo': movie.ratings ? JSON.stringify(movie.ratings) : null
-    };
+        id: movie.id,
+        title: movie.title,
+        originalTitle: movie.originalTitle || null,
+        type: movie.type,
+        coverUrl: movie.coverUrl || null,
+        backdropUrl: movie.backdropUrl || null,
+        description: movie.overview || null,
+        releaseDate: movie.releaseDate || null,
+        year: movie.year || null,
+        genres: JSON.stringify(movie.genres || []),
+        tags: JSON.stringify(movie.tags || []),
+        duration: movie.duration || null,
+        totalEpisodes: movie.totalEpisodes || null,
+        currentSeason: movie.currentSeason || null,
+        score: movie.score || null,
+        directors: JSON.stringify(movie.directors || []),
+        actors: JSON.stringify(movie.actors || []),
+        country: movie.countries ? movie.countries.join(',') : null,
+        language: movie.languages ? movie.languages.join(',') : null,
+        plot: movie.overview || null,
+        createTime: Date.now(),
+        updateTime: Date.now(),
+        videoSources: JSON.stringify(movie.sources || []),
+        episodes: JSON.stringify(movie.episodes || []),
+        ratingInfo: movie.ratings ? JSON.stringify(movie.ratings) : null
+      };
 
       const rowsInserted = await this.rdbStore.insert('movies', valuesBucket);
       
       if (rowsInserted > 0) {
-        Logger.info(TAG, `Movie added successfully: ${movie.id}`);
+        LoggerUtil.info(TAG, `Movie added successfully: ${movie.id}`);
         const result: DatabaseResult<string> = {
           success: true,
           data: movie.id
@@ -407,9 +252,9 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Failed to insert movie');
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to add movie: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to add movie: ${error instanceof Error ? error.message : String(error)}`);
       const result: DatabaseResult<string> = {
-        success: false, 
+        success: false,
         error: error instanceof Error ? error : new Error(String(error)),
         message: 'Failed to add movie'
       };
@@ -424,30 +269,30 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       }
 
       const valuesBucket: relationalStore.ValuesBucket = {
-      'title': movie.title,
-      'originalTitle': movie.originalTitle || null,
-      'type': movie.type,
-      'coverUrl': movie.coverUrl || null,
-      'backdropUrl': movie.backdropUrl || null,
-      'description': movie.overview || null,
-      'releaseDate': movie.releaseDate || null,
-      'year': movie.year || null,
-      'genres': JSON.stringify(movie.genres || []),
-      'tags': JSON.stringify(movie.tags || []),
-      'duration': movie.duration || null,
-      'totalEpisodes': movie.totalEpisodes || null,
-      'currentSeason': movie.currentSeason || null,
-      'score': movie.score || null,
-      'directors': JSON.stringify(movie.directors || []),
-      'actors': JSON.stringify(movie.actors || []),
-      'country': movie.countries ? movie.countries.join(',') : null,
-      'language': movie.languages ? movie.languages.join(',') : null,
-      'plot': movie.overview || null,
-      'updateTime': Date.now(),
-      'videoSources': JSON.stringify(movie.sources || []),
-      'episodes': JSON.stringify(movie.episodes || []),
-      'ratingInfo': movie.ratings ? JSON.stringify(movie.ratings) : null
-    };
+        'title': movie.title,
+        'originalTitle': movie.originalTitle || null,
+        'type': movie.type,
+        'coverUrl': movie.coverUrl || null,
+        'backdropUrl': movie.backdropUrl || null,
+        'description': movie.overview || null,
+        'releaseDate': movie.releaseDate || null,
+        'year': movie.year || null,
+        'genres': JSON.stringify(movie.genres || []),
+        'tags': JSON.stringify(movie.tags || []),
+        'duration': movie.duration || null,
+        'totalEpisodes': movie.totalEpisodes || null,
+        'currentSeason': movie.currentSeason || null,
+        'score': movie.score || null,
+        'directors': JSON.stringify(movie.directors || []),
+        'actors': JSON.stringify(movie.actors || []),
+        'country': movie.countries ? movie.countries.join(',') : null,
+        'language': movie.languages ? movie.languages.join(',') : null,
+        'plot': movie.overview || null,
+        'updateTime': Date.now(),
+        'videoSources': JSON.stringify(movie.sources || []),
+        'episodes': JSON.stringify(movie.episodes || []),
+        'ratingInfo': movie.ratings ? JSON.stringify(movie.ratings) : null
+      };
 
       const predicates = new relationalStore.RdbPredicates('movies');
       predicates.equalTo('id', movie.id);
@@ -455,7 +300,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsUpdated = await this.rdbStore.update(valuesBucket, predicates);
       
       if (rowsUpdated > 0) {
-        Logger.info(TAG, `Movie updated successfully: ${movie.id}`);
+        LoggerUtil.info(TAG, `Movie updated successfully: ${movie.id}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -470,9 +315,9 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to update movie: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to update movie: ${error instanceof Error ? error.message : String(error)}`);
       const result: DatabaseResult<boolean> = {
-        success: false, 
+        success: false,
         error: error instanceof Error ? error : new Error(String(error)),
         message: 'Failed to update movie'
       };
@@ -492,11 +337,15 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
       if (rowsDeleted > 0) {
-        Logger.info(TAG, `Movie deleted successfully: ${movieId}`);
-        // 同时删除相关的收藏记录
+        LoggerUtil.info(TAG, `Movie deleted successfully: ${movieId}`);
+        // 同时删除相关的收藏记录 | Also delete related favorite records
         const favPredicates = new relationalStore.RdbPredicates('favorites');
         favPredicates.equalTo('movieId', movieId);
         await this.rdbStore.delete(favPredicates);
+        // 同时删除相关的历史记录 | Also delete related history records
+        const historyPredicates = new relationalStore.RdbPredicates('history');
+        historyPredicates.equalTo('contentId', movieId);
+        await this.rdbStore.delete(historyPredicates);
         
         const result: DatabaseResult<boolean> = {
           success: true,
@@ -512,9 +361,9 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to delete movie: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to delete movie: ${error instanceof Error ? error.message : String(error)}`);
       const result: DatabaseResult<boolean> = {
-        success: false, 
+        success: false,
         error: error instanceof Error ? error : new Error(String(error)),
         message: 'Failed to delete movie'
       };
@@ -532,29 +381,26 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       predicates.equalTo('id', movieId);
       
       const resultSet = await this.rdbStore.query(predicates);
+      let movie: Movie | null = null;
       
       if (resultSet && resultSet.goToFirstRow()) {
-        const movie = this.parseMovieFromResultSet(resultSet);
-        resultSet.close();
-        const result: DatabaseResult<Movie | null> = {
-          success: true,
-          data: movie
-        };
-        return result;
-      } else {
-        if (resultSet) {
-          resultSet.close();
+        const movieData = this.extractMovieFromResultSet(resultSet);
+        if (movieData) {
+          movie = new Movie(movieData);
         }
-        const result: DatabaseResult<Movie | null> = {
-          success: true,
-          data: null
-        };
-        return result;
+        resultSet.close();
       }
-    } catch (error) {
-      Logger.error(TAG, `Failed to get movie by ID: ${error instanceof Error ? error.message : String(error)}`);
+      
+      LoggerUtil.info(TAG, `Retrieved movie by ID: ${movieId}`);
       const result: DatabaseResult<Movie | null> = {
-        success: false, 
+        success: true,
+        data: movie
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get movie by ID ${movieId}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<Movie | null> = {
+        success: false,
         error: error instanceof Error ? error : new Error(String(error)),
         message: 'Failed to get movie by ID'
       };
@@ -562,253 +408,1122 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
     }
   }
 
-  /**
-   * 从结果集中解析Movie对象
-   */
-  private parseMovieFromResultSet(resultSet: relationalStore.ResultSet): Movie | null {
+  async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> {
     try {
-      if (!resultSet || resultSet.rowCount === 0) {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const movies: Movie[] = [];
+      
+      for (let i = 0; i < movieIds.length; i++) {
+        const movieId = movieIds[i];
+        const movieResult = await this.getMovieById(movieId);
+        if (movieResult.success && movieResult.data) {
+          movies.push(movieResult.data);
+        }
+      }
+      
+      const result: DatabaseResult<Movie[]> = {
+        success: true,
+        data: movies
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get movies by IDs: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<Movie[]> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get movies by IDs'
+      };
+      return result;
+    }
+  }
+
+  async getMoviesPaginated(params: PaginationParams, filters?: MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const pageSize = params.pageSize || 20;
+      const page = params.page || 1;
+      const offset = (page - 1) * pageSize;
+      
+      // Build query conditions | 鏋勫缓鏌ヨ鏉′欢
+      const predicates = new relationalStore.RdbPredicates('movies');
+      
+      // Apply filter conditions | 搴旂敤杩囨护鏉′欢
+      if (filters) {
+        // Various filter conditions can be added here | 杩欓噷鍙互娣诲姞鍚勭杩囨护鏉′欢
+      }
+      
+      // Apply sorting | 搴旂敤鎺掑簭
+      if (params.sortBy) {
+        if (params.sortOrder === 'asc') {
+          predicates.orderByAsc(params.sortBy);
+        } else {
+          predicates.orderByDesc(params.sortBy);
+        }
+      } else {
+        predicates.orderByDesc('createTime');
+      }
+      
+      // Apply pagination | 搴旂敤鍒嗛〉
+      predicates.limitAs(pageSize);
+      predicates.offsetAs(offset);
+      
+      // Get data | 鑾峰彇鏁版嵁
+      const resultSet = await this.rdbStore.query(predicates);
+      const movies: Movie[] = [];
+      let total = 0;
+      
+      if (resultSet) {
+        if (resultSet.goToFirstRow()) {
+          do {
+            const movieData = this.extractMovieFromResultSet(resultSet);
+            if (movieData) {
+              movies.push(new Movie(movieData));
+            }
+          } while (resultSet.goToNextRow());
+        }
+        // Get total count | 鑾峰彇鎬昏褰曟暟
+        total = resultSet.rowCount;
+        resultSet.close();
+      }
+      
+      const totalPages = Math.ceil(total / pageSize);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+      
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: true,
+        data: {
+          items: movies,
+          totalCount: total,
+          page,
+          pageSize,
+          totalPages,
+          hasNextPage,
+          hasPrevPage
+        }
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get movies paginated: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get movies paginated'
+      };
+      return result;
+    }
+  }
+
+  async searchMovies(keyword: string, params: PaginationParams, filters?: MovieFilter): Promise<DatabaseResult<PaginatedResult<Movie>>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const pageSize = params.pageSize || 20;
+      const page = params.page || 1;
+      const offset = (page - 1) * pageSize;
+      
+      // Build search query | 鏋勫缓鎼滅储鏌ヨ
+      const predicates = new relationalStore.RdbPredicates('movies');
+      predicates.contains('title', keyword)
+        .or()
+        .contains('originalTitle', keyword)
+        .or()
+        .contains('description', keyword)
+        .or()
+        .contains('actors', keyword)
+        .or()
+        .contains('directors', keyword)
+        .limitAs(pageSize)
+        .offsetAs(offset)
+        .orderByDesc('createTime');
+      
+      // Get data | 鑾峰彇鏁版嵁
+      const resultSet = await this.rdbStore.query(predicates);
+      const movies: Movie[] = [];
+      let total = 0;
+      
+      if (resultSet) {
+        if (resultSet.goToFirstRow()) {
+          do {
+            const movieData = this.extractMovieFromResultSet(resultSet);
+            if (movieData) {
+              movies.push(new Movie(movieData));
+            }
+          } while (resultSet.goToNextRow());
+        }
+        // Get total count | 鑾峰彇鎬昏褰曟暟
+        total = resultSet.rowCount;
+        resultSet.close();
+      }
+      
+      const totalPages = Math.ceil(total / pageSize);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+      
+      LoggerUtil.info(TAG, `Searched movies with keyword "${keyword}": found ${movies.length} results`);
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: true,
+        data: {
+          items: movies,
+          totalCount: total,
+          page,
+          pageSize,
+          totalPages,
+          hasNextPage,
+          hasPrevPage
+        }
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to search movies with keyword "${keyword}": ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to search movies'
+      };
+      return result;
+    }
+  }
+
+  /**
+ * 从结果集中提取电影数据 | Extract movie data from result set
+ */
+  private extractMovieFromResultSet(resultSet: relationalStore.ResultSet): MovieConstructorParams | null {
+    try {
+      const id = resultSet.getString(resultSet.getColumnIndex('id'));
+      if (!id) {
         return null;
       }
 
-      // 创建一个符合Movie构造函数参数的对象
-    const movieData: MovieConstructorParams = {};
-    
-    // 逐个赋值属性，确保类型安全
-    movieData.id = this.safeGetString(resultSet, 'id') || '';
-    movieData.title = this.safeGetString(resultSet, 'title') || '';
-    movieData.originalTitle = this.safeGetString(resultSet, 'originalTitle');
-    movieData.type = this.safeGetLong(resultSet, 'type') || 0;
-    movieData.coverUrl = this.safeGetString(resultSet, 'coverUrl');
-    movieData.backdropUrl = this.safeGetString(resultSet, 'backdropUrl');
-    movieData.overview = this.safeGetString(resultSet, 'description');
-    movieData.releaseDate = this.safeGetString(resultSet, 'releaseDate');
-    movieData.year = this.safeGetLong(resultSet, 'year');
-    movieData.genres = this.safeParseJson(this.safeGetString(resultSet, 'genres') || '[]');
-    movieData.tags = this.safeParseJson(this.safeGetString(resultSet, 'tags') || '[]');
-    movieData.duration = this.safeGetLong(resultSet, 'duration');
-    movieData.totalEpisodes = this.safeGetLong(resultSet, 'totalEpisodes');
-    movieData.currentSeason = this.safeGetLong(resultSet, 'currentSeason') || 1;
-    movieData.score = this.safeGetDouble(resultSet, 'score');
-    movieData.directors = this.safeParseJson(this.safeGetString(resultSet, 'directors') || '[]');
-    movieData.actors = this.safeParseJson(this.safeGetString(resultSet, 'actors') || '[]');
-    const countryStr = this.safeGetString(resultSet, 'country');
-    movieData.countries = countryStr ? countryStr.split(',') : [];
-    const languageStr = this.safeGetString(resultSet, 'language');
-    movieData.languages = languageStr ? languageStr.split(',') : [];
-    movieData.sources = this.safeParseJson(this.safeGetString(resultSet, 'videoSources') || '[]');
-    movieData.episodes = this.safeParseJson(this.safeGetString(resultSet, 'episodes') || '[]');
-    movieData.ratings = this.safeParseJson(this.safeGetString(resultSet, 'ratingInfo') || '[]');
-    
-    const movie = new Movie(movieData as MovieConstructorParams);
-    return movie;
+      const title = resultSet.getString(resultSet.getColumnIndex('title'));
+      if (!title) {
+        return null;
+      }
+
+      const genresStr = resultSet.getString(resultSet.getColumnIndex('genres'));
+      const genres = genresStr ? JSON.parse(genresStr) as string[] : [];
+      
+      const tagsStr = resultSet.getString(resultSet.getColumnIndex('tags'));
+      const tags = tagsStr ? JSON.parse(tagsStr) as string[] : [];
+      
+      const directorsStr = resultSet.getString(resultSet.getColumnIndex('directors'));
+      const directors = directorsStr ? JSON.parse(directorsStr) as string[] : [];
+      
+      const actorsStr = resultSet.getString(resultSet.getColumnIndex('actors'));
+      const actors = actorsStr ? JSON.parse(actorsStr) as string[] : [];
+      
+      const countryStr = resultSet.getString(resultSet.getColumnIndex('country'));
+      const countries = countryStr ? countryStr.split(',') : [];
+      
+      const languageStr = resultSet.getString(resultSet.getColumnIndex('language'));
+      const languages = languageStr ? languageStr.split(',') : [];
+      
+      const sourcesStr = resultSet.getString(resultSet.getColumnIndex('videoSources'));
+      const sources: VideoSource[] = sourcesStr ? JSON.parse(sourcesStr) as VideoSource[] : [];
+      
+      const episodesStr = resultSet.getString(resultSet.getColumnIndex('episodes'));
+      const episodes: Episode[] = episodesStr ? JSON.parse(episodesStr) as Episode[] : [];
+      
+      const ratingsStr = resultSet.getString(resultSet.getColumnIndex('ratingInfo'));
+      const ratings: RatingInfo[] = ratingsStr ? JSON.parse(ratingsStr) as RatingInfo[] : [];
+
+      const typeStr = resultSet.getString(resultSet.getColumnIndex('type')) || 'movie';
+      let videoType: VideoType = VideoType.MOVIE;
+      if (typeStr === 'tv_series') {
+        videoType = VideoType.TV_SERIES;
+      } else if (typeStr === 'anime') {
+        videoType = VideoType.ANIME;
+      } else if (typeStr === 'documentary') {
+        videoType = VideoType.DOCUMENTARY;
+      } else if (typeStr === 'variety') {
+        videoType = VideoType.VARIETY;
+      } else if (typeStr === 'live') {
+        videoType = VideoType.LIVE;
+      } else {
+        videoType = VideoType.OTHER;
+      }
+
+      const movieParams: MovieConstructorParams = {
+        id,
+        title,
+        originalTitle: resultSet.getString(resultSet.getColumnIndex('originalTitle')) || '',
+        type: videoType,
+        coverUrl: resultSet.getString(resultSet.getColumnIndex('coverUrl')) || '',
+        backdropUrl: resultSet.getString(resultSet.getColumnIndex('backdropUrl')) || '',
+        overview: resultSet.getString(resultSet.getColumnIndex('description')) || '',
+        releaseDate: resultSet.getString(resultSet.getColumnIndex('releaseDate')) || '',
+        year: resultSet.getLong(resultSet.getColumnIndex('year')) || 0,
+        genres,
+        tags,
+        duration: resultSet.getLong(resultSet.getColumnIndex('duration')) || 0,
+        totalEpisodes: resultSet.getLong(resultSet.getColumnIndex('totalEpisodes')) || 0,
+        currentSeason: resultSet.getLong(resultSet.getColumnIndex('currentSeason')) || 0,
+        score: resultSet.getDouble(resultSet.getColumnIndex('score')) || 0,
+        directors,
+        actors,
+        countries,
+        languages,
+        sources,
+        episodes,
+        ratings,
+        updateTime: String(resultSet.getLong(resultSet.getColumnIndex('updateTime')) || Date.now())
+      };
+      return movieParams;
     } catch (error) {
-      Logger.error(TAG, `Failed to parse movie from result set: ${error instanceof Error ? error.message : String(error)}`);
+      LoggerUtil.error(TAG, `Failed to extract movie from result set: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
 
-  /**
-   * 安全获取字符串类型字段
-   */
-  private safeGetString(resultSet: relationalStore.ResultSet, columnName: string): string | undefined {
-    try {
-      const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return undefined;
-      const value = resultSet.getString(columnIndex);
-      return value || undefined;
-    } catch (error) {
-      Logger.warn(TAG, `Failed to get string column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return undefined;
-    }
-  }
-
-  /**
-   * 安全获取长整型字段
-   */
-  private safeGetLong(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
-    try {
-      const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return undefined;
-      const value = resultSet.getLong(columnIndex);
-      return value !== null ? value : undefined;
-    } catch (error) {
-      Logger.warn(TAG, `Failed to get long column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return undefined;
-    }
-  }
-
-  /**
-   * 安全获取双精度字段
-   */
-  private safeGetDouble(resultSet: relationalStore.ResultSet, columnName: string): number | undefined {
-    try {
-      const columnIndex = resultSet.getColumnIndex(columnName);
-      if (columnIndex === -1) return undefined;
-      const value = resultSet.getDouble(columnIndex);
-      return value !== null ? value : undefined;
-    } catch (error) {
-      Logger.warn(TAG, `Failed to get double column ${columnName}: ${error instanceof Error ? error.message : String(error)}`);
-      return undefined;
-    }
-  }
-
-  /**
-   * 安全解析JSON
-   */
-  private safeParseJson<T>(jsonStr: string): T | undefined {
-    try {
-      if (!jsonStr) {
-        return undefined;
-      }
-      const result = JSON.parse(jsonStr) as T;
-      // 将null转换为undefined，解决类型不匹配问题
-      return result === null ? undefined : result;
-    } catch (error) {
-      Logger.warn(TAG, `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`);
-      return undefined;
-    }
-  }
-
-  // ========== 占位实现 ==========
-  // 为了代码能编译通过，提供基础的占位实现
-  async getMoviesByIds(movieIds: string[]): Promise<DatabaseResult<Movie[]>> {
-    return { success: true, data: [] };
-  }
-
-  async getMoviesPaginated(params: PaginationParams): Promise<DatabaseResult<PaginatedResult<Movie>>> {
-    return { success: true, data: { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false } };
-  }
-
-  async searchMovies(keyword: string, params: PaginationParams): Promise<DatabaseResult<PaginatedResult<Movie>>> {
-    return { success: true, data: { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false } };
-  }
-
-  async addUser(user: User): Promise<DatabaseResult<string>> {
-    return { success: true, data: 'user-id' };
-  }
-
-  async updateUser(user: User): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
-  }
-
-  async deleteUser(userId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
-  }
-
-  async getUserById(userId: string): Promise<DatabaseResult<User | null>> {
-    return { success: true, data: null };
-  }
-
-  async getAllUsers(): Promise<DatabaseResult<User[]>> {
-    return { success: true, data: [] };
-  }
-
-  async getUserByUsername(username: string): Promise<DatabaseResult<User | null>> {
-    return { success: true, data: null };
-  }
+  // ========== 历史记录相关实现 | History record-related implementation ==========
 
   async saveHistory(history: History): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const valuesBucket: relationalStore.ValuesBucket = {
+        'id': history.id,
+        'userId': history.userId,
+        'contentId': history.contentId,
+        'contentTitle': history.contentTitle,
+        'contentType': history.contentType,
+        'coverUrl': history.coverUrl || '',
+        'progress': history.progress,
+        'totalDuration': history.totalDuration,
+        'lastWatchTime': history.lastWatchTime,
+        'playCount': history.playCount,
+        'isFinished': history.isFinished,
+        'episodeId': history.episodeId || '',
+        'season': history.season || 0,
+        'episode': history.episode || 0
+      };
+
+      // 首先检查记录是否已存在 | First check if record already exists
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('contentId', history.contentId)
+        .and()
+        .equalTo('userId', history.userId);
+      
+      // 使用查询来检查记录是否存在 | Use query to check if record exists
+      const resultSet = await this.rdbStore.query(predicates);
+      let existingCount = 0;
+      if (resultSet) {
+        if (resultSet.goToFirstRow()) {
+          existingCount = 1;
+        }
+        resultSet.close();
+      }
+      
+      let rowsAffected = 0;
+      if (existingCount > 0) {
+        // 更新现有记录 | Update existing record
+        rowsAffected = await this.rdbStore.update(valuesBucket, predicates);
+      } else {
+        // 插入新记录 | Insert new record
+        rowsAffected = await this.rdbStore.insert('history', valuesBucket);
+      }
+      
+      if (rowsAffected > 0) {
+        LoggerUtil.info(TAG, `History item ${existingCount > 0 ? 'updated' : 'added'} successfully: ${history.contentId}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        throw new Error('Failed to add or update history item');
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to save history: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to save history'
+      };
+      return result;
+    }
   }
 
   async deleteHistory(historyId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('id', historyId);
+      
+      const rowsDeleted = await this.rdbStore.delete(predicates);
+      
+      if (rowsDeleted > 0) {
+        LoggerUtil.info(TAG, `History item deleted successfully: ${historyId}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: false,
+          message: 'History item not found'
+        };
+        return result;
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to delete history: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to delete history'
+      };
+      return result;
+    }
   }
 
   async deleteAllHistoryByUserId(userId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('userId', userId);
+      
+      const rowsDeleted = await this.rdbStore.delete(predicates);
+      
+      LoggerUtil.info(TAG, `All history items deleted for user ${userId}: ${rowsDeleted} items`);
+      const result: DatabaseResult<boolean> = {
+        success: true,
+        data: true
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to delete all history for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to delete all history'
+      };
+      return result;
+    }
   }
 
   async getHistoryById(historyId: string): Promise<DatabaseResult<History | null>> {
-    return { success: true, data: null };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('id', historyId);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      let history: History | null = null;
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        history = this.extractHistoryFromResultSet(resultSet);
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<History | null> = {
+        success: true,
+        data: history
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get history by ID ${historyId}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<History | null> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get history by ID'
+      };
+      return result;
+    }
   }
 
   async getUserHistory(userId: string, params: PaginationParams): Promise<DatabaseResult<PaginatedResult<History>>> {
-    return { success: true, data: { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false } };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const pageSize = params.pageSize || 20;
+      const pageIndex = params.page || 1;
+      const offset = (pageIndex - 1) * pageSize;
+      
+      // Get paginated data | 鑾峰彇鍒嗛〉鏁版嵁
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('userId', userId)
+        .orderByDesc('lastWatchTime')
+        .limitAs(pageSize)
+        .offsetAs(offset);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      const historyItems: History[] = [];
+      let total = 0;
+      
+      if (resultSet) {
+        if (resultSet.goToFirstRow()) {
+          do {
+            const historyItem = this.extractHistoryFromResultSet(resultSet);
+            if (historyItem) {
+              historyItems.push(historyItem);
+            }
+          } while (resultSet.goToNextRow());
+        }
+        // Use getRowCount to get total count | 浣跨敤getRowCount鑾峰彇鎬昏褰曟暟
+        total = resultSet.rowCount;
+        resultSet.close();
+      }
+      
+      const totalPages = Math.ceil(total / pageSize);
+      const hasNextPage = pageIndex < totalPages;
+      const hasPrevPage = pageIndex > 1;
+      
+      LoggerUtil.info(TAG, `Retrieved history items for user ${userId}: found ${historyItems.length} results`);
+      const result: DatabaseResult<PaginatedResult<History>> = {
+        success: true,
+        data: {
+          items: historyItems,
+          totalCount: total,
+          page: pageIndex,
+          pageSize,
+          totalPages,
+          hasNextPage,
+          hasPrevPage
+        }
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get history items for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<PaginatedResult<History>> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get history items'
+      };
+      return result;
+    }
   }
 
   async getUserContentHistory(userId: string, contentId: string, contentType: string): Promise<DatabaseResult<History | null>> {
-    return { success: true, data: null };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('userId', userId)
+        .and()
+        .equalTo('contentId', contentId)
+        .and()
+        .equalTo('contentType', contentType);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      let history: History | null = null;
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        history = this.extractHistoryFromResultSet(resultSet);
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<History | null> = {
+        success: true,
+        data: history
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get user content history: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<History | null> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get user content history'
+      };
+      return result;
+    }
   }
 
-  async getRecentHistory(userId: string, limit: number = 20): Promise<DatabaseResult<History[]>> {
-    return { success: true, data: [] };
+  async getRecentHistory(userId: string, limit: number): Promise<DatabaseResult<History[]>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('history');
+      predicates.equalTo('userId', userId)
+        .orderByDesc('lastWatchTime')
+        .limitAs(limit);
+      predicates.offsetAs(0);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      const historyItems: History[] = [];
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        do {
+          const historyItem = this.extractHistoryFromResultSet(resultSet);
+          if (historyItem) {
+            historyItems.push(historyItem);
+          }
+        } while (resultSet.goToNextRow());
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<History[]> = {
+        success: true,
+        data: historyItems
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get recent history: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<History[]> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get recent history'
+      };
+      return result;
+    }
   }
+
+  /**
+ * 从结果集中提取历史记录数据 | Extract history data from result set
+ */
+  private extractHistoryFromResultSet(resultSet: relationalStore.ResultSet): History {
+    // 使用对象字面量创建History实例，确保参数类型正确 | Create History instance using object literal, ensure parameter types are correct
+    try {
+      return new History({
+        id: resultSet.getString(resultSet.getColumnIndex('id')) || `history_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+        userId: resultSet.getString(resultSet.getColumnIndex('userId')) || '',
+        contentId: resultSet.getString(resultSet.getColumnIndex('contentId')) || '',
+        contentTitle: resultSet.getString(resultSet.getColumnIndex('contentTitle')) || '',
+        contentType: resultSet.getLong(resultSet.getColumnIndex('contentType')) as VideoType,
+        coverUrl: resultSet.getString(resultSet.getColumnIndex('coverUrl')) || '',
+        progress: resultSet.getLong(resultSet.getColumnIndex('progress')) || 0,
+        totalDuration: resultSet.getLong(resultSet.getColumnIndex('totalDuration')) || 0,
+        lastWatchTime: resultSet.getString(resultSet.getColumnIndex('lastWatchTime')) || new Date().toISOString(),
+        playCount: resultSet.getLong(resultSet.getColumnIndex('playCount')) || 0,
+        isFinished: resultSet.getLong(resultSet.getColumnIndex('isFinished')) === 1,
+        episodeId: resultSet.getString(resultSet.getColumnIndex('episodeId')) || '',
+        season: resultSet.getLong(resultSet.getColumnIndex('season')) || 0,
+        episode: resultSet.getLong(resultSet.getColumnIndex('episode')) || 0
+      });
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to extract history from result set: ${error instanceof Error ? error.message : String(error)}`);
+      // 返回默认的History对象，确保函数不会抛出异常 | Return default History object, ensure function won't throw exception
+      return new History({
+        id: `history_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+        userId: '',
+        contentId: '',
+        contentTitle: '',
+        contentType: VideoType.MOVIE,
+        coverUrl: '',
+        progress: 0,
+        totalDuration: 0,
+        lastWatchTime: new Date().toISOString(),
+        playCount: 0,
+        isFinished: false,
+        episodeId: '',
+        season: 0,
+        episode: 0
+      });
+    }
+  }
+
+  // ========== User-related implementation | 鐢ㄦ埛鐩稿叧瀹炵幇 ==========
+
+  async addUser(user: User): Promise<DatabaseResult<string>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const valuesBucket: relationalStore.ValuesBucket = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email || null,
+        'nickname': user.nickname || null,
+        'avatarUrl': user.avatarUrl || null,
+        'role': user.role,
+        'lastLoginTime': user.lastLoginTime || null,
+        'registrationDate': user.registrationDate || Date.now().toString(),
+        'status': String(user.status || 'active'),
+        'isVerified': user.isVerified ? 1 : 0,
+        'subscriptionEndDate': user.subscriptionEndDate || null,
+        'watchHistoryEnabled': user.watchHistoryEnabled ? 1 : 0,
+        'favoritesEnabled': user.favoritesEnabled ? 1 : 0,
+        'totalWatchTime': user.totalWatchTime || 0
+      };
+
+      const rowsInserted = await this.rdbStore.insert('users', valuesBucket);
+      
+      if (rowsInserted > 0) {
+        LoggerUtil.info(TAG, `User added successfully: ${user.id}`);
+        const result: DatabaseResult<string> = {
+          success: true,
+          data: user.id
+        };
+        return result;
+      } else {
+        throw new Error('Failed to insert user');
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to add user: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<string> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to add user'
+      };
+      return result;
+    }
+  }
+
+  async updateUser(user: User): Promise<DatabaseResult<boolean>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const valuesBucket: relationalStore.ValuesBucket = {
+        'username': user.username,
+        'email': user.email || null,
+        'nickname': user.nickname || null,
+        'avatarUrl': user.avatarUrl || null,
+        'role': user.role,
+        'lastLoginTime': user.lastLoginTime || null,
+        'registrationDate': user.registrationDate || Date.now().toString(),
+        'status': String(user.status || 'active'),
+        'isVerified': user.isVerified ? 1 : 0,
+        'subscriptionEndDate': user.subscriptionEndDate || null,
+        'watchHistoryEnabled': user.watchHistoryEnabled ? 1 : 0,
+        'favoritesEnabled': user.favoritesEnabled ? 1 : 0,
+        'totalWatchTime': user.totalWatchTime || 0
+      };
+
+      const predicates = new relationalStore.RdbPredicates('users');
+      predicates.equalTo('id', user.id);
+      
+      const rowsUpdated = await this.rdbStore.update(valuesBucket, predicates);
+      
+      if (rowsUpdated > 0) {
+        LoggerUtil.info(TAG, `User updated successfully: ${user.id}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: false,
+          message: 'User not found'
+        };
+        return result;
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to update user: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to update user'
+      };
+      return result;
+    }
+  }
+
+  async deleteUser(userId: string): Promise<DatabaseResult<boolean>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('users');
+      predicates.equalTo('id', userId);
+      
+      const rowsDeleted = await this.rdbStore.delete(predicates);
+      
+      if (rowsDeleted > 0) {
+        LoggerUtil.info(TAG, `User deleted successfully: ${userId}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: false,
+          message: 'User not found'
+        };
+        return result;
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to delete user: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to delete user'
+      };
+      return result;
+    }
+  }
+
+  async getUserById(userId: string): Promise<DatabaseResult<User | null>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('users');
+      predicates.equalTo('id', userId);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      let user: User | null = null;
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        try {
+          user = new User({
+            id: resultSet.getString(resultSet.getColumnIndex('id')) || '',
+            username: resultSet.getString(resultSet.getColumnIndex('username')) || '',
+            email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
+            nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
+            avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
+            role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+            lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
+            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
+            status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+            isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
+            subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
+            watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
+            favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
+            totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
+          });
+        } catch (innerError) {
+          LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+        } finally {
+          resultSet.close();
+        }
+      } else if (resultSet) {
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<User | null> = {
+        success: true,
+        data: user
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get user by ID ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<User | null> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get user by ID'
+      };
+      return result;
+    }
+  }
+
+  async getAllUsers(): Promise<DatabaseResult<User[]>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('users');
+      const resultSet = await this.rdbStore.query(predicates);
+      const users: User[] = [];
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        do {
+          try {
+            const user = new User({
+              id: resultSet.getString(resultSet.getColumnIndex('id')) || '',
+              username: resultSet.getString(resultSet.getColumnIndex('username')) || '',
+              email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
+              nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
+              avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
+              role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+              lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
+              registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
+              status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+              isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
+              subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
+              watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
+              favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
+              totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
+            });
+            users.push(user);
+          } catch (innerError) {
+            LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+          }
+        } while (resultSet.goToNextRow());
+        resultSet.close();
+      } else if (resultSet) {
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<User[]> = {
+        success: true,
+        data: users
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get all users: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<User[]> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get all users'
+      };
+      return result;
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<DatabaseResult<User | null>> {
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('users');
+      predicates.equalTo('username', username);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      let user: User | null = null;
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        try {
+          user = new User({
+            id: resultSet.getString(resultSet.getColumnIndex('id')) || '',
+            username: resultSet.getString(resultSet.getColumnIndex('username')) || '',
+            email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
+            nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
+            avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
+            role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+            lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
+            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
+            status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+            isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
+            subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
+            watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
+            favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
+            totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
+          });
+        } catch (innerError) {
+          LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+        } finally {
+          resultSet.close();
+        }
+      } else if (resultSet) {
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<User | null> = {
+        success: true,
+        data: user
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get user by username ${username}: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<User | null> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get user by username'
+      };
+      return result;
+    }
+  }
+
+  // ========== Favorite-related implementation | 鏀惰棌鐩稿叧瀹炰緥 ==========
 
   async addFavorite(userId: string, movieId: string, collectionName?: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const valuesBucket: relationalStore.ValuesBucket = {
+        'userId': userId,
+        'movieId': movieId,
+        'collectionName': collectionName || 'default',
+        'createTime': Date.now()
+      };
+
+      const rowsInserted = await this.rdbStore.insert('favorites', valuesBucket);
+      
+      if (rowsInserted > 0) {
+        LoggerUtil.info(TAG, `Favorite added successfully: user ${userId}, movie ${movieId}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        throw new Error('Failed to insert favorite');
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to add favorite: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to add favorite'
+      };
+      return result;
+    }
   }
 
   async removeFavorite(userId: string, movieId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('favorites');
+      predicates.equalTo('userId', userId)
+        .and()
+        .equalTo('movieId', movieId);
+      
+      const rowsDeleted = await this.rdbStore.delete(predicates);
+      
+      if (rowsDeleted > 0) {
+        LoggerUtil.info(TAG, `Favorite removed successfully: user ${userId}, movie ${movieId}`);
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: true
+        };
+        return result;
+      } else {
+        const result: DatabaseResult<boolean> = {
+          success: true,
+          data: false,
+          message: 'Favorite not found'
+        };
+        return result;
+      }
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to remove favorite: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to remove favorite'
+      };
+      return result;
+    }
   }
 
   async isFavorited(userId: string, movieId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('favorites');
+      predicates.equalTo('userId', userId)
+        .and()
+        .equalTo('movieId', movieId);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      let isFavorited = false;
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        isFavorited = true;
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<boolean> = {
+        success: true,
+        data: isFavorited
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to check if favorited: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<boolean> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to check if favorited'
+      };
+      return result;
+    }
   }
 
   async getUserFavorites(userId: string, params: PaginationParams, collectionName?: string): Promise<DatabaseResult<PaginatedResult<Movie>>> {
-    return { success: true, data: { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false } };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      // Need to implement join query here to get user's favorite movies | 杩欓噷闇€瑕佸疄鐜拌仈鍚堟煡璇紝鑾峰彇鐢ㄦ埛鏀惰棌鐨勭數褰?
+      // Temporarily return empty result | 鏆傛椂杩斿洖绌虹粨鏋?
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: true,
+        data: {
+          items: [],
+          totalCount: 0,
+          page: params.page || 1,
+          pageSize: params.pageSize || 20,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false
+        }
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get user favorites: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<PaginatedResult<Movie>> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get user favorites'
+      };
+      return result;
+    }
   }
 
   async getUserCollections(userId: string): Promise<DatabaseResult<string[]>> {
-    return { success: true, data: [] };
+    try {
+      if (!this.rdbStore) {
+        throw new Error('Database not initialized');
+      }
+
+      const predicates = new relationalStore.RdbPredicates('favorites');
+      predicates.equalTo('userId', userId);
+      
+      const resultSet = await this.rdbStore.query(predicates);
+      const collections: string[] = [];
+      const collectionMap: Record<string, boolean> = {};
+      
+      if (resultSet && resultSet.goToFirstRow()) {
+        do {
+          const collectionName = resultSet.getString(resultSet.getColumnIndex('collectionName')) || 'default';
+          if (!collectionMap[collectionName]) {
+            collectionMap[collectionName] = true;
+            collections.push(collectionName);
+          }
+        } while (resultSet.goToNextRow());
+        resultSet.close();
+      }
+      
+      const result: DatabaseResult<string[]> = {
+        success: true,
+        data: collections
+      };
+      return result;
+    } catch (error) {
+      LoggerUtil.error(TAG, `Failed to get user collections: ${error instanceof Error ? error.message : String(error)}`);
+      const result: DatabaseResult<string[]> = {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        message: 'Failed to get user collections'
+      };
+      return result;
+    }
   }
 
-  async addSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
-
-  async deleteSearchHistory(userId: string, keyword: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
-  }
-
-  async clearSearchHistory(userId: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
-
-  async getUserSearchHistory(userId: string, limit: number = 50): Promise<DatabaseResult<string[]>> {
-    return { success: true, data: [] };
-  }
-
-  async cacheSearchResults(keyword: string, results: SearchResult[], expirationTime?: number): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
-
-  async getCachedSearchResults(keyword: string): Promise<DatabaseResult<SearchResult[] | null>> {
-    return { success: true, data: null };
-  }
-
-  async clearExpiredCache(): Promise<DatabaseResult<number>> {
-    return { success: true, data: 0 };
-  }
-
-  async getCacheSize(): Promise<DatabaseResult<number>> {
-    return { success: true, data: 0 };
-  }
-
-  async clearAllCache(): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
-
-  async saveConfig(key: string, value: ConfigValue, group?: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
-
-  async getConfig(key: string, group?: string): Promise<DatabaseResult<ConfigValue | null>> {
-    return { success: true, data: null };
-  }
-
-  async deleteConfig(key: string, group?: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: false };
-  }
-
-  async getConfigGroup(group: string): Promise<DatabaseResult<Record<string, ConfigValue>>> {
-    return { success: true, data: {} };
-  }
-
-  async clearConfigGroup(group: string): Promise<DatabaseResult<boolean>> {
-    return { success: true, data: true };
-  }
+  // ========== Search history-related implementation | 鎼滅储鍘嗗彶鐩稿叧瀹炵幇 ==========
 }

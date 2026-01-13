@@ -1,5 +1,5 @@
-// SQLiteHelper.ets - SQLite数据库操作辅助类
-// 提供基本的CRUD操作和SQL查询构建功能
+// SQLiteHelper.ets - SQLite数据库操作辅助类 // SQLite Database Operation Helper Class
+// 提供基本的CRUD操作和SQL查询构建功能 // Provide basic CRUD operations and SQL query building capabilities
 
 import RelationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from './DatabaseManager';
@@ -8,19 +8,17 @@ import Logger from '../../common/util/Logger';
 const TAG = 'SQLiteHelper';
 
 /**
- * 数据库支持的值类�?*/
+ * 数据库支持的类型 // Database supported types
+ */
 export type ValueType = string | number | boolean | null;
 
 /**
- * 数据库记录类�?*/
+ * 数据库记录类型 // Database record type
+ */
 export type DatabaseRecord = Record<string, ValueType>;
 
 /**
- * SQLiteHelper类定义开�?*/
-
-
-/**
- * SQL查询条件接口
+ * SQL查询条件接口 // SQL query condition interface
  */
 export interface QueryCondition {
   column: string;
@@ -29,7 +27,7 @@ export interface QueryCondition {
 }
 
 /**
- * SQL排序选项接口
+ * SQL排序选项接口 // SQL sort option interface
  */
 export interface SortOption {
   column: string;
@@ -37,7 +35,8 @@ export interface SortOption {
 }
 
 /**
- * 数据库操作结果接�?*/
+ * 数据库操作结果接口 // Database operation result interface
+ */
 export interface DatabaseResult {
   success: boolean;
   message?: string;
@@ -50,18 +49,18 @@ export class SQLiteHelper {
   private dbManager: DatabaseManager;
   
   /**
-   * 获取对象的键数组（ArkTS兼容方法）
+   * 获取对象的键数组（ArkTS兼容方法） // Get object key array (ArkTS compatible method)
    */
   private getObjectKeys<T extends DatabaseRecord>(obj: T): string[] {
     try {
       const jsonString = JSON.stringify(obj);
-      // 使用字符串解析来提取键，避免使用Object.keys
+      // 使用字符串解析来提取键，避免使用Object.keys // Use string parsing to extract keys, avoid using Object.keys
       const keys: string[] = [];
       let inKey = false;
       let currentKey = '';
       let isEscaped = false;
       
-      // 跳过JSON对象的开始大括号
+      // 跳过JSON对象的开始大括号 // Skip JSON object opening brace
       let i = 1;
       
       while (i < jsonString.length) {
@@ -93,7 +92,7 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取对象的值数组（ArkTS兼容方法）
+   * 获取对象的值数组（ArkTS兼容方法） // Get object value array (ArkTS compatible method)
    */
   private getObjectValues<T extends DatabaseRecord>(obj: T): ValueType[] {
     try {
@@ -116,7 +115,7 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取SQLiteHelper单例实例
+   * 获取SQLiteHelper单例实例 // Get SQLiteHelper singleton instance
    */
   public static getInstance(): SQLiteHelper {
     if (!SQLiteHelper.instance) {
@@ -126,10 +125,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 插入数据
-   * @param tableName 表名
-   * @param values 要插入的数据
-   * @returns 插入结果
+   * 插入数据 // Insert data
+   * @param tableName 表名 // Table name
+   * @param values 要插入的数据 // Data to insert
+   * @returns 插入结果 // Insert result
    */
   public async insert(tableName: string, values: Record<string, ValueType>): Promise<DatabaseResult> {
     try {
@@ -137,17 +136,17 @@ export class SQLiteHelper {
       
       const database = this.dbManager.getDatabase();
       
-      // 构建插入语句
+      // 构建插入语句 // Build insert statement
       const columns = this.getObjectKeys(values);
       const placeholders = columns.map(() => '?').join(', ');
       const bindArgs = this.getObjectValues(values);
       
       const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
       
-      // 执行插入
+      // 执行插入 // Execute insert
       await database.executeSql(sql, bindArgs);
       
-      // 获取最后插入的ID
+      // 获取最后插入的ID // Get last inserted ID
       const result: RelationalStore.ResultSet = await database.querySql(`SELECT last_insert_rowid() as id`);
       let lastInsertRowId = -1;
       if (result.goToFirstRow()) {
@@ -172,10 +171,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 批量插入数据
-   * @param tableName 表名
-   * @param dataList 数据列表
-   * @returns 插入结果
+   * 批量插入数据 // Batch insert data
+   * @param tableName 表名 // Table name
+   * @param dataList 数据列表 // Data list
+   * @returns 插入结果 // Insert result
    */
   public async batchInsert(tableName: string, dataList: Array<Record<string, ValueType>>): Promise<DatabaseResult> {
     if (!dataList || dataList.length === 0) {
@@ -212,11 +211,11 @@ export class SQLiteHelper {
   }
   
   /**
-   * 更新数据
-   * @param tableName 表名
-   * @param values 要更新的数据
-   * @param conditions 更新条件
-   * @returns 更新结果
+   * 更新数据 // Update data
+   * @param tableName 表名 // Table name
+   * @param values 要更新的数据 // Data to update
+   * @param conditions 更新条件 // Update conditions
+   * @returns 更新结果 // Update result
    */
   public async update(
     tableName: string,
@@ -226,7 +225,7 @@ export class SQLiteHelper {
     try {
       const database = this.dbManager.getDatabase();
       
-      // 构建更新语句
+      // 构建更新语句 // Build update statement
       const columns = this.getObjectKeys(values);
       const setClause = columns
         .map(key => `${key} = ?`)
@@ -235,7 +234,7 @@ export class SQLiteHelper {
       let sql = `UPDATE ${tableName} SET ${setClause}`;
       const bindArgs: ValueType[] = this.getObjectValues(values);
       
-      // 添加条件
+      // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
@@ -250,15 +249,15 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参数
+        // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            // 替换spread运算符，使用传统的for循环
+            // 替换spread运算符，使用传统的for循环 // Replace spread operator, use traditional for loop
             for (let i = 0; i < cond.value.length; i++) {
               bindArgs.push(cond.value[i] as ValueType);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            // 确保cond.value不是数组
+            // 确保cond.value不是数组 // Ensure cond.value is not array
             if (!Array.isArray(cond.value)) {
               bindArgs.push(cond.value as ValueType);
             }
@@ -266,10 +265,10 @@ export class SQLiteHelper {
         });
       }
       
-      // 执行更新
+      // 执行更新 // Execute update
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行数
+      // 获取影响的行数 // Get affected rows
       const result = await database.querySql('SELECT changes() as affected_rows');
       let affectedRows = 0;
       if (result.goToFirstRow()) {
@@ -293,10 +292,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 删除数据
-   * @param tableName 表名
-   * @param conditions 删除条件
-   * @returns 删除结果
+   * 删除数据 // Delete data
+   * @param tableName 表名 // Table name
+   * @param conditions 删除条件 // Delete conditions
+   * @returns 删除结果 // Delete result
    */
   public async delete(
     tableName: string,
@@ -308,7 +307,7 @@ export class SQLiteHelper {
       let sql = `DELETE FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
       
-      // 添加条件
+      // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
@@ -323,15 +322,15 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参数
+        // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            // 替换spread运算符，使用传统的for循环
+            // 替换spread运算符，使用传统的for循环 // Replace spread operator, use traditional for loop
             for (let i = 0; i < cond.value.length; i++) {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            // 确保cond.value不是数组
+            // 确保cond.value不是数组 // Ensure cond.value is not array
             if (!Array.isArray(cond.value)) {
               bindArgs.push(cond.value as ValueType);
             }
@@ -339,10 +338,10 @@ export class SQLiteHelper {
         });
       }
       
-      // 执行删除
+      // 执行删除 // Execute delete
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行
+      // 获取影响的行 // Get affected rows
       const result: RelationalStore.ResultSet = await database.querySql('SELECT changes() as affected_rows');
       let affectedRows = 0;
       if (result.goToFirstRow()) {
@@ -366,12 +365,14 @@ export class SQLiteHelper {
   }
   
   /**
-   * 查询数据
-   * @param tableName 表名
-   * @param columns 要查询的�?   * @param conditions 查询条件
-   * @param sortOptions 排序选项
-   * @param limit 限制数量
-   * @param offset 偏移�?   * @returns 查询结果列表
+   * 查询数据 // Query data
+   * @param tableName 表名 // Table name
+   * @param columns 要查询的列 // Columns to query
+   * @param conditions 查询条件 // Query conditions
+   * @param sortOptions 排序选项 // Sort options
+   * @param limit 限制数量 // Limit count
+   * @param offset 偏移量 // Offset
+   * @returns 查询结果列表 // Query result list
    */
   public async query<T extends DatabaseRecord>(
     tableName: string,
@@ -384,11 +385,11 @@ export class SQLiteHelper {
     try {
       const database = this.dbManager.getDatabase();
       
-      // 构建查询语句
+      // 构建查询语句 // Build query statement
       let sql = `SELECT ${columns.join(', ')} FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
       
-      // 添加条件
+      // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
@@ -403,15 +404,15 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参数
+        // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            // 替换spread运算符，使用传统的for循环
+            // 替换spread运算符，使用传统的for循环 // Replace spread operator, use traditional for loop
             for (let i = 0; i < cond.value.length; i++) {
               bindArgs.push(cond.value[i]);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            // 确保cond.value不是数组
+            // 确保cond.value不是数组 // Ensure cond.value is not array
             if (!Array.isArray(cond.value)) {
               bindArgs.push(cond.value as ValueType);
             }
@@ -419,7 +420,7 @@ export class SQLiteHelper {
         });
       }
       
-      // 添加排序
+      // 添加排序 // Add sorting
       if (sortOptions && sortOptions.length > 0) {
         const orderByClause = sortOptions
           .map(option => `${option.column} ${option.order || 'ASC'}`)
@@ -427,7 +428,7 @@ export class SQLiteHelper {
         sql += ` ORDER BY ${orderByClause}`;
       }
       
-      // 添加分页
+      // 添加分页 // Add pagination
       if (limit !== undefined) {
         sql += ` LIMIT ? OFFSET ?`;
         bindArgs.push(limit, offset);
@@ -435,10 +436,10 @@ export class SQLiteHelper {
       
       Logger.debug(TAG, `Executing query: ${sql}, args: ${JSON.stringify(bindArgs)}`);
       
-      // 执行查询
+      // 执行查询 // Execute query
       const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
       
-      // 处理结果
+      // 处理结果 // Process results
       const records: T[] = [];
       while (result.goToNextRow()) {
         const record: DatabaseRecord = {};
@@ -446,28 +447,28 @@ export class SQLiteHelper {
         for (let index = 0; index < columnNames.length; index++) {
           const column = columnNames[index];
           
-          // 先尝试获取字符串
+          // 先尝试获取字符串 // First try to get string
           const stringValue = result.getString(index);
           if (stringValue !== null) {
             record[column] = stringValue;
           } else {
-            // 尝试获取整数
+            // 尝试获取数字 // Try to get number
             const longValue = result.getLong(index);
             if (longValue !== null) {
               record[column] = longValue;
             } else {
-              // 尝试获取浮点数
+              // 尝试获取浮点数 // Try to get float
               const doubleValue = result.getDouble(index);
               if (doubleValue !== null && !isNaN(doubleValue)) {
                 record[column] = doubleValue;
               } else {
-                // 获取布尔值 - 使用getLong检查
-              const longValue = result.getLong(index);
-              if (longValue !== null) {
-                record[column] = longValue === 1;
-              } else {
-                record[column] = null;
-              }
+                // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
+                const boolLongValue = result.getLong(index);
+                if (boolLongValue !== null) {
+                  record[column] = boolLongValue === 1;
+                } else {
+                  record[column] = null;
+                }
               }
             }
           }
@@ -484,10 +485,11 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取单条记录
-   * @param tableName 表名
-   * @param columns 要查询的�?   * @param conditions 查询条件
-   * @returns 单条记录或null
+   * 获取单条记录 // Get single record
+   * @param tableName 表名 // Table name
+   * @param columns 要查询的列 // Columns to query
+   * @param conditions 查询条件 // Query conditions
+   * @returns 单条记录或null // Single record or null
    */
   public async getFirst<T extends DatabaseRecord>(
     tableName: string, 
@@ -499,10 +501,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取记录总数
-   * @param tableName 表名
-   * @param conditions 查询条件
-   * @returns 记录总数
+   * 获取记录总数 // Get total record count
+   * @param tableName 表名 // Table name
+   * @param conditions 查询条件 // Query conditions
+   * @returns 记录总数 // Total record count
    */
   public async count(tableName: string, conditions?: Array<QueryCondition>): Promise<number> {
     try {
@@ -511,7 +513,7 @@ export class SQLiteHelper {
       let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
       
-      // 添加条件
+      // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
@@ -526,15 +528,15 @@ export class SQLiteHelper {
         
         sql += ` WHERE ${whereClause}`;
         
-        // 处理IN条件的参数
+        // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
-            // 替换spread运算符，使用传统的for循环
+            // 替换spread运算符，使用传统的for循环 // Replace spread operator, use traditional for loop
             for (let i = 0; i < cond.value.length; i++) {
               bindArgs.push(cond.value[i] as ValueType);
             }
           } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
-            // 确保cond.value是ValueType类型，不是数组
+            // 确保cond.value是ValueType类型，不是数组 // Ensure cond.value is ValueType, not array
             if (!Array.isArray(cond.value)) {
               bindArgs.push(cond.value as ValueType);
             }
@@ -556,9 +558,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 检查记录是否存�?   * @param tableName 表名
-   * @param conditions 查询条件
-   * @returns 是否存在
+   * 检查记录是否存在 // Check if record exists
+   * @param tableName 表名 // Table name
+   * @param conditions 查询条件 // Query conditions
+   * @returns 是否存在 // Whether exists
    */
   public async exists(tableName: string, conditions?: Array<QueryCondition>): Promise<boolean> {
     const count = await this.count(tableName, conditions);
@@ -566,10 +569,10 @@ export class SQLiteHelper {
   }
   
   /**
-   * 执行自定义SQL查询
-   * @param sql SQL语句
-   * @param bindArgs 绑定参数
-   * @returns 查询结果
+   * 执行自定义SQL查询 // Execute custom SQL query
+   * @param sql SQL语句 // SQL statement
+   * @param bindArgs 绑定参数 // Bind arguments
+   * @returns 查询结果 // Query result
    */
   public async executeCustomQuery<T extends Record<string, string | number | boolean | null>>(sql: string, bindArgs?: ValueType[]): Promise<T[]> {
     try {
@@ -579,7 +582,7 @@ export class SQLiteHelper {
       
       const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
       
-      // 处理结果
+      // 处理结果 // Process results
       const records: T[] = [];
       while (result.goToNextRow()) {
         const record: Record<string, string | number | boolean | null> = {};
@@ -587,22 +590,22 @@ export class SQLiteHelper {
         for (let index = 0; index < columnNames.length; index++) {
           const column = columnNames[index];
           
-          // 先尝试获取字符串
+          // 先尝试获取字符串 // First try to get string
           const stringValue = result.getString(index);
           if (stringValue !== null) {
             record[column] = stringValue;
           } else {
-            // 尝试获取整数
+            // 尝试获取数字 // Try to get number
             const longValue = result.getLong(index);
             if (longValue !== null) {
               record[column] = longValue;
             } else {
-              // 尝试获取浮点数
+              // 尝试获取浮点数 // Try to get float
               const doubleValue = result.getDouble(index);
               if (doubleValue !== null && !isNaN(doubleValue)) {
                 record[column] = doubleValue;
               } else {
-                // 获取布尔值 - 使用getLong检查
+                // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
                 const boolLongValue = result.getLong(index);
                 if (boolLongValue !== null) {
                   record[column] = boolLongValue === 1;

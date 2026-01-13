@@ -1,301 +1,177 @@
-// FileUtil - 文件操作工具
-import fs from '@ohos.file.fs';
-import common from '@ohos.app.ability.common';
-import Logger from './Logger';
-import JsonUtil, { safeStringify } from './JsonUtil';
-
-const TAG = 'FileUtil';
+/**
+ * 文件工具类 // File utility class
+ * 提供文件操作相关的工具函数 // Provides file operation utility functions
+ */
 
 /**
- * 文件操作工具�? * 提供文件的读写、创建、删除等基本操作
+ * 文件工具类 // File utility class
  */
 export default class FileUtil {
-  /**
-   * 读取文件内容
-   * @param filePath 文件路径
-   * @returns 文件内容字符�?   */
-  public static async readFile(filePath: string): Promise<string> {
-    try {
-      const file = await fs.open(filePath, fs.OpenMode.READ_ONLY);
-      const fileInfo = await fs.stat(filePath);
-      const buffer = new ArrayBuffer(fileInfo.size);
-      await fs.read(file.fd, buffer);
-      await fs.close(file.fd);
-      // 修复any类型问题，使用显式的类型转换
-      const uint8Array = new Uint8Array(buffer);
-      let result = '';
-      for (let i = 0; i < uint8Array.length; i++) {
-        result += String.fromCharCode(uint8Array[i]);
-      }
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to read file: ${filePath}, error: ${errorMessage}`);
-      throw new Error(`Failed to read file: ${filePath}. ${errorMessage}`);
-    }
-  }
+  private static readonly TAG: string = 'FileUtil';
 
   /**
-   * 写入文件内容
-   * @param filePath 文件路径
-   * @param content 文件内容
+   * 获取文件扩展名 // Gets file extension
+   * @param fileName 文件名 // File name
+   * @returns 文件扩展名 // File extension
    */
-  public static async writeFile(filePath: string, content: string): Promise<void> {
-    try {
-      // 确保目录存在
-      await FileUtil.ensureDirExists(filePath.substring(0, filePath.lastIndexOf('/')));
-      
-      // 在HarmonyOS SDK 5.1.1中，OpenMode不支持TRUNCATE，使用CREATE | WRITE_ONLY即可
-      const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
-      // 修复any类型问题，使用显式的类型转换
-      const buffer = new ArrayBuffer(content.length);
-      const view = new Uint8Array(buffer);
-      for (let i = 0; i < content.length; i++) {
-        view[i] = content.charCodeAt(i);
-      }
-      await fs.write(file.fd, buffer);
-      await fs.close(file.fd);
-      Logger.info(TAG, `File written successfully: ${filePath}`);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to write file: ${filePath}, error: ${errorMessage}`);
-      throw new Error(`Failed to write file: ${filePath}. ${errorMessage}`);
+  public static getFileExtension(fileName: string): string {
+    if (!fileName) {
+      return '';
     }
-  }
-
-  /**
-   * 追加内容到文�?   * @param filePath 文件路径
-   * @param content 追加的内�?   */
-  public static async appendFile(filePath: string, content: string): Promise<void> {
-    try {
-      // 确保目录存在
-      await FileUtil.ensureDirExists(filePath.substring(0, filePath.lastIndexOf('/')));
-      
-      // 检查文件是否存在，如果不存在则创建
-      if (!(await FileUtil.exists(filePath))) {
-        await FileUtil.writeFile(filePath, content);
-        return;
-      }
-      
-      // 先读取现有内容，然后合并写入
-      const existingContent = await FileUtil.readFile(filePath);
-      const newContent = existingContent + content;
-      await FileUtil.writeFile(filePath, newContent);
-      Logger.info(TAG, `Content appended to file: ${filePath}`);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to append to file: ${filePath}, error: ${errorMessage}`);
-      throw new Error(`Failed to append to file: ${filePath}. ${errorMessage}`);
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      return '';
     }
+    return fileName.substring(lastDotIndex + 1).toLowerCase();
   }
 
   /**
-   * 删除文件
-   * @param filePath 文件路径
+   * 获取文件名（不含扩展名） // Gets file name without extension
+   * @param fileName 文件名 // File name
+   * @returns 文件名（不含扩展名） // File name without extension
    */
-  public static async deleteFile(filePath: string): Promise<void> {
-    try {
-      if (await FileUtil.exists(filePath)) {
-        await fs.unlink(filePath);
-        Logger.info(TAG, `File deleted successfully: ${filePath}`);
-      } else {
-        Logger.warn(TAG, `File not found: ${filePath}`);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to delete file: ${filePath}, error: ${errorMessage}`);
-      throw new Error(`Failed to delete file: ${filePath}. ${errorMessage}`);
+  public static getFileNameWithoutExtension(fileName: string): string {
+    if (!fileName) {
+      return '';
     }
-  }
-
-  /**
-   * 创建目录
-   * @param dirPath 目录路径
-   */
-  public static async mkdir(dirPath: string): Promise<void> {
-    try {
-      // 在HarmonyOS SDK 5.1.1中，mkdir只接受路径和递归标志
-      await fs.mkdir(dirPath, false);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to create directory ${dirPath}: ${errorMessage}`);
-      throw new Error(`Failed to create directory ${dirPath}: ${errorMessage}`);
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      return fileName;
     }
+    return fileName.substring(0, lastDotIndex);
   }
 
   /**
-   * 确保目录存在，如果不存在则创�?   * @param dirPath 目录路径
+   * 获取文件大小的可读格式 // Gets readable file size
+   * @param bytes 文件大小（字节） // File size in bytes
+   * @returns 可读的文件大小 // Readable file size
    */
-  public static async ensureDirExists(dirPath: string): Promise<void> {
-    try {
-      // 在HarmonyOS SDK 5.1.1中，mkdir只接受路径和递归标志
-      await fs.mkdir(dirPath, true);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
-      throw new Error(`Failed to ensure directory exists ${dirPath}: ${errorMessage}`);
+  public static getReadableFileSize(bytes: number): string {
+    if (bytes === 0) {
+      return '0 B';
     }
+
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
   /**
-   * 判断文件或目录是否存�?   * @param path 路径
-   * @returns 是否存在
+   * 检查文件是否为图片 // Checks if file is image
+   * @param fileName 文件名 // File name
+   * @returns 是否为图片 // Is image
    */
-  public static async exists(path: string): Promise<boolean> {
-    try {
-      await fs.stat(path);
-      return true;
-    } catch {
-      return false;
+  public static isImageFile(fileName: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const ext = this.getFileExtension(fileName);
+    return imageExtensions.includes(ext);
+  }
+
+  /**
+   * 检查文件是否为视频 // Checks if file is video
+   * @param fileName 文件名 // File name
+   * @returns 是否为视频 // Is video
+   */
+  public static isVideoFile(fileName: string): boolean {
+    const videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'm4v'];
+    const ext = this.getFileExtension(fileName);
+    return videoExtensions.includes(ext);
+  }
+
+  /**
+   * 检查文件是否为音频 // Checks if file is audio
+   * @param fileName 文件名 // File name
+   * @returns 是否为音频 // Is audio
+   */
+  public static isAudioFile(fileName: string): boolean {
+    const audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'wma'];
+    const ext = this.getFileExtension(fileName);
+    return audioExtensions.includes(ext);
+  }
+
+  /**
+   * 检查文件是否为文本 // Checks if file is text
+   * @param fileName 文件名 // File name
+   * @returns 是否为文本 // Is text
+   */
+  public static isTextFile(fileName: string): boolean {
+    const textExtensions = ['txt', 'md', 'json', 'xml', 'html', 'css', 'js', 'ts', 'ets'];
+    const ext = this.getFileExtension(fileName);
+    return textExtensions.includes(ext);
+  }
+
+  /**
+   * 生成唯一文件名 // Generates unique file name
+   * @param originalName 原始文件名 // Original file name
+   * @returns 唯一文件名 // Unique file name
+   */
+  public static generateUniqueFileName(originalName: string): string {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    const ext = this.getFileExtension(originalName);
+    const baseName = this.getFileNameWithoutExtension(originalName);
+    return `${baseName}_${timestamp}_${random}${ext ? `.${ext}` : ''}`;
+  }
+
+  /**
+   * 清理文件名（移除特殊字符） // Cleans file name (removes special characters)
+   * @param fileName 文件名 // File name
+   * @returns 清理后的文件名 // Cleaned file name
+   */
+  public static cleanFileName(fileName: string): string {
+    if (!fileName) {
+      return '';
     }
+    // 移除特殊字符，只保留字母、数字、下划线、中划线和点 // Remove special characters, keep only letters, numbers, underscores, hyphens and dots
+    return fileName.replace(/[^a-zA-Z0-9_一-龥.-]/g, '_');
   }
 
   /**
-   * 获取文件信息
-   * @param filePath 文件路径
-   * @returns 文件信息
+   * 规范化路径 // Normalizes path
+   * @param path 文件路径 // File path
+   * @returns 规范化后的路径 // Normalized path
    */
-  public static async getFileStat(filePath: string): Promise<fs.Stat> {
-    try {
-      return await fs.stat(filePath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to get file stat ${filePath}: ${errorMessage}`);
-      throw new Error(`Failed to get file stat ${filePath}: ${errorMessage}`);
+  public static normalizePath(path: string): string {
+    if (!path) {
+      return '';
     }
+    // 将反斜杠替换为正斜杠，移除重复斜杠 // Replace backslashes with forward slashes, remove duplicate slashes
+    return path.replace(/[\\]/g, '/').replace(/\/+/g, '/');
   }
 
   /**
-   * 列出目录下的文件
-   * @param dirPath 目录路径
-   * @returns 文件列表
+   * 获取路径中的文件名 // Gets file name from path
+   * @param path 文件路径 // File path
+   * @returns 文件名 // File name
    */
-  public static async listFiles(dirPath: string): Promise<string[]> {
-    try {
-      // 在HarmonyOS SDK 5.1.1中，使用fs.listFile方法
-      // fs.listFile返回的是string[]类型
-      const fileList: string[] = await fs.listFile(dirPath);
-      return fileList;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to list files in directory ${dirPath}: ${errorMessage}`);
-      throw new Error(`Failed to list files in directory ${dirPath}: ${errorMessage}`);
+  public static getFileNameFromPath(path: string): string {
+    if (!path) {
+      return '';
     }
-  }
-
-  /**
-   * 复制文件
-   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
-   */
-  public static async copyFile(srcPath: string, destPath: string): Promise<void> {
-    try {
-      // 确保目标目录存在
-      await FileUtil.ensureDirExists(FileUtil.getParentPath(destPath));
-      await fs.copyFile(srcPath, destPath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
-      throw new Error(`Failed to copy file from ${srcPath} to ${destPath}: ${errorMessage}`);
+    const normalizedPath = this.normalizePath(path);
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    if (lastSlashIndex === -1) {
+      return normalizedPath;
     }
+    return normalizedPath.substring(lastSlashIndex + 1);
   }
 
   /**
-   * 移动文件
-   * @param srcPath 源文件路�?   * @param destPath 目标文件路径
+   * 获取路径中的目录名 // Gets directory name from path
+   * @param path 文件路径 // File path
+   * @returns 目录名 // Directory name
    */
-  public static async moveFile(srcPath: string, destPath: string): Promise<void> {
-    try {
-      // 确保目标目录存在
-      await FileUtil.ensureDirExists(FileUtil.getParentPath(destPath));
-      await fs.rename(srcPath, destPath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
-      throw new Error(`Failed to move file from ${srcPath} to ${destPath}: ${errorMessage}`);
+  public static getDirectoryFromPath(path: string): string {
+    if (!path) {
+      return '';
     }
-  }
-
-  /**
-   * 获取文件扩展�?   * @param filename 文件�?   * @returns 文件扩展�?   */
-  public static getFileExtension(filename: string): string {
-    const lastDotIndex = filename.lastIndexOf('.');
-    return lastDotIndex > 0 ? filename.slice(lastDotIndex + 1).toLowerCase() : '';
-  }
-
-  /**
-   * 获取文件名（不含扩展名）
-   * @param filename 文件�?   * @returns 文件名（不含扩展名）
-   */
-  public static getFileNameWithoutExtension(filename: string): string {
-    const lastDotIndex = filename.lastIndexOf('.');
-    return lastDotIndex > 0 ? filename.slice(0, lastDotIndex) : filename;
-  }
-
-  /**
-   * 获取父目录路�?   * @param path 文件或目录路�?   * @returns 父目录路�?   */
-  public static getParentPath(path: string): string {
-    const parts = path.split('/').filter(Boolean);
-    parts.pop();
-    return parts.length > 0 ? parts.join('/') : '/';
-  }
-
-  /**
-   * 获取文件�?   * @param path 文件路径
-   * @returns 文件�?   */
-  public static getFileName(path: string): string {
-    const parts = path.split('/').filter(Boolean);
-    return parts.length > 0 ? parts[parts.length - 1] : '';
-  }
-
-  /**
-   * 清空目录内容
-   * @param dirPath 目录路径
-   */
-  public static async clearDirectory(dirPath: string): Promise<void> {
-    try {
-      if (!(await FileUtil.exists(dirPath))) {
-        return;
-      }
-      
-      const files = await FileUtil.listFiles(dirPath);
-      for (const file of files) {
-        const filePath = `${dirPath}/${file}`;
-        const stat = await FileUtil.getFileStat(filePath);
-        if (stat.isDirectory()) {
-          await FileUtil.clearDirectory(filePath);
-          await fs.rmdir(filePath);
-        } else {
-          await fs.unlink(filePath);
-        }
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to clear directory ${dirPath}: ${errorMessage}`);
-      throw new Error(`Failed to clear directory ${dirPath}: ${errorMessage}`);
+    const normalizedPath = this.normalizePath(path);
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    if (lastSlashIndex === -1) {
+      return '.';
     }
-  }
-
-  /**
-   * 获取应用程序数据目录
-   * @returns 应用程序数据目录路径
-   */
-  public static async getApplicationDataDir(): Promise<string> {
-    try {
-      // 对于HarmonyOS应用，使用临时目录替代直接访问/data/app/
-      // 避免权限问题和路径错误
-      return '/data/storage/el2/base/haps/';
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(TAG, `Failed to get application data directory: ${errorMessage}`);
-      return '/data/storage/el2/base/haps/'; // 如果获取失败，返回安全的默认路径
-    }
-  }
-
-  /**
-   * 检查文件是否存�?   * @param filePath 文件路径
-   * @returns 文件是否存在
-   */
-  public static async isFileExists(filePath: string): Promise<boolean> {
-    return await FileUtil.exists(filePath);
+    return normalizedPath.substring(0, lastSlashIndex);
   }
 }

@@ -1,3 +1,6 @@
+// 解析服务 | Parser service
+// 提供视频源解析和处理功能 | Provides video source parsing and processing functionality
+
 import Logger from '../../common/util/Logger';
 import { ParserInfo } from '../../data/repository/NetworkRepository';
 import { NetworkResult, VideoSourceInfo } from '../../data/bean/NetworkResult';
@@ -5,7 +8,7 @@ import ConfigService from '../config/ConfigService';
 import { HttpService } from '../HttpService';
 
 /**
- * 解析器配置接口
+ * 解析器配置接口 | Parser config interface
  */
 interface ParserConfig {
   enabled?: boolean;
@@ -14,7 +17,7 @@ interface ParserConfig {
 }
 
 /**
- * 解析器执行上下文
+ * 解析器执行上下文 | Parser execution context
  */
 interface ParserContext {
   parserId: string;
@@ -23,17 +26,17 @@ interface ParserContext {
 }
 
 /**
- * 自定义解析器接口
+ * 自定义解析器接口 | Custom parser interface
  */
 interface CustomParser extends ParserInfo {
-  // 可能的额外属性
+  // 可能的额外属性 | Possible extra properties
   version?: string;
   priority?: number;
 }
 
 export class ParserService {
   private static readonly TAG: string = 'ParserService';
-  // 使用静态私有成员变量存储单例实例
+  // 使用私有静态成员变量存储单例实例 | Use private static member variable to store singleton instance
   private static instance: ParserService | null = null;
   
   private parsers: Map<string, ParserInfo> = new Map();
@@ -46,36 +49,36 @@ export class ParserService {
   private configService = ConfigService.getInstance();
   
   /**
-   * 构造函数
+   * 构造函数 | Constructor
    */
   private constructor() {
-    // 初始化默认解析器
+    // 初始化默认解析器 | Initialize default parsers
     this.initializeDefaultParsers();
   }
   
   /**
-   * 获取单例实例
+   * 获取单例实例 | Get singleton instance
    */
   public static getInstance(): ParserService {
     if (!ParserService.instance) {
-      // 创建新实例并存储到静态变量
+      // 创建新实例并存储到静态变量 | Create new instance and store to static variable
       ParserService.instance = new ParserService();
     }
-    // 确保返回实例不为null
+    // 确保返回实例不为null | Ensure returned instance is not null
     return ParserService.instance!;
   }
   
   /**
-   * 初始化服务
+   * 初始化服务 | Initialize service
    */
   public async initialize(): Promise<void> {
     try {
       Logger.info(ParserService.TAG, 'Initializing ParserService...');
       
-      // 加载解析器配置
+      // 加载解析器配置 Load parser config
       await this.loadParserConfig();
       
-      // 加载自定义解析器
+      // 加载自定义解析器 Load custom parsers
       await this.loadCustomParsers();
       
       Logger.info(ParserService.TAG, `ParserService initialized with ${this.parsers.size} parsers`);
@@ -86,9 +89,9 @@ export class ParserService {
   }
   
   /**
-   * 获取视频源列表
-   * @param contentId 内容ID
-   * @param contentType 内容类型
+   * 获取视频源列表 | Get video sources list
+   * @param contentId 内容ID | Content ID
+   * @param contentType 内容类型 | Content type
    * @returns Promise<NetworkResult<VideoSourceInfo[]>>
    */
   public async getVideoSources(contentId: string, contentType: string): Promise<NetworkResult<VideoSourceInfo[]>> {
@@ -96,7 +99,7 @@ export class ParserService {
       Logger.info(ParserService.TAG, `Getting video sources for contentId: ${contentId}, contentType: ${contentType}`);
       
       // 这里可以根据contentId和contentType获取视频源列表
-      // 目前返回一个模拟的空列表，可以根据实际需求实现
+      // 当前返回一个模拟的空列表，可以根据实际需求实现
       return { success: true, data: [] };
     } catch (error) {
       Logger.error(ParserService.TAG, `Failed to get video sources: ${error instanceof Error ? error.message : String(error)}`);
@@ -108,28 +111,28 @@ export class ParserService {
   }
 
   /**
-   * 解析视频源
-   * @param sourceUrl 原始视频源URL
-   * @param parserId 解析器ID（可选）
+   * 解析视频源 | Parse video source
+   * @param sourceUrl 原始视频源URL | Original video source URL
+   * @param parserId 解析器ID（可选）| Parser ID (optional)
    * @returns Promise<NetworkResult<VideoSourceInfo>>
    */
   public async parseVideoSource(sourceUrl: string, parserId?: string): Promise<NetworkResult<VideoSourceInfo>> {
     try {
       Logger.info(ParserService.TAG, `Parsing video source: ${sourceUrl}, parserId: ${parserId}`);
       
-      // 验证URL
+      // 验证URL Validate URL
       if (!sourceUrl || typeof sourceUrl !== 'string') {
         return { success: false, message: 'Invalid source URL' };
       }
       
-      // 获取解析器
+      // 获取解析器 Get parser
       const parser = this.getParser(parserId);
       if (!parser) {
         return { success: false, message: 'No suitable parser found' };
       }
       
-      // 执行解析
-      // 手动合并配置，避免对象展开操作
+      // 执行解析 Execute parse
+      // 手动合并配置，防止对象展开操作
       const config: ParserConfig = {
         enabled: this.defaultConfig.enabled,
         timeout: this.defaultConfig.timeout,
@@ -144,7 +147,7 @@ export class ParserService {
       
       const result = await this.executeParser(context);
       
-      // 记录解析结果
+      // 记录解析结果 Record parse result
       Logger.info(ParserService.TAG, `Parse result for ${sourceUrl}: ${result.success ? 'success' : 'failed'}`);
       
       return result;
@@ -158,7 +161,7 @@ export class ParserService {
   }
   
   /**
-   * 获取所有可用解析器
+   * 获取所有可用解析器 | Get all available parsers
    * @returns Promise<NetworkResult<ParserInfo[]>>
    */
   public async getParsers(): Promise<NetworkResult<ParserInfo[]>> {
@@ -172,8 +175,8 @@ export class ParserService {
   }
   
   /**
-   * 检查解析器是否可用
-   * @param parserId 解析器ID
+   * 检查解析器是否可用 | Check if parser is available
+   * @param parserId 解析器ID | Parser ID
    * @returns Promise<NetworkResult<boolean>>
    */
   public async checkParserAvailability(parserId: string): Promise<NetworkResult<boolean>> {
@@ -188,8 +191,8 @@ export class ParserService {
   }
   
   /**
-   * 添加自定义解析器
-   * @param parser 解析器信息
+   * 添加自定义解析器 | Add custom parser
+   * @param parser 解析器信息 | Parser info
    */
   public addParser(parser: ParserInfo): void {
     if (parser && parser.id) {
@@ -199,8 +202,8 @@ export class ParserService {
   }
   
   /**
-   * 移除解析器
-   * @param parserId 解析器ID
+   * 删除解析器 Remove parser
+   * @param parserId 解析器ID Parser ID
    */
   public removeParser(parserId: string): void {
     if (this.parsers.delete(parserId)) {
@@ -209,9 +212,9 @@ export class ParserService {
   }
   
   /**
-   * 更新解析器配置
-   * @param parserId 解析器ID
-   * @param config 新配置
+   * 更新解析器配置 Update parser config
+   * @param parserId 解析器ID Parser ID
+   * @param config 新配置 New config
    */
   public updateParserConfig(parserId: string, config: Partial<ParserInfo>): void {
     const parser = this.parsers.get(parserId);
@@ -233,14 +236,14 @@ export class ParserService {
   }
   
   /**
-   * 初始化默认解析器
+   * 初始化默认解析器 Initialize default parsers
    */
   private initializeDefaultParsers(): void {
-    // 添加默认解析器
+    // 添加默认解析器 Add default parsers
     const defaultParsers: ParserInfo[] = [
       {
         id: 'direct',
-        name: '直链解析',
+        name: '直接解析',
         description: '直接使用原始URL，适用于HTTP/HTTPS视频流',
         supports: ['http', 'https'],
         version: '1.0',
@@ -280,14 +283,14 @@ export class ParserService {
       }
     ];
     
-    // 注册默认解析器
+    // 注册默认解析器 Register default parsers
     defaultParsers.forEach(parser => {
       this.parsers.set(parser.id, parser);
     });
   }
   
   /**
-   * 加载解析器配置
+   * 加载解析器配置 Load parser config
    */
   private async loadParserConfig(): Promise<void> {
     try {
@@ -312,7 +315,7 @@ export class ParserService {
   }
   
   /**
-   * 加载自定义解析器
+   * 加载自定义解析器 Load custom parsers
    */
   private async loadCustomParsers(): Promise<void> {
     try {
@@ -344,7 +347,7 @@ export class ParserService {
   }
   
   /**
-   * 获取适合的解析器
+   * 获取合适的解析器 Get suitable parser
    */
   private getParser(parserId?: string): ParserInfo | undefined {
     // 如果指定了解析器ID，优先使用
@@ -352,12 +355,12 @@ export class ParserService {
       return this.parsers.get(parserId);
     }
     
-    // 返回默认解析器
+    // 返回默认解析器 Return default parser
     return this.parsers.get('direct');
   }
   
   /**
-   * 执行解析器
+   * 执行解析器 Execute parser
    */
   private async executeParser(context: ParserContext): Promise<NetworkResult<VideoSourceInfo>> {
     let attempts = 0;
@@ -407,7 +410,7 @@ export class ParserService {
   }
   
   /**
-   * 直接解析（不做处理）
+   * 直接解析（不做处理）Direct parse (no processing)
    */
   private async directParse(url: string): Promise<VideoSourceInfo> {
     // 简单检测视频类型
@@ -444,7 +447,7 @@ export class ParserService {
   }
   
   /**
-   * HLS流解析
+   * HLS流解析 HLS stream parse
    */
   private async hlsParse(url: string): Promise<VideoSourceInfo> {
     try {
@@ -461,7 +464,7 @@ export class ParserService {
             }
           }
         } catch (headError) {
-          // HEAD请求失败，继续使用原始URL
+          // HEAD请求失败，继续使用原URL
           Logger.debug(ParserService.TAG, `HEAD request failed: ${headError instanceof Error ? headError.message : String(headError)}`);
         }
       }
@@ -484,7 +487,7 @@ export class ParserService {
   }
   
   /**
-   * DASH流解析
+   * DASH流解析 DASH stream parse
    */
   private async dashParse(url: string): Promise<VideoSourceInfo> {
     try {
@@ -501,7 +504,7 @@ export class ParserService {
             }
           }
         } catch (headError) {
-          // HEAD请求失败，继续使用原始URL
+          // HEAD请求失败，继续使用原URL
           Logger.debug(ParserService.TAG, `HEAD request failed: ${headError instanceof Error ? headError.message : String(headError)}`);
         }
       }
@@ -524,7 +527,7 @@ export class ParserService {
   }
   
   /**
-   * 从URL检测视频质量
+   * 从URL检测视频质量 Detect video quality from URL
    */
   private detectQuality(url: string): string {
     const lowercaseUrl = url.toLowerCase();
@@ -545,7 +548,7 @@ export class ParserService {
   }
   
   /**
-   * 清理资源
+   * 清理资源 Clean resources
    */
   public destroy(): void {
     try {
@@ -559,7 +562,9 @@ export class ParserService {
   }
 }
 
-// 导出单例实例 - 使用函数调用方式
+// 导出单例实例 - 使用函数调用方式 Export singleton instance - using function call method
 export function getParserService(): ParserService {
   return ParserService.getInstance();
 }
+
+

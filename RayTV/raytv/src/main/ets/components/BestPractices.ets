@@ -1,12 +1,14 @@
-/*
- * ArkTS组件最佳实践示�? * 提供标准化的组件使用模板
+/**
+ * ArkTS Component Best Practice Examples | ArkTS组件最佳实践示例
+ * Provide standardized component usage templates | 提供标准化的组件使用模板
  */
 
-import { ListItem, Text, Button, ProgressBar, Flex, Image } from '@kit.ArkUI';
-import { MediaItem, HistoryItem } from '../model/DataModel';
+import { ListItem, Text, Button, ProgressBar, Flex, Image, Column, Color, TextOverflow, FontWeight, ImageFit, ItemAlign, FlexDirection, HorizontalAlign, FlexAlign } from '@kit.ArkUI';
+import { MediaItem, HistoryItem } from '../data/model/DataModel';
 
 /**
- * ListItem组件最佳实践示�? */
+ * ListItem Component Best Practice Example | ListItem组件最佳实践示例
+ */
 @Component
 export struct ListItemBestPractice {
   @Prop item: MediaItem;
@@ -19,16 +21,16 @@ export struct ListItemBestPractice {
       })
     {
       Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
-        // 左侧图标
+        // Left icon | 左侧图标
         Image(this.item.cover || $r('app.media.default_cover'))
           .width(48)
           .height(48)
           .borderRadius(8)
           .objectFit(ImageFit.Cover)
 
-        // 主要内容区域
+        // Main content area | 主要内容区域
         Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center }) {
-          Text(this.item.title || '未知标题')
+          Text(this.item.title || '未知标题') // 未知标题 | Unknown title
             .fontSize(16)
             .fontWeight(FontWeight.Medium)
             .maxLines(1)
@@ -43,8 +45,8 @@ export struct ListItemBestPractice {
         .layoutWeight(1)
         .margin({ left: 12 })
 
-        // 右侧操作区域
-        Button('播放')
+        // Right operation area | 右侧操作区域
+        Button('播放') // 播放 | Play
           .fontSize(12)
           .padding({ left: 8, right: 8, top: 4, bottom: 4 })
       }
@@ -55,7 +57,8 @@ export struct ListItemBestPractice {
 }
 
 /**
- * ProgressBar组件最佳实践示�? */
+ * ProgressBar Component Best Practice Example | ProgressBar组件最佳实践示例
+ */
 @Component
 export struct ProgressBarBestPractice {
   @Prop currentTime: number = 0;
@@ -63,7 +66,7 @@ export struct ProgressBarBestPractice {
   @Prop showLabel: boolean = true;
 
   private getProgressPercent(): number {
-    // 零除保护
+    // Division protection | 除法保护
     return this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0;
   }
 
@@ -102,7 +105,8 @@ export struct ProgressBarBestPractice {
 }
 
 /**
- * 媒体卡片组件最佳实�? */
+ * Media Card Component Best Practice Example | 媒体卡片组件最佳实践示例
+ */
 @Component
 export struct MediaCardBestPractice {
   @Prop mediaItem: MediaItem;
@@ -111,16 +115,16 @@ export struct MediaCardBestPractice {
 
   build() {
     Column() {
-      // 封面图片
+      // Cover image | 封面图片
       Image(this.mediaItem.cover || $r('app.media.default_cover'))
         .width('100%')
         .aspectRatio(16/9)
         .objectFit(ImageFit.Cover)
         .borderRadius(8)
 
-      // 内容信息
+      // Content information | 内容信息
       Column() {
-        Text(this.mediaItem.title || '未知标题')
+        Text(this.mediaItem.title || '未知标题') // 未知标题 | Unknown title
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
           .maxLines(2)
@@ -133,16 +137,16 @@ export struct MediaCardBestPractice {
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-        // 操作按钮
+        // Operation buttons | 操作按钮
         Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-          Button('播放')
+          Button('播放') // 播放 | Play
             .fontSize(12)
             .padding({ left: 12, right: 12, top: 6, bottom: 6 })
             .onClick(() => {
               this.onPlay(this.mediaItem);
             })
 
-          Button(this.mediaItem.isFavorite ? '取消收藏' : '收藏')
+          Button(this.mediaItem.isFavorite ? '取消收藏' : '收藏') // 取消收藏/收藏 | Unfavorite / Favorite
             .fontSize(12)
             .padding({ left: 12, right: 12, top: 6, bottom: 6 })
             .backgroundColor(this.mediaItem.isFavorite ? '#FF6B6B' : '#F0F0F0')
@@ -166,10 +170,11 @@ export struct MediaCardBestPractice {
 }
 
 /**
- * 加载状态组件最佳实�? */
+ * Loading State Component Best Practice Example | 加载状态组件最佳实践示例
+ */
 @Component
 export struct LoadingBestPractice {
-  @Prop message: string = '加载�?..';
+  @Prop message: string = '加载中...'; // 加载中... | Loading...
   @Prop size: number = 32;
 
   build() {
@@ -193,12 +198,13 @@ export struct LoadingBestPractice {
 }
 
 /**
- * 空状态组件最佳实�? */
+ * Empty State Component Best Practice Example | 空状态组件最佳实践示例
+ */
 @Component
 export struct EmptyStateBestPractice {
-  @Prop title: string = '暂无数据';
-  @Prop description: string = '当前没有可显示的内容';
-  @Prop actionText: string = '刷新';
+  @Prop title: string = '无数据'; // 无数据 | No data
+  @Prop description: string = '当前没有可显示的内容'; // 当前没有可显示的内容 | No content to display
+  @Prop actionText: string = '刷新'; // 刷新 | Refresh
   @Prop onAction: () => void;
 
   build() {

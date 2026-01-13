@@ -1,5 +1,5 @@
-// HistoryRepository.ets - 历史记录数据仓库
-// 负责历史记录相关数据的存储、读取和管理
+﻿// HistoryRepository.ets - 鍘嗗彶璁板綍鏁版嵁浠撳簱
+// 璐熻矗鍘嗗彶璁板綍鐩稿叧鏁版嵁鐨勫瓨鍌ㄣ€佽鍙栧拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { History, HistoryGroup, HistoryType, ContentType } from '../bean/History';
@@ -10,7 +10,7 @@ import StorageUtil from '../../common/util/StorageUtil';
 const TAG = 'HistoryRepository';
 const HISTORY_CACHE_PREFIX = 'history_item_';
 const HISTORY_LIST_CACHE = 'history_list_cache';
-const MAX_HISTORY_ITEMS = 1000; // 最大历史记录数
+const MAX_HISTORY_ITEMS = 1000; // 鏈€澶у巻鍙茶褰曟暟
 
 export class HistoryRepository {
   private static instance: HistoryRepository;
@@ -23,7 +23,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取历史记录仓库单例实例
+   * 鑾峰彇鍘嗗彶璁板綍浠撳簱鍗曚緥瀹炰緥
    */
   public static getInstance(): HistoryRepository {
     if (!HistoryRepository.instance) {
@@ -33,16 +33,14 @@ export class HistoryRepository {
   }
   
   /**
-   * 保存或更新历史记录
-   * @param history 历史记录信息
-   * @returns 是否保存成功
+   * 淇濆瓨鎴栨洿鏂板巻鍙茶褰?   * @param history 鍘嗗彶璁板綍淇℃伅
+   * @returns 鏄惁淇濆瓨鎴愬姛
    */
   public async saveHistory(history: History): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving history for: ${history.title}`);
       
-      // 检查是否已存在相同内容的历史记录
-      const existingHistory = await this.findExistingHistory(history);
+      // 妫€鏌ユ槸鍚﹀凡瀛樺湪鐩稿悓鍐呭鐨勫巻鍙茶褰?      const existingHistory = await this.findExistingHistory(history);
       
       const historyData = {
         [HISTORY_TABLE.COLUMNS.ID]: existingHistory?.id || null,
@@ -65,7 +63,7 @@ export class HistoryRepository {
       
       let result;
       if (existingHistory?.id) {
-        // 更新现有历史记录
+        // 鏇存柊鐜版湁鍘嗗彶璁板綍
         const conditions: QueryCondition[] = [{
           column: HISTORY_TABLE.COLUMNS.ID,
           value: existingHistory.id
@@ -75,19 +73,18 @@ export class HistoryRepository {
           history.id = existingHistory.id.toString();
         }
       } else {
-        // 插入新历史记录
-        result = await this.sqliteHelper.insert(HISTORY_TABLE.TABLE_NAME, historyData);
+        // 鎻掑叆鏂板巻鍙茶褰?        result = await this.sqliteHelper.insert(HISTORY_TABLE.TABLE_NAME, historyData);
         if (result.success && result.lastInsertRowId) {
           history.id = result.lastInsertRowId.toString();
         }
       }
       
       if (result.success) {
-        // 更新缓存
+        // 鏇存柊缂撳瓨
         await this.cacheHistoryItem(history);
         await this.invalidateHistoryListCache();
         
-        // 检查是否需要清理旧记录
+        // 妫€鏌ユ槸鍚﹂渶瑕佹竻鐞嗘棫璁板綍
         await this.cleanupOldHistory();
         
         Logger.info(TAG, `History saved successfully: ${history.title}`);
@@ -102,8 +99,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 查找是否存在相同内容的历史记录
-   */
+   * 鏌ユ壘鏄惁瀛樺湪鐩稿悓鍐呭鐨勫巻鍙茶褰?   */
   private async findExistingHistory(history: History): Promise<Record<string, Serializable> | null> {
     const conditions: QueryCondition[] = [{
       column: HISTORY_TABLE.COLUMNS.CONTENT_TYPE, 
@@ -113,7 +109,7 @@ export class HistoryRepository {
       value: history.contentId
     }];
     
-    // 对于剧集内容，还需要匹配集数ID
+    // 瀵逛簬鍓ч泦鍐呭锛岃繕闇€瑕佸尮閰嶉泦鏁癐D
     if (history.episodeId && history.contentType === ContentType.EPISODE) {
       conditions.push({
         column: HISTORY_TABLE.COLUMNS.EPISODE_ID,
@@ -125,21 +121,18 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取历史记录列表
-   * @param limit 限制数量
-   * @param offset 偏移量
-   * @returns 历史记录列表
+   * 鑾峰彇鍘嗗彶璁板綍鍒楄〃
+   * @param limit 闄愬埗鏁伴噺
+   * @param offset 鍋忕Щ閲?   * @returns 鍘嗗彶璁板綍鍒楄〃
    */
   public async getHistoryList(limit: number, offset: number = 0): Promise<History[]> {
     try {
-      // 构建排序选项 - 按最后播放时间降序
-      const sortOptions = [{
+      // 鏋勫缓鎺掑簭閫夐」 - 鎸夋渶鍚庢挱鏀炬椂闂撮檷搴?      const sortOptions = [{
         column: HISTORY_TABLE.COLUMNS.LAST_PLAY_TIME,
         order: 'DESC'
       }];
       
-      // 查询数据库
-      const historyRecords = await this.sqliteHelper.query(
+      // 鏌ヨ鏁版嵁搴?      const historyRecords = await this.sqliteHelper.query(
         HISTORY_TABLE.TABLE_NAME,
         ['*'],
         undefined,
@@ -148,7 +141,7 @@ export class HistoryRepository {
         offset
       );
       
-      // 转换为History对象
+      // 杞崲涓篐istory瀵硅薄
       const histories = this.convertToHistoryObjects(historyRecords);
       
       Logger.info(TAG, `Retrieved ${histories.length} history items`);
@@ -161,10 +154,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 按内容类型获取历史记录
-   * @param contentType 内容类型
-   * @param limit 限制数量
-   * @returns 历史记录列表
+   * 鎸夊唴瀹圭被鍨嬭幏鍙栧巻鍙茶褰?   * @param contentType 鍐呭绫诲瀷
+   * @param limit 闄愬埗鏁伴噺
+   * @returns 鍘嗗彶璁板綍鍒楄〃
    */
   public async getHistoryByContentType(contentType: ContentType, limit: number): Promise<History[]> {
     try {
@@ -197,10 +189,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 按站点获取历史记录
-   * @param siteId 站点ID
-   * @param limit 限制数量
-   * @returns 历史记录列表
+   * 鎸夌珯鐐硅幏鍙栧巻鍙茶褰?   * @param siteId 绔欑偣ID
+   * @param limit 闄愬埗鏁伴噺
+   * @returns 鍘嗗彶璁板綍鍒楄〃
    */
   public async getHistoryBySite(siteId: string, limit: number): Promise<History[]> {
     try {
@@ -233,21 +224,19 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取单条历史记录
-   * @param historyId 历史记录ID
-   * @returns 历史记录或null
+   * 鑾峰彇鍗曟潯鍘嗗彶璁板綍
+   * @param historyId 鍘嗗彶璁板綍ID
+   * @returns 鍘嗗彶璁板綍鎴杗ull
    */
   public async getHistoryById(historyId: string): Promise<History | null> {
     try {
-      // 尝试从缓存获取
-      const cachedHistory = await this.getCachedHistoryItem(historyId);
+      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedHistory = await this.getCachedHistoryItem(historyId);
       if (cachedHistory) {
         Logger.debug(TAG, `Returning history ${historyId} from cache`);
         return cachedHistory;
       }
       
-      // 查询数据库
-      const conditions: QueryCondition[] = [{
+      // 鏌ヨ鏁版嵁搴?      const conditions: QueryCondition[] = [{
         column: HISTORY_TABLE.COLUMNS.ID,
         value: historyId
       }];
@@ -262,10 +251,10 @@ export class HistoryRepository {
         return null;
       }
       
-      // 转换为History对象
+      // 杞崲涓篐istory瀵硅薄
       const history = this.convertToHistoryObject(historyRecord);
       
-      // 更新缓存
+      // 鏇存柊缂撳瓨
       await this.cacheHistoryItem(history);
       
       return history;
@@ -277,11 +266,11 @@ export class HistoryRepository {
   }
   
   /**
-   * 根据内容ID获取历史记录
-   * @param contentType 内容类型
-   * @param contentId 内容ID
-   * @param episodeId 集数ID（可选）
-   * @returns 历史记录或null
+   * 鏍规嵁鍐呭ID鑾峰彇鍘嗗彶璁板綍
+   * @param contentType 鍐呭绫诲瀷
+   * @param contentId 鍐呭ID
+   * @param episodeId 闆嗘暟ID锛堝彲閫夛級
+   * @returns 鍘嗗彶璁板綍鎴杗ull
    */
   public async getHistoryByContent(contentType: ContentType, contentId: string, episodeId?: string): Promise<History | null> {
     try {
@@ -319,9 +308,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 删除历史记录
-   * @param historyId 历史记录ID
-   * @returns 是否删除成功
+   * 鍒犻櫎鍘嗗彶璁板綍
+   * @param historyId 鍘嗗彶璁板綍ID
+   * @returns 鏄惁鍒犻櫎鎴愬姛
    */
   public async deleteHistory(historyId: string): Promise<boolean> {
     try {
@@ -335,7 +324,7 @@ export class HistoryRepository {
       const result = await this.sqliteHelper.delete(HISTORY_TABLE.TABLE_NAME, conditions);
       
       if (result.success) {
-        // 清除缓存
+        // 娓呴櫎缂撳瓨
         await this.removeCachedHistoryItem(historyId);
         await this.invalidateHistoryListCache();
         Logger.info(TAG, `History ${historyId} deleted successfully`);
@@ -350,10 +339,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 批量删除历史记录
-   * @param historyIds 历史记录ID列表
-   * @returns 删除成功的数量
-   */
+   * 鎵归噺鍒犻櫎鍘嗗彶璁板綍
+   * @param historyIds 鍘嗗彶璁板綍ID鍒楄〃
+   * @returns 鍒犻櫎鎴愬姛鐨勬暟閲?   */
   public async deleteHistories(historyIds: string[]): Promise<number> {
     if (!historyIds || historyIds.length === 0) {
       return 0;
@@ -371,7 +359,7 @@ export class HistoryRepository {
       const result = await this.sqliteHelper.delete(HISTORY_TABLE.TABLE_NAME, conditions);
       
       if (result.success) {
-        // 清除缓存
+        // 娓呴櫎缂撳瓨
         for (const id of historyIds) {
           await this.removeCachedHistoryItem(id);
         }
@@ -388,8 +376,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 清空所有历史记录
-   * @returns 是否清空成功
+   * 娓呯┖鎵€鏈夊巻鍙茶褰?   * @returns 鏄惁娓呯┖鎴愬姛
    */
   public async clearAllHistory(): Promise<boolean> {
     try {
@@ -398,8 +385,7 @@ export class HistoryRepository {
       const result = await this.sqliteHelper.delete(HISTORY_TABLE.TABLE_NAME);
       
       if (result.success) {
-        // 清除所有缓存
-        await this.clearHistoryCache();
+        // 娓呴櫎鎵€鏈夌紦瀛?        await this.clearHistoryCache();
         Logger.info(TAG, `All history cleared, deleted ${result.affectedRows} records`);
       }
       
@@ -412,10 +398,8 @@ export class HistoryRepository {
   }
   
   /**
-   * 清空指定类型的历史记录
-   * @param contentType 内容类型
-   * @returns 删除成功的数量
-   */
+   * 娓呯┖鎸囧畾绫诲瀷鐨勫巻鍙茶褰?   * @param contentType 鍐呭绫诲瀷
+   * @returns 鍒犻櫎鎴愬姛鐨勬暟閲?   */
   public async clearHistoryByType(contentType: ContentType): Promise<number> {
     try {
       Logger.debug(TAG, `Clearing history for type: ${contentType}`);
@@ -441,8 +425,8 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取历史记录总数
-   * @returns 历史记录总数
+   * 鑾峰彇鍘嗗彶璁板綍鎬绘暟
+   * @returns 鍘嗗彶璁板綍鎬绘暟
    */
   public async getHistoryCount(): Promise<number> {
     try {
@@ -455,9 +439,9 @@ export class HistoryRepository {
   }
   
   /**
-   * 按内容类型获取历史记录总数
-   * @param contentType 内容类型
-   * @returns 历史记录总数
+   * 鎸夊唴瀹圭被鍨嬭幏鍙栧巻鍙茶褰曟€绘暟
+   * @param contentType 鍐呭绫诲瀷
+   * @returns 鍘嗗彶璁板綍鎬绘暟
    */
   public async getHistoryCountByType(contentType: ContentType): Promise<number> {
     try {
@@ -475,11 +459,10 @@ export class HistoryRepository {
   }
   
   /**
-   * 更新播放进度
-   * @param historyId 历史记录ID
-   * @param playPosition 播放位置（毫秒）
-   * @param totalDuration 总时长（毫秒）
-   * @returns 是否更新成功
+   * 鏇存柊鎾斁杩涘害
+   * @param historyId 鍘嗗彶璁板綍ID
+   * @param playPosition 鎾斁浣嶇疆锛堟绉掞級
+   * @param totalDuration 鎬绘椂闀匡紙姣锛?   * @returns 鏄惁鏇存柊鎴愬姛
    */
   public async updatePlayProgress(historyId: string, playPosition: number, totalDuration: number): Promise<boolean> {
     try {
@@ -500,7 +483,7 @@ export class HistoryRepository {
       const result = await this.sqliteHelper.update(HISTORY_TABLE.TABLE_NAME, data, conditions);
       
       if (result.success) {
-        // 清除缓存
+        // 娓呴櫎缂撳瓨
         await this.removeCachedHistoryItem(historyId);
         await this.invalidateHistoryListCache();
         Logger.info(TAG, `Updated play progress for history ${historyId}`);
@@ -515,16 +498,14 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取最近观看的历史记录分组
-   * @param limit 每个类型的限制数量
-   * @returns 分组后的历史记录
+   * 鑾峰彇鏈€杩戣鐪嬬殑鍘嗗彶璁板綍鍒嗙粍
+   * @param limit 姣忎釜绫诲瀷鐨勯檺鍒舵暟閲?   * @returns 鍒嗙粍鍚庣殑鍘嗗彶璁板綍
    */
   public async getRecentHistoryGroups(limit: number): Promise<HistoryGroup[]> {
     try {
       const groups: HistoryGroup[] = [];
       
-      // 按内容类型分组获取
-      const contentTypes = [ContentType.MOVIE, ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
+      // 鎸夊唴瀹圭被鍨嬪垎缁勮幏鍙?      const contentTypes = [ContentType.MOVIE, ContentType.SERIES, ContentType.LIVE, ContentType.EPISODE];
       
       for (const type of contentTypes) {
         const histories = await this.getHistoryByContentType(type, limit);
@@ -547,7 +528,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 清理超出限制的旧历史记录
+   * 娓呯悊瓒呭嚭闄愬埗鐨勬棫鍘嗗彶璁板綍
    */
   private async cleanupOldHistory(): Promise<void> {
     try {
@@ -556,7 +537,7 @@ export class HistoryRepository {
       if (totalCount > MAX_HISTORY_ITEMS) {
         const excessCount = totalCount - MAX_HISTORY_ITEMS;
         
-        // 获取需要删除的旧记录ID
+        // 鑾峰彇闇€瑕佸垹闄ょ殑鏃ц褰旾D
         const oldestRecords = await this.sqliteHelper.query(
           HISTORY_TABLE.TABLE_NAME, 
           [HISTORY_TABLE.COLUMNS.ID],
@@ -569,11 +550,10 @@ export class HistoryRepository {
         );
         
         if (oldestRecords && oldestRecords.length > 0) {
-          // 构建删除条件
+          // 鏋勫缓鍒犻櫎鏉′欢
           const idsToDelete = oldestRecords.map(record => record[HISTORY_TABLE.COLUMNS.ID].toString());
           
-          // 删除旧记录
-          await this.deleteHistories(idsToDelete);
+          // 鍒犻櫎鏃ц褰?          await this.deleteHistories(idsToDelete);
           Logger.info(TAG, `Cleaned up ${idsToDelete.length} old history records`);
         }
       }
@@ -584,8 +564,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 缓存历史记录项
-   */
+   * 缂撳瓨鍘嗗彶璁板綍椤?   */
   private async cacheHistoryItem(history: History): Promise<void> {
     try {
       await this.storageUtil.setObject(`${HISTORY_CACHE_PREFIX}${history.id}`, history);
@@ -596,7 +575,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取缓存的历史记录项
+   * 鑾峰彇缂撳瓨鐨勫巻鍙茶褰曢」
    */
   private async getCachedHistoryItem(historyId: string): Promise<History | null> {
     try {
@@ -609,7 +588,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 移除缓存的历史记录项
+   * 绉婚櫎缂撳瓨鐨勫巻鍙茶褰曢」
    */
   private async removeCachedHistoryItem(historyId: string): Promise<void> {
     try {
@@ -621,8 +600,7 @@ export class HistoryRepository {
   }
   
   /**
-   * 使历史记录列表缓存失效
-   */
+   * 浣垮巻鍙茶褰曞垪琛ㄧ紦瀛樺け鏁?   */
   private async invalidateHistoryListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(HISTORY_LIST_CACHE);
@@ -633,11 +611,10 @@ export class HistoryRepository {
   }
   
   /**
-   * 清除所有历史记录缓存
-   */
+   * 娓呴櫎鎵€鏈夊巻鍙茶褰曠紦瀛?   */
   private async clearHistoryCache(): Promise<void> {
     try {
-      // 这里简化处理，实际应用中可能需要更复杂的缓存清理逻辑
+      // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旂敤涓彲鑳介渶瑕佹洿澶嶆潅鐨勭紦瀛樻竻鐞嗛€昏緫
       await this.storageUtil.remove(HISTORY_LIST_CACHE);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -646,20 +623,19 @@ export class HistoryRepository {
   }
   
   /**
-   * 获取内容类型的标题
-   */
+   * 鑾峰彇鍐呭绫诲瀷鐨勬爣棰?   */
   private getContentTypeTitle(contentType: ContentType): string {
     const titles: Record<string, string> = {
-      [ContentType.MOVIE]: '电影',
-      [ContentType.SERIES]: '电视剧',
-      [ContentType.LIVE]: '直播',
-      [ContentType.EPISODE]: '剧集'
+      [ContentType.MOVIE]: '鐢靛奖',
+      [ContentType.SERIES]: '鐢佃鍓?,
+      [ContentType.LIVE]: '鐩存挱',
+      [ContentType.EPISODE]: '鍓ч泦'
     };
-    return titles[contentType] || '其他';
+    return titles[contentType] || '鍏朵粬';
   }
   
   /**
-   * 将数据库记录转换为History对象
+   * 灏嗘暟鎹簱璁板綍杞崲涓篐istory瀵硅薄
    */
   private convertToHistoryObject(record: Record<string, Serializable>): History {
     return {
@@ -683,9 +659,11 @@ export class HistoryRepository {
   }
   
   /**
-   * 将数据库记录数组转换为History对象数组
+   * 灏嗘暟鎹簱璁板綍鏁扮粍杞崲涓篐istory瀵硅薄鏁扮粍
    */
   private convertToHistoryObjects(records: Record<string, Serializable>[]): History[] {
     return records.map(record => this.convertToHistoryObject(record));
   }
 }
+
+
