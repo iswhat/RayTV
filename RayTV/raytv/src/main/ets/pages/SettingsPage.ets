@@ -8,6 +8,7 @@ import { DeviceService } from '../service/device/DeviceService';
 import { DataSyncService } from '../service/sync/DataSyncService';
 import { VoiceAssistantManager } from '../service/voice/VoiceAssistantManager';
 import { GestureService } from '../service/input/GestureService';
+import { DeviceFlowManager } from '../service/device/DeviceFlowManager';
 import CacheService, { CacheType } from '../service/cache/CacheService';
 import ConfigSourceSwitcher from '../components/ConfigSourceSwitcher';
 import display from '@ohos.display';
@@ -79,6 +80,11 @@ struct SettingsPage {
   @State voiceAssistantStatus: string = '未初始化';
   // 手势控制状态 | Gesture control state
   @State gestureControlStatus: string = '未初始化';
+  // 设备流转状态 | Device flow state
+  @State deviceFlowEnabled: boolean = false;
+  @State deviceFlowStatus: string = '未初始化';
+  @State availableDevices: any[] = [];
+  @State showDeviceFlowPopup: boolean = false;
   
   // 缓存项 | Cache item
   interface CacheItem {
@@ -90,21 +96,32 @@ struct SettingsPage {
   }
   
   // 服务实例 | Service instances
-  private cacheService: CacheService = CacheService.getInstance();
-  
-  // 服务实例 | Service instances
-  private configService: ConfigService = ConfigService.getInstance();
-  private settingService: SettingService = SettingService.getInstance();
-  private adBlockManager: AdBlockManager = AdBlockManager.getInstance();
-  private wallManager: WallManager = WallManager.getInstance();
-  private deviceService: DeviceService = DeviceService.getInstance();
-  private dataSyncService: DataSyncService = DataSyncService.getInstance();
-  private voiceAssistantManager: VoiceAssistantManager = VoiceAssistantManager.getInstance();
-  private gestureService: GestureService = GestureService.getInstance();
+  private cacheService: CacheService | null = null;
+  private configService: ConfigService | null = null;
+  private settingService: SettingService | null = null;
+  private adBlockManager: AdBlockManager | null = null;
+  private wallManager: WallManager | null = null;
+  private deviceService: DeviceService | null = null;
+  private dataSyncService: DataSyncService | null = null;
+  private voiceAssistantManager: VoiceAssistantManager | null = null;
+  private gestureService: GestureService | null = null;
+  private deviceFlowManager: DeviceFlowManager | null = null;
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info(this.TAG, 'SettingsPage about to appear');
+    
+    // 初始化服务实例 | Initialize service instances
+    this.cacheService = CacheService.getInstance();
+    this.configService = ConfigService.getInstance();
+    this.settingService = SettingService.getInstance();
+    this.adBlockManager = AdBlockManager.getInstance();
+    this.wallManager = WallManager.getInstance();
+    this.deviceService = DeviceService.getInstance();
+    this.dataSyncService = DataSyncService.getInstance();
+    this.voiceAssistantManager = VoiceAssistantManager.getInstance();
+    this.gestureService = GestureService.getInstance();
+    this.deviceFlowManager = DeviceFlowManager.getInstance();
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
@@ -123,6 +140,9 @@ struct SettingsPage {
     
     // 加载手势控制状态 | Load gesture control status
     this.loadGestureControlStatus();
+    
+    // 加载设备流转状态 | Load device flow status
+    this.loadDeviceFlowStatus();
     
     // 加载壁纸列表 | Load wallpaper list
     this.loadWallpapers();
@@ -222,6 +242,21 @@ struct SettingsPage {
           type: 'toggle',
           value: this.gestureControlEnabled,
           onToggle: (value: boolean) => this.handleGestureControlToggle(value)
+        },
+        {
+          id: 'device_flow',
+          title: '跨设备流转',
+          description: '开启或关闭跨设备流转功能，支持在不同设备间无缝切换',
+          type: 'toggle',
+          value: this.deviceFlowEnabled,
+          onToggle: (value: boolean) => this.handleDeviceFlowToggle(value)
+        },
+        {
+          id: 'device_flow_manage',
+          title: '设备流转管理',
+          description: '查看可用设备并发起流转',
+          type: 'button',
+          onClick: () => this.showDeviceFlowPopup = true
         },
         {
           id: 'cache',
@@ -506,6 +541,31 @@ struct SettingsPage {
   }
   
   /**
+   * 加载设备流转状态 | Load device flow status
+   */
+  private async loadDeviceFlowStatus(): Promise<void> {
+    try {
+      const status = await this.deviceFlowManager.isEnabled();
+      this.deviceFlowEnabled = status;
+      // 更新设置项值 | Update setting item value
+      const deviceFlowItem = this.settingItems.find(item => item.id === 'device_flow');
+      if (deviceFlowItem) {
+        deviceFlowItem.value = status;
+      }
+      
+      // 加载可用设备列表 | Load available devices list
+      this.availableDevices = this.deviceFlowManager.getAvailableDevices();
+      this.deviceFlowStatus = this.availableDevices.length > 0 ? `已发现 ${this.availableDevices.length} 个设备` : '未发现设备';
+      
+      Logger.info(this.TAG, `Device flow status: ${status}, devices: ${this.availableDevices.length}`);
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to load device flow status: ${error}`);
+      this.deviceFlowEnabled = false;
+      this.deviceFlowStatus = '加载失败';
+    }
+  }
+  
+  /**
    * 处理手势控制切换 | Handle gesture control toggle
    */
   private async handleGestureControlToggle(value: boolean): Promise<void> {
@@ -532,6 +592,66 @@ struct SettingsPage {
       }
     } catch (error) {
       Logger.error(this.TAG, `Failed to toggle gesture control: ${error}`);
+    }
+  }
+  
+  /**
+   * 处理设备流转切换 | Handle device flow toggle
+   */
+  private async handleDeviceFlowToggle(value: boolean): Promise<void> {
+    try {
+      // 调用实际的DeviceFlowManager切换设备流转状态 | Call actual DeviceFlowManager to toggle device flow status
+      await this.deviceFlowManager.setEnabled(value);
+      
+      this.deviceFlowEnabled = value;
+      // 更新设置项值 | Update setting item value
+      const deviceFlowItem = this.settingItems.find(item => item.id === 'device_flow');
+      if (deviceFlowItem) {
+        deviceFlowItem.value = value;
+      }
+      
+      // 如果开启设备流转，刷新设备列表 | If enabled, refresh device list
+      if (value) {
+        await this.deviceFlowManager.refreshDevices();
+        this.availableDevices = this.deviceFlowManager.getAvailableDevices();
+        this.deviceFlowStatus = this.availableDevices.length > 0 ? `已发现 ${this.availableDevices.length} 个设备` : '未发现设备';
+      }
+      
+      Logger.info(this.TAG, `Device flow ${value ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to toggle device flow: ${error}`);
+    }
+  }
+  
+  /**
+   * 处理设备流转发起 | Handle device flow start
+   */
+  private async handleDeviceFlowStart(deviceId: string): Promise<void> {
+    try {
+      Logger.info(this.TAG, `Starting device flow to device: ${deviceId}`);
+      
+      // 准备流转数据 | Prepare flow data
+      const flowData = {
+        mediaInfo: {
+          title: '当前播放内容',
+          position: 0,
+          duration: 0
+        },
+        appState: {
+          currentPage: 'SettingsPage'
+        }
+      };
+      
+      // 发起流转 | Start flow
+      await this.deviceFlowManager.startFlow({
+        flowType: 'video',
+        data: flowData,
+        targetDeviceId: deviceId
+      });
+      
+      Logger.info(this.TAG, 'Device flow started successfully');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to start device flow: ${error}`);
     }
   }
   
@@ -1579,6 +1699,156 @@ struct SettingsPage {
     }
   }
   
+  // 渲染设备流转弹窗 | Render device flow popup
+  @Builder
+  renderDeviceFlowPopup() {
+    if (this.showDeviceFlowPopup) {
+      // 刷新设备列表
+      if (this.deviceFlowEnabled) {
+        this.deviceFlowManager.refreshDevices();
+        this.availableDevices = this.deviceFlowManager.getAvailableDevices();
+      }
+      
+      Stack({
+        alignContent: Alignment.Center
+      }) {
+        // 半透明背景 | Semi-transparent background
+        Column()
+          .width('100%')
+          .height('100%')
+          .backgroundColor('rgba(0, 0, 0, 0.7)')
+          .onClick(() => this.showDeviceFlowPopup = false)
+        
+        // 弹窗内容 | Popup content
+        Column() {
+          Row() {
+            Text('设备流转管理')
+              .fontSize(20)
+              .fontWeight(700)
+              .fontColor('#333333')
+              .flexGrow(1)
+              .textAlign(TextAlign.Center)
+            
+            Button() {
+              Text('×')
+                .fontSize(24)
+                .fontColor('#999999')
+            }
+            .width(40)
+            .height(40)
+            .backgroundColor('transparent')
+            .onClick(() => this.showDeviceFlowPopup = false)
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .alignItems(VerticalAlign.Center)
+          .margin({ bottom: 20 })
+        
+        // 设备流转状态 | Device flow status
+        Row() {
+          Text('流转状态:')
+            .fontSize(16)
+            .fontColor('#666666')
+            .margin({ right: 10 })
+          
+          Text(this.deviceFlowStatus)
+            .fontSize(16)
+            .fontColor('#4CAF50')
+            .fontWeight(600)
+        }
+        .width('100%')
+        .margin({ bottom: 20 })
+        
+        // 可用设备列表 | Available devices list
+        if (!this.deviceFlowEnabled) {
+          Text('请先开启跨设备流转功能')
+            .fontSize(16)
+            .fontColor('#FF5722')
+            .margin({ bottom: 30 })
+        } else if (this.availableDevices.length === 0) {
+          Text('未发现可用设备')
+            .fontSize(16)
+            .fontColor('#666666')
+            .margin({ bottom: 30 })
+          
+          Button() {
+            Text('刷新设备列表')
+              .fontSize(14)
+              .fontColor('#FFFFFF')
+          }
+          .width(150)
+          .height(40)
+          .backgroundColor('#2196F3')
+          .borderRadius(6)
+          .onClick(async () => {
+            await this.deviceFlowManager.refreshDevices();
+            this.availableDevices = this.deviceFlowManager.getAvailableDevices();
+            this.deviceFlowStatus = this.availableDevices.length > 0 ? `已发现 ${this.availableDevices.length} 个设备` : '未发现设备';
+          })
+          .margin({ bottom: 20 })
+        } else {
+          Column() {
+            ForEach(this.availableDevices, (device: any) => {
+              Row() {
+                Column() {
+                  Text(device.deviceName)
+                    .fontSize(16)
+                    .fontWeight(500)
+                    .fontColor('#333333')
+                    .margin({ bottom: 5 })
+                  
+                  Text(`类型: ${device.deviceType} | 状态: ${device.status}`)
+                    .fontSize(14)
+                    .fontColor('#666666')
+                }
+                .flexGrow(1)
+                
+                Button() {
+                  Text('发起流转')
+                    .fontSize(14)
+                    .fontColor('#FFFFFF')
+                }
+                .width(100)
+                .height(36)
+                .backgroundColor('#4CAF50')
+                .borderRadius(6)
+                .onClick(() => this.handleDeviceFlowStart(device.deviceId))
+              }
+              .width('100%')
+              .padding(15)
+              .backgroundColor('#FFFFFF')
+              .borderRadius(8)
+              .margin({ bottom: 10 })
+              .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 1 })
+            })
+          }
+          .width('100%')
+          .margin({ bottom: 20 })
+        }
+        
+        Button() {
+          Text('确定')
+            .fontSize(16)
+            .fontColor('#FFFFFF')
+        }
+        .width(120)
+        .height(45)
+        .backgroundColor('#4CAF50')
+        .borderRadius(8)
+        .onClick(() => this.showDeviceFlowPopup = false)
+        }
+        .width('80%')
+        .maxWidth(600)
+        .padding(24)
+        .backgroundColor('#FFFFFF')
+        .borderRadius(12)
+        .alignItems(HorizontalAlign.Center)
+      }
+      .width('100%')
+      .height('100%')
+    }
+  }
+  
   // 渲染数据同步弹窗 | Render data sync popup
   @Builder
   renderDataSyncPopup() {
@@ -2128,6 +2398,7 @@ struct SettingsPage {
       this.renderDataSyncPopup();
       this.renderVoiceAssistantPopup();
       this.renderGestureControlPopup();
+      this.renderDeviceFlowPopup();
     }
     .width('100%')
     .height('100%')

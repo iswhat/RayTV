@@ -804,11 +804,12 @@ export default class SettingService {
    */
   private async validateImportedSettings(settings: Partial<AppSettings>): Promise<void> {
     // 验证必要的设置项 | Validate required setting items
-    if (settings.themeMode !== undefined && !Object.values(ThemeMode).includes(settings.themeMode as ThemeMode)) {
+    if (settings.themeMode !== undefined && (settings.themeMode < 0 || settings.themeMode > 3)) {
       throw new Error('Invalid theme mode in imported settings');
     }
     
-    if (settings.language && !Object.values(LanguageCode).includes(settings.language as LanguageCode)) {
+    const validLanguageCodes = ['zh_CN', 'zh_TW', 'en_US', 'ja_JP', 'ko_KR', 'de_DE'];
+    if (settings.language && !validLanguageCodes.includes(settings.language)) {
       throw new Error('Invalid language in imported settings');
     }
     

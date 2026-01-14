@@ -1,4 +1,4 @@
-﻿// DeviceInfoRepository.ets - 璁惧淇℃伅鏁版嵁浠撳簱
+// DeviceInfoRepository.ets - 璁惧淇℃伅鏁版嵁浠撳簱
 // 璐熻矗璁惧淇℃伅鐨勬敹闆嗐€佸瓨鍌ㄥ拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
@@ -470,7 +470,7 @@ export class DeviceInfoRepository {
   /**
    * 鑾峰彇璁惧鑳藉姏
    */
-  public async getDeviceCapabilities(): Promise<DeviceCapability | null> {
+  public async getDeviceCapabilities(): Promise<DeviceCapability[] | null> {
     if (!this.isInitialized) {
       await this.initialize();
     }

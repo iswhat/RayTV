@@ -5,7 +5,6 @@ import { PlaybackService } from '../service/playback/PlaybackService';
 import { AVPlayerService } from '../service/playback/AVPlayerService';
 import { SearchService } from '../service/search/SearchService';
 import SubtitleService, { SubtitleTrack, SubtitleProvider, SubtitleLanguage } from '../service/media/SubtitleService';
-import { DanmakuService, DanmakuItem, DanmakuConfig } from '../service/danmaku/DanmakuService';
 import { AnalyticsService } from '../service/analytics/AnalyticsService';
 import CacheService, { CachePriority } from '../service/cache/CacheService';
 import display from '@ohos.display';
@@ -58,7 +57,6 @@ struct PlaybackPage {
   @State showSubtitleOptions: boolean = false;
   @State showAudioTrackOptions: boolean = false;
   @State showSkipOptions: boolean = false;
-  @State showDanmakuOptions: boolean = false;
   @State videoPlayerHeight: number = 0;
   @State subtitleTracks: SubtitleTrack[] = [];
   @State selectedSubtitle: SubtitleTrack | null = null;
@@ -75,21 +73,12 @@ struct PlaybackPage {
   @State showLiveSettings: boolean = false; // 是否显示直播设置
   @State controlHideTimer: number | null = null; // 控制条隐藏计时器
   @State currentFocusElement: string = ''; // 当前焦点元素
-  // 弹幕相关状态 | Danmaku related state
-  @State isDanmakuEnabled: boolean = true;
-  @State danmakuOpacity: number = 0.8;
-  @State danmakuFontSize: number = 24;
-  @State danmakuDensity: 'low' | 'medium' | 'high' = 'medium';
-  @State danmakuItems: DanmakuItem[] = [];
-  @State isLoadingDanmaku: boolean = false;
-  
   // 服务实例 | Service instances
   private mediaService: MediaService = MediaService.getInstance();
   private playbackService: PlaybackService = PlaybackService.getInstance();
   private avPlayerService: AVPlayerService = AVPlayerService.getInstance();
   private searchService: SearchService = SearchService.getInstance();
   private subtitleService: SubtitleService = SubtitleService.getInstance();
-  private danmakuService: DanmakuService = DanmakuService.getInstance();
   private analyticsService: AnalyticsService = AnalyticsService.getInstance();
   private cacheService: CacheService = CacheService.getInstance();
   
@@ -287,14 +276,7 @@ struct PlaybackPage {
             }
           }
           
-          // 更新弹幕时间 | Update danmaku time
-          if (this.isDanmakuEnabled) {
-            this.danmakuService.updateCurrentTime(state.currentTime);
-          }
-        });
-        
-        // 加载弹幕 | Load danmaku
-        await this.loadDanmaku();
+
         
         Logger.info(this.TAG, 'Playback initialized successfully');
       }
@@ -324,8 +306,6 @@ struct PlaybackPage {
       const result = await this.playbackService.switchEpisode(episode);
       
       if (result.isSuccess()) {
-        // 重新加载弹幕 | Reload danmaku
-        await this.loadDanmaku();
         Logger.info(this.TAG, `Selected episode: ${episode.title}`);
       } else {
         Logger.error(this.TAG, `Failed to switch episode: ${result.message}`);
@@ -565,121 +545,6 @@ struct PlaybackPage {
       Logger.info(this.TAG, 'Updated subtitle style');
     } catch (error) {
       Logger.error(this.TAG, `Failed to update subtitle style: ${error}`);
-    }
-  }
-  
-  /**
-   * 加载弹幕 | Load danmaku
-   */
-  private async loadDanmaku(): Promise<void> {
-    try {
-      if (this.mediaInfo && this.selectedEpisode) {
-        this.isLoadingDanmaku = true;
-        Logger.info(this.TAG, `Loading danmaku for: ${this.mediaInfo.title}, episode: ${this.selectedEpisode.episode}`);
-        
-        // 生成缓存键 | Generate cache key
-        const cacheKey = `danmaku_${this.mediaInfo.id}_${this.selectedEpisode.id}`;
-        
-        // 尝试从缓存获取 | Try to get from cache
-        const cachedDanmaku = await this.cacheService.get<DanmakuItem[]>(cacheKey);
-        
-        if (cachedDanmaku && cachedDanmaku.length > 0) {
-          this.danmakuItems = cachedDanmaku;
-          this.danmakuService.setDanmakuList(this.danmakuItems);
-          Logger.info(this.TAG, `Loaded ${this.danmakuItems.length} danmaku items from cache`);
-          this.isLoadingDanmaku = false;
-          return;
-        }
-        
-        // 从DanmakuService加载弹幕 | Load danmaku from DanmakuService
-        const result = await this.danmakuService.loadDanmaku({
-          mediaId: this.mediaInfo.id,
-          episodeId: this.selectedEpisode.id,
-          title: this.mediaInfo.title,
-          episode: this.selectedEpisode.episode
-        });
-        
-        if (result.isSuccess() && result.data) {
-          this.danmakuItems = result.data;
-          this.danmakuService.setDanmakuList(this.danmakuItems);
-          
-          // 缓存结果 | Cache result
-          await this.cacheService.set(cacheKey, this.danmakuItems, {
-            expiry: 2592000000, // 30天缓存 | 30 days cache
-            priority: CachePriority.NORMAL,
-            tags: ['danmaku', 'media'],
-            source: 'DanmakuService'
-          });
-          
-          Logger.info(this.TAG, `Loaded ${this.danmakuItems.length} danmaku items from service`);
-        } else {
-          Logger.warn(this.TAG, `No danmaku found: ${result.message}`);
-          this.danmakuItems = [];
-        }
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load danmaku: ${errorMsg}`);
-      this.danmakuItems = [];
-    } finally {
-      this.isLoadingDanmaku = false;
-    }
-  }
-  
-  /**
-   * 发送弹幕 | Send danmaku
-   */
-  private async sendDanmaku(text: string): Promise<void> {
-    try {
-      if (!text || text.trim() === '') return;
-      
-      const danmakuItem: DanmakuItem = {
-        id: `danmaku_${Date.now()}`,
-        text: text.trim(),
-        color: '#FFFFFF',
-        mode: 'scroll',
-        time: this.currentTime,
-        userId: 'user',
-        userLevel: 1
-      };
-      
-      // 发送弹幕 | Send danmaku
-      const result = await this.danmakuService.sendDanmaku(danmakuItem);
-      
-      if (result.isSuccess()) {
-        // 添加到本地弹幕列表 | Add to local danmaku list
-        this.danmakuItems.push(danmakuItem);
-        this.danmakuService.addDanmaku(danmakuItem);
-        Logger.info(this.TAG, `Sent danmaku: ${text}`);
-      } else {
-        Logger.error(this.TAG, `Failed to send danmaku: ${result.message}`);
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to send danmaku: ${errorMsg}`);
-    }
-  }
-  
-  /**
-   * 更新弹幕配置 | Update danmaku config
-   */
-  private async updateDanmakuConfig(): Promise<void> {
-    try {
-      const config: DanmakuConfig = {
-        enabled: this.isDanmakuEnabled,
-        opacity: this.danmakuOpacity,
-        fontSize: this.danmakuFontSize,
-        density: this.danmakuDensity,
-        showTop: true,
-        showBottom: true,
-        showScroll: true
-      };
-      
-      await this.danmakuService.updateConfig(config);
-      Logger.info(this.TAG, 'Updated danmaku config');
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to update danmaku config: ${errorMsg}`);
     }
   }
   
@@ -1372,28 +1237,7 @@ struct PlaybackPage {
             .touchEventListener((e) => this.onTouchEvent(e))
             .gestureEventListener((e) => this.onGestureEvent(e))
             
-            // 弹幕显示区域 | Danmaku display area
-            if (this.isDanmakuEnabled && this.danmakuItems.length > 0) {
-              Column() {
-                ForEach(this.danmakuItems.filter(item => item.time <= this.currentTime), (danmaku: DanmakuItem) => {
-                  Text(danmaku.text)
-                    .fontSize(this.danmakuFontSize)
-                    .fontColor(danmaku.color || '#FFFFFF')
-                    .opacity(this.danmakuOpacity)
-                    .padding({ horizontal: 20, vertical: 5 })
-                    .backgroundColor('transparent')
-                    .animation({
-                      duration: 8000,
-                      curve: Curve.Linear,
-                      iterations: 1
-                    })
-                }, (danmaku: DanmakuItem) => danmaku.id)
-              }
-              .width('100%')
-              .height(this.videoPlayerHeight - 80)
-              .position({ top: 0, left: 0 })
-              .overflow(Overflow.Hidden)
-            }
+
           }
           
           // 播放控制条 | Playback control bar
@@ -1522,25 +1366,7 @@ struct PlaybackPage {
                 })
                 .keyEventListener((e) => this.onKeyEvent(e))
                 
-                // 弹幕按钮 | Danmaku button
-                Button() {
-                  Text(this.isDanmakuEnabled ? '弹幕' : '无弹幕')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(140)
-                .height(60)
-                .backgroundColor(this.isDanmakuEnabled ? '#4CAF50' : '#9E9E9E')
-                .borderRadius(12)
-                .margin({ right: 20 })
-                .onClick(() => this.showDanmakuOptions = !this.showDanmakuOptions)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Danmaku button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
+
                 
                 // 字幕按钮 | Subtitle button
                 Button() {
@@ -2194,8 +2020,7 @@ struct PlaybackPage {
       // 字幕选项 | Subtitle options
       this.renderSubtitleOptions()
       
-      // 弹幕选项 | Danmaku options
-      this.renderDanmakuOptions()
+
       
       // 音轨选项 | Audio track options
       this.renderAudioTrackOptions()

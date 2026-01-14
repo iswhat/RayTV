@@ -309,11 +309,11 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       this.addToHistory(historyItem);
 
-      // 使用新的router.push API替换旧的router.pushUrl
+      // 使用新的router.pushUrl API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.push({
+      await router.pushUrl({
         url: url,
         params: routerParams
       });
@@ -330,7 +330,7 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
-      // 使用router.back()方法 - 虽然标记为已废弃，但目前没有直接替换方案
+      // 使用router.back()方法
       await router.back();
       this.removeLastFromHistory();
     } catch (error) {
@@ -346,8 +346,8 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用新的router.push API替换旧的router.pushUrl
-      await router.push({
+      // 使用新的router.pushUrl API
+      await router.pushUrl({
         url: this.getPageUrl(PageRoute.HOME),
         params: {} as Record<string, string | number | boolean | null>
       });
@@ -369,11 +369,11 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用新的router.replace API替换旧的router.replaceUrl
+      // 使用新的router.replaceUrl API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.replace({
+      await router.replaceUrl({
         url: url,
         params: routerParams
       });
@@ -519,35 +519,10 @@ export class AppNavigator {
    * 获取当前页面路由 | Get current route
    */
   getCurrentRoute(): string {
-    // 使用新的router.getState() API，虽然标记为已废弃，但目前没有直接替换方案
-    try {
-      const state = router.getState();
-      const url = state.path || '';
-      
-      // 从URL映射回路由 - 使用数组避免映射常量问题，使用构造函数避免Structural typing
-      const routeMap = new Array<RouteMapping>();
-      
-      routeMap.push(new RouteMappingImpl('pages/HomePage', PageRoute.HOME));
-      routeMap.push(new RouteMappingImpl('pages/VideoPlayPage', PageRoute.VIDEO_PLAY));
-      routeMap.push(new RouteMappingImpl('pages/LineManagerPage', PageRoute.LINE_MANAGER));
-      routeMap.push(new RouteMappingImpl('pages/SettingsPage', PageRoute.SETTINGS));
-      routeMap.push(new RouteMappingImpl('pages/SearchPage', PageRoute.SEARCH));
-      routeMap.push(new RouteMappingImpl('pages/SearchResultPage', PageRoute.SEARCH_RESULT));
-      routeMap.push(new RouteMappingImpl('pages/HistoryPage', PageRoute.HISTORY));
-      routeMap.push(new RouteMappingImpl('pages/CategoryPage', PageRoute.CATEGORY));
-      routeMap.push(new RouteMappingImpl('pages/DetailPage', PageRoute.DETAIL));
-      routeMap.push(new RouteMappingImpl('pages/LivePage', PageRoute.LIVE));
-
-      // 鏌ユ壘鍖归厤鐨刄RL
-      for (let i = 0; i < routeMap.length; i++) {
-        if (routeMap[i].url === url) {
-          return routeMap[i].route;
-        }
-      }
-    } catch (error) {
-      console.error('Failed to get current route:', error);
+    // 从历史记录中获取当前路由
+    if (this.navigationHistory.length > 0) {
+      return this.navigationHistory[this.navigationHistory.length - 1].route;
     }
-    
     return PageRoute.HOME;
   }
   
@@ -555,27 +530,23 @@ export class AppNavigator {
    * 获取当前路由参数 | Get current route params
    */
   getCurrentRouteParams(): DetailParams {
-    try {
-      const state = router.getState();
-      const params = state.params || {};
-      
-      // 构建DetailParams对象
-      const detailParams: DetailParams = {
-        id: params.id || '1',
-        siteKey: params.siteKey || 'default',
-        type: params.type || 'movie'
-      };
-      
-      return detailParams;
-    } catch (error) {
-      console.error('Failed to get current route params:', error);
-      // 返回默认值
-      return {
-        id: '1',
-        siteKey: 'default',
-        type: 'movie'
-      };
+    // 从历史记录中获取当前参数
+    if (this.navigationHistory.length > 0) {
+      const currentItem = this.navigationHistory[this.navigationHistory.length - 1];
+      if (currentItem.params) {
+        return {
+          id: currentItem.params.getParam('id') as string || '1',
+          siteKey: currentItem.params.getParam('siteKey') as string || 'default',
+          type: currentItem.params.getParam('type') as string || 'movie'
+        };
+      }
     }
+    // 返回默认值
+    return {
+      id: '1',
+      siteKey: 'default',
+      type: 'movie'
+    };
   }
 }
 

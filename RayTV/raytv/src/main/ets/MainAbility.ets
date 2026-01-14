@@ -29,27 +29,56 @@ export default class MainAbility extends UIAbility {
     // Set up global error handler
     setupGlobalErrorHandler();
     
+    // Handle cross-device migration params if present
+    if (want && want.parameters && want.parameters['flowParams']) {
+      hilog.info(0x0000, 'MainAbility', 'Received cross-device migration params');
+      // Initialize DeviceFlowManager first to handle migration
+      import('../service/device/DeviceFlowManager').then((DeviceFlowManagerModule) => {
+        const DeviceFlowManager = DeviceFlowManagerModule.DeviceFlowManager;
+        const deviceFlowManager = DeviceFlowManager.getInstance();
+        deviceFlowManager.initialize()
+          .then(() => {
+            return deviceFlowManager.restoreFromFlowParams(want.parameters['flowParams']);
+          })
+          .catch((error: Error) => {
+            hilog.error(0x0000, 'MainAbility', 'Failed to handle cross-device migration: %{public}s', error.message);
+          });
+      });
+    }
+    
     // Initialize DataSyncService
-    import('../service/sync/DataSyncService').then(({ default: DataSyncService }) => {
+    import('../service/sync/DataSyncService').then((DataSyncServiceModule) => {
+      const DataSyncService = DataSyncServiceModule.default;
       const dataSyncService = DataSyncService.getInstance();
-      dataSyncService.initialize(this).catch(error => {
-        hilog.error(0x0000, 'MainAbility', 'Failed to initialize DataSyncService: %{public}s', error instanceof Error ? error.message : String(error));
+      dataSyncService.initialize(this).catch((error: Error) => {
+        hilog.error(0x0000, 'MainAbility', 'Failed to initialize DataSyncService: %{public}s', error.message);
       });
     });
     
     // Initialize VoiceAssistantManager
-    import('../service/voice/VoiceAssistantManager').then(({ VoiceAssistantManager }) => {
+    import('../service/voice/VoiceAssistantManager').then((VoiceAssistantManagerModule) => {
+      const VoiceAssistantManager = VoiceAssistantManagerModule.VoiceAssistantManager;
       const voiceAssistantManager = VoiceAssistantManager.getInstance();
-      voiceAssistantManager.initialize(this).catch(error => {
-        hilog.error(0x0000, 'MainAbility', 'Failed to initialize VoiceAssistantManager: %{public}s', error instanceof Error ? error.message : String(error));
+      voiceAssistantManager.initialize(this).catch((error: Error) => {
+        hilog.error(0x0000, 'MainAbility', 'Failed to initialize VoiceAssistantManager: %{public}s', error.message);
       });
     });
     
     // Initialize GestureService
-    import('../service/input/GestureService').then(({ GestureService }) => {
+    import('../service/input/GestureService').then((GestureServiceModule) => {
+      const GestureService = GestureServiceModule.GestureService;
       const gestureService = GestureService.getInstance();
-      gestureService.initialize(this).catch(error => {
-        hilog.error(0x0000, 'MainAbility', 'Failed to initialize GestureService: %{public}s', error instanceof Error ? error.message : String(error));
+      gestureService.initialize(this).catch((error: Error) => {
+        hilog.error(0x0000, 'MainAbility', 'Failed to initialize GestureService: %{public}s', error.message);
+      });
+    });
+    
+    // Initialize DeviceFlowManager for cross-device migration
+    import('../service/device/DeviceFlowManager').then((DeviceFlowManagerModule) => {
+      const DeviceFlowManager = DeviceFlowManagerModule.DeviceFlowManager;
+      const deviceFlowManager = DeviceFlowManager.getInstance();
+      deviceFlowManager.initialize().catch((error: Error) => {
+        hilog.error(0x0000, 'MainAbility', 'Failed to initialize DeviceFlowManager: %{public}s', error.message);
       });
     });
   }

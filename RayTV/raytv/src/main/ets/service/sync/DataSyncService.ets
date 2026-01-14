@@ -1,4 +1,4 @@
-﻿// DataSyncService.ets - 数据同步服务 | Data sync service
+// DataSyncService.ets - 数据同步服务 | Data sync service
 // 负责协调本地数据库、网络数据和分布式数据之间的同步 | Responsible for coordinating synchronization between local database, network data, and distributed data
 
 import Logger from '../../common/util/Logger';
@@ -337,7 +337,7 @@ export default class DataSyncService {
    */
   private registerDistributedDataListeners(): void {
     // 监听所有数据类型的变化
-    const syncDataTypes = this.getObjectValues(SyncDataType);
+    const syncDataTypes = ['history', 'favorites', 'config', 'playback_progress', 'device_info'];
     
     syncDataTypes.forEach(dataType => {
       this.distributedDataService.addDataChangeListener(
