@@ -70,7 +70,8 @@ export class StorageUtil {
     try {
       const preferences = StorageUtil.getPreferences();
       if (preferences) {
-        return await preferences.get(key, defaultValue) as string;
+        const value = await preferences.get(key, defaultValue);
+        return typeof value === 'string' ? value : defaultValue;
       }
       return defaultValue;
     } catch (error) {
