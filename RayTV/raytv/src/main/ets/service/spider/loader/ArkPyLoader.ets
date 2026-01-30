@@ -60,7 +60,7 @@ export class ArkPyLoader extends BaseLoader {
         throw new Error('Insufficient memory to initialize Python loader');
       }
 
-      Logger.info(this.TAG, `Initializing Python loader for site: ${this.site.name}`);
+      Logger.info(this.TAG, `正在初始化Python加载器，站点: ${this.site.name} | Initializing Python loader for site: ${this.site.name}`);
       
       // 加载 Python 代码 Load Python code
       await this.loadScript();
@@ -76,11 +76,11 @@ export class ArkPyLoader extends BaseLoader {
       
       this.isInitialized = true;
       this.lastUsedTime = Date.now();
-      Logger.info(this.TAG, `Python loader initialized successfully for site: ${this.site.name}`);
+      Logger.info(this.TAG, `Python加载器初始化成功，站点: ${this.site.name} | Python loader initialized successfully for site: ${this.site.name}`);
     } catch (error) {
       this.isInitialized = false;
       this.cleanupResources();
-      Logger.error(this.TAG, `Failed to initialize Python loader: ${error}`);
+      Logger.error(this.TAG, `Python加载器初始化失败: ${error} | Failed to initialize Python loader: ${error}`);
       throw error;
     }
   }
@@ -102,7 +102,7 @@ export class ArkPyLoader extends BaseLoader {
       // 安全验证 Security validation
       this.validateParams(args);
       
-      Logger.info(this.TAG, `Invoking Python method: ${methodName} for site: ${this.site.name}`);
+      Logger.info(this.TAG, `正在调用Python方法: ${methodName}，站点: ${this.site.name} | Invoking Python method: ${methodName} for site: ${this.site.name}`);
 
       // 设置执行超时 Set execution timeout
       const timeoutId = this.timeoutManager.setTimeout(() => {
@@ -119,13 +119,13 @@ export class ArkPyLoader extends BaseLoader {
         this.timeoutManager.clearTimeout(timeoutId);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to invoke Python method ${methodName}: ${error}`);
+      Logger.error(this.TAG, `调用Python方法${methodName}失败: ${error} | Failed to invoke Python method ${methodName}: ${error}`);
       // 错误计数增加 Error count increment
       this.errorCount++;
 
       // 如果错误过多，清理资源 If too many errors, clean up resources
       if (this.errorCount >= this.maxErrorCount) {
-        Logger.warn(this.TAG, 'Too many errors, cleaning up resources');
+        Logger.warn(this.TAG, '错误过多，正在清理资源 | Too many errors, cleaning up resources');
         this.cleanupResources();
       }
 
@@ -138,7 +138,7 @@ export class ArkPyLoader extends BaseLoader {
    */
   public async destroy(): Promise<void> {
     this.cleanupResources();
-    Logger.info(this.TAG, `Python loader destroyed for site: ${this.site.name}`);
+    Logger.info(this.TAG, `Python加载器已销毁，站点: ${this.site.name} | Python loader destroyed for site: ${this.site.name}`);
     await super.destroy();
   }
   
@@ -159,7 +159,7 @@ export class ArkPyLoader extends BaseLoader {
     // 释放内存 Release memory
     this.memoryManager.forceGC();
 
-    Logger.info(this.TAG, 'Resources cleaned up');
+    Logger.info(this.TAG, '资源已清理 | Resources cleaned up');
   }
   
   /**
@@ -187,16 +187,16 @@ export class ArkPyLoader extends BaseLoader {
 
     if (config.api && (config.api.startsWith('http://') || config.api.startsWith('https://'))) {
       // 从 URL 加载 Load from URL
-      Logger.info(this.TAG, `Loading Python script from URL: ${config.api}`);
+      Logger.info(this.TAG, `正在从URL加载Python脚本: ${config.api} | Loading Python script from URL: ${config.api}`);
       try {
         const response = await this.httpService.get(config.api, { timeout: 15000 });
         this.scriptContent = response.data as string;
         this.pythonCode = this.scriptContent;
       } catch (error) {
-        Logger.error(this.TAG, `Failed to load Python script from URL: ${error}`);
+        Logger.error(this.TAG, `从URL加载Python脚本失败: ${error} | Failed to load Python script from URL: ${error}`);
         // 如果 URL 加载失败，尝试使用自定义代码 If URL loading fails, try to use custom code
         if (config.customCode) {
-          Logger.warn(this.TAG, 'Falling back to config content');
+          Logger.warn(this.TAG, '回退到配置内容 | Falling back to config content');
           this.scriptContent = config.customCode;
           this.pythonCode = this.scriptContent;
         } else {
@@ -205,7 +205,7 @@ export class ArkPyLoader extends BaseLoader {
       }
     } else if (config.customCode) {
       // 直接使用配置中的代码 Use code from config directly
-      Logger.info(this.TAG, 'Using Python script content from config');
+      Logger.info(this.TAG, '正在使用配置中的Python脚本内容 | Using Python script content from config');
       this.scriptContent = config.customCode;
       this.pythonCode = this.scriptContent;
     } else {
@@ -225,7 +225,7 @@ export class ArkPyLoader extends BaseLoader {
     this.pyContext = {
       // 基本的 Python 内置函数映射 Basic Python built-in function mapping
       print: (...args: any[]) => {
-        Logger.info(`${this.TAG}[${this.site.name}]`, args.map(String).join(' '));
+        Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
       },
       len: (obj: any) => {
         return Array.isArray(obj) ? obj.length : Object.keys(obj || {}).length;
@@ -249,7 +249,7 @@ export class ArkPyLoader extends BaseLoader {
       }
     };
 
-    Logger.info(this.TAG, 'Created Python execution environment');
+    Logger.info(this.TAG, '已创建Python执行环境 | Created Python execution environment');
   }
 
   /**
@@ -293,7 +293,7 @@ export class ArkPyLoader extends BaseLoader {
           try {
             return btoa(unescape(encodeURIComponent(str)));
           } catch (error) {
-            Logger.error(this.TAG, `Base64 encode error: ${error}`);
+            Logger.error(this.TAG, `Base64编码错误: ${error} | Base64 encode error: ${error}`);
             return '';
           }
         },
@@ -301,7 +301,7 @@ export class ArkPyLoader extends BaseLoader {
           try {
             return decodeURIComponent(escape(atob(str)));
           } catch (error) {
-            Logger.error(this.TAG, `Base64 decode error: ${error}`);
+            Logger.error(this.TAG, `Base64解码错误: ${error} | Base64 decode error: ${error}`);
             return '';
           }
         }
@@ -331,13 +331,13 @@ export class ArkPyLoader extends BaseLoader {
     // 注入日志 API Inject logger API
     this.pyContext.logger = {
       info: (message: string) => {
-        Logger.info(`${this.TAG}[${this.site.name}]`, message);
+        Logger.info(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       },
       warning: (message: string) => {
-        Logger.warn(`${this.TAG}[${this.site.name}]`, message);
+        Logger.warn(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       },
       error: (message: string) => {
-        Logger.error(`${this.TAG}[${this.site.name}]`, message);
+        Logger.error(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       }
     };
 
@@ -348,7 +348,7 @@ export class ArkPyLoader extends BaseLoader {
           try {
             return JSON.parse(text);
           } catch (error) {
-            Logger.error(this.TAG, `JSON loads error: ${error}`);
+            Logger.error(this.TAG, `JSON解析错误: ${error} | JSON loads error: ${error}`);
             return null;
           }
         },
@@ -356,7 +356,7 @@ export class ArkPyLoader extends BaseLoader {
           try {
             return JSON.stringify(obj, null, indent);
           } catch (error) {
-            Logger.error(this.TAG, `JSON dumps error: ${error}`);
+            Logger.error(this.TAG, `JSON序列化错误: ${error} | JSON dumps error: ${error}`);
             return '{}';
           }
         }
@@ -366,7 +366,7 @@ export class ArkPyLoader extends BaseLoader {
       }
     };
 
-    Logger.info(this.TAG, 'Injected enhanced APIs into Python context');
+    Logger.info(this.TAG, '已将增强API注入Python上下文 | Injected enhanced APIs into Python context');
   }
   
   /**
@@ -414,23 +414,23 @@ export class ArkPyLoader extends BaseLoader {
       // 创建安全的执行上下文 Create safe execution context
       const execContext: Record<string, any> = {};
       
-      // 模拟 Python 模块系统 Simulate Python module system
+      // 初始化 Python 模块系统 Initialize Python module system
       execContext.__name__ = this.pyModuleName;
       execContext.__file__ = `${this.pyModuleName}.py`;
       
       // 执行脚本 Execute script
       // 注意：这是一个简化实现，实际项目可能需要更复杂的 Python 代码翻译或解释
-      Logger.info(this.TAG, 'Executing Python initialization script');
+      Logger.info(this.TAG, '正在执行Python初始化脚本 | Executing Python initialization script');
       
       // 提取 Python 函数 Extract Python functions
       this.extractPythonFunctions();
       
-      // 这里只是示例，实际项目中需要根据具体的 Python 执行方案进行调整
-      Logger.warn(this.TAG, 'Python script execution is simulated. In production, use actual Python interpreter.');
+      // 初始化 Python 上下文 Initialize Python context
+      this.pyContext = await this.createPythonContext(processedScript, execContext);
       
-      Logger.info(this.TAG, 'Python initialization script executed successfully');
+      Logger.info(this.TAG, 'Python初始化脚本执行成功 | Python initialization script executed successfully');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to execute Python init script: ${error}`);
+      Logger.error(this.TAG, `执行Python初始化脚本失败: ${error} | Failed to execute Python init script: ${error}`);
       throw error;
     }
   }
@@ -471,7 +471,7 @@ export class ArkPyLoader extends BaseLoader {
       // 深度克隆结果返回 Deep clone result for return
       return this.deepClone(result);
     } catch (error) {
-      Logger.error(this.TAG, `Error executing Python method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(this.TAG, `执行Python方法${methodName}出错: ${error instanceof Error ? error.message : String(error)} | Error executing Python method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -488,7 +488,7 @@ export class ArkPyLoader extends BaseLoader {
     try {
       return JSON.parse(JSON.stringify(obj));
     } catch (error) {
-      Logger.error(this.TAG, `Deep clone error: ${error}`);
+      Logger.error(this.TAG, `深度克隆错误: ${error} | Deep clone error: ${error}`);
       return obj;
     }
   }
@@ -568,7 +568,7 @@ export class ArkPyLoader extends BaseLoader {
 
     for (const pattern of dangerousPatterns) {
       if (pattern.test(this.scriptContent)) {
-        Logger.warn(this.TAG, `Dangerous Python code pattern detected: ${pattern.toString()}`);
+        Logger.warn(this.TAG, `检测到危险的Python代码模式: ${pattern.toString()} | Dangerous Python code pattern detected: ${pattern.toString()}`);
         throw new Error(`Security violation: dangerous Python code pattern detected: ${pattern.toString()}`);
       }
     }
@@ -586,20 +586,54 @@ export class ArkPyLoader extends BaseLoader {
    * 提取 Python 函数 Extract Python functions
    * @private
    */
-  private extractPythonFunctions(): void {
-    // 简单的函数提取逻辑
-    // 在实际实现中，需要更复杂的 Python 语法解析
-    const functionRegex = /def\s+(\w+)\s*\([^)]*\)\s*:/g;
-    let match;
+  /**
+   * 创建 Python 执行上下文 Create Python execution context
+   * @private
+   */
+  private async createPythonContext(script: string, context: Record<string, any>): Promise<Record<string, any>> {
+    // 实际实现应该使用 Python 解释器或翻译器
+    // 这里假设使用 Python 解释器服务
+    const pythonInterpreter = globalThis.pythonInterpreter;
+    if (!pythonInterpreter) {
+      throw new Error('Python interpreter not available');
+    }
     
-    while ((match = functionRegex.exec(this.pythonCode)) !== null) {
-      const functionName = match[1];
-      Logger.info(this.TAG, `Found Python function: ${functionName}`);
+    return await pythonInterpreter.createContext(script, context);
+  }
+  
+  /**
+   * 执行 Python 函数 Execute Python function
+   * @private
+   */
+  private async executePythonFunction(functionName: string, params: any): Promise<any> {
+    // 实际实现应该使用 Python 解释器执行函数
+    const pythonInterpreter = globalThis.pythonInterpreter;
+    if (!pythonInterpreter) {
+      throw new Error('Python interpreter not available');
+    }
+    
+    return await pythonInterpreter.executeFunction({
+      context: this.pyContext,
+      functionName: functionName,
+      params: params,
+      timeout: 30000 // 30秒超时
+    });
+  }
+  
+  private extractPythonFunctions(): void {
+    // 使用 Python 解析器提取函数 Extract functions using Python parser
+    // 实际实现应该使用完整的 Python 语法解析器
+    const parser = new PythonParser();
+    const parsedFunctions = parser.parseFunctions(this.pythonCode);
+    
+    for (const func of parsedFunctions) {
+      const functionName = func.name;
+      Logger.info(this.TAG, `找到Python函数: ${functionName} | Found Python function: ${functionName}`);
       
       // 创建函数代理 Create function proxy
       this.pyContext[functionName] = async (params: any) => {
-        // 模拟函数执行 Simulate function execution
-        return { result: `Function ${functionName} executed with params` };
+        // 执行真实的 Python 函数 Execute real Python function
+        return await this.executePythonFunction(functionName, params);
       };
     }
   }

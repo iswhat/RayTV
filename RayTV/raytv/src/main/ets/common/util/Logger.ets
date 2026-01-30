@@ -2,7 +2,7 @@
  * Logger - Logger utility class | 日志工具类
  * Provides unified logging functionality | 提供统一的日志记录功能
  */
-import { hilog } from '@kit.ArkTS';
+import hilog from '@ohos.hilog';
 
 /**
  * Log level enum | 日志级别枚举
@@ -17,7 +17,7 @@ export enum LogLevel {
 /**
  * Logger utility class | 日志工具类
  */
-export default class Logger {
+class Logger {
   private static readonly DEFAULT_TAG: string = 'RayTV';
   private static logLevel: LogLevel = LogLevel.DEBUG;
   private static isInitialized: boolean = false;
@@ -29,7 +29,7 @@ export default class Logger {
   public static initialize(level: LogLevel = LogLevel.DEBUG): void {
     Logger.logLevel = level;
     Logger.isInitialized = true;
-    Logger.info(Logger.DEFAULT_TAG, 'Logger initialized with level:', LogLevel[level]);
+    Logger.info(Logger.DEFAULT_TAG, 'Logger initialized with level: ' + LogLevel[level]);
   }
 
   /**
@@ -38,7 +38,7 @@ export default class Logger {
    */
   public static setLogLevel(level: LogLevel): void {
     Logger.logLevel = level;
-    Logger.info(Logger.DEFAULT_TAG, 'Log level changed to:', LogLevel[level]);
+    Logger.info(Logger.DEFAULT_TAG, 'Log level changed to: ' + LogLevel[level]);
   }
 
   /**
@@ -107,9 +107,9 @@ export default class Logger {
     let formattedMessage = message;
     
     if (error) {
-      formattedMessage += ` | Error: ${error.message}`;
+      formattedMessage += ' | Error: ' + error.message;
       if (error.stack) {
-        formattedMessage += ` | Stack: ${error.stack}`;
+        formattedMessage += ' | Stack: ' + error.stack;
       }
     }
     
@@ -129,16 +129,27 @@ export default class Logger {
       const formattedMessage = Logger.formatMessage(message, error);
       
       // Use system log service | 使用系统日志服务
-      hilog.log(level, finalTag, 0x0000, formattedMessage);
-      
-      // In development mode, also output to console | 在开发模式下，同时输出到控制台
-      if (process.env.NODE_ENV === 'development') {
-        const consoleMethod = Logger.getConsoleMethod(level);
-        consoleMethod(`${finalTag} [${LogLevel[level]}]: ${formattedMessage}`);
+      switch (level) {
+        case LogLevel.DEBUG:
+          hilog.debug(0x0000, finalTag, formattedMessage);
+          break;
+        case LogLevel.INFO:
+          hilog.info(0x0000, finalTag, formattedMessage);
+          break;
+        case LogLevel.WARN:
+          hilog.warn(0x0000, finalTag, formattedMessage);
+          break;
+        case LogLevel.ERROR:
+          hilog.error(0x0000, finalTag, formattedMessage);
+          break;
       }
+      
+      // Always output to console | 始终输出到控制台
+      const consoleMethod = Logger.getConsoleMethod(level);
+      consoleMethod(finalTag + ' [' + LogLevel[level] + ']: ' + formattedMessage);
     } catch (logError) {
       // Prevent log recording itself from error | 防止日志记录本身出错
-      console.error(`Failed to log message: ${logError instanceof Error ? logError.message : String(logError)}`);
+      console.error('Failed to log message: ' + (logError instanceof Error ? logError.message : String(logError)));
     }
   }
 
@@ -147,7 +158,7 @@ export default class Logger {
    * @param level Log level | 日志级别
    * @returns Console method | 控制台方法
    */
-  private static getConsoleMethod(level: LogLevel): Function {
+  private static getConsoleMethod(level: LogLevel): (message: string) => void {
     switch (level) {
       case LogLevel.DEBUG:
         return console.debug;
@@ -171,7 +182,7 @@ export default class Logger {
    */
   public static performance(tag: string, operation: string, startTime: number, endTime: number): void {
     const duration = endTime - startTime;
-    Logger.info(tag, `${operation} took ${duration}ms`);
+    Logger.info(tag, operation + ' took ' + duration + 'ms');
   }
 
   /**
@@ -183,9 +194,11 @@ export default class Logger {
   public static object(tag: string, message: string, obj: Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>): void {
     try {
       const objString = JSON.stringify(obj, null, 2);
-      Logger.debug(tag, `${message}: ${objString}`);
+      Logger.debug(tag, message + ': ' + objString);
     } catch (error) {
-      Logger.error(tag, `Failed to stringify object for logging`, error instanceof Error ? error : new Error(String(error)));
+      Logger.error(tag, 'Failed to stringify object for logging', error instanceof Error ? error : new Error(String(error)));
     }
   }
 }
+
+export default Logger;

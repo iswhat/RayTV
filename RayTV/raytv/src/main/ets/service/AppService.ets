@@ -19,7 +19,7 @@ import SubtitleService from './media/SubtitleService';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
 import { getParserService } from './parser/index';
 
-import { AnalyticsService } from './analytics/AnalyticsService';
+
 import { VoiceAssistantManager } from './voice/VoiceAssistantManager';
 import { DeviceService } from './device/DeviceService';
 import { DataSyncService } from './sync/DataSyncService';
@@ -471,7 +471,7 @@ export default class AppService {
         { name: 'liveStream', service: LiveStreamService.getInstance() },
         { name: 'subtitle', service: SubtitleService.getInstance() },
         { name: 'parser', service: getParserService() },
-        { name: 'analytics', service: AnalyticsService.getInstance() },
+
         { name: 'voiceAssistant', service: VoiceAssistantManager.getInstance() },
         { name: 'device', service: DeviceService.getInstance() },
         { name: 'dataSync', service: DataSyncService.getInstance() },

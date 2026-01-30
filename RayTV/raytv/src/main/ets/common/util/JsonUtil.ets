@@ -2,7 +2,9 @@
  * JSON utility class | JSON工具类
  * Provides safe JSON serialization and deserialization functionality | 提供安全的JSON序列化和反序列化功能
  */
-export default class JsonUtil {
+import Logger from './Logger';
+
+class JsonUtil {
   /**
    * Safely parses JSON string | 安全地解析JSON字符串
    * @param jsonStr JSON string | JSON字符串
@@ -16,7 +18,7 @@ export default class JsonUtil {
       }
       return null;
     } catch (error) {
-      console.error('JsonUtil: Failed to parse JSON string:', error);
+      Logger.error('JsonUtil', 'Failed to parse JSON string: ' + error);
       return null;
     }
   }
@@ -34,7 +36,7 @@ export default class JsonUtil {
       }
       return JSON.stringify(obj, null, space);
     } catch (error) {
-      console.error('JsonUtil: Failed to stringify object:', error);
+      Logger.error('JsonUtil', 'Failed to stringify object: ' + error);
       return '';
     }
   }
@@ -44,15 +46,15 @@ export default class JsonUtil {
    * @param jsonStr JSON string | JSON字符串
    * @returns Parsed array, empty array if parsing fails | 解析后的数组，解析失败返回空数组
    */
-  public static parseArray<T>(jsonStr: string): T[] {
+  public static parseArray(jsonStr: string): Array<Record<string, string | number | boolean | null>> {
     try {
-      const parsed = JSON.parse(jsonStr) as unknown;
+      const parsed = JSON.parse(jsonStr) as Array<Record<string, string | number | boolean | null>>;
       if (Array.isArray(parsed)) {
-        return parsed as T[];
+        return parsed;
       }
       return [];
     } catch (error) {
-      console.error('JsonUtil: Failed to parse JSON array:', error);
+      Logger.error('JsonUtil', 'Failed to parse JSON array: ' + error);
       return [];
     }
   }
@@ -62,12 +64,38 @@ export default class JsonUtil {
    * @param obj Object to clone | 要克隆的对象
    * @returns Cloned object | 克隆后的对象
    */
-  public static deepClone<T>(obj: T): T {
+  public static deepClone(obj: Record<string, string | number | boolean | null | undefined> | null): Record<string, string | number | boolean | null> | null {
     try {
-      return JSON.parse(JSON.stringify(obj)) as T;
+      if (obj === null) {
+        return null;
+      }
+      // 创建一个安全对象，排除undefined值
+      const safeObj: Record<string, string | number | boolean | null> = {};
+      const keys = Object.keys(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = obj[key];
+        if (value !== undefined) {
+          safeObj[key] = value as string | number | boolean | null;
+        }
+      }
+      const cloned = JSON.parse(JSON.stringify(safeObj)) as Record<string, string | number | boolean | null>;
+      return cloned;
     } catch (error) {
-      console.error('JsonUtil: Failed to deep clone object:', error);
-      return obj;
+      Logger.error('JsonUtil', 'Failed to deep clone object: ' + error);
+      // 创建一个新对象，排除undefined值
+      const safeObj: Record<string, string | number | boolean | null> = {};
+      if (typeof obj === 'object' && obj !== null) {
+        const keys = Object.keys(obj);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = obj[key];
+          if (value !== undefined) {
+            safeObj[key] = value as string | number | boolean | null;
+          }
+        }
+      }
+      return safeObj;
     }
   }
 
@@ -79,17 +107,34 @@ export default class JsonUtil {
    */
   public static merge(target: Record<string, string | number | boolean | null>, source: Record<string, string | number | boolean | null>): Record<string, string | number | boolean | null> {
     try {
-      const merged = { ...target };
-      for (const key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          merged[key] = source[key];
-        }
+      const merged: Record<string, string | number | boolean | null> = {};
+      // 复制target对象
+      const targetKeys = JsonUtil.getObjectKeys(target);
+      for (let i = 0; i < targetKeys.length; i++) {
+        const key = targetKeys[i];
+        merged[key] = target[key];
+      }
+      // 复制source对象，覆盖target中的相同键
+      const sourceKeys = JsonUtil.getObjectKeys(source);
+      for (let i = 0; i < sourceKeys.length; i++) {
+        const key = sourceKeys[i];
+        merged[key] = source[key];
       }
       return merged;
     } catch (error) {
-      console.error('JsonUtil: Failed to merge objects:', error);
+      Logger.error('JsonUtil', 'Failed to merge objects: ' + error);
       return target;
     }
+  }
+
+  /**
+   * Gets object keys | 获取对象键
+   * @param obj Object | 对象
+   * @returns Array of keys | 键数组
+   */
+  private static getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
+    // 使用Object.keys替代for...in循环
+    return Object.keys(obj);
   }
 
   /**
@@ -101,7 +146,7 @@ export default class JsonUtil {
     try {
       JSON.parse(jsonStr);
       return true;
-    } catch {
+    } catch (error) {
       return false;
     }
   }
@@ -114,10 +159,10 @@ export default class JsonUtil {
    */
   public static format(jsonStr: string, indent: number = 2): string {
     try {
-      const parsed = JSON.parse(jsonStr) as unknown;
+      const parsed: Record<string, string | number | boolean | null> | null = JSON.parse(jsonStr) as Record<string, string | number | boolean | null> | null;
       return JSON.stringify(parsed, null, indent);
     } catch (error) {
-      console.error('JsonUtil: Failed to format JSON string:', error);
+      Logger.error('JsonUtil', 'Failed to format JSON string: ' + error);
       return jsonStr;
     }
   }
@@ -129,10 +174,10 @@ export default class JsonUtil {
    */
   public static compress(jsonStr: string): string {
     try {
-      const parsed = JSON.parse(jsonStr) as unknown;
+      const parsed: Record<string, string | number | boolean | null> | null = JSON.parse(jsonStr) as Record<string, string | number | boolean | null> | null;
       return JSON.stringify(parsed);
     } catch (error) {
-      console.error('JsonUtil: Failed to compress JSON string:', error);
+      Logger.error('JsonUtil', 'Failed to compress JSON string: ' + error);
       return jsonStr;
     }
   }
@@ -148,9 +193,11 @@ export default class JsonUtil {
       const parsed = JSON.parse(jsonStr) as Record<string, string | number | boolean | null>;
       return parsed[field];
     } catch (error) {
-      console.error('JsonUtil: Failed to extract field from JSON string:', error);
+      Logger.error('JsonUtil', 'Failed to extract field from JSON string: ' + error);
       return undefined;
     }
   }
 }
+
+export default JsonUtil;
 

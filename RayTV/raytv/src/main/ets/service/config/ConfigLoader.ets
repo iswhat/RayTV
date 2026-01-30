@@ -1,7 +1,6 @@
 // ConfigLoader - 配置加载器 | Config loader
-import Logger from '../../common/util/Logger';
+
 import http from '@ohos.net.http';
-import HttpMethod from '@ohos.net.http';
 import fs from '@ohos.file.fs';
 import { Site } from '../../data/bean/Site';
 import { AppConfig } from '../../data/bean/Config';
@@ -16,13 +15,13 @@ interface ConfigObject {
   // 移除any类型的通用键名，使用更具体的属性定义 | Remove generic any type keys, use more specific property definitions
 }
 
-const TAG = 'ConfigLoader';
+
 
 /**
  * 配置加载器，提供多源配置加载能力 | Config loader, providing multi-source config loading capability
  */
 export class ConfigLoader {
-  private static instance: ConfigLoader;
+  private static instance: ConfigLoader | null = null;
   private cachePath: string;
   
   private constructor() {
@@ -48,7 +47,7 @@ export class ConfigLoader {
    */
   public async loadFromUrl(url: string, cacheHours?: number, forceRefresh: boolean = false): Promise<string> {
     try {
-      Logger.info(TAG, `Loading config from URL: ${url}`);
+      console.log(`Loading config from URL: ${url}`);
       
       // 验证缓存时间 | Validate cache time
       const normalizedCacheHours = this.normalizeCacheTime(cacheHours);
@@ -58,20 +57,20 @@ export class ConfigLoader {
         try {
           const cachedContent = await this.loadFromCache(url, normalizedCacheHours);
           if (cachedContent) {
-            Logger.info(TAG, `Using cached config (${normalizedCacheHours}h)`);
+            console.log(`Using cached config (${normalizedCacheHours}h)`);
             return cachedContent;
           }
-        } catch (cacheError) {
-          Logger.error(TAG, `Failed to load cached config: ${cacheError}`);
+        } catch (cacheError: Error) {
+          console.error(`Failed to load cached config: ${cacheError.message}`);
         }
       } else {
-        Logger.info(TAG, `Force refresh enabled, bypassing cache`);
+        console.log(`Force refresh enabled, bypassing cache`);
       }
       
       // 创建HTTP请求 | Create HTTP request
       const request = http.createHttp();
       const response = await request.request(url, {
-        method: HttpMethod.GET,
+        method: http.RequestMethod.GET,
         header: {
           'Content-Type': 'application/json',
           'User-Agent': 'RayTV-HarmonyOS'
@@ -82,7 +81,7 @@ export class ConfigLoader {
       
       if (response.responseCode === 200) {
         const configContent = response.result as string;
-        Logger.info(TAG, `Successfully loaded config from URL`);
+        console.log(`Successfully loaded config from URL`);
         
         // 缓存配置 | Cache config
         await this.cacheConfig(url, configContent);
@@ -91,18 +90,18 @@ export class ConfigLoader {
       } else {
         throw new Error(`Failed to load config, status code: ${response.responseCode}`);
       }
-    } catch (error) {
-      Logger.error(TAG, `Failed to load config from URL: ${error}`);
+    } catch (error: Error) {
+      console.error(`Failed to load config from URL`, error);
       
       // 尝试从缓存加载 | Try to load from cache
       try {
         const cachedContent = await this.loadFromCache(url);
         if (cachedContent) {
-          Logger.warn(TAG, `Using cached config since network failed`);
+          console.warn(`Using cached config since network failed`);
           return cachedContent;
         }
-      } catch (cacheError) {
-        Logger.error(TAG, `Failed to load cached config: ${cacheError}`);
+      } catch (cacheError: Error) {
+        console.error(`Failed to load cached config`, cacheError);
       }
       
       throw error;
@@ -115,7 +114,7 @@ export class ConfigLoader {
    */
   public async loadFromFile(filePath: string): Promise<string> {
     try {
-      Logger.info(TAG, `Loading config from file: ${filePath}`);
+      console.log(`Loading config from file: ${filePath}`);
       
       // 检查文件是否存在 | Check if file exists
       const fileInfo = await fs.getFileStat(filePath);
@@ -128,10 +127,10 @@ export class ConfigLoader {
       const fileContent = await fs.readText(file.fd);
       await fs.close(file.fd);
       
-      Logger.info(TAG, `Successfully loaded config from file`);
+      console.log(`Successfully loaded config from file`);
       return fileContent;
-    } catch (error) {
-      Logger.error(TAG, `Failed to load config from file: ${error}`);
+    } catch (error: Error) {
+      console.error(`Failed to load config from file`, error);
       throw error;
     }
   }
@@ -142,7 +141,7 @@ export class ConfigLoader {
    */
   public parseConfig(content: string): { sites: Site[]; appConfig?: AppConfig } {
     try {
-      Logger.info(TAG, 'Parsing config content');
+      console.log('Parsing config content');
       
       // 尝试解析为纯JSON | Try to parse as pure JSON
       try {
@@ -150,11 +149,11 @@ export class ConfigLoader {
         return this.processConfigObject(config);
       } catch (jsonError) {
         // 如果不是纯JSON，尝试解析为JavaScript格式 | If not pure JSON, try to parse as JavaScript format
-        Logger.info(TAG, 'Not pure JSON, trying to parse as JavaScript');
+        console.log('Not pure JSON, trying to parse as JavaScript');
         return this.parseJavaScriptConfig(content);
       }
-    } catch (error) {
-      Logger.error(TAG, `Failed to parse config: ${error}`);
+    } catch (error: Error) {
+      console.error(`Failed to parse config`, error);
       throw new Error('Invalid config format');
     }
   }
@@ -170,14 +169,20 @@ export class ConfigLoader {
     // 检查是否为Site数组 | Check if it's Site array
     if (Array.isArray(config)) {
       // 直接是站点数组 | Directly site array
-      sites.push(...config);
+      for (let i = 0; i < config.length; i++) {
+        sites.push(config[i]);
+      }
     } else {
       // 处理站点配置 | Process site config
       if (config.sites && Array.isArray(config.sites)) {
-        sites.push(...config.sites);
+        for (let i = 0; i < config.sites.length; i++) {
+          sites.push(config.sites[i]);
+        }
       } else if (config.data && Array.isArray(config.data)) {
         // 兼容旧版配置格式 | Compatible with old config format
-        sites.push(...config.data);
+        for (let i = 0; i < config.data.length; i++) {
+          sites.push(config.data[i]);
+        }
       }
       
       // 处理应用配置 | Process app config
@@ -186,7 +191,7 @@ export class ConfigLoader {
       }
     }
     
-    Logger.info(TAG, `Processed ${sites.length} sites`);
+    console.log(`Processed ${sites.length} sites`);
     return { sites, appConfig };
   }
   
@@ -211,8 +216,8 @@ export class ConfigLoader {
       }
       
       throw new Error('Could not find valid JavaScript config');
-    } catch (error) {
-      Logger.error(TAG, `Failed to parse JavaScript config: ${error}`);
+    } catch (error: Error) {
+      console.error(`Failed to parse JavaScript config`, error);
       throw new Error('Invalid JavaScript config format');
     }
   }
@@ -236,9 +241,9 @@ export class ConfigLoader {
       await fs.writeText(file.fd, content);
       await fs.close(file.fd);
       
-      Logger.debug(TAG, `Config cached to ${cacheFilePath}`);
-    } catch (error) {
-      Logger.warn(TAG, `Failed to cache config: ${error}`);
+      console.debug(`Config cached to ${cacheFilePath}`);
+    } catch (error: Error) {
+      console.warn(`Failed to cache config`, error);
       // 缓存失败不影响主要功能 | Cache failure does not affect main functionality
     }
   }
@@ -276,14 +281,14 @@ export class ConfigLoader {
       const now = Date.now();
       const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 转换为毫秒 | Convert to milliseconds
       if (now - cacheTime > cacheExpiry) {
-        Logger.debug(TAG, `Cache expired, ignoring`);
+        console.debug(`Cache expired, ignoring`);
         return null;
       }
       
-      Logger.debug(TAG, `Loaded config from cache`);
+      console.debug(`Loaded config from cache`);
       return content;
-    } catch (error) {
-      Logger.warn(TAG, `Failed to load from cache: ${error}`);
+    } catch (error: Error) {
+      console.warn(`Failed to load from cache`, error);
       return null;
     }
   }
@@ -295,7 +300,7 @@ export class ConfigLoader {
    */
   public async saveConfigToFile(sites: Site[], filePath: string): Promise<void> {
     try {
-      Logger.info(TAG, `Saving config to file: ${filePath}`);
+      console.log(`Saving config to file: ${filePath}`);
       
       // 创建配置对象 | Create config object
       const config = { sites };
@@ -308,9 +313,9 @@ export class ConfigLoader {
       await fs.writeText(file.fd, configJson);
       await fs.close(file.fd);
       
-      Logger.info(TAG, `Successfully saved config to file`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to save config to file: ${error}`);
+      console.log(`Successfully saved config to file`);
+    } catch (error: Error) {
+      console.error(`Failed to save config to file`, error);
       throw error;
     }
   }
@@ -339,8 +344,8 @@ export class ConfigLoader {
         // 目录不存在，创建目录 | Directory not exists, create directory
         await fs.mkdir(this.cachePath, true);
       }
-    } catch (error) {
-      Logger.error(TAG, `Failed to ensure cache directory: ${error}`);
+    } catch (error: Error) {
+      console.error(`Failed to ensure cache directory`, error);
       throw error;
     }
   }
@@ -374,7 +379,7 @@ export class ConfigLoader {
    */
   public async clearCache(): Promise<void> {
     try {
-      Logger.info(TAG, 'Clearing config cache');
+      console.log('Clearing config cache');
       
       // 读取缓存目录 | Read cache directory
       const files = await fs.listFile(this.cachePath);
@@ -384,13 +389,13 @@ export class ConfigLoader {
         if (file.name.startsWith('config_') && file.name.endsWith('.json')) {
           const filePath = `${this.cachePath}/${file.name}`;
           await fs.unlink(filePath);
-          Logger.debug(TAG, `Deleted cache file: ${file.name}`);
+          console.debug(`Deleted cache file: ${file.name}`);
         }
       }
       
-      Logger.info(TAG, 'Cache cleared successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to clear cache: ${error}`);
+      console.log('Cache cleared successfully');
+    } catch (error: Error) {
+      console.error(`Failed to clear cache`, error);
       throw error;
     }
   }
@@ -401,7 +406,7 @@ export class ConfigLoader {
    */
   public async cleanExpiredCache(cacheHours: number = this.minCacheHours): Promise<void> {
     try {
-      Logger.info(TAG, `Cleaning expired cache (threshold: ${cacheHours}h)`);
+      console.log(`Cleaning expired cache (threshold: ${cacheHours}h)`);
       
       // 读取缓存目录 | Read cache directory
       const files = await fs.listFile(this.cachePath);
@@ -418,17 +423,17 @@ export class ConfigLoader {
             
             if (now - cacheTime > cacheExpiry) {
               await fs.unlink(filePath);
-              Logger.debug(TAG, `Deleted expired cache file: ${file.name}`);
+              console.debug(`Deleted expired cache file: ${file.name}`);
             }
-          } catch (fileError) {
-            Logger.error(TAG, `Failed to check/delete cache file ${file.name}`, fileError instanceof Error ? fileError : new Error(String(fileError)));
+          } catch (fileError: Error) {
+            console.error(`Failed to check/delete cache file ${file.name}`, fileError);
           }
         }
       }
       
-      Logger.info(TAG, 'Expired cache cleaned successfully');
-    } catch (error) {
-      Logger.error(TAG, 'Failed to clean expired cache', error instanceof Error ? error : new Error(String(error)));
+      console.log('Expired cache cleaned successfully');
+    } catch (error: Error) {
+      console.error('Failed to clean expired cache', error);
     }
   }
   
@@ -463,8 +468,8 @@ export class ConfigLoader {
         cacheFiles: configFiles.length,
         lastCacheTime: lastTime
       };
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get cache info', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get cache info', error);
       return {
         cacheSize: 0,
         cacheFiles: 0,
@@ -493,6 +498,6 @@ export class ConfigLoader {
     this.minCacheHours = Math.max(24, minHours);
     this.maxCacheHours = Math.min(72, Math.max(this.minCacheHours, maxHours));
     this.defaultCacheHours = this.minCacheHours; // 默认使用最小缓存时间 | Default to use minimum cache time
-    Logger.info(TAG, `Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
+    console.log(`Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
   }
 }

@@ -17,7 +17,7 @@ export interface Closable {
  * @template I Instance type | 实例类型
  */
 export abstract class FactoryBase<T, I> {
-  private static instance: FactoryBase<any, any> | null = null;
+  private static instance: FactoryBase<string, Record<string, object>> | null = null;
   protected instanceMap: Map<T, I> = new Map();
   protected isInitialized: boolean = false;
   /**
@@ -33,7 +33,7 @@ export abstract class FactoryBase<T, I> {
    * Get singleton instance | 获取单例实例
    * @returns Factory instance | 工厂实例
    */
-  public static getInstance(): FactoryBase<any, any> | null {
+  public static getInstance(): FactoryBase<string, Record<string, object>> | null {
     if (!FactoryBase.instance) {
       // 由于ArkTS限制，静态方法中无法创建实例，需要子类实现具体逻辑
       return null;
@@ -89,10 +89,14 @@ export abstract class FactoryBase<T, I> {
       for (const entry of this.instanceMap.entries()) {
         const type = entry[0];
         const instance = entry[1];
-        const closableInstance = instance as unknown as Closable;
-        if (typeof closableInstance.close === 'function') {
-          await closableInstance.close();
-          Logger.info(this.TAG, `${type} instance closed`);
+        // 使用类型检查代替类型断言
+        if (instance && typeof instance === 'object') {
+          // 直接检查close属性
+          const closableInstance = instance as Closable;
+          if (closableInstance.close && typeof closableInstance.close === 'function') {
+            await closableInstance.close();
+            Logger.info(this.TAG, String(type) + ' instance closed');
+          }
         }
       }
       
@@ -102,7 +106,11 @@ export abstract class FactoryBase<T, I> {
       
       Logger.info(this.TAG, 'All resources closed successfully');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to close resources: ${error instanceof Error ? error.message : String(error)}`);
+      let errorMsg: string = 'Unknown error';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      Logger.error(this.TAG, 'Failed to close resources: ' + errorMsg);
     }
   }
   /**

@@ -1,5 +1,5 @@
-﻿// SQLiteDatabaseRepository - SQLite数据库实现类 | SQLite database implementation class
-import LoggerUtil from '../../common/util/Logger';
+// SQLiteDatabaseRepository - SQLite数据库实现类 | SQLite database implementation class
+
 import JsonUtil from '../../common/util/JsonUtil';
 import DatabaseRepository, {
   DatabaseResult,
@@ -10,7 +10,7 @@ import DatabaseRepository, {
   MovieFilter
 } from './DatabaseRepository';
 import Movie, { MovieConstructorParams, VideoType, VideoSource, Episode, RatingInfo } from '../model/Movie';
-import User from '../model/User';
+import User, { UserParams, UserRole, UserStatus } from '../model/User';
 import History from '../model/History';
 import SearchResult from '../model/SearchResult';
 import relationalStore from '@ohos.data.relationalStore';
@@ -21,10 +21,7 @@ const TAG = 'SQLiteDatabaseRepository';
 const DATABASE_NAME = 'raytv.db';
 const DATABASE_VERSION = 1;
 
-// 配置值类型接口 | Config value type interface
-export interface ConfigValueObject {
-  value: string;
-}
+
 
 // 网站信息接口定义 | Site information interface definition
 export interface SiteInfo {
@@ -35,7 +32,13 @@ export interface SiteInfo {
   description?: string;
   enabled?: boolean;
   weight?: number;
-  extraInfo?: Record<string, string | number | boolean | null | undefined>;
+  extraInfo?: SiteExtraInfo;
+}
+
+// 网站额外信息接口 | Site extra information interface
+export interface SiteExtraInfo {
+  key?: string;
+  value?: string | number | boolean | null;
 }
 
 // 网站数据接口定义 | Site data interface definition
@@ -49,7 +52,7 @@ export interface Site {
   weight: number;
   createTime: number;
   updateTime: number;
-  extraInfo: Record<string, string | number | boolean | null | undefined> | null;
+  extraInfo: SiteExtraInfo | null;
 }
 
 /**
@@ -59,7 +62,7 @@ export interface Site {
 export default class SQLiteDatabaseRepository implements DatabaseRepository {
   private rdbStore: relationalStore.RdbStore | null = null;
   private status: DatabaseStatus = DatabaseStatus.INITIALIZING;
-  private configMap: Map<string, ConfigValueObject | Record<string, string | number | boolean | Record<string, string | number | boolean>>> = new Map(); // 用于缓存配置 | Used for caching configs
+  private configMap: Map<string, ConfigValue> = new Map(); // 用于缓存配置 | Used for caching configs
   private context: common.UIAbilityContext | null = null;
 
   /**
@@ -97,7 +100,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       // 加载配置缓存 | Load config cache
       await this.loadConfigCache();
 
-      LoggerUtil.info(TAG, 'Database initialized successfully');
+      console.info(TAG + ': 数据库初始化成功 | Database initialized successfully');
       const result: DatabaseResult<void> = {
         success: true,
         data: undefined
@@ -105,7 +108,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       return result;
     } catch (error) {
       this.status = DatabaseStatus.ERROR;
-      LoggerUtil.error(TAG, `Failed to initialize database: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 数据库初始化失败 | Failed to initialize database: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<void> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -132,7 +135,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         // ArkTS没有直接的rdbStore关闭方法，由系统管理 | ArkTS has no direct close method for rdbStore, managed by system
         this.rdbStore = null;
         this.status = DatabaseStatus.CLOSED;
-        LoggerUtil.info(TAG, 'Database connection closed successfully');
+        console.info(TAG + ': 数据库连接已成功关闭 | Database connection closed successfully');
       }
 
       const result: DatabaseResult<void> = {
@@ -141,7 +144,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to close database connection: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 关闭数据库连接失败 | Failed to close database connection: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<void> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -172,28 +175,26 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
           if (key) {
             try {
               if (!value) {
-                const configValue = { value: '' } as ConfigValueObject;
-                this.configMap.set(`${config_group}:${key}`, configValue);
-              } else {
-                const parsedValue = JSON.parse(value) as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
-                if (parsedValue && typeof parsedValue === 'object') {
-                  this.configMap.set(`${config_group}:${key}`, parsedValue);
-                } else {
-                  const configValue = { value: value } as ConfigValueObject;
-                  this.configMap.set(`${config_group}:${key}`, configValue);
-                }
-              }
+            this.configMap.set(`${config_group}:${key}`, '');
+          } else {
+            try {
+              // 安全的JSON解析，使用明确的类型断言 | Safe JSON parsing with explicit type assertion
+              const parsedValue: ConfigValue = JSON.parse(value) as ConfigValue;
+              this.configMap.set(`${config_group}:${key}`, parsedValue);
+            } catch (parseError) {
+              this.configMap.set(`${config_group}:${key}`, value as ConfigValue);
+            }
+          }
             } catch (e) {
-              LoggerUtil.warn(TAG, `Failed to parse config value for key ${key}: ${e instanceof Error ? e.message : String(e)}`);
-              const configValue = { value: value || '' } as ConfigValueObject;
-              this.configMap.set(`${config_group}:${key}`, configValue);
+              console.warn(TAG + `: 解析配置值失败，键: ${key} | Failed to parse config value for key ${key}: ` + (e instanceof Error ? e.message : String(e)));
+              this.configMap.set(`${config_group}:${key}`, value || '');
             }
           }
         } while (resultSet.goToNextRow());
         resultSet.close();
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to load config cache: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 加载配置缓存失败 | Failed to load config cache: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -242,7 +243,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsInserted = await this.rdbStore.insert('movies', valuesBucket);
       
       if (rowsInserted > 0) {
-        LoggerUtil.info(TAG, `Movie added successfully: ${movie.id}`);
+        console.info(TAG + `: 影视添加成功: ${movie.id} | Movie added successfully: ${movie.id}`);
         const result: DatabaseResult<string> = {
           success: true,
           data: movie.id
@@ -252,7 +253,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Failed to insert movie');
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to add movie: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 添加影视失败 | Failed to add movie: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<string> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -300,7 +301,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsUpdated = await this.rdbStore.update(valuesBucket, predicates);
       
       if (rowsUpdated > 0) {
-        LoggerUtil.info(TAG, `Movie updated successfully: ${movie.id}`);
+        console.info(TAG + `: 影视更新成功: ${movie.id} | Movie updated successfully: ${movie.id}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -315,7 +316,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to update movie: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 更新影视失败 | Failed to update movie: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -337,7 +338,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
       if (rowsDeleted > 0) {
-        LoggerUtil.info(TAG, `Movie deleted successfully: ${movieId}`);
+        console.info(TAG + `: 影视删除成功: ${movieId} | Movie deleted successfully: ${movieId}`);
         // 同时删除相关的收藏记录 | Also delete related favorite records
         const favPredicates = new relationalStore.RdbPredicates('favorites');
         favPredicates.equalTo('movieId', movieId);
@@ -361,7 +362,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to delete movie: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 删除影视失败 | Failed to delete movie: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -391,14 +392,14 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         resultSet.close();
       }
       
-      LoggerUtil.info(TAG, `Retrieved movie by ID: ${movieId}`);
+      console.info(TAG + `: 根据ID获取影视成功: ${movieId} | Retrieved movie by ID: ${movieId}`);
       const result: DatabaseResult<Movie | null> = {
         success: true,
         data: movie
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get movie by ID ${movieId}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 根据ID获取影视失败: ${movieId} | Failed to get movie by ID ${movieId}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<Movie | null> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -430,7 +431,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get movies by IDs: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 根据ID列表获取影视失败 | Failed to get movies by IDs: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<Movie[]> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -510,7 +511,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get movies paginated: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 获取分页影视列表失败 | Failed to get movies paginated: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<PaginatedResult<Movie>> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -568,7 +569,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const hasNextPage = page < totalPages;
       const hasPrevPage = page > 1;
       
-      LoggerUtil.info(TAG, `Searched movies with keyword "${keyword}": found ${movies.length} results`);
+      console.info(TAG + `: 搜索影视关键词 "${keyword}": 找到 ${movies.length} 个结果 | Searched movies with keyword "${keyword}": found ${movies.length} results`);
       const result: DatabaseResult<PaginatedResult<Movie>> = {
         success: true,
         data: {
@@ -583,7 +584,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to search movies with keyword "${keyword}": ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 搜索影视关键词 "${keyword}" 失败 | Failed to search movies with keyword "${keyword}": ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<PaginatedResult<Movie>> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -678,7 +679,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return movieParams;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to extract movie from result set: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 从结果集提取影视数据失败 | Failed to extract movie from result set: ' + (error instanceof Error ? error.message : String(error)));
       return null;
     }
   }
@@ -734,7 +735,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       }
       
       if (rowsAffected > 0) {
-        LoggerUtil.info(TAG, `History item ${existingCount > 0 ? 'updated' : 'added'} successfully: ${history.contentId}`);
+        console.info(TAG + `: 历史记录${existingCount > 0 ? '更新' : '添加'}成功: ${history.contentId} | History item ${existingCount > 0 ? 'updated' : 'added'} successfully: ${history.contentId}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -744,7 +745,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Failed to add or update history item');
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to save history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 保存历史记录失败 | Failed to save history: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -766,7 +767,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
       if (rowsDeleted > 0) {
-        LoggerUtil.info(TAG, `History item deleted successfully: ${historyId}`);
+        console.info(TAG + `: 历史记录删除成功: ${historyId} | History item deleted successfully: ${historyId}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -781,7 +782,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to delete history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 删除历史记录失败 | Failed to delete history: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -802,14 +803,14 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
-      LoggerUtil.info(TAG, `All history items deleted for user ${userId}: ${rowsDeleted} items`);
+      console.info(TAG + `: 已删除用户 ${userId} 的所有历史记录: ${rowsDeleted} 项 | All history items deleted for user ${userId}: ${rowsDeleted} items`);
       const result: DatabaseResult<boolean> = {
         success: true,
         data: true
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to delete all history for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 删除用户 ${userId} 的所有历史记录失败 | Failed to delete all history for user ${userId}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -842,7 +843,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get history by ID ${historyId}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 根据ID获取历史记录失败: ${historyId} | Failed to get history by ID ${historyId}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<History | null> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -891,7 +892,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const hasNextPage = pageIndex < totalPages;
       const hasPrevPage = pageIndex > 1;
       
-      LoggerUtil.info(TAG, `Retrieved history items for user ${userId}: found ${historyItems.length} results`);
+      console.info(TAG + `: 获取用户 ${userId} 的历史记录: 找到 ${historyItems.length} 个结果 | Retrieved history items for user ${userId}: found ${historyItems.length} results`);
       const result: DatabaseResult<PaginatedResult<History>> = {
         success: true,
         data: {
@@ -906,7 +907,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get history items for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 获取用户 ${userId} 的历史记录失败 | Failed to get history items for user ${userId}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<PaginatedResult<History>> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -943,7 +944,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get user content history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 获取用户内容历史记录失败 | Failed to get user content history: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<History | null> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -984,7 +985,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get recent history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 获取最近历史记录失败 | Failed to get recent history: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<History[]> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1017,7 +1018,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         episode: resultSet.getLong(resultSet.getColumnIndex('episode')) || 0
       });
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to extract history from result set: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 从结果集提取历史记录失败 | Failed to extract history from result set: ' + (error instanceof Error ? error.message : String(error)));
       // 返回默认的History对象，确保函数不会抛出异常 | Return default History object, ensure function won't throw exception
       return new History({
         id: `history_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -1066,7 +1067,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsInserted = await this.rdbStore.insert('users', valuesBucket);
       
       if (rowsInserted > 0) {
-        LoggerUtil.info(TAG, `User added successfully: ${user.id}`);
+        console.info(TAG + `: 用户添加成功: ${user.id} | User added successfully: ${user.id}`);
         const result: DatabaseResult<string> = {
           success: true,
           data: user.id
@@ -1076,7 +1077,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Failed to insert user');
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to add user: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 添加用户失败 | Failed to add user: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<string> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1114,7 +1115,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsUpdated = await this.rdbStore.update(valuesBucket, predicates);
       
       if (rowsUpdated > 0) {
-        LoggerUtil.info(TAG, `User updated successfully: ${user.id}`);
+        console.info(TAG + `: 用户更新成功: ${user.id} | User updated successfully: ${user.id}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -1129,7 +1130,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to update user: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 更新用户失败 | Failed to update user: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1151,7 +1152,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
       if (rowsDeleted > 0) {
-        LoggerUtil.info(TAG, `User deleted successfully: ${userId}`);
+        console.info(TAG + `: 用户删除成功: ${userId} | User deleted successfully: ${userId}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -1166,7 +1167,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to delete user: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 删除用户失败 | Failed to delete user: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1196,18 +1197,18 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
             email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
             nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
             avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
-            role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+            role: (resultSet.getString(resultSet.getColumnIndex('role')) as UserRole) || UserRole.USER,
             lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
-            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
-            status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || new Date().toISOString(),
+            status: (resultSet.getString(resultSet.getColumnIndex('status')) as UserStatus) || UserStatus.ACTIVE,
             isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
             subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
             watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
             favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
             totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
-          });
+          } as UserParams);
         } catch (innerError) {
-          LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+          console.error(TAG + ': 从结果集创建用户失败 | Failed to create user from result set: ' + (innerError instanceof Error ? innerError.message : String(innerError)));
         } finally {
           resultSet.close();
         }
@@ -1221,7 +1222,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get user by ID ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: Failed to get user by ID ${userId}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<User | null> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1250,19 +1251,19 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
               email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
               nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
               avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
-              role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+              role: (resultSet.getString(resultSet.getColumnIndex('role')) as UserRole) || UserRole.USER,
               lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
-              registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
-              status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+              registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || new Date().toISOString(),
+              status: (resultSet.getString(resultSet.getColumnIndex('status')) as UserStatus) || UserStatus.ACTIVE,
               isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
               subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
               watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
               favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
               totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
-            });
+            } as UserParams);
             users.push(user);
           } catch (innerError) {
-            LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+            console.error(TAG + ': 从结果集创建用户失败 | Failed to create user from result set: ' + (innerError instanceof Error ? innerError.message : String(innerError)));
           }
         } while (resultSet.goToNextRow());
         resultSet.close();
@@ -1276,7 +1277,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get all users: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': Failed to get all users: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<User[]> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1306,18 +1307,18 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
             email: resultSet.getString(resultSet.getColumnIndex('email')) || undefined,
             nickname: resultSet.getString(resultSet.getColumnIndex('nickname')) || undefined,
             avatarUrl: resultSet.getString(resultSet.getColumnIndex('avatarUrl')) || undefined,
-            role: resultSet.getString(resultSet.getColumnIndex('role')) || 'user',
+            role: (resultSet.getString(resultSet.getColumnIndex('role')) as UserRole) || UserRole.USER,
             lastLoginTime: resultSet.getString(resultSet.getColumnIndex('lastLoginTime')) || undefined,
-            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || Date.now().toString(),
-            status: resultSet.getString(resultSet.getColumnIndex('status')) || 'active',
+            registrationDate: resultSet.getString(resultSet.getColumnIndex('registrationDate')) || new Date().toISOString(),
+            status: (resultSet.getString(resultSet.getColumnIndex('status')) as UserStatus) || UserStatus.ACTIVE,
             isVerified: resultSet.getLong(resultSet.getColumnIndex('isVerified')) === 1,
             subscriptionEndDate: resultSet.getString(resultSet.getColumnIndex('subscriptionEndDate')) || undefined,
             watchHistoryEnabled: resultSet.getLong(resultSet.getColumnIndex('watchHistoryEnabled')) === 1,
             favoritesEnabled: resultSet.getLong(resultSet.getColumnIndex('favoritesEnabled')) === 1,
             totalWatchTime: resultSet.getLong(resultSet.getColumnIndex('totalWatchTime')) || 0
-          });
+          } as UserParams);
         } catch (innerError) {
-          LoggerUtil.error(TAG, `Failed to create user from result set: ${innerError instanceof Error ? innerError.message : String(innerError)}`);
+          console.error(TAG + ': 从结果集创建用户失败 | Failed to create user from result set: ' + (innerError instanceof Error ? innerError.message : String(innerError)));
         } finally {
           resultSet.close();
         }
@@ -1331,7 +1332,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get user by username ${username}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + `: 根据用户名获取用户失败: ${username} | Failed to get user by username ${username}: ` + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<User | null> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1359,7 +1360,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsInserted = await this.rdbStore.insert('favorites', valuesBucket);
       
       if (rowsInserted > 0) {
-        LoggerUtil.info(TAG, `Favorite added successfully: user ${userId}, movie ${movieId}`);
+        console.info(TAG + `: 收藏添加成功: 用户 ${userId}, 影视 ${movieId} | Favorite added successfully: user ${userId}, movie ${movieId}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -1369,7 +1370,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         throw new Error('Failed to insert favorite');
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to add favorite: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 添加收藏失败 | Failed to add favorite: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1393,7 +1394,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       const rowsDeleted = await this.rdbStore.delete(predicates);
       
       if (rowsDeleted > 0) {
-        LoggerUtil.info(TAG, `Favorite removed successfully: user ${userId}, movie ${movieId}`);
+        console.info(TAG + `: 收藏移除成功: 用户 ${userId}, 影视 ${movieId} | Favorite removed successfully: user ${userId}, movie ${movieId}`);
         const result: DatabaseResult<boolean> = {
           success: true,
           data: true
@@ -1408,7 +1409,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
         return result;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to remove favorite: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 移除收藏失败 | Failed to remove favorite: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1443,7 +1444,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to check if favorited: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 检查收藏状态失败 | Failed to check if favorited: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<boolean> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1475,7 +1476,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get user favorites: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 获取用户收藏失败 | Failed to get user favorites: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<PaginatedResult<Movie>> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -1496,13 +1497,13 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       
       const resultSet = await this.rdbStore.query(predicates);
       const collections: string[] = [];
-      const collectionMap: Record<string, boolean> = {};
+      const collectionSet = new Set<string>();
       
       if (resultSet && resultSet.goToFirstRow()) {
         do {
           const collectionName = resultSet.getString(resultSet.getColumnIndex('collectionName')) || 'default';
-          if (!collectionMap[collectionName]) {
-            collectionMap[collectionName] = true;
+          if (!collectionSet.has(collectionName)) {
+            collectionSet.add(collectionName);
             collections.push(collectionName);
           }
         } while (resultSet.goToNextRow());
@@ -1515,7 +1516,7 @@ export default class SQLiteDatabaseRepository implements DatabaseRepository {
       };
       return result;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get user collections: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ': 获取用户收藏集失败 | Failed to get user collections: ' + (error instanceof Error ? error.message : String(error)));
       const result: DatabaseResult<string[]> = {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),

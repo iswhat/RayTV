@@ -1,6 +1,7 @@
-import Logger from '../../common/util/Logger';
-import FileSystemAccess from '@ohos.file.fs';
-import { configService } from '../config/ConfigService';
+
+import ConfigService from '../config/ConfigService';
+
+// ConfigService将在需要时直接调用 | ConfigService will be called directly when needed
 
 /**
  * 壁纸类型枚举 Wallpaper type enum
@@ -34,7 +35,7 @@ export class WallTypeDetector {
    */
   public static async detectType(uri: string): Promise<WallpaperType> {
     try {
-      Logger.info(WallTypeDetector.TAG, `Detecting type for: ${uri}`);
+      console.log("Detecting type for: " + uri);
       
       // 根据文件扩展名判断 Based on file extension
       const extension = this.getFileExtension(uri).toLowerCase();
@@ -59,8 +60,9 @@ export class WallTypeDetector {
           // If cannot judge by extension, try to detect by MIME type
           return await this.detectByMimeType(uri);
       }
-    } catch (error) {
-      Logger.error(WallTypeDetector.TAG, `Failed to detect wallpaper type: ${error}`);
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to detect wallpaper type: " + errorMessage);
       return WallpaperType.NONE;
     }
   }
@@ -76,7 +78,7 @@ export class WallTypeDetector {
       // 暂时返回默认值
       // Should implement logic to detect by reading file header or requesting MIME type
       // Temporarily return default value
-      Logger.warn(WallTypeDetector.TAG, 'MIME type detection not implemented, returning NONE');
+      console.warn("MIME type detection not implemented, returning NONE");
       return WallpaperType.NONE;
     } catch (error) {
       return WallpaperType.NONE;
@@ -87,16 +89,15 @@ export class WallTypeDetector {
 /**
  * 壁纸管理器 Wallpaper manager
  */
-export class WallManager {
+export default class WallManager {
   private static readonly TAG: string = 'WallManager';
   private static instance: WallManager;
   
   private currentWallpaper: WallpaperInfo | null = null;
   private isEnabled: boolean = false;
   private cachePath: string = '';
-  private fileSystem: FileSystemAccess | null = null;
   
-  private constructor() {}
+  constructor() {}
   
   /**
    * 获取单例实例 Get singleton instance
@@ -113,12 +114,12 @@ export class WallManager {
    */
   public async initialize(): Promise<void> {
     try {
-      Logger.info(WallManager.TAG, 'Initializing WallManager...');
+      console.log('Initializing WallManager...');
       
       // 从配置加载设置 Load settings from config
-      const enableWallpaper = await configService.getConfig('enableWallpaper', false);
-      const wallpaperType = await configService.getConfig('wallpaperType', WallpaperType.NONE);
-      const wallpaperUri = await configService.getConfig('wallpaperUri', '');
+      const enableWallpaper = await ConfigService.getInstance().getConfig('enableWallpaper', false);
+      const wallpaperType = await ConfigService.getInstance().getConfig('wallpaperType', WallpaperType.NONE);
+      const wallpaperUri = await ConfigService.getInstance().getConfig('wallpaperUri', '');
       
       this.isEnabled = enableWallpaper;
       
@@ -127,10 +128,11 @@ export class WallManager {
         await this.loadWallpaper(wallpaperUri, wallpaperType as WallpaperType);
       }
       
-      Logger.info(WallManager.TAG, 'WallManager initialized successfully');
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to initialize WallManager: ${error}`);
-      throw error;
+      console.log('WallManager initialized successfully');
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to initialize WallManager: " + errorMessage);
+      throw new Error("Failed to initialize WallManager: " + errorMessage);
     }
   }
   
@@ -139,7 +141,7 @@ export class WallManager {
    */
   public async loadWallpaper(uri: string, type?: WallpaperType): Promise<WallpaperInfo> {
     try {
-      Logger.info(WallManager.TAG, `Loading wallpaper: ${uri}`);
+      console.log("Loading wallpaper: " + uri);
       
       // 如果未指定类型，自动检测 If type not specified, auto detect
       const wallpaperType = type || await WallTypeDetector.detectType(uri);
@@ -169,14 +171,15 @@ export class WallManager {
       this.currentWallpaper = wallpaperInfo;
       
       // 保存到配置 Save to config
-      await configService.setConfig('wallpaperUri', uri);
-      await configService.setConfig('wallpaperType', wallpaperType);
+      await ConfigService.getInstance().setConfig('wallpaperUri', uri);
+      await ConfigService.getInstance().setConfig('wallpaperType', wallpaperType);
       
-      Logger.info(WallManager.TAG, `Wallpaper loaded: ${wallpaperInfo.name}, type: ${wallpaperType}`);
+      console.log("Wallpaper loaded: " + wallpaperInfo.name + ", type: " + wallpaperType);
       return wallpaperInfo;
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to load wallpaper: ${error}`);
-      throw error;
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to load wallpaper: " + errorMessage);
+      throw new Error("Failed to load wallpaper: " + errorMessage);
     }
   }
   
@@ -186,12 +189,13 @@ export class WallManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await configService.setConfig('enableWallpaper', enabled);
+      await ConfigService.getInstance().setConfig('enableWallpaper', enabled);
       
-      Logger.info(WallManager.TAG, `Wallpaper ${enabled ? 'enabled' : 'disabled'}`);
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to set wallpaper enabled state: ${error}`);
-      throw error;
+      console.log("Wallpaper " + (enabled ? "enabled" : "disabled"));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to set wallpaper enabled state: " + errorMessage);
+      throw new Error("Failed to set wallpaper enabled state: " + errorMessage);
     }
   }
   
@@ -207,21 +211,22 @@ export class WallManager {
    */
   public async clearWallpaper(): Promise<void> {
     try {
-      Logger.info(WallManager.TAG, 'Clearing current wallpaper');
+      console.log('Clearing current wallpaper');
       
       this.currentWallpaper = null;
       this.isEnabled = false;
       
       // 清除配置 Clear config
-      await configService.setConfig('enableWallpaper', false);
-      await configService.setConfig('wallpaperUri', '');
-      await configService.setConfig('wallpaperType', WallpaperType.NONE);
+      await ConfigService.getInstance().setConfig('enableWallpaper', false);
+      await ConfigService.getInstance().setConfig('wallpaperUri', '');
+      await ConfigService.getInstance().setConfig('wallpaperType', WallpaperType.NONE);
       
       // 清理缓存文件 Clean cache files
       await this.cleanCache();
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to clear wallpaper: ${error}`);
-      throw error;
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to clear wallpaper: " + errorMessage);
+      throw new Error("Failed to clear wallpaper: " + errorMessage);
     }
   }
   
@@ -230,16 +235,17 @@ export class WallManager {
    */
   public async createSnapshot(videoUri: string): Promise<string> {
     try {
-      Logger.info(WallManager.TAG, `Creating snapshot for video: ${videoUri}`);
+      console.log("Creating snapshot for video: " + videoUri);
       
       // 这里应该实现从视频创建快照的逻辑
       // 暂时返回原URI
       // Should implement logic to create snapshot from video
       // Temporarily return original URI
       return videoUri;
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to create snapshot: ${error}`);
-      throw error;
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to create snapshot: " + errorMessage);
+      throw new Error("Failed to create snapshot: " + errorMessage);
     }
   }
   
@@ -248,12 +254,13 @@ export class WallManager {
    */
   private async cleanCache(): Promise<void> {
     try {
-      Logger.info(WallManager.TAG, 'Cleaning wallpaper cache');
+      console.log('Cleaning wallpaper cache');
       
       // 实现缓存清理逻辑 Implement cache cleaning logic
       // 暂时不做实际操作 Temporarily no actual operation
-    } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to clean cache: ${error}`);
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to clean cache: " + errorMessage);
     }
   }
   
@@ -278,7 +285,7 @@ export class WallManager {
       // 实现获取缓存大小的逻辑 Implement logic to get cache size
       return 0;
     } catch (error) {
-      Logger.error(WallManager.TAG, `Failed to get cache size: ${error}`);
+      console.error("Failed to get cache size: " + (error instanceof Error ? error.message : String(error)));
       return 0;
     }
   }

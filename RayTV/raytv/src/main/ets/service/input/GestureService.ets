@@ -1,10 +1,21 @@
 // 手势服务 | Gesture service
 // 基于HarmonyOS @ohos.multimodalInput.gesture API实现手势识别功能 | Based on HarmonyOS @ohos.multimodalInput.gesture API to implement gesture recognition functionality
 
-import Logger from '../../common/util/Logger';
+
 import gesture from '@ohos.multimodalInput.gesture';
 import input from '@ohos.multimodalInput.input';
 import BusinessError from '@ohos.base';
+
+/**
+ * 手势指针接口 | Gesture pointer interface
+ */
+export interface GesturePointer {
+  id: string;
+  x: number;
+  y: number;
+  pressure: number;
+  size: number;
+}
 
 /**
  * 手势原始事件接口 | Gesture raw event interface
@@ -14,7 +25,7 @@ export interface GestureRawEvent {
   x?: number;
   y?: number;
   timestamp?: number;
-  pointers?: Object;
+  pointers?: GesturePointer[];
   deviceId?: number;
   button?: number;
   direction?: string;
@@ -22,6 +33,8 @@ export interface GestureRawEvent {
   velocity?: number;
   scale?: number;
   rotation?: number;
+  deltaX?: number;
+  deltaY?: number;
 }
 
 /**
@@ -108,7 +121,7 @@ export interface GestureService {
  * 基于HarmonyOS @ohos.multimodalInput.gesture API实现手势识别功能 | Based on HarmonyOS @ohos.multimodalInput.gesture API to implement gesture recognition functionality
  */
 export class GestureServiceImpl implements GestureService {
-  private readonly TAG: string = 'GestureServiceImpl';
+
   private isInitialized: boolean = false;
   private gestureManager: gesture.GestureManager | null = null;
   private config: GestureConfig = {};
@@ -122,22 +135,21 @@ export class GestureServiceImpl implements GestureService {
   async init(config?: GestureConfig): Promise<void> {
     try {
       if (this.isInitialized) {
-        Logger.warn(this.TAG, 'Gesture service already initialized');
+        console.warn('Gesture service already initialized');
         return;
       }
       
       // 合并配置 | Merge configuration
       this.config = {
-        enableTap: true,
-        enableDoubleTap: true,
-        enableLongPress: true,
-        enableSwipe: true,
-        enablePinch: true,
-        enableRotate: true,
-        enablePan: true,
-        swipeThreshold: 50,
-        longPressDuration: 500,
-        ...config
+        enableTap: config?.enableTap ?? true,
+        enableDoubleTap: config?.enableDoubleTap ?? true,
+        enableLongPress: config?.enableLongPress ?? true,
+        enableSwipe: config?.enableSwipe ?? true,
+        enablePinch: config?.enablePinch ?? true,
+        enableRotate: config?.enableRotate ?? true,
+        enablePan: config?.enablePan ?? true,
+        swipeThreshold: config?.swipeThreshold ?? 50,
+        longPressDuration: config?.longPressDuration ?? 500
       };
       
       // 创建手势管理器 | Create gesture manager
@@ -147,10 +159,11 @@ export class GestureServiceImpl implements GestureService {
       this.subscribeToGestureEvents();
       
       this.isInitialized = true;
-      Logger.info(this.TAG, 'Gesture service initialized successfully');
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize gesture service: ${error}`);
-      throw error;
+      console.log('Gesture service initialized successfully');
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to initialize gesture service: " + errorMessage);
+      throw new Error(errorMessage);
     }
   }
   
@@ -159,7 +172,7 @@ export class GestureServiceImpl implements GestureService {
    */
   onGesture(callback: (event: GestureEvent) => void): void {
     this.globalCallback = callback;
-    Logger.info(this.TAG, 'Global gesture callback set');
+    console.log('Global gesture callback set');
   }
   
   /**
@@ -167,7 +180,7 @@ export class GestureServiceImpl implements GestureService {
    */
   on(type: GestureType, callback: (event: GestureEvent) => void): void {
     this.gestureCallbacks.set(type, callback);
-    Logger.info(this.TAG, `Gesture callback set for type: ${type}`);
+    console.log("Gesture callback set for type: " + type);
   }
   
   /**
@@ -175,7 +188,7 @@ export class GestureServiceImpl implements GestureService {
    */
   off(type: GestureType): void {
     this.gestureCallbacks.delete(type);
-    Logger.info(this.TAG, `Gesture callback removed for type: ${type}`);
+    console.log("Gesture callback removed for type: " + type);
   }
   
   /**
@@ -184,7 +197,7 @@ export class GestureServiceImpl implements GestureService {
   offAll(): void {
     this.globalCallback = undefined;
     this.gestureCallbacks.clear();
-    Logger.info(this.TAG, 'All gesture callbacks removed');
+    console.log('All gesture callbacks removed');
   }
   
   /**
@@ -201,9 +214,10 @@ export class GestureServiceImpl implements GestureService {
       this.gestureCallbacks.clear();
       this.isInitialized = false;
       
-      Logger.info(this.TAG, 'Gesture service destroyed');
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to destroy gesture service: ${error}`);
+      console.log('Gesture service destroyed');
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to destroy gesture service: " + errorMessage);
     }
   }
   
@@ -212,13 +226,14 @@ export class GestureServiceImpl implements GestureService {
    */
   subscribeToGestureEvents(): void {
     try {
-      this.subscription = input.on('multimodalGesture', (event) => {
+      this.subscription = input.on('multimodalGesture', (event: GestureRawEvent) => {
         this.handleGestureEvent(event);
       });
       
-      Logger.info(this.TAG, 'Gesture events subscribed');
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to subscribe to gesture events: ${error}`);
+      console.log('Gesture events subscribed');
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to subscribe to gesture events: " + errorMessage);
     }
   }
   
@@ -241,8 +256,9 @@ export class GestureServiceImpl implements GestureService {
       if (specificCallback) {
         specificCallback(gestureEvent);
       }
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to handle gesture event: ${error}`);
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to handle gesture event: " + errorMessage);
     }
   }
   
@@ -286,8 +302,8 @@ export class GestureServiceImpl implements GestureService {
           if (Math.abs(event.distance || 0) < (this.config.swipeThreshold || 50)) return null;
           
           let direction: Direction = Direction.UP;
-          const deltaX = (event as any).deltaX || 0;
-          const deltaY = (event as any).deltaY || 0;
+          const deltaX = event.deltaX || 0;
+          const deltaY = event.deltaY || 0;
           
           if (Math.abs(deltaX) > Math.abs(deltaY)) {
             direction = deltaX > 0 ? Direction.RIGHT : Direction.LEFT;
@@ -329,8 +345,8 @@ export class GestureServiceImpl implements GestureService {
           
         case 'pan':
           if (!this.config.enablePan) return null;
-          const panDeltaX = (event as any).deltaX || 0;
-          const panDeltaY = (event as any).deltaY || 0;
+          const panDeltaX = event.deltaX || 0;
+          const panDeltaY = event.deltaY || 0;
           return {
             type: GestureType.PAN,
             x: event.x || 0,
@@ -344,8 +360,9 @@ export class GestureServiceImpl implements GestureService {
         default:
           return null;
       }
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to build gesture event: ${error}`);
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error("Failed to build gesture event: " + errorMessage);
       return null;
     }
   }
@@ -355,3 +372,4 @@ export class GestureServiceImpl implements GestureService {
  * 手势服务单例 | Gesture service singleton
  */
 export const GestureServiceInstance: GestureService = new GestureServiceImpl();
+export default GestureServiceInstance;

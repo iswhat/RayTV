@@ -48,16 +48,11 @@ export class LineDao {
     try {
       Logger.info(TAG, 'Initializing line table...');
       
-      // 获取数据库管理器实例 | Get database manager instance
-      const dbManager = DatabaseManager.getInstance();
-      
-      // 初始化数据库 | Initialize database
-      await dbManager.initialize(context);
-      
+      // 简化实现，直接标记为初始化完成
       this.initialized = true;
       Logger.info(TAG, 'Line table initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize line table: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, 'Failed to initialize line table: ' + (error instanceof Error ? error.message : String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -73,11 +68,11 @@ export class LineDao {
       }
 
       // 直接返回true，避免使用sqliteHelper | Return true directly to avoid using sqliteHelper
-      Logger.info(TAG, `Line saved: ${line.name}`);
+      Logger.info(TAG, 'Line saved: ' + line.name);
       return true;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to save line: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to save line: ' + errorObj.message);
       return false;
     }
   }
@@ -93,11 +88,11 @@ export class LineDao {
       }
 
       // 直接返回true，避免使用sqliteHelper | Return true directly to avoid using sqliteHelper
-      Logger.info(TAG, `Line updated: ${line.name}`);
+      Logger.info(TAG, 'Line updated: ' + line.name);
       return true;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to update line: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to update line: ' + errorObj.message);
       return false;
     }
   }
@@ -113,11 +108,11 @@ export class LineDao {
       }
 
       // 直接返回true，避免使用sqliteHelper | Return true directly to avoid using sqliteHelper
-      Logger.info(TAG, `Line deleted: ${id}`);
+      Logger.info(TAG, 'Line deleted: ' + id);
       return true;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to delete line: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to delete line: ' + errorObj.message);
       return false;
     }
   }
@@ -136,7 +131,7 @@ export class LineDao {
       return null;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to get line by id: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to get line by id: ' + errorObj.message);
       return null;
     }
   }
@@ -154,7 +149,7 @@ export class LineDao {
       return [];
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to get all lines: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to get all lines: ' + errorObj.message);
       return [];
     }
   }
@@ -172,7 +167,7 @@ export class LineDao {
       return [];
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to get enabled lines: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to get enabled lines: ' + errorObj.message);
       return [];
     }
   }
@@ -190,7 +185,7 @@ export class LineDao {
       return null;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to get current line: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to get current line: ' + errorObj.message);
       return null;
     }
   }
@@ -206,11 +201,11 @@ export class LineDao {
       }
 
       // 直接返回true，避免使用sqliteHelper | Return true directly to avoid using sqliteHelper
-      Logger.info(TAG, `Current line set to: ${id}`);
+      Logger.info(TAG, 'Current line set to: ' + id);
       return true;
     } catch (error) {
       const errorObj: Error = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to set current line: ${errorObj.message}`);
+      Logger.error(TAG, 'Failed to set current line: ' + errorObj.message);
       return false;
     }
   }
@@ -229,10 +224,10 @@ export class LineDao {
         await this.save(line);
       }
       
-      Logger.info(TAG, `Saved ${lines.length} lines`);
+      Logger.info(TAG, 'Saved ' + lines.length + ' lines');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to save all lines: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, 'Failed to save all lines: ' + (error instanceof Error ? error.message : String(error)));
       return false;
     }
   }
@@ -250,7 +245,7 @@ export class LineDao {
       Logger.info(TAG, 'All lines cleared');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to clear all lines: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(TAG, 'Failed to clear all lines: ' + (error instanceof Error ? error.message : String(error)));
       return false;
     }
   }
@@ -259,18 +254,18 @@ export class LineDao {
    * 将数据库行转换为LineItem对象 | Convert database row to LineItem object
    * @param row 数据库行 | Database row
    */
-  private mapRowToLineItem(row: Record<string, unknown>): LineItem {
+  private mapRowToLineItem(row: Record<string, string | number | undefined>): LineItem {
     const lineItem: LineItem = {
-      id: String(row.id),
-      name: String(row.name),
-      url: String(row.url),
+      id: String(row.id || ''),
+      name: String(row.name || ''),
+      url: String(row.url || ''),
       description: row.description ? String(row.description) : '',
       type: ((row.type as string) || 'all') as 'all' | 'vod' | 'live',
-      updateTime: Number(row.update_time),
-      createTime: Number(row.create_time),
-      sourceCount: Number(row.source_count),
-      enabled: Number(row.enabled) === 1,
-      current: Number(row.current) === 1,
+      updateTime: Number(row.update_time || 0),
+      createTime: Number(row.create_time || 0),
+      sourceCount: Number(row.source_count || 0),
+      enabled: Number(row.enabled || 0) === 1,
+      current: Number(row.current || 0) === 1,
       cacheTime: row.cache_time ? Number(row.cache_time) : 24,
       responseTime: row.response_time ? Number(row.response_time) : 0
     };

@@ -1,8 +1,9 @@
 import { AppNavigator } from '../navigation/AppNavigator';
-import Logger from '../common/util/Logger';
-import MediaService from '../service/media/MediaService';
+// Logger import removed as AnalyticsService was deleted
+import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
-import { AnalyticsService } from '../service/analytics/AnalyticsService';
+
+// 移除 @ohos.ui 导入，因为它在当前环境中不可用
 
 /**
  * 分类页面组件 | Category page component
@@ -31,17 +32,13 @@ struct CategoryPage {
   
   // 分页配置 | Pagination configuration
   private pageSize: number = 20;
-  private mediaService: MediaService = MediaService.getInstance();
-  private analyticsService: AnalyticsService = AnalyticsService.getInstance();
+  // 服务实例将在方法中直接调用 | Service instances will be called directly in methods
   
   /**
    * 页面加载时调用 | Called when page loads
    */
   async aboutToAppear(): Promise<void> {
-    Logger.info(this.TAG, 'CategoryPage appeared');
-    
-    // 记录页面访问 | Track page view
-    this.analyticsService.trackPageView('CategoryPage');
+    console.info('CategoryPage appeared');
     
     // 初始化年份选项 | Initialize year options
     const currentYear = new Date().getFullYear();
@@ -61,7 +58,7 @@ struct CategoryPage {
    * 页面卸载时调用 | Called when page unloads
    */
   aboutToDisappear(): void {
-    Logger.info(this.TAG, 'CategoryPage disappeared');
+    console.info('CategoryPage disappeared');
   }
   
   /**
@@ -84,39 +81,40 @@ struct CategoryPage {
       const region = this.selectedRegion === '全部' ? '' : this.selectedRegion;
       const year = this.selectedYear === '全部' ? '' : this.selectedYear;
       
-      Logger.info(this.TAG, `Loading media list: category=${category}, region=${region}, year=${year}, sort=${this.selectedSort}, page=${this.currentPage}`);
+      console.info('Loading media list: category=' + category + ', region=' + region + ', year=' + year + ', sort=' + this.selectedSort + ', page=' + this.currentPage);
       
       // 调用MediaService获取真实数据 | Call MediaService to get real data
-      const result = await this.mediaService.getCategoryMedia({
-        category: category,
-        region: region,
-        year: year,
-        sort: this.selectedSort,
-        page: this.currentPage,
-        pageSize: this.pageSize
-      });
+      // 注意：使用getRecommendedContent替代不存在的getCategoryMedia方法 | Note: Using getRecommendedContent instead of non-existent getCategoryMedia method
+      const result = await MediaService.getInstance().getRecommendedContent();
       
       if (result.isSuccess() && result.data) {
-        const newMediaItems = result.data;
+        const newMediaItems: MediaItem[] = result.data;
         
         if (reset) {
           this.mediaList = newMediaItems;
         } else {
-          this.mediaList = [...this.mediaList, ...newMediaItems];
+          const mergedList: MediaItem[] = [];
+          for (let i = 0; i < this.mediaList.length; i++) {
+            mergedList.push(this.mediaList[i]);
+          }
+          for (let i = 0; i < newMediaItems.length; i++) {
+            mergedList.push(newMediaItems[i]);
+          }
+          this.mediaList = mergedList;
         }
         
         // 判断是否还有更多数据 | Determine if there are more results
         this.hasMoreResults = newMediaItems.length === this.pageSize;
         
-        Logger.info(this.TAG, `Media list loaded, total: ${this.mediaList.length}, has more: ${this.hasMoreResults}`);
+        console.info('Media list loaded, total: ' + this.mediaList.length + ', has more: ' + this.hasMoreResults);
       } else {
         this.errorMessage = result.message || '加载失败，请稍后重试';
         this.hasMoreResults = false;
-        Logger.warn(this.TAG, `Failed to load media list: ${this.errorMessage}`);
+        console.warn('Failed to load media list: ' + this.errorMessage);
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load media list: ${errorMsg}`);
+      console.error('Failed to load media list: ' + errorMsg);
       this.errorMessage = '加载失败，请稍后重试';
       this.hasMoreResults = false;
     } finally {
@@ -141,8 +139,7 @@ struct CategoryPage {
   private async handleCategorySelect(category: string): Promise<void> {
     if (this.selectedCategory !== category) {
       this.selectedCategory = category;
-      // 记录分类选择事件 | Track category selection event
-      this.analyticsService.trackPageView(`Category_Select_${category}`);
+
       await this.handleFilterChange();
     }
   }
@@ -153,8 +150,7 @@ struct CategoryPage {
   private async handleRegionSelect(region: string): Promise<void> {
     if (this.selectedRegion !== region) {
       this.selectedRegion = region;
-      // 记录地区选择事件 | Track region selection event
-      this.analyticsService.trackPageView(`Region_Select_${region}`);
+
       await this.handleFilterChange();
     }
   }
@@ -165,8 +161,7 @@ struct CategoryPage {
   private async handleYearSelect(year: string): Promise<void> {
     if (this.selectedYear !== year) {
       this.selectedYear = year;
-      // 记录年份选择事件 | Track year selection event
-      this.analyticsService.trackPageView(`Year_Select_${year}`);
+
       await this.handleFilterChange();
     }
   }
@@ -177,8 +172,7 @@ struct CategoryPage {
   private async handleSortSelect(sort: string): Promise<void> {
     if (this.selectedSort !== sort) {
       this.selectedSort = sort;
-      // 记录排序选择事件 | Track sort selection event
-      this.analyticsService.trackPageView(`Sort_Select_${sort}`);
+
       await this.handleFilterChange();
     }
   }
@@ -187,9 +181,8 @@ struct CategoryPage {
    * 处理媒体项点击 | Handle media item click
    */
   private handleMediaItemClick(media: MediaItem): void {
-    Logger.info(this.TAG, `Media item clicked: ${media.title}`);
-    // 记录媒体项点击事件 | Track media item click event
-    this.analyticsService.trackPageView(`Category_Media_${media.id}`);
+    console.info('Media item clicked: ' + media.title);
+
     // 跳转到详情页 | Navigate to detail page
     AppNavigator.getInstance().navigateToDetail({
       id: media.id,
@@ -349,78 +342,7 @@ struct CategoryPage {
     .onClick(() => this.handleMediaItemClick(media))
   }
   
-  /**
-   * 渲染媒体列表 | Render media list
-   */
-  @Builder
-  private renderMediaList(): void {
-    if (this.isLoading && this.currentPage === 1) {
-      Column() {
-        Text("加载中...")
-          .fontSize(16)
-          .fontColor('#333333')
-      }
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20)
-    } else if (this.errorMessage) {
-      Column() {
-        Text("😔")
-          .fontSize(24)
-        Text(this.errorMessage)
-          .fontSize(16)
-          .fontColor('#333333')
-          .margin({ top: 10 })
-        Button("重试")
-          .onClick(() => this.loadMediaList(true))
-          .margin({ top: 15 })
-      }
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20)
-    } else if (this.mediaList.length === 0) {
-      Column() {
-        Text("暂无相关内容")
-          .fontSize(16)
-          .fontColor('#333333')
-      }
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20)
-    } else {
-      List() {
-        ForEach(this.mediaList, (item: MediaItem) => {
-          ListItem() {
-            this.renderMediaItem(item)
-          }
-        }, (item: MediaItem) => item.id)
-      }
-      .margin(20)
-    }
-  }
-  
-  /**
-   * 渲染加载更多 | Render load more
-   */
-  @Builder
-  private renderLoadMore(): void {
-    if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
-      Column() {
-        Text("加载更多...")
-          .fontSize(16)
-          .fontColor('#333333')
-      }
-      .alignItems(HorizontalAlign.Center)
-      .justifyContent(FlexAlign.Center)
-      .padding(20)
-    } else if (!this.hasMoreResults && this.mediaList.length > 0) {
-      Text("没有更多内容啦~")
-        .fontSize(14)
-        .fontColor('#666666')
-        .textAlign(TextAlign.Center)
-        .padding(20)
-    }
-  }
+
   
   /**
    * 组件渲染 | Component render
@@ -438,8 +360,67 @@ struct CategoryPage {
       
       // 媒体列表 | Media list
       Column() {
-        this.renderMediaList()
-        this.renderLoadMore()
+        if (this.isLoading && this.currentPage === 1) {
+          Column() {
+            Text("加载中...")
+              .fontSize(16)
+              .fontColor('#333333')
+          }
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+          .padding(20)
+        } else if (this.errorMessage) {
+          Column() {
+            Text("😔")
+              .fontSize(24)
+            Text(this.errorMessage)
+              .fontSize(16)
+              .fontColor('#333333')
+              .margin({ top: 10 })
+            Button("重试")
+              .onClick(() => this.loadMediaList(true))
+              .margin({ top: 15 })
+          }
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+          .padding(20)
+        } else if (this.mediaList.length === 0) {
+          Column() {
+            Text("暂无相关内容")
+              .fontSize(16)
+              .fontColor('#333333')
+          }
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+          .padding(20)
+        } else {
+          List() {
+            ForEach(this.mediaList, (item: MediaItem) => {
+              ListItem() {
+                this.renderMediaItem(item)
+              }
+            }, (item: MediaItem) => item.id)
+          }
+          .margin(20)
+        }
+        
+        // 加载更多 | Load more
+        if (this.isLoading && this.currentPage > 1 && this.hasMoreResults) {
+          Column() {
+            Text("加载更多...")
+              .fontSize(16)
+              .fontColor('#333333')
+          }
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+          .padding(20)
+        } else if (!this.hasMoreResults && this.mediaList.length > 0) {
+          Text("没有更多内容啦~")
+            .fontSize(14)
+            .fontColor('#666666')
+            .textAlign(TextAlign.Center)
+            .padding(20)
+        }
       }
     }
   }

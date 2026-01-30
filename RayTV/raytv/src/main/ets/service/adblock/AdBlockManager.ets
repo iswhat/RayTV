@@ -1,6 +1,8 @@
-import Logger from '../../common/util/Logger';
+
 import { AdBlockConfig } from '../../data/bean/Config';
-import { configService } from '../config/ConfigService';
+import ConfigService from '../config/ConfigService';
+
+// ConfigService将在需要时直接调用 | ConfigService will be called directly when needed
 
 /**
  * 规则统计信息接口 | Rule statistics interface
@@ -50,7 +52,7 @@ export class AdRule {
       if (!domain) {
         return false;
       }
-      return domain === this.pattern || domain.endsWith(`.${this.pattern}`);
+      return domain === this.pattern || domain.endsWith('.' + this.pattern);
     } catch (error) {
       return false;
     }
@@ -89,7 +91,9 @@ export class UrlFilter {
    * 批量添加规则 | Add rules in bulk
    */
   addRules(rules: AdRule[]): void {
-    this.rules.push(...rules);
+    for (let i = 0; i < rules.length; i++) {
+      this.rules.push(rules[i]);
+    }
   }
 
   /**
@@ -137,7 +141,7 @@ export class AdBlockManager {
   private isInitialized: boolean = false;
   private whitelist: Set<string> = new Set();
 
-  private constructor() {}
+  constructor() {}
 
   /**
    * 获取单例实例 | Get singleton instance
@@ -154,10 +158,10 @@ export class AdBlockManager {
    */
   public async initialize(): Promise<void> {
     try {
-      Logger.info(AdBlockManager.TAG, 'Initializing AdBlockManager...');
+      console.info(AdBlockManager.TAG + ': 正在初始化广告拦截管理器... | Initializing AdBlockManager...');
       
       // 加载配置 | Load configuration
-      this.config = await configService.getAdBlockConfig();
+      this.config = await ConfigService.getInstance().getAdBlockConfig();
       
       // 加载默认规则 | Load default rules
       await this.loadDefaultRules();
@@ -166,10 +170,10 @@ export class AdBlockManager {
       await this.loadWhitelist();
       
       this.isInitialized = true;
-      Logger.info(AdBlockManager.TAG, `AdBlockManager initialized with ${this.urlFilter.getRuleCount()} rules`);
+      console.info(AdBlockManager.TAG + ': 广告拦截管理器已初始化，包含 ' + this.urlFilter.getRuleCount() + ' 条规则 | AdBlockManager initialized with ' + this.urlFilter.getRuleCount() + ' rules');
     } catch (error) {
-      Logger.error(AdBlockManager.TAG, `Failed to initialize AdBlockManager: ${error}`);
-      throw new Error(`Failed to initialize AdBlockManager: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(AdBlockManager.TAG + ': 初始化广告拦截管理器失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to initialize AdBlockManager: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Failed to initialize AdBlockManager: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -210,7 +214,7 @@ export class AdBlockManager {
             this.urlFilter.addRule(new AdRule(ruleStr, 'keyword', 'Custom keyword rule'));
           }
         } catch (e) {
-          Logger.error(AdBlockManager.TAG, `Invalid custom rule: ${ruleStr}`, e instanceof Error ? e : new Error(String(e)));
+          console.error(AdBlockManager.TAG + ': 无效的自定义规则: ' + ruleStr + ' | Invalid custom rule: ' + ruleStr + ' ' + (e instanceof Error ? e.message : String(e)));
         }
       });
     }
@@ -233,13 +237,13 @@ export class AdBlockManager {
    */
   public async updateRules(): Promise<void> {
     try {
-      Logger.info(AdBlockManager.TAG, 'Updating ad block rules...');
+      console.info(AdBlockManager.TAG + ': 正在更新广告拦截规则... | Updating ad block rules...');
       
       // 清除现有规则 | Clear existing rules
       this.urlFilter.clearRules();
       
       // 重新加载配置 | Reload configuration
-      this.config = await configService.getAdBlockConfig();
+      this.config = await ConfigService.getInstance().getAdBlockConfig();
       
       // 重新加载规则 | Reload rules
       await this.loadDefaultRules();
@@ -248,13 +252,13 @@ export class AdBlockManager {
       // 更新最后更新时间 | Update last update time
       if (this.config) {
         this.config.lastUpdateTime = Date.now();
-        await configService.saveAdBlockConfig(this.config);
+        await ConfigService.getInstance().saveAdBlockConfig(this.config);
       }
       
-      Logger.info(AdBlockManager.TAG, `Rules updated. Now have ${this.urlFilter.getRuleCount()} rules.`);
+      console.info(AdBlockManager.TAG + ': 规则已更新。现在有 ' + this.urlFilter.getRuleCount() + ' 条规则。 | Rules updated. Now have ' + this.urlFilter.getRuleCount() + ' rules.');
     } catch (error) {
-      Logger.error(AdBlockManager.TAG, `Failed to update rules: ${error}`);
-      throw new Error(`Failed to update rules: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(AdBlockManager.TAG + ': 更新规则失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to update rules: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Failed to update rules: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -313,7 +317,7 @@ export class AdBlockManager {
   public async addCustomFilter(filter: string): Promise<void> {
     try {
       if (!this.config) {
-        this.config = await configService.getAdBlockConfig();
+        this.config = await ConfigService.getInstance().getAdBlockConfig();
       }
       
       // 确保config不为null | Ensure config is not null
@@ -324,13 +328,13 @@ export class AdBlockManager {
         
         if (!this.config.customFilters.includes(filter)) {
           this.config.customFilters.push(filter);
-          await configService.saveAdBlockConfig(this.config);
+          await ConfigService.getInstance().saveAdBlockConfig(this.config);
           await this.updateRules();
         }
       }
     } catch (error) {
-      Logger.error(AdBlockManager.TAG, `Failed to add custom filter: ${error}`);
-      throw new Error(`Failed to add custom filter: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(AdBlockManager.TAG + ': 添加自定义过滤器失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to add custom filter: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Failed to add custom filter: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -340,19 +344,19 @@ export class AdBlockManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       if (!this.config) {
-        this.config = await configService.getAdBlockConfig();
+        this.config = await ConfigService.getInstance().getAdBlockConfig();
       }
       
       // 确保config不为null | Ensure config is not null
       if (this.config) {
         this.config.enabled = enabled;
-        await configService.saveAdBlockConfig(this.config);
+        await ConfigService.getInstance().saveAdBlockConfig(this.config);
         
-        Logger.info(AdBlockManager.TAG, `Ad blocking ${enabled ? 'enabled' : 'disabled'}`);
+        console.info(AdBlockManager.TAG + ': 广告拦截已' + (enabled ? '启用' : '禁用') + ' | Ad blocking ' + (enabled ? 'enabled' : 'disabled'));
       }
     } catch (error) {
-      Logger.error(AdBlockManager.TAG, `Failed to set ad block enabled state: ${error}`);
-      throw new Error(`Failed to set ad block enabled state: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(AdBlockManager.TAG + ': 设置广告拦截启用状态失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to set ad block enabled state: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Failed to set ad block enabled state: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 }
@@ -361,3 +365,5 @@ export class AdBlockManager {
 export function getAdBlockManager(): AdBlockManager {
   return AdBlockManager.getInstance();
 }
+
+export default AdBlockManager;

@@ -1,7 +1,6 @@
-﻿// SearchHistoryRepository - 搜索历史仓库 | Search history repository
+// SearchHistoryRepository - 搜索历史仓库 | Search history repository
 // 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等 | Manages user search history data, including saving, retrieving, deleting search records, etc.
 
-import LoggerUtil from '../../common/util/Logger';
 import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
 
@@ -115,7 +114,7 @@ export interface FavoriteToggleEventData {
 export interface SearchHistoryImportData {
   history?: SearchHistoryItem[];
   favorites?: SearchHistoryItem[];
-  config?: Partial<SearchHistoryConfig>;
+  config?: { maxHistoryItems?: number; maxFavoriteItems?: number; autoClearDays?: number; enableAutoComplete?: boolean; enableRecentSearches?: boolean; enableFavorites?: boolean };
 }
 
 /**
@@ -165,10 +164,10 @@ export class SearchHistoryRepository {
   private eventBus = EventBusUtil;
 
   /**
-   * 私有构造函数 | Private constructor
+   * 构造函数 | Constructor
    */
-  private constructor() {
-    LoggerUtil.info('SearchHistoryRepository', 'SearchHistoryRepository initialized');
+  constructor() {
+    console.info('SearchHistoryRepository: 搜索历史仓库已初始化 | SearchHistoryRepository initialized');
     this.setupEventListeners();
     this.initialize();
   }
@@ -198,9 +197,9 @@ export class SearchHistoryRepository {
       // 检查并清理过期历史记录 | Check and cleanup expired history records
       await this.cleanupExpiredHistory();
       
-      LoggerUtil.info('SearchHistoryRepository', 'SearchHistoryRepository initialization completed');
+      console.info('SearchHistoryRepository: 搜索历史仓库初始化完成 | SearchHistoryRepository initialization completed');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to initialize SearchHistoryRepository: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 搜索历史仓库初始化失败 | Failed to initialize SearchHistoryRepository', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -309,11 +308,11 @@ export class SearchHistoryRepository {
       // 发布搜索历史添加事件 | Publish search history added event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED);
       
-      LoggerUtil.debug('SearchHistoryRepository', `Search history saved: "${trimmedQuery}" (type: ${type})`);
+      console.debug(`SearchHistoryRepository: 搜索历史已保存: "${trimmedQuery}" (类型: ${type}) | Search history saved: "${trimmedQuery}" (type: ${type})`);
       
       return newItem;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to save search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 保存搜索历史失败 | Failed to save search history', error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -344,7 +343,7 @@ export class SearchHistoryRepository {
       
       return history;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to get search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 获取搜索历史失败 | Failed to get search history', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -357,7 +356,7 @@ export class SearchHistoryRepository {
     try {
       return await this.getHistory(SearchType.ALL, Math.max(1, Math.min(count, 50)));
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', `Failed to get recent searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('SearchHistoryRepository: 获取最近搜索失败 | Failed to get recent searches', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -377,7 +376,7 @@ export class SearchHistoryRepository {
       
       // 检查是否删除了记录 | Check if record was deleted
       if (history.length === initialLength) {
-        LoggerUtil.debug('SearchHistoryRepository', `Search history item with ID ${id} not found`);
+        console.debug(`SearchHistoryRepository: 未找到ID为 ${id} 的搜索历史项 | Search history item with ID ${id} not found`);
         return false;
       }
       
@@ -392,11 +391,11 @@ export class SearchHistoryRepository {
       // 发布搜索历史删除事件 | Publish search history deleted event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED);
       
-      LoggerUtil.debug('SearchHistoryRepository', `Search history item deleted: ${id}`);
+      console.debug(`SearchHistoryRepository: 已删除搜索历史项: ${id} | Search history item deleted: ${id}`);
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to delete search history item ${id}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`SearchHistoryRepository: 删除搜索历史项 ${id} 失败 | Failed to delete search history item ${id}`, error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -429,11 +428,11 @@ export class SearchHistoryRepository {
       // 发布搜索历史清除事件 | Publish search history cleared event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CLEARED);
       
-      LoggerUtil.info('SearchHistoryRepository', `Search history cleared${type ? ` for type: ${type}` : ''}`);
+      console.info(`SearchHistoryRepository: 搜索历史已清除${type ? `，类型: ${type}` : ''} | Search history cleared${type ? ` for type: ${type}` : ''}`);
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to clear search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 清除搜索历史失败 | Failed to clear search history', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -445,7 +444,7 @@ export class SearchHistoryRepository {
     try {
       await StorageUtil.remove(this.storageKeys.recentSearches, StorageType.PREFERENCES);
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', `Failed to clear recent searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('SearchHistoryRepository: 清除最近搜索失败 | Failed to clear recent searches', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -513,11 +512,11 @@ export class SearchHistoryRepository {
       // 发布收藏状态变更事件 | Publish favorite status changed event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED);
       
-      LoggerUtil.debug('SearchHistoryRepository', `Search favorite toggled: ${id}, favorite: ${item.isFavorite}`);
+      console.debug(`SearchHistoryRepository: 搜索收藏状态已切换: ${id}, 收藏: ${item.isFavorite} | Search favorite toggled: ${id}, favorite: ${item.isFavorite}`);
       
       return item;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to toggle favorite for search history item ${id}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`SearchHistoryRepository: 切换搜索历史项 ${id} 的收藏状态失败 | Failed to toggle favorite for search history item ${id}`, error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -534,7 +533,7 @@ export class SearchHistoryRepository {
       
       return Array.from(this.cachedFavorites);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to get favorite searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 获取收藏搜索失败 | Failed to get favorite searches', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -578,11 +577,11 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      LoggerUtil.info('SearchHistoryRepository', 'All favorite searches cleared');
+      console.info('SearchHistoryRepository: 所有收藏搜索已清除 | All favorite searches cleared');
       
       return true;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to clear favorite searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 清除收藏搜索失败 | Failed to clear favorite searches', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -626,7 +625,7 @@ export class SearchHistoryRepository {
       
       return suggestions;
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('SearchHistoryRepository: 获取搜索建议失败 | Failed to get search suggestions', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -667,11 +666,11 @@ export class SearchHistoryRepository {
       // 发布配置变更事件 | Publish configuration changed event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_CONFIG_CHANGED);
       
-      LoggerUtil.info('SearchHistoryRepository', 'Search history configuration updated');
+      console.info('SearchHistoryRepository: 搜索历史配置已更新 | Search history configuration updated');
       
       return updatedConfig;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to set search history config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 设置搜索历史配置失败 | Failed to set search history config', error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -696,7 +695,7 @@ export class SearchHistoryRepository {
         enableFavorites: this.cachedConfig!.enableFavorites
       };
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to get search history config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 获取搜索历史配置失败 | Failed to get search history config', error instanceof Error ? error : new Error(String(error)));
       // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
       return {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
@@ -729,7 +728,7 @@ export class SearchHistoryRepository {
         StorageType.PREFERENCES
       );
       
-      LoggerUtil.info('SearchHistoryRepository', 'Search history configuration reset to default');
+      console.info('SearchHistoryRepository: 搜索历史配置已重置为默认值 | Search history configuration reset to default');
     
       return {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
@@ -740,7 +739,7 @@ export class SearchHistoryRepository {
         enableFavorites: this.defaultConfig.enableFavorites
       };
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to reset search history config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 重置搜索历史配置失败 | Failed to reset search history config', error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -756,9 +755,9 @@ export class SearchHistoryRepository {
       );
       
       this.cachedHistory = historyResult || [];
-      LoggerUtil.debug('SearchHistoryRepository', `Loaded ${this.cachedHistory.length} search history items`);
+      console.debug(`SearchHistoryRepository: 已加载 ${this.cachedHistory.length} 个搜索历史项 | Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 加载搜索历史失败 | Failed to load search history', error instanceof Error ? error : new Error(String(error)));
       this.cachedHistory = [];
     }
   }
@@ -774,9 +773,9 @@ export class SearchHistoryRepository {
       );
       
       this.cachedFavorites = favoritesResult || [];
-      LoggerUtil.debug('SearchHistoryRepository', `Loaded ${this.cachedFavorites.length} favorite searches`);
+      console.debug(`SearchHistoryRepository: 已加载 ${this.cachedFavorites.length} 个收藏搜索项 | Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to load favorite searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 加载收藏搜索失败 | Failed to load favorite searches', error instanceof Error ? error : new Error(String(error)));
       this.cachedFavorites = [];
     }
   }
@@ -816,9 +815,9 @@ export class SearchHistoryRepository {
       // 验证配置 | Validate configuration
       this.validateConfig(this.cachedConfig);
       
-      LoggerUtil.debug('SearchHistoryRepository', 'Search history configuration loaded');
+      console.debug('SearchHistoryRepository: 搜索历史配置已加载 | Search history configuration loaded');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to load search history config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 加载搜索历史配置失败 | Failed to load search history config', error instanceof Error ? error : new Error(String(error)));
       // 使用手动属性复制替代扩展运算符 | Use manual property copy instead of spread operator
       this.cachedConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
@@ -854,9 +853,9 @@ export class SearchHistoryRepository {
         )
       ]);
       
-      LoggerUtil.debug('SearchHistoryRepository', 'Search history data saved');
+      console.debug('SearchHistoryRepository: 搜索历史数据已保存 | Search history data saved');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to save search history data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 保存搜索历史数据失败 | Failed to save search history data', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -889,10 +888,10 @@ export class SearchHistoryRepository {
           StorageType.PREFERENCES
         );
         
-        LoggerUtil.info('SearchHistoryRepository', `Cleaned up ${history.length - filteredHistory.length} expired search history items`);
+        console.info(`SearchHistoryRepository: 已清理 ${history.length - filteredHistory.length} 个过期搜索历史项 | Cleaned up ${history.length - filteredHistory.length} expired search history items`);
       }
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', `Failed to cleanup expired search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('SearchHistoryRepository: 清理过期搜索历史失败 | Failed to cleanup expired search history', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -955,7 +954,7 @@ export class SearchHistoryRepository {
         }
       }
     } catch (error) {
-      LoggerUtil.warn('SearchHistoryRepository', `Failed to apply config changes: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('SearchHistoryRepository: 应用配置变更失败 | Failed to apply config changes', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -1001,11 +1000,11 @@ export class SearchHistoryRepository {
         exportTime: Date.now()
       };
       
-      LoggerUtil.info('SearchHistoryRepository', 'Search history data exported');
+      console.info('SearchHistoryRepository: 搜索历史数据已导出 | Search history data exported');
       
       return data;
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to export search history data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 导出搜索历史数据失败 | Failed to export search history data', error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -1184,9 +1183,9 @@ export class SearchHistoryRepository {
         );
       }
       
-      LoggerUtil.info('SearchHistoryRepository', 'Search history data imported successfully');
+      console.info('SearchHistoryRepository: 搜索历史数据导入成功 | Search history data imported successfully');
     } catch (error) {
-      LoggerUtil.error('SearchHistoryRepository', `Failed to import search history data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('SearchHistoryRepository: 导入搜索历史数据失败 | Failed to import search history data', error instanceof Error ? error : new Error(String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }

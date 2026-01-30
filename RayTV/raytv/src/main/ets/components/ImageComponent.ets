@@ -114,7 +114,7 @@ export struct ImageComponent {
       // Implementation of intersection observer | 交叉观察器实现
       const element = this.$element();
       if (element) {
-        // Simulate intersection observer | 模拟交叉观察器
+        // Setup real intersection observer | 设置真实交叉观察器
         this.observer = new IntersectionObserver(entries => {
           for (const entry of entries) {
             if (entry.isIntersecting) {
@@ -159,10 +159,10 @@ export struct ImageComponent {
     this.isLoading = true;
     this.loadFailed = false;
 
-    // Simulate image loading | 模拟图片加载
+    // Real image loading implementation | 真实图片加载实现
     try {
-      // Simulate loading timeout | 模拟加载超时
-      setTimeout(() => {
+      // Setup loading timeout | 设置加载超时
+      const timeoutId = setTimeout(() => {
         if (this.isLoading) {
           Logger.warn(this.TAG, `Image loading timeout: ${this.src}`);
           this.isLoading = false;
@@ -171,12 +171,33 @@ export struct ImageComponent {
         }
       }, 10000); // 10 seconds timeout | 10秒超时
       
-      // Simulate loading success | 模拟加载成功
-      setTimeout(() => {
+      // Use Image object to load image | 使用Image对象加载图片
+      const image = new Image();
+      
+      // Set image source | 设置图片源
+      image.src = this.src;
+      
+      // Handle image load success | 处理图片加载成功
+      image.onload = () => {
+        clearTimeout(timeoutId);
         this.isLoading = false;
         this.loadFailed = false;
         this.currentImage = this.src || '';
-      }, 1000);
+      };
+      
+      // Handle image load error | 处理图片加载失败
+      image.onerror = (error) => {
+        clearTimeout(timeoutId);
+        Logger.error(this.TAG, `Failed to load image: ${this.src}`, error instanceof Error ? error : new Error(String(error)));
+        this.isLoading = false;
+        this.loadFailed = true;
+        this.currentImage = this.errorImage || '';
+      };
+      
+      // Set crossOrigin if needed | 根据需要设置crossOrigin
+      if (this.crossOrigin) {
+        image.crossOrigin = this.crossOrigin;
+      }
       
     } catch (error) {
       Logger.error(this.TAG, `Failed to load image: ${this.src}`, error instanceof Error ? error : new Error(String(error)));

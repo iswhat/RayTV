@@ -1,13 +1,13 @@
-﻿// 搜索服务 | Search service
+// 搜索服务 | Search service
 // 提供全面的搜索功能，包括网站点搜索、高级过滤、历史记录管理、热门搜索等 | Provides comprehensive search functionality, including site search, advanced filtering, history management, hot searches, etc.
 
 import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
 import { SiteManager, CallSiteMethodOptions } from '../spider/SiteManager';
 import { Vod } from '../../data/bean/Vod';
 import { LiveChannel } from '../../data/bean/Live';
-import { AnalyticsService } from '../analytics/AnalyticsService';
+
 import { HttpService, HttpOptions, HttpResponse } from '../HttpService';
-import LoggerUtil from '../../common/util/Logger';
+
 import ConfigService from '../config/ConfigService';
 import pinyinUtil from '../../common/util/PinyinUtil';
 import { VodRepository } from '../../data/repository/VodRepository';
@@ -88,7 +88,7 @@ export interface SearchResultHighlight {
 // 搜索结果元数据接口 | Search result meta data interface
 export interface SearchResultMeta {
   viewCount?: number;      // 查看次数 | View count
-  extraData?: Record<string, string | number | boolean | null | undefined>; // 额外数据 | Extra data
+  extraData?: { [key: string]: string | number | boolean | null | undefined }; // 额外数据 | Extra data
 }
 
 // 搜索结果项接口 | Search result item interface
@@ -328,12 +328,9 @@ export interface SearchStats {
 }
 
 // 搜索服务类 | Search service class
-export class SearchService {
-  static instance: SearchService;
-  storageUtil: StorageUtil;
-  siteManager: SiteManager;
-  analyticsService: AnalyticsService;
-  configService: ConfigService;
+export default class SearchService {
+  private static instance: SearchService | null = null;
+  // 服务实例将在需要时直接调用 | Service instances will be called directly when needed
   searchHistory: SearchHistoryItem[] = [];
   searchCache: Map<string, SearchResponse> = new Map();
   hotSearches: HotSearchItem[] = [];
@@ -352,10 +349,6 @@ export class SearchService {
    * 构造函数 Constructor
    */
   constructor() {
-    this.storageUtil = StorageUtil.getInstance();
-    this.siteManager = SiteManager.getInstance();
-    this.analyticsService = AnalyticsService.getInstance();
-    this.configService = ConfigService.getInstance();
     this.initialize();
   }
 
@@ -374,7 +367,7 @@ export class SearchService {
    */
   async initialize(): Promise<void> {
     try {
-      LoggerUtil.info(TAG, 'Initializing search service...');
+      console.info('Initializing search service...');
 
       // 加载配置 Load config
       await this.loadConfig();
@@ -388,9 +381,9 @@ export class SearchService {
       }
       
       this.isInitialized = true;
-      LoggerUtil.info(TAG, 'Search service initialized successfully');
+      console.info('Search service initialized successfully');
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to initialize search service: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to initialize search service: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -399,9 +392,9 @@ export class SearchService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      // 使用get方法获取JSON字符串，然后手动解析
-      // Use get method to get JSON string, then manually parse
-      const savedConfigStr = await StorageUtil.get<string>('search_config', StorageType.PREFERENCES);
+      // 使用getString方法获取JSON字符串，然后手动解析
+      // Use getString method to get JSON string, then manually parse
+      const savedConfigStr = await StorageUtil.getString('search_config');
       const configObject = savedConfigStr ? JSON.parse(savedConfigStr) as Partial<SearchConfig> : {} as Partial<SearchConfig>;
       // 合并默认配置和保存的配置
       // Merge default config and saved config
@@ -428,7 +421,7 @@ export class SearchService {
       };
       this.config = mergedConfig;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to load search config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to load search config: " + (error instanceof Error ? error.message : String(error)));
       this.config = DEFAULT_SEARCH_CONFIG;
     }
   }
@@ -440,9 +433,9 @@ export class SearchService {
     try {
       // 将对象转换为JSON字符串后保存
       // Convert object to JSON string and save
-      await StorageUtil.set('search_config', JSON.stringify(this.config), StorageType.PREFERENCES);
+      await StorageUtil.putString('search_config', JSON.stringify(this.config));
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to save search config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ": Failed to save search config: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -467,10 +460,9 @@ export class SearchService {
     const startTime = Date.now();
     
     try {
-      LoggerUtil.info(TAG, `执行搜索: query=${query}, type=${type}, page=${page}, filters=${JSON.stringify(filters)}`);
+      console.info("执行搜索: query=" + query + ", type=" + type + ", page=" + page + ", filters=" + JSON.stringify(filters));
       
-      // 记录搜索事件 Record search event
-      this.analyticsService.trackSearch(query);
+
 
       // 检查缓存 Check cache
       const cacheKey = this.getCacheKey(query, type, filters, siteKeys, limitPerSite);
@@ -530,7 +522,7 @@ export class SearchService {
       
       return response;
     } catch (error) {
-      LoggerUtil.error(TAG, `搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("搜索失败: " + (error instanceof Error ? error.message : String(error)));
       throw error instanceof Error ? error : new Error(String(error));
     }
   }
@@ -586,7 +578,7 @@ export class SearchService {
           const callOptions: CallSiteMethodOptions = { timeout };
           // 为数组添加明确的类型声明 Add explicit type declaration for array
           const methodParams: Array<string | SearchParams> = [keyword, searchParams];
-          const searchPromise = this.siteManager.callSiteMethod<SearchItem[]>(
+          const searchPromise = SiteManager.getInstance().callSiteMethod<SearchItem[]>(
             site.key,
             'search',
             methodParams,
@@ -606,7 +598,7 @@ export class SearchService {
           };
           return siteResult;
         } catch (error) {
-          LoggerUtil.warn(TAG, `在站点 ${site.name} 搜索失败: ${error instanceof Error ? error.message : String(error)}`);
+          console.warn("在站点 " + site.name + " 搜索失败: " + (error instanceof Error ? error.message : String(error)));
           const siteResult: SiteSearchResult = {
             siteKey: site.key,
             siteName: site.name,
@@ -719,7 +711,7 @@ export class SearchService {
    * 获取可搜索的站点 Get searchable sites
    */
   private async getSearchableSites(siteKeys: string[]): Promise<SiteKeyName[]> {
-    const allSites = await this.siteManager.getActiveSites();
+    const allSites = await SiteManager.getInstance().getActiveSites();
     
     if (siteKeys.length > 0) {
       const filteredSites: SiteKeyName[] = [];
@@ -779,7 +771,7 @@ export class SearchService {
         this.lastHotSearchUpdate = Date.now();
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get hot searches: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to get hot searches: " + (error instanceof Error ? error.message : String(error)));
       // 如果获取失败，使用默认热门搜索 If failed to get, use default hot searches
       this.hotSearches = [
         { id: '1', keyword: '热门电影', rank: 1, searchCount: 1000, trend: 'up' },
@@ -813,7 +805,7 @@ export class SearchService {
         return response.data;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get search suggestions: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to get search suggestions: " + (error instanceof Error ? error.message : String(error)));
     }
 
     // 如果API调用失败，返回空数组 If API call fails, return empty array
@@ -863,7 +855,7 @@ export class SearchService {
       try {
         listener(response);
       } catch (error) {
-        LoggerUtil.error(TAG, `Failed to notify search listener: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Failed to notify search listener: " + (error instanceof Error ? error.message : String(error)));
       }
     }
   }
@@ -877,7 +869,7 @@ export class SearchService {
       try {
         listener(suggestions);
       } catch (error) {
-        LoggerUtil.error(TAG, `Failed to notify suggestion listener: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Failed to notify suggestion listener: " + (error instanceof Error ? error.message : String(error)));
       }
     }
   }
@@ -933,7 +925,7 @@ export class SearchService {
         return response.data;
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get search stats: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`Failed to get search stats: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // 返回默认统计信息 Return default stats
@@ -950,7 +942,7 @@ export class SearchService {
   public async updateSiteInfo(siteKey: string, siteInfo: SiteInfo): Promise<void> {
     // 这里可以实现站点信息的更新逻辑
     // Here can implement site info update logic
-    LoggerUtil.info(TAG, `更新站点信息: ${siteKey}`);
+    console.info("更新站点信息: " + siteKey);
   }
 
   /**
@@ -958,12 +950,12 @@ export class SearchService {
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      const historyStr = await StorageUtil.get<string>('search_history', StorageType.PREFERENCES);
+      const historyStr = await StorageUtil.getString('search_history');
       if (historyStr) {
         this.searchHistory = JSON.parse(historyStr) as SearchHistoryItem[];
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ": Failed to load search history: " + (error instanceof Error ? error.message : String(error)));
       this.searchHistory = [];
     }
   }
@@ -973,9 +965,9 @@ export class SearchService {
    */
   private async saveSearchHistory(): Promise<void> {
     try {
-      await StorageUtil.set('search_history', JSON.stringify(this.searchHistory), StorageType.PREFERENCES);
+      await StorageUtil.putString('search_history', JSON.stringify(this.searchHistory));
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to save search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG + ": Failed to save search history: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -1027,7 +1019,7 @@ export class SearchService {
       // 保存更新后的历史记录 Save updated history
       await this.saveSearchHistory();
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to add to search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to add to search history: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -1039,7 +1031,7 @@ export class SearchService {
       this.searchHistory = [];
       await this.saveSearchHistory();
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to clear search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to clear search history: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -1054,7 +1046,7 @@ export class SearchService {
         await this.saveSearchHistory();
       }
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to delete search history: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to delete search history: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -1095,7 +1087,7 @@ export class SearchService {
       this.config = mergedConfig;
       await this.saveConfig();
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to set search config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Failed to set search config: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 

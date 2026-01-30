@@ -1,4 +1,4 @@
-import Logger from '../../common/util/Logger';
+
 import { Site } from '../../data/bean/Site';
 import { SiteManager } from '../spider/SiteManager';
 import { ConfigLoader } from './ConfigLoader';
@@ -6,6 +6,7 @@ import { ConfigParser } from './ConfigParser';
 import { SiteDao } from '../../data/db/dao/SiteDao';
 import { LineDao } from '../../data/db/dao/LineDao';
 import http from '@ohos.net.http';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'LineManager';
 
@@ -56,7 +57,27 @@ export interface LineResponseResult {
 export interface LineResult {
   success: boolean;
   message?: string;
-  data?: Record<string, unknown>;
+  data?: LineResultData;
+}
+
+/**
+ * 线路管理结果数据接口 | Line management result data interface
+ */
+export interface LineResultData {
+  line?: LineItem;
+  sites?: Site[];
+  responseTime?: number;
+  id?: string;
+  name?: string;
+  url?: string;
+  description?: string;
+  type?: string;
+  updateTime?: number;
+  createTime?: number;
+  sourceCount?: number;
+  enabled?: boolean;
+  current?: boolean;
+  cacheTime?: number;
 }
 
 /**
@@ -66,13 +87,8 @@ export interface LineResult {
 export class LineManager {
   private static instance: LineManager | null = null;
   private lines: Map<string, LineItem> = new Map();
-  private siteManager: SiteManager;
-  private configLoader: ConfigLoader;
-  private configParser: ConfigParser;
-  private siteDao: SiteDao;
-  private lineDao: LineDao;
   private initialized: boolean = false;
-  private context?: any;
+  private context?: common.UIAbilityContext;
   
   // 默认缓存时间配置
   private defaultCacheHours: number = 24; // 默认24小时 | Default 24 hours
@@ -88,17 +104,12 @@ export class LineManager {
     }
     return LineManager.instance;
   }
-
+  
   /**
    * 构造函数 | Constructor
    */
   private constructor() {
-    this.siteManager = SiteManager.getInstance();
-    this.configLoader = ConfigLoader.getInstance();
-    this.configParser = ConfigParser.getInstance();
-    this.siteDao = new SiteDao();
-    this.lineDao = new LineDao();
-    Logger.info(TAG, 'LineManager initialized');
+    console.info(TAG + ': LineManager initialized');
   }
 
   /**
@@ -109,14 +120,14 @@ export class LineManager {
   public setCacheTimeRange(minHours: number, maxHours: number): void {
     this.minCacheHours = Math.max(24, minHours);
     this.maxCacheHours = Math.min(72, Math.max(this.minCacheHours, maxHours));
-    Logger.info(TAG, `Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
+    console.info(TAG + `: Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
   }
 
   /**
    * 初始化线路管理器 | Initialize line manager
    * @param context 应用上下文 | Application context
    */
-  public async initialize(context?: any): Promise<void> {
+  public async initialize(context?: common.UIAbilityContext): Promise<void> {
     if (this.initialized) {
       return;
     }
@@ -127,10 +138,10 @@ export class LineManager {
         this.context = context;
       }
       
-      Logger.info(TAG, 'Initializing line manager...');
+      console.info(TAG + ': Initializing line manager...');
       
       // 初始化线路表 | Initialize line table
-      await this.lineDao.initTable(context);
+      await new LineDao().initTable(context);
       
       // 从持久化存储加载线路配置 | Load line config from persistent storage
       await this.loadLines();
@@ -138,21 +149,21 @@ export class LineManager {
       // 恢复当前线路的源 | Restore sources for current line
       const currentLine = this.getCurrentLine();
       if (currentLine && currentLine.enabled) {
-        Logger.info(TAG, `Restoring sources for current line: ${currentLine.name}`);
+        console.info(TAG + `: Restoring sources for current line: ${currentLine.name}`);
         try {
           // 加载配置并注册源 | Load config and register sources
-          const configContent = await this.configLoader.loadFromUrl(currentLine.url);
-          const sites = this.configParser.parseSites(configContent);
-          await this.siteManager.registerSites(sites);
+          const configContent = await ConfigLoader.getInstance().loadFromUrl(currentLine.url);
+          const sites = ConfigParser.getInstance().parseSites(configContent);
+          await SiteManager.getInstance().registerSites(sites);
         } catch (error) {
-          Logger.error(TAG, `Failed to restore current line sources`, error instanceof Error ? error : new Error(String(error)));
+          console.error(TAG + `: Failed to restore current line sources`, error instanceof Error ? error : new Error(String(error)));
         }
       }
       
       this.initialized = true;
-      Logger.info(TAG, `Line manager initialized with ${this.lines.size} lines`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to initialize line manager`, error instanceof Error ? error : new Error(String(error)));
+      console.info(TAG + `: Line manager initialized with ${this.lines.size} lines`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to initialize line manager`, error);
       throw error;
     }
   }
@@ -215,17 +226,17 @@ export class LineManager {
       // 保存到持久化存储 | Save to persistent storage
       await this.saveLines();
 
-      Logger.info(TAG, `Added line: ${name} (${url})`);
+      console.info(TAG + `: Added line: ${name} (${url})`);
       return {
         success: true,
         message: '线路添加成功',
         data: line
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to add line: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to add line: ${error.message}`);
       return {
         success: false, 
-        message: `添加线路失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `添加线路失败: ${error.message}`
       };
     }
   }
@@ -255,16 +266,16 @@ export class LineManager {
       // 保存到持久化存储 | Save to persistent storage
       await this.saveLines();
 
-      Logger.info(TAG, `Deleted line: ${line.name}`);
+      console.info(TAG + `: Deleted line: ${line.name}`);
       return {
         success: true,
         message: '线路删除成功'
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to delete line: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to delete line: ${error.message}`);
       return {
         success: false, 
-        message: `删除线路失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `删除线路失败: ${error.message}`
       };
     }
   }
@@ -290,8 +301,20 @@ export class LineManager {
       }
 
       // 更新线路信息 | Update line information
-      const updatedLine = { ...line, ...data };
-      updatedLine.updateTime = Date.now();
+      const updatedLine: LineItem = {
+        id: line.id,
+        name: data.name !== undefined ? data.name : line.name,
+        url: data.url !== undefined ? data.url : line.url,
+        description: data.description !== undefined ? data.description : line.description,
+        type: data.type !== undefined ? data.type : line.type,
+        updateTime: Date.now(),
+        createTime: line.createTime,
+        sourceCount: data.sourceCount !== undefined ? data.sourceCount : line.sourceCount,
+        enabled: data.enabled !== undefined ? data.enabled : line.enabled,
+        current: data.current !== undefined ? data.current : line.current,
+        cacheTime: data.cacheTime !== undefined ? data.cacheTime : line.cacheTime,
+        responseTime: data.responseTime !== undefined ? data.responseTime : line.responseTime
+      };
 
       // 如果更新了URL，需要重新生成ID | If URL is updated, need to regenerate ID
       if (data.url && data.url !== line.url) {
@@ -325,17 +348,17 @@ export class LineManager {
       // 保存到持久化存储 | Save to persistent storage
       await this.saveLines();
 
-      Logger.info(TAG, `Updated line: ${updatedLine.name}`);
+      console.info(TAG + `: Updated line: ${updatedLine.name}`);
       return {
         success: true,
         message: '线路更新成功',
         data: updatedLine
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to update line: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to update line: ${error.message}`);
       return {
         success: false, 
-        message: `更新线路失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `更新线路失败: ${error.message}`
       };
     }
   }
@@ -356,11 +379,11 @@ export class LineManager {
 
       // 强制从URL加载最新配置（跳过缓存） | Force load latest config from URL (skip cache)
       const startTime = Date.now();
-      const configContent = await this.configLoader.loadFromUrl(line.url, line.cacheTime, true);
+      const configContent = await ConfigLoader.getInstance().loadFromUrl(line.url, line.cacheTime, true);
       const responseTime = Date.now() - startTime;
       
       // 解析源配置 | Parse source config
-      const sites = this.configParser.parseSites(configContent);
+      const sites = ConfigParser.getInstance().parseSites(configContent);
       
       // 更新线路信息 | Update line information
       line.sourceCount = sites.length;
@@ -373,13 +396,13 @@ export class LineManager {
         await this.disableCurrentSources();
         
         // 注册新源 | Register new sources
-        await this.siteManager.registerSites(sites);
+        await SiteManager.getInstance().registerSites(sites);
       }
 
       // 保存到持久化存储 | Save to persistent storage
       await this.saveLines();
 
-      Logger.info(TAG, `Refreshed line: ${line.name}, loaded ${sites.length} sources`);
+      console.info(TAG + `: Refreshed line: ${line.name}, loaded ${sites.length} sources`);
       return {
         success: true,
         message: `线路刷新成功，共${sites.length}个源，响应时间${responseTime}ms`,
@@ -389,11 +412,11 @@ export class LineManager {
           responseTime
         }
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to refresh line: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to refresh line: ${error.message}`);
       return {
         success: false, 
-        message: `刷新线路失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `刷新线路失败: ${error.message}`
       };
     }
   }
@@ -426,26 +449,26 @@ export class LineManager {
       line.current = true;
       
       // 加载线路配置，使用线路配置的缓存时间 | Load line config, use line's cache time
-      const configContent = await this.configLoader.loadFromUrl(line.url, line.cacheTime);
-      const sites = this.configParser.parseSites(configContent);
+      const configContent = await ConfigLoader.getInstance().loadFromUrl(line.url, line.cacheTime);
+      const sites = ConfigParser.getInstance().parseSites(configContent);
       
       // 注册源 | Register sources
-      await this.siteManager.registerSites(sites);
+      await SiteManager.getInstance().registerSites(sites);
       
       // 保存到持久化存储 | Save to persistent storage
       await this.saveLines();
 
-      Logger.info(TAG, `Switched to line: ${line.name}, loaded ${sites.length} sources`);
+      console.info(TAG + `: Switched to line: ${line.name}, loaded ${sites.length} sources`);
       return {
         success: true,
         message: `成功切换到线路"${line.name}"`,
         data: sites
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to switch line: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to switch line: ${error.message}`);
       return {
         success: false, 
-        message: `切换线路失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `切换线路失败: ${error.message}`
       };
     }
   }
@@ -472,11 +495,11 @@ export class LineManager {
       const startTime = Date.now();
       
       // 测试线路响应速度 | Test line response speed
-      const configContent = await this.configLoader.loadFromUrl(line.url);
+      const configContent = await ConfigLoader.getInstance().loadFromUrl(line.url);
       const responseTime = Date.now() - startTime;
       
       // 解析源 | Parse sources
-      const sites = this.configParser.parseSites(configContent);
+      const sites = ConfigParser.getInstance().parseSites(configContent);
       
       // 更新线路响应时间 | Update line response time
       line.responseTime = responseTime;
@@ -488,14 +511,14 @@ export class LineManager {
         responseTime,
         success: true
       };
-    } catch (error) {
-      Logger.error(TAG, `Failed to test line response: ${error}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to test line response: ${error.message}`);
       return {
         lineId: line.id, 
         lineName: line.name,
         responseTime: 0,
         success: false,
-        error: String(error)
+        error: error.message
       };
     }
   }
@@ -514,8 +537,8 @@ export class LineManager {
 
     try {
       // 加载线路配置 | Load line config
-      const configContent = await this.configLoader.loadFromUrl(line.url);
-      const sites = this.configParser.parseSites(configContent);
+      const configContent = await ConfigLoader.getInstance().loadFromUrl(line.url);
+      const sites = ConfigParser.getInstance().parseSites(configContent);
       
       const results: SourceResponseResult[] = [];
       
@@ -562,7 +585,10 @@ export class LineManager {
         
         // 等待所有测试完成 | Wait for all tests to complete
         const threadResults = await Promise.all(testPromises);
-        results.push(...threadResults);
+        // 使用循环替代扩展运算符
+        for (let i = 0; i < threadResults.length; i++) {
+          results.push(threadResults[i]);
+        }
       } else {
         // 单线程模式 | Single-thread mode
         for (const site of sites) {
@@ -606,8 +632,8 @@ export class LineManager {
       }
       
       return results;
-    } catch (error) {
-      Logger.error(TAG, 'Failed to test source responses', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to test source responses', error);
       return [];
     }
   }
@@ -629,9 +655,9 @@ export class LineManager {
    * 禁用当前所有源 | Disable all current sources
    */
   private async disableCurrentSources(): Promise<void> {
-    const sites = this.siteManager.getAllSites();
+    const sites = SiteManager.getInstance().getAllSites();
     for (const site of sites) {
-      await this.siteManager.setSiteEnabled(site.key, false);
+      await SiteManager.getInstance().setSiteEnabled(site.key, false);
     }
   }
 
@@ -641,15 +667,15 @@ export class LineManager {
    */
   public async testLineUrl(url: string): Promise<LineResult> {
     try {
-      Logger.info(TAG, `Testing line URL: ${url}`);
+      console.info(TAG + `: Testing line URL: ${url}`);
       
       const startTime = Date.now();
       // 加载配置，使用默认缓存时间，不强制更新 | Load config, use default cache time, not force update
-      const configContent = await this.configLoader.loadFromUrl(url, this.defaultCacheHours);
+      const configContent = await ConfigLoader.getInstance().loadFromUrl(url, this.defaultCacheHours);
       const responseTime = Date.now() - startTime;
       
       // 解析源 | Parse sources
-      const sites = this.configParser.parseSites(configContent);
+      const sites = ConfigParser.getInstance().parseSites(configContent);
       
       // 验证源数量 | Validate source count
       if (sites.length === 0) {
@@ -664,11 +690,11 @@ export class LineManager {
         message: `URL访问成功，发现${sites.length}个源，响应时间${responseTime}ms`,
         data: { sites, responseTime }
       };
-    } catch (error) {
-      Logger.error(TAG, 'Failed to test line URL', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to test line URL', error);
       return {
         success: false,
-        message: `URL测试失败: ${error instanceof Error ? error.message : String(error)}`
+        message: `URL测试失败: ${error.message}`
       };
     }
   }
@@ -748,12 +774,12 @@ export class LineManager {
   private async saveLines(): Promise<void> {
     try {
       const lines = Array.from(this.lines.values());
-      Logger.info(TAG, `Saving ${lines.length} lines`);
+      console.info(TAG + `: Saving ${lines.length} lines`);
       
       // 批量保存线路 | Batch save lines
-      await this.lineDao.saveAll(lines);
-    } catch (error) {
-      Logger.error(TAG, `Failed to save lines: ${error}`);
+      await new LineDao().saveAll(lines);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to save lines: ${error.message}`);
       // 保存失败不影响主要功能 | Save failure does not affect main functionality
     }
   }
@@ -763,10 +789,10 @@ export class LineManager {
    */
   private async loadLines(): Promise<void> {
     try {
-      Logger.info(TAG, 'Loading lines from storage');
+      console.info(TAG + ': Loading lines from storage');
       
       // 从数据库加载线路 | Load lines from database
-      const lines = await this.lineDao.getAll();
+      const lines = await new LineDao().getAll();
       
       // 清空现有线路 | Clear existing lines
       this.lines.clear();
@@ -776,9 +802,9 @@ export class LineManager {
         this.lines.set(line.id, line);
       });
       
-      Logger.info(TAG, `Loaded ${lines.length} lines from storage`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to load lines: ${error}`);
+      console.info(TAG + `: Loaded ${lines.length} lines from storage`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to load lines: ${error.message}`);
     }
   }
 }

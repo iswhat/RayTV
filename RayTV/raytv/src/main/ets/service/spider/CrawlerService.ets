@@ -24,8 +24,15 @@ export interface VideoItem {
 }
 
 /**
- * 视频详情接口定义 Video detail interface definition
+ * 脚本加载器接口定义 Script loader interface definition
  */
+export interface ScriptLoader {
+  loadScript: (scriptContent: string, options?: Record<string, string>) => Promise<object>;
+  executeMethod: <T>(methodName: string, ...args: Array<string | number | boolean | object>) => Promise<T>;
+  destroy: () => void;
+}
+
+// 视频详情接口定义 Video detail interface definition
 export interface VideoDetail {
   id: string;
   title: string;
@@ -101,7 +108,7 @@ export class CrawlerService {
   private httpService: HttpService;
   private storageUtil: StorageUtil;
   private configParser: ConfigParser;
-  private scriptLoaders: Map<string, any> = new Map();
+  private scriptLoaders: Map<string, ScriptLoader> = new Map();
   private performanceStats: Map<string, {
     totalCalls: number;
     successfulCalls: number;
@@ -137,15 +144,15 @@ export class CrawlerService {
     if (this.initialized) return;
     
     try {
-      Logger.info(this.TAG, 'Initializing crawler service...');
+      Logger.info(this.TAG, '正在初始化爬虫服务... | Initializing crawler service...');
       // 加载存储的站点配置 Load stored site configurations
       await this.loadSiteConfigs();
       // 初始化默认站点 Initialize default sites
       await this.initDefaultSites();
       this.initialized = true;
-      Logger.info(this.TAG, `Crawler service initialized with ${this.siteConfigs.size} sites`);
+      Logger.info(this.TAG, `爬虫服务已初始化，共${this.siteConfigs.size}个站点 | Crawler service initialized with ${this.siteConfigs.size} sites`);
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to initialize crawler service:', error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, '初始化爬虫服务失败: | Failed to initialize crawler service:', error instanceof Error ? error : new Error(String(error)));
       // 初始化失败时仍设置为已初始化，以保证应用继续运行
       // Set to initialized even if initialization fails to ensure app continues to run
       this.initialized = true;
@@ -163,12 +170,12 @@ export class CrawlerService {
           if (this.validateSiteConfig(config)) {
             this.siteConfigs.set(config.key, config);
           } else {
-            Logger.warn(this.TAG, `Invalid site config: ${config.key}`);
+            Logger.warn(this.TAG, `无效的站点配置: ${config.key} | Invalid site config: ${config.key}`);
           }
         }
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to load site configs:', error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, '加载站点配置失败: | Failed to load site configs:', error instanceof Error ? error : new Error(String(error)));
     }
   }
   
@@ -180,7 +187,7 @@ export class CrawlerService {
       // 如果没有站点配置，添加默认的模拟站点
       // If no site configurations, add default mock sites
       if (this.siteConfigs.size === 0) {
-        const defaultSites = this.getDefaultSites();
+        const defaultSites = await this.getDefaultSites();
         for (const site of defaultSites) {
           if (this.validateSiteConfig(site)) {
             this.siteConfigs.set(site.key, site);
@@ -208,7 +215,7 @@ export class CrawlerService {
         }
       }
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to init default sites:', error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, '初始化默认站点失败: | Failed to init default sites:', error instanceof Error ? error : new Error(String(error)));
     }
   }
   
@@ -219,26 +226,26 @@ export class CrawlerService {
     try {
       // 验证必填字段 Validate required fields
       if (!config.key || !config.name || !config.type || !config.url) {
-        Logger.error(this.TAG, 'Site config missing required fields');
+        Logger.error(this.TAG, '站点配置缺少必填字段 | Site config missing required fields');
         return false;
       }
       
       // 验证站点类型 Validate site type
       const validTypes = ['vod', 'live'];
       if (!validTypes.includes(config.type)) {
-        Logger.error(this.TAG, `Invalid site type: ${config.type}`);
+        Logger.error(this.TAG, `无效的站点类型: ${config.type} | Invalid site type: ${config.type}`);
         return false;
       }
       
       // 验证URL格式 Validate URL format
       if (!config.url.startsWith('http://') && !config.url.startsWith('https://')) {
-        Logger.error(this.TAG, `Invalid URL format: ${config.url}`);
+        Logger.error(this.TAG, `无效的URL格式: ${config.url} | Invalid URL format: ${config.url}`);
         return false;
       }
       
       return true;
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to validate site config:', error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, '验证站点配置失败: | Failed to validate site config:', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -250,7 +257,7 @@ export class CrawlerService {
     try {
       // 根据站点类型和配置创建对应的爬虫实例
       // Create corresponding crawler instance based on site type and configuration
-      Logger.info(this.TAG, `Creating spider for site: ${key}`);
+      Logger.info(this.TAG, `正在为站点创建爬虫: ${key} | Creating spider for site: ${key}`);
       
       // 使用LoaderFactory创建加载器 Use LoaderFactory to create loader
       const loaderFactory = await import('./LoaderFactory');
@@ -260,7 +267,7 @@ export class CrawlerService {
       // 使用加载器创建爬虫实例 Use loader to create crawler instance
       return await loader.createSpider();
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create spider for site ${key}:`, error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, `为站点${key}创建爬虫失败: | Failed to create spider for site ${key}:`, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
@@ -342,39 +349,39 @@ export class CrawlerService {
   /**
    * 获取默认站点配置 Get default site configurations
    */
-  private getDefaultSites(): SiteInfo[] {
-    // 返回实际可用的站点配置，而不是模拟站点
-    // Return actual usable site configurations, not mock sites
-    return [
-      {
-        key: 'official_video_site',
-        name: '官方视频站',
-        type: 'vod',
-        url: 'https://api.raytv.com/v1',
-        enabled: true,
-        updateTime: new Date().toISOString(),
-        version: '1.0.0',
-        userAgent: '',
-        requestHeaders: {},
-        searchRule: {},
-        detailRule: {},
-        playRule: {}
-      },
-      {
-        key: 'official_live_site',
-        name: '官方直播站',
-        type: 'live',
-        url: 'https://api.raytv.com/live/v1',
-        enabled: true,
-        updateTime: new Date().toISOString(),
-        version: '1.0.0',
-        userAgent: '',
-        requestHeaders: {},
-        searchRule: {},
-        detailRule: {},
-        playRule: {}
+  private async getDefaultSites(): Promise<SiteInfo[]> {
+    // 从真实API获取默认站点配置 | Get default site configurations from real API
+    try {
+      const httpService = HttpService.getInstance();
+      const response = await httpService.request<SiteInfo[]>('https://api.raytv.com/config/sites/default', {
+        method: 'GET',
+        timeout: 10000
+      });
+      
+      if (response.status >= 200 && response.status < 300 && Array.isArray(response.data)) {
+        return response.data.map((site: SiteInfo) => ({
+          key: site.key,
+          name: site.name,
+          type: site.type,
+          url: site.url,
+          enabled: site.enabled !== false,
+          updateTime: site.updateTime || new Date().toISOString(),
+          version: site.version || '1.0.0',
+          userAgent: site.userAgent || '',
+          requestHeaders: site.requestHeaders || {},
+          searchRule: site.searchRule || {},
+          detailRule: site.detailRule || {},
+          playRule: site.playRule || {}
+        }));
       }
-    ];
+      
+      // 如果API调用失败，返回空数组 | Return empty array if API call fails
+      return [];
+    } catch (error) {
+      Logger.error(this.TAG, '从API获取默认站点失败: | Failed to get default sites from API:', error instanceof Error ? error : new Error(String(error)));
+      // API调用失败时返回空数组，避免使用硬编码数据 | Return empty array when API call fails, avoid using hardcoded data
+      return [];
+    }
   }
   
   /**
@@ -471,7 +478,7 @@ export class CrawlerService {
       
       return null;
     } catch (error) {
-      Logger.error(this.TAG, 'Failed to import site config:', error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, '导入站点配置失败: | Failed to import site config:', error instanceof Error ? error : new Error(String(error)));
       throw new Error('导入站点配置失败');
     }
   }
@@ -506,7 +513,7 @@ export class CrawlerService {
     
     const spider = this.siteSpiders.get(siteKey);
     if (!spider) {
-      Logger.error(this.TAG, `No spider found for site: ${siteKey}`);
+      Logger.error(this.TAG, `未找到站点的爬虫: ${siteKey} | No spider found for site: ${siteKey}`);
       // 返回空数据 Return empty data
       return this.getDefaultEmptyData<T>(methodName);
     }
@@ -531,32 +538,59 @@ export class CrawlerService {
    */
   private async callSpiderMethod<T>(
     spider: SiteSpider,
-    methodName: string,
+    methodName: keyof SiteSpider,
     args: Array<string | number | boolean | object>,
     options: CallSiteMethodOptions
   ): Promise<T> {
     try {
-      const method = (spider as Record<string, unknown>)[methodName];
-      if (typeof method === 'function') {
-        // 设置超时 Set timeout
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => {
-            reject(new Error(`Method ${methodName} timed out after ${options.timeout}ms`));
-          }, options.timeout);
-        });
-        
-        // 使用Promise.race实现超时控制 Use Promise.race to implement timeout control
-        return await Promise.race([
-          (spider as Record<string, Function>)[methodName](...args) as Promise<T>,
-          timeoutPromise
-        ]);
-      } else {
-        throw new Error(`Method ${methodName} not found in spider`);
+      // 使用类型守卫检查方法是否存在 Use type guard to check if method exists
+      let result: T;
+      
+      // 根据方法名调用对应的方法 Call corresponding method based on method name
+      switch (methodName) {
+        case 'getSiteInfo':
+          result = await spider.getSiteInfo() as unknown as T;
+          break;
+        case 'getRecommendList':
+          result = await spider.getRecommendList() as unknown as T;
+          break;
+        case 'getHotList':
+          result = await spider.getHotList() as unknown as T;
+          break;
+        case 'getLatestList':
+          result = await spider.getLatestList() as unknown as T;
+          break;
+        case 'getCategories':
+          result = await spider.getCategories() as unknown as T;
+          break;
+        case 'getCategoryList':
+          result = await spider.getCategoryList(args[0] as string, args[1] as number) as unknown as T;
+          break;
+        case 'search':
+          result = await spider.search(args[0] as string, args[1] as number | undefined) as unknown as T;
+          break;
+        case 'getDetail':
+          result = await spider.getDetail(args[0] as string) as unknown as T;
+          break;
+        case 'getPlayUrl':
+          result = await spider.getPlayUrl(args[0] as string, args[1] as string | undefined) as unknown as T;
+          break;
+        case 'getSearchSuggestions':
+          if (typeof spider.getSearchSuggestions === 'function') {
+            result = await spider.getSearchSuggestions(args[0] as string) as unknown as T;
+          } else {
+            throw new Error(`Method ${String(methodName)} not implemented`);
+          }
+          break;
+        default:
+          throw new Error(`Method ${String(methodName)} not supported`);
       }
+      
+      return result;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to call ${methodName} on spider:`, error instanceof Error ? error : new Error(String(error)));
+      Logger.error(this.TAG, `调用爬虫的${String(methodName)}方法失败: | Failed to call ${String(methodName)} on spider:`, error instanceof Error ? error : new Error(String(error)));
       // 返回空数据 Return empty data
-      return this.getDefaultEmptyData<T>(methodName);
+      return this.getDefaultEmptyData<T>(String(methodName));
     }
   }
   
@@ -564,7 +598,7 @@ export class CrawlerService {
    * 根据方法名返回默认空数据 Return default empty data based on method name
    */
   private getDefaultEmptyData<T>(methodName: string): T {
-    Logger.warn(this.TAG, `Returning default empty data for method: ${methodName}`);
+    Logger.warn(this.TAG, `为方法${methodName}返回默认空数据 | Returning default empty data for method: ${methodName}`);
     
     // 根据不同方法返回对应的空数据类型
     // Return corresponding empty data type based on different methods
@@ -576,22 +610,22 @@ export class CrawlerService {
       case 'search':
       case 'getSearchSuggestions':
       case 'getCategories':
-        return [] as unknown as T;
+        return ([] as T);
       case 'getDetail':
-        return {
+        return ({ 
           id: '',
           title: '未知标题',
           cover: '',
           description: '暂无描述',
           playSources: [],
           episodes: []
-        } as unknown as T;
+        } as T);
       case 'getPlayUrl':
-        return '' as unknown as T;
+        return ('') as T;
       case 'getSiteInfo':
-        return {} as unknown as T;
+        return ({}) as T;
       default:
-        return {} as unknown as T;
+        return ({}) as T;
     }
   }
   
@@ -617,7 +651,7 @@ export class CrawlerService {
     
     this.performanceStats.set(siteKey, stats);
     
-    Logger.debug(this.TAG, `Site ${siteKey} performance: ${JSON.stringify(stats)}`);
+    Logger.debug(this.TAG, `站点${siteKey}性能数据: ${JSON.stringify(stats)} | Site ${siteKey} performance: ${JSON.stringify(stats)}`);
   }
   
   /**
@@ -656,7 +690,15 @@ export class CrawlerService {
     successRate: number;
     lastCallTime?: number;
   }> {
-    const result = new Map<string, any>();
+    const result = new Map<string, {
+      totalCalls: number;
+      successfulCalls: number;
+      failedCalls: number;
+      totalTime: number;
+      averageTime: number;
+      successRate: number;
+      lastCallTime?: number;
+    }>();
     this.performanceStats.forEach((stats, siteKey) => {
       result.set(siteKey, {
         ...stats,

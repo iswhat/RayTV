@@ -5,7 +5,7 @@ import { PlaybackService } from '../service/playback/PlaybackService';
 import { AVPlayerService } from '../service/playback/AVPlayerService';
 import { SearchService } from '../service/search/SearchService';
 import SubtitleService, { SubtitleTrack, SubtitleProvider, SubtitleLanguage } from '../service/media/SubtitleService';
-import { AnalyticsService } from '../service/analytics/AnalyticsService';
+
 import CacheService, { CachePriority } from '../service/cache/CacheService';
 import display from '@ohos.display';
 import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign, FlexWrap, KeyEvent, FocusStyle, TouchEvent, GestureEvent, Curve } from '@ohos/arkui';
@@ -27,6 +27,62 @@ interface ParseLine {
   selected: boolean;
 }
 
+// 媒体信息接口 | Media info interface
+export interface MediaInfo {
+  id: string;
+  title: string;
+  cover?: string;
+  description?: string;
+  episodes: Array<{
+    id: string;
+    title: string;
+    episode: number;
+    duration?: string;
+    played?: boolean;
+  }>;
+  parseLines: Array<{
+    id: string;
+    name: string;
+  }>;
+  type: string;
+  siteKey: string;
+  rating?: string;
+  year?: string;
+  region?: string;
+  director?: string;
+  actor?: string;
+}
+
+// 音频轨道接口 | Audio track interface
+export interface AudioTrack {
+  id: string;
+  name: string;
+  language?: string;
+  selected?: boolean;
+}
+
+// 字幕样式接口 | Subtitle style interface
+export interface SubtitleStyle {
+  fontSize: number;
+  fontFamily: string;
+  fontWeight: string;
+  color: string;
+  backgroundColor: string;
+  opacity: number;
+  borderWidth: number;
+  borderColor: string;
+}
+
+// 播放设置接口 | Playback settings interface
+export interface PlaybackSettings {
+  playbackSpeed: number;
+  subtitleStyle: SubtitleStyle;
+  selectedSubtitleId?: string;
+  selectedAudioTrackId?: string;
+  skipOpening: boolean;
+  skipEnding: boolean;
+}
+
 @Entry
 @Component
 struct PlaybackPage {
@@ -35,7 +91,7 @@ struct PlaybackPage {
   private episodeScroller: Scroller = new Scroller();
   
   // 状态管理 | State management
-  @State mediaInfo: any = null;
+  @State mediaInfo: MediaInfo | null = null;
   @State episodes: Episode[] = [];
   @State parseLines: ParseLine[] = [];
   @State selectedEpisode: Episode | null = null;
@@ -62,8 +118,8 @@ struct PlaybackPage {
   @State selectedSubtitle: SubtitleTrack | null = null;
   @State subtitleLanguages: SubtitleLanguage[] = [];
   @State isSearchingSubtitles: boolean = false;
-  @State audioTracks: any[] = [];
-  @State selectedAudioTrack: any = null;
+  @State audioTracks: AudioTrack[] = [];
+  @State selectedAudioTrack: AudioTrack | null = null;
   @State skipOpeningTime: number = 90; // 默认跳过片头时间（秒）
   @State skipEndingTime: number = 300; // 默认跳过片尾时间（秒）
   @State isSkipOpeningEnabled: boolean = true;
@@ -79,15 +135,14 @@ struct PlaybackPage {
   private avPlayerService: AVPlayerService = AVPlayerService.getInstance();
   private searchService: SearchService = SearchService.getInstance();
   private subtitleService: SubtitleService = SubtitleService.getInstance();
-  private analyticsService: AnalyticsService = AnalyticsService.getInstance();
+
   private cacheService: CacheService = CacheService.getInstance();
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info(this.TAG, 'PlaybackPage about to appear');
     
-    // 记录页面访问 | Track page view
-    this.analyticsService.trackPageView('PlaybackPage');
+
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
@@ -141,7 +196,7 @@ struct PlaybackPage {
       const cacheKey = `media_info_${params.id}_${params.siteKey}_${params.type}`;
       
       // 尝试从缓存获取 | Try to get from cache
-      const cachedInfo = await this.cacheService.get<any>(cacheKey);
+      const cachedInfo = await this.cacheService.get<MediaInfo>(cacheKey);
       
       if (cachedInfo) {
         this.mediaInfo = cachedInfo;
@@ -208,7 +263,7 @@ struct PlaybackPage {
    */
   private loadEpisodes(): void {
     if (this.mediaInfo && this.mediaInfo.episodes) {
-      this.episodes = this.mediaInfo.episodes.map((ep: any, index: number) => ({
+      this.episodes = this.mediaInfo.episodes.map((ep, index: number) => ({
         id: ep.id || `ep_${index}`,
         title: ep.title || `第${ep.episode || (index + 1)}集`,
         episode: ep.episode || (index + 1),
@@ -228,7 +283,7 @@ struct PlaybackPage {
    */
   private loadParseLines(): void {
     if (this.mediaInfo && this.mediaInfo.parseLines) {
-      this.parseLines = this.mediaInfo.parseLines.map((line: any, index: number) => ({
+      this.parseLines = this.mediaInfo.parseLines.map((line, index: number) => ({
         id: line.id || `line_${index}`,
         name: line.name || `线路${index + 1}`,
         selected: index === 0
@@ -299,8 +354,7 @@ struct PlaybackPage {
       // 显示加载状态 | Show loading state
       this.isLoading = true;
       
-      // 记录剧集选择事件 | Track episode selection event
-      this.analyticsService.trackPageView(`Episode_Select_${episode.id}`);
+
       
       // 调用实际的PlaybackService切换剧集 | Call actual PlaybackService to switch episode
       const result = await this.playbackService.switchEpisode(episode);
@@ -370,8 +424,7 @@ struct PlaybackPage {
       
       if (result.isSuccess()) {
         this.isPlaying = !this.isPlaying;
-        // 记录播放/暂停事件 | Track play/pause event
-        this.analyticsService.trackPageView(`${this.isPlaying ? 'Play' : 'Pause'}`);
+        
         Logger.info(this.TAG, `${this.isPlaying ? 'Playing' : 'Paused'}`);
       } else {
         Logger.error(this.TAG, `Failed to toggle playback: ${result.message}`);
@@ -538,7 +591,7 @@ struct PlaybackPage {
   /**
    * 处理字幕样式设置 | Handle subtitle style setting
    */
-  private async handleSubtitleStyleChange(style: any): Promise<void> {
+  private async handleSubtitleStyleChange(style: SubtitleStyle): Promise<void> {
     try {
       await this.subtitleService.setSubtitleStyle(style);
       await this.playbackService.updateSubtitleStyle(style);
@@ -662,7 +715,7 @@ struct PlaybackPage {
       
       // 尝试从缓存加载跳过设置 | Try to load skip settings from cache
       const cacheKey = `skip_settings_${this.mediaInfo.id}`;
-      const cachedSettings = await this.cacheService.get<any>(cacheKey);
+      const cachedSettings = await this.cacheService.get<{ skipOpeningTime?: number; skipEndingTime?: number; isSkipOpeningEnabled?: boolean; isSkipEndingEnabled?: boolean }>(cacheKey);
       
       if (cachedSettings) {
         this.skipOpeningTime = cachedSettings.skipOpeningTime || 90;
@@ -1733,7 +1786,7 @@ struct PlaybackPage {
   /**
    * 处理音轨选择 | Handle audio track selection
    */
-  private async handleAudioTrackSelect(track: any): Promise<void> {
+  private async handleAudioTrackSelect(track: AudioTrack): Promise<void> {
     try {
       this.selectedAudioTrack = track;
       // 调用实际的PlaybackService切换音轨 | Call actual PlaybackService to switch audio track
@@ -1761,7 +1814,7 @@ struct PlaybackPage {
             .fontColor('#999999')
             .margin({ left: 10 })
         } else {
-          ForEach(this.audioTracks, (track: any) => {
+          ForEach(this.audioTracks, (track: AudioTrack) => {
             Button() {
               Text(track.name || `音轨 ${track.id}`)
                 .fontSize(14)
@@ -1789,164 +1842,7 @@ struct PlaybackPage {
     }
   }
   
-  // 渲染弹幕选项 | Render danmaku options
-  @Builder
-  renderDanmakuOptions() {
-    if (this.showDanmakuOptions) {
-      Column() {
-        Text('弹幕设置')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        // 弹幕开关 | Danmaku toggle
-        Column() {
-          Text('弹幕开关')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Button() {
-            Text(this.isDanmakuEnabled ? '已开启' : '已关闭')
-              .fontSize(14)
-              .fontColor(this.isDanmakuEnabled ? '#4CAF50' : '#9E9E9E')
-              .fontWeight(500)
-          }
-          .width(120)
-          .height(40)
-          .backgroundColor(this.isDanmakuEnabled ? '#E8F5E9' : '#F5F5F5')
-          .borderRadius(8)
-          .margin({ left: 10, right: 15 })
-          .onClick(() => {
-            this.isDanmakuEnabled = !this.isDanmakuEnabled;
-            this.updateDanmakuConfig();
-          })
-          .focusable(true)
-          .onFocus(() => {
-            Logger.info(this.TAG, 'Danmaku toggle focused');
-          })
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 弹幕密度 | Danmaku density
-        Column() {
-          Text('弹幕密度')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            ForEach(['low', 'medium', 'high'], (density: 'low' | 'medium' | 'high') => {
-              Button() {
-                Text(density === 'low' ? '稀疏' : density === 'medium' ? '适中' : '密集')
-                  .fontSize(14)
-                  .fontColor(this.danmakuDensity === density ? '#FFFFFF' : '#333333')
-                  .fontWeight(500)
-              }
-              .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-              .backgroundColor(this.danmakuDensity === density ? '#4CAF50' : '#F5F5F5')
-              .borderRadius(8)
-              .margin({ left: 10, right: 10 })
-              .onClick(() => {
-                this.danmakuDensity = density;
-                this.updateDanmakuConfig();
-              })
-              .focusable(true)
-              .onFocus(() => {
-                Logger.info(this.TAG, `Danmaku density ${density} focused`);
-              })
-            })
-          }
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 弹幕字体大小 | Danmaku font size
-        Column() {
-          Text('字体大小')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            ForEach([20, 24, 28, 32], (size: number) => {
-              Button() {
-                Text(`${size}px`)
-                  .fontSize(14)
-                  .fontColor(this.danmakuFontSize === size ? '#FFFFFF' : '#333333')
-                  .fontWeight(500)
-              }
-              .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-              .backgroundColor(this.danmakuFontSize === size ? '#4CAF50' : '#F5F5F5')
-              .borderRadius(8)
-              .margin({ left: 10, right: 10 })
-              .onClick(() => {
-                this.danmakuFontSize = size;
-                this.updateDanmakuConfig();
-              })
-              .focusable(true)
-              .onFocus(() => {
-                Logger.info(this.TAG, `Danmaku font size ${size} focused`);
-              })
-            })
-          }
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 弹幕透明度 | Danmaku opacity
-        Column() {
-          Text('透明度')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            ForEach([0.5, 0.7, 0.8, 1.0], (opacity: number) => {
-              Button() {
-                Text(`${Math.round(opacity * 100)}%`)
-                  .fontSize(14)
-                  .fontColor(this.danmakuOpacity === opacity ? '#FFFFFF' : '#333333')
-                  .fontWeight(500)
-              }
-              .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-              .backgroundColor(this.danmakuOpacity === opacity ? '#4CAF50' : '#F5F5F5')
-              .borderRadius(8)
-              .margin({ left: 10, right: 10 })
-              .onClick(() => {
-                this.danmakuOpacity = opacity;
-                this.updateDanmakuConfig();
-              })
-              .focusable(true)
-              .onFocus(() => {
-                Logger.info(this.TAG, `Danmaku opacity ${opacity} focused`);
-              })
-            })
-          }
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 弹幕数量 | Danmaku count
-        Text(`当前弹幕数量: ${this.danmakuItems.length}`)
-          .fontSize(14)
-          .fontColor('#666666')
-          .margin({ left: 10 })
-      }
-      .width('100%')
-      .padding(25)
-      .backgroundColor('#FFFFFF')
-      .borderRadius(12)
-      .margin({ top: 15, right: 30, left: 30 })
-      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
-    }
-  }
+
   
   build() {
     Column() {

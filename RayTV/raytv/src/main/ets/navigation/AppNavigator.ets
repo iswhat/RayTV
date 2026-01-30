@@ -1,8 +1,9 @@
-﻿// 应用导航服务 | Application navigation service
+// 应用导航服务 | Application navigation service
 // 管理页面路由、导航栈和页面导航 | Manage page routing, navigation stack, and page navigation
 
 import router from '@ohos.router';
 import StorageUtil, { StorageType } from '../common/util/StorageUtil';
+// Logger import removed as AnalyticsService was deleted
 
 // 页面路由常量 | Page route constants
 export class PageRoute {
@@ -145,6 +146,7 @@ export class NavigationParamsImpl implements NavigationParams {
   
   clone(): NavigationParams {
     const clone = new NavigationParamsImpl();
+    // 使用Object.keys替代for-in循环
     const keys = Object.keys(this._data);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -153,10 +155,11 @@ export class NavigationParamsImpl implements NavigationParams {
     return clone;
   }
   
-  // 杞崲涓烘櫘閫氬璞′互渚垮湪router涓娇鐢?// Convert to plain object for use in router
+  // 转换为普通对象以便在router中使用 | Convert to plain object for use in router
   toObject(): Record<string, string | number | boolean | null> {
-    // 鎵嬪姩鏋勫缓瀵硅薄锛岄伩鍏嶄娇鐢∣bject.fromEntries
+    // 手动构建对象，避免使用Object.fromEntries
     const result: Record<string, string | number | boolean | null> = {};
+    // 使用Object.keys替代for-in循环
     const keys = Object.keys(this._data);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -171,6 +174,7 @@ export class NavigationParamsImpl implements NavigationParams {
 
 export class AppNavigator {
   private static instance: AppNavigator | null = null;
+
   private storageUtil: StorageUtil;
   private navigationHistory: Array<NavigationHistoryItem> = []; // 使用Array<Type>语法
 
@@ -235,7 +239,8 @@ export class AppNavigator {
    * @param prefilledKeyword 预填关键词 | Prefilled keyword
    */
   async navigateToSearch(prefilledKeyword: string): Promise<void> {
-    // 纭繚鍏抽敭璇嶅缁堟槸瀛楃涓?- 浣跨敤绫诲瀷鍖栧璞?    const searchParams: NavigationParams = new NavigationParamsImpl();
+    // 确保关键词始终是字符串 - 使用类型化对象
+    const searchParams: NavigationParams = new NavigationParamsImpl();
     searchParams.setParam('keyword', prefilledKeyword || '');
     await this.navigateTo(PageRoute.SEARCH, searchParams);
   }
@@ -250,8 +255,6 @@ export class AppNavigator {
     await this.navigateTo(PageRoute.SEARCH_RESULT, searchParams);
   }
 
-
-
   /**
    * 导航到历史记录页面 | Navigate to history page
    */
@@ -264,7 +267,7 @@ export class AppNavigator {
    * @param category 分类信息 | Category information
    */
   async navigateToCategory(category: CategoryInfo): Promise<void> {
-    // 纭繚category瀵硅薄鏈夋纭殑绫诲瀷 - 鏄庣‘绫诲瀷鏍囪
+    // 确保category对象有正确的类型 - 明确类型标记
     const categoryParams: NavigationParams = new NavigationParamsImpl();
     categoryParams.setParam('id', category.id || '');
     categoryParams.setParam('name', category.name);
@@ -277,7 +280,7 @@ export class AppNavigator {
    * @param params 详情参数 | Detail parameters
    */
   async navigateToDetail(params: DetailParams): Promise<void> {
-    // 淇缁撴瀯绫诲瀷閿欒锛氬皢DetailParams杞崲涓篘avigationParams
+    // 修复结构类型错误：将DetailParams转换为NavigationParams
     const navParams: NavigationParams = new NavigationParamsImpl();
     navParams.setParam('id', params.id);
     navParams.setParam('siteKey', params.siteKey);
@@ -309,19 +312,17 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       this.addToHistory(historyItem);
 
-      // 使用新的router.pushUrl API
+      // 使用router.push API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.pushUrl({
+      await router.push({
         url: url,
         params: routerParams
       });
-    } catch (error) {
-        // 安全处理错误信息
-        const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`Navigation to ${route} failed:`, errorMsg);
-        throw new Error(`Navigation to ${route} failed: ${errorMsg}`);
+    } catch (error: Error) {
+      console.error('Navigation to ' + route + ' failed: ' + error.message);
+      throw new Error('Navigation to ' + route + ' failed: ' + error.message);
     }
   }
 
@@ -330,14 +331,12 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
-      // 使用router.back()方法
+      // 使用router.back方法
       await router.back();
       this.removeLastFromHistory();
-    } catch (error) {
-      console.error('Navigation back failed:', error);
-      // 安全处理错误信息
-      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Navigation back failed: ${errorMsg}`);
+    } catch (error: Error) {
+      console.error('Navigation back failed: ' + error.message);
+      throw new Error('Navigation back failed: ' + error.message);
     }
   }
 
@@ -346,18 +345,16 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用新的router.pushUrl API
-      await router.pushUrl({
+      // 使用新的router.push API
+      await router.push({
         url: this.getPageUrl(PageRoute.HOME),
         params: {} as Record<string, string | number | boolean | null>
       });
       this.navigationHistory = [];
       await this.saveNavigationHistory();
-    } catch (error) {
-      console.error('Navigation back to home failed:', error);
-      // 瀹夊叏澶勭悊閿欒淇℃伅
-      const errorMsg: string = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Navigation back to home failed: ${errorMsg}`);
+    } catch (error: Error) {
+      console.error('Navigation back to home failed: ' + error.message);
+      throw new Error('Navigation back to home failed: ' + error.message);
     }
   }
 
@@ -369,11 +366,11 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用新的router.replaceUrl API
+      // 使用新的router.replace API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.replaceUrl({
+      await router.replace({
         url: url,
         params: routerParams
       });
@@ -385,9 +382,9 @@ export class AppNavigator {
       historyItem.params = params;
       historyItem.timestamp = Date.now();
       this.replaceLastInHistory(historyItem);
-    } catch (error) {
-      console.error(`Navigation replace to ${route} failed:`, error);
-      throw new Error(`Navigation replace to ${route} failed`);
+    } catch (error: Error) {
+      console.error('Navigation replace to ' + route + ' failed: ' + error.message);
+      throw new Error('Navigation replace to ' + route + ' failed: ' + error.message);
     }
   }
 
@@ -474,9 +471,9 @@ export class AppNavigator {
       });
       // 转换为JSON字符串保存，避免类型不兼容问题
       const historyJson = JSON.stringify(serializableHistory);
-      await StorageUtil.save('navigationHistory', historyJson);
-    } catch (error) {
-      console.error('Failed to save navigation history:', error);
+      await StorageUtil.set('navigationHistory', historyJson);
+    } catch (error: Error) {
+      console.error('Failed to save navigation history: ' + error.message);
     }
   }
 
@@ -509,8 +506,8 @@ export class AppNavigator {
       } else {
         this.navigationHistory = [];
       }
-    } catch (error) {
-      console.error('Failed to load navigation history:', error);
+    } catch (error: Error) {
+      console.error('Failed to load navigation history: ' + error.message);
       this.navigationHistory = [];
     }
   }
@@ -549,4 +546,7 @@ export class AppNavigator {
     };
   }
 }
+
+// 添加默认导出
+export default AppNavigator;
 

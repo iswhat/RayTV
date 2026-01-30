@@ -60,7 +60,7 @@ export class TypeSafetyUtil {
       return error;
     }
     const errorStr = String(error);
-    return message ? new Error(`${message}: ${errorStr}`) : new Error(errorStr);
+    return message ? new Error(message + ': ' + errorStr) : new Error(errorStr);
   }
 
   /**
@@ -87,6 +87,7 @@ export class TypeSafetyUtil {
         return defaultValue;
       }
       const currentObj = current as Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>;
+      // 安全检查对象属性存在性，使用Object.prototype.hasOwnProperty.call
       if (!Object.prototype.hasOwnProperty.call(currentObj, key)) {
         return defaultValue;
       }
@@ -131,6 +132,7 @@ export class TypeSafetyUtil {
     if (!obj || typeof obj !== 'object') {
       return false;
     }
+    // 安全检查对象属性存在性，使用Object.prototype.hasOwnProperty.call
     return Object.prototype.hasOwnProperty.call(obj, property);
   }
 

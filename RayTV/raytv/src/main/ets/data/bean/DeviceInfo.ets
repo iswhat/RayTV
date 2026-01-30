@@ -141,7 +141,29 @@ export interface DeviceMediaCapabilities {
  * Device permission information interface | 设备权限信息接口
  */
 export interface DevicePermissionInfo {
-  [permission: string]: boolean; // Permission name and status | 权限名称和状态
+  permissions: Map<string, boolean>; // Permission map | 权限映射
+  hasPermission(permission: string): boolean; // Check if has permission | 检查是否有权限
+  setPermission(permission: string, granted: boolean): void; // Set permission status | 设置权限状态
+  getAllPermissions(): Map<string, boolean>; // Get all permissions | 获取所有权限
+}
+
+/**
+ * Device permission information implementation class | 设备权限信息实现类
+ */
+export class DevicePermissionInfoImpl implements DevicePermissionInfo {
+  permissions: Map<string, boolean> = new Map();
+  
+  hasPermission(permission: string): boolean {
+    return this.permissions.get(permission) || false;
+  }
+  
+  setPermission(permission: string, granted: boolean): void {
+    this.permissions.set(permission, granted);
+  }
+  
+  getAllPermissions(): Map<string, boolean> {
+    return this.permissions;
+  }
 }
 
 /**

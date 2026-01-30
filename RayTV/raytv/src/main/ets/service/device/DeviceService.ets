@@ -1,13 +1,13 @@
 // 设备服务 | Device service
 // 提供设备信息管理、能力检测和状态监控功能 | Provides device information management, capability detection, and status monitoring functionality
 
-import Logger from '../../common/util/Logger';
+
 import DeviceInfoRepository from '../../data/repository/DeviceInfoRepository';
 import ConfigService from '../config/ConfigService';
-import { DeviceInfo, DeviceType, DeviceStatus, DeviceCapability } from '../../data/bean/DeviceInfo';
-import TypeSafetyUtil from '../../common/util/TypeSafetyUtil';
+import { DeviceInfo, DeviceType, DeviceStatus, DeviceCapability, DevicePermissionInfoImpl } from '../../data/bean/DeviceInfo';
+import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 
-const TAG = 'DeviceService';
+
 
 // 设备能力检查信息接口 | Device capability check information interface
 export interface CapabilityDetails {
@@ -16,7 +16,8 @@ export interface CapabilityDetails {
   maxValue?: number;
   minValue?: number;
   supportedFormats?: string[];
-  properties?: Record<string, string | number | boolean>;
+  // 移除索引签名，使用明确的属性 | Remove indexed signature, use explicit properties
+  properties?: Map<string, string | number | boolean>;
 }
 
 // 设备能力检查结果 | Device capability check result
@@ -27,17 +28,13 @@ export interface CapabilityCheckResult {
 }
 
 export default class DeviceService {
-  private static instance: DeviceService;
-  private deviceInfoRepository: DeviceInfoRepository;
-  private configService: ConfigService;
+  private static instance: DeviceService | null = null;
   private cachedDeviceInfo: DeviceInfo | null = null;
   private deviceListeners: Array<(info: DeviceInfo) => void> = [];
   private isInitialized: boolean = false;
   private lastCapabilityCheckTime: number = 0;
 
   private constructor() {
-    this.deviceInfoRepository = DeviceInfoRepository.getInstance();
-    this.configService = ConfigService.getInstance();
     this.initialize();
   }
 
@@ -57,21 +54,21 @@ export default class DeviceService {
   public async initialize(): Promise<void> {
     try {
       // 加载设备信息 | Load device information
-      this.cachedDeviceInfo = await this.deviceInfoRepository.getDeviceInfo();
+      this.cachedDeviceInfo = await DeviceInfoRepository.getInstance().getDeviceInfo();
       
       // 如果没有设备信息，收集并保存 | If no device information, collect and save
       if (!this.cachedDeviceInfo) {
         this.cachedDeviceInfo = await this.collectDeviceInfo();
-        await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
+        await DeviceInfoRepository.getInstance().saveDeviceInfo(this.cachedDeviceInfo);
       }
       
       // 定期更新设备信息 | Update device information regularly
       this.scheduleDeviceInfoUpdate();
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Device service initialized');
-    } catch (error) {
-      Logger.error(TAG, 'Failed to initialize device service', error instanceof Error ? error : new Error(String(error)));
+      console.log('Device service initialized');
+    } catch (error: Error) {
+      console.error('Failed to initialize device service', error);
       // 创建基本的设备信息作为后备 | Create basic device information as fallback
       this.cachedDeviceInfo = this.createDefaultDeviceInfo();
       this.isInitialized = true;
@@ -82,7 +79,7 @@ export default class DeviceService {
    * 收集设备信息 | Collect device information
    */
   private async collectDeviceInfo(): Promise<DeviceInfo> {
-    Logger.info(TAG, 'Collecting device information');
+    console.log('Collecting device information');
     
     try {
       // 设备标识 | Device identification
@@ -128,7 +125,7 @@ export default class DeviceService {
           spatialAudioSupported: false,
           hardwareAcceleration: false
         },
-        devicePermissionInfo: {},
+        devicePermissionInfo: new DevicePermissionInfoImpl(),
         deviceAppInfo: {
           packageName: 'com.example.raytv',
           versionName: '1.0.0',
@@ -145,10 +142,10 @@ export default class DeviceService {
         customProperties: new Map()
       };
       
-      Logger.info(TAG, 'Device information collected: ' + deviceInfo.deviceName + ' (' + deviceInfo.deviceType + ')');
+      console.log('Device information collected: ' + deviceInfo.deviceName + ' (' + deviceInfo.deviceType + ')');
       return deviceInfo;
-    } catch (error) {
-      Logger.error(TAG, 'Error collecting device information: ' + (error instanceof Error ? error.message : String(error)));
+    } catch (error: Error) {
+      console.error('Error collecting device information: ' + error.message);
       return this.createDefaultDeviceInfo();
     }
   }
@@ -197,7 +194,7 @@ export default class DeviceService {
         spatialAudioSupported: false,
         hardwareAcceleration: false
       },
-      devicePermissionInfo: {},
+      devicePermissionInfo: new DevicePermissionInfoImpl(),
       deviceAppInfo: {
         packageName: 'com.example.raytv',
         versionName: '1.0.0',
@@ -219,7 +216,7 @@ export default class DeviceService {
    * 生成设备ID | Generate device ID
    */
   private async generateDeviceId(): Promise<string> {
-    return `device-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    return "device-" + Date.now() + "-" + Math.random().toString(36).substring(2, 9);
   }
 
   /**
@@ -253,8 +250,8 @@ export default class DeviceService {
     try {
       // 使用HarmonyOS设备信息API获取制造商 | Use HarmonyOS device information API to get manufacturer
       return 'Unknown Manufacturer';
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get manufacturer', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get manufacturer', error);
       return 'Unknown';
     }
   }
@@ -266,8 +263,8 @@ export default class DeviceService {
     try {
       // 使用HarmonyOS设备信息API获取设备型号 | Use HarmonyOS device information API to get device model
       return 'Unknown Model';
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get device model', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get device model', error);
       return 'Unknown';
     }
   }
@@ -279,8 +276,8 @@ export default class DeviceService {
     try {
       // 使用HarmonyOS设备信息API获取系统版本 | Use HarmonyOS device information API to get system version
       return 'Unknown';
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get OS version', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get OS version', error);
       return 'Unknown';
     }
   }
@@ -354,8 +351,8 @@ export default class DeviceService {
         total: 1024 * 1024 * 1024 * 100, // 100GB
         available: 1024 * 1024 * 1024 * 50  // 50GB可用
       };
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get storage info', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get storage info', error);
       return {
         total: 0,
         available: 0
@@ -373,8 +370,8 @@ export default class DeviceService {
         total: 1024 * 1024 * 1024 * 4, // 4GB
         available: 1024 * 1024 * 1024 * 2  // 2GB可用
       };
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get memory info', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get memory info', error);
       return {
         total: 0,
         available: 0
@@ -385,14 +382,14 @@ export default class DeviceService {
   /**
    * 获取网络信息 | Get network information
    */
-  private async getNetworkInfo(): Promise<any> {
+  private async getNetworkInfo(): Promise<{ type: string }> {
     try {
       // 实际网络信息获取逻辑 | Actual network information获取 logic
       return {
         type: 'none'
       };
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get network info', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get network info', error);
       return {
         type: 'none'
       };
@@ -406,8 +403,8 @@ export default class DeviceService {
     try {
       // 实际音频设备获取逻辑 | Actual audio devices获取 logic
       return ['Built-in Speaker'];
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get audio devices', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get audio devices', error);
       return [];
     }
   }
@@ -419,21 +416,33 @@ export default class DeviceService {
     try {
       // 实际视频输出获取逻辑 | Actual video outputs获取 logic
       return ['Built-in Display'];
-    } catch (error) {
-      Logger.error(TAG, 'Failed to get video outputs', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to get video outputs', error);
       return [];
     }
   }
 
   /**
+   * 系统属性接口 | System properties interface
+   */
+  interface SystemProperties {
+    // 使用Map替代索引签名 | Use Map instead of indexed signature
+    properties: Map<string, string>;
+  }
+  
+  /**
    * 获取系统属性 | Get system properties
    */
-  private getSystemProperties(): Record<string, string> {
+  private getSystemProperties(): SystemProperties {
     try {
       // 实际系统属性获取逻辑 | Actual system properties获取 logic
-      return {};
+      return {
+        properties: new Map()
+      };
     } catch {
-      return {};
+      return {
+        properties: new Map()
+      };
     }
   }
 
@@ -454,11 +463,11 @@ export default class DeviceService {
     try {
       const updatedInfo = await this.collectDeviceInfo();
       this.cachedDeviceInfo = updatedInfo;
-      await this.deviceInfoRepository.saveDeviceInfo(updatedInfo);
+      await DeviceInfoRepository.getInstance().saveDeviceInfo(updatedInfo);
       this.notifyDeviceInfoChanged();
-      Logger.info(TAG, 'Device info refreshed');
-    } catch (error) {
-      Logger.error(TAG, 'Failed to refresh device info', error instanceof Error ? error : new Error(String(error)));
+      console.log('Device info refreshed');
+    } catch (error: Error) {
+      console.error('Failed to refresh device info', error);
     }
   }
 
@@ -473,22 +482,98 @@ export default class DeviceService {
   }
 
   /**
+   * 设备信息更新接口 | Device info update interface
+   */
+  interface DeviceInfoUpdate {
+    deviceName?: string;
+    deviceType?: DeviceType;
+    manufacturer?: string;
+    model?: string;
+    osVersion?: string;
+    screenResolution?: string;
+    screenDensity?: number;
+    supportedVideoCodecs?: string[];
+    supportedAudioCodecs?: string[];
+    cpuCores?: number;
+    memorySize?: number;
+    storageSize?: number;
+    ipAddress?: string;
+    macAddress?: string;
+    capabilities?: string[];
+    properties?: Map<string, string | number | boolean>;
+  }
+  
+  /**
    * 更新设备信息 | Update device information
    */
-  public async updateDeviceInfo(info: Partial<DeviceInfo>): Promise<void> {
+  public async updateDeviceInfo(info: DeviceInfoUpdate): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
     
     if (this.cachedDeviceInfo) {
-      this.cachedDeviceInfo = {
-        ...this.cachedDeviceInfo,
-        ...info,
-        updatedAt: Date.now()
-      };
-      await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
+      // 手动构建更新后的设备信息对象 | Manually construct updated device info object
+      const updatedInfo = this.createUpdatedDeviceInfo(this.cachedDeviceInfo, info);
+      updatedInfo.updatedAt = Date.now();
+      this.cachedDeviceInfo = updatedInfo;
+      await DeviceInfoRepository.getInstance().saveDeviceInfo(this.cachedDeviceInfo);
       this.notifyDeviceInfoChanged();
     }
+  }
+
+  /**
+   * 创建更新后的设备信息对象 | Create updated device info object
+   */
+  private createUpdatedDeviceInfo(base: DeviceInfo, updates: DeviceInfoUpdate): DeviceInfo {
+    // 手动复制基础对象 | Manually copy base object
+    const result: DeviceInfo = {
+      deviceId: base.deviceId,
+      deviceName: base.deviceName,
+      deviceType: base.deviceType,
+      osVersion: base.osVersion,
+      apiVersion: base.apiVersion,
+      appVersion: base.appVersion,
+      deviceNetworkInfo: base.deviceNetworkInfo,
+      deviceHardwareInfo: base.deviceHardwareInfo,
+      deviceDisplayInfo: base.deviceDisplayInfo,
+      deviceMediaCapabilities: base.deviceMediaCapabilities,
+      devicePermissionInfo: base.devicePermissionInfo,
+      deviceAppInfo: base.deviceAppInfo,
+      status: base.status,
+      capabilities: base.capabilities,
+      isTvMode: base.isTvMode,
+      isRemoteControlAvailable: base.isRemoteControlAvailable,
+      isMultiDeviceSupport: base.isMultiDeviceSupport,
+      isPrimaryDevice: base.isPrimaryDevice,
+      createdAt: base.createdAt,
+      updatedAt: base.updatedAt,
+      customProperties: base.customProperties
+    };
+    
+    // 手动应用更新 | Manually apply updates
+    if (updates.deviceId !== undefined) result.deviceId = updates.deviceId;
+    if (updates.deviceName !== undefined) result.deviceName = updates.deviceName;
+    if (updates.deviceType !== undefined) result.deviceType = updates.deviceType;
+    if (updates.osVersion !== undefined) result.osVersion = updates.osVersion;
+    if (updates.apiVersion !== undefined) result.apiVersion = updates.apiVersion;
+    if (updates.appVersion !== undefined) result.appVersion = updates.appVersion;
+    if (updates.deviceNetworkInfo !== undefined) result.deviceNetworkInfo = updates.deviceNetworkInfo;
+    if (updates.deviceHardwareInfo !== undefined) result.deviceHardwareInfo = updates.deviceHardwareInfo;
+    if (updates.deviceDisplayInfo !== undefined) result.deviceDisplayInfo = updates.deviceDisplayInfo;
+    if (updates.deviceMediaCapabilities !== undefined) result.deviceMediaCapabilities = updates.deviceMediaCapabilities;
+    if (updates.devicePermissionInfo !== undefined) result.devicePermissionInfo = updates.devicePermissionInfo;
+    if (updates.deviceAppInfo !== undefined) result.deviceAppInfo = updates.deviceAppInfo;
+    if (updates.status !== undefined) result.status = updates.status;
+    if (updates.capabilities !== undefined) result.capabilities = updates.capabilities;
+    if (updates.isTvMode !== undefined) result.isTvMode = updates.isTvMode;
+    if (updates.isRemoteControlAvailable !== undefined) result.isRemoteControlAvailable = updates.isRemoteControlAvailable;
+    if (updates.isMultiDeviceSupport !== undefined) result.isMultiDeviceSupport = updates.isMultiDeviceSupport;
+    if (updates.isPrimaryDevice !== undefined) result.isPrimaryDevice = updates.isPrimaryDevice;
+    if (updates.createdAt !== undefined) result.createdAt = updates.createdAt;
+    if (updates.updatedAt !== undefined) result.updatedAt = updates.updatedAt;
+    if (updates.customProperties !== undefined) result.customProperties = updates.customProperties;
+    
+    return result;
   }
 
   /**
@@ -521,7 +606,13 @@ export default class DeviceService {
       await this.initialize();
     }
     
-    return [...(this.cachedDeviceInfo as DeviceInfo).capabilities];
+    // 手动复制数组 | Manually copy array
+    const capabilities = (this.cachedDeviceInfo as DeviceInfo).capabilities;
+    const result: DeviceCapability[] = [];
+    for (let i = 0; i < capabilities.length; i++) {
+      result.push(capabilities[i]);
+    }
+    return result;
   }
 
   /**
@@ -534,8 +625,11 @@ export default class DeviceService {
     
     if (this.cachedDeviceInfo) {
       // 使用类型安全的方式存储自定义属性 | Store custom properties in a type-safe way
-      this.cachedDeviceInfo.customProperties[key] = TypeSafetyUtil.safeStringify(value);
-      await this.deviceInfoRepository.saveDeviceInfo(this.cachedDeviceInfo);
+      if (!this.cachedDeviceInfo.customProperties) {
+        this.cachedDeviceInfo.customProperties = new Map();
+      }
+      this.cachedDeviceInfo.customProperties.set(key, JSON.stringify(value));
+      await DeviceInfoRepository.getInstance().saveDeviceInfo(this.cachedDeviceInfo);
       this.notifyDeviceInfoChanged();
     }
   }
@@ -548,8 +642,9 @@ export default class DeviceService {
       await this.initialize();
     }
     
-    if (this.cachedDeviceInfo) {
-      return (this.cachedDeviceInfo.customProperties[key] as T) || defaultValue;
+    if (this.cachedDeviceInfo && this.cachedDeviceInfo.customProperties) {
+      const value = this.cachedDeviceInfo.customProperties.get(key);
+      return value ? JSON.parse(value) as T : defaultValue;
     }
     
     return defaultValue;
@@ -575,12 +670,36 @@ export default class DeviceService {
   private notifyDeviceInfoChanged(): void {
     if (!this.cachedDeviceInfo) return;
     
-    const infoCopy: DeviceInfo = { ...this.cachedDeviceInfo };
+    // 手动创建设备信息副本 | Manually create device info copy
+    const infoCopy: DeviceInfo = {
+      deviceId: this.cachedDeviceInfo.deviceId,
+      deviceName: this.cachedDeviceInfo.deviceName,
+      deviceType: this.cachedDeviceInfo.deviceType,
+      osVersion: this.cachedDeviceInfo.osVersion,
+      apiVersion: this.cachedDeviceInfo.apiVersion,
+      appVersion: this.cachedDeviceInfo.appVersion,
+      deviceNetworkInfo: this.cachedDeviceInfo.deviceNetworkInfo,
+      deviceHardwareInfo: this.cachedDeviceInfo.deviceHardwareInfo,
+      deviceDisplayInfo: this.cachedDeviceInfo.deviceDisplayInfo,
+      deviceMediaCapabilities: this.cachedDeviceInfo.deviceMediaCapabilities,
+      devicePermissionInfo: this.cachedDeviceInfo.devicePermissionInfo,
+      deviceAppInfo: this.cachedDeviceInfo.deviceAppInfo,
+      status: this.cachedDeviceInfo.status,
+      capabilities: this.cachedDeviceInfo.capabilities,
+      isTvMode: this.cachedDeviceInfo.isTvMode,
+      isRemoteControlAvailable: this.cachedDeviceInfo.isRemoteControlAvailable,
+      isMultiDeviceSupport: this.cachedDeviceInfo.isMultiDeviceSupport,
+      isPrimaryDevice: this.cachedDeviceInfo.isPrimaryDevice,
+      createdAt: this.cachedDeviceInfo.createdAt,
+      updatedAt: this.cachedDeviceInfo.updatedAt,
+      customProperties: this.cachedDeviceInfo.customProperties
+    };
+    
     this.deviceListeners.forEach(listener => {
       try {
         listener(infoCopy);
-      } catch (error) {
-        Logger.error(TAG, 'Error in device info listener', error instanceof Error ? error : new Error(String(error)));
+      } catch (error: Error) {
+        console.error('Error in device info listener', error);
       }
     });
   }
@@ -594,8 +713,8 @@ export default class DeviceService {
       // 将字节转换为MB | Convert bytes to MB
       const availableMB = storageInfo.available / (1024 * 1024);
       return availableMB >= minRequiredMB;
-    } catch (error) {
-      Logger.error(TAG, 'Failed to check storage', error instanceof Error ? error : new Error(String(error)));
+    } catch (error: Error) {
+      console.error('Failed to check storage', error);
       return false;
     }
   }

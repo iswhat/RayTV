@@ -1,8 +1,9 @@
 // 媒体服务 | Media service
 // 实现媒体管理功能，包括播放记录、收藏管理等 | Implement media management functions, including playback records, collection management, etc.
 
-import Logger from '../../common/util/Logger';
+
 import ApiResponse from '../../data/dto/ApiResponse';
+import { SiteService } from '../spider/SiteService';
 
 // 常量定义 | Constant definition
 const TAG = 'MediaService';
@@ -27,6 +28,15 @@ export interface MediaInfo {
   addedAt: number;
 }
 
+// 站点返回的推荐内容接口 | Site returned recommended content interface
+export interface SiteRecommendedItem {
+  id: string;
+  title: string;
+  cover?: string;
+  type: string;
+  rating?: string;
+}
+
 // 推荐内容接口 | Recommended content interface
 export interface RecommendedContent {
   id: string;
@@ -42,7 +52,7 @@ export interface RecommendedContent {
  * 实现媒体管理功能，包括播放记录、收藏管理等 | Implement media management functions, including playback records, collection management, etc.
  */
 export class MediaService {
-  private static instance: MediaService;
+  private static instance: MediaService | null = null;
   private playbackRecords: Map<string, PlaybackRecord> = new Map();
   private collections: Map<string, MediaInfo> = new Map();
   private isInitialized: boolean = false;
@@ -74,7 +84,7 @@ export class MediaService {
     }
 
     try {
-      Logger.info(TAG, 'Initializing media service...');
+      console.info(TAG + ': Initializing media service...');
       
       // 初始化数据结构 | Initialize data structure
       this.playbackRecords = new Map();
@@ -84,11 +94,10 @@ export class MediaService {
       this.startProgressSync();
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Media service initialized successfully');
-    } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      Logger.error(TAG, `Failed to initialize media service: ${errorObj.message}`);
-      throw errorObj;
+      console.info(TAG + ': Media service initialized successfully');
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to initialize media service: ${error.message}`);
+      throw error;
     }
   }
 
@@ -99,7 +108,7 @@ export class MediaService {
     // 实现进度同步逻辑 | Implement progress sync logic
     this.progressSyncInterval = setInterval(() => {
       // 简单的进度同步日志，不持久化存储 | Simple progress sync log, not persistent storage
-      Logger.info(TAG, `Progress sync completed at ${new Date().toISOString()}`);
+      console.info(TAG + `: Progress sync completed at ${new Date().toISOString()}`);
     }, 30000); // 每30秒同步一次 | Sync every 30 seconds
   }
 
@@ -174,17 +183,16 @@ export class MediaService {
    */
   public async getRecommendedContent(): Promise<ApiResponse<RecommendedContent[]>> {
     try {
-      Logger.info(TAG, 'Getting recommended content...');
+      console.info(TAG + ': Getting recommended content...');
       
       // 从实际站点获取推荐内容 | Get recommended content from actual sites
       // 1. 获取所有启用的站点 | 1. Get all enabled sites
-      const SiteService = await import('../spider/SiteService');
-      const siteService = SiteService.SiteService.getInstance();
+      const siteService = SiteService.getInstance();
       const enabledSites = await siteService.getEnabledSites();
       
       // 2. 如果没有启用的站点，返回空列表 | 2. If no enabled sites, return empty list
       if (enabledSites.length === 0) {
-        Logger.warn(TAG, 'No enabled sites found');
+        console.warn(TAG + ': No enabled sites found');
         return ApiResponse.success([], '获取推荐内容成功');
       }
       
@@ -194,23 +202,32 @@ export class MediaService {
       for (const site of enabledSites) {
         try {
           // 调用站点的推荐内容方法 | Call site's recommendation method
-          const siteContent = await siteService.callSiteMethod<RecommendedContent[]> (
+          const siteContent = await siteService.callSiteMethod(
             site.key,
             'getRecommendations',
             [],
             { timeout: 10000 }
-          );
+          ) as SiteRecommendedItem[];
           
           if (Array.isArray(siteContent) && siteContent.length > 0) {
             // 添加站点标识并合并结果 | Add site identifier and merge results
-            const contentWithSite = siteContent.map(item => ({
-              ...item,
-              siteKey: site.key
-            }));
-            recommendedContent.push(...contentWithSite);
+            for (let i = 0; i < siteContent.length; i++) {
+              const item = siteContent[i];
+              if (item && typeof item === 'object') {
+                const contentWithSite: RecommendedContent = {
+                  id: item.id || '',
+                  title: item.title || '',
+                  cover: item.cover,
+                  type: item.type || '',
+                  siteKey: site.key,
+                  rating: item.rating
+                };
+                recommendedContent.push(contentWithSite);
+              }
+            }
           }
-        } catch (error) {
-          Logger.warn(TAG, `Failed to get recommendations from site ${site.name}: ${error instanceof Error ? error.message : String(error)}`);
+        } catch (error: Error) {
+          console.warn(TAG + `: Failed to get recommendations from site ${site.name}: ${error.message}`);
           // 继续处理下一个站点，不影响整体结果 | Continue processing next site, not affecting overall result
           continue;
         }
@@ -218,14 +235,14 @@ export class MediaService {
       
       // 4. 如果没有获取到推荐内容，返回空数据 | 4. If no recommended content obtained, return empty data
       if (recommendedContent.length === 0) {
-        Logger.warn(TAG, 'No recommended content found from any site');
+        console.warn(TAG + ': No recommended content found from any site');
         return ApiResponse.success([], '获取推荐内容成功');
       }
       
-      Logger.info(TAG, `Retrieved ${recommendedContent.length} recommended content items from ${enabledSites.length} sites`);
+      console.info(TAG + `: Retrieved ${recommendedContent.length} recommended content items from ${enabledSites.length} sites`);
       return ApiResponse.success(recommendedContent, '获取推荐内容成功');
-    } catch (error) {
-      Logger.error(TAG, `Failed to get recommended content: ${error instanceof Error ? error.message : String(error)}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to get recommended content: ${error.message}`);
       return ApiResponse.error(500, '获取推荐内容失败');
     }
   }
@@ -245,7 +262,7 @@ export class MediaService {
     this.collections.clear();
 
     this.isInitialized = false;
-    Logger.info(TAG, 'Media service closed successfully');
+    console.info(TAG + ': Media service closed successfully');
   }
 }
 

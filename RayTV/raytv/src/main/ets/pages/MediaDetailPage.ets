@@ -2,9 +2,13 @@
 // 媒体详情页面组件 - Media detail page component
 
 import { AppNavigator } from '../navigation/AppNavigator';
-import Logger from '../common/util/Logger';
+// Logger import removed as AnalyticsService was deleted
 import { Vod } from '../data/bean/Vod';
-import { Column, Row, Grid, GridItem, Button, Text, Scroll, ForEach, FlexAlign, HorizontalAlign, VerticalAlign, ScrollDirection } from '@kit.ArkUI';
+// 移除 @ohos.ui 导入，因为它在当前环境中不可用
+import RepositoryFactory from '../data/repository/RepositoryFactory';
+import VodRepository from '../data/repository/VodRepository';
+import ApiResponse from '../data/dto/ApiResponse';
+import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, VerticalAlign } from '@ohos.components';
 
 // 播放源接口 - Play source interface
 export interface PlaySource {
@@ -30,6 +34,8 @@ export interface MediaItem {
 @Component
 struct MediaDetailPage {
   private readonly TAG: string = 'MediaDetailPage';
+  private vodRepository: VodRepository | null = null;
+  
   @State media: Vod = {
     id: '',
     name: '',
@@ -51,9 +57,12 @@ struct MediaDetailPage {
   @State filteredSources: PlaySource[] = [];
   @State relatedMedia: MediaItem[] = [];
   @State activeTab: string = 'info';
+  @State isLoading: boolean = true;
 
-  aboutToAppear() {
-    // 模拟加载媒体详情 - Simulate loading media details
+  aboutToAppear(): void {
+    // 初始化仓库 - Initialize repository
+    this.vodRepository = VodRepository.getInstance();
+    // 加载媒体详情 - Load media details
     this.loadMediaDetail();
     this.loadEpisodes();
     this.loadSources();
@@ -63,60 +72,99 @@ struct MediaDetailPage {
   /**
    * 加载媒体详情 - Load media details
    */
-  private loadMediaDetail(): void {
-    // 模拟加载媒体详情数据 - Simulate loading media details data
-    this.media = {
-      id: '1',
-      name: '示例影片',
-      type: '电影',
-      area: '中国',
-      lang: '普通话',
-      year: '2023',
-      score: '8.5',
-      status: '已完结',
-      desc: '这是一部示例电影，用于展示媒体详情页面。',
-      cover: '',
-      tag: '动作,剧情',
-      url: '',
-      sourceKey: 'test',
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
+  private async loadMediaDetail(): Promise<void> {
+    try {
+      this.isLoading = true;
+      // 实际实现应该从路由参数获取媒体ID - Actual implementation should get media ID from route params
+      const mediaId = this.getMediaIdFromParams();
+      
+      if (!mediaId) {
+        throw new Error('Media ID not found');
+      }
+      
+      // 模拟数据 - Mock data since getVodDetail is not implemented
+      this.media = {
+        id: mediaId,
+        name: '测试电影',
+        type: 'movie',
+        area: '中国大陆',
+        lang: '中文',
+        year: '2024',
+        score: '9.5',
+        status: '已完结',
+        desc: '这是一部测试电影，用于演示媒体详情页面。',
+        cover: 'https://via.placeholder.com/300x450?text=Test+Movie',
+        tag: '动作,科幻',
+        url: 'https://example.com/test-movie',
+        sourceKey: 'test_source',
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime()
+      };
+    } catch (error: Error) {
+      console.error(`加载媒体详情失败: ${error.message} | Failed to load media detail: ${error.message}`);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   /**
    * 加载剧集列表 - Load episode list
    */
-  private loadEpisodes(): void {
-    // 模拟加载剧集数据 - Simulate loading episode data
-    this.episodes = [
-      { id: '1', name: '第1集', url: '' },
-      { id: '2', name: '第2集', url: '' },
-      { id: '3', name: '第3集', url: '' }
-    ];
+  private async loadEpisodes(): Promise<void> {
+    try {
+      // 模拟数据 - Mock data since getEpisodes is not implemented
+      this.episodes = [
+        { id: '1', name: '第1集', url: 'https://example.com/episode1' },
+        { id: '2', name: '第2集', url: 'https://example.com/episode2' },
+        { id: '3', name: '第3集', url: 'https://example.com/episode3' },
+        { id: '4', name: '第4集', url: 'https://example.com/episode4' },
+        { id: '5', name: '第5集', url: 'https://example.com/episode5' },
+        { id: '6', name: '第6集', url: 'https://example.com/episode6' }
+      ];
+    } catch (error: Error) {
+      console.error(`加载剧集列表失败: ${error.message} | Failed to load episodes: ${error.message}`);
+    }
   }
 
   /**
    * 加载播放源 - Load play sources
    */
-  private loadSources(): void {
-    // 模拟加载播放源数据 - Simulate loading play source data
-    this.filteredSources = [
-      { name: '播放源1', quality: '1080P' },
-      { name: '播放源2', quality: '720P' }
-    ];
+  private async loadSources(): Promise<void> {
+    try {
+      // 模拟数据 - Mock data since getPlaySources is not implemented
+      this.filteredSources = [
+        { name: '播放源1', quality: '蓝光' },
+        { name: '播放源2', quality: '高清' },
+        { name: '播放源3', quality: '标清' }
+      ];
+    } catch (error: Error) {
+      console.error(`加载播放源失败: ${error.message} | Failed to load play sources: ${error.message}`);
+    }
   }
 
   /**
    * 加载相关推荐 - Load related recommendations
    */
-  private loadRelatedMedia(): void {
-    // 模拟加载相关推荐数据 - Simulate loading related recommendation data
-    this.relatedMedia = [
-      { title: '相关影片1', cover: '', url: '' },
-      { title: '相关影片2', cover: '', url: '' },
-      { title: '相关影片3', cover: '', url: '' }
-    ];
+  private async loadRelatedMedia(): Promise<void> {
+    try {
+      // 模拟数据 - Mock data since getRelatedMedia is not implemented
+      this.relatedMedia = [
+        { title: '相关电影1', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+1', url: 'https://example.com/related1' },
+        { title: '相关电影2', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+2', url: 'https://example.com/related2' },
+        { title: '相关电影3', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+3', url: 'https://example.com/related3' }
+      ];
+    } catch (error: Error) {
+      console.error(`加载相关推荐失败: ${error.message} | Failed to load related media: ${error.message}`);
+    }
+  }
+  
+  /**
+   * 从路由参数获取媒体ID - Get media ID from route params
+   */
+  private getMediaIdFromParams(): string | null {
+    // 实际实现应该从路由参数获取媒体ID - Actual implementation should get media ID from route params
+    // 由于router模块不可用，返回默认值 - Return default value since router module is not available
+    return '1'; // 默认值用于演示 - Default value for demonstration
   }
 
   /**
@@ -125,24 +173,30 @@ struct MediaDetailPage {
   @Builder
   private renderEpisodes(): void {
     // 剧集网格布局 - Episode grid layout
-    Grid() {
+    Column() {
+      // 使用ForEach渲染剧集列表 - Use ForEach to render episode list
       ForEach(this.episodes, (episode: Episode, index: number) => {
-        GridItem() {
-          Button(episode.name || `${index + 1}`)
-            .backgroundColor('#66BB6A')
-            .fontColor('#FFFFFF')
-            .padding(15)
-            .borderRadius(8)
-            .fontSize(16)
-            .onClick(() => {
-              this.handleEpisodeClick(episode);
-            })
+        if (index % 6 === 0) {
+          // 每6个剧集开始一个新行 - Start a new row every 6 episodes
+          Row() {
+            ForEach(this.episodes.slice(index, index + 6), (ep: Episode, idx: number) => {
+              Button(ep.name || (index + idx + 1).toString())
+                .backgroundColor('#66BB6A')
+                .fontColor('#FFFFFF')
+                .padding(15)
+                .borderRadius(8)
+                .fontSize(16)
+                .flexGrow(1)
+                .margin({ right: idx < 5 ? 10 : 0 })
+                .onClick(() => {
+                  this.handleEpisodeClick(ep);
+                })
+            }, (ep: Episode) => ep.id)
+          }
+          .margin({ bottom: 10 })
         }
-      });
+      }, (episode: Episode) => episode.id)
     }
-    .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr')
-    .columnsGap(10)
-    .rowsGap(10)
     .width('100%')
     .height('auto');
   }
@@ -152,45 +206,52 @@ struct MediaDetailPage {
    */
   @Builder
   private renderPlaySources(): void {
-    if (this.filteredSources?.length === 0) {
-      Column() {
-        Text('暂无播放源或没有匹配的片源')
-          .fontSize(24)
-          .fontColor('#FFFFFF')
-      }
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
-      .padding(20);
-    } else {
-      Column() {
-        ForEach(this.filteredSources, (source: PlaySource) => {
-          Button() {
-            Row() {
-              Column() {
-                Text(source.name || "")
-                  .fontSize(20)
-                  .fontColor('#FFFFFF');
-                Text(source.quality || "")
-                  .fontSize(16)
-                  .fontColor('#FFFFFF');
-              }
-              .alignItems(HorizontalAlign.Start);
-
-              Text('播')
-                .fontSize(24)
+    Column() {
+      ForEach(this.filteredSources, (source: PlaySource) => {
+        Button() {
+          Row() {
+            Column() {
+              Text(source.name || "")
+                .fontSize(20)
+                .fontColor('#FFFFFF');
+              Text(source.quality || "")
+                .fontSize(16)
                 .fontColor('#FFFFFF');
             }
-            .justifyContent(FlexAlign.SpaceBetween)
-            .alignItems(VerticalAlign.Center)
-            .width('100%');
+            .alignItems(HorizontalAlign.Start);
+
+            Text('播')
+              .fontSize(24)
+              .fontColor('#FFFFFF');
           }
-          .backgroundColor('#66BB6A')
-          .padding(15)
-          .borderRadius(10)
-          .onClick(() => this.handlePlayClick(this.episodes[0] || { id: '', name: '', url: '' }, source));
+          .justifyContent(FlexAlign.SpaceBetween)
+          .alignItems(VerticalAlign.Center)
+          .width('100%');
+        }
+        .backgroundColor('#66BB6A')
+        .padding(15)
+        .borderRadius(10)
+        .onClick(() => {
+          const episode = this.episodes.length > 0 ? this.episodes[0] : { id: '', name: '', url: '' };
+          this.handlePlayClick(episode, source);
         });
-      }
+      }, (source: PlaySource) => source.name);
     }
+  }
+  
+  /**
+   * 渲染空播放源提示 - Render empty play sources hint
+   */
+  @Builder
+  private renderEmptyPlaySources(): void {
+    Column() {
+      Text('暂无播放源或没有匹配的片源')
+        .fontSize(24)
+        .fontColor('#FFFFFF')
+    }
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center)
+    .padding(20);
   }
 
   /**
@@ -206,37 +267,35 @@ struct MediaDetailPage {
         .margin({ bottom: 15 });
       
       // 横向滚动的相关推荐列表 - Horizontal scrolling related recommendation list
-      Scroll() {
-        Row() {
-          ForEach(this.relatedMedia, (media: MediaItem) => {
+      Row() {
+        ForEach(this.relatedMedia, (media: MediaItem) => {
+          Column() {
+            // 相关推荐封面 - Related recommendation cover
             Column() {
-              // 相关推荐封面 - Related recommendation cover
-              Column() {
-                Text('封面')
-                  .fontSize(16)
-                  .fontColor('#666666');
-              }
-              .width(150)
-              .height(200)
-              .backgroundColor('#E0E0E0')
-              .borderRadius(8)
-              .justifyContent(FlexAlign.Center)
-              .alignItems(HorizontalAlign.Center);
-              
-              // 相关推荐标题 - Related recommendation title
-              Text(media.title || "")
+              Text('封面')
                 .fontSize(16)
-                .fontColor('#FFFFFF')
-                .maxLines(2)
-                .width(150);
+                .fontColor('#666666');
             }
             .width(150)
-            .margin({ right: 15 })
-            .onClick(() => this.handleRelatedMediaClick(media));
-          });
-        }
+            .height(200)
+            .backgroundColor('#E0E0E0')
+            .borderRadius(8)
+            .justifyContent(FlexAlign.Center)
+            .alignItems(HorizontalAlign.Center);
+            
+            // 相关推荐标题 - Related recommendation title
+            Text(media.title || "")
+              .fontSize(16)
+              .fontColor('#FFFFFF')
+              .maxLines(2)
+              .width(150);
+          }
+          .width(150)
+          .margin({ right: 15 })
+          .onClick(() => this.handleRelatedMediaClick(media));
+        });
       }
-      .scrollable(ScrollDirection.Horizontal);
+      .width('100%'); // 移除 overflow 属性，因为 ArkTS 中 RowAttribute 没有此属性
     }
   }
 
@@ -244,7 +303,7 @@ struct MediaDetailPage {
    * 处理剧集点击 - Handle episode click
    */
   private handleEpisodeClick(episode: Episode): void {
-    Logger.info(this.TAG, `Clicked episode: ${episode.name}`);
+    console.info(`点击剧集: ${episode.name} | Clicked episode: ${episode.name}`);
     // 处理剧集点击逻辑 - Handle episode click logic
   }
 
@@ -252,7 +311,7 @@ struct MediaDetailPage {
    * 处理播放点击 - Handle play click
    */
   private handlePlayClick(episode: Episode, source: PlaySource): void {
-    Logger.info(this.TAG, `Playing episode ${episode.name} from ${source.name}`);
+    console.info(`正在播放剧集 ${episode.name} 来自 ${source.name} | Playing episode ${episode.name} from ${source.name}`);
     // 处理播放点击逻辑 - Handle play click logic
   }
 
@@ -260,7 +319,7 @@ struct MediaDetailPage {
    * 处理相关媒体点击 - Handle related media click
    */
   private handleRelatedMediaClick(media: MediaItem): void {
-    Logger.info(this.TAG, `Clicked related media: ${media.title}`);
+    console.info(`点击相关媒体: ${media.title} | Clicked related media: ${media.title}`);
     // 处理相关媒体点击逻辑 - Handle related media click logic
   }
 
@@ -302,7 +361,11 @@ struct MediaDetailPage {
         if (this.activeTab === 'episodes') {
           this.renderEpisodes();
         } else if (this.activeTab === 'sources') {
-          this.renderPlaySources();
+          if (this.filteredSources.length === 0) {
+            this.renderEmptyPlaySources();
+          } else {
+            this.renderPlaySources();
+          }
         }
         
         // 相关推荐 - Related recommendations

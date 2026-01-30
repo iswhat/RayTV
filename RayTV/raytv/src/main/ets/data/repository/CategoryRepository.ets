@@ -1,4 +1,4 @@
-﻿// CategoryRepository - 鍒嗙被浠撳簱
+// CategoryRepository - 鍒嗙被浠撳簱
 // 璐熻矗绠＄悊瑙嗛鍜岀洿鎾殑鍒嗙被鏁版嵁
 
 import Logger from '../../common/util/Logger';
@@ -588,7 +588,7 @@ export class CategoryRepository {
       if (!this.isSyncing && this.shouldSync()) {
         await this.syncCategories();
       }
-    }, this.storageConfig.syncInterval) as unknown as number;
+    }, this.storageConfig.syncInterval);
   }
 
   /**

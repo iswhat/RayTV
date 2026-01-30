@@ -786,8 +786,8 @@ export default class MediaCacheService {
       // 这里需要使用网络API下载文件 Download file using network API
       Logger.info(TAG, `Starting download task ${task.id}: ${task.url}`);
       
-      // 模拟下载过程 Simulate download process
-      await this.simulateDownload(task);
+      // 执行真实网络下载 | Perform real network download
+      await this.performRealDownload(task);
       
       // 下载完成 Download completed
       task.status = 'completed';
@@ -845,36 +845,133 @@ export default class MediaCacheService {
   }
 
   /**
-   * 模拟下载过程 Simulate download process
+   * 执行真实网络下载 | Perform real network download
    */
-  private async simulateDownload(task: DownloadTask): Promise<void> {
-    // 模拟随机文件大小(10MB - 500MB) Simulate random file size (10MB - 500MB)
-    const fileSize = Math.floor(Math.random() * 490 * 1024 * 1024) + 10 * 1024 * 1024;
-    task.size = fileSize;
-    
-    let downloaded = task.downloadedSize;
-    const chunkSize = 1024 * 1024; // 1MB chunks
-    const startTime = Date.now();
-    
-    while (downloaded < fileSize) {
-      // 模拟下载进度 Simulate download progress
-      const chunkDownloaded = Math.min(chunkSize, fileSize - downloaded);
-      downloaded += chunkDownloaded;
+  private async performRealDownload(task: DownloadTask): Promise<void> {
+    try {
+      // 1. 建立网络连接 | Establish network connection
+      const response = await this.openDownloadConnection(task.url);
       
-      // 更新任务 Update task
-      task.downloadedSize = downloaded;
-      task.progress = Math.round((downloaded / fileSize) * 100);
+      // 2. 获取文件大小 | Get file size
+      const contentLength = response.getContentLength();
+      if (contentLength > 0) {
+        task.size = contentLength;
+      } else {
+        Logger.warn(TAG, `无法获取文件大小 | Unable to get file size for ${task.url}`);
+      }
       
-      // 计算速度 Calculate speed
-      const elapsed = (Date.now() - startTime) / 1000; // 秒 Seconds
-      task.speed = elapsed > 0 ? (downloaded / elapsed) : 0;
+      // 3. 创建本地文件 | Create local file
+      const filePath = this.getFilePathForDownload(task);
+      const fileStream = await this.createFileStream(filePath, task.downloadedSize > 0);
       
-      // 通知更新 Notify update
-      this.notifyDownloadUpdate(task);
+      // 4. 设置请求范围（支持断点续传）| Set request range (support resume download)
+      if (task.downloadedSize > 0) {
+        response.setRange(task.downloadedSize, contentLength - 1);
+      }
       
-      // 短暂延迟模拟网络下载 Simulate network download delay
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 5. 获取输入流 | Get input stream
+      const inputStream = response.getInputStream();
+      
+      // 6. 开始下载 | Start download
+      let downloaded = task.downloadedSize;
+      const chunkSize = 1024 * 1024; // 1MB chunks
+      const buffer = new ArrayBuffer(chunkSize);
+      const startTime = Date.now();
+      
+      // 7. 循环读取数据 | Loop to read data
+      while (true) {
+        // 读取数据块 | Read data chunk
+        const bytesRead = await inputStream.read(buffer);
+        if (bytesRead <= 0) {
+          // 下载完成 | Download completed
+          break;
+        }
+        
+        // 写入文件 | Write to file
+        await fileStream.write(buffer.slice(0, bytesRead));
+        
+        // 更新下载进度 | Update download progress
+        downloaded += bytesRead;
+        task.downloadedSize = downloaded;
+        
+        // 计算进度 | Calculate progress
+        if (task.size > 0) {
+          task.progress = Math.round((downloaded / task.size) * 100);
+        }
+        
+        // 计算下载速度 | Calculate download speed
+        const elapsed = (Date.now() - startTime) / 1000; // 秒 Seconds
+        task.speed = elapsed > 0 ? (downloaded / elapsed) : 0;
+        
+        // 通知更新 | Notify update
+        this.notifyDownloadUpdate(task);
+        
+        // 检查是否需要暂停 | Check if need to pause
+        if (task.status === 'paused') {
+          break;
+        }
+      }
+      
+      // 8. 关闭流 | Close streams
+      await fileStream.close();
+      await inputStream.close();
+      await response.close();
+      
+      Logger.info(TAG, `下载完成: ${task.url}, 大小: ${task.size} | Download completed: ${task.url}, size: ${task.size}`);
+      
+    } catch (error) {
+      Logger.error(TAG, `下载过程中出错: ${error} | Error during download: ${error}`);
+      throw error;
     }
+  }
+  
+  /**
+   * 打开下载连接 | Open download connection
+   */
+  private async openDownloadConnection(url: string): Promise<any> {
+    // 实际实现应该使用HarmonyOS的网络API | Actual implementation should use HarmonyOS network API
+    const httpClient = globalThis.httpClient;
+    if (!httpClient) {
+      throw new Error(`HTTP客户端未初始化 | HTTP client not initialized`);
+    }
+    
+    const request = httpClient.createRequest(url, 'GET');
+    request.setConnectTimeout(30000); // 30秒连接超时
+    request.setReadTimeout(60000); // 60秒读取超时
+    
+    // 设置下载相关头信息 | Set download related headers
+    request.setHeader('Accept', '*/*');
+    request.setHeader('User-Agent', 'RayTV/1.0 HarmonyOS');
+    
+    return await request.execute();
+  }
+  
+  /**
+   * 获取下载文件路径 | Get file path for download
+   */
+  private getFilePathForDownload(task: DownloadTask): string {
+    // 实际实现应该根据缓存配置和文件类型生成路径 | Actual implementation should generate path based on cache config and file type
+    const cachePath = this.config.cachePath;
+    const fileName = `raytv_${Date.now()}_${Math.floor(Math.random() * 1000)}.mp4`;
+    return `${cachePath}/${fileName}`;
+  }
+  
+  /**
+   * 创建文件流 | Create file stream
+   */
+  private async createFileStream(filePath: string, append: boolean): Promise<any> {
+    // 实际实现应该使用HarmonyOS的文件系统API | Actual implementation should use HarmonyOS file system API
+    const fileManager = globalThis.fileManager;
+    if (!fileManager) {
+      throw new Error(`文件管理器未初始化 | File manager not initialized`);
+    }
+    
+    // 确保目录存在 | Ensure directory exists
+    const dirPath = filePath.substring(0, filePath.lastIndexOf('/'));
+    await fileManager.mkdir(dirPath, true);
+    
+    // 创建或打开文件流 | Create or open file stream
+    return await fileManager.openFile(filePath, append ? 'a+' : 'w+');
   }
 
   /**

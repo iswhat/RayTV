@@ -237,24 +237,6 @@ export default interface NetworkRepository {
    */
   getVideoChapters(contentId: string, season: number): Promise<NetworkResult<ChapterInfo[]>>;
 
-  /**
-   * 获取视频弹幕 | Get video danmaku
-   * @param contentId 内容ID | Content ID
-   * @param startTime 开始时间 | Start time
-   * @param endTime 结束时间 | End time
-   * @returns 弹幕列表 | Danmaku list
-   */
-  getVideoDanmaku(contentId: string, startTime: number, endTime: number): Promise<NetworkResult<Record<string, string | number | boolean>[]>>;
-
-  /**
-   * 鎻愪氦瑙嗛寮瑰箷
-   * @param contentId 鍐呭ID
-   * @param danmaku 寮瑰箷鍐呭
-   * @param timestamp 鏃堕棿鎴?
-   * @returns 鎻愪氦缁撴灉
-   */
-  submitDanmaku(contentId: string, danmaku: string, timestamp: number): Promise<NetworkResult<boolean>>;
-
   // ========== 鍒嗙被鐩稿叧鎺ュ彛 ==========
   
   /**

@@ -1,11 +1,13 @@
-import { AppNavigator, DetailParams, CategoryInfo } from '../navigation/AppNavigator';
-import Logger from '../common/util/Logger';
+import { AppNavigator, DetailParams } from '../navigation/AppNavigator';
+// Logger import removed as AnalyticsService was deleted
 import ConfigService from '../service/config/ConfigService';
-import MediaService from '../service/media/MediaService';
-import CacheService, { CachePriority } from '../service/cache/CacheService';
-import { AnalyticsService } from '../service/analytics/AnalyticsService';
+import { MediaService, RecommendedContent } from '../service/media/MediaService';
+import CacheService from '../service/cache/CacheService';
+
+import ApiResponse from '../data/dto/ApiResponse';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, ImageFit, FlexAlign, FlexDirection } from '@ohos/arkui';
+import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, ImageFit, BarState, HorizontalAlign, Alignment } from '@ohos/components';
+
 
 /**
  * 应用主页面 | Application main page
@@ -25,9 +27,27 @@ interface FeaturedMediaItem {
   rating?: string;
 }
 
+interface MediaServiceItem {
+  id: string;
+  title: string;
+  cover?: string;
+  type?: string;
+  siteKey?: string;
+  rating?: string;
+}
+
 interface CategoryTab {
   id: string;
   name: string;
+}
+
+/**
+ * 响应数据接口 | Response data interface
+ */
+interface SuccessMediaResponse {
+  isSuccess: () => boolean;
+  data: MediaServiceItem[];
+  message?: string;
 }
 
 @Entry
@@ -65,14 +85,11 @@ struct MainPage {
   private configService: ConfigService = ConfigService.getInstance();
   private mediaService: MediaService = MediaService.getInstance();
   private cacheService: CacheService = CacheService.getInstance();
-  private analyticsService: AnalyticsService = AnalyticsService.getInstance();
+
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
-    Logger.info(this.TAG, 'MainPage about to appear');
-    
-    // 记录页面访问 | Track page view
-    this.analyticsService.trackPageView('MainPage');
+    console.info('MainPage about to appear');
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
@@ -85,15 +102,15 @@ struct MainPage {
   }
   
   // 初始化屏幕信息 | Initialize screen information
-  private initScreenInfo() {
+  private initScreenInfo(): void {
     try {
       const displayInfo = display.getDefaultDisplaySync();
       this.screenWidth = displayInfo.width;
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
-      Logger.info(this.TAG, `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to get screen info: ${error}`);
+      console.info('Screen info: width=' + this.screenWidth + ', height=' + this.screenHeight + ', landscape=' + this.isLandscape);
+    } catch (error: Error) {
+      console.error('Failed to get screen info: ' + error.message);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -104,31 +121,23 @@ struct MainPage {
   /**
    * 加载分类 | Load categories
    */
-  private async loadCategories() {
+  private async loadCategories(): Promise<void> {
     try {
-      const result = await this.mediaService.getCategories();
-      if (result.isSuccess() && result.data) {
-        this.categories = result.data.map(item => ({
-          id: item.id,
-          name: item.name
-        } as CategoryTab));
-      } else {
-        // 默认分类 | Default categories
-        this.categories = [
-          { id: 'all', name: '全部' },
-          { id: 'movie', name: '电影' },
-          { id: 'tv', name: '电视剧' },
-          { id: 'variety', name: '综艺' },
-          { id: 'anime', name: '动画' },
-          { id: 'korean', name: '韩剧' },
-          { id: 'chinese', name: '国产剧' },
-          { id: 'american', name: '美剧' },
-          { id: 'hk', name: '港剧' }
-        ];
-      }
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to load categories: ${error}`);
-      // 默认分类 | Default categories
+      // 使用默认分类 | Use default categories
+      this.categories = [
+        { id: 'all', name: '全部' },
+        { id: 'movie', name: '电影' },
+        { id: 'tv', name: '电视剧' },
+        { id: 'variety', name: '综艺' },
+        { id: 'anime', name: '动画' },
+        { id: 'korean', name: '韩剧' },
+        { id: 'chinese', name: '国产剧' },
+        { id: 'american', name: '美剧' },
+        { id: 'hk', name: '港剧' }
+      ];
+    } catch (error: Error) {
+      console.error('Failed to load categories: ' + error.message);
+      // 使用默认分类 | Use default categories
       this.categories = [
         { id: 'all', name: '全部' },
         { id: 'movie', name: '电影' },
@@ -144,23 +153,36 @@ struct MainPage {
   }
   
   /**
+   * 简化条件判断的辅助方法 | Helper method to simplify condition checking
+   */
+  private isSuccessResponse(response: ApiResponse<RecommendedContent[]>): boolean {
+    return typeof response === 'object' && 
+           response !== null && 
+           typeof response.isSuccess === 'function' && 
+           response.isSuccess() && 
+           response.data !== undefined && 
+           Array.isArray(response.data) && 
+           response.data.length > 0;
+  }
+
+  /**
    * 加载推荐内容 | Load recommended content
    */
-  private async loadFeaturedMedia() {
+  private async loadFeaturedMedia(): Promise<void> {
     try {
       this.isLoading = true;
       this.isError = false;
-      Logger.info(this.TAG, 'Loading featured media...');
+      console.info('Loading featured media...');
       
       // 生成缓存键 | Generate cache key
-      const cacheKey = `featured_media_${this.selectedCategory}_${this.currentSite}`;
+      const cacheKey = 'featured_media_' + this.selectedCategory + '_' + this.currentSite;
       
       // 尝试从缓存获取 | Try to get from cache
-      const cachedData = await this.cacheService.get<FeaturedMediaItem[]>(cacheKey);
+      const cachedData: FeaturedMediaItem[] | null = await this.cacheService.get<FeaturedMediaItem[]>(cacheKey);
       
       if (cachedData && cachedData.length > 0) {
         this.featuredMedia = cachedData;
-        Logger.info(this.TAG, `Loaded ${this.featuredMedia.length} featured media items from cache`);
+        console.info('Loaded ' + this.featuredMedia.length + ' featured media items from cache');
         this.isLoading = false;
         return;
       }
@@ -168,36 +190,37 @@ struct MainPage {
       // 使用MediaService获取实际的推荐内容 | Use MediaService to get actual recommended content
       const result = await this.mediaService.getRecommendedContent();
       
-      if (result.isSuccess() && result.data && result.data.length > 0) {
-        this.featuredMedia = result.data.map(item => ({
-          id: item.id,
-          title: item.title,
-          cover: item.cover || '',
-          type: item.type,
-          siteKey: item.siteKey,
-          rating: item.rating
-        } as FeaturedMediaItem));
-        Logger.info(this.TAG, `Loaded ${this.featuredMedia.length} featured media items from service`);
+      if (this.isSuccessResponse(result)) {
+        // 确保data不是undefined | Ensure data is not undefined
+        const data = result.data as RecommendedContent[];
+        this.featuredMedia = data.map((item: RecommendedContent) => {
+          const mediaItem: FeaturedMediaItem = {
+            id: item.id,
+            title: item.title,
+            cover: item.cover || '',
+            type: item.type || 'vod',
+            siteKey: item.siteKey,
+            rating: item.rating
+          };
+          return mediaItem;
+        });
+        console.info('Loaded ' + this.featuredMedia.length + ' featured media items from service');
         
         // 缓存结果 | Cache result
-        await this.cacheService.set(cacheKey, this.featuredMedia, {
-          expiry: 3600000, // 1小时缓存 1 hour cache
-          priority: CachePriority.HIGH,
-          tags: ['featured', 'recommended'],
-          source: 'MediaService'
-        });
+        await this.cacheService.set(cacheKey, this.featuredMedia);
       } else {
         // 加载失败，设置错误状态 | Loading failed, set error state
         this.isError = true;
-        this.errorMessage = result.message || '推荐内容加载失败';
+        // 确保message不是undefined | Ensure message is not undefined
+        const message = result.message;
+        this.errorMessage = typeof message === 'string' ? message : '推荐内容加载失败';
         this.featuredMedia = [];
-        Logger.warn(this.TAG, `Failed to load featured media: ${this.errorMessage}`);
+        console.warn('Failed to load featured media: ' + this.errorMessage);
       }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load featured media: ${errorMsg}`);
+    } catch (error: Error) {
+      console.error('Failed to load featured media: ' + error.message);
       this.isError = true;
-      this.errorMessage = errorMsg;
+      this.errorMessage = error.message;
       this.featuredMedia = [];
     } finally {
       this.isLoading = false;
@@ -205,11 +228,10 @@ struct MainPage {
   }
   
   // 处理主菜单点击 | Handle main menu click
-  private handleMainMenuClick(key: string) {
-    Logger.info(this.TAG, `Main menu clicked: ${key}`);
+  private handleMainMenuClick(key: string): void {
+    console.info('Main menu clicked: ' + key);
     
-    // 记录菜单点击事件 | Track menu click event
-    this.analyticsService.trackPageView(`Menu_${key}`);
+
     
     switch (key) {
       case 'vod':
@@ -220,7 +242,7 @@ struct MainPage {
         AppNavigator.getInstance().navigateToLive();
         break;
       case 'search':
-        AppNavigator.getInstance().navigateToSearch("");
+        AppNavigator.getInstance().navigateToSearch('');
         break;
       case 'history':
         AppNavigator.getInstance().navigateToHistory();
@@ -235,27 +257,24 @@ struct MainPage {
   }
   
   // 处理分类标签点击 | Handle category tab click
-  private handleCategoryClick(categoryId: string) {
+  private handleCategoryClick(categoryId: string): void {
     this.selectedCategory = categoryId;
-    Logger.info(this.TAG, `Category clicked: ${categoryId}`);
-    // 记录分类点击事件 | Track category click event
-    this.analyticsService.trackPageView(`Category_${categoryId}`);
+    console.info('Category clicked: ' + categoryId);
+
     // 这里可以根据分类加载对应内容
     this.loadFeaturedMedia();
   }
   
   // 处理片源切换 | Handle site switch
-  private handleSiteSwitch() {
+  private handleSiteSwitch(): void {
     this.showSiteDialog = true;
-    // 记录片源切换事件 | Track site switch event
-    this.analyticsService.trackPageView('SiteSwitch');
+
   }
   
   // 处理影视点击 | Handle media click
-  private handleMediaClick(media: FeaturedMediaItem) {
-    Logger.info(this.TAG, `Media clicked: ${media.title}`);
-    // 记录媒体点击事件 | Track media click event
-    this.analyticsService.trackPageView(`Media_${media.id}`);
+  private handleMediaClick(media: FeaturedMediaItem): void {
+    console.info('Media clicked: ' + media.title);
+
     const params: DetailParams = {
       id: media.id,
       siteKey: media.siteKey || '',
@@ -272,12 +291,12 @@ struct MainPage {
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `${year}年${month}月${day}日 ${hours}:${minutes}`;
+    return year + '年' + month + '月' + day + '日 ' + hours + ':' + minutes;
   }
   
   // 渲染媒体项 | Render media item
   @Builder
-  renderMediaItem(media: FeaturedMediaItem) {
+  private renderMediaItem(media: FeaturedMediaItem): void {
     Column() {
       Image(media.cover || 'https://via.placeholder.com/300x450?text=No+Image')
         .width('100%')
@@ -286,7 +305,7 @@ struct MainPage {
         .borderRadius(8)
         .backgroundColor('#1E1E1E')
         .onError(() => {
-          Logger.warn(this.TAG, `Failed to load cover image: ${media.cover}`);
+          console.warn('Failed to load cover image: ' + media.cover);
         })
       
       Text(media.title)
@@ -314,9 +333,7 @@ struct MainPage {
   
   // 渲染片源选择弹窗 | Render site selection dialog
   @Builder
-  renderSiteDialog() {
-    if (!this.showSiteDialog) return;
-    
+  private renderSiteDialog(): void {
     Stack({
       alignContent: Alignment.Center
     }) {
@@ -421,11 +438,6 @@ struct MainPage {
                 .padding({ left: 30, right: 30, top: 16, bottom: 16 })
             }
             .onClick(() => this.handleMainMenuClick(item.key))
-            .borderBottomWidth(this.selectedTab === item.key ? 4 : 0)
-            .borderBottomColor('#007AFF')
-            .focusable(true)
-            .focusBorderWidth(2)
-            .focusBorderColor('#007AFF')
           }, (item: TabItem) => item.key)
         }
         .width('100%')
@@ -448,15 +460,11 @@ struct MainPage {
                   .borderRadius(24)
                   .margin({ right: 16 })
                   .onClick(() => this.handleCategoryClick(category.id))
-                  .focusable(true)
-                  .focusBorderWidth(2)
-                  .focusBorderColor('#007AFF')
               }, (category: CategoryTab) => category.id)
             }
             .width('100%')
             .padding({ left: 30, right: 30, top: 16, bottom: 16 })
           }
-          .scrollable(ScrollDirection.Horizontal)
           .scrollBar(BarState.Off)
           .backgroundColor('#121212')
         }
@@ -516,9 +524,7 @@ struct MainPage {
             }
             
             // 内容区域 | Content area
-            Scroll(this.contentScroller, {
-              scrollDirection: ScrollDirection.Horizontal
-            }) {
+            Scroll(this.contentScroller) {
               Row() {
                 ForEach(this.featuredMedia, (item: FeaturedMediaItem) => {
                   this.renderMediaItem(item)
@@ -556,7 +562,9 @@ struct MainPage {
       }
       
       // 片源选择弹窗 | Site selection dialog
-      this.renderSiteDialog()
+      if (this.showSiteDialog) {
+        this.renderSiteDialog()
+      }
     }
     .width('100%')
     .height('100%')

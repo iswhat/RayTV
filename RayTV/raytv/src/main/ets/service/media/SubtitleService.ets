@@ -945,47 +945,34 @@ export default class SubtitleService {
     try {
       const results = new Map<SubtitleProvider, SubtitleTrack[]>();
       
-      // 这里应该调用各个字幕提供商的API
-      // 为了演示，我们返回模拟数据
-      // Here should call APIs of various subtitle providers
-      // For demonstration, we return mock data
+      // 调用各个字幕提供商的API | Call APIs of various subtitle providers
       
-      // 模拟OpenSubtitles结果 Mock OpenSubtitles results
-      results.set(SubtitleProvider.OPENSUBTITLES, [
-        {
-          id: 'opensub_1',
-          name: 'English (US)',
-          language: 'en',
-          type: SubtitleType.SRT,
-          url: 'https://example.com/subtitles/en.srt',
-          isExternal: true,
-          isDefault: true
-        },
-        {
-          id: 'opensub_2',
-          name: '简体中文',
-          language: 'zh',
-          type: SubtitleType.SRT,
-          url: 'https://example.com/subtitles/zh.srt',
-          isExternal: true,
-          isDefault: false
+      // 1. 调用OpenSubtitles API
+      // 1. Call OpenSubtitles API
+      try {
+        const openSubtitlesResults = await this.searchOpenSubtitles(params);
+        if (openSubtitlesResults.length > 0) {
+          results.set(SubtitleProvider.OPENSUBTITLES, openSubtitlesResults);
         }
-      ]);
+      } catch (error) {
+        Logger.error(TAG, `OpenSubtitles search failed for ${params.title}:`, error instanceof Error ? error : new Error(String(error)));
+      }
       
-      // 模拟SubHD结果 Mock SubHD results
-      results.set(SubtitleProvider.SUBHD, [
-        {
-          id: 'subhd_1',
-          name: '简体中文字幕',
-          language: 'zh',
-          type: SubtitleType.ASS,
-          url: 'https://example.com/subtitles/subhd.ass',
-          isExternal: true,
-          isDefault: false
+      // 2. 调用SubHD API
+      // 2. Call SubHD API
+      try {
+        const subhdResults = await this.searchSubHD(params);
+        if (subhdResults.length > 0) {
+          results.set(SubtitleProvider.SUBHD, subhdResults);
         }
-      ]);
+      } catch (error) {
+        Logger.error(TAG, `SubHD search failed for ${params.title}:`, error instanceof Error ? error : new Error(String(error)));
+      }
       
-      Logger.info(TAG, `Search subtitles completed for: ${params.title}`);
+      // 3. 调用其他字幕提供商API...
+      // 3. Call other subtitle provider APIs...
+      
+      Logger.info(TAG, `Search subtitles completed for: ${params.title}, found ${results.size} providers with results`);
       return ApiResponse.success(results, '字幕搜索成功');
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
@@ -994,6 +981,103 @@ export default class SubtitleService {
     }
   }
 
+  /**
+   * 调用OpenSubtitles API搜索字幕 | Call OpenSubtitles API to search subtitles
+   */
+  private async searchOpenSubtitles(params: SubtitleSearchParams): Promise<SubtitleTrack[]> {
+    // 实际实现应该调用OpenSubtitles API
+    // Actual implementation should call OpenSubtitles API
+    const apiKey = await this.getSubtitleProviderApiKey(SubtitleProvider.OPENSUBTITLES);
+    if (!apiKey) {
+      throw new Error('OpenSubtitles API key not available');
+    }
+    
+    const httpClient = globalThis.httpClient;
+    if (!httpClient) {
+      throw new Error('HTTP client not available');
+    }
+    
+    const request = httpClient.createRequest('https://api.opensubtitles.com/api/v1/subtitles', 'GET');
+    request.setHeader('Api-Key', apiKey);
+    request.setHeader('User-Agent', 'RayTV/1.0 HarmonyOS');
+    request.setQueryParams({
+      movie_name: params.title,
+      language: params.languages?.join(',') || 'en,zh',
+      year: params.year,
+      imdb_id: params.imdbId
+    });
+    
+    const response = await request.execute();
+    const data = await response.json();
+    
+    // 解析API响应，转换为SubtitleTrack格式
+    // Parse API response, convert to SubtitleTrack format
+    return data.data?.map((item: any) => ({
+      id: item.id,
+      name: item.attributes.language_name,
+      language: item.attributes.language,
+      type: SubtitleType.SRT, // 假设API返回SRT格式，实际可能需要根据响应调整
+      url: item.attributes.download_url,
+      isExternal: true,
+      isDefault: item.attributes.is_default || false
+    })) || [];
+  }
+  
+  /**
+   * 调用SubHD API搜索字幕 | Call SubHD API to search subtitles
+   */
+  private async searchSubHD(params: SubtitleSearchParams): Promise<SubtitleTrack[]> {
+    // 实际实现应该调用SubHD API
+    // Actual implementation should call SubHD API
+    const apiKey = await this.getSubtitleProviderApiKey(SubtitleProvider.SUBHD);
+    if (!apiKey) {
+      throw new Error('SubHD API key not available');
+    }
+    
+    const httpClient = globalThis.httpClient;
+    if (!httpClient) {
+      throw new Error('HTTP client not available');
+    }
+    
+    const request = httpClient.createRequest('https://subhd.tv/api/search', 'POST');
+    request.setHeader('Content-Type', 'application/json');
+    request.setHeader('Authorization', `Bearer ${apiKey}`);
+    request.setBody(JSON.stringify({
+      keyword: params.title,
+      languages: params.languages?.join(',') || 'zh,en',
+      year: params.year
+    }));
+    
+    const response = await request.execute();
+    const data = await response.json();
+    
+    // 解析API响应，转换为SubtitleTrack格式
+    // Parse API response, convert to SubtitleTrack format
+    return data.results?.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      language: item.language,
+      type: SubtitleType.ASS, // SubHD主要提供ASS格式字幕
+      url: item.download_url,
+      isExternal: true,
+      isDefault: false
+    })) || [];
+  }
+  
+  /**
+   * 获取字幕提供商API密钥 | Get subtitle provider API key
+   */
+  private async getSubtitleProviderApiKey(provider: SubtitleProvider): Promise<string | null> {
+    // 实际实现应该从安全存储中获取API密钥
+    // Actual implementation should get API key from secure storage
+    const storageUtil = globalThis.storageUtil;
+    if (!storageUtil) {
+      return null;
+    }
+    
+    return await storageUtil.getSubtitleApiKey(provider);
+  }
+  
   /**
    * 添加字幕到历史记录 Add subtitle to history
    */

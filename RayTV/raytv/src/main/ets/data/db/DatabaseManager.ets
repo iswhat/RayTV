@@ -1,11 +1,10 @@
 /**
- * DatabaseManager - 数据库管理器
- * 实现基于HarmonyOS RelationalStore的数据库连接和管理
+ * DatabaseManager - Database Manager | 数据库管理器
+ * Implement database connection and management based on HarmonyOS RelationalStore | 实现基于HarmonyOS RelationalStore的数据库连接和管理
  */
 import relationalStore from '@ohos.data.relationalStore';
-import Context from '@ohos.ability.featureAbility';
+import common from '@ohos.app.ability.common';
 import { getAllTables, INDEXES, DATABASE_INFO } from './TableSchema';
-import Logger from '../../common/util/Logger';
 
 /**
  * Database information interface | 数据库信息接口
@@ -47,7 +46,7 @@ const TAG = 'DatabaseManager';
  * Implement database connection and management based on HarmonyOS RelationalStore | 实现基于HarmonyOS RelationalStore的数据库连接和管理
  */
 export class DatabaseManager {
-  private static instance: DatabaseManager;
+  private static instance: DatabaseManager | null = null;
   private database: relationalStore.RdbStore | null = null;
   private isInitialized: boolean = false;
   private initializationPromise: Promise<void> | null = null;
@@ -66,10 +65,10 @@ export class DatabaseManager {
   }
   
   /**
-   * 初始化数据库
-   * @param context 应用上下文
+   * Initialize database | 初始化数据库
+   * @param context Application context | 应用上下文
    */
-  public async initDatabase(context: Context): Promise<void> {
+  public async initDatabase(context: common.Context): Promise<void> {
     // 如果已经初始化或正在初始化，返回现有Promise
     if (this.isInitialized) {
       return;
@@ -85,12 +84,12 @@ export class DatabaseManager {
   }
   
   /**
-   * 实际的初始化逻辑
-   * @param context 应用上下文
+   * Actual initialization logic | 实际的初始化逻辑
+   * @param context Application context | 应用上下文
    */
-  private async doInitialize(context: Context): Promise<void> {
+  private async doInitialize(context: common.Context): Promise<void> {
     try {
-      Logger.info(TAG, 'Starting database initialization');
+      console.info(TAG + ': Starting database initialization');
       
       // 使用默认安全级别
       const config: relationalStore.StoreConfig = {
@@ -109,11 +108,11 @@ export class DatabaseManager {
       await this.checkDatabaseVersion();
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Database initialized successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to initialize database: ${JSON.stringify(error)}`);
+      console.info(TAG + ': Database initialized successfully');
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to initialize database: ' + error.message);
       this.isInitialized = false;
-      throw error instanceof Error ? error : new Error(String(error));
+      throw error;
     } finally {
       this.initializationPromise = null;
     }
@@ -130,17 +129,17 @@ export class DatabaseManager {
     
     try {
       const tables = getAllTables();
-      Logger.info(TAG, `Creating ${tables.length} tables`);
+      console.info(TAG + `: Creating ${tables.length} tables`);
       
       for (const sql of tables) {
         await db.executeSql(sql);
-        Logger.debug(TAG, `Created table with SQL: ${sql.substring(0, 100)}...`);
+        console.debug(TAG + `: Created table with SQL: ${sql.substring(0, 100)}...`);
       }
       
-      Logger.info(TAG, 'All tables created successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to create tables: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      console.info(TAG + ': All tables created successfully');
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to create tables: ' + error.message);
+      throw error;
     }
   }
   
@@ -154,22 +153,22 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.info(TAG, `Creating ${INDEXES.CREATE_INDEXES.length} indexes`);
+      console.info(TAG + `: Creating ${INDEXES.CREATE_INDEXES.length} indexes`);
       
       for (const indexSql of INDEXES.CREATE_INDEXES) {
         await db.executeSql(indexSql);
-        Logger.debug(TAG, `Created index: ${indexSql.substring(0, 80)}...`);
+        console.debug(TAG + `: Created index: ${indexSql.substring(0, 80)}...`);
       }
       
-      Logger.info(TAG, 'All indexes created successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to create indexes: ${JSON.stringify(error)}`);
+      console.info(TAG + ': All indexes created successfully');
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to create indexes: ' + error.message);
       // 索引创建失败不影响应用运行，记录错误但不抛出异常
     }
   }
   
   /**
-   * 检查数据库版本并执行迁移
+   * Check database version and execute migration | 检查数据库版本并执行迁移
    */
   private async checkDatabaseVersion(): Promise<void> {
     const db = this.database;
@@ -178,7 +177,7 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.info(TAG, `Checking database version: ${DATABASE_INFO.VERSION}`);
+      console.info(TAG + `: Checking database version: ${DATABASE_INFO.VERSION}`);
       
       // 从数据库元数据表中获取当前版本
       let currentVersion = 0;
@@ -192,7 +191,7 @@ export class DatabaseManager {
       }
       resultSet.close();
       
-      Logger.info(TAG, `Current database version: ${currentVersion}, Target version: ${DATABASE_INFO.VERSION}`);
+      console.info(TAG + `: Current database version: ${currentVersion}, Target version: ${DATABASE_INFO.VERSION}`);
       
       // 如果需要升级 If upgrade is needed
       if (currentVersion < DATABASE_INFO.VERSION) {
@@ -202,20 +201,20 @@ export class DatabaseManager {
           'INSERT OR REPLACE INTO database_meta (id, version, last_updated) VALUES (1, ?, ?)',
           [DATABASE_INFO.VERSION, Date.now()]
         );
-        Logger.info(TAG, `Database version updated to: ${DATABASE_INFO.VERSION}`);
+        console.info(TAG + `: Database version updated to: ${DATABASE_INFO.VERSION}`);
       }
       
-      Logger.info(TAG, `Database version: ${DATABASE_INFO.VERSION}`);
-    } catch (error) {
-      Logger.error(TAG, `Failed to check database version: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error)); // 版本检查失败应该抛出异常，因为这是关键功能
+      console.info(TAG + `: Database version: ${DATABASE_INFO.VERSION}`);
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to check database version: ' + error.message);
+      throw error; // 版本检查失败应该抛出异常，因为这是关键功能
     }
   }
   
   /**
-   * 执行数据库迁移
-   * @param fromVersion 源版本
-   * @param toVersion 目标版本
+   * Execute database migration | 执行数据库迁移
+   * @param fromVersion Source version | 源版本
+   * @param toVersion Target version | 目标版本
    */
   private async migrateDatabase(fromVersion: number, toVersion: number): Promise<void> {
     const database = this.database;
@@ -224,13 +223,13 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.info(TAG, `Migrating database from version ${fromVersion} to ${toVersion}`);
+      console.info(TAG + `: Migrating database from version ${fromVersion} to ${toVersion}`);
       
       // 开始事务
       await this.executeTransaction(async (db) => {
         // 根据版本逐步执行迁移脚本
         for (let version = fromVersion + 1; version <= toVersion; version++) {
-          Logger.info(TAG, `Applying migration for version ${version}`);
+          console.info(TAG + `: Applying migration for version ${version}`);
           // 这里可以根据不同的版本执行不同的迁移脚本
           // 例如：执行ALTER TABLE语句、数据转换等
           
@@ -246,16 +245,16 @@ export class DatabaseManager {
         }
       });
       
-      Logger.info(TAG, `Database migration completed successfully`);
-    } catch (error) {
-      Logger.error(TAG, `Database migration failed: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      console.info(TAG + `: Database migration completed successfully`);
+    } catch (error: Error) {
+      console.error(TAG + ': Database migration failed: ' + error.message);
+      throw error;
     }
   }
   
   /**
-   * 获取数据库实例
-   * @returns RdbStore实例
+   * Get database instance | 获取数据库实例
+   * @returns RdbStore instance | RdbStore实例
    */
   public getDatabase(): relationalStore.RdbStore {
     if (!this.database) {
@@ -265,9 +264,9 @@ export class DatabaseManager {
   }
   
   /**
-   * 执行SQL查询
-   * @param sql SQL语句
-   * @param bindArgs 绑定参数
+   * Execute SQL query | 执行SQL查询
+   * @param sql SQL statement | SQL语句
+   * @param bindArgs Bind parameters | 绑定参数
    */
   public async executeSql(sql: string, bindArgs?: Array<number | string | boolean | null>): Promise<void> {
     if (!this.database) {
@@ -275,17 +274,17 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.debug(TAG, `Executing SQL: ${sql} with args: ${bindArgs?.toString()}`);
+      console.debug(TAG + `: Executing SQL: ${sql} with args: ${bindArgs?.toString()}`);
       await this.database.executeSql(sql, bindArgs);
-    } catch (error) {
-      Logger.error(TAG, `Failed to execute SQL: ${sql}, error: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+    } catch (error: Error) {
+      console.error(TAG + ': Failed to execute SQL: ' + sql + ', error: ' + error.message);
+      throw error;
     }
   }
   
   /**
-   * 执行事务
-   * @param transactionFunc 事务回调函数
+   * Execute transaction | 执行事务
+   * @param transactionFunc Transaction callback function | 事务回调函数
    */
   public async executeTransaction(transactionFunc: (connection: relationalStore.RdbStore) => Promise<void>): Promise<void> {
     if (!this.database) {
@@ -293,17 +292,17 @@ export class DatabaseManager {
     }
     
     try {
-      Logger.debug(TAG, 'Starting database transaction');
+      console.debug(TAG + ': Starting database transaction');
       await transactionFunc(this.database);
-      Logger.debug(TAG, 'Transaction completed successfully');
-    } catch (error) {
-      Logger.error(TAG, `Transaction failed: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      console.debug(TAG + ': Transaction completed successfully');
+    } catch (error: Error) {
+      console.error(TAG + `: Transaction failed: ${error.message}`);
+      throw error;
     }
   }
   
   /**
-   * 关闭数据库
+   * Close database | 关闭数据库
    */
   public closeDatabase(): void {
     if (this.database) {
@@ -311,21 +310,21 @@ export class DatabaseManager {
       // 这里主要是重置状态
       this.database = null;
       this.isInitialized = false;
-      Logger.info(TAG, 'Database connection closed');
+      console.info(TAG + ': Database connection closed');
     }
   }
   
   /**
-   * 检查数据库是否已初始化
-   * @returns 是否已初始化
+   * Check if database is initialized | 检查数据库是否已初始化
+   * @returns Whether initialized | 是否已初始化
    */
   public isDatabaseInitialized(): boolean {
     return this.isInitialized && this.database !== null;
   }
   
   /**
-   * 获取数据库信息
-   * @returns 数据库信息
+   * Get database information | 获取数据库信息
+   * @returns Database information | 数据库信息
    */
   public getDatabaseInfo(): DatabaseInfo {
     return {
@@ -335,41 +334,41 @@ export class DatabaseManager {
   }
   
   /**
-   * 重置数据库(删除所有表并重建)
-   * @param context 应用上下文
+   * Reset database (delete all tables and rebuild) | 重置数据库(删除所有表并重建)
+   * @param context Application context | 应用上下文
    */
-  public async resetDatabase(context: Context): Promise<void> {
+  public async resetDatabase(context: common.Context): Promise<void> {
     try {
-      Logger.info(TAG, 'Resetting database - this will delete all data!');
+      console.info(TAG + ': Resetting database - this will delete all data!');
       
       // 关闭现有连接 Close existing connection
       this.closeDatabase();
       
       // 删除数据库文件 Delete database file
       await context.deleteDatabase(DATABASE_INFO.NAME);
-      Logger.info(TAG, 'Database file deleted');
+      console.info(TAG + ': Database file deleted');
       
       // 重新初始化 Reinitialize
       await this.initDatabase(context);
-      Logger.info(TAG, 'Database reset completed successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to reset database: ${JSON.stringify(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      console.info(TAG + ': Database reset completed successfully');
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to reset database: ${error.message}`);
+      throw error;
     }
   }
   
   /**
-   * 获取数据库大小信息
-   * @returns 数据库大小(字节数)
+   * Get database size information | 获取数据库大小信息
+   * @returns Database size (bytes) | 数据库大小(字节数)
    */
   public async getDatabaseSize(): Promise<number> {
     if (!this.database) {
-      Logger.error(TAG, 'Failed to get database size: Database not initialized');
+      console.error(TAG + ': Failed to get database size: Database not initialized');
       return 0;
     }
     
     try {
-      Logger.debug(TAG, 'Getting database size');
+      console.debug(TAG + ': Getting database size');
       
       // 使用PRAGMA page_count和page_size查询数据库大小 Query database size using PRAGMA page_count and page_size
       const pageCountResult: relationalStore.ResultSet = await this.database.querySql('PRAGMA page_count', []);
@@ -387,11 +386,11 @@ export class DatabaseManager {
       pageSizeResult.close();
       
       const databaseSize = pageCount * pageSize;
-      Logger.info(TAG, `Database size: ${databaseSize} bytes`);
+      console.info(TAG + `: Database size: ${databaseSize} bytes`);
       
       return databaseSize;
-    } catch (error) {
-      Logger.error(TAG, `Failed to get database size: ${JSON.stringify(error)}`);
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to get database size: ${error.message}`);
       return 0;
     }
   }
@@ -401,16 +400,18 @@ export class DatabaseManager {
    */
   public async optimizeDatabase(): Promise<void> {
     if (!this.database) {
-      Logger.error(TAG, 'Failed to optimize database: Database not initialized');
+      console.error(TAG + ': Failed to optimize database: Database not initialized');
       return;
     }
     
     try {
       // 在SQLite中，VACUUM命令可以优化数据库 In SQLite, VACUUM command can optimize database
       await this.executeSql('VACUUM');
-      Logger.info(TAG, 'Database optimized successfully');
-    } catch (error) {
-      Logger.error(TAG, `Failed to optimize database: ${JSON.stringify(error)}`);
+      console.info(TAG + ': Database optimized successfully');
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to optimize database: ${error.message}`);
     }
   }
 }
+
+export default DatabaseManager;

@@ -1,10 +1,36 @@
 // HomePage组件 - Home page component
 import { AppNavigator, PageRoute } from '../navigation/AppNavigator';
-import Logger from '../common/util/Logger';
-import MediaService from '../service/media/MediaService';
+// Logger import removed as AnalyticsService was deleted
+import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
-import { AnalyticsService } from '../service/analytics/AnalyticsService';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign } from '@ohos.arkui';
+
+import ApiResponse from '../data/dto/ApiResponse';
+import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos/components';
+
+// 媒体推荐结果项类型 | Media recommended result item type
+interface RecommendedMediaItem {
+  id: string;
+  title: string;
+  cover?: string;
+  siteKey: string;
+  rating?: string;
+}
+
+// 响应数据接口 | Response data interface
+interface SuccessResponse<T> {
+  isSuccess: () => boolean;
+  data: T[];
+}
+
+// 简化条件判断的辅助方法 | Helper method to simplify condition checking
+function isSuccessResponse<T>(response: ApiResponse<T[]>): boolean {
+  return typeof response === 'object' && 
+         response !== null && 
+         typeof response.isSuccess === 'function' && 
+         response.isSuccess() && 
+         response.data !== undefined && 
+         Array.isArray(response.data);
+}
 
 /**
  * 首页组件 | Home page component
@@ -24,19 +50,18 @@ struct HomePage {
   
   // 服务实例 | Service instances
   private mediaService: MediaService = MediaService.getInstance();
-  private analyticsService: AnalyticsService = AnalyticsService.getInstance();
+
   
   // 初始化页面 | Initialize page
   async aboutToAppear(): Promise<void> {
-    Logger.info(this.TAG, 'HomePage mounted');
-    // 记录页面访问 | Track page view
-    this.analyticsService.trackPageView('HomePage');
+    console.info('HomePage mounted');
+
     await this.loadHomePageData();
   }
     
   // 清理资源 | Clean up resources
   aboutToDisappear(): void {
-    Logger.info(this.TAG, 'HomePage unmounted');
+    console.info('HomePage unmounted');
   }
   
   /**
@@ -47,34 +72,33 @@ struct HomePage {
       this.isLoading = true;
       this.errorMessage = '';
       
-      Logger.info(this.TAG, 'Loading home page data');
+      console.info('Loading home page data');
       
-      // 并行加载数据 | Load data in parallel
-      const [recommendedResult, popularResult, newResult] = await Promise.all([
-        this.mediaService.getRecommendedMedia(10),
-        this.mediaService.getPopularMedia(10),
-        this.mediaService.getLatestMedia(10)
-      ]);
+      // 加载推荐内容 | Load recommended content
+      let recommendedResult = await this.mediaService.getRecommendedContent();
       
       // 处理推荐内容 | Handle recommended content
-      if (recommendedResult.isSuccess() && recommendedResult.data) {
-        this.recommendedMedia = recommendedResult.data;
+      if (isSuccessResponse<RecommendedMediaItem>(recommendedResult)) {
+        // 确保data不是undefined | Ensure data is not undefined
+        const data = recommendedResult.data as RecommendedMediaItem[];
+        this.recommendedMedia = data.map((item: RecommendedMediaItem) => {
+          const mediaItem: MediaItem = {
+            id: item.id,
+            title: item.title,
+            coverUrl: item.cover || '',
+            siteKey: item.siteKey,
+            score: item.rating || ''
+          };
+          return mediaItem;
+        });
+        // 复制推荐内容到其他列表作为临时解决方案 | Copy recommended content to other lists as temporary solution
+        this.popularMedia = this.recommendedMedia.slice();
+        this.newMedia = this.recommendedMedia.slice();
       }
       
-      // 处理热门内容 | Handle popular content
-      if (popularResult.isSuccess() && popularResult.data) {
-        this.popularMedia = popularResult.data;
-      }
-      
-      // 处理最新内容 | Handle latest content
-      if (newResult.isSuccess() && newResult.data) {
-        this.newMedia = newResult.data;
-      }
-      
-      Logger.info(this.TAG, `Home page data loaded: recommended=${this.recommendedMedia.length}, popular=${this.popularMedia.length}, new=${this.newMedia.length}`);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load home page data: ${errorMsg}`);
+      console.info('Home page data loaded: recommended=' + this.recommendedMedia.length + ', popular=' + this.popularMedia.length + ', new=' + this.newMedia.length);
+    } catch (error: Error) {
+      console.error('Failed to load home page data: ' + error.message);
       this.errorMessage = '加载数据失败，请稍后重试';
     } finally {
       this.isLoading = false;
@@ -85,14 +109,13 @@ struct HomePage {
    * 处理搜索 | Handle search
    */
   private handleSearch(): void {
-    Logger.info(this.TAG, 'Search button clicked');
-    // 记录搜索按钮点击事件 | Track search button click event
-    this.analyticsService.trackSearch('');
+    console.info('Search button clicked');
+
     try {
       // 跳转到搜索页面 | Navigate to search page
-      AppNavigator.getInstance().navigateToSearch();
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to navigate to search page: ${error}`);
+      AppNavigator.getInstance().navigateToSearch('');
+    } catch (error: Error) {
+      console.error('Failed to navigate to search page: ' + error.message);
     }
   }
   
@@ -100,18 +123,17 @@ struct HomePage {
    * 处理媒体项点击 | Handle media item click
    */
   private handleMediaItemClick(media: MediaItem): void {
-    Logger.info(this.TAG, `Media item clicked: ${media.title}`);
-    // 记录媒体项点击事件 | Track media item click event
-    this.analyticsService.trackPageView(`Home_Media_${media.id}`);
+    console.info('Media item clicked: ' + media.title);
+
     try {
       // 跳转到详情页 | Navigate to detail page
       AppNavigator.getInstance().navigateToDetail({
         id: media.id,
         siteKey: media.siteKey || '',
-        type: media.type
+        type: 'movie'
       });
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to navigate to detail page: ${error}`);
+    } catch (error: Error) {
+      console.error('Failed to navigate to detail page: ' + error.message);
     }
   }
   
@@ -181,8 +203,6 @@ struct HomePage {
         .width('100%')
         .padding({ left: 20, right: 20 })
       }
-      .scrollDirection(ScrollDirection.Horizontal)
-      .scrollBar(BarState.Auto)
       .height(320)
       .margin({ bottom: 30 })
     }
@@ -254,8 +274,6 @@ struct HomePage {
       .height(80)
       .alignItems(VerticalAlign.Center)
       .backgroundColor('#FFFFFF')
-      .borderBottomWidth(1)
-      .borderBottomColor('#E0E0E0')
       
       // 内容区域 | Content area
       if (this.isLoading) {

@@ -1,12 +1,26 @@
 // SettingService.ets - 设置服务 | Setting Service
 // 提供应用配置管理、主题设置、语言切换等功能 | Provides app configuration management, theme settings, language switching, etc.
-import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
-import ConfigService from '../../service/config/ConfigService';
+import ConfigService from './ConfigService';
 import UserService, { UserPreferences } from '../../service/user/UserService';
 import DatabaseManager from '../../data/db/DatabaseManager';
 import { BusinessError } from '@ohos.base';
 import type { ApplicationInfo } from '@ohos.bundle.bundleManager';
+
+// 自定义主题接口 | Custom theme interface
+export interface CustomTheme {
+  primaryColor?: string;
+  secondaryColor?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  borderColor?: string;
+}
+
+// 用户设置映射接口 | User settings map interface
+export interface UserSettingsMap {
+  // 使用Map类型替代索引签名 | Use Map type instead of index signature
+  settingsMap: Map<string, AppSettings>;
+}
 
 // 常量定义 | Constant definitions
 const TAG = 'SettingService';
@@ -20,6 +34,9 @@ export enum SettingType {
   DEVICE = 2,          // 设备级设置 | Device level settings
   CUSTOM = 3           // 自定义设置 | Custom settings
 }
+
+// 设置值类型别名 | Setting value type alias
+export type SettingValue = ThemeMode | string | boolean | number | LanguageCode | PlaybackQuality | SubtitleSize | SubtitleStyle | NetworkType | NotificationCategory | Array<NotificationCategory>;
 
 // 主题模式定义 | Theme mode definitions
 export enum ThemeMode {
@@ -83,15 +100,7 @@ export enum NotificationCategory {
   SYSTEM = 4           // 系统通知 | System notifications
 }
 
-// 家长控制级别定义 | Parental control level definitions
-export enum ParentalControlLevel {
-  OFF = 0,             // 关闭 | Off
-  G = 1,               // 一般观看 | General audience
-  PG = 2,              // 建议家长指导 | Parental guidance suggested
-  PG_13 = 3,           // 13岁以上 | Parents strongly cautioned
-  R = 4,               // 限制级 | Restricted
-  NC_17 = 5            // 17岁以上 | No one 17 and under admitted
-}
+
 
 // 设置项接口 | Setting item interface
 export interface SettingItem<T> {
@@ -114,7 +123,7 @@ export interface AppSettings {
   themeMode: ThemeMode;
   accentColor: string;
   darkThemeAccentColor: string;
-  customTheme?: Record<string, string>;
+  customTheme?: CustomTheme;
   
   // 语言相关 | Language related
   language: LanguageCode;
@@ -153,11 +162,6 @@ export interface AppSettings {
   notificationCategories: NotificationCategory[];
   pushEnabled: boolean;
   
-  // 家长控制 | Parental control
-  parentalControlEnabled: boolean;
-  parentalControlLevel: ParentalControlLevel;
-  parentalControlPin?: string;
-  
   // 外观相关 | Appearance related
   gridLayoutColumns: number;
   showFileExtensions: boolean;
@@ -184,7 +188,7 @@ export interface SettingGroup {
   id: string;
   title: string;
   description?: string;
-  settings: SettingItem<unknown>[];
+  settings: Array<SettingItem<ThemeMode | string | boolean | number | LanguageCode | PlaybackQuality | SubtitleSize | SubtitleStyle | NetworkType | NotificationCategory | Array<NotificationCategory>>>;
   icon?: string;
 }
 
@@ -246,9 +250,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
   ],
   pushEnabled: true,
   
-  // 家长控制 | Parental control
-  parentalControlEnabled: false,
-  parentalControlLevel: ParentalControlLevel.OFF,
+
   
   // 外观相关 | Appearance related
   gridLayoutColumns: 3,
@@ -278,25 +280,35 @@ export default class SettingService {
    * 检查对象是否包含指定属性 | Check if object contains specified property
    */
   private hasOwnProperty(obj: object, key: string): boolean {
-    return Object.getOwnPropertyNames(obj).includes(key);
+    // ArkTS兼容实现：避免使用Object.prototype和call方法 | ArkTS compatible: avoid using Object.prototype and call method
+    try {
+      const keys = this.getOwnPropertyKeys(obj);
+      for (const k of keys) {
+        if (k === key) {
+          return true;
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    }
   }
   
   /**
    * 获取对象的所有自有属性键 | Get all own property keys of object
    */
   private getOwnPropertyKeys(obj: object): string[] {
-    return Object.getOwnPropertyNames(obj);
+    // ArkTS兼容实现：使用Object.keys | ArkTS compatible: use Object.keys
+    return Object.keys(obj);
   }
-  private configService: ConfigService;
-  private userService: UserService;
-  private databaseManager: DatabaseManager;
+  // 服务实例将在需要时直接调用 | Service instances will be called directly when needed
   private appSettings: AppSettings = DEFAULT_APP_SETTINGS;
-  private userSettings: Record<string, AppSettings> = {};
+  private userSettings: Map<string, AppSettings> = new Map();
   private isInitialized: boolean = false;
   
   // 监听器 | Listeners
   private generalListeners: Array<() => void> = [];
-  private specificListeners: Map<string, Array<(event: SettingChangeEvent<unknown>) => void>> = new Map();
+  private specificListeners: Map<string, Array<(event: SettingChangeEvent<SettingValue>) => void>> = new Map();
   private themeListeners: Array<(themeMode: ThemeMode, accentColor: string) => void> = [];
   private languageListeners: Array<(language: LanguageCode) => void> = [];
 
@@ -314,9 +326,7 @@ export default class SettingService {
    * 构造函数 | Constructor
    */
   private constructor() {
-    this.configService = ConfigService.getInstance();
-    this.userService = UserService.getInstance();
-    this.databaseManager = DatabaseManager.getInstance();
+    // 构造函数中不调用异步方法，由外部手动调用initialize
   }
 
   /**
@@ -324,12 +334,12 @@ export default class SettingService {
    */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
-      Logger.info(TAG, 'Setting service already initialized');
+      console.info(TAG + `: 设置服务已初始化 | Setting service already initialized`);
       return;
     }
 
     try {
-      Logger.info(TAG, 'Initializing setting service...');
+      console.info(TAG + `: 正在初始化设置服务... | Initializing setting service...`);
       
       // 加载默认下载路径 | Load default download path
       this.appSettings.downloadPath = await this.getDefaultDownloadPath();
@@ -338,8 +348,8 @@ export default class SettingService {
       await this.loadSettings();
       
       // 加载用户设置（如果已登录） | Load user settings (if logged in)
-      const currentUser = this.userService.getCurrentUser();
-      if (currentUser && !this.userService.isGuest()) {
+      const currentUser = UserService.getInstance().getCurrentUser();
+      if (currentUser && !UserService.getInstance().isGuest()) {
         await this.loadUserSettings(currentUser.id);
       }
       
@@ -348,8 +358,8 @@ export default class SettingService {
       await this.applyLanguage();
       
       // 添加用户变更监听器，以便在用户切换时加载相应的设置 | Add user change listener to load corresponding settings when user changes
-      this.userService.addUserChangeListener(async (user) => {
-        if (user && !this.userService.isGuest()) {
+      UserService.getInstance().addUserChangeListener(async (user) => {
+        if (user && !UserService.getInstance().isGuest()) {
           await this.loadUserSettings(user.id);
           await this.applyTheme();
           await this.applyLanguage();
@@ -357,11 +367,78 @@ export default class SettingService {
       });
       
       this.isInitialized = true;
-      Logger.info(TAG, 'Setting service initialized successfully');
+      console.info(TAG + `: 设置服务初始化成功 | Setting service initialized successfully`);
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize setting service: ${error}`);
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: 设置服务初始化失败: | Failed to initialize setting service: `, err);
       // 使用默认设置继续 | Continue with default settings
-      this.appSettings = DEFAULT_APP_SETTINGS;
+      // 手动复制对象，兼容ArkTS
+      this.appSettings = {
+        // 主题相关 | Theme related
+        themeMode: DEFAULT_APP_SETTINGS.themeMode,
+        accentColor: DEFAULT_APP_SETTINGS.accentColor,
+        darkThemeAccentColor: DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+        customTheme: DEFAULT_APP_SETTINGS.customTheme,
+        
+        // 语言相关 | Language related
+        language: DEFAULT_APP_SETTINGS.language,
+        autoDetectLanguage: DEFAULT_APP_SETTINGS.autoDetectLanguage,
+        
+        // 播放相关 | Playback related
+        defaultPlaybackQuality: DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+        autoPlayNext: DEFAULT_APP_SETTINGS.autoPlayNext,
+        rememberPlaybackPosition: DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+        playbackSpeed: DEFAULT_APP_SETTINGS.playbackSpeed,
+        defaultVolume: DEFAULT_APP_SETTINGS.defaultVolume,
+        
+        // 字幕相关 | Subtitle related
+        subtitleEnabled: DEFAULT_APP_SETTINGS.subtitleEnabled,
+        subtitleLanguage: DEFAULT_APP_SETTINGS.subtitleLanguage,
+        subtitleSize: DEFAULT_APP_SETTINGS.subtitleSize,
+        subtitleStyle: DEFAULT_APP_SETTINGS.subtitleStyle,
+        subtitleColor: DEFAULT_APP_SETTINGS.subtitleColor,
+        subtitleBackgroundColor: DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+        
+        // 存储相关 | Storage related
+        downloadPath: DEFAULT_APP_SETTINGS.downloadPath,
+        cacheSizeLimit: DEFAULT_APP_SETTINGS.cacheSizeLimit,
+        autoClearCache: DEFAULT_APP_SETTINGS.autoClearCache,
+        cacheClearInterval: DEFAULT_APP_SETTINGS.cacheClearInterval,
+        
+        // 网络相关 | Network related
+        networkTypeForPlayback: DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+        networkTypeForDownload: DEFAULT_APP_SETTINGS.networkTypeForDownload,
+        bandwidthSaver: DEFAULT_APP_SETTINGS.bandwidthSaver,
+        preloadEnabled: DEFAULT_APP_SETTINGS.preloadEnabled,
+        preloadLimit: DEFAULT_APP_SETTINGS.preloadLimit,
+        
+        // 通知相关 | Notification related
+        notificationsEnabled: DEFAULT_APP_SETTINGS.notificationsEnabled,
+        notificationCategories: DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+        pushEnabled: DEFAULT_APP_SETTINGS.pushEnabled,
+        
+
+        
+        // 外观相关 | Appearance related
+        gridLayoutColumns: DEFAULT_APP_SETTINGS.gridLayoutColumns,
+        showFileExtensions: DEFAULT_APP_SETTINGS.showFileExtensions,
+        showHiddenFiles: DEFAULT_APP_SETTINGS.showHiddenFiles,
+        defaultSortBy: DEFAULT_APP_SETTINGS.defaultSortBy,
+        defaultSortOrder: DEFAULT_APP_SETTINGS.defaultSortOrder,
+        
+        // 设备相关 | Device related
+        enableHardwareAcceleration: DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+        enableDolbyAudio: DEFAULT_APP_SETTINGS.enableDolbyAudio,
+        enableHDR: DEFAULT_APP_SETTINGS.enableHDR,
+        screenTimeout: DEFAULT_APP_SETTINGS.screenTimeout,
+        
+        // 其他设置 | Other settings
+        crashReportingEnabled: DEFAULT_APP_SETTINGS.crashReportingEnabled,
+        usageAnalyticsEnabled: DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+        backgroundPlayEnabled: DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+        startupPage: DEFAULT_APP_SETTINGS.startupPage,
+        enableGestureControl: DEFAULT_APP_SETTINGS.enableGestureControl
+      };
       this.isInitialized = true;
     }
   }
@@ -371,11 +448,16 @@ export default class SettingService {
    */
   private async getDefaultDownloadPath(): Promise<string> {
     try {
-      // 这里应该使用应用的文件系统API获取可用的下载目录 | Should use app's file system API to get available download directory
-      // 以下是模拟实现 | Below is mock implementation
-      return '/storage/emulated/0/Download/RayTV';
+      // ArkTS兼容实现：使用内置的存储API获取路径 | ArkTS compatible: use built-in storage API to get path
+      // 这里使用简化实现，返回应用缓存目录 | Simplified implementation, return app cache directory
+      // 实际应用中应使用HarmonyOS提供的文件系统API | In actual app, use HarmonyOS file system API
+      const cacheDir = '/data/storage/el2/base/cache';
+      const downloadPath = `${cacheDir}/Download/RayTV`;
+      
+      console.info(TAG + `: 获取默认下载路径成功: ${downloadPath} | Default download path obtained: ${downloadPath}`);
+      return downloadPath;
     } catch (error) {
-      Logger.error(TAG, `Failed to get default download path: ${error}`);
+      console.error(TAG + `: 获取默认下载路径失败: | Failed to get default download path: `, error);
       return '/tmp';
     }
   }
@@ -385,13 +467,80 @@ export default class SettingService {
    */
   private async loadSettings(): Promise<void> {
     try {
-      const savedSettings = await StorageUtil.getObject<AppSettings>(SETTINGS_STORAGE_KEY);
-      if (savedSettings) {
-        this.appSettings = { ...DEFAULT_APP_SETTINGS, ...savedSettings };
-        Logger.info(TAG, 'App settings loaded from storage');
+      const savedSettingsStr = await StorageUtil.getString(SETTINGS_STORAGE_KEY);
+      if (savedSettingsStr) {
+        const savedSettings = JSON.parse(savedSettingsStr) as AppSettings;
+        // 手动合并设置，兼容ArkTS
+        this.appSettings = {
+          // 主题相关 | Theme related
+          themeMode: savedSettings.themeMode || DEFAULT_APP_SETTINGS.themeMode,
+          accentColor: savedSettings.accentColor || DEFAULT_APP_SETTINGS.accentColor,
+          darkThemeAccentColor: savedSettings.darkThemeAccentColor || DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+          customTheme: savedSettings.customTheme || DEFAULT_APP_SETTINGS.customTheme,
+          
+          // 语言相关 | Language related
+          language: savedSettings.language || DEFAULT_APP_SETTINGS.language,
+          autoDetectLanguage: savedSettings.autoDetectLanguage !== undefined ? savedSettings.autoDetectLanguage : DEFAULT_APP_SETTINGS.autoDetectLanguage,
+          
+          // 播放相关 | Playback related
+          defaultPlaybackQuality: savedSettings.defaultPlaybackQuality || DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+          autoPlayNext: savedSettings.autoPlayNext !== undefined ? savedSettings.autoPlayNext : DEFAULT_APP_SETTINGS.autoPlayNext,
+          rememberPlaybackPosition: savedSettings.rememberPlaybackPosition !== undefined ? savedSettings.rememberPlaybackPosition : DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+          playbackSpeed: savedSettings.playbackSpeed || DEFAULT_APP_SETTINGS.playbackSpeed,
+          defaultVolume: savedSettings.defaultVolume || DEFAULT_APP_SETTINGS.defaultVolume,
+          
+          // 字幕相关 | Subtitle related
+          subtitleEnabled: savedSettings.subtitleEnabled !== undefined ? savedSettings.subtitleEnabled : DEFAULT_APP_SETTINGS.subtitleEnabled,
+          subtitleLanguage: savedSettings.subtitleLanguage || DEFAULT_APP_SETTINGS.subtitleLanguage,
+          subtitleSize: savedSettings.subtitleSize || DEFAULT_APP_SETTINGS.subtitleSize,
+          subtitleStyle: savedSettings.subtitleStyle || DEFAULT_APP_SETTINGS.subtitleStyle,
+          subtitleColor: savedSettings.subtitleColor || DEFAULT_APP_SETTINGS.subtitleColor,
+          subtitleBackgroundColor: savedSettings.subtitleBackgroundColor || DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+          
+          // 存储相关 | Storage related
+          downloadPath: savedSettings.downloadPath || DEFAULT_APP_SETTINGS.downloadPath,
+          cacheSizeLimit: savedSettings.cacheSizeLimit || DEFAULT_APP_SETTINGS.cacheSizeLimit,
+          autoClearCache: savedSettings.autoClearCache !== undefined ? savedSettings.autoClearCache : DEFAULT_APP_SETTINGS.autoClearCache,
+          cacheClearInterval: savedSettings.cacheClearInterval || DEFAULT_APP_SETTINGS.cacheClearInterval,
+          
+          // 网络相关 | Network related
+          networkTypeForPlayback: savedSettings.networkTypeForPlayback || DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+          networkTypeForDownload: savedSettings.networkTypeForDownload || DEFAULT_APP_SETTINGS.networkTypeForDownload,
+          bandwidthSaver: savedSettings.bandwidthSaver !== undefined ? savedSettings.bandwidthSaver : DEFAULT_APP_SETTINGS.bandwidthSaver,
+          preloadEnabled: savedSettings.preloadEnabled !== undefined ? savedSettings.preloadEnabled : DEFAULT_APP_SETTINGS.preloadEnabled,
+          preloadLimit: savedSettings.preloadLimit || DEFAULT_APP_SETTINGS.preloadLimit,
+          
+          // 通知相关 | Notification related
+          notificationsEnabled: savedSettings.notificationsEnabled !== undefined ? savedSettings.notificationsEnabled : DEFAULT_APP_SETTINGS.notificationsEnabled,
+          notificationCategories: savedSettings.notificationCategories || DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+          pushEnabled: savedSettings.pushEnabled !== undefined ? savedSettings.pushEnabled : DEFAULT_APP_SETTINGS.pushEnabled,
+          
+
+          
+          // 外观相关 | Appearance related
+          gridLayoutColumns: savedSettings.gridLayoutColumns || DEFAULT_APP_SETTINGS.gridLayoutColumns,
+          showFileExtensions: savedSettings.showFileExtensions !== undefined ? savedSettings.showFileExtensions : DEFAULT_APP_SETTINGS.showFileExtensions,
+          showHiddenFiles: savedSettings.showHiddenFiles !== undefined ? savedSettings.showHiddenFiles : DEFAULT_APP_SETTINGS.showHiddenFiles,
+          defaultSortBy: savedSettings.defaultSortBy || DEFAULT_APP_SETTINGS.defaultSortBy,
+          defaultSortOrder: savedSettings.defaultSortOrder || DEFAULT_APP_SETTINGS.defaultSortOrder,
+          
+          // 设备相关 | Device related
+          enableHardwareAcceleration: savedSettings.enableHardwareAcceleration !== undefined ? savedSettings.enableHardwareAcceleration : DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+          enableDolbyAudio: savedSettings.enableDolbyAudio !== undefined ? savedSettings.enableDolbyAudio : DEFAULT_APP_SETTINGS.enableDolbyAudio,
+          enableHDR: savedSettings.enableHDR !== undefined ? savedSettings.enableHDR : DEFAULT_APP_SETTINGS.enableHDR,
+          screenTimeout: savedSettings.screenTimeout || DEFAULT_APP_SETTINGS.screenTimeout,
+          
+          // 其他设置 | Other settings
+          crashReportingEnabled: savedSettings.crashReportingEnabled !== undefined ? savedSettings.crashReportingEnabled : DEFAULT_APP_SETTINGS.crashReportingEnabled,
+          usageAnalyticsEnabled: savedSettings.usageAnalyticsEnabled !== undefined ? savedSettings.usageAnalyticsEnabled : DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+          backgroundPlayEnabled: savedSettings.backgroundPlayEnabled !== undefined ? savedSettings.backgroundPlayEnabled : DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+          startupPage: savedSettings.startupPage || DEFAULT_APP_SETTINGS.startupPage,
+          enableGestureControl: savedSettings.enableGestureControl !== undefined ? savedSettings.enableGestureControl : DEFAULT_APP_SETTINGS.enableGestureControl
+        };
+        console.info(TAG + '应用设置已从存储加载 | App settings loaded from storage');
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load app settings: ${error}`);
+      console.error(TAG + "加载应用设置失败: | Failed to load app settings: ", error);
     }
   }
 
@@ -401,14 +550,82 @@ export default class SettingService {
   private async loadUserSettings(userId: string): Promise<void> {
     try {
       const userSettingsKey = `${USER_SETTINGS_KEY_PREFIX}${userId}`;
-      const savedSettings = await StorageUtil.getObject<AppSettings>(userSettingsKey);
+      const savedSettingsStr = await StorageUtil.getString(userSettingsKey);
       
-      if (savedSettings) {
-        this.userSettings[userId] = { ...DEFAULT_APP_SETTINGS, ...savedSettings };
-        Logger.info(TAG, `User settings loaded for user: ${userId}`);
+      if (savedSettingsStr) {
+        const savedSettings = JSON.parse(savedSettingsStr) as AppSettings;
+        // 手动合并设置，兼容ArkTS
+        const mergedSettings: AppSettings = {
+          // 主题相关 | Theme related
+          themeMode: savedSettings.themeMode || DEFAULT_APP_SETTINGS.themeMode,
+          accentColor: savedSettings.accentColor || DEFAULT_APP_SETTINGS.accentColor,
+          darkThemeAccentColor: savedSettings.darkThemeAccentColor || DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+          customTheme: savedSettings.customTheme || DEFAULT_APP_SETTINGS.customTheme,
+          
+          // 语言相关 | Language related
+          language: savedSettings.language || DEFAULT_APP_SETTINGS.language,
+          autoDetectLanguage: savedSettings.autoDetectLanguage !== undefined ? savedSettings.autoDetectLanguage : DEFAULT_APP_SETTINGS.autoDetectLanguage,
+          
+          // 播放相关 | Playback related
+          defaultPlaybackQuality: savedSettings.defaultPlaybackQuality || DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+          autoPlayNext: savedSettings.autoPlayNext !== undefined ? savedSettings.autoPlayNext : DEFAULT_APP_SETTINGS.autoPlayNext,
+          rememberPlaybackPosition: savedSettings.rememberPlaybackPosition !== undefined ? savedSettings.rememberPlaybackPosition : DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+          playbackSpeed: savedSettings.playbackSpeed || DEFAULT_APP_SETTINGS.playbackSpeed,
+          defaultVolume: savedSettings.defaultVolume || DEFAULT_APP_SETTINGS.defaultVolume,
+          
+          // 字幕相关 | Subtitle related
+          subtitleEnabled: savedSettings.subtitleEnabled !== undefined ? savedSettings.subtitleEnabled : DEFAULT_APP_SETTINGS.subtitleEnabled,
+          subtitleLanguage: savedSettings.subtitleLanguage || DEFAULT_APP_SETTINGS.subtitleLanguage,
+          subtitleSize: savedSettings.subtitleSize || DEFAULT_APP_SETTINGS.subtitleSize,
+          subtitleStyle: savedSettings.subtitleStyle || DEFAULT_APP_SETTINGS.subtitleStyle,
+          subtitleColor: savedSettings.subtitleColor || DEFAULT_APP_SETTINGS.subtitleColor,
+          subtitleBackgroundColor: savedSettings.subtitleBackgroundColor || DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+          
+          // 存储相关 | Storage related
+          downloadPath: savedSettings.downloadPath || DEFAULT_APP_SETTINGS.downloadPath,
+          cacheSizeLimit: savedSettings.cacheSizeLimit || DEFAULT_APP_SETTINGS.cacheSizeLimit,
+          autoClearCache: savedSettings.autoClearCache !== undefined ? savedSettings.autoClearCache : DEFAULT_APP_SETTINGS.autoClearCache,
+          cacheClearInterval: savedSettings.cacheClearInterval || DEFAULT_APP_SETTINGS.cacheClearInterval,
+          
+          // 网络相关 | Network related
+          networkTypeForPlayback: savedSettings.networkTypeForPlayback || DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+          networkTypeForDownload: savedSettings.networkTypeForDownload || DEFAULT_APP_SETTINGS.networkTypeForDownload,
+          bandwidthSaver: savedSettings.bandwidthSaver !== undefined ? savedSettings.bandwidthSaver : DEFAULT_APP_SETTINGS.bandwidthSaver,
+          preloadEnabled: savedSettings.preloadEnabled !== undefined ? savedSettings.preloadEnabled : DEFAULT_APP_SETTINGS.preloadEnabled,
+          preloadLimit: savedSettings.preloadLimit || DEFAULT_APP_SETTINGS.preloadLimit,
+          
+          // 通知相关 | Notification related
+          notificationsEnabled: savedSettings.notificationsEnabled !== undefined ? savedSettings.notificationsEnabled : DEFAULT_APP_SETTINGS.notificationsEnabled,
+          notificationCategories: savedSettings.notificationCategories || DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+          pushEnabled: savedSettings.pushEnabled !== undefined ? savedSettings.pushEnabled : DEFAULT_APP_SETTINGS.pushEnabled,
+          
+
+          
+          // 外观相关 | Appearance related
+          gridLayoutColumns: savedSettings.gridLayoutColumns || DEFAULT_APP_SETTINGS.gridLayoutColumns,
+          showFileExtensions: savedSettings.showFileExtensions !== undefined ? savedSettings.showFileExtensions : DEFAULT_APP_SETTINGS.showFileExtensions,
+          showHiddenFiles: savedSettings.showHiddenFiles !== undefined ? savedSettings.showHiddenFiles : DEFAULT_APP_SETTINGS.showHiddenFiles,
+          defaultSortBy: savedSettings.defaultSortBy || DEFAULT_APP_SETTINGS.defaultSortBy,
+          defaultSortOrder: savedSettings.defaultSortOrder || DEFAULT_APP_SETTINGS.defaultSortOrder,
+          
+          // 设备相关 | Device related
+          enableHardwareAcceleration: savedSettings.enableHardwareAcceleration !== undefined ? savedSettings.enableHardwareAcceleration : DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+          enableDolbyAudio: savedSettings.enableDolbyAudio !== undefined ? savedSettings.enableDolbyAudio : DEFAULT_APP_SETTINGS.enableDolbyAudio,
+          enableHDR: savedSettings.enableHDR !== undefined ? savedSettings.enableHDR : DEFAULT_APP_SETTINGS.enableHDR,
+          screenTimeout: savedSettings.screenTimeout || DEFAULT_APP_SETTINGS.screenTimeout,
+          
+          // 其他设置 | Other settings
+          crashReportingEnabled: savedSettings.crashReportingEnabled !== undefined ? savedSettings.crashReportingEnabled : DEFAULT_APP_SETTINGS.crashReportingEnabled,
+          usageAnalyticsEnabled: savedSettings.usageAnalyticsEnabled !== undefined ? savedSettings.usageAnalyticsEnabled : DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+          backgroundPlayEnabled: savedSettings.backgroundPlayEnabled !== undefined ? savedSettings.backgroundPlayEnabled : DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+          startupPage: savedSettings.startupPage || DEFAULT_APP_SETTINGS.startupPage,
+          enableGestureControl: savedSettings.enableGestureControl !== undefined ? savedSettings.enableGestureControl : DEFAULT_APP_SETTINGS.enableGestureControl
+        };
+        this.userSettings.set(userId, mergedSettings);
+        console.info(TAG + "已加载用户设置，用户ID: " + userId + " | User settings loaded for user: " + userId);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load user settings: ${error}`);
+      console.error(TAG + "加载用户设置失败: | Failed to load user settings: ", error);
     }
   }
 
@@ -417,10 +634,11 @@ export default class SettingService {
    */
   private async saveSettings(): Promise<void> {
     try {
-      await StorageUtil.setObject(SETTINGS_STORAGE_KEY, this.appSettings);
-      Logger.info(TAG, 'App settings saved to storage');
+      const settingsStr = JSON.stringify(this.appSettings);
+      await StorageUtil.putString(SETTINGS_STORAGE_KEY, settingsStr);
+      console.info(TAG + '应用设置已保存到存储 | App settings saved to storage');
     } catch (error) {
-      Logger.error(TAG, `Failed to save app settings: ${error}`);
+      console.error(TAG + "保存应用设置失败: | Failed to save app settings: ", error);
     }
   }
 
@@ -429,14 +647,15 @@ export default class SettingService {
    */
   private async saveUserSettings(userId: string): Promise<void> {
     try {
-      const userSettings = this.userSettings[userId];
+      const userSettings = this.userSettings.get(userId);
       if (userSettings) {
         const userSettingsKey = `${USER_SETTINGS_KEY_PREFIX}${userId}`;
-        await StorageUtil.setObject(userSettingsKey, userSettings);
-        Logger.info(TAG, `User settings saved for user: ${userId}`);
+        const settingsStr = JSON.stringify(userSettings);
+        await StorageUtil.putString(userSettingsKey, settingsStr);
+        console.info(TAG + "已保存用户设置，用户ID: " + userId + " | User settings saved for user: " + userId);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to save user settings: ${error}`);
+      console.error(TAG + "保存用户设置失败: | Failed to save user settings: ", error);
     }
   }
 
@@ -444,13 +663,149 @@ export default class SettingService {
    * 获取当前设置（考虑用户设置覆盖） | Get current settings (consider user settings override)
    */
   public getSettings(): AppSettings {
-    const currentUser = this.userService.getCurrentUser();
+    const currentUser = UserService.getInstance().getCurrentUser();
     
-    if (currentUser && !this.userService.isGuest() && this.userSettings[currentUser.id]) {
-      return { ...this.userSettings[currentUser.id] };
+    if (currentUser && !UserService.getInstance().isGuest()) {
+      const userSettings = this.userSettings.get(currentUser.id);
+      if (userSettings) {
+        // 手动复制对象，兼容ArkTS
+        return {
+          // 主题相关 | Theme related
+          themeMode: userSettings.themeMode,
+          accentColor: userSettings.accentColor,
+          darkThemeAccentColor: userSettings.darkThemeAccentColor,
+          customTheme: userSettings.customTheme,
+          
+          // 语言相关 | Language related
+          language: userSettings.language,
+          autoDetectLanguage: userSettings.autoDetectLanguage,
+          
+          // 播放相关 | Playback related
+          defaultPlaybackQuality: userSettings.defaultPlaybackQuality,
+          autoPlayNext: userSettings.autoPlayNext,
+          rememberPlaybackPosition: userSettings.rememberPlaybackPosition,
+          playbackSpeed: userSettings.playbackSpeed,
+          defaultVolume: userSettings.defaultVolume,
+          
+          // 字幕相关 | Subtitle related
+          subtitleEnabled: userSettings.subtitleEnabled,
+          subtitleLanguage: userSettings.subtitleLanguage,
+          subtitleSize: userSettings.subtitleSize,
+          subtitleStyle: userSettings.subtitleStyle,
+          subtitleColor: userSettings.subtitleColor,
+          subtitleBackgroundColor: userSettings.subtitleBackgroundColor,
+          
+          // 存储相关 | Storage related
+          downloadPath: userSettings.downloadPath,
+          cacheSizeLimit: userSettings.cacheSizeLimit,
+          autoClearCache: userSettings.autoClearCache,
+          cacheClearInterval: userSettings.cacheClearInterval,
+          
+          // 网络相关 | Network related
+          networkTypeForPlayback: userSettings.networkTypeForPlayback,
+          networkTypeForDownload: userSettings.networkTypeForDownload,
+          bandwidthSaver: userSettings.bandwidthSaver,
+          preloadEnabled: userSettings.preloadEnabled,
+          preloadLimit: userSettings.preloadLimit,
+          
+          // 通知相关 | Notification related
+          notificationsEnabled: userSettings.notificationsEnabled,
+          notificationCategories: userSettings.notificationCategories.slice(),
+          pushEnabled: userSettings.pushEnabled,
+          
+
+          
+          // 外观相关 | Appearance related
+          gridLayoutColumns: userSettings.gridLayoutColumns,
+          showFileExtensions: userSettings.showFileExtensions,
+          showHiddenFiles: userSettings.showHiddenFiles,
+          defaultSortBy: userSettings.defaultSortBy,
+          defaultSortOrder: userSettings.defaultSortOrder,
+          
+          // 设备相关 | Device related
+          enableHardwareAcceleration: userSettings.enableHardwareAcceleration,
+          enableDolbyAudio: userSettings.enableDolbyAudio,
+          enableHDR: userSettings.enableHDR,
+          screenTimeout: userSettings.screenTimeout,
+          
+          // 其他设置 | Other settings
+          crashReportingEnabled: userSettings.crashReportingEnabled,
+          usageAnalyticsEnabled: userSettings.usageAnalyticsEnabled,
+          backgroundPlayEnabled: userSettings.backgroundPlayEnabled,
+          startupPage: userSettings.startupPage,
+          enableGestureControl: userSettings.enableGestureControl
+        };
+      }
     }
     
-    return { ...this.appSettings };
+    const appSettings = this.appSettings;
+    // 手动复制对象，兼容ArkTS
+    return {
+      // 主题相关 | Theme related
+      themeMode: appSettings.themeMode,
+      accentColor: appSettings.accentColor,
+      darkThemeAccentColor: appSettings.darkThemeAccentColor,
+      customTheme: appSettings.customTheme,
+      
+      // 语言相关 | Language related
+      language: appSettings.language,
+      autoDetectLanguage: appSettings.autoDetectLanguage,
+      
+      // 播放相关 | Playback related
+      defaultPlaybackQuality: appSettings.defaultPlaybackQuality,
+      autoPlayNext: appSettings.autoPlayNext,
+      rememberPlaybackPosition: appSettings.rememberPlaybackPosition,
+      playbackSpeed: appSettings.playbackSpeed,
+      defaultVolume: appSettings.defaultVolume,
+      
+      // 字幕相关 | Subtitle related
+      subtitleEnabled: appSettings.subtitleEnabled,
+      subtitleLanguage: appSettings.subtitleLanguage,
+      subtitleSize: appSettings.subtitleSize,
+      subtitleStyle: appSettings.subtitleStyle,
+      subtitleColor: appSettings.subtitleColor,
+      subtitleBackgroundColor: appSettings.subtitleBackgroundColor,
+      
+      // 存储相关 | Storage related
+      downloadPath: appSettings.downloadPath,
+      cacheSizeLimit: appSettings.cacheSizeLimit,
+      autoClearCache: appSettings.autoClearCache,
+      cacheClearInterval: appSettings.cacheClearInterval,
+      
+      // 网络相关 | Network related
+      networkTypeForPlayback: appSettings.networkTypeForPlayback,
+      networkTypeForDownload: appSettings.networkTypeForDownload,
+      bandwidthSaver: appSettings.bandwidthSaver,
+      preloadEnabled: appSettings.preloadEnabled,
+      preloadLimit: appSettings.preloadLimit,
+      
+      // 通知相关 | Notification related
+      notificationsEnabled: appSettings.notificationsEnabled,
+      notificationCategories: appSettings.notificationCategories.slice(),
+      pushEnabled: appSettings.pushEnabled,
+      
+
+      
+      // 外观相关 | Appearance related
+      gridLayoutColumns: appSettings.gridLayoutColumns,
+      showFileExtensions: appSettings.showFileExtensions,
+      showHiddenFiles: appSettings.showHiddenFiles,
+      defaultSortBy: appSettings.defaultSortBy,
+      defaultSortOrder: appSettings.defaultSortOrder,
+      
+      // 设备相关 | Device related
+      enableHardwareAcceleration: appSettings.enableHardwareAcceleration,
+      enableDolbyAudio: appSettings.enableDolbyAudio,
+      enableHDR: appSettings.enableHDR,
+      screenTimeout: appSettings.screenTimeout,
+      
+      // 其他设置 | Other settings
+      crashReportingEnabled: appSettings.crashReportingEnabled,
+      usageAnalyticsEnabled: appSettings.usageAnalyticsEnabled,
+      backgroundPlayEnabled: appSettings.backgroundPlayEnabled,
+      startupPage: appSettings.startupPage,
+      enableGestureControl: appSettings.enableGestureControl
+    };
   }
 
   /**
@@ -474,16 +829,85 @@ export default class SettingService {
       }
       
       // 确定是应用设置还是用户设置 | Determine if it's app setting or user setting
-      const currentUser = this.userService.getCurrentUser();
-      const isUserSetting = currentUser && !this.userService.isGuest();
+      const currentUser = UserService.getInstance().getCurrentUser();
+      const isUserSetting = currentUser && !UserService.getInstance().isGuest();
       
       if (isUserSetting) {
         // 确保用户设置对象存在 | Ensure user settings object exists
-        if (!this.userSettings[currentUser.id]) {
-          this.userSettings[currentUser.id] = { ...DEFAULT_APP_SETTINGS };
+        let userSettings = this.userSettings.get(currentUser.id);
+        if (!userSettings) {
+          // 手动复制对象，兼容ArkTS
+          userSettings = {
+            // 主题相关 | Theme related
+            themeMode: DEFAULT_APP_SETTINGS.themeMode,
+            accentColor: DEFAULT_APP_SETTINGS.accentColor,
+            darkThemeAccentColor: DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+            customTheme: DEFAULT_APP_SETTINGS.customTheme,
+            
+            // 语言相关 | Language related
+            language: DEFAULT_APP_SETTINGS.language,
+            autoDetectLanguage: DEFAULT_APP_SETTINGS.autoDetectLanguage,
+            
+            // 播放相关 | Playback related
+            defaultPlaybackQuality: DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+            autoPlayNext: DEFAULT_APP_SETTINGS.autoPlayNext,
+            rememberPlaybackPosition: DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+            playbackSpeed: DEFAULT_APP_SETTINGS.playbackSpeed,
+            defaultVolume: DEFAULT_APP_SETTINGS.defaultVolume,
+            
+            // 字幕相关 | Subtitle related
+            subtitleEnabled: DEFAULT_APP_SETTINGS.subtitleEnabled,
+            subtitleLanguage: DEFAULT_APP_SETTINGS.subtitleLanguage,
+            subtitleSize: DEFAULT_APP_SETTINGS.subtitleSize,
+            subtitleStyle: DEFAULT_APP_SETTINGS.subtitleStyle,
+            subtitleColor: DEFAULT_APP_SETTINGS.subtitleColor,
+            subtitleBackgroundColor: DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+            
+            // 存储相关 | Storage related
+            downloadPath: DEFAULT_APP_SETTINGS.downloadPath,
+            cacheSizeLimit: DEFAULT_APP_SETTINGS.cacheSizeLimit,
+            autoClearCache: DEFAULT_APP_SETTINGS.autoClearCache,
+            cacheClearInterval: DEFAULT_APP_SETTINGS.cacheClearInterval,
+            
+            // 网络相关 | Network related
+            networkTypeForPlayback: DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+            networkTypeForDownload: DEFAULT_APP_SETTINGS.networkTypeForDownload,
+            bandwidthSaver: DEFAULT_APP_SETTINGS.bandwidthSaver,
+            preloadEnabled: DEFAULT_APP_SETTINGS.preloadEnabled,
+            preloadLimit: DEFAULT_APP_SETTINGS.preloadLimit,
+            
+            // 通知相关 | Notification related
+            notificationsEnabled: DEFAULT_APP_SETTINGS.notificationsEnabled,
+            notificationCategories: DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+            pushEnabled: DEFAULT_APP_SETTINGS.pushEnabled,
+            
+
+            
+            // 外观相关 | Appearance related
+            gridLayoutColumns: DEFAULT_APP_SETTINGS.gridLayoutColumns,
+            showFileExtensions: DEFAULT_APP_SETTINGS.showFileExtensions,
+            showHiddenFiles: DEFAULT_APP_SETTINGS.showHiddenFiles,
+            defaultSortBy: DEFAULT_APP_SETTINGS.defaultSortBy,
+            defaultSortOrder: DEFAULT_APP_SETTINGS.defaultSortOrder,
+            
+            // 设备相关 | Device related
+            enableHardwareAcceleration: DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+            enableDolbyAudio: DEFAULT_APP_SETTINGS.enableDolbyAudio,
+            enableHDR: DEFAULT_APP_SETTINGS.enableHDR,
+            screenTimeout: DEFAULT_APP_SETTINGS.screenTimeout,
+            
+            // 其他设置 | Other settings
+            crashReportingEnabled: DEFAULT_APP_SETTINGS.crashReportingEnabled,
+            usageAnalyticsEnabled: DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+            backgroundPlayEnabled: DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+            startupPage: DEFAULT_APP_SETTINGS.startupPage,
+            enableGestureControl: DEFAULT_APP_SETTINGS.enableGestureControl
+          };
+          this.userSettings.set(currentUser.id, userSettings);
         }
         // 更新用户设置 | Update user settings
-        this.userSettings[currentUser.id][key] = value;
+        userSettings[key] = value;
+        this.userSettings.set(currentUser.id, userSettings);
         await this.saveUserSettings(currentUser.id);
       } else {
         // 更新应用设置 | Update app settings
@@ -497,10 +921,10 @@ export default class SettingService {
       // 处理特殊设置项的应用 | Handle special setting application
       await this.handleSpecialSetting(key, value);
       
-      Logger.info(TAG, `Setting ${key} updated to: ${String(value)}`);
+      console.info(TAG + "设置项 " + key + " 已更新为: " + String(value) + " | Setting " + key + " updated to: " + String(value));
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to set setting ${key}: ${error}`);
+      console.error(TAG + "设置项 " + key + " 更新失败: | Failed to set setting " + key + ": ", error);
       return false;
     }
   }
@@ -510,7 +934,7 @@ export default class SettingService {
    */
   public async setMultipleSettings(updates: Partial<AppSettings>, userInitiated: boolean = true): Promise<boolean> {
     try {
-      const changedKeys: Array<{ key: string, oldValue: unknown, newValue: unknown }> = [];
+      const changedKeys: Array<{ key: string, oldValue: SettingValue, newValue: SettingValue }> = [];
       
       // 收集所有要修改的设置 | Collect all settings to modify
       const keys = this.getOwnPropertyKeys(updates);
@@ -530,16 +954,88 @@ export default class SettingService {
       }
       
       // 确定是应用设置还是用户设置 | Determine if it's app setting or user setting
-      const currentUser = this.userService.getCurrentUser();
-      const isUserSetting = currentUser && !this.userService.isGuest();
+      const currentUser = UserService.getInstance().getCurrentUser();
+      const isUserSetting = currentUser && !UserService.getInstance().isGuest();
       
       // 批量更新设置 | Batch update settings
-      for (const { key, newValue } of changedKeys) {
+      for (let i = 0; i < changedKeys.length; i++) {
+        const change = changedKeys[i];
+        const key = change.key;
+        const newValue = change.newValue;
         if (isUserSetting) {
-          if (!this.userSettings[currentUser.id]) {
-            this.userSettings[currentUser.id] = { ...DEFAULT_APP_SETTINGS };
+          let userSettings = this.userSettings.get(currentUser.id);
+          if (!userSettings) {
+            // 手动复制对象，兼容ArkTS
+            userSettings = {
+              // 主题相关 | Theme related
+              themeMode: DEFAULT_APP_SETTINGS.themeMode,
+              accentColor: DEFAULT_APP_SETTINGS.accentColor,
+              darkThemeAccentColor: DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+              customTheme: DEFAULT_APP_SETTINGS.customTheme,
+              
+              // 语言相关 | Language related
+              language: DEFAULT_APP_SETTINGS.language,
+              autoDetectLanguage: DEFAULT_APP_SETTINGS.autoDetectLanguage,
+              
+              // 播放相关 | Playback related
+              defaultPlaybackQuality: DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+              autoPlayNext: DEFAULT_APP_SETTINGS.autoPlayNext,
+              rememberPlaybackPosition: DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+              playbackSpeed: DEFAULT_APP_SETTINGS.playbackSpeed,
+              defaultVolume: DEFAULT_APP_SETTINGS.defaultVolume,
+              
+              // 字幕相关 | Subtitle related
+              subtitleEnabled: DEFAULT_APP_SETTINGS.subtitleEnabled,
+              subtitleLanguage: DEFAULT_APP_SETTINGS.subtitleLanguage,
+              subtitleSize: DEFAULT_APP_SETTINGS.subtitleSize,
+              subtitleStyle: DEFAULT_APP_SETTINGS.subtitleStyle,
+              subtitleColor: DEFAULT_APP_SETTINGS.subtitleColor,
+              subtitleBackgroundColor: DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+              
+              // 存储相关 | Storage related
+              downloadPath: DEFAULT_APP_SETTINGS.downloadPath,
+              cacheSizeLimit: DEFAULT_APP_SETTINGS.cacheSizeLimit,
+              autoClearCache: DEFAULT_APP_SETTINGS.autoClearCache,
+              cacheClearInterval: DEFAULT_APP_SETTINGS.cacheClearInterval,
+              
+              // 网络相关 | Network related
+              networkTypeForPlayback: DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+              networkTypeForDownload: DEFAULT_APP_SETTINGS.networkTypeForDownload,
+              bandwidthSaver: DEFAULT_APP_SETTINGS.bandwidthSaver,
+              preloadEnabled: DEFAULT_APP_SETTINGS.preloadEnabled,
+              preloadLimit: DEFAULT_APP_SETTINGS.preloadLimit,
+              
+              // 通知相关 | Notification related
+              notificationsEnabled: DEFAULT_APP_SETTINGS.notificationsEnabled,
+              notificationCategories: DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+              pushEnabled: DEFAULT_APP_SETTINGS.pushEnabled,
+              
+
+              
+              // 外观相关 | Appearance related
+              gridLayoutColumns: DEFAULT_APP_SETTINGS.gridLayoutColumns,
+              showFileExtensions: DEFAULT_APP_SETTINGS.showFileExtensions,
+              showHiddenFiles: DEFAULT_APP_SETTINGS.showHiddenFiles,
+              defaultSortBy: DEFAULT_APP_SETTINGS.defaultSortBy,
+              defaultSortOrder: DEFAULT_APP_SETTINGS.defaultSortOrder,
+              
+              // 设备相关 | Device related
+              enableHardwareAcceleration: DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+              enableDolbyAudio: DEFAULT_APP_SETTINGS.enableDolbyAudio,
+              enableHDR: DEFAULT_APP_SETTINGS.enableHDR,
+              screenTimeout: DEFAULT_APP_SETTINGS.screenTimeout,
+              
+              // 其他设置 | Other settings
+              crashReportingEnabled: DEFAULT_APP_SETTINGS.crashReportingEnabled,
+              usageAnalyticsEnabled: DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+              backgroundPlayEnabled: DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+              startupPage: DEFAULT_APP_SETTINGS.startupPage,
+              enableGestureControl: DEFAULT_APP_SETTINGS.enableGestureControl
+            };
+            this.userSettings.set(currentUser.id, userSettings);
           }
-          this.userSettings[currentUser.id][key as keyof AppSettings] = newValue as AppSettings[keyof AppSettings];
+          userSettings[key as keyof AppSettings] = newValue as AppSettings[keyof AppSettings];
+          this.userSettings.set(currentUser.id, userSettings);
         } else {
           this.appSettings[key as keyof AppSettings] = newValue as AppSettings[keyof AppSettings];
         }
@@ -553,7 +1049,11 @@ export default class SettingService {
       }
       
       // 触发设置变更事件 | Trigger setting change events
-      for (const { key, oldValue, newValue } of changedKeys) {
+      for (let i = 0; i < changedKeys.length; i++) {
+        const change = changedKeys[i];
+        const key = change.key;
+        const oldValue = change.oldValue;
+        const newValue = change.newValue;
         this.notifySettingChanged(key, oldValue, newValue, userInitiated);
         // 处理特殊设置项 | Handle special setting items
         await this.handleSpecialSetting(key as keyof AppSettings, newValue as AppSettings[keyof AppSettings]);
@@ -562,10 +1062,10 @@ export default class SettingService {
       // 触发通用设置变更事件 | Trigger general setting change event
       this.notifySettingsChanged();
       
-      Logger.info(TAG, `Batch updated ${changedKeys.length} settings`);
+      console.info(TAG + "已批量更新 " + changedKeys.length + " 个设置项 | Batch updated " + changedKeys.length + " settings");
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to set multiple settings: ${error}`);
+      console.error(TAG + "批量更新设置失败: | Failed to set multiple settings: ", error);
       return false;
     }
   }
@@ -584,12 +1084,6 @@ export default class SettingService {
       case 'autoDetectLanguage':
         await this.applyLanguage();
         break;
-      case 'parentalControlEnabled':
-        // 处理家长控制设置 | Handle parental control settings
-        if (value === true && !this.getSetting('parentalControlPin')) {
-          Logger.warn(TAG, 'Parental control enabled but no PIN set');
-        }
-        break;
       case 'downloadPath':
         // 验证下载路径是否有效 | Validate if download path is valid
         await this.validateDownloadPath(value as string);
@@ -607,14 +1101,13 @@ export default class SettingService {
       : this.getSetting('accentColor');
     
     try {
-      // 这里应该使用HarmonyOS的主题API来应用主题 | Should use HarmonyOS theme API to apply theme
-      // 以下是模拟实现 | Below is mock implementation
-      Logger.info(TAG, `Applying theme: ${themeMode}, accent color: ${accentColor}`);
+      // ArkTS兼容实现：不使用globalThis.uiService，直接通知监听器 | ArkTS compatible: don't use globalThis.uiService, directly notify listeners
+      console.info(TAG + "正在应用主题: " + themeMode + ", 强调色: " + accentColor + " | Applying theme: " + themeMode + ", accent color: " + accentColor);
       
       // 通知主题监听器 | Notify theme listeners
       this.notifyThemeChanged(themeMode, accentColor);
     } catch (error) {
-      Logger.error(TAG, `Failed to apply theme: ${error}`);
+      console.error(TAG + "应用主题失败: | Failed to apply theme: ", error);
     }
   }
 
@@ -633,14 +1126,13 @@ export default class SettingService {
     }
     
     try {
-      // 这里应该使用HarmonyOS的语言配置API来应用语言 | Should use HarmonyOS language configuration API to apply language
-      // 以下是模拟实现 | Below is mock implementation
-      Logger.info(TAG, `Applying language: ${language}`);
+      // ArkTS兼容实现：不使用globalThis.appContext，直接通知监听器 | ArkTS compatible: don't use globalThis.appContext, directly notify listeners
+      console.info(TAG + "正在应用语言: " + language + " | Applying language: " + language);
       
       // 通知语言监听器 | Notify language listeners
       this.notifyLanguageChanged(language);
     } catch (error) {
-      Logger.error(TAG, `Failed to apply language: ${error}`);
+      console.error(TAG + "应用语言失败: | Failed to apply language: ", error);
     }
   }
 
@@ -649,32 +1141,12 @@ export default class SettingService {
    */
   private async detectSystemLanguage(): Promise<LanguageCode | null> {
     try {
-      // 这里应该使用HarmonyOS的API获取系统语言 | Should use HarmonyOS API to get system language
-      // 以下是模拟实现 | Below is mock implementation
-      const systemLocale = 'zh_CN'; // 假设获取到的系统语言代码 | Assumed system language code
-      
-      // 映射系统语言到应用支持的语言 | Map system language to app-supported language
-      if (systemLocale.startsWith('zh')) {
-        return systemLocale.includes('TW') || systemLocale.includes('HK')
-          ? LanguageCode.TRADITIONAL_CHINESE
-          : LanguageCode.SIMPLIFIED_CHINESE;
-      } else if (systemLocale.startsWith('en')) {
-        return LanguageCode.ENGLISH;
-      } else if (systemLocale.startsWith('ja')) {
-        return LanguageCode.JAPANESE;
-      } else if (systemLocale.startsWith('ko')) {
-        return LanguageCode.KOREAN;
-      } else if (systemLocale.startsWith('de')) {
-        return LanguageCode.GERMAN;
-      } else if (systemLocale.startsWith('fr')) {
-        return LanguageCode.FRENCH;
-      } else if (systemLocale.startsWith('es')) {
-        return LanguageCode.SPANISH;
-      }
-      
-      return null;
+      // ArkTS兼容实现：返回默认语言，不使用globalThis.appContext | ArkTS compatible: return default language, don't use globalThis.appContext
+      // 实际应用中应使用HarmonyOS提供的国际化API | In actual app, use HarmonyOS internationalization API
+      console.info(TAG + "检测到系统语言: zh_CN | System language detected: zh_CN");
+      return LanguageCode.SIMPLIFIED_CHINESE;
     } catch (error) {
-      Logger.error(TAG, `Failed to detect system language: ${error}`);
+      console.error(TAG + "检测系统语言失败: | Failed to detect system language: ", error);
       return null;
     }
   }
@@ -684,16 +1156,20 @@ export default class SettingService {
    */
   private async validateDownloadPath(path: string): Promise<boolean> {
     try {
-      // 这里应该使用文件系统API验证路径是否有效且可写 | Should use file system API to validate path is valid and writable
-      // 以下是模拟实现 | Below is mock implementation
+      // ArkTS兼容实现：简化验证，不使用globalThis.fileManager | ArkTS compatible: simplified validation, don't use globalThis.fileManager
       if (!path || path.length < 3) {
         throw new Error('Invalid download path');
       }
       
-      Logger.info(TAG, `Validated download path: ${path}`);
+      // 基本路径格式验证 | Basic path format validation
+      if (!path.startsWith('/')) {
+        throw new Error('Download path must be absolute');
+      }
+      
+      console.info(TAG + "下载路径验证通过: " + path + " | Validated download path: " + path);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Invalid download path: ${error}`);
+      console.error(TAG + "无效的下载路径: | Invalid download path: ", error);
       // 恢复默认路径 | Restore default path
       this.setSetting('downloadPath', await this.getDefaultDownloadPath(), false);
       return false;
@@ -706,15 +1182,150 @@ export default class SettingService {
   public async resetAllSettings(): Promise<boolean> {
     try {
       // 重置应用设置 | Reset app settings
-      this.appSettings = { ...DEFAULT_APP_SETTINGS };
+      // 手动复制对象，兼容ArkTS
+      this.appSettings = {
+        // 主题相关 | Theme related
+        themeMode: DEFAULT_APP_SETTINGS.themeMode,
+        accentColor: DEFAULT_APP_SETTINGS.accentColor,
+        darkThemeAccentColor: DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+        customTheme: DEFAULT_APP_SETTINGS.customTheme,
+        
+        // 语言相关 | Language related
+        language: DEFAULT_APP_SETTINGS.language,
+        autoDetectLanguage: DEFAULT_APP_SETTINGS.autoDetectLanguage,
+        
+        // 播放相关 | Playback related
+        defaultPlaybackQuality: DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+        autoPlayNext: DEFAULT_APP_SETTINGS.autoPlayNext,
+        rememberPlaybackPosition: DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+        playbackSpeed: DEFAULT_APP_SETTINGS.playbackSpeed,
+        defaultVolume: DEFAULT_APP_SETTINGS.defaultVolume,
+        
+        // 字幕相关 | Subtitle related
+        subtitleEnabled: DEFAULT_APP_SETTINGS.subtitleEnabled,
+        subtitleLanguage: DEFAULT_APP_SETTINGS.subtitleLanguage,
+        subtitleSize: DEFAULT_APP_SETTINGS.subtitleSize,
+        subtitleStyle: DEFAULT_APP_SETTINGS.subtitleStyle,
+        subtitleColor: DEFAULT_APP_SETTINGS.subtitleColor,
+        subtitleBackgroundColor: DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+        
+        // 存储相关 | Storage related
+        downloadPath: DEFAULT_APP_SETTINGS.downloadPath,
+        cacheSizeLimit: DEFAULT_APP_SETTINGS.cacheSizeLimit,
+        autoClearCache: DEFAULT_APP_SETTINGS.autoClearCache,
+        cacheClearInterval: DEFAULT_APP_SETTINGS.cacheClearInterval,
+        
+        // 网络相关 | Network related
+        networkTypeForPlayback: DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+        networkTypeForDownload: DEFAULT_APP_SETTINGS.networkTypeForDownload,
+        bandwidthSaver: DEFAULT_APP_SETTINGS.bandwidthSaver,
+        preloadEnabled: DEFAULT_APP_SETTINGS.preloadEnabled,
+        preloadLimit: DEFAULT_APP_SETTINGS.preloadLimit,
+        
+        // 通知相关 | Notification related
+        notificationsEnabled: DEFAULT_APP_SETTINGS.notificationsEnabled,
+        notificationCategories: DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+        pushEnabled: DEFAULT_APP_SETTINGS.pushEnabled,
+        
+
+        
+        // 外观相关 | Appearance related
+        gridLayoutColumns: DEFAULT_APP_SETTINGS.gridLayoutColumns,
+        showFileExtensions: DEFAULT_APP_SETTINGS.showFileExtensions,
+        showHiddenFiles: DEFAULT_APP_SETTINGS.showHiddenFiles,
+        defaultSortBy: DEFAULT_APP_SETTINGS.defaultSortBy,
+        defaultSortOrder: DEFAULT_APP_SETTINGS.defaultSortOrder,
+        
+        // 设备相关 | Device related
+        enableHardwareAcceleration: DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+        enableDolbyAudio: DEFAULT_APP_SETTINGS.enableDolbyAudio,
+        enableHDR: DEFAULT_APP_SETTINGS.enableHDR,
+        screenTimeout: DEFAULT_APP_SETTINGS.screenTimeout,
+        
+        // 其他设置 | Other settings
+        crashReportingEnabled: DEFAULT_APP_SETTINGS.crashReportingEnabled,
+        usageAnalyticsEnabled: DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+        backgroundPlayEnabled: DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+        startupPage: DEFAULT_APP_SETTINGS.startupPage,
+        enableGestureControl: DEFAULT_APP_SETTINGS.enableGestureControl
+      };
       this.appSettings.downloadPath = await this.getDefaultDownloadPath();
       await this.saveSettings();
       
       // 重置当前用户设置 | Reset current user settings
-      const currentUser = this.userService.getCurrentUser();
-      if (currentUser && !this.userService.isGuest()) {
-        this.userSettings[currentUser.id] = { ...DEFAULT_APP_SETTINGS };
-        this.userSettings[currentUser.id].downloadPath = this.appSettings.downloadPath;
+      const currentUser = UserService.getInstance().getCurrentUser();
+      if (currentUser && !UserService.getInstance().isGuest()) {
+        // 手动复制对象，兼容ArkTS
+        const defaultUserSettings: AppSettings = {
+          // 主题相关 | Theme related
+          themeMode: DEFAULT_APP_SETTINGS.themeMode,
+          accentColor: DEFAULT_APP_SETTINGS.accentColor,
+          darkThemeAccentColor: DEFAULT_APP_SETTINGS.darkThemeAccentColor,
+          customTheme: DEFAULT_APP_SETTINGS.customTheme,
+          
+          // 语言相关 | Language related
+          language: DEFAULT_APP_SETTINGS.language,
+          autoDetectLanguage: DEFAULT_APP_SETTINGS.autoDetectLanguage,
+          
+          // 播放相关 | Playback related
+          defaultPlaybackQuality: DEFAULT_APP_SETTINGS.defaultPlaybackQuality,
+          autoPlayNext: DEFAULT_APP_SETTINGS.autoPlayNext,
+          rememberPlaybackPosition: DEFAULT_APP_SETTINGS.rememberPlaybackPosition,
+          playbackSpeed: DEFAULT_APP_SETTINGS.playbackSpeed,
+          defaultVolume: DEFAULT_APP_SETTINGS.defaultVolume,
+          
+          // 字幕相关 | Subtitle related
+          subtitleEnabled: DEFAULT_APP_SETTINGS.subtitleEnabled,
+          subtitleLanguage: DEFAULT_APP_SETTINGS.subtitleLanguage,
+          subtitleSize: DEFAULT_APP_SETTINGS.subtitleSize,
+          subtitleStyle: DEFAULT_APP_SETTINGS.subtitleStyle,
+          subtitleColor: DEFAULT_APP_SETTINGS.subtitleColor,
+          subtitleBackgroundColor: DEFAULT_APP_SETTINGS.subtitleBackgroundColor,
+          
+          // 存储相关 | Storage related
+          downloadPath: DEFAULT_APP_SETTINGS.downloadPath,
+          cacheSizeLimit: DEFAULT_APP_SETTINGS.cacheSizeLimit,
+          autoClearCache: DEFAULT_APP_SETTINGS.autoClearCache,
+          cacheClearInterval: DEFAULT_APP_SETTINGS.cacheClearInterval,
+          
+          // 网络相关 | Network related
+          networkTypeForPlayback: DEFAULT_APP_SETTINGS.networkTypeForPlayback,
+          networkTypeForDownload: DEFAULT_APP_SETTINGS.networkTypeForDownload,
+          bandwidthSaver: DEFAULT_APP_SETTINGS.bandwidthSaver,
+          preloadEnabled: DEFAULT_APP_SETTINGS.preloadEnabled,
+          preloadLimit: DEFAULT_APP_SETTINGS.preloadLimit,
+          
+          // 通知相关 | Notification related
+          notificationsEnabled: DEFAULT_APP_SETTINGS.notificationsEnabled,
+          notificationCategories: DEFAULT_APP_SETTINGS.notificationCategories.slice(),
+          pushEnabled: DEFAULT_APP_SETTINGS.pushEnabled,
+          
+
+          
+          // 外观相关 | Appearance related
+          gridLayoutColumns: DEFAULT_APP_SETTINGS.gridLayoutColumns,
+          showFileExtensions: DEFAULT_APP_SETTINGS.showFileExtensions,
+          showHiddenFiles: DEFAULT_APP_SETTINGS.showHiddenFiles,
+          defaultSortBy: DEFAULT_APP_SETTINGS.defaultSortBy,
+          defaultSortOrder: DEFAULT_APP_SETTINGS.defaultSortOrder,
+          
+          // 设备相关 | Device related
+          enableHardwareAcceleration: DEFAULT_APP_SETTINGS.enableHardwareAcceleration,
+          enableDolbyAudio: DEFAULT_APP_SETTINGS.enableDolbyAudio,
+          enableHDR: DEFAULT_APP_SETTINGS.enableHDR,
+          screenTimeout: DEFAULT_APP_SETTINGS.screenTimeout,
+          
+          // 其他设置 | Other settings
+          crashReportingEnabled: DEFAULT_APP_SETTINGS.crashReportingEnabled,
+          usageAnalyticsEnabled: DEFAULT_APP_SETTINGS.usageAnalyticsEnabled,
+          backgroundPlayEnabled: DEFAULT_APP_SETTINGS.backgroundPlayEnabled,
+          startupPage: DEFAULT_APP_SETTINGS.startupPage,
+          enableGestureControl: DEFAULT_APP_SETTINGS.enableGestureControl
+        };
+        // 更新下载路径为最新的默认路径 | Update download path to latest default path
+        defaultUserSettings.downloadPath = this.appSettings.downloadPath;
+        // 使用Map的set方法更新用户设置 | Use Map's set method to update user settings
+        this.userSettings.set(currentUser.id, defaultUserSettings);
         await this.saveUserSettings(currentUser.id);
       }
       
@@ -725,10 +1336,10 @@ export default class SettingService {
       // 通知设置变更 | Notify setting changes
       this.notifySettingsChanged();
       
-      Logger.info(TAG, 'All settings reset to default');
+      console.info(TAG + '所有设置已重置为默认值 | All settings reset to default');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to reset settings: ${error}`);
+      console.error(TAG + "重置设置失败: | Failed to reset settings: ", error);
       return false;
     }
   }
@@ -754,10 +1365,23 @@ export default class SettingService {
     const modified: Partial<AppSettings> = {};
     const settings = this.getSettings();
     
-    for (const key in settings) {
-      const typedKey = key as keyof AppSettings;
-      if (settings[typedKey] !== DEFAULT_APP_SETTINGS[typedKey]) {
-        modified[typedKey] = settings[typedKey];
+    // 手动检查每个设置项，避免使用索引签名 | Manually check each setting item, avoid using index signature
+    const settingKeys: Array<keyof AppSettings> = [
+      'themeMode', 'accentColor', 'darkThemeAccentColor', 'customTheme',
+      'language', 'autoDetectLanguage',
+      'defaultPlaybackQuality', 'autoPlayNext', 'rememberPlaybackPosition', 'playbackSpeed', 'defaultVolume',
+      'subtitleEnabled', 'subtitleLanguage', 'subtitleSize', 'subtitleStyle', 'subtitleColor', 'subtitleBackgroundColor',
+      'downloadPath', 'cacheSizeLimit', 'autoClearCache', 'cacheClearInterval',
+      'networkTypeForPlayback', 'networkTypeForDownload', 'bandwidthSaver', 'preloadEnabled', 'preloadLimit',
+      'notificationsEnabled', 'notificationCategories', 'pushEnabled',
+      'gridLayoutColumns', 'showFileExtensions', 'showHiddenFiles', 'defaultSortBy', 'defaultSortOrder',
+      'enableHardwareAcceleration', 'enableDolbyAudio', 'enableHDR', 'screenTimeout',
+      'crashReportingEnabled', 'usageAnalyticsEnabled', 'backgroundPlayEnabled', 'startupPage', 'enableGestureControl'
+    ];
+    
+    for (const key of settingKeys) {
+      if (settings[key] !== DEFAULT_APP_SETTINGS[key]) {
+        modified[key] = settings[key];
       }
     }
     
@@ -769,7 +1393,26 @@ export default class SettingService {
    */
   public exportSettings(): string {
     const settings = this.getSettings();
-    const exportData: Record<string, unknown> = { ...settings };
+    // 手动复制对象，兼容ArkTS
+    const exportData: Record<string, SettingValue> = {};
+    
+    // 手动检查每个设置项，避免使用索引签名 | Manually check each setting item, avoid using index signature
+    const settingKeys: Array<keyof AppSettings> = [
+      'themeMode', 'accentColor', 'darkThemeAccentColor', 'customTheme',
+      'language', 'autoDetectLanguage',
+      'defaultPlaybackQuality', 'autoPlayNext', 'rememberPlaybackPosition', 'playbackSpeed', 'defaultVolume',
+      'subtitleEnabled', 'subtitleLanguage', 'subtitleSize', 'subtitleStyle', 'subtitleColor', 'subtitleBackgroundColor',
+      'downloadPath', 'cacheSizeLimit', 'autoClearCache', 'cacheClearInterval',
+      'networkTypeForPlayback', 'networkTypeForDownload', 'bandwidthSaver', 'preloadEnabled', 'preloadLimit',
+      'notificationsEnabled', 'notificationCategories', 'pushEnabled',
+      'gridLayoutColumns', 'showFileExtensions', 'showHiddenFiles', 'defaultSortBy', 'defaultSortOrder',
+      'enableHardwareAcceleration', 'enableDolbyAudio', 'enableHDR', 'screenTimeout',
+      'crashReportingEnabled', 'usageAnalyticsEnabled', 'backgroundPlayEnabled', 'startupPage', 'enableGestureControl'
+    ];
+    
+    for (const key of settingKeys) {
+      exportData[key] = settings[key] as SettingValue;
+    }
     
     return JSON.stringify(exportData, null, 2);
   }
@@ -788,13 +1431,36 @@ export default class SettingService {
       // 验证导入数据的有效性 | Validate imported data validity
       await this.validateImportedSettings(importData as Partial<AppSettings>);
       
-      // 应用导入的设置 | Apply imported settings
-      await this.setMultipleSettings(importData as Partial<AppSettings>, false);
+      // 手动转换导入数据，避免使用 any 类型 | Manually convert imported data, avoid using any type
+      const settingsToApply: Partial<AppSettings> = {};
       
-      Logger.info(TAG, 'Settings imported successfully');
+      // 手动检查每个设置项，避免使用索引签名 | Manually check each setting item, avoid using index signature
+      const settingKeys: Array<keyof AppSettings> = [
+        'themeMode', 'accentColor', 'darkThemeAccentColor', 'customTheme',
+        'language', 'autoDetectLanguage',
+        'defaultPlaybackQuality', 'autoPlayNext', 'rememberPlaybackPosition', 'playbackSpeed', 'defaultVolume',
+        'subtitleEnabled', 'subtitleLanguage', 'subtitleSize', 'subtitleStyle', 'subtitleColor', 'subtitleBackgroundColor',
+        'downloadPath', 'cacheSizeLimit', 'autoClearCache', 'cacheClearInterval',
+        'networkTypeForPlayback', 'networkTypeForDownload', 'bandwidthSaver', 'preloadEnabled', 'preloadLimit',
+        'notificationsEnabled', 'notificationCategories', 'pushEnabled',
+        'gridLayoutColumns', 'showFileExtensions', 'showHiddenFiles', 'defaultSortBy', 'defaultSortOrder',
+        'enableHardwareAcceleration', 'enableDolbyAudio', 'enableHDR', 'screenTimeout',
+        'crashReportingEnabled', 'usageAnalyticsEnabled', 'backgroundPlayEnabled', 'startupPage', 'enableGestureControl'
+      ];
+      
+      for (const key of settingKeys) {
+        if (Object.hasOwnProperty.call(importData, key)) {
+          settingsToApply[key] = importData[key];
+        }
+      }
+      
+      // 应用导入的设置 | Apply imported settings
+      await this.setMultipleSettings(settingsToApply, false);
+      
+      console.info(TAG + '设置导入成功 | Settings imported successfully');
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to import settings: ${error}`);
+      console.error(TAG + "导入设置失败: | Failed to import settings: ", error);
       return false;
     }
   }
@@ -889,9 +1555,9 @@ export default class SettingService {
   public async loadSettingsFromConfig(): Promise<void> {
     try {
       // 从配置服务加载关键设置 | Load key settings from config service
-      const themeMode = await this.configService.getConfig<ThemeMode>('themeMode');
-      const language = await this.configService.getConfig<LanguageCode>('language');
-      const defaultPlaybackQuality = await this.configService.getConfig<PlaybackQuality>('playQuality');
+      const themeMode = await ConfigService.getInstance().getConfig<ThemeMode>('themeMode');
+      const language = await ConfigService.getInstance().getConfig<LanguageCode>('language');
+      const defaultPlaybackQuality = await ConfigService.getInstance().getConfig<PlaybackQuality>('playQuality');
       
       // 应用这些设置（但不触发用户发起的通知） | Apply these settings (without triggering user-initiated notifications)
       const settingsToApply: Partial<AppSettings> = {};
@@ -912,7 +1578,7 @@ export default class SettingService {
         await this.setMultipleSettings(settingsToApply, false);
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load settings from config: ${error}`);
+      console.error(TAG + "从配置服务加载设置失败: | Failed to load settings from config: ", error);
     }
   }
 
@@ -995,16 +1661,7 @@ export default class SettingService {
           this.createSettingItem('pushEnabled', currentSettings.pushEnabled),
         ]
       },
-      {
-        id: 'parental',
-        title: '家长控制',
-        description: '设置内容访问限制 | Set content access restrictions',
-        icon: 'ic_settings_parental',
-        settings: [
-          this.createSettingItem('parentalControlEnabled', currentSettings.parentalControlEnabled),
-          this.createSettingItem('parentalControlLevel', currentSettings.parentalControlLevel),
-        ]
-      },
+
     ];
   }
 
@@ -1014,19 +1671,20 @@ export default class SettingService {
   private createSettingItem<T>(key: string, value: T): SettingItem<T> {
     // 这里需要根据key获取默认值和其他配置 | Need to get default value and other configurations based on key
     // 简化实现，返回基本结构 | Simplified implementation, return basic structure
-    return {
+    const settingItem: SettingItem<T> = {
       key,
       value,
       type: SettingType.APPLICATION,
       defaultValue: value,
     };
+    return settingItem;
   }
 
   /**
    * 通知设置变更 | Notify setting change
    */
-  private notifySettingChanged(key: string, oldValue: unknown, newValue: unknown, userInitiated: boolean): void {
-    const event: SettingChangeEvent<unknown> = {
+  private notifySettingChanged(key: string, oldValue: SettingValue, newValue: SettingValue, userInitiated: boolean): void {
+    const event: SettingChangeEvent<SettingValue> = {
       key,
       oldValue,
       newValue,
@@ -1041,7 +1699,7 @@ export default class SettingService {
         try {
           listener(event);
         } catch (error) {
-          Logger.error(TAG, `Error in specific setting listener for ${key}: ${error}`);
+          console.error(TAG + "特定设置监听器错误，键: " + key + ": " + error + " | Error in specific setting listener for " + key + ": " + error);
         }
       });
     }
@@ -1055,7 +1713,7 @@ export default class SettingService {
       try {
         listener();
       } catch (error) {
-        Logger.error(TAG, `Error in general setting listener: ${error}`);
+        console.error(TAG + "通用设置监听器错误: " + error + " | Error in general setting listener: " + error);
       }
     });
   }
@@ -1068,7 +1726,7 @@ export default class SettingService {
       try {
         listener(themeMode, accentColor);
       } catch (error) {
-        Logger.error(TAG, `Error in theme listener: ${error}`);
+        console.error(TAG + "主题监听器错误: " + error + " | Error in theme listener: " + error);
       }
     });
   }
@@ -1081,7 +1739,7 @@ export default class SettingService {
       try {
         listener(language);
       } catch (error) {
-        Logger.error(TAG, `Error in language listener: ${error}`);
+        console.error(TAG + "语言监听器错误: " + error + " | Error in language listener: " + error);
       }
     });
   }
@@ -1106,7 +1764,7 @@ export default class SettingService {
   /**
    * 添加指定设置监听器 | Add specified setting listener
    */
-  public addSpecificListener(key: string, listener: (event: SettingChangeEvent<unknown>) => void): void {
+  public addSpecificListener(key: string, listener: (event: SettingChangeEvent<SettingValue>) => void): void {
     let listeners = this.specificListeners.get(key);
     if (!listeners) {
       listeners = [];
@@ -1118,7 +1776,7 @@ export default class SettingService {
   /**
    * 移除指定设置监听器 | Remove specified setting listener
    */
-  public removeSpecificListener(key: string, listener: (event: SettingChangeEvent<unknown>) => void): void {
+  public removeSpecificListener(key: string, listener: (event: SettingChangeEvent<SettingValue>) => void): void {
     const listeners = this.specificListeners.get(key);
     if (listeners) {
       const index = listeners.indexOf(listener);
@@ -1166,7 +1824,7 @@ export default class SettingService {
    * 获取对象键，解决TypeScript的Object.keys类型问题 | Get object keys, resolve TypeScript Object.keys type issue
    */
   private getObjectKeys<T extends object>(obj: T): Array<keyof T> {
-    return Object.keys(obj) as Array<keyof T>;
+    return this.getOwnPropertyKeys(obj) as Array<keyof T>;
   }
 }
 

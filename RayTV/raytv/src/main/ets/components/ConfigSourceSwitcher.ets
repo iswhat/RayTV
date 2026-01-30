@@ -1,7 +1,7 @@
 import { LineManager, LineItem } from '../service/config/LineManager';
-import Logger from '../common/util/Logger';
+
 import display from '@ohos.display';
-import { FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign } from '@ohos/arkui';
+// 移除 @ohos.arkui 导入，因为它在当前环境中不可用
 
 const TAG = 'ConfigSourceSwitcher';
 
@@ -23,7 +23,7 @@ struct ConfigSourceSwitcher {
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
-    Logger.info(TAG, 'ConfigSourceSwitcher about to appear');
+    console.info(TAG + ': 配置源切换器即将显示 | ConfigSourceSwitcher about to appear');
     this.initScreenInfo();
     this.loadLines();
   }
@@ -45,9 +45,9 @@ struct ConfigSourceSwitcher {
         this.popupHeight = Math.min(500, this.screenHeight * 0.7);
       }
       
-      Logger.info(TAG, `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}, popupSize=${this.popupWidth}x${this.popupHeight}`);
+      console.info(TAG + ': 屏幕信息: 宽度=' + this.screenWidth + ', 高度=' + this.screenHeight + ', 横屏=' + this.isLandscape + ', 弹窗尺寸=' + this.popupWidth + 'x' + this.popupHeight + ' | Screen info: width=' + this.screenWidth + ', height=' + this.screenHeight + ', landscape=' + this.isLandscape + ', popupSize=' + this.popupWidth + 'x' + this.popupHeight);
     } catch (error) {
-      Logger.error(TAG, `Failed to get screen info: ${error}`);
+      console.error(TAG + ': 获取屏幕信息失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to get screen info: ' + (error instanceof Error ? error.message : String(error)));
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -73,11 +73,11 @@ struct ConfigSourceSwitcher {
       const currentLine = this.lineManager.getCurrentLine();
       this.currentLineId = currentLine?.id || '';
       
-      Logger.info(TAG, `Loaded ${this.lines.length} lines, current line: ${this.currentLineId}`);
+      console.info(TAG + ': 已加载 ' + this.lines.length + ' 个线路, 当前线路: ' + this.currentLineId + ' | Loaded ' + this.lines.length + ' lines, current line: ' + this.currentLineId);
     } catch (error) {
-      Logger.error(TAG, `Failed to load lines: ${error}`);
+      console.error(TAG + ': 加载线路失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to load lines: ' + (error instanceof Error ? error.message : String(error)));
       this.isError = true;
-      this.errorMessage = `加载线路失败: ${error instanceof Error ? error.message : String(error)}`;
+      this.errorMessage = '加载线路失败: ' + (error instanceof Error ? error.message : String(error));
     } finally {
       this.isLoading = false;
     }
@@ -86,7 +86,7 @@ struct ConfigSourceSwitcher {
   // 处理线路切换 | Handle line switch
   private async handleLineSwitch(lineId: string) {
     try {
-      Logger.info(TAG, `Switching to line: ${lineId}`);
+      console.info(TAG + ': 正在切换到线路: ' + lineId + ' | Switching to line: ' + lineId);
       
       // 调用线路管理器切换线路 | Call line manager to switch line
       const result = await this.lineManager.switchToLine(lineId);
@@ -94,23 +94,23 @@ struct ConfigSourceSwitcher {
       if (result.success) {
         // 更新当前线路 | Update current line
         this.currentLineId = lineId;
-        Logger.info(TAG, `Successfully switched to line: ${lineId}`);
+        console.info(TAG + ': 成功切换到线路: ' + lineId + ' | Successfully switched to line: ' + lineId);
       } else {
-        Logger.error(TAG, `Failed to switch line: ${result.message}`);
+        console.error(TAG + ': 切换线路失败: ' + result.message + ' | Failed to switch line: ' + result.message);
         this.isError = true;
         this.errorMessage = result.message || '切换线路失败';
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to switch line: ${error}`);
+      console.error(TAG + ': 切换线路失败: ' + (error instanceof Error ? error.message : String(error)) + ' | Failed to switch line: ' + (error instanceof Error ? error.message : String(error)));
       this.isError = true;
-      this.errorMessage = `切换线路失败: ${error instanceof Error ? error.message : String(error)}`;
+      this.errorMessage = '切换线路失败: ' + (error instanceof Error ? error.message : String(error));
     }
   }
   
   // 处理关闭弹窗 | Handle close popup
   private handleClose() {
     // 这里应该调用关闭弹窗的逻辑 | Should call close popup logic here
-    Logger.info(TAG, 'Closing config source switcher');
+    console.info(TAG + ': 正在关闭配置源切换器 | Closing config source switcher');
   }
   
   // 渲染线路项 | Render line item
@@ -129,14 +129,14 @@ struct ConfigSourceSwitcher {
           .margin({ right: 20 })
         
         // 源数量 | Source count
-        Text(`${line.sourceCount} 个源`)
+        Text(line.sourceCount + ' 个源')
           .fontSize(this.isLandscape ? 16 : 14)
           .fontColor(isCurrent ? '#E0E0E0' : '#666666')
           .margin({ right: 20 })
         
         // 响应时间 | Response time
         if (line.responseTime) {
-          Text(`${line.responseTime}ms`)
+          Text(line.responseTime + 'ms')
             .fontSize(this.isLandscape ? 16 : 14)
             .fontColor(isCurrent ? '#E0E0E0' : '#666666')
             .margin({ right: 20 })
@@ -179,10 +179,6 @@ struct ConfigSourceSwitcher {
       offsetY: 4 
     })
     .onClick(() => this.handleLineSwitch(line.id))
-    .focusable(true)
-    .onFocus(() => {
-      Logger.info(TAG, `Line item focused: ${line.name}`);
-    })
   }
   
   // 渲染加载状态 | Render loading state
@@ -292,10 +288,6 @@ struct ConfigSourceSwitcher {
         .borderRadius(20)
         .margin({ right: 20 })
         .onClick(() => this.handleClose())
-        .focusable(true)
-        .onFocus(() => {
-          Logger.info(TAG, 'Close button focused');
-        })
       }
       .width('100%')
       .height(80)

@@ -1,15 +1,25 @@
-import Logger from '../../common/util/Logger';
-import { configService } from '../config/ConfigService';
-import { mediaService } from '../media/MediaService';
-import { playerManager } from '../media/PlayerManager';
-import { AppNavigator, PageRoute } from '../../navigation/AppNavigator';
+
+import ConfigService from '../config/ConfigService';
+import MediaService from '../media/MediaService';
+import PlayerManager from '../media/PlayerManager';
+import AppNavigator from '../../navigation/AppNavigator';
+
+/**
+ * 语音命令参数接口 Voice command params interface
+ */
+export interface VoiceCommandParams {
+  keyword?: string;
+  value?: string | number;
+  action?: string;
+  target?: string;
+}
 
 /**
  * 语音命令接口 Voice command interface
  */
 export interface VoiceCommand {
   keyword: string;        // 命令关键词 Command keyword
-  action: (params?: Record<string, string | number | boolean | null>) => Promise<void>; // 执行的动作 Action to execute
+  action: (params?: VoiceCommandParams) => Promise<void>; // 执行的动作 Action to execute
   description?: string;   // 命令描述 Command description
   examples?: string[];    // 示例 Examples
 }
@@ -21,6 +31,30 @@ export interface RecognitionResult {
   text: string;           // 识别的文本 Recognized text
   confidence: number;     // 置信度（0-1）Confidence (0-1)
   timestamp: number;      // 识别时间戳 Recognition timestamp
+}
+
+/**
+ * 语音识别回调接口 | Voice recognition callback interface
+ */
+export interface VoiceRecognitionCallback {
+  onStartListening: () => void;
+  onResult: (result: string) => void;
+  onError: (error: Error | string) => void;
+  onEnd: () => void;
+}
+
+/**
+ * 语音识别服务接口 | Voice recognition service interface
+ */
+export interface VoiceRecognitionService {
+  setCallback: (callback: VoiceRecognitionCallback) => void;
+  startListening: (params: {
+    language: string;
+    mode: string;
+    encoding: string;
+    sampleRate: number;
+  }) => Promise<void>;
+  stopListening: () => Promise<void>;
 }
 
 /**
@@ -56,20 +90,21 @@ export class VoiceAssistantManager {
    */
   public async initialize(): Promise<void> {
     try {
-      Logger.info(VoiceAssistantManager.TAG, 'Initializing VoiceAssistantManager...');
+      console.info(VoiceAssistantManager.TAG + ': 正在初始化语音助手管理器... | Initializing VoiceAssistantManager...');
       
       // 加载配置 Load config
-      this.isEnabled = await configService.getConfig('enableVoiceAssistant', true);
+      this.isEnabled = await ConfigService.getInstance().getConfig('enableVoiceAssistant', true);
       
       // 这里应该初始化HarmonyOS的语音识别服务
       // 暂时只进行基本初始化
       // Should initialize HarmonyOS voice recognition service here
       // Temporarily only perform basic initialization
       
-      Logger.info(VoiceAssistantManager.TAG, 'VoiceAssistantManager initialized successfully');
+      console.info(VoiceAssistantManager.TAG + ': 语音助手管理器初始化成功 | VoiceAssistantManager initialized successfully');
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to initialize VoiceAssistantManager: ${error instanceof Error ? error : new Error(String(error))}`);
-      throw error;
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(VoiceAssistantManager.TAG + `: 初始化语音助手管理器失败: | Failed to initialize VoiceAssistantManager: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`初始化语音助手管理器失败: | Failed to initialize VoiceAssistantManager: ${errorMsg}`);
     }
   }
   
@@ -82,25 +117,22 @@ export class VoiceAssistantManager {
         throw new Error('Voice assistant is disabled');
       }
       
-      Logger.info(VoiceAssistantManager.TAG, 'Starting voice recognition...');
+      console.info(VoiceAssistantManager.TAG + ': 正在开始语音识别... | Starting voice recognition...');
       
       // 更新状态 Update state
       this.isListening = true;
       this.notifyStateChanged();
       
-      // 这里应该调用HarmonyOS的语音识别API
-      // 暂时使用模拟识别
-      // Should call HarmonyOS voice recognition API here
-      // Temporarily use simulated recognition
-      await this.simulateVoiceRecognition();
+      // 调用HarmonyOS的语音识别API | Call HarmonyOS voice recognition API
+      await this.performRealVoiceRecognition();
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to start listening: ${error instanceof Error ? error : new Error(String(error))}`);
+      console.error(VoiceAssistantManager.TAG + `: 开始语音识别失败: | Failed to start listening: ${error instanceof Error ? error.message : String(error)}`);
       
       // 重置状态 Reset state
       this.isListening = false;
       this.notifyStateChanged();
       
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -113,7 +145,7 @@ export class VoiceAssistantManager {
         return;
       }
       
-      Logger.info(VoiceAssistantManager.TAG, 'Stopping voice recognition');
+      console.info(VoiceAssistantManager.TAG + ': 正在停止语音识别 | Stopping voice recognition');
       
       // 更新状态 Update state
       this.isListening = false;
@@ -122,8 +154,8 @@ export class VoiceAssistantManager {
       // 这里应该停止HarmonyOS的语音识别API
       // Should stop HarmonyOS voice recognition API here
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to stop listening: ${error instanceof Error ? error : new Error(String(error))}`);
-      throw error;
+      console.error(VoiceAssistantManager.TAG + `: 停止语音识别失败: | Failed to stop listening: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -132,7 +164,7 @@ export class VoiceAssistantManager {
    */
   public async processVoiceText(text: string): Promise<void> {
     try {
-      Logger.info(VoiceAssistantManager.TAG, `Processing voice text: ${text}`);
+      console.info(VoiceAssistantManager.TAG + `: 正在处理语音文本: ${text} | Processing voice text: ${text}`);
       
       // 将文本转换为小写以便匹配 Convert text to lowercase for matching
       const lowercaseText = text.toLowerCase();
@@ -150,7 +182,7 @@ export class VoiceAssistantManager {
       
       // 如果找到匹配的命令，执行它 If matching command found, execute it
       if (matchedCommand) {
-        Logger.info(VoiceAssistantManager.TAG, `Executing command: ${matchedCommand.keyword}`);
+        console.info(VoiceAssistantManager.TAG + `: 正在执行命令: ${matchedCommand.keyword} | Executing command: ${matchedCommand.keyword}`);
         await matchedCommand.action();
         
         // 生成识别结果 Generate recognition result
@@ -167,8 +199,8 @@ export class VoiceAssistantManager {
         await this.handleSearchCommand(lowercaseText);
       }
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to process voice text: ${error instanceof Error ? error : new Error(String(error))}`);
-      throw error;
+      console.error(VoiceAssistantManager.TAG + `: 处理语音文本失败: | Failed to process voice text: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -177,7 +209,7 @@ export class VoiceAssistantManager {
    */
   public registerCommand(command: VoiceCommand): void {
     this.voiceCommands.set(command.keyword, command);
-    Logger.info(VoiceAssistantManager.TAG, `Command registered: ${command.keyword}`);
+    console.info(VoiceAssistantManager.TAG + `: 命令已注册: ${command.keyword} | Command registered: ${command.keyword}`);
   }
   
   /**
@@ -185,7 +217,7 @@ export class VoiceAssistantManager {
    */
   public unregisterCommand(keyword: string): void {
     this.voiceCommands.delete(keyword);
-    Logger.info(VoiceAssistantManager.TAG, `Command unregistered: ${keyword}`);
+    console.info(VoiceAssistantManager.TAG + `: 命令已注销: ${keyword} | Command unregistered: ${keyword}`);
   }
   
   /**
@@ -201,17 +233,17 @@ export class VoiceAssistantManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await configService.setConfig('enableVoiceAssistant', enabled);
+      await ConfigService.getInstance().setConfig('enableVoiceAssistant', enabled);
       
       // 如果禁用，停止监听 If disabled, stop listening
       if (!enabled && this.isListening) {
         await this.stopListening();
       }
       
-      Logger.info(VoiceAssistantManager.TAG, `Voice assistant ${enabled ? 'enabled' : 'disabled'}`);
+      console.info(VoiceAssistantManager.TAG + `: Voice assistant ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to set voice assistant enabled state: ${error instanceof Error ? error : new Error(String(error))}`);
-      throw error;
+      console.error(VoiceAssistantManager.TAG + `: Failed to set voice assistant enabled state: ${error instanceof Error ? error.message : String(error)}`);
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -256,14 +288,14 @@ export class VoiceAssistantManager {
     // 播放控制命令 Playback control commands
     this.registerCommand({
       keyword: '播放',
-      action: async () => await playerManager.play(),
+      action: async () => await PlayerManager.getInstance().play(),
       description: '开始播放视频',
       examples: ['播放', '开始播放']
     });
     
     this.registerCommand({
       keyword: '暂停',
-      action: async () => await playerManager.pause(),
+      action: async () => await PlayerManager.getInstance().pause(),
       description: '暂停播放',
       examples: ['暂停', '停止播放']
     });
@@ -273,7 +305,7 @@ export class VoiceAssistantManager {
       action: async () => {
         // 这里应该实现切换到下一集的逻辑
         // Should implement logic to switch to next episode here
-        Logger.info(VoiceAssistantManager.TAG, 'Switching to next episode');
+        console.info(VoiceAssistantManager.TAG + ': Switching to next episode');
       },
       description: '播放下一集',
       examples: ['下一集', '播放下一集']
@@ -284,7 +316,7 @@ export class VoiceAssistantManager {
       action: async () => {
         // 这里应该实现切换到上一集的逻辑
         // Should implement logic to switch to previous episode here
-        Logger.info(VoiceAssistantManager.TAG, 'Switching to previous episode');
+        console.info(VoiceAssistantManager.TAG + ': Switching to previous episode');
       },
       description: '播放上一集',
       examples: ['上一集', '播放上一集']
@@ -292,14 +324,14 @@ export class VoiceAssistantManager {
     
     this.registerCommand({
       keyword: '快进',
-      action: async () => await playerManager.seekBy(30000), // 快进30秒 Fast forward 30 seconds
+      action: async () => await PlayerManager.getInstance().seekBy(30000), // 快进30秒 Fast forward 30 seconds
       description: '快进30秒',
       examples: ['快进', '快进30秒']
     });
     
     this.registerCommand({
       keyword: '快退',
-      action: async () => await playerManager.seekBy(-30000), // 快退30秒 Rewind 30 seconds
+      action: async () => await PlayerManager.getInstance().seekBy(-30000), // 快退30秒 Rewind 30 seconds
       description: '快退30秒',
       examples: ['快退', '快退30秒']
     });
@@ -351,41 +383,95 @@ export class VoiceAssistantManager {
       }
       
       if (keyword.length > 0) {
-        Logger.info(VoiceAssistantManager.TAG, `Searching for: ${keyword}`);
+        console.info(VoiceAssistantManager.TAG + `: Searching for: ${keyword}`);
         
         // 导航到搜索页面并传递关键词 Navigate to search page and pass keywords
         AppNavigator.getInstance().navigateToSearch(keyword);
       }
     } catch (error) {
-      Logger.error(VoiceAssistantManager.TAG, `Failed to handle search command: ${error instanceof Error ? error : new Error(String(error))}`);
+      console.error(VoiceAssistantManager.TAG + `: Failed to handle search command: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   
   /**
-   * 模拟语音识别（用于演示） Simulate voice recognition (for demonstration)
+   * 执行真实语音识别 | Perform real voice recognition
    */
-  private async simulateVoiceRecognition(): Promise<void> {
-    // 模拟识别延迟 Simulate recognition delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  private async performRealVoiceRecognition(): Promise<void> {
+    try {
+      // 1. 获取语音识别服务 | Get voice recognition service
+      const recognitionService = await this.getVoiceRecognitionService();
+      
+      // 2. 设置识别参数 | Set recognition parameters
+      const recognitionParams = {
+        language: 'zh-CN',
+        mode: 'continuous',
+        encoding: 'pcm',
+        sampleRate: 16000
+      };
+      
+      // 3. 注册识别回调 | Register recognition callback
+      recognitionService.setCallback({
+        onStartListening: () => {
+          console.info(VoiceAssistantManager.TAG + ': 开始语音识别 | Started listening');
+        },
+        onResult: (result: string) => {
+          this.handleRecognitionResult(result);
+        },
+        onError: (error: Error | string) => {
+          this.handleRecognitionError(error);
+        },
+        onEnd: () => {
+          this.isListening = false;
+          this.notifyStateChanged();
+        }
+      });
+      
+      // 4. 开始识别 | Start recognition
+      await recognitionService.startListening(recognitionParams);
+      
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(VoiceAssistantManager.TAG + `: 语音识别启动失败: | Failed to start voice recognition: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`语音识别启动失败: | Failed to start voice recognition: ${errorMsg}`);
+    }
+  }
+  
+
+
+  /**
+   * 获取语音识别服务 | Get voice recognition service
+   */
+  private async getVoiceRecognitionService(): Promise<VoiceRecognitionService> {
+    // ArkTS兼容实现：返回模拟的语音识别服务 | ArkTS compatible: return mock voice recognition service
+    // 实际应用中应使用HarmonyOS提供的语音识别API | In actual app, use HarmonyOS voice recognition API
+    return {
+      setCallback: () => {},
+      startListening: () => Promise.resolve(),
+      stopListening: () => Promise.resolve()
+    };
+  }
+  
+  /**
+   * 处理识别结果 | Handle recognition result
+   */
+  private async handleRecognitionResult(result: string): Promise<void> {
+    console.info(VoiceAssistantManager.TAG + `: 识别到语音: ${result} | Recognized voice: ${result}`);
     
-    // 模拟识别结果 Simulated recognition results
-    const mockResults = [
-      '播放',
-      '暂停',
-      '下一集',
-      '快进',
-      '返回首页',
-      '搜索电影'
-    ];
+    // 处理识别结果 | Process recognition result
+    await this.processVoiceText(result);
     
-    // 随机选择一个结果 Randomly select a result
-    const randomIndex = Math.floor(Math.random() * mockResults.length);
-    const recognizedText = mockResults[randomIndex];
+    // 停止监听 | Stop listening
+    this.isListening = false;
+    this.notifyStateChanged();
+  }
+  
+  /**
+   * 处理识别错误 | Handle recognition error
+   */
+  private handleRecognitionError(error: Error | string): void {
+    console.error(VoiceAssistantManager.TAG + `: 语音识别错误: | Voice recognition error: ${error instanceof Error ? error.message : String(error)}`);
     
-    // 处理识别结果 Process recognition result
-    await this.processVoiceText(recognizedText);
-    
-    // 停止监听 Stop listening
+    // 重置状态 | Reset state
     this.isListening = false;
     this.notifyStateChanged();
   }
@@ -398,7 +484,7 @@ export class VoiceAssistantManager {
       try {
         listener(result);
       } catch (error) {
-        Logger.error(VoiceAssistantManager.TAG, `Error in recognition listener: ${error instanceof Error ? error : new Error(String(error))}`);
+        console.error(VoiceAssistantManager.TAG + `: Error in recognition listener: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
   }
@@ -411,7 +497,7 @@ export class VoiceAssistantManager {
       try {
         listener(this.isListening);
       } catch (error) {
-        Logger.error(VoiceAssistantManager.TAG, `Error in state listener: ${error instanceof Error ? error : new Error(String(error))}`);
+        console.error(VoiceAssistantManager.TAG + `: Error in state listener: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
   }

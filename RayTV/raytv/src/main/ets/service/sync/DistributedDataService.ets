@@ -1,18 +1,18 @@
-// DistributedDataService.ets - ·Ö²¼Ê½Êý¾Ý·þÎñ | Distributed data service
-// »ùÓÚHarmonyOS·Ö²¼Ê½ÄÜÁ¦ÊµÏÖ¶àÉè±¸Êý¾ÝÍ¬²½ | Based on HarmonyOS distributed capabilities toÊµÏÖ multi-device data synchronization
+// DistributedDataService.ets - ï¿½Ö²ï¿½Ê½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ | Distributed data service
+// ï¿½ï¿½ï¿½ï¿½HarmonyOSï¿½Ö²ï¿½Ê½ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö¶ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ | Based on HarmonyOS distributed capabilities toÊµï¿½ï¿½ multi-device data synchronization
 
-import Logger from '../../common/util/Logger';
+
 import distributedKVStore from '@ohos.data.distributedKVStore';
 import BusinessError from '@ohos.base';
 import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
 import { SyncData, DataChangeListener } from '../../types/common';
 
-// ³£Á¿¶¨Òå | Constant definition
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Constant definition
 const TAG = 'DistributedDataService';
 const STORE_ID = 'raytv_distributed_data';
 
-// Êý¾ÝÍ¬²½ÀàÐÍÃ¶¾Ù | Data synchronization type enumeration
+// ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ | Data synchronization type enumeration
 export enum SyncDataType {
   HISTORY = 'history',
   FAVORITES = 'favorites',
@@ -21,15 +21,15 @@ export enum SyncDataType {
   DEVICE_INFO = 'device_info'
 }
 
-// Í¬²½³åÍ»½â¾ö²ßÂÔÃ¶¾Ù | Synchronization conflict resolution strategy enumeration
+// Í¬ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ | Synchronization conflict resolution strategy enumeration
 export enum ConflictResolutionStrategy {
-  LATEST_WIN = 'latest_win', // ×îÐÂÊ±¼ä´ÁÓÅÏÈ | Latest timestamp priority
-  LOCAL_WIN = 'local_win',   // ±¾µØÊý¾ÝÓÅÏÈ | Local data priority
-  REMOTE_WIN = 'remote_win', // Ô¶³ÌÊý¾ÝÓÅÏÈ | Remote data priority
-  MERGE = 'merge'            // ºÏ²¢Êý¾Ý | Merge data
+  LATEST_WIN = 'latest_win', // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Latest timestamp priority
+  LOCAL_WIN = 'local_win',   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Local data priority
+  REMOTE_WIN = 'remote_win', // Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Remote data priority
+  MERGE = 'merge'            // ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½ | Merge data
 }
 
-// Í¬²½×´Ì¬Ã¶¾Ù | Synchronization status enumeration
+// Í¬ï¿½ï¿½×´Ì¬Ã¶ï¿½ï¿½ | Synchronization status enumeration
 export enum SyncStatus {
   IDLE = 'idle',
   SYNCHRONIZING = 'synchronizing',
@@ -38,29 +38,29 @@ export enum SyncStatus {
   CONFLICT = 'conflict'
 }
 
-// Í¬²½ÅäÖÃ½Ó¿Ú | Synchronization configuration interface
+// Í¬ï¿½ï¿½ï¿½ï¿½ï¿½Ã½Ó¿ï¿½ | Synchronization configuration interface
 export interface SyncConfig {
   enabled: boolean;
   autoSync: boolean;
-  syncInterval: number; // Ãë | Seconds
+  syncInterval: number; // ï¿½ï¿½ | Seconds
   conflictStrategy: ConflictResolutionStrategy;
   syncTypes: SyncDataType[];
   allowCellularSync: boolean;
   showSyncNotifications: boolean;
 }
 
-// Ä¬ÈÏÍ¬²½ÅäÖÃ | Default synchronization configuration
+// Ä¬ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Default synchronization configuration
 const DEFAULT_SYNC_CONFIG: SyncConfig = {
   enabled: true,
   autoSync: true,
-  syncInterval: 300, // 5·ÖÖÓ | 5 minutes
+  syncInterval: 300, // 5ï¿½ï¿½ï¿½ï¿½ | 5 minutes
   conflictStrategy: ConflictResolutionStrategy.LATEST_WIN,
   syncTypes: [SyncDataType.HISTORY, SyncDataType.FAVORITES],
   allowCellularSync: false,
   showSyncNotifications: true
 };
 
-// Í¬²½×´Ì¬½Ó¿Ú | Synchronization status interface
+// Í¬ï¿½ï¿½×´Ì¬ï¿½Ó¿ï¿½ | Synchronization status interface
 export interface SyncState {
   status: SyncStatus;
   lastSyncTime?: number;
@@ -71,7 +71,7 @@ export interface SyncState {
   syncDataSize?: number;
 }
 
-// ·Ö²¼Ê½Êý¾Ý·þÎñÀà | Distributed data service class
+// ï¿½Ö²ï¿½Ê½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ | Distributed data service class
 export default class DistributedDataService {
   static instance: DistributedDataService;
   kvManager: distributedKVStore.KVManager | null = null;
@@ -86,7 +86,7 @@ export default class DistributedDataService {
   private context: common.Context | null = null;
 
   /**
-   * »ñÈ¡µ¥ÀýÊµÀý | Get singleton instance
+   * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ | Get singleton instance
    */
   static getInstance(): DistributedDataService {
     if (!DistributedDataService.instance) {
@@ -96,28 +96,28 @@ export default class DistributedDataService {
   }
 
   /**
-   * ¹¹Ôìº¯Êý | Constructor
+   * ï¿½ï¿½ï¿½ìº¯ï¿½ï¿½ | Constructor
    */
   constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
-   * ³õÊ¼»¯·Ö²¼Ê½Êý¾Ý·þÎñ | Initialize distributed data service
-   * @param context Ó¦ÓÃÉÏÏÂÎÄ | Application context
+   * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ö²ï¿½Ê½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ | Initialize distributed data service
+   * @param context Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Application context
    */
   async initialize(context: common.Context): Promise<void> {
     if (this.isInitialized) {
-      Logger.info(TAG, 'Distributed data service already initialized');
+      console.info(TAG, 'Distributed data service already initialized');
       return;
     }
 
     this.context = context;
 
     try {
-      Logger.info(TAG, 'Initializing distributed data service...');
+      console.info(TAG, 'Initializing distributed data service...');
 
-      // ´´½¨KVManager
+      // ï¿½ï¿½ï¿½ï¿½KVManager
       const managerConfig: distributedKVStore.KVManagerConfig = {
         context: context,
         bundleName: 'com.example.raytv'
@@ -126,7 +126,7 @@ export default class DistributedDataService {
       try {
         this.kvManager = await distributedKVStore.createKVManager(managerConfig);
       } catch (error) {
-        Logger.error(TAG, `Failed to create KVManager: ${JSON.stringify(error)}`);
+        console.error(TAG, `Failed to create KVManager: ${JSON.stringify(error)}`);
         throw new Error(`KVManager creation failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
@@ -134,7 +134,7 @@ export default class DistributedDataService {
         throw new Error('Failed to create KVManager instance');
       }
 
-      // »ñÈ¡KVStore
+      // ï¿½ï¿½È¡KVStore
       const options: distributedKVStore.Options = {
         createIfMissing: true,
         encrypt: false,
@@ -147,7 +147,7 @@ export default class DistributedDataService {
       try {
         this.kvStore = await this.kvManager.getKVStore<distributedKVStore.SingleKVStore>(STORE_ID, options);
       } catch (error) {
-        Logger.error(TAG, `Failed to get KVStore: ${JSON.stringify(error)}`);
+        console.error(TAG, `Failed to get KVStore: ${JSON.stringify(error)}`);
         throw new Error(`KVStore initialization failed: ${error instanceof Error ? error.message : String(error)}`);
       }
       
@@ -155,27 +155,27 @@ export default class DistributedDataService {
         throw new Error('Failed to get KVStore instance');
       }
 
-      // ¼ÓÔØÍ¬²½ÅäÖÃ
+      // ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
       await this.loadSyncConfig();
 
-      // ×¢²áÊý¾Ý±ä»¯¼àÌý
+      // ×¢ï¿½ï¿½ï¿½ï¿½ï¿½Ý±ä»¯ï¿½ï¿½ï¿½ï¿½
       await this.registerDataChangeListener();
 
-      // Æô¶¯×Ô¶¯Í¬²½
+      // ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Í¬ï¿½ï¿½
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
         this.startAutoSync();
       }
 
       this.isInitialized = true;
-      Logger.info(TAG, 'Distributed data service initialized successfully');
+      console.info(TAG, 'Distributed data service initialized successfully');
     } catch (error) {
-      Logger.error(TAG, `Failed to initialize distributed data service: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to initialize distributed data service: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
 
   /**
-   * ¼ÓÔØÍ¬²½ÅäÖÃ | Load synchronization configuration
+   * ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Load synchronization configuration
    */
   async loadSyncConfig(): Promise<void> {
     try {
@@ -184,39 +184,39 @@ export default class DistributedDataService {
         this.syncConfig = { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to load sync config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to load sync config: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * ±£´æÍ¬²½ÅäÖÃ | Save synchronization configuration
+   * ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Save synchronization configuration
    */
   async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = { ...this.syncConfig, ...config };
       await this.configService.setConfig('syncConfig', this.syncConfig);
       
-      // ¸ù¾ÝÅäÖÃµ÷Õû×Ô¶¯Í¬²½
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Í¬ï¿½ï¿½
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
         this.startAutoSync();
       } else {
         this.stopAutoSync();
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to save sync config: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to save sync config: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
 
   /**
-   * »ñÈ¡Í¬²½ÅäÖÃ | Get synchronization configuration
+   * ï¿½ï¿½È¡Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Get synchronization configuration
    */
   getSyncConfig(): SyncConfig {
     return { ...this.syncConfig };
   }
 
   /**
-   * ×¢²áÊý¾Ý±ä»¯¼àÌý | Register data change listener
+   * ×¢ï¿½ï¿½ï¿½ï¿½ï¿½Ý±ä»¯ï¿½ï¿½ï¿½ï¿½ | Register data change listener
    */
   async registerDataChangeListener(): Promise<void> {
     if (!this.kvStore) {
@@ -226,7 +226,7 @@ export default class DistributedDataService {
     try {
       const subscriptionCallback = async (data: distributedKVStore.SubscribeResult) => {
         try {
-          Logger.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
+          console.debug(TAG, `Data change detected: ${JSON.stringify(data)}`);
           
           if (data && data.insertEntries && data.insertEntries.length > 0) {
             for (const entry of data.insertEntries) {
@@ -234,33 +234,33 @@ export default class DistributedDataService {
               const deviceId = entry.deviceId || 'local';
               
               try {
-                // »ñÈ¡Êý¾Ý²¢Í¨Öª¼àÌýÆ÷
+                // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ý²ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 let value;
                 if (this.kvStore !== null && this.kvStore !== undefined) {
                   value = await this.kvStore.get(key);
                 }
                 if (value && this.dataListeners.size > 0) {
-                  // ²éÕÒËùÓÐÆ¥ÅäµÄ¼àÌýÆ÷
+                  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
                   this.notifyRelevantListeners(key, value, deviceId);
                 }
               } catch (error) {
-                Logger.error(TAG, `Failed to process changed data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
+                console.error(TAG, `Failed to process changed data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
               }
             }
           }
         } catch (error) {
-          Logger.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error)}`);
+          console.error(TAG, `Error in data change callback: ${error instanceof Error ? error.message : String(error)}`);
         }
       };
       
       await this.kvStore.on('dataChange', distributedKVStore.SubscribeType.SUBSCRIBE_TYPE_ALL, subscriptionCallback);
     } catch (error) {
-      Logger.error(TAG, `Failed to register data change listener: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to register data change listener: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   
   /**
-   * Í¨ÖªÏà¹ØµÄ¼àÌýÆ÷ | Notify relevant listeners
+   * Í¨Öªï¿½ï¿½ØµÄ¼ï¿½ï¿½ï¿½ï¿½ï¿½ | Notify relevant listeners
    */
   private notifyRelevantListeners<T>(key: string, value: T, deviceId: string): void {
     for (const [prefix, listeners] of this.dataListeners.entries()) {
@@ -269,7 +269,7 @@ export default class DistributedDataService {
           try {
             listener(key, value, deviceId);
           } catch (error) {
-            Logger.error(TAG, `Error in data listener for prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
+            console.error(TAG, `Error in data listener for prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
       }
@@ -277,9 +277,9 @@ export default class DistributedDataService {
   }
 
   /**
-   * ¼àÌýÖ¸¶¨ÀàÐÍµÄÊý¾Ý±ä»¯ | Listen for data changes of specified type
-   * @param dataType Êý¾ÝÀàÐÍ | Data type
-   * @param listener ¼àÌý»Øµ÷ | Listener callback
+   * ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½Ý±ä»¯ | Listen for data changes of specified type
+   * @param dataType ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data type
+   * @param listener ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ | Listener callback
    */
   addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
@@ -289,13 +289,13 @@ export default class DistributedDataService {
     }
     
     this.dataListeners.get(keyPrefix)!.push(listener);
-    Logger.debug(TAG, `Added data change listener for ${dataType}`);
+    console.debug(TAG, `Added data change listener for ${dataType}`);
   }
 
   /**
-   * ÒÆ³ýÊý¾Ý±ä»¯¼àÌý | Remove data change listener
-   * @param dataType Êý¾ÝÀàÐÍ | Data type
-   * @param listener ¼àÌý»Øµ÷ | Listener callback
+   * ï¿½Æ³ï¿½ï¿½ï¿½ï¿½Ý±ä»¯ï¿½ï¿½ï¿½ï¿½ | Remove data change listener
+   * @param dataType ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data type
+   * @param listener ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ | Listener callback
    */
   removeDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
@@ -306,7 +306,7 @@ export default class DistributedDataService {
       
       if (index > -1) {
         listeners.splice(index, 1);
-        // Èç¹ûÃ»ÓÐ¼àÌýÆ÷ÁË£¬ÒÆ³ýÕâ¸öÇ°×º
+        // ï¿½ï¿½ï¿½Ã»ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ï¿½Ç°×º
         if (listeners.length === 0) {
           this.dataListeners.delete(keyPrefix);
         }
@@ -315,10 +315,10 @@ export default class DistributedDataService {
   }
 
   /**
-   * ±£´æÍ¬²½Êý¾Ý | Save synchronization data
-   * @param dataType Êý¾ÝÀàÐÍ | Data type
-   * @param key Êý¾Ý¼ü | Data key
-   * @param data Êý¾ÝÄÚÈÝ | Data content
+   * ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Save synchronization data
+   * @param dataType ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data type
+   * @param key ï¿½ï¿½ï¿½Ý¼ï¿½ | Data key
+   * @param data ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data content
    */
   async saveSyncData<T>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
@@ -333,19 +333,19 @@ export default class DistributedDataService {
         deviceId: await this.getLocalDeviceId()
       };
 
-      // ±£´æÊý¾Ýµ½KVStore
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½KVStore
       await this.kvStore.put(fullKey, syncData);
-      Logger.debug(TAG, `Saved sync data: ${fullKey}`);
+      console.debug(TAG, `Saved sync data: ${fullKey}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to save sync data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to save sync data for key ${key}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
 
   /**
-   * »ñÈ¡Í¬²½Êý¾Ý | Get synchronization data
-   * @param dataType Êý¾ÝÀàÐÍ | Data type
-   * @param key Êý¾Ý¼ü | Data key
+   * ï¿½ï¿½È¡Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Get synchronization data
+   * @param dataType ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data type
+   * @param key ï¿½ï¿½ï¿½Ý¼ï¿½ | Data key
    */
   async getSyncData<T>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
@@ -357,21 +357,21 @@ export default class DistributedDataService {
       const value = await this.kvStore.get(fullKey);
 
       if (value && typeof value === 'object' && 'data' in value) {
-        Logger.debug(TAG, `Retrieved sync data: ${fullKey}`);
+        console.debug(TAG, `Retrieved sync data: ${fullKey}`);
         return value.data;
       }
       
       return null;
     } catch (error) {
-      Logger.error(TAG, `Failed to get sync data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to get sync data: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }
 
   /**
-   * É¾³ýÍ¬²½Êý¾Ý | Delete synchronization data
-   * @param dataType Êý¾ÝÀàÐÍ | Data type
-   * @param key Êý¾Ý¼ü | Data key
+   * É¾ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Delete synchronization data
+   * @param dataType ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Data type
+   * @param key ï¿½ï¿½ï¿½Ý¼ï¿½ | Data key
    */
   async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
@@ -381,45 +381,45 @@ export default class DistributedDataService {
     try {
       const fullKey = `${dataType}_${key}`;
       await this.kvStore.delete(fullKey);
-      Logger.debug(TAG, `Deleted sync data: ${fullKey}`);
+      console.debug(TAG, `Deleted sync data: ${fullKey}`);
     } catch (error) {
-      Logger.error(TAG, `Failed to delete sync data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to delete sync data: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
 
   /**
-   * Æô¶¯×Ô¶¯Í¬²½ | Start auto synchronization
+   * ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Í¬ï¿½ï¿½ | Start auto synchronization
    */
   private startAutoSync(): void {
-    this.stopAutoSync(); // ÏÈÍ£Ö¹ÏÖÓÐµÄ¶¨Ê±Æ÷
+    this.stopAutoSync(); // ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ÐµÄ¶ï¿½Ê±ï¿½ï¿½
     
     try {
       this.syncTimerId = setInterval(async () => {
         try {
           await this.synchronizeData();
         } catch (error) {
-          Logger.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error)}`);
+          console.error(TAG, `Auto sync failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }, this.syncConfig.syncInterval * 1000);
     } catch (error) {
-      Logger.error(TAG, `Failed to start auto sync: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to start auto sync: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * Í£Ö¹×Ô¶¯Í¬²½ | Stop auto synchronization
+   * Í£Ö¹ï¿½Ô¶ï¿½Í¬ï¿½ï¿½ | Stop auto synchronization
    */
   private stopAutoSync(): void {
     if (this.syncTimerId !== null) {
       clearInterval(this.syncTimerId);
       this.syncTimerId = null;
-      Logger.info(TAG, 'Auto sync stopped');
+      console.info(TAG, 'Auto sync stopped');
     }
   }
 
   /**
-   * ÊÖ¶¯´¥·¢Êý¾ÝÍ¬²½ | Manually trigger data synchronization
+   * ï¿½Ö¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ | Manually trigger data synchronization
    */
   async synchronizeData(): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled || this.syncState.status === SyncStatus.SYNCHRONIZING) {
@@ -432,13 +432,13 @@ export default class DistributedDataService {
     };
 
     try {
-      Logger.info(TAG, 'Starting data synchronization...');
+      console.info(TAG, 'Starting data synchronization...');
       
-      // »ñÈ¡ÔÚÏßÉè±¸ÁÐ±í
+      // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ð±ï¿½
       const devices = await this.getAvailableDevices();
-      Logger.debug(TAG, `Available devices: ${JSON.stringify(devices)}`);
+      console.debug(TAG, `Available devices: ${JSON.stringify(devices)}`);
       
-      // Í¬²½Ã¿ÖÖÊý¾ÝÀàÐÍ
+      // Í¬ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
       for (const dataType of this.syncConfig.syncTypes) {
         await this.syncDataType(dataType, devices);
       }
@@ -450,9 +450,9 @@ export default class DistributedDataService {
         syncedDevices: devices
       };
       
-      Logger.info(TAG, 'Data synchronization completed successfully');
+      console.info(TAG, 'Data synchronization completed successfully');
     } catch (error) {
-      Logger.error(TAG, `Data synchronization failed: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Data synchronization failed: ${error instanceof Error ? error.message : String(error)}`);
       this.syncState = {
         status: SyncStatus.FAILED,
         error: error instanceof Error ? error.message : String(error)
@@ -462,7 +462,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * »ñÈ¡¿ÉÓÃÉè±¸ | Get available devices
+   * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ | Get available devices
    */
   private async getAvailableDevices(): Promise<string[]> {
     try {
@@ -474,13 +474,13 @@ export default class DistributedDataService {
       this.deviceIds = deviceInfoList.map(device => device.deviceId).filter(id => id);
       return this.deviceIds;
     } catch (error) {
-      Logger.error(TAG, `Failed to get available devices: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to get available devices: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * »ñÈ¡±¾µØÉè±¸ID | Get local device ID
+   * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ID | Get local device ID
    */
   private async getLocalDeviceId(): Promise<string> {
     try {
@@ -491,48 +491,48 @@ export default class DistributedDataService {
       const deviceInfo = await this.kvManager.getLocalDeviceInfo();
       return deviceInfo?.deviceId || 'unknown';
     } catch (error) {
-      Logger.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to get local device ID: ${error instanceof Error ? error.message : String(error)}`);
       return 'unknown';
     }
   }
 
   /**
-   * Í¬²½Ö¸¶¨Êý¾ÝÀàÐÍ | Synchronize specified data type
+   * Í¬ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ | Synchronize specified data type
    */
   private async syncDataType(dataType: SyncDataType, deviceIds: string[]): Promise<void> {
     if (!this.kvStore) {
       return;
     }
 
-    Logger.debug(TAG, `Syncing data type: ${dataType} with ${deviceIds.length} devices`);
+    console.debug(TAG, `Syncing data type: ${dataType} with ${deviceIds.length} devices`);
     const keyPrefix = `${dataType}_`;
 
     try {
-      // »ñÈ¡ËùÓÐÆ¥ÅäÇ°×ºµÄ¼ü
+      // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½Ç°×ºï¿½Ä¼ï¿½
       const keys = await this.getAllKeysWithPrefix(keyPrefix);
-      Logger.debug(TAG, `Found ${keys.length} keys for data type ${dataType}`);
+      console.debug(TAG, `Found ${keys.length} keys for data type ${dataType}`);
 
       for (const fullKey of keys) {
         try {
-          // »ñÈ¡±¾µØÊý¾Ý
+          // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
           const localData = await this.kvStore.get(fullKey);
           if (localData) {
-            Logger.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
+            console.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
           }
         } catch (error) {
-          Logger.error(TAG, `Error processing key ${fullKey}: ${error instanceof Error ? error.message : String(error)}`);
-          // ¼ÌÐø´¦ÀíÏÂÒ»¸ö¼ü£¬²»ÖÐ¶ÏÕû¸öÍ¬²½Á÷³Ì
+          console.error(TAG, `Error processing key ${fullKey}: ${error instanceof Error ? error.message : String(error)}`);
+          // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
           continue;
         }
       }
     } catch (error) {
-      Logger.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to sync data type ${dataType}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
 
   /**
-   * »ñÈ¡ËùÓÐÆ¥ÅäÇ°×ºµÄ¼ü | Get all keys with prefix
+   * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½Ç°×ºï¿½Ä¼ï¿½ | Get all keys with prefix
    */
   private async getAllKeysWithPrefix(prefix: string): Promise<string[]> {
     if (!this.kvStore) {
@@ -554,13 +554,13 @@ export default class DistributedDataService {
       
       return keys;
     } catch (error) {
-      Logger.error(TAG, `Failed to get keys with prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Failed to get keys with prefix ${prefix}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
 
   /**
-   * ´¦ÀíÍ¬²½³åÍ» | Handle synchronization conflict
+   * ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½Í» | Handle synchronization conflict
    */
   private async resolveConflict<T>(localData: T, remoteData: T): Promise<T> {
     try {
@@ -574,41 +574,41 @@ export default class DistributedDataService {
           const remoteTime = (remoteData as { timestamp?: number })?.timestamp || 0;
           return localTime >= remoteTime ? localData : remoteData;
         case ConflictResolutionStrategy.MERGE:
-          // ÊµÏÖºÏ²¢²ßÂÔ
+          // Êµï¿½ÖºÏ²ï¿½ï¿½ï¿½ï¿½ï¿½
           return await this.mergeData(localData, remoteData);
         default:
           return localData;
       }
     } catch (error) {
-      Logger.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
-      return localData; // ³ö´íÊ±Ä¬ÈÏ±£Áô±¾µØÊý¾Ý
+      console.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
+      return localData; // ï¿½ï¿½ï¿½ï¿½Ê±Ä¬ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
   }
 
   /**
-   * ºÏ²¢Êý¾Ý£¨¸ù¾Ý²»Í¬Êý¾ÝÀàÐÍÊµÏÖÖÇÄÜºÏ²¢²ßÂÔ£© | Merge data (implement intelligent merge strategy based on different data types)
+   * ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ÜºÏ²ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ | Merge data (implement intelligent merge strategy based on different data types)
    */
   private async mergeData<T>(localData: T, remoteData: T): Promise<T> {
-    // ÕâÀï¿ÉÒÔ¸ù¾Ý²»Í¬µÄÊý¾ÝÀàÐÍÊµÏÖ²»Í¬µÄºÏ²¢²ßÂÔ
-    // ÀýÈç£¬¶ÔÓÚÀúÊ·¼ÇÂ¼¿ÉÒÔºÏ²¢È¥ÖØ£¬¶ÔÓÚÅäÖÃ¿ÉÒÔ»ùÓÚÊ±¼ä´ÁÑ¡Ôñ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½Ý²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö²ï¿½Í¬ï¿½ÄºÏ²ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ç£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ÔºÏ²ï¿½È¥ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Ô»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
     try {
-      // Ä¬ÈÏÊµÏÖ£ºÓÅÏÈÊ¹ÓÃ±¾µØÊý¾Ý
+      // Ä¬ï¿½ï¿½Êµï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
       return localData;
     } catch (error) {
-      Logger.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
       return localData;
     }
   }
 
   /**
-   * »ñÈ¡Í¬²½×´Ì¬ | Get synchronization status
+   * ï¿½ï¿½È¡Í¬ï¿½ï¿½×´Ì¬ | Get synchronization status
    */
   getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
-   * ÇåÀí×ÊÔ´ | Clean up resources
+   * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ | Clean up resources
    */
   async cleanup(): Promise<void> {
     this.stopAutoSync();

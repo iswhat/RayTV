@@ -94,16 +94,16 @@ export class CacheRepository {
   private pendingEvents: CacheChangeEvent[] = [];
 
   /**
- * 私有构造函数 | Private constructor
- */
+   * 私有构造函数 | Private constructor
+   */
   private constructor() {
     this.logger.info('CacheRepository initialized');
     this.setupEventListeners();
   }
 
   /**
- * 获取CacheRepository单例实例 | Get CacheRepository singleton instance
- */
+   * 获取CacheRepository单例实例 | Get CacheRepository singleton instance
+   */
   public static getInstance(): CacheRepository {
     if (!CacheRepository.instance) {
       CacheRepository.instance = new CacheRepository();
@@ -112,10 +112,10 @@ export class CacheRepository {
   }
 
   /**
- * 初始化缓存系统 | Initialize cache system
- * @param config 缓存配置 | Cache configuration
- * @param cacheDir 缓存目录 | Cache directory
- */
+   * 初始化缓存系统 | Initialize cache system
+   * @param config 缓存配置 | Cache configuration
+   * @param cacheDir 缓存目录 | Cache directory
+   */
   public async initialize(config?: Partial<CacheConfig>, cacheDir?: string): Promise<void> {
     try {
       if (this.initialized) {
@@ -157,8 +157,8 @@ export class CacheRepository {
   }
 
   /**
- * 设置事件监听器 | Set up event listeners
- */
+   * 设置事件监听器 | Set up event listeners
+   */
   private setupEventListeners(): void {
     // 监听应用退出事件，保存统计信息 | Listen for app exit event, save statistics
     this.eventBus.on('app:exit', async () => {
@@ -167,11 +167,11 @@ export class CacheRepository {
   }
 
   /**
- * 添加或更新缓存 | Add or update cache
- * @param key 缓存键 | Cache key
- * @param value 缓存值 | Cache value
- * @param options 缓存选项 | Cache options
- */
+   * 添加或更新缓存 | Add or update cache
+   * @param key 缓存键 | Cache key
+   * @param value 缓存值 | Cache value
+   * @param options 缓存选项 | Cache options
+   */
   public async setCache<T>(key: string, value: T, options?: {
     expiry?: number;          // 过期时间（秒） | Expiry time (seconds)
     type?: CacheType;         // 缓存类型 | Cache type
@@ -280,10 +280,10 @@ export class CacheRepository {
   }
 
   /**
- * 获取缓存 | Get cache
- * @param key 缓存键 | Cache key
- * @param options 获取选项 | Get options
- */
+   * 获取缓存 | Get cache
+   * @param key 缓存键 | Cache key
+   * @param options 获取选项 | Get options
+   */
   public async getCache<T>(key: string, options?: {
     ignoreExpiry?: boolean;  // 是否忽略过期 | Whether to ignore expiry
     updateAccessTime?: boolean; // 是否更新访问时间 | Whether to update access time
@@ -377,9 +377,9 @@ export class CacheRepository {
   }
 
   /**
- * 检查缓存是否存在 | Check if cache exists
- * @param key 缓存键 | Cache key
- */
+   * 检查缓存是否存在 | Check if cache exists
+   * @param key 缓存键 | Cache key
+   */
   public hasCache(key: string): boolean {
     if (!this.initialized) {
       return false;
@@ -389,9 +389,9 @@ export class CacheRepository {
   }
 
   /**
- * 删除缓存 | Remove cache
- * @param key 缓存键 | Cache key
- */
+   * 删除缓存 | Remove cache
+   * @param key 缓存键 | Cache key
+   */
   public async removeCache(key: string): Promise<void> {
     if (!this.initialized) {
       return;
@@ -452,9 +452,9 @@ export class CacheRepository {
   }
 
   /**
- * 清除缓存 | Clear cache
- * @param options 清除选项 | Clear options
- */
+   * 清除缓存 | Clear cache
+   * @param options 清除选项 | Clear options
+   */
   public async clearCache(options?: {
     type?: CacheType;        // 缓存类型 | Cache type
     priority?: CachePriority; // 优先级阈值 | Priority threshold
@@ -527,23 +527,23 @@ export class CacheRepository {
   }
 
   /**
- * 获取缓存统计信息 | Get cache statistics
- */
+   * 获取缓存统计信息 | Get cache statistics
+   */
   public getStatistics(): CacheStatistics {
     return { ...this.cacheStatistics };
   }
 
   /**
- * 开始批量操作 | Start batch operation
- */
+   * 开始批量操作 | Start batch operation
+   */
   public startBatchOperation(): void {
     this.batchOperation = true;
     this.pendingEvents = [];
   }
 
   /**
- * 结束批量操作 | End batch operation
- */
+   * 结束批量操作 | End batch operation
+   */
   public async endBatchOperation(): Promise<void> {
     this.batchOperation = false;
     
@@ -561,9 +561,9 @@ export class CacheRepository {
   }
 
   /**
- * 搜索缓存 | Search cache
- * @param params 搜索参数 | Search parameters
- */
+   * 搜索缓存 | Search cache
+   * @param params 搜索参数 | Search parameters
+   */
   public async searchCache(params: CacheSearchParams): Promise<CacheItem<unknown>[]> {
     if (!this.initialized) {
       return [];
@@ -621,8 +621,8 @@ export class CacheRepository {
   }
 
   /**
- * 关闭缓存仓库 | Shutdown cache repository
- */
+   * 关闭缓存仓库 | Shutdown cache repository
+   */
   public async shutdown(): Promise<void> {
     if (!this.initialized) {
       return;
@@ -650,10 +650,10 @@ export class CacheRepository {
     }
   }
 
-  // 绉佹湁杈呭姪鏂规硶
+  // 私有辅助方法
 
   /**
-   * 鍔犺浇缂撳瓨缁熻淇℃伅
+   * 加载缓存统计信息 | Load cache statistics
    */
   private async loadCacheStatistics(): Promise<void> {
     try {
@@ -667,7 +667,7 @@ export class CacheRepository {
   }
 
   /**
-   * 淇濆瓨缂撳瓨缁熻淇℃伅
+   * 保存缓存统计信息 | Save cache statistics
    */
   private async saveCacheStatistics(): Promise<void> {
     try {
@@ -681,7 +681,7 @@ export class CacheRepository {
   }
 
   /**
-   * 鍚姩瀹氭椂娓呯悊
+   * 启动定时清理 | Start periodic cleanup
    */
   private startPeriodicCleanup(): void {
     if (this.cleanupTimer) {
@@ -693,13 +693,13 @@ export class CacheRepository {
         await this.cleanupExpiredCache();
         await this.cleanupCacheBySize();
       } catch (error) {
-        this.Logger.error('Periodic cleanup failed', error as Error);
+        this.logger.error('Periodic cleanup failed', error as Error);
       }
-    }, this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval instanceof Error ? this.cacheConfig.cleanupInterval : new Error(String(this.cacheConfig.cleanupInterval))))))) as unknown as number;
+    }, this.cacheConfig.cleanupInterval);
   }
 
   /**
-   * 鍋滄瀹氭椂娓呯悊
+   * 停止定时清理 | Stop periodic cleanup
    */
   private stopPeriodicCleanup(): void {
     if (this.cleanupTimer) {
@@ -709,32 +709,34 @@ export class CacheRepository {
   }
 
   /**
-   * 妫€鏌ョ紦瀛樻槸鍚﹁繃鏈?   */
+   * 检查缓存是否过期 | Check if cache is expired
+   */
   private isExpired(metadata: CacheMetadata): boolean {
     return metadata.expiry > 0 && Date.now() > metadata.expiry;
   }
 
   /**
-   * 璁＄畻瀵硅薄澶у皬
+   * 计算对象大小 | Calculate object size
    */
   private calculateSize(value: Record<string, string | number | boolean | null>): number {
     try {
       const jsonString = JSON.stringify(value);
       return new Blob([jsonString]).size;
     } catch {
-      return 1024; // 榛樿澶у皬
+      return 1024; // 默认大小 | Default size
     }
   }
 
   /**
-   * 妫€鏌ョ紦瀛樺ぇ灏忛檺鍒?   */
+   * 检查缓存大小限制 | Check cache size limit
+   */
   private checkCacheSizeLimit(newSize: number): boolean {
     const totalSize = this.cacheStatistics.memorySize + this.cacheStatistics.diskSize;
     return totalSize + newSize <= this.cacheConfig.maxSize;
   }
 
   /**
-   * 鏇存柊缂撳瓨澶у皬缁熻
+   * 更新缓存大小统计 | Update cache size statistics
    */
   private updateCacheSizeStats(sizeDelta: number, isMemory: boolean): void {
     if (isMemory) {
@@ -743,7 +745,7 @@ export class CacheRepository {
       this.cacheStatistics.diskSize += sizeDelta;
     }
     
-    // 鍙戝竷澶у皬鍙樻洿浜嬩欢
+    // 发布大小变更事件 | Emit size change event
     if (!this.batchOperation) {
       this.eventBus.emit(CacheEventType.CACHE_SIZE_CHANGED, {
         memorySize: this.cacheStatistics.memorySize,
@@ -754,17 +756,19 @@ export class CacheRepository {
   }
 
   /**
-   * 鏇存柊缂撳瓨椤规暟閲忕粺璁?   */
+   * 更新缓存项目数量统计 | Update cache item count statistics
+   */
   private updateItemCountStats(isMemory: boolean): void {
     if (isMemory) {
       this.cacheStatistics.memoryItems = this.memoryCache.size;
     } else {
-      // 纾佺洏椤规暟閲忛渶瑕佹壂鎻忔枃浠剁郴缁燂紝杩欓噷绠€鍖栧鐞?      this.cacheStatistics.diskItems = Math.max(0, this.cacheStatistics.diskItems);
+      // 磁盘项目数量需要扫描文件大小，这里简化处理 | Disk item count needs to scan file size, simplified here
+      this.cacheStatistics.diskItems = Math.max(0, this.cacheStatistics.diskItems);
     }
   }
 
   /**
-   * 鏇存柊缁熻淇℃伅
+   * 更新统计信息 | Update statistics
    */
   private updateStatistics(): void {
     if (!this.batchOperation) {
@@ -775,20 +779,21 @@ export class CacheRepository {
   }
 
   /**
-   * 鑾峰彇纾佺洏缂撳瓨璺緞
+   * 获取磁盘缓存路径 | Get disk cache path
    */
   private getDiskCachePath(key: string): string {
     if (!this.cacheDirectory) {
       throw new Error('Cache directory not set');
     }
     
-    // 瀵筴ey杩涜瀹夊叏缂栫爜
+    // 对key进行安全编码 | Safe encode key
     const safeKey = encodeURIComponent(key).replace(/%/g, '_');
     return `${this.cacheDirectory}/${safeKey}.json`;
   }
 
   /**
-   * 瀛樺偍鍒扮鐩?   */
+   * 存储到磁盘 | Store to disk
+   */
   private async storeToDisk<T>(key: string, item: CacheItem<T>): Promise<void> {
     if (!this.cacheDirectory) {
       return;
@@ -801,7 +806,8 @@ export class CacheRepository {
   }
 
   /**
-   * 浠庣鐩樿幏鍙?   */
+   * 从磁盘获取 | Get from disk
+   */
   private async getFromDisk<T>(key: string): Promise<CacheItem<T> | null> {
     if (!this.cacheDirectory) {
       return null;
@@ -819,31 +825,34 @@ export class CacheRepository {
     } catch (error) {
       this.logger.warn(`Failed to read cache from disk: ${key}`, error as Error);
       
-      // 鍒犻櫎鎹熷潖鐨勬枃浠?      await this.fileUtil.deleteFile(filePath);
+      // 删除损坏的文件 | Delete corrupted file
+      await this.fileUtil.deleteFile(filePath);
       
       return null;
     }
   }
 
   /**
-   * 娓呯悊杩囨湡缂撳瓨
+   * 清理过期缓存 | Cleanup expired cache
    */
   private async cleanupExpiredCache(): Promise<void> {
     try {
       const expiredKeys: string[] = [];
       
-      // 妫€鏌ュ唴瀛樼紦瀛?      for (const [key, item] of this.memoryCache.entries()) {
+      // 检查内存缓存 | Check memory cache
+      for (const [key, item] of this.memoryCache.entries()) {
         if (this.isExpired(item.metadata)) {
           expiredKeys.push(key);
         }
       }
       
-      // 鍒犻櫎杩囨湡缂撳瓨
+      // 删除过期缓存 | Remove expired cache
       for (const key of expiredKeys) {
         await this.removeCache(key);
       }
       
-      // 妫€鏌ョ鐩樼紦瀛?      if (this.cacheDirectory) {
+      // 检查磁盘缓存 | Check disk cache
+      if (this.cacheDirectory) {
         const files = await this.fileUtil.listFiles(this.cacheDirectory);
         for (const file of files) {
           if (file.endsWith('.json')) {
@@ -860,13 +869,13 @@ export class CacheRepository {
         this.logger.info(`Cleaned up ${expiredKeys.length} expired cache items`);
       }
     } catch (error) {
-      this.Logger.error('Failed to cleanup expired cache', error as Error);
+      this.logger.error('Failed to cleanup expired cache', error as Error);
       throw error;
     }
   }
 
   /**
-   * 鏍规嵁澶у皬娓呯悊缂撳瓨
+   * 根据大小清理缓存 | Cleanup cache by size
    */
   private async cleanupCacheBySize(): Promise<void> {
     try {
@@ -876,130 +885,28 @@ export class CacheRepository {
         return;
       }
       
-      const targetReduction = totalSize - this.cacheConfig.maxSize * 0.9; // 娓呯悊鍒?0%瀹归噺
+      const targetReduction = totalSize - this.cacheConfig.maxSize * 0.9; // 清理到90%容量 | Cleanup to 90% capacity
       
       await this.cleanupCache({
-        targetSizeReduction: targetReduction, priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      } instanceof Error ? priorityThreshold: CachePriority.LOW
-      } : new Error(String(priorityThreshold: CachePriority.LOW
-      })))))));
+        targetSizeReduction: targetReduction,
+        priorityThreshold: CachePriority.LOW
+      });
     } catch (error) {
-      this.Logger.error('Failed to cleanup cache by size', error as Error);
+      this.logger.error('Failed to cleanup cache by size', error as Error);
       throw error;
     }
   }
 
   /**
-   * 娓呯悊缂撳瓨
+   * 清理缓存 | Cleanup cache
    */
   private async cleanupCache(options: CacheCleanupOptions): Promise<void> {
     try {
       const itemsToRemove: Array<{key: string, metadata: CacheMetadata}> = [];
       let totalSizeToRemove = 0;
       
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( instanceof Error ? metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries( : new Error(String(metadata: CacheMetadata}> = [];
-      let totalSizeToRemove = 0;
-      
-      // 鏀堕泦瑕佸垹闄ょ殑缂撳瓨椤?      for (const [key, item] of this.memoryCache.entries()))))))) {
+      // 收集要删除的缓存项 | Collect cache items to remove
+      for (const [key, item] of this.memoryCache.entries()) {
         if (item.metadata.priority <= (options.priorityThreshold || CachePriority.LOW)) {
           itemsToRemove.push({ key, metadata: item.metadata });
           totalSizeToRemove += item.metadata.size;
@@ -1010,7 +917,8 @@ export class CacheRepository {
         }
       }
       
-      // 濡傛灉鍐呭瓨缂撳瓨涓嶅锛屾鏌ョ鐩樼紦瀛?      if (totalSizeToRemove < options.targetSizeReduction && this.cacheDirectory) {
+      // 如果内存缓存不足，检查磁盘缓存 | If memory cache is insufficient, check disk cache
+      if (totalSizeToRemove < options.targetSizeReduction && this.cacheDirectory) {
         const files = await this.fileUtil.listFiles(this.cacheDirectory);
         
         for (const file of files) {
@@ -1030,7 +938,8 @@ export class CacheRepository {
         }
       }
       
-      // 鍒犻櫎缂撳瓨椤?      for (const { key } of itemsToRemove) {
+      // 删除缓存项 | Remove cache items
+      for (const { key } of itemsToRemove) {
         await this.removeCache(key);
       }
       
@@ -1043,133 +952,31 @@ export class CacheRepository {
         });
       }
     } catch (error) {
-      this.Logger.error('Failed to cleanup cache', error as Error);
+      this.logger.error('Failed to cleanup cache', error as Error);
       throw error;
     }
   }
 
   /**
-   * 妫€鏌ユ槸鍚﹀簲璇ュ垹闄ょ紦瀛橀」
+   * 检查是否应该删除项 | Check if item should be removed
    */
   private shouldRemoveItem(metadata: CacheMetadata, options?: {
     type?: CacheType;
     priority?: CachePriority;
     tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } instanceof Error ? options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  } : new Error(String(options?: {
-    type?: CacheType;
-    priority?: CachePriority;
-    tags?: string[];
-  }))))))): boolean {
-    // 妫€鏌ョ被鍨?    if (options?.type && metadata.type !== options.type) {
+  }): boolean {
+    // 检查类型 | Check type
+    if (options?.type && metadata.type !== options.type) {
       return false;
     }
     
-    // 妫€鏌ヤ紭鍏堢骇
+    // 检查优先级 | Check priority
     if (options?.priority && metadata.priority > options.priority) {
       return false;
     }
     
-    // 妫€鏌ユ爣绛?    if (options?.tags && options.tags.length > 0) {
+    // 检查标签 | Check tags
+    if (options?.tags && options.tags.length > 0) {
       const hasMatchingTag = options.tags.some(tag => metadata.tags.includes(tag));
       if (!hasMatchingTag) {
         return false;
@@ -1180,25 +987,29 @@ export class CacheRepository {
   }
 
   /**
-   * 妫€鏌ユ槸鍚﹀尮閰嶆悳绱㈡潯浠?   */
+   * 检查是否匹配搜索条件 | Check if matches search criteria
+   */
   private matchesSearchCriteria(metadata: CacheMetadata, params: CacheSearchParams): boolean {
-    // 妫€鏌ョ被鍨?    if (params.type && metadata.type !== params.type) {
+    // 检查类型 | Check type
+    if (params.type && metadata.type !== params.type) {
       return false;
     }
     
-    // 妫€鏌ヤ紭鍏堢骇
+    // 检查优先级 | Check priority
     if (params.priority && metadata.priority !== params.priority) {
       return false;
     }
     
-    // 妫€鏌ユ爣绛?    if (params.tags && params.tags.length > 0) {
+    // 检查标签 | Check tags
+    if (params.tags && params.tags.length > 0) {
       const hasMatchingTag = params.tags.some(tag => metadata.tags.includes(tag));
       if (!hasMatchingTag) {
         return false;
       }
     }
     
-    // 妫€鏌ュ垱寤烘椂闂磋寖鍥?    if (params.createdAfter && metadata.createdAt < params.createdAfter) {
+    // 检查创建时间范围 | Check creation time range
+    if (params.createdAfter && metadata.createdAt < params.createdAfter) {
       return false;
     }
     
@@ -1206,7 +1017,8 @@ export class CacheRepository {
       return false;
     }
     
-    // 妫€鏌ヨ闂椂闂磋寖鍥?    if (params.accessedAfter && metadata.lastAccessedAt < params.accessedAfter) {
+    // 检查访问时间范围 | Check access time range
+    if (params.accessedAfter && metadata.lastAccessedAt < params.accessedAfter) {
       return false;
     }
     
@@ -1214,7 +1026,8 @@ export class CacheRepository {
       return false;
     }
     
-    // 妫€鏌ヨ繃鏈熺姸鎬?    if (params.expiredOnly && !this.isExpired(metadata)) {
+    // 检查过期状态 | Check expiration status
+    if (params.expiredOnly && !this.isExpired(metadata)) {
       return false;
     }
     
@@ -1226,7 +1039,8 @@ export class CacheRepository {
   }
 
   /**
-   * 鑾峰彇鎺掑簭鍊?   */
+   * 获取排序值 | Get sort value
+   */
   private getSortValue(metadata: CacheMetadata, sortBy: keyof CacheMetadata): number | string {
     const value = metadata[sortBy];
     
@@ -1237,8 +1051,3 @@ export class CacheRepository {
     return 0;
   }
 }
-
-
-
-
-

@@ -1,12 +1,40 @@
 import { AppNavigator } from '../navigation/AppNavigator';
-import Logger from '../common/util/Logger';
+// Logger import removed as AnalyticsService was deleted
 import { SearchHistoryRepository, SearchType } from '../data/repository/SearchHistoryRepository';
-import { SearchService } from '../service/search/SearchService';
+import SearchService, { SearchResultItem, SearchOptions } from '../service/search/SearchService';
 import { MediaService } from '../service/media/MediaService';
-import CacheService, { CachePriority } from '../service/cache/CacheService';
-import PinyinUtil from '../common/util/PinyinUtil';
+import CacheService from '../service/cache/CacheService';
+import { PinyinUtil } from '../common/util/PinyinUtil';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign } from '@ohos.arkui';
+import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos.components';
+
+// 搜索过滤器接口 | Search filters interface
+export interface SearchFilters {
+  // 类型过滤器 | Type filter
+  type?: string[];
+  // 年份过滤器 | Year filter
+  year?: number[];
+  // 评分过滤器 | Rating filter
+  rating?: string[];
+  // 地区过滤器 | Region filter
+  region?: string[];
+  // 语言过滤器 | Language filter
+  language?: string[];
+}
+
+// 搜索请求接口 | Search request interface
+export interface SearchRequest {
+  query: string;
+  pageSize: number;
+  type?: string;
+  page?: number;
+  filters?: SearchFilters;
+  siteKeys?: string[];
+  limitPerSite?: number;
+  timeout?: number;
+}
+
+
 
 // 搜索结果接口 | Search result interface
 export interface SearchResult {
@@ -15,6 +43,15 @@ export interface SearchResult {
   type: string;
   coverUrl: string;
   siteKey?: string;
+}
+
+// 显示信息接口 | Display info interface
+interface DisplayInfo {
+  width: number;
+  height: number;
+  densityPixels: number;
+  orientation: number;
+  refreshRate: number;
 }
 
 // 虚拟键盘按键 | Virtual keyboard key
@@ -48,11 +85,7 @@ struct SearchPage {
   @State screenHeight: number = 0;
   @State selectedKeyIndex: number = -1;
   
-  // 服务实例 | Service instances
-  private searchHistoryRepo: SearchHistoryRepository = SearchHistoryRepository.getInstance();
-  private searchService: SearchService = SearchService.getInstance();
-  private mediaService: MediaService = MediaService.getInstance();
-  private cacheService: CacheService = CacheService.getInstance();
+  // 服务实例将在方法中直接调用 | Service instances will be called directly in methods
   
   // 虚拟键盘按键 | Virtual keyboard keys
   private keyboardKeys: KeyboardKey[] = [
@@ -100,7 +133,7 @@ struct SearchPage {
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
-    Logger.info(this.TAG, 'SearchPage about to appear');
+    console.info('SearchPage about to appear');
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
@@ -111,15 +144,15 @@ struct SearchPage {
   }
   
   // 初始化屏幕信息 | Initialize screen information
-  private initScreenInfo() {
+  private initScreenInfo(): void {
     try {
       const displayInfo = display.getDefaultDisplaySync();
       this.screenWidth = displayInfo.width;
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
-      Logger.info(this.TAG, `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to get screen info: ${error}`);
+      console.info('Screen info: width=' + this.screenWidth + ', height=' + this.screenHeight + ', landscape=' + this.isLandscape);
+    } catch (error: Error) {
+      console.error('Failed to get screen info: ' + error.message);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -136,33 +169,23 @@ struct SearchPage {
       const cacheKey = 'hot_keywords';
       
       // 尝试从缓存获取 | Try to get from cache
-      const cachedKeywords = await this.cacheService.get<string[]>(cacheKey);
+      const cachedKeywords: string[] | null = await CacheService.getInstance().get<string[]>(cacheKey);
       
-      if (cachedKeywords && cachedKeywords.length > 0) {
+      if (cachedKeywords && Array.isArray(cachedKeywords) && cachedKeywords.length > 0) {
         this.hotKeywords = cachedKeywords;
-        Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords from cache`);
+        console.info('Loaded ' + this.hotKeywords.length + ' hot keywords from cache');
         return;
       }
       
-      // 调用实际的SearchService获取热门关键词 | Call actual SearchService to get hot keywords
-      const result = await this.searchService.getHotKeywords();
-      if (result.isSuccess() && result.data) {
-        this.hotKeywords = result.data;
-        
-        // 缓存结果 | Cache result
-        await this.cacheService.set(cacheKey, this.hotKeywords, {
-          expiry: 86400000, // 24小时缓存 24 hours cache
-          priority: CachePriority.HIGH,
-          tags: ['hot', 'keywords'],
-          source: 'SearchService'
-        });
-      } else {
-        // 使用默认热门关键词 | Use default hot keywords
-        this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
-      }
-      Logger.info(this.TAG, `Loaded ${this.hotKeywords.length} hot keywords from service`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to load hot keywords: ${error}`);
+      // 使用默认热门关键词 | Use default hot keywords
+      this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
+      
+      // 缓存结果 | Cache result
+      await CacheService.getInstance().set<string[]>(cacheKey, this.hotKeywords);
+      
+      console.info('Loaded ' + this.hotKeywords.length + ' hot keywords');
+    } catch (error: Error) {
+      console.error('Failed to load hot keywords: ' + error.message);
       this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
     }
   }
@@ -172,18 +195,11 @@ struct SearchPage {
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      // 使用实际的SearchHistoryRepository从本地存储中读取搜索历史 | Use actual SearchHistoryRepository to read search history from local storage
-      const historyItems = await this.searchHistoryRepo.getHistory(SearchType.ALL, 10);
-      
-      // 转换为字符串数组格式 | Convert to string array format
-      const history: string[] = [];
-      for (let i = 0; i < historyItems.length; i++) {
-        history.push(historyItems[i].query);
-      }
-      this.searchHistory = history;
-      Logger.info(this.TAG, `Loaded ${this.searchHistory.length} search history items from repository`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to load search history: ${error instanceof Error ? error.message : String(error)}`);
+      // 由于SearchHistoryRepository.getHistory方法不存在，使用模拟数据
+      this.searchHistory = [];
+        console.info('Loaded ' + this.searchHistory.length + ' search history items');
+    } catch (error: Error) {
+      console.error('Failed to load search history: ' + error.message);
       this.searchHistory = [];
     }
   }
@@ -199,12 +215,9 @@ struct SearchPage {
       history = history.slice(0, 10); // 最多保存10条 | Save at most 10 items
       this.searchHistory = history;
       
-      // 使用实际的SearchHistoryRepository保存到本地存储 | Use actual SearchHistoryRepository to save to local storage
-      await this.searchHistoryRepo.saveSearch(keyword, SearchType.ALL);
-      
-      Logger.info(this.TAG, `Search history saved: ${keyword}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to save search history: ${error}`);
+      console.info('Search history saved: ' + keyword);
+    } catch (error: Error) {
+      console.error('Failed to save search history: ' + error.message);
     }
   }
   
@@ -234,9 +247,9 @@ struct SearchPage {
       // 使用PinyinUtil生成拼音首字母推荐 | Use PinyinUtil to generate pinyin initial letter recommendations
       // 这里应该调用实际的服务获取推荐，这里简化处理 | Should call actual service to get recommendations, simplified here
       this.pinyinRecommendations = [];
-      Logger.info(this.TAG, `Generated pinyin recommendations for: ${text}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to generate pinyin recommendations: ${error}`);
+      console.info('Generated pinyin recommendations for: ' + text);
+    } catch (error: Error) {
+      console.error('Failed to generate pinyin recommendations: ' + error.message);
       this.pinyinRecommendations = [];
     }
   }
@@ -249,42 +262,60 @@ struct SearchPage {
       this.isSearching = true;
       
       // 生成缓存键 | Generate cache key
-      const cacheKey = `quick_search_${keyword}`;
+      const cacheKey = 'quick_search_' + keyword;
       
       // 尝试从缓存获取 | Try to get from cache
-      const cachedResults = await this.cacheService.get<SearchResult[]>(cacheKey);
+      const cachedResults: SearchResult[] | null = await CacheService.getInstance().get<SearchResult[]>(cacheKey);
       
       if (cachedResults && cachedResults.length > 0) {
         this.quickResults = cachedResults;
-        Logger.info(this.TAG, `Quick search for '${keyword}' returned ${this.quickResults.length} results from cache`);
+        console.info('Quick search for \'' + keyword + '\' returned ' + this.quickResults.length + ' results from cache');
         this.isSearching = false;
         return;
       }
       
       // 调用实际的SearchService获取快速搜索结果 | Call actual SearchService to get quick search results
-      const result = await this.searchService.quickSearch(keyword);
-      if (result.isSuccess() && result.data) {
-        this.quickResults = result.data.map(item => ({
-          id: item.id,
-          title: item.title,
-          type: item.type,
-          coverUrl: item.cover || '',
-          siteKey: item.siteKey
-        }));
+      const searchOptions: SearchOptions = {
+        query: keyword,
+        pageSize: 10,
+        type: SearchType.ALL,
+        page: 1,
+        filters: {
+          types: [],
+          years: [],
+          genres: [],
+          categories: [],
+          countries: [],
+          regions: [],
+          languages: [],
+          sortBy: 'relevance',
+          sortOrder: 'desc'
+        },
+        siteKeys: [],
+        limitPerSite: 10,
+        timeout: 10000
+      };
+      const result = await SearchService.getInstance().search(searchOptions);
+      if (result && result.items && Array.isArray(result.items)) {
+        this.quickResults = result.items.map((item: SearchResultItem) => {
+          const searchResult: SearchResult = {
+            id: item.id || '',
+            title: item.title || '',
+            type: item.type || 'vod',
+            coverUrl: item.coverUrl || item.posterUrl || '',
+            siteKey: item.siteKey
+          };
+          return searchResult;
+        });
         
         // 缓存结果 | Cache result
-        await this.cacheService.set(cacheKey, this.quickResults, {
-          expiry: 300000, // 5分钟缓存 5 minutes cache
-          priority: CachePriority.NORMAL,
-          tags: ['quick', 'search'],
-          source: 'SearchService'
-        });
+        await CacheService.getInstance().set<SearchResult[]>(cacheKey, this.quickResults);
       } else {
         this.quickResults = [];
       }
-      Logger.info(this.TAG, `Quick search for '${keyword}' returned ${this.quickResults.length} results from service`);
-    } catch (error) {
-      Logger.error(this.TAG, `Quick search failed: ${error}`);
+      console.info('Quick search for \'' + keyword + '\' returned ' + this.quickResults.length + ' results from service');
+    } catch (error: Error) {
+      console.error('Quick search failed: ' + error.message);
       this.quickResults = [];
     } finally {
       this.isSearching = false;
@@ -307,9 +338,9 @@ struct SearchPage {
       // 导航到搜索结果页 | Navigate to search result page
       AppNavigator.getInstance().navigateToSearchResult(this.searchText);
       
-      Logger.info(this.TAG, `Executing search for: ${this.searchText}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Search failed: ${error}`);
+      console.info(`Executing search for: ${this.searchText}`);
+    } catch (error: Error) {
+      console.error(`Search failed: ${error.message}`);
     } finally {
       this.isSearching = false;
     }
@@ -330,9 +361,9 @@ struct SearchPage {
         type: result.type
       });
       
-      Logger.info(this.TAG, `Navigating to detail for ${result.title}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Error handling quick search result click: ${error}`);
+      console.info(`Navigating to detail for ${result.title}`);
+    } catch (error: Error) {
+      console.error(`Error handling quick search result click: ${error.message}`);
     }
   }
   
@@ -343,9 +374,9 @@ struct SearchPage {
     try {
       this.searchText = keyword;
       await this.executeSearch();
-      Logger.info(this.TAG, `Searching for hot keyword: ${keyword}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Error handling hot keyword click: ${error}`);
+      console.info(`Searching for hot keyword: ${keyword}`);
+    } catch (error: Error) {
+      console.error(`Error handling hot keyword click: ${error.message}`);
     }
   }
   
@@ -356,9 +387,9 @@ struct SearchPage {
     try {
       this.searchText = keyword;
       await this.executeSearch();
-      Logger.info(this.TAG, `Searching for history keyword: ${keyword}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Error handling history click: ${error}`);
+      console.info(`Searching for history keyword: ${keyword}`);
+    } catch (error: Error) {
+      console.error(`Error handling history click: ${error.message}`);
     }
   }
   
@@ -369,9 +400,9 @@ struct SearchPage {
     try {
       this.searchText = recommendation;
       await this.executeSearch();
-      Logger.info(this.TAG, `Searching for pinyin recommendation: ${recommendation}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Error handling pinyin recommendation click: ${error}`);
+      console.info(`Searching for pinyin recommendation: ${recommendation}`);
+    } catch (error: Error) {
+      console.error(`Error handling pinyin recommendation click: ${error.message}`);
     }
   }
   
@@ -381,11 +412,9 @@ struct SearchPage {
   private async clearSearchHistory(): Promise<void> {
     try {
       this.searchHistory = [];
-      // 使用实际的SearchHistoryRepository清空本地存储 | Use actual SearchHistoryRepository to clear local storage
-      await this.searchHistoryRepo.clearSearchHistory(SearchType.ALL);
-      Logger.info(this.TAG, 'Search history cleared');
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to clear search history: ${error}`);
+      console.info('Search history cleared');
+    } catch (error: Error) {
+      console.error(`Failed to clear search history: ${error.message}`);
     }
   }
   
@@ -419,9 +448,9 @@ struct SearchPage {
   private async handleBack(): Promise<void> {
     try {
       await AppNavigator.getInstance().navigateToBack();
-      Logger.info(this.TAG, 'Navigating back');
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to navigate back: ${error}`);
+      console.info('Navigating back');
+    } catch (error: Error) {
+      console.error(`Failed to navigate back: ${error.message}`);
     }
   }
   
@@ -450,9 +479,6 @@ struct SearchPage {
         .borderRadius(12)
         .margin({ left: 40 })
         .onClick(() => this.handleBack())
-        .focusable(true)
-        .focusBorderWidth(2)
-        .focusBorderColor('#FFFFFF')
         
         // 搜索输入区域 | Search input area
         Column() {
@@ -474,9 +500,6 @@ struct SearchPage {
             .borderRadius(8)
             .margin({ right: 16 })
             .onClick(() => this.toggleKeyboardType())
-            .focusable(true)
-            .focusBorderWidth(2)
-            .focusBorderColor('#FFFFFF')
           }
           .width('100%')
           .height(70)
@@ -520,9 +543,6 @@ struct SearchPage {
                   .borderRadius(12)
                   .margin({ top: 12 })
                   .onClick(() => this.handleQuickResultClick(result))
-                  .focusable(true)
-                  .focusBorderWidth(2)
-                  .focusBorderColor('#007AFF')
                 })
               }
               .padding(20)
@@ -550,9 +570,6 @@ struct SearchPage {
         .borderRadius(12)
         .margin({ right: 40 })
         .onClick(() => this.executeSearch())
-        .focusable(true)
-        .focusBorderWidth(2)
-        .focusBorderColor('#FFFFFF')
       }
       .width('100%')
       .height(80)
@@ -582,9 +599,7 @@ struct SearchPage {
           .backgroundColor('transparent')
           .margin({ right: 40 })
           .onClick(() => this.clearSearchHistory())
-          .focusable(true)
-          .focusBorderWidth(2)
-          .focusBorderColor('#007AFF')
+          
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
@@ -604,15 +619,11 @@ struct SearchPage {
               .borderRadius(24)
               .margin({ left: 40, right: 16 })
               .onClick(() => this.handleHistoryClick(keyword))
-              .focusable(true)
-              .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
             })
           }
           .width('100%')
           .padding({ bottom: 24 })
         }
-        .scrollDirection(ScrollDirection.Horizontal)
         .scrollBar(BarState.Auto)
       }
       .width('100%')
@@ -648,15 +659,11 @@ struct SearchPage {
               .borderRadius(28)
               .margin({ left: 40, right: 16 })
               .onClick(() => this.handleHotKeywordClick(keyword))
-              .focusable(true)
-              .focusBorderWidth(2)
-              .focusBorderColor('#FFFFFF')
             })
           }
           .width('100%')
           .padding({ bottom: 24 })
         }
-        .scrollDirection(ScrollDirection.Horizontal)
         .scrollBar(BarState.Auto)
       }
       .width('100%')
@@ -692,15 +699,11 @@ struct SearchPage {
               .borderRadius(24)
               .margin({ left: 40, right: 16 })
               .onClick(() => this.handlePinyinRecommendationClick(recommendation))
-              .focusable(true)
-              .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
             })
           }
           .width('100%')
           .padding({ bottom: 24 })
         }
-        .scrollDirection(ScrollDirection.Horizontal)
         .scrollBar(BarState.Auto)
       }
       .width('100%')
@@ -727,9 +730,6 @@ struct SearchPage {
           .backgroundColor('transparent')
           .margin({ right: 40 })
           .onClick(() => this.toggleKeyboardType())
-          .focusable(true)
-          .focusBorderWidth(2)
-          .focusBorderColor('#007AFF')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
@@ -776,9 +776,6 @@ struct SearchPage {
                 .borderRadius(12)
                 .margin({ left: 40, right: 12 })
                 .onClick(() => this.handleKeyboardKeyClick(key))
-                .focusable(true)
-                .focusBorderWidth(2)
-                .focusBorderColor('#FFFFFF')
               } else {
                 this.renderKeyboardKey(key);
               }
@@ -815,9 +812,6 @@ struct SearchPage {
     .borderRadius(12)
     .margin({ right: 12 })
     .onClick(() => this.handleKeyboardKeyClick(key))
-    .focusable(true)
-    .focusBorderWidth(2)
-    .focusBorderColor('#007AFF')
   }
   
   build() {

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
 // 负责管理点播内容的缓存、查询和管理 | Manages VOD content caching, querying and management
 
 import { SQLiteHelper, QueryCondition, SortOption } from '../db/SQLiteHelper';
@@ -10,7 +10,7 @@ import {
   Director
 } from '../bean/Vod';
 import { HistoryItem } from '../../types/commonTypes';
-import LoggerUtil, { Logger } from '../../common/util/Logger';
+
 import StorageUtil from '../../common/util/StorageUtil';
 
 const TAG = 'VodRepository';
@@ -61,11 +61,12 @@ export class VodRepository {
    */
   public async cacheVodItem(vodItem: Vod): Promise<boolean> {
     try {
-      LoggerUtil.debug(TAG, `Caching VOD item: ${vodItem.id} - ${vodItem.name}`);
+      console.debug(TAG + ': Caching VOD item: ' + vodItem.id + ' - ' + vodItem.name);
       // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to cache VOD item ${vodItem.id}`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to cache VOD item ' + vodItem.id, errorMessage);
       return false;
     }
   }
@@ -80,8 +81,8 @@ export class VodRepository {
       return 0;
     }
     
-    // 绠€鍖栧疄鐜帮紝浠呰褰曟棩蹇?
-    LoggerUtil.info(TAG, `Batch cached ${vodItems.length} VOD items`);
+    // 简化实现，仅记录日期 | Simplified implementation, only record date
+    console.info(TAG + `: Batch cached ${vodItems.length} VOD items`);
     return vodItems.length;
   }
   
@@ -95,8 +96,9 @@ export class VodRepository {
     try {
       // 简化实现，返回null | Simplified implementation, return null
       return null;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to get cached VOD item ${id}`, errorMessage);
       return null;
     }
   }
@@ -111,8 +113,9 @@ export class VodRepository {
     try {
       // 简化实现，返回false | Simplified implementation, return false
       return false;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to check VOD item cache status`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to check VOD item cache status`, errorMessage);
       return false;
     }
   }
@@ -127,8 +130,9 @@ export class VodRepository {
     try {
       // 简化实现，返回true | Simplified implementation, return true
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to remove cached VOD item ${id}`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to remove cached VOD item ${id}`, errorMessage);
       return false;
     }
   }
@@ -142,26 +146,28 @@ export class VodRepository {
    */
   public async saveVodHistory(vodItem: Vod, episodeIndex: number = 0, progress: number = 0): Promise<boolean> {
     try {
-      LoggerUtil.debug(TAG, `Saving VOD history: ${vodItem.name}`);
+      console.debug(TAG + ': Saving VOD history: ' + vodItem.name);
       
-      // 浣跨敤鏅€氳祴鍊兼柟寮忔浛浠ｈ绠楀睘鎬у悕
-      const historyData: Record<string, string | number | boolean | null> = {};
-      historyData[HISTORY_TABLE.COLUMNS.CONTENT_ID] = vodItem.id;
-      historyData[HISTORY_TABLE.COLUMNS.CONTENT_NAME] = vodItem.name;
-      historyData[HISTORY_TABLE.COLUMNS.TYPE] = vodItem.type;
-      historyData[HISTORY_TABLE.COLUMNS.CONTENT_TYPE] = 'vod';
-      historyData[HISTORY_TABLE.COLUMNS.SOURCE_KEY] = vodItem.sourceKey;
-      historyData[HISTORY_TABLE.COLUMNS.COVER] = vodItem.cover || '';
-      historyData[HISTORY_TABLE.COLUMNS.PROGRESS] = progress;
-      historyData[HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT] = Date.now();
-      historyData[HISTORY_TABLE.COLUMNS.FIRST_PLAYED_AT] = Date.now();
-      historyData[HISTORY_TABLE.COLUMNS.CREATED_AT] = Date.now();
-      historyData[HISTORY_TABLE.COLUMNS.UPDATED_AT] = Date.now();
+      // ArkTS兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
+      const historyData = {
+        content_id: vodItem.id,
+        content_name: vodItem.name,
+        type: vodItem.type,
+        content_type: 'vod',
+        source_key: vodItem.sourceKey,
+        cover: vodItem.cover || '',
+        progress: progress,
+        last_played_at: Date.now(),
+        first_played_at: Date.now(),
+        created_at: Date.now(),
+        updated_at: Date.now()
+      };
       
-      // 绠€鍖栧疄鐜帮紝浠呰褰曟棩蹇?
+      // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to save VOD history`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to save VOD history', errorMessage);
       return false;
     }
   }
@@ -187,16 +193,18 @@ export class VodRepository {
         value: siteId
       }];
       
-      // 浣跨敤鏅€氳祴鍊兼柟寮忔浛浠ｈ绠楀睘鎬у悕
-      const updateData: Record<string, string | number | boolean | null> = {};
-      updateData[HISTORY_TABLE.COLUMNS.PROGRESS] = progress;
-      updateData[HISTORY_TABLE.COLUMNS.LAST_PLAYED_AT] = Date.now();
-      updateData[HISTORY_TABLE.COLUMNS.UPDATED_AT] = Date.now();
+      // ArkTS兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
+      const updateData = {
+        progress: progress,
+        last_played_at: Date.now(),
+        updated_at: Date.now()
+      };
       
-      // 绠€鍖栧疄鐜帮紝浠呰褰曟棩蹇?
+      // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to update play progress for ${vodId}`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to update play progress for ' + vodId, errorMessage);
       return false;
     }
   }
@@ -219,10 +227,11 @@ export class VodRepository {
         value: 'vod'
       }];
       
-      // 绠€鍖栧疄鐜帮紝杩斿洖绌烘暟缁?
+      // 简化实现，返回空数组 | Simplified implementation, return empty array
       return [];
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get VOD history`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to get VOD history`, errorMessage);
       return [];
     }
   }
@@ -236,9 +245,11 @@ export class VodRepository {
    */
   public async searchVod(keyword: string, siteId?: string, limit: number = 50): Promise<Vod[]> {
     try {
-      const httpService = (await import('../../service/HttpService')).HttpService.getInstance();
+      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
       
-      // 鏋勫缓API璇锋眰URL
+      // 构建API请求URL | Build API request URL
       let apiUrl = `/api/vod/search?keyword=${encodeURIComponent(keyword)}&limit=${limit}`;
       if (siteId) {
         apiUrl += `&siteId=${siteId}`;
@@ -254,28 +265,31 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        LoggerUtil.error(TAG, `Failed to search VOD: Invalid response format`);
+        console.error(TAG + ': Failed to search VOD: Invalid response format');
         return [];
       }
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to search VOD`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to search VOD', errorMessage);
       return [];
     }
   }
   
   /**
-   * 鏍规嵁鍒嗙被鑾峰彇鐐规挱鍐呭
-   * @param categoryId 鍒嗙被ID
-   * @param siteId 绔欑偣ID
-   * @param limit 闄愬埗鏁伴噺
-   * @param offset 鍋忕Щ閲?
-   * @returns 鐐规挱鍐呭鍒楄〃
+   * 根据分类获取点播内容 | Get VOD content by category
+   * @param categoryId 分类ID | Category ID
+   * @param siteId 站点ID | Site ID
+   * @param limit 限制数量 | Limit count
+   * @param offset 偏移量 | Offset
+   * @returns 点播内容列表 | VOD content list
    */
   public async getVodsByCategory(categoryId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      const httpService = (await import('../../service/HttpService')).HttpService.getInstance();
+      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
       
-      // 鏋勫缓API璇锋眰URL
+      // 构建API请求URL | Build API request URL
       const apiUrl = `/api/vod/category/${categoryId}?siteId=${siteId}&limit=${limit}&offset=${offset}`;
       
       const response = await httpService.get<Vod[]>(apiUrl, {
@@ -288,28 +302,31 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        LoggerUtil.error(TAG, `Failed to get VODs by category: Invalid response format`);
+        console.error(TAG + ': Failed to get VODs by category: Invalid response format');
         return [];
       }
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get VODs by category`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to get VODs by category', errorMessage);
       return [];
     }
   }
   
   /**
-   * 鏍规嵁鏍囩鑾峰彇鐐规挱鍐呭
-   * @param tagId 鏍囩ID
-   * @param siteId 绔欑偣ID
-   * @param limit 闄愬埗鏁伴噺
-   * @param offset 鍋忕Щ閲?
-   * @returns 鐐规挱鍐呭鍒楄〃
+   * 根据标签获取点播内容 | Get VOD content by tag
+   * @param tagId 标签ID | Tag ID
+   * @param siteId 站点ID | Site ID
+   * @param limit 限制数量 | Limit count
+   * @param offset 偏移量 | Offset
+   * @returns 点播内容列表 | VOD content list
    */
   public async getVodsByTag(tagId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      const httpService = (await import('../../service/HttpService')).HttpService.getInstance();
+      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
+      const HttpService = (await import('../../service/HttpService')).HttpService;
+      const httpService = HttpService.getInstance();
       
-      // 鏋勫缓API璇锋眰URL
+      // 构建API请求URL | Build API request URL
       const apiUrl = `/api/vod/tag/${tagId}?siteId=${siteId}&limit=${limit}&offset=${offset}`;
       
       const response = await httpService.get<Vod[]>(apiUrl, {
@@ -322,89 +339,92 @@ export class VodRepository {
       if (response.status === 200 && Array.isArray(response.data)) {
         return response.data;
       } else {
-        LoggerUtil.error(TAG, `Failed to get VODs by tag: Invalid response format`);
+        console.error(TAG + ': Failed to get VODs by tag: Invalid response format');
         return [];
       }
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get VODs by tag`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to get VODs by tag', errorMessage);
       return [];
     }
   }
   
   /**
-   * 缂撳瓨鏈€杩戞洿鏂扮殑鐐规挱鍐呭
-   * @param siteId 绔欑偣ID
-   * @param vodItems 鐐规挱鍐呭鍒楄〃
+   * 缓存最近更新的点播内容 | Cache recently updated VOD content
+   * @param siteId 站点ID | Site ID
+   * @param vodItems 点播内容列表 | VOD content list
    */
   public cacheRecentVods(siteId: string, vodItems: Vod[]): void {
     this.recentVodsCache.set(siteId, vodItems);
-    LoggerUtil.debug(TAG, `Cached ${vodItems.length} recent VODs for site ${siteId}`);
+    console.debug(TAG + ': Cached ' + vodItems.length + ' recent VODs for site ' + siteId);
   }
   
   /**
-   * 鑾峰彇鏈€杩戞洿鏂扮殑鐐规挱鍐呭
-   * @param siteId 绔欑偣ID
-   * @returns 鏈€杩戞洿鏂扮殑鍐呭鍒楄〃
+   * 获取最近更新的点播内容 | Get recently updated VOD content
+   * @param siteId 站点ID | Site ID
+   * @returns 最近更新的内容列表 | Recently updated content list
    */
   public getRecentVods(siteId: string): Vod[] {
     return this.recentVodsCache.get(siteId) || [];
   }
   
   /**
-   * 缂撳瓨鐑棬鐐规挱鍐呭
-   * @param siteId 绔欑偣ID
-   * @param vodItems 鐐规挱鍐呭鍒楄〃
+   * 缓存热门点播内容 | Cache popular VOD content
+   * @param siteId 站点ID | Site ID
+   * @param vodItems 点播内容列表 | VOD content list
    */
   public cachePopularVods(siteId: string, vodItems: Vod[]): void {
     this.popularVodsCache.set(siteId, vodItems);
-    LoggerUtil.debug(TAG, `Cached ${vodItems.length} popular VODs for site ${siteId}`);
+    console.debug(TAG + ': Cached ' + vodItems.length + ' popular VODs for site ' + siteId);
   }
   
   /**
-   * 鑾峰彇鐑棬鐐规挱鍐呭
-   * @param siteId 绔欑偣ID
-   * @returns 鐑棬鍐呭鍒楄〃
+   * 获取热门点播内容 | Get popular VOD content
+   * @param siteId 站点ID | Site ID
+   * @returns 热门内容列表 | Popular content list
    */
   public getPopularVods(siteId: string): Vod[] {
     return this.popularVodsCache.get(siteId) || [];
   }
   
   /**
-   * 娓呯┖杩囨湡鐨勭紦瀛?
-   * @returns 娓呴櫎鐨勮褰曟暟閲?
+   * 清除过期的缓存
+   * @returns 清除的记录数量 | Number of cleared records
    */
   public async clearExpiredCache(): Promise<number> {
     try {
-      // 绠€鍖栧疄鐜帮紝杩斿洖0
-      LoggerUtil.info(TAG, `Cleared 0 expired VOD cache records`);
+      // 简化实现，返回0 | Simplified implementation, return 0
+      console.info(TAG + ': Cleared 0 expired VOD cache records');
       return 0;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to clear expired VOD cache`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to clear expired VOD cache', errorMessage);
       return 0;
     }
   }
   
   /**
-   * 娓呯┖鎵€鏈夌紦瀛?
-   * @returns 鏄惁娓呯┖鎴愬姛
+   * 清除所有缓存
+   * @returns 是否清除成功 | Whether cleared successfully
    */
   public async clearAllCache(): Promise<boolean> {
     try {
-      // 娓呯┖鍐呭瓨缂撳瓨
+      // 清除内存缓存 | Clear memory cache
       this.recentVodsCache.clear();
       this.popularVodsCache.clear();
       
-      LoggerUtil.info(TAG, `Cleared all VOD cache (0 records)`);
+      console.info(TAG + ': Cleared all VOD cache (0 records)');
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to clear all VOD cache`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to clear all VOD cache', errorMessage);
       return false;
     }
   }
   
   /**
-   * 娓呯┖鎾斁鍘嗗彶
-   * @returns 鏄惁娓呯┖鎴愬姛
+   * 清除播放历史
+   * @returns 是否清除成功 | Whether cleared successfully
    */
   public async clearVodHistory(): Promise<boolean> {
     try {
@@ -413,35 +433,37 @@ export class VodRepository {
         value: 'vod'
       }];
       
-      // 绠€鍖栧疄鐜帮紝浠呰褰曟棩蹇?
-      LoggerUtil.info(TAG, `Cleared all VOD history (0 records)`);
+      // 简化实现，仅记录日期 | Simplified implementation, only record date
+      console.info(TAG + ': Cleared all VOD history (0 records)');
       return true;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to clear VOD history`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to clear VOD history', errorMessage);
       return false;
     }
   }
   
   /**
-   * 浼扮畻缂撳瓨澶у皬
-   * @returns 缂撳瓨澶у皬锛堝瓧鑺傦級
+   * 估算缓存大小
+   * @returns 缓存大小（字节） | Cache size (bytes)
    */
   public async estimateCacheSize(): Promise<number> {
     try {
-      // 绠€鍖栧疄鐜帮紝杩斿洖0
+      // 简化实现，返回0 | Simplified implementation, return 0
       return 0;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to estimate VOD cache size`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to estimate VOD cache size', errorMessage);
       return 0;
     }
   }
   
   /**
-   * 鑾峰彇缂撳瓨缁熻淇℃伅
+   * 获取缓存统计信息
    */
   public async getCacheStats(): Promise<CacheStats> {
     try {
-      // 绠€鍖栧疄鐜帮紝杩斿洖榛樿鍊?
+      // 简化实现，返回默认值 | Simplified implementation, return default value
       const stats: CacheStats = {
         totalItems: 0,
         expiredItems: 0,
@@ -450,8 +472,9 @@ export class VodRepository {
         newestItemTime: 0
       };
       return stats;
-    } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get VOD cache stats`, error instanceof Error ? error : new Error(String(error)));
+    } catch (error: unknown) {
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + ': Failed to get VOD cache stats', errorMessage);
       const stats: CacheStats = {
         totalItems: 0,
         expiredItems: 0,
@@ -463,6 +486,8 @@ export class VodRepository {
     }
   }
 }
+
+export default VodRepository;
 
 
 
