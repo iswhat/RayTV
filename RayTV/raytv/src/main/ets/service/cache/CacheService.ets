@@ -6,6 +6,7 @@ import JsonUtil from '../../common/util/JsonUtil';
 import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import ConfigService from '../config/ConfigService';
 import FileService, { StorageLocation, FileType, FileConfig } from '../storage/FileService';
+import Logger from '../../common/util/Logger';
 
 // 常量定义 Constants definition
 const TAG = 'CacheService';
@@ -204,6 +205,16 @@ export interface CacheItemMetadata {
   source?: string;
 }
 
+// 缓存项数据接口 Cache item data interface
+export interface CacheItemData {
+  id?: string;
+  name?: string;
+  value?: string | number | boolean | null;
+  content?: string;
+  timestamp?: number;
+  status?: string;
+}
+
 // 缓存数据接口 Cache data interface
 export interface CacheData {
   // 移除索引签名和Record类型，使用具体属性
@@ -217,7 +228,7 @@ export interface CacheData {
   timestamp?: number;
   status?: string;
   // 支持数组类型 | Support array type
-  items?: any[];
+  items?: CacheItemData[];
 }
 
 // 内存缓存项接口 Memory cache item interface
@@ -653,8 +664,8 @@ export default class CacheService {
   private calculateObjectSize(obj: string | number | boolean | CacheData | null | undefined): number {
     try {
       // 简单估算，实际应用中可以使用更准确的方法 | Simple estimate, more accurate methods can be used in actual applications
-      let str: string;
-      if (obj === null || obj === undefined) {
+      let str: string = '';
+      if (!obj) {
         str = '';
       } else if (typeof obj === 'string') {
         str = obj;
@@ -822,7 +833,7 @@ export default class CacheService {
         }
         
         // 格式化大小 | Format size
-        let size: string;
+        let size: string = '0 B';
         if (metadata.size < 1024) {
           size = `${metadata.size} B`;
         } else if (metadata.size < 1024 * 1024) {
@@ -1431,7 +1442,7 @@ export default class CacheService {
         if (this.cacheConfig.enableMemoryCache && 
             (cacheType === CacheType.MEMORY || cacheType === CacheType.MEMORY_DISK)) {
           // 将数据转换为CacheData类型 | Convert data to CacheData type
-          let cacheData: CacheData;
+          let cacheData: CacheData = { value: null };
           if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean' || data === null) {
             cacheData = { value: data };
           } else if (Array.isArray(data)) {

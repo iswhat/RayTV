@@ -5,20 +5,16 @@ import { PlaybackService } from '../service/playback/PlaybackService';
 import { AVPlayerService } from '../service/playback/AVPlayerService';
 import { SearchService } from '../service/search/SearchService';
 import SubtitleService, { SubtitleTrack, SubtitleProvider, SubtitleLanguage } from '../service/media/SubtitleService';
+import TimerManager from '../common/util/TimerManager';
 
 import CacheService, { CachePriority } from '../service/cache/CacheService';
 import display from '@ohos.display';
 import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign, FlexWrap, KeyEvent, FocusStyle, TouchEvent, GestureEvent, Curve } from '@ohos/arkui';
 
-// 剧集信息 | Episode info
-interface Episode {
-  id: string;
-  title: string;
-  episode: number;
-  duration?: string;
-  played?: boolean;
-  current?: boolean;
-}
+// 导入子组件 | Import sub-components
+import { PlaybackControls } from './playback/PlaybackControls';
+import { SkipSettings } from './playback/SkipSettings';
+import { EpisodeList } from './playback/EpisodeList';
 
 // 解析线路 | Parse line
 interface ParseLine {
@@ -91,48 +87,122 @@ struct PlaybackPage {
   private episodeScroller: Scroller = new Scroller();
   
   // 状态管理 | State management
-  @State mediaInfo: MediaInfo | null = null;
-  @State episodes: Episode[] = [];
-  @State parseLines: ParseLine[] = [];
-  @State selectedEpisode: Episode | null = null;
-  @State selectedLine: ParseLine | null = null;
-  @State playbackSpeed: number = 1.0;
-  @State isPlaying: boolean = true;
-  @State currentTime: number = 0;
-  @State duration: number = 0;
-  @State progress: number = 0;
-  @State isLoading: boolean = true;
-  @State isError: boolean = false;
-  @State errorMessage: string = '加载失败';
-  @State isLandscape: boolean = false;
-  @State screenWidth: number = 0;
-  @State screenHeight: number = 0;
-  @State showControls: boolean = false; // 默认隐藏控制条
-  @State showEpisodeList: boolean = true;
-  @State showMoreOptions: boolean = false;
-  @State showSubtitleOptions: boolean = false;
-  @State showAudioTrackOptions: boolean = false;
-  @State showSkipOptions: boolean = false;
-  @State videoPlayerHeight: number = 0;
-  @State subtitleTracks: SubtitleTrack[] = [];
-  @State selectedSubtitle: SubtitleTrack | null = null;
-  @State subtitleLanguages: SubtitleLanguage[] = [];
-  @State isSearchingSubtitles: boolean = false;
-  @State audioTracks: AudioTrack[] = [];
-  @State selectedAudioTrack: AudioTrack | null = null;
-  @State skipOpeningTime: number = 90; // 默认跳过片头时间（秒）
-  @State skipEndingTime: number = 300; // 默认跳过片尾时间（秒）
-  @State isSkipOpeningEnabled: boolean = true;
-  @State isSkipEndingEnabled: boolean = true;
-  @State isLiveMode: boolean = false; // 是否为直播模式
-  @State showLiveChannelList: boolean = false; // 是否显示直播频道列表
-  @State showLiveSettings: boolean = false; // 是否显示直播设置
-  @State controlHideTimer: number | null = null; // 控制条隐藏计时器
-  @State currentFocusElement: string = ''; // 当前焦点元素
+  
+  // 媒体信息状态 | Media info state
+  @State mediaState: {
+    info: MediaInfo | null;
+    episodes: Episode[];
+    parseLines: ParseLine[];
+    selectedEpisode: Episode | null;
+    selectedLine: ParseLine | null;
+  } = {
+    info: null,
+    episodes: [],
+    parseLines: [],
+    selectedEpisode: null,
+    selectedLine: null
+  };
+  
+  // 播放状态 | Playback state
+  @State playbackState: {
+    isPlaying: boolean;
+    currentTime: number;
+    duration: number;
+    progress: number;
+    playbackSpeed: number;
+    isLoading: boolean;
+    isError: boolean;
+    errorMessage: string;
+  } = {
+    isPlaying: true,
+    currentTime: 0,
+    duration: 0,
+    progress: 0,
+    playbackSpeed: 1.0,
+    isLoading: true,
+    isError: false,
+    errorMessage: '加载失败'
+  };
+  
+  // UI状态 | UI state
+  @State uiState: {
+    isLandscape: boolean;
+    screenWidth: number;
+    screenHeight: number;
+    showControls: boolean;
+    showEpisodeList: boolean;
+    showMoreOptions: boolean;
+    showSubtitleOptions: boolean;
+    showAudioTrackOptions: boolean;
+    showSkipOptions: boolean;
+    videoPlayerHeight: number;
+    controlHideTimer: number | null;
+    currentFocusElement: string;
+  } = {
+    isLandscape: false,
+    screenWidth: 0,
+    screenHeight: 0,
+    showControls: false, // 默认隐藏控制条
+    showEpisodeList: true,
+    showMoreOptions: false,
+    showSubtitleOptions: false,
+    showAudioTrackOptions: false,
+    showSkipOptions: false,
+    videoPlayerHeight: 0,
+    controlHideTimer: null,
+    currentFocusElement: ''
+  };
+  
+  // 字幕状态 | Subtitle state
+  @State subtitleState: {
+    tracks: SubtitleTrack[];
+    selectedTrack: SubtitleTrack | null;
+    languages: SubtitleLanguage[];
+    isSearching: boolean;
+  } = {
+    tracks: [],
+    selectedTrack: null,
+    languages: [],
+    isSearching: false
+  };
+  
+  // 音轨状态 | Audio track state
+  @State audioState: {
+    tracks: AudioTrack[];
+    selectedTrack: AudioTrack | null;
+  } = {
+    tracks: [],
+    selectedTrack: null
+  };
+  
+  // 跳过设置状态 | Skip settings state
+  @State skipState: {
+    skipOpeningTime: number;
+    skipEndingTime: number;
+    isSkipOpeningEnabled: boolean;
+    isSkipEndingEnabled: boolean;
+  } = {
+    skipOpeningTime: 90, // 默认跳过片头时间（秒）
+    skipEndingTime: 300, // 默认跳过片尾时间（秒）
+    isSkipOpeningEnabled: true,
+    isSkipEndingEnabled: true
+  };
+  
+  // 直播状态 | Live state
+  @State liveState: {
+    isLiveMode: boolean;
+    showChannelList: boolean;
+    showSettings: boolean;
+  } = {
+    isLiveMode: false, // 是否为直播模式
+    showChannelList: false, // 是否显示直播频道列表
+    showSettings: false, // 是否显示直播设置
+  };
   // 服务实例 | Service instances
   private mediaService: MediaService = MediaService.getInstance();
   private playbackService: PlaybackService = PlaybackService.getInstance();
   private avPlayerService: AVPlayerService = AVPlayerService.getInstance();
+  private timerManager: TimerManager = TimerManager.getInstance();
   private searchService: SearchService = SearchService.getInstance();
   private subtitleService: SubtitleService = SubtitleService.getInstance();
 
@@ -155,27 +225,27 @@ struct PlaybackPage {
   private initScreenInfo() {
     try {
       const displayInfo = display.getDefaultDisplaySync();
-      this.screenWidth = displayInfo.width;
-      this.screenHeight = displayInfo.height;
-      this.isLandscape = this.screenWidth > this.screenHeight;
+      this.uiState.screenWidth = displayInfo.width;
+      this.uiState.screenHeight = displayInfo.height;
+      this.uiState.isLandscape = this.uiState.screenWidth > this.uiState.screenHeight;
       
       // 计算视频播放器高度 | Calculate video player height
-      if (this.isLandscape) {
+      if (this.uiState.isLandscape) {
         // 横屏模式：占据屏幕高度的60% | Landscape mode: 60% of screen height
-        this.videoPlayerHeight = this.screenHeight * 0.6;
+        this.uiState.videoPlayerHeight = this.uiState.screenHeight * 0.6;
       } else {
         // 竖屏模式：固定高度 | Portrait mode: fixed height
-        this.videoPlayerHeight = 400;
+        this.uiState.videoPlayerHeight = 400;
       }
       
-      Logger.info(this.TAG, `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}, playerHeight=${this.videoPlayerHeight}`);
+      Logger.info(this.TAG, `Screen info: width=${this.uiState.screenWidth}, height=${this.uiState.screenHeight}, landscape=${this.uiState.isLandscape}, playerHeight=${this.uiState.videoPlayerHeight}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get screen info: ${error}`);
       // 默认值 | Default values
-      this.screenWidth = 1920;
-      this.screenHeight = 1080;
-      this.isLandscape = true;
-      this.videoPlayerHeight = 648; // 1080 * 0.6
+      this.uiState.screenWidth = 1920;
+      this.uiState.screenHeight = 1080;
+      this.uiState.isLandscape = true;
+      this.uiState.videoPlayerHeight = 648; // 1080 * 0.6
     }
   }
   
@@ -184,14 +254,23 @@ struct PlaybackPage {
    */
   private async loadMediaInfo(): Promise<void> {
     try {
-      this.isLoading = true;
-      this.isError = false;
-      
-      // 获取路由参数 | Get route parameters
+      this.playbackState.isLoading = true;
+      this.playbackState.isError = false;
+
+      // 修复问题2：获取路由参数并验证 - 检查params是否存在
+      // Get route parameters and validate - check if params exists
       const params: DetailParams = AppNavigator.getInstance().getCurrentRouteParams();
-      
+
+      if (!params || !params.id || !params.siteKey) {
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = '缺少必要的参数';
+        Logger.error(this.TAG, 'Missing required route parameters');
+        this.playbackState.isLoading = false;
+        return;
+      }
+
       Logger.info(this.TAG, `Loading media info for: ${params.id} from ${params.siteKey}`);
-      
+
       // 生成缓存键 | Generate cache key
       const cacheKey = `media_info_${params.id}_${params.siteKey}_${params.type}`;
       
@@ -199,7 +278,7 @@ struct PlaybackPage {
       const cachedInfo = await this.cacheService.get<MediaInfo>(cacheKey);
       
       if (cachedInfo) {
-        this.mediaInfo = cachedInfo;
+        this.mediaState.info = cachedInfo;
         
         // 加载剧集列表 | Load episode list
         this.loadEpisodes();
@@ -212,8 +291,8 @@ struct PlaybackPage {
         // 加载字幕 | Load subtitles
         await this.loadSubtitles();
         
-        Logger.info(this.TAG, `Loaded media info from cache: ${this.mediaInfo.title}`);
-        this.isLoading = false;
+        Logger.info(this.TAG, `Loaded media info from cache: ${this.mediaState.info.title}`);
+        this.playbackState.isLoading = false;
         return;
       }
       
@@ -221,10 +300,10 @@ struct PlaybackPage {
       const result = await this.mediaService.getMediaDetail(params.id, params.siteKey, params.type);
       
       if (result.isSuccess() && result.data) {
-        this.mediaInfo = result.data;
+        this.mediaState.info = result.data;
         
         // 缓存结果 | Cache result
-        await this.cacheService.set(cacheKey, this.mediaInfo, {
+        await this.cacheService.set(cacheKey, this.mediaState.info, {
           expiry: 86400000, // 24小时缓存 24 hours cache
           priority: CachePriority.HIGH,
           tags: ['media', 'detail'],
@@ -242,19 +321,19 @@ struct PlaybackPage {
         // 加载字幕 | Load subtitles
         await this.loadSubtitles();
         
-        Logger.info(this.TAG, `Loaded media info from service: ${this.mediaInfo.title}`);
+        Logger.info(this.TAG, `Loaded media info from service: ${this.mediaState.info.title}`);
       } else {
-        this.isError = true;
-        this.errorMessage = result.message || '加载失败';
-        Logger.warn(this.TAG, `Failed to load media info: ${this.errorMessage}`);
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = result.message || '加载失败';
+        Logger.warn(this.TAG, `Failed to load media info: ${this.playbackState.errorMessage}`);
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to load media info: ${errorMsg}`);
-      this.isError = true;
-      this.errorMessage = errorMsg;
+      this.playbackState.isError = true;
+      this.playbackState.errorMessage = errorMsg;
     } finally {
-      this.isLoading = false;
+      this.playbackState.isLoading = false;
     }
   }
   
@@ -262,8 +341,8 @@ struct PlaybackPage {
    * 加载剧集列表 | Load episode list
    */
   private loadEpisodes(): void {
-    if (this.mediaInfo && this.mediaInfo.episodes) {
-      this.episodes = this.mediaInfo.episodes.map((ep, index: number) => ({
+    if (this.mediaState.info && this.mediaState.info.episodes) {
+      this.mediaState.episodes = this.mediaState.info.episodes.map((ep, index: number) => ({
         id: ep.id || `ep_${index}`,
         title: ep.title || `第${ep.episode || (index + 1)}集`,
         episode: ep.episode || (index + 1),
@@ -271,10 +350,10 @@ struct PlaybackPage {
         played: ep.played || false,
         current: index === 0
       }));
-      this.selectedEpisode = this.episodes[0];
-      Logger.info(this.TAG, `Loaded ${this.episodes.length} episodes`);
+      this.mediaState.selectedEpisode = this.mediaState.episodes[0];
+      Logger.info(this.TAG, `Loaded ${this.mediaState.episodes.length} episodes`);
     } else {
-      this.episodes = [];
+      this.mediaState.episodes = [];
     }
   }
   
@@ -282,21 +361,21 @@ struct PlaybackPage {
    * 加载解析线路 | Load parse lines
    */
   private loadParseLines(): void {
-    if (this.mediaInfo && this.mediaInfo.parseLines) {
-      this.parseLines = this.mediaInfo.parseLines.map((line, index: number) => ({
+    if (this.mediaState.info && this.mediaState.info.parseLines) {
+      this.mediaState.parseLines = this.mediaState.info.parseLines.map((line, index: number) => ({
         id: line.id || `line_${index}`,
         name: line.name || `线路${index + 1}`,
         selected: index === 0
       }));
-      this.selectedLine = this.parseLines[0];
-      Logger.info(this.TAG, `Loaded ${this.parseLines.length} parse lines`);
+      this.mediaState.selectedLine = this.mediaState.parseLines[0];
+      Logger.info(this.TAG, `Loaded ${this.mediaState.parseLines.length} parse lines`);
     } else {
-      this.parseLines = [{
+      this.mediaState.parseLines = [{
         id: 'line_1',
         name: '默认线路',
         selected: true
       }];
-      this.selectedLine = this.parseLines[0];
+      this.mediaState.selectedLine = this.mediaState.parseLines[0];
     }
   }
   
@@ -305,33 +384,32 @@ struct PlaybackPage {
    */
   private async initPlayback(): Promise<void> {
     try {
-      if (this.selectedEpisode && this.selectedLine) {
+      if (this.mediaState.selectedEpisode && this.mediaState.selectedLine) {
         // 调用实际的PlaybackService初始化播放 | Call actual PlaybackService to initialize playback
         await this.playbackService.initPlayback({
-          episode: this.selectedEpisode,
-          line: this.selectedLine,
-          mediaInfo: this.mediaInfo
+          episode: this.mediaState.selectedEpisode,
+          line: this.mediaState.selectedLine,
+          mediaInfo: this.mediaState.info
         });
         
         // 监听播放状态 | Listen to playback state
         this.playbackService.onPlaybackStateChange((state) => {
-          this.isPlaying = state.isPlaying;
-          this.currentTime = state.currentTime;
-          this.duration = state.duration;
-          this.progress = state.progress;
+          this.playbackState.isPlaying = state.isPlaying;
+          this.playbackState.currentTime = state.currentTime;
+          this.playbackState.duration = state.duration;
+          this.playbackState.progress = state.progress;
           
           // 检查是否需要自动跳过 | Check if auto skip is needed
           this.checkAutoSkip();
           
           // 加载音轨信息 | Load audio track info
           if (state.audioTracks && state.audioTracks.length > 0) {
-            this.audioTracks = state.audioTracks;
-            if (!this.selectedAudioTrack && this.audioTracks.length > 0) {
-              this.selectedAudioTrack = this.audioTracks[0];
+            this.audioState.tracks = state.audioTracks;
+            if (!this.audioState.selectedTrack && this.audioState.tracks.length > 0) {
+              this.audioState.selectedTrack = this.audioState.tracks[0];
             }
           }
-          
-
+        });
         
         Logger.info(this.TAG, 'Playback initialized successfully');
       }
@@ -345,16 +423,14 @@ struct PlaybackPage {
    */
   private async handleEpisodeSelect(episode: Episode): Promise<void> {
     try {
-      this.selectedEpisode = episode;
+      this.mediaState.selectedEpisode = episode;
       // 更新剧集状态 | Update episode state
-      this.episodes.forEach(ep => {
+      this.mediaState.episodes.forEach(ep => {
         ep.current = ep.id === episode.id;
       });
       
       // 显示加载状态 | Show loading state
-      this.isLoading = true;
-      
-
+      this.playbackState.isLoading = true;
       
       // 调用实际的PlaybackService切换剧集 | Call actual PlaybackService to switch episode
       const result = await this.playbackService.switchEpisode(episode);
@@ -363,16 +439,16 @@ struct PlaybackPage {
         Logger.info(this.TAG, `Selected episode: ${episode.title}`);
       } else {
         Logger.error(this.TAG, `Failed to switch episode: ${result.message}`);
-        this.isError = true;
-        this.errorMessage = result.message || '切换剧集失败';
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = result.message || '切换剧集失败';
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to switch episode: ${errorMsg}`);
-      this.isError = true;
-      this.errorMessage = errorMsg;
+      this.playbackState.isError = true;
+      this.playbackState.errorMessage = errorMsg;
     } finally {
-      this.isLoading = false;
+      this.playbackState.isLoading = false;
     }
   }
   
@@ -381,14 +457,14 @@ struct PlaybackPage {
    */
   private async handleLineSelect(line: ParseLine): Promise<void> {
     try {
-      this.selectedLine = line;
+      this.mediaState.selectedLine = line;
       // 更新线路状态 | Update line state
-      this.parseLines.forEach(l => {
+      this.mediaState.parseLines.forEach(l => {
         l.selected = l.id === line.id;
       });
       
       // 显示加载状态 | Show loading state
-      this.isLoading = true;
+      this.playbackState.isLoading = true;
       
       // 调用实际的PlaybackService切换解析线路 | Call actual PlaybackService to switch parse line
       const result = await this.playbackService.switchParseLine(line);
@@ -397,16 +473,16 @@ struct PlaybackPage {
         Logger.info(this.TAG, `Selected parse line: ${line.name}`);
       } else {
         Logger.error(this.TAG, `Failed to switch parse line: ${result.message}`);
-        this.isError = true;
-        this.errorMessage = result.message || '切换解析线路失败';
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = result.message || '切换解析线路失败';
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to switch parse line: ${errorMsg}`);
-      this.isError = true;
-      this.errorMessage = errorMsg;
+      this.playbackState.isError = true;
+      this.playbackState.errorMessage = errorMsg;
     } finally {
-      this.isLoading = false;
+      this.playbackState.isLoading = false;
     }
   }
   
@@ -415,17 +491,17 @@ struct PlaybackPage {
    */
   private async handlePlayPause(): Promise<void> {
     try {
-      let result;
-      if (this.isPlaying) {
+      let result: { isSuccess: () => boolean };
+      if (this.playbackState.isPlaying) {
         result = await this.playbackService.pause();
       } else {
         result = await this.playbackService.play();
       }
       
       if (result.isSuccess()) {
-        this.isPlaying = !this.isPlaying;
+        this.playbackState.isPlaying = !this.playbackState.isPlaying;
         
-        Logger.info(this.TAG, `${this.isPlaying ? 'Playing' : 'Paused'}`);
+        Logger.info(this.TAG, `${this.playbackState.isPlaying ? 'Playing' : 'Paused'}`);
       } else {
         Logger.error(this.TAG, `Failed to toggle playback: ${result.message}`);
       }
@@ -444,7 +520,7 @@ struct PlaybackPage {
       const result = await this.playbackService.setPlaybackSpeed(speed);
       
       if (result.isSuccess()) {
-        this.playbackSpeed = speed;
+        this.playbackState.playbackSpeed = speed;
         Logger.info(this.TAG, `Playback speed set to: ${speed}x`);
       } else {
         Logger.error(this.TAG, `Failed to change playback speed: ${result.message}`);
@@ -460,7 +536,7 @@ struct PlaybackPage {
    */
   private async handleFastForward(seconds: number = 30): Promise<void> {
     try {
-      const targetTime = this.currentTime + seconds;
+      const targetTime = this.playbackState.currentTime + seconds;
       // 调用实际的PlaybackService快进 | Call actual PlaybackService to fast forward
       const result = await this.playbackService.seek(targetTime);
       
@@ -480,7 +556,7 @@ struct PlaybackPage {
    */
   private async handleRewind(seconds: number = 10): Promise<void> {
     try {
-      const targetTime = Math.max(0, this.currentTime - seconds);
+      const targetTime = Math.max(0, this.playbackState.currentTime - seconds);
       // 调用实际的PlaybackService快退 | Call actual PlaybackService to rewind
       const result = await this.playbackService.seek(targetTime);
       
@@ -500,29 +576,29 @@ struct PlaybackPage {
    */
   private async loadSubtitles(): Promise<void> {
     try {
-      if (this.mediaInfo) {
-        this.isSearchingSubtitles = true;
-        Logger.info(this.TAG, `Searching subtitles for: ${this.mediaInfo.title}`);
+      if (this.mediaState.info) {
+        this.subtitleState.isSearching = true;
+        Logger.info(this.TAG, `Searching subtitles for: ${this.mediaState.info.title}`);
         
         // 生成缓存键 | Generate cache key
-        const cacheKey = `subtitles_${this.mediaInfo.id}_${this.mediaInfo.title}`;
+        const cacheKey = `subtitles_${this.mediaState.info.id}_${this.mediaState.info.title}`;
         
         // 尝试从缓存获取 | Try to get from cache
         const cachedTracks = await this.cacheService.get<SubtitleTrack[]>(cacheKey);
         
         if (cachedTracks && cachedTracks.length > 0) {
-          this.subtitleTracks = cachedTracks;
-          this.subtitleLanguages = this.subtitleService.getSupportedLanguages();
+          this.subtitleState.tracks = cachedTracks;
+          this.subtitleState.languages = this.subtitleService.getSupportedLanguages();
           
-          Logger.info(this.TAG, `Found ${this.subtitleTracks.length} subtitle tracks from cache`);
-          this.isSearchingSubtitles = false;
+          Logger.info(this.TAG, `Found ${this.subtitleState.tracks.length} subtitle tracks from cache`);
+          this.subtitleState.isSearching = false;
           return;
         }
         
         // 搜索字幕 | Search subtitles
         const result = await this.subtitleService.searchSubtitles({
-          title: this.mediaInfo.title,
-          year: this.mediaInfo.year,
+          title: this.mediaState.info.title,
+          year: this.mediaState.info.year,
           languages: ['zh', 'en']
         });
         
@@ -533,18 +609,18 @@ struct PlaybackPage {
             allTracks.push(...tracks);
           });
           
-          this.subtitleTracks = allTracks;
-          this.subtitleLanguages = this.subtitleService.getSupportedLanguages();
+          this.subtitleState.tracks = allTracks;
+          this.subtitleState.languages = this.subtitleService.getSupportedLanguages();
           
           // 缓存结果 | Cache result
-          await this.cacheService.set(cacheKey, this.subtitleTracks, {
+          await this.cacheService.set(cacheKey, this.subtitleState.tracks, {
             expiry: 604800000, // 7天缓存 7 days cache
             priority: CachePriority.NORMAL,
             tags: ['subtitles', 'media'],
             source: 'SubtitleService'
           });
           
-          Logger.info(this.TAG, `Found ${this.subtitleTracks.length} subtitle tracks from service`);
+          Logger.info(this.TAG, `Found ${this.subtitleState.tracks.length} subtitle tracks from service`);
         } else {
           Logger.warn(this.TAG, `Failed to search subtitles: ${result.message}`);
         }
@@ -552,7 +628,7 @@ struct PlaybackPage {
     } catch (error) {
       Logger.error(this.TAG, `Failed to load subtitles: ${error}`);
     } finally {
-      this.isSearchingSubtitles = false;
+      this.subtitleState.isSearching = false;
     }
   }
   
@@ -561,7 +637,7 @@ struct PlaybackPage {
    */
   private async handleSubtitleSelect(track: SubtitleTrack): Promise<void> {
     try {
-      this.selectedSubtitle = track;
+      this.subtitleState.selectedTrack = track;
       Logger.info(this.TAG, `Selected subtitle: ${track.name}`);
       
       // 如果是外部字幕，需要下载 | If external subtitle, need to download
@@ -582,7 +658,9 @@ struct PlaybackPage {
       }
       
       // 添加到历史记录 | Add to history
-      await this.subtitleService.addToHistory(this.mediaInfo.id, track);
+      if (this.mediaState.info) {
+        await this.subtitleService.addToHistory(this.mediaState.info.id, track);
+      }
     } catch (error) {
       Logger.error(this.TAG, `Failed to select subtitle: ${error}`);
     }
@@ -606,13 +684,13 @@ struct PlaybackPage {
    */
   private async handleOtherLineSearch(): Promise<void> {
     try {
-      if (this.mediaInfo) {
+      if (this.mediaState.info) {
         // 调用实际的SearchService搜索其他线路 | Call actual SearchService to search other lines
-        const result = await this.searchService.searchOtherSources(this.mediaInfo.title);
+        const result = await this.searchService.searchOtherSources(this.mediaState.info.title);
         
         if (result.isSuccess() && result.data && result.data.length > 0) {
           // 这里可以显示其他线路的搜索结果 | Can show other line search results here
-          Logger.info(this.TAG, `Found ${result.data.length} other sources for ${this.mediaInfo.title}`);
+          Logger.info(this.TAG, `Found ${result.data.length} other sources for ${this.mediaState.info.title}`);
         }
       }
     } catch (error) {
@@ -649,17 +727,17 @@ struct PlaybackPage {
   private async handleSkipOpening(): Promise<void> {
     try {
       // 记录当前时间作为跳过片头时间点 | Record current time as skip opening time
-      this.skipOpeningTime = Math.floor(this.currentTime);
-      this.isSkipOpeningEnabled = true;
+      this.skipState.skipOpeningTime = Math.floor(this.playbackState.currentTime);
+      this.skipState.isSkipOpeningEnabled = true;
       
       // 保存到缓存 | Save to cache
-      if (this.mediaInfo) {
-        const cacheKey = `skip_settings_${this.mediaInfo.id}`;
+      if (this.mediaState.info) {
+        const cacheKey = `skip_settings_${this.mediaState.info.id}`;
         await this.cacheService.set(cacheKey, {
-          skipOpeningTime: this.skipOpeningTime,
-          skipEndingTime: this.skipEndingTime,
-          isSkipOpeningEnabled: this.isSkipOpeningEnabled,
-          isSkipEndingEnabled: this.isSkipEndingEnabled
+          skipOpeningTime: this.skipState.skipOpeningTime,
+          skipEndingTime: this.skipState.skipEndingTime,
+          isSkipOpeningEnabled: this.skipState.isSkipOpeningEnabled,
+          isSkipEndingEnabled: this.skipState.isSkipEndingEnabled
         }, {
           expiry: 2592000000, // 30天缓存 | 30 days cache
           priority: CachePriority.HIGH,
@@ -668,8 +746,8 @@ struct PlaybackPage {
       }
       
       // 立即跳转到当前时间 | Jump to current time immediately
-      await this.playbackService.seek(this.currentTime);
-      Logger.info(this.TAG, `Skip opening time recorded: ${this.skipOpeningTime}s`);
+      await this.playbackService.seek(this.playbackState.currentTime);
+      Logger.info(this.TAG, `Skip opening time recorded: ${this.skipState.skipOpeningTime}s`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle skip opening: ${error}`);
     }
@@ -681,18 +759,18 @@ struct PlaybackPage {
   private async handleSkipEnding(): Promise<void> {
     try {
       // 计算剩余时间作为跳过片尾时间点 | Calculate remaining time as skip ending time
-      const remainingTime = Math.floor(this.duration - this.currentTime);
-      this.skipEndingTime = remainingTime;
-      this.isSkipEndingEnabled = true;
+      const remainingTime = Math.floor(this.playbackState.duration - this.playbackState.currentTime);
+      this.skipState.skipEndingTime = remainingTime;
+      this.skipState.isSkipEndingEnabled = true;
       
       // 保存到缓存 | Save to cache
-      if (this.mediaInfo) {
-        const cacheKey = `skip_settings_${this.mediaInfo.id}`;
+      if (this.mediaState.info) {
+        const cacheKey = `skip_settings_${this.mediaState.info.id}`;
         await this.cacheService.set(cacheKey, {
-          skipOpeningTime: this.skipOpeningTime,
-          skipEndingTime: this.skipEndingTime,
-          isSkipOpeningEnabled: this.isSkipOpeningEnabled,
-          isSkipEndingEnabled: this.isSkipEndingEnabled
+          skipOpeningTime: this.skipState.skipOpeningTime,
+          skipEndingTime: this.skipState.skipEndingTime,
+          isSkipOpeningEnabled: this.skipState.isSkipOpeningEnabled,
+          isSkipEndingEnabled: this.skipState.isSkipEndingEnabled
         }, {
           expiry: 2592000000, // 30天缓存 | 30 days cache
           priority: CachePriority.HIGH,
@@ -700,7 +778,7 @@ struct PlaybackPage {
         });
       }
       
-      Logger.info(this.TAG, `Skip ending time recorded: ${this.skipEndingTime}s`);
+      Logger.info(this.TAG, `Skip ending time recorded: ${this.skipState.skipEndingTime}s`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle skip ending: ${error}`);
     }
@@ -711,34 +789,34 @@ struct PlaybackPage {
    */
   private async checkAutoSkip(): Promise<void> {
     try {
-      if (!this.mediaInfo) return;
+      if (!this.mediaState.info) return;
       
       // 尝试从缓存加载跳过设置 | Try to load skip settings from cache
-      const cacheKey = `skip_settings_${this.mediaInfo.id}`;
+      const cacheKey = `skip_settings_${this.mediaState.info.id}`;
       const cachedSettings = await this.cacheService.get<{ skipOpeningTime?: number; skipEndingTime?: number; isSkipOpeningEnabled?: boolean; isSkipEndingEnabled?: boolean }>(cacheKey);
       
       if (cachedSettings) {
-        this.skipOpeningTime = cachedSettings.skipOpeningTime || 90;
-        this.skipEndingTime = cachedSettings.skipEndingTime || 300;
-        this.isSkipOpeningEnabled = cachedSettings.isSkipOpeningEnabled !== false;
-        this.isSkipEndingEnabled = cachedSettings.isSkipEndingEnabled !== false;
+        this.skipState.skipOpeningTime = cachedSettings.skipOpeningTime || 90;
+        this.skipState.skipEndingTime = cachedSettings.skipEndingTime || 300;
+        this.skipState.isSkipOpeningEnabled = cachedSettings.isSkipOpeningEnabled !== false;
+        this.skipState.isSkipEndingEnabled = cachedSettings.isSkipEndingEnabled !== false;
         Logger.info(this.TAG, `Loaded skip settings from cache`);
       }
       
       // 检查是否需要跳过片头 | Check if need to skip opening
-      if (this.isSkipOpeningEnabled && this.currentTime < 5) {
-        await this.playbackService.seek(this.skipOpeningTime);
-        Logger.info(this.TAG, `Auto skipped opening to ${this.skipOpeningTime}s`);
+      if (this.skipState.isSkipOpeningEnabled && this.playbackState.currentTime < 5) {
+        await this.playbackService.seek(this.skipState.skipOpeningTime);
+        Logger.info(this.TAG, `Auto skipped opening to ${this.skipState.skipOpeningTime}s`);
       }
       
       // 检查是否需要跳过片尾 | Check if need to skip ending
-      if (this.isSkipEndingEnabled && this.duration > 0) {
-        const remainingTime = this.duration - this.currentTime;
-        if (remainingTime <= this.skipEndingTime + 2) {
+      if (this.skipState.isSkipEndingEnabled && this.playbackState.duration > 0) {
+        const remainingTime = this.playbackState.duration - this.playbackState.currentTime;
+        if (remainingTime <= this.skipState.skipEndingTime + 2) {
           // 跳转到下一集 | Jump to next episode
-          const currentIndex = this.episodes.findIndex(ep => ep.current);
-          if (currentIndex < this.episodes.length - 1) {
-            await this.handleEpisodeSelect(this.episodes[currentIndex + 1]);
+          const currentIndex = this.mediaState.episodes.findIndex(ep => ep.current);
+          if (currentIndex < this.mediaState.episodes.length - 1) {
+            await this.handleEpisodeSelect(this.mediaState.episodes[currentIndex + 1]);
           }
           Logger.info(this.TAG, `Auto skipped ending, jumping to next episode`);
         }
@@ -751,7 +829,7 @@ struct PlaybackPage {
   // 渲染跳过选项 | Render skip options
   @Builder
   renderSkipOptions() {
-    if (this.showSkipOptions) {
+    if (this.uiState.showSkipOptions) {
       Column() {
         Text('跳过设置')
           .fontSize(18)
@@ -769,17 +847,17 @@ struct PlaybackPage {
           
           Row() {
             Button() {
-              Text(this.isSkipOpeningEnabled ? '已开启' : '未开启')
+              Text(this.skipState.isSkipOpeningEnabled ? '已开启' : '未开启')
                 .fontSize(14)
-                .fontColor(this.isSkipOpeningEnabled ? '#4CAF50' : '#9E9E9E')
+                .fontColor(this.skipState.isSkipOpeningEnabled ? '#4CAF50' : '#9E9E9E')
                 .fontWeight(500)
             }
             .width(120)
             .height(40)
-            .backgroundColor(this.isSkipOpeningEnabled ? '#E8F5E9' : '#F5F5F5')
+            .backgroundColor(this.skipState.isSkipOpeningEnabled ? '#E8F5E9' : '#F5F5F5')
             .borderRadius(8)
             .margin({ left: 10, right: 15 })
-            .onClick(() => this.isSkipOpeningEnabled = !this.isSkipOpeningEnabled)
+            .onClick(() => this.skipState.isSkipOpeningEnabled = !this.skipState.isSkipOpeningEnabled)
             .focusable(true)
             .onFocus(() => {
               Logger.info(this.TAG, 'Skip opening toggle focused');
@@ -802,7 +880,7 @@ struct PlaybackPage {
             })
           }
           
-          Text(`当前跳过时间: ${this.formatTime(this.skipOpeningTime)}`)
+          Text(`当前跳过时间: ${this.formatTime(this.skipState.skipOpeningTime)}`)
             .fontSize(14)
             .fontColor('#666666')
             .margin({ top: 8, left: 10 })
@@ -820,17 +898,17 @@ struct PlaybackPage {
           
           Row() {
             Button() {
-              Text(this.isSkipEndingEnabled ? '已开启' : '未开启')
+              Text(this.skipState.isSkipEndingEnabled ? '已开启' : '未开启')
                 .fontSize(14)
-                .fontColor(this.isSkipEndingEnabled ? '#4CAF50' : '#9E9E9E')
+                .fontColor(this.skipState.isSkipEndingEnabled ? '#4CAF50' : '#9E9E9E')
                 .fontWeight(500)
             }
             .width(120)
             .height(40)
-            .backgroundColor(this.isSkipEndingEnabled ? '#E8F5E9' : '#F5F5F5')
+            .backgroundColor(this.skipState.isSkipEndingEnabled ? '#E8F5E9' : '#F5F5F5')
             .borderRadius(8)
             .margin({ left: 10, right: 15 })
-            .onClick(() => this.isSkipEndingEnabled = !this.isSkipEndingEnabled)
+            .onClick(() => this.skipState.isSkipEndingEnabled = !this.skipState.isSkipEndingEnabled)
             .focusable(true)
             .onFocus(() => {
               Logger.info(this.TAG, 'Skip ending toggle focused');
@@ -853,7 +931,7 @@ struct PlaybackPage {
             })
           }
           
-          Text(`当前跳过时间: ${this.formatTime(this.skipEndingTime)}`)
+          Text(`当前跳过时间: ${this.formatTime(this.skipState.skipEndingTime)}`)
             .fontSize(14)
             .fontColor('#666666')
             .margin({ top: 8, left: 10 })
@@ -889,33 +967,33 @@ struct PlaybackPage {
   
   // 处理控制条显示 | Handle control bar show
   private showControlsWithTimer(): void {
-    this.showControls = true;
+    this.uiState.showControls = true;
     this.resetControlHideTimer();
   }
   
   // 重置控制条隐藏计时器 | Reset control bar hide timer
   private resetControlHideTimer(): void {
     // 清除之前的计时器 | Clear previous timer
-    if (this.controlHideTimer !== null) {
-      clearTimeout(this.controlHideTimer);
+    if (this.uiState.controlHideTimer !== null) {
+      this.timerManager.clearTimeout(this.uiState.controlHideTimer);
     }
-    
+
     // 设置新的计时器，5秒后隐藏控制条 | Set new timer to hide controls after 5 seconds
-    this.controlHideTimer = setTimeout(() => {
-      this.showControls = false;
-    }, 5000);
+    this.uiState.controlHideTimer = this.timerManager.setTimeout(() => {
+      this.uiState.showControls = false;
+    }, 5000, 'PlaybackPage.controlHide');
   }
   
   // 处理键盘事件 | Handle keyboard events
   private onKeyEvent(e: KeyEvent): boolean {
     if (e.type === KeyEvent.KeyType.DOWN) {
       // 重置控制条隐藏计时器 | Reset control bar hide timer on any key press
-      if (this.showControls) {
+      if (this.uiState.showControls) {
         this.resetControlHideTimer();
       }
       
       // 直播模式处理 | Live mode handling
-      if (this.isLiveMode) {
+      if (this.liveState.isLiveMode) {
         switch (e.keyCode) {
           case KeyEvent.KeyCode.KEY_ENTER:
           case KeyEvent.KeyCode.KEY_SPACE:
@@ -936,11 +1014,11 @@ struct PlaybackPage {
             return true;
           case KeyEvent.KeyCode.KEY_LEFT:
             // 显示频道列表 | Show channel list
-            this.showLiveChannelList = true;
+            this.liveState.showChannelList = true;
             return true;
           case KeyEvent.KeyCode.KEY_RIGHT:
             // 显示直播设置 | Show live settings
-            this.showLiveSettings = true;
+            this.liveState.showSettings = true;
             return true;
           default:
             return false;
@@ -959,13 +1037,13 @@ struct PlaybackPage {
           return true;
         case KeyEvent.KeyCode.KEY_UP:
           // 处理上方向键 | Handle up arrow
-          if (this.showControls) {
+          if (this.uiState.showControls) {
             this.focusManager.moveUp();
           }
           return true;
         case KeyEvent.KeyCode.KEY_DOWN:
           // 处理下方向键 | Handle down arrow
-          if (!this.showControls) {
+          if (!this.uiState.showControls) {
             // 显示控制条 | Show controls
             this.showControlsWithTimer();
           } else {
@@ -975,7 +1053,7 @@ struct PlaybackPage {
           return true;
         case KeyEvent.KeyCode.KEY_LEFT:
           // 处理左方向键 | Handle left arrow
-          if (!this.showControls) {
+          if (!this.uiState.showControls) {
             // 快退10秒 | Rewind 10 seconds
             this.handleRewind(10);
           } else {
@@ -985,7 +1063,7 @@ struct PlaybackPage {
           return true;
         case KeyEvent.KeyCode.KEY_RIGHT:
           // 处理右方向键 | Handle right arrow
-          if (!this.showControls) {
+          if (!this.uiState.showControls) {
             // 快进30秒 | Fast forward 30 seconds
             this.handleFastForward(30);
           } else {
@@ -1024,13 +1102,13 @@ struct PlaybackPage {
         switch (e.direction) {
           case GestureEvent.Direction.LEFT:
             // 向左滑动 | Swipe left
-            if (!this.showControls) {
+            if (!this.uiState.showControls) {
               this.handleFastForward(30);
             }
             break;
           case GestureEvent.Direction.RIGHT:
             // 向右滑动 | Swipe right
-            if (!this.showControls) {
+            if (!this.uiState.showControls) {
               this.handleRewind(10);
             }
             break;
@@ -1039,7 +1117,7 @@ struct PlaybackPage {
             break;
           case GestureEvent.Direction.DOWN:
             // 向下滑动 | Swipe down
-            if (!this.showControls) {
+            if (!this.uiState.showControls) {
               this.showControlsWithTimer();
             }
             break;
@@ -1047,7 +1125,7 @@ struct PlaybackPage {
         break;
       case GestureEvent.GestureType.TAP:
         // 处理点击手势 | Handle tap gesture
-        if (!this.showControls) {
+        if (!this.uiState.showControls) {
           this.showControlsWithTimer();
         }
         break;
@@ -1070,7 +1148,7 @@ struct PlaybackPage {
   // 渲染直播频道列表 | Render live channel list
   @Builder
   renderLiveChannelList() {
-    if (this.showLiveChannelList && this.isLiveMode) {
+    if (this.liveState.showChannelList && this.liveState.isLiveMode) {
       Column() {
         Text('频道列表')
           .fontSize(18)
@@ -1093,7 +1171,7 @@ struct PlaybackPage {
   // 渲染直播设置 | Render live settings
   @Builder
   renderLiveSettings() {
-    if (this.showLiveSettings && this.isLiveMode) {
+    if (this.liveState.showSettings && this.liveState.isLiveMode) {
       Column() {
         Text('直播设置')
           .fontSize(18)
@@ -1188,7 +1266,7 @@ struct PlaybackPage {
   @Builder
   renderVideoPlayer() {
     Column() {
-      if (this.isLoading) {
+      if (this.playbackState.isLoading) {
             Column() {
               // 加载动画 | Loading animation
               Column() {
@@ -1218,25 +1296,25 @@ struct PlaybackPage {
             }
             .justifyContent(FlexAlign.Center)
             .width('100%')
-            .height(this.videoPlayerHeight)
+            .height(this.uiState.videoPlayerHeight)
             .backgroundColor('rgba(0, 0, 0, 0.9)')
             .touchEventListener((e) => this.onTouchEvent(e))
             .gestureEventListener((e) => this.onGestureEvent(e))
-          } else if (this.isError) {
+          } else if (this.playbackState.isError) {
             Column() {
               Text('播放失败')
                 .fontSize(28)
                 .fontColor('#FF5722')
                 .fontWeight(700)
                 .margin({ top: 20 })
-              Text(this.errorMessage)
+              Text(this.playbackState.errorMessage)
                 .fontSize(18)
                 .fontColor('#FFFFFF')
                 .margin({ top: 12, left: 40, right: 40 })
                 .textAlign(TextAlign.Center)
               Button('重试')
                 .onClick(() => {
-                  this.isError = false;
+                  this.playbackState.isError = false;
                   this.loadMediaInfo();
                 })
                 .backgroundColor('#4CAF50')
@@ -1270,7 +1348,7 @@ struct PlaybackPage {
             }
             .justifyContent(FlexAlign.Center)
             .width('100%')
-            .height(this.videoPlayerHeight)
+            .height(this.uiState.videoPlayerHeight)
             .backgroundColor('rgba(0, 0, 0, 0.9)')
             .touchEventListener((e) => this.onTouchEvent(e))
             .gestureEventListener((e) => this.onGestureEvent(e))
@@ -1284,217 +1362,147 @@ struct PlaybackPage {
                 .fontColor('#FFFFFF')
             }
             .width('100%')
-            .height(this.videoPlayerHeight - 80)
+            .height(this.uiState.videoPlayerHeight - 80)
             .backgroundColor('#000000')
             .justifyContent(FlexAlign.Center)
             .touchEventListener((e) => this.onTouchEvent(e))
             .gestureEventListener((e) => this.onGestureEvent(e))
             
-
+            // 播放控制组件 | Playback controls component
+            PlaybackControls({
+              isPlaying: this.playbackState.isPlaying,
+              currentTime: this.playbackState.currentTime,
+              duration: this.playbackState.duration,
+              progress: this.playbackState.progress,
+              showControls: this.uiState.showControls,
+              selectedSubtitle: this.subtitleState.selectedTrack,
+              showSkipOptions: this.uiState.showSkipOptions,
+              showSubtitleOptions: this.uiState.showSubtitleOptions,
+              showAudioTrackOptions: this.uiState.showAudioTrackOptions,
+              audioTracks: this.audioState.tracks,
+              selectedAudioTrack: this.audioState.selectedTrack,
+              videoPlayerHeight: this.uiState.videoPlayerHeight,
+              onPlayPause: () => this.handlePlayPause(),
+              onFastForward: (seconds: number) => this.handleFastForward(seconds),
+              onRewind: (seconds: number) => this.handleRewind(seconds),
+              onShowSkipOptions: () => this.uiState.showSkipOptions = !this.uiState.showSkipOptions,
+              onShowSubtitleOptions: () => this.uiState.showSubtitleOptions = !this.uiState.showSubtitleOptions,
+              onShowAudioTrackOptions: () => this.uiState.showAudioTrackOptions = !this.uiState.showAudioTrackOptions,
+              onKeyEvent: (e: KeyEvent) => this.onKeyEvent(e)
+            })
           }
           
-          // 播放控制条 | Playback control bar
-          if (this.showControls) {
-            Column() {
-              // 进度条 | Progress bar
-              Column() {
-                Row() {
-                  Text(this.formatTime(this.currentTime))
-                    .fontSize(14)
-                    .fontColor('#666666')
-                    .margin({ right: 10 })
-                  
-                  // 进度条轨道 | Progress bar track
-                  Column() {
-                    Row() {
-                      Column()
-                        .width(`${this.progress}%`)
-                        .height('100%')
-                        .backgroundColor('#4CAF50')
-                        .borderRadius(4)
-                      Column()
-                        .width(`${100 - this.progress}%`)
-                        .height('100%')
-                        .backgroundColor('#E0E0E0')
-                        .borderRadius(4)
-                    }
-                    .width('100%')
-                    .height(8)
-                    .borderRadius(4)
-                  }
-                  .flexGrow(1)
-                  .margin({ right: 10 })
-                  
-                  Text(this.formatTime(this.duration))
-                    .fontSize(14)
-                    .fontColor('#666666')
-                }
-                .width('100%')
-                .padding({ left: 30, right: 30, top: 10 })
-              }
-              
-              // 控制按钮 | Control buttons
-              Row() {
-                // 播放/暂停按钮 | Play/pause button
-                Button() {
-                  Text(this.isPlaying ? '暂停' : '播放')
-                    .fontSize(18)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(120)
-                .height(60)
-                .backgroundColor('#4CAF50')
-                .borderRadius(12)
-                .margin({ left: 30 })
-                .onClick(() => this.handlePlayPause())
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Play/pause button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-                // 快退按钮 | Rewind button
-                Button() {
-                  Text('快退10s')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(500)
-                }
-                .width(140)
-                .height(60)
-                .backgroundColor('#2196F3')
-                .borderRadius(12)
-                .margin({ left: 20 })
-                .onClick(() => this.handleRewind(10))
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Rewind button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-                // 快进按钮 | Fast forward button
-                Button() {
-                  Text('快进30s')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(500)
-                }
-                .width(140)
-                .height(60)
-                .backgroundColor('#2196F3')
-                .borderRadius(12)
-                .margin({ left: 20 })
-                .onClick(() => this.handleFastForward(30))
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Fast forward button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-                // 中间空白区域 | Middle space
-                Column()
-                  .flexGrow(1)
-                
-                // 跳过按钮 | Skip button
-                Button() {
-                  Text('跳过')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(120)
-                .height(60)
-                .backgroundColor('#9C27B0')
-                .borderRadius(12)
-                .margin({ right: 20 })
-                .onClick(() => this.showSkipOptions = !this.showSkipOptions)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Skip button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-
-                
-                // 字幕按钮 | Subtitle button
-                Button() {
-                  Text(this.selectedSubtitle ? '字幕' : '无字幕')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(140)
-                .height(60)
-                .backgroundColor(this.selectedSubtitle ? '#4CAF50' : '#9E9E9E')
-                .borderRadius(12)
-                .margin({ right: 20 })
-                .onClick(() => this.showSubtitleOptions = !this.showSubtitleOptions)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Subtitle button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-                // 音轨按钮 | Audio track button
-                Button() {
-                  Text('音轨')
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(120)
-                .height(60)
-                .backgroundColor('#FF9800')
-                .borderRadius(12)
-                .margin({ right: 20 })
-                .onClick(() => this.showAudioTrackOptions = !this.showAudioTrackOptions)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Audio track button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-                
-                // 播放速度 | Playback speed
-                Button() {
-                  Text(`${this.playbackSpeed}x`)
-                    .fontSize(16)
-                    .fontColor('#FFFFFF')
-                    .fontWeight(600)
-                }
-                .width(120)
-                .height(60)
-                .backgroundColor('#FF5722')
-                .borderRadius(12)
-                .margin({ right: 30 })
-                .onClick(() => this.showMoreOptions = !this.showMoreOptions)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Speed button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-              }
-              .width('100%')
-              .height(70)
-              .alignItems(VerticalAlign.Center)
+          // 跳过设置组件 | Skip settings component
+          SkipSettings({
+            showSkipOptions: this.uiState.showSkipOptions,
+            isSkipOpeningEnabled: this.skipState.isSkipOpeningEnabled,
+            isSkipEndingEnabled: this.skipState.isSkipEndingEnabled,
+            skipOpeningTime: this.skipState.skipOpeningTime,
+            skipEndingTime: this.skipState.skipEndingTime,
+            onToggleSkipOpening: () => this.skipState.isSkipOpeningEnabled = !this.skipState.isSkipOpeningEnabled,
+            onToggleSkipEnding: () => this.skipState.isSkipEndingEnabled = !this.skipState.isSkipEndingEnabled,
+            onSetSkipOpeningTime: () => this.handleSkipOpening(),
+            onSetSkipEndingTime: () => this.handleSkipEnding()
+          })
+        }
+      }
+    }
+  }
+  
+  // 渲染剧集列表 | Render episode list
+  @Builder
+  renderEpisodeList() {
+    EpisodeList({
+      episodes: this.mediaState.episodes,
+      selectedEpisode: this.mediaState.selectedEpisode,
+      showEpisodeList: this.uiState.showEpisodeList,
+      onEpisodeSelect: (episode: Episode) => this.handleEpisodeSelect(episode)
+    })
+  }
+  
+  // 渲染媒体信息 | Render media info
+  @Builder
+  renderMediaInfo() {
+    if (this.mediaState.info) {
+      Column() {
+        Row() {
+          // 封面 | Cover
+          Image(this.mediaState.info.cover || 'https://via.placeholder.com/200x300?text=No+Image')
+            .width(this.uiState.isLandscape ? 200 : 150)
+            .height(this.uiState.isLandscape ? 300 : 200)
+            .objectFit(ImageFit.Cover)
+            .borderRadius(12)
+            .backgroundColor('#F5F5F5')
+            .margin({ left: this.uiState.isLandscape ? 40 : 30, right: 25 })
+          
+          // 信息 | Info
+          Column() {
+            Text(this.mediaState.info.title)
+              .fontSize(this.uiState.isLandscape ? 28 : 24)
+              .fontWeight(700)
+              .fontColor('#333333')
+              .margin({ bottom: 15 })
+            
+            Text(this.mediaState.info.description || '暂无简介')
+              .fontSize(16)
+              .fontColor('#666666')
+              .maxLines(this.uiState.isLandscape ? 4 : 3)
+              .margin({ bottom: 15 })
+            
+            Row() {
+              Text(`类型: ${this.mediaState.info.type || '未知'}`)
+                .fontSize(16)
+                .fontColor('#666666')
+                .margin({ right: 25 })
+              Text(`评分: ${this.mediaState.info.rating || '暂无'}`)
+                .fontSize(16)
+                .fontColor('#FF9800')
+                .fontWeight(500)
             }
           }
-          .width('100%')
-          .height(140)
-          .backgroundColor('rgba(255, 255, 255, 0.95)')
-          .borderTopWidth(1)
-          .borderTopColor('#E0E0E0')
-          .animation({
-            duration: 300,
-            curve: Curve.EaseOut
-          })
+        }
+      }
+    }
+  }
+  
+  // 渲染解析线路选择 | Render parse line selection
+  @Builder
+  renderParseLineSelection() {
+    if (this.mediaState.info) {
+      Column() {
+        Row() {
+          Text('解析线路:')
+            .fontSize(18)
+            .fontColor('#333333')
+            .fontWeight(500)
+            .margin({ right: 15, top: 20 })
+          
+          Scroll(this.scroller) {
+            Row() {
+              ForEach(this.mediaState.parseLines, (line: ParseLine) => {
+                Button() {
+                  Text(line.name)
+                    .fontSize(14)
+                    .fontColor(line.selected ? '#FFFFFF' : '#333333')
+                    .fontWeight(500)
+                }
+                .width(100)
+                .height(40)
+                .backgroundColor(line.selected ? '#2196F3' : '#F5F5F5')
+                .borderRadius(8)
+                .margin({ right: 10 })
+                .onClick(() => this.handleLineSelect(line))
+                .focusable(true)
+                .focusStyle(this.focusStyle)
+                .onFocus(() => {
+                  Logger.info(this.TAG, `Parse line ${line.name} focused`);
+                })
+                .keyEventListener((e) => this.onKeyEvent(e))
+              })
+            }
+          }
+          .width('70%')
+          .height(60)
         }
       }
     }

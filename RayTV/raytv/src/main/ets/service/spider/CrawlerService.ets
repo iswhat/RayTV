@@ -520,7 +520,7 @@ export class CrawlerService {
     
     // 记录性能统计 Record performance statistics
     const startTime = Date.now();
-    let result: T;
+    let result: T = this.getDefaultEmptyData<T>(methodName);
     
     try {
       result = await this.callSpiderMethod<T>(spider, methodName, args, options);
@@ -544,7 +544,7 @@ export class CrawlerService {
   ): Promise<T> {
     try {
       // 使用类型守卫检查方法是否存在 Use type guard to check if method exists
-      let result: T;
+      let result: T = this.getDefaultEmptyData<T>(String(methodName));
       
       // 根据方法名调用对应的方法 Call corresponding method based on method name
       switch (methodName) {

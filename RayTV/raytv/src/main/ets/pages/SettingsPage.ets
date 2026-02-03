@@ -1,5 +1,5 @@
 import { AppNavigator } from '../navigation/AppNavigator';
-// Logger import removed as AnalyticsService was deleted
+import Logger from '../common/util/Logger';
 import ConfigService from '../service/config/ConfigService';
 import SettingService from '../service/config/SettingService';
 import AdBlockManager from '../service/adblock/AdBlockManager';
@@ -109,7 +109,7 @@ struct SettingsPage {
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
-    console.info('SettingsPage about to appear');
+    Logger.info('SettingsPage', 'About to appear');
     
     // 服务实例会在需要时通过getInstance()获取 | Service instances will be obtained via getInstance() when needed
     

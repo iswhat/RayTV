@@ -94,6 +94,71 @@ interface SearchParamsRecord {
   sortOrder?: string;
 }
 
+// 定义热门搜索参数接口 | Define hot search params interface
+interface HotSearchParams {
+  limit: number;
+}
+
+// 定义搜索建议参数接口 | Define search suggestions params interface
+interface SearchSuggestionsParams {
+  keyword: string;
+  limit: number;
+}
+
+// 定义电影评分接口 | Define movie rating interface
+interface MovieRating {
+  rating: number;
+  votes: number;
+  rating1: number;
+  rating2: number;
+  rating3: number;
+}
+
+// 定义分类接口 | Define category interface
+interface Category {
+  id: number;
+  name: string;
+  icon?: string;
+  count?: number;
+}
+
+// 定义直播EPG接口 | Define live EPG interface
+interface LiveEpg {
+  channelId: string;
+  programs: LiveProgram[];
+}
+
+// 定义直播节目接口 | Define live program interface
+interface LiveProgram {
+  id: string;
+  title: string;
+  startTime: number;
+  endTime: number;
+  description?: string;
+}
+
+// 定义更新检查接口 | Define update check interface
+interface UpdateInfo {
+  version: string;
+  url: string;
+  size: number;
+  changelog: string;
+  force: boolean;
+}
+
+// 定义应用配置接口 | Define app config interface
+interface AppConfigInfo {
+  version: string;
+  apiUrl: string;
+  supportEmail: string;
+  features: {
+    live: boolean;
+    vod: boolean;
+    search: boolean;
+    download: boolean;
+  };
+}
+
 // 定义缓存记录接口 - 去除引用别名 | Define cache record interface - remove reference alias
 interface CacheRecord {
   data: string;
@@ -210,7 +275,7 @@ export default class DefaultNetworkRepository implements NetworkRepository {
       const testUrl = `${this.config.baseUrl}/api/test`;
       // 使用http模块直接发送请求，避免NetworkUtil的类型问题
       const httpRequest = http.createHttp();
-      let responseStatus: number;
+      let responseStatus: number = 0;
 
       try {
         const options: HttpRequestOptions = {
@@ -485,9 +550,10 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async getHotSearchKeywords(limit: number = 20): Promise<NetworkResult<string[]>> {
     try {
       const requestUrl = '/api/search/hot';
-      // 创建params对象，避免对象字面量类型问题
-      const params: Record<string, number> = {};
-      params.limit = limit;
+      // 创建params对象，使用具体接口类型
+      const params: HotSearchParams = {
+        limit: limit
+      };
       const cacheKey = this.generateCacheKey(requestUrl, 'GET', params);
       
       // 尝试从缓存获取 | Try to get from cache
@@ -553,10 +619,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
   async getSearchSuggestions(keyword: string, limit: number = 10): Promise<NetworkResult<string[]>> {
     try {
       const requestUrl = '/api/search/suggestions';
-      // 创建params对象，避免对象字面量类型问题
-      const params: Record<string, string | number> = {};
-      params.keyword = keyword;
-      params.limit = limit;
+      // 创建params对象，使用具体接口类型
+      const params: SearchSuggestionsParams = {
+        keyword: keyword,
+        limit: limit
+      };
       
       const requestConfig = this.createRequestConfig(requestUrl, http.RequestMethod.GET, undefined, params);
       // 使用http模块直接发送请求，避免NetworkUtil的类型问题

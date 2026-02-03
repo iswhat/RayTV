@@ -2,6 +2,8 @@
 import StorageUtil from '../../common/util/StorageUtil';
 import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import ConfigParser from './ConfigParser';
+import Logger from '../../common/util/Logger';
+import { handleError, ConfigError } from '../../common/util/AppError';
 
 // 导入类型和DTO | Import types and DTO
 import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
@@ -638,9 +640,10 @@ export default class ConfigService {
       await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
       
       return ApiResponse.success(this.fullConfig, '配置更新成功');
-    } catch (error: Error) {
+    } catch (error) {
       // 处理配置更新错误 | Handle config update error
-      console.error(TAG + ": 更新完整配置失败: " + error.message + " | Failed to update full config: " + error.message);
+      const appError = handleError(error, 'Failed to update full config');
+      Logger.error(TAG, appError.toString());
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
     }
   }
@@ -672,7 +675,7 @@ export default class ConfigService {
    */
   private async initializeConfig(): Promise<void> {
     try {
-      console.info(TAG + ': 正在初始化配置... | Initializing configuration...');
+      Logger.info(TAG, '正在初始化配置... | Initializing configuration...');
       
       // 1. 首先尝试加载完整配置 | 1. First try to load complete configuration
       await this.loadFullConfig();
@@ -704,9 +707,10 @@ export default class ConfigService {
       this.ensureDefaultConfig();
       
       this.isInitialized = true;
-      console.info(TAG + ': 配置初始化成功 | Configuration initialized successfully');
-    } catch (error: Error) {
-      console.error(TAG + ": 配置初始化失败: " + error.message + " | Failed to initialize configuration: " + error.message);
+      Logger.info(TAG, '配置初始化成功 | Configuration initialized successfully');
+    } catch (error) {
+      const appError = handleError(error, 'Failed to initialize configuration');
+      Logger.error(TAG, appError.toString());
       // 初始化失败时使用默认配置 | Use default config when initialization fails
       this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
       this.ensureDefaultConfig();
@@ -728,21 +732,22 @@ export default class ConfigService {
         if (storedConfig && typeof storedConfig === 'object') {
           // 合并存储的配置和默认配置 - 避免unknown类型转换 | Merge stored config and default config - avoid unknown type conversion
           this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig as ConfigUpdate);
-          console.info(TAG + ': 从存储加载完整配置成功 | Loaded full configuration from storage');
+          Logger.info(TAG, '从存储加载完整配置成功 | Loaded full configuration from storage');
         } else {
           // 使用默认配置 | Use default config
           this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
           await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
-          console.info(TAG + ': 使用默认完整配置 | Using default full configuration');
+          Logger.info(TAG, '使用默认完整配置 | Using default full configuration');
         }
       } else {
         // 使用默认配置 | Use default config
         this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
         await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
-        console.info(TAG + ': 使用默认完整配置 | Using default full configuration');
+        Logger.info(TAG, '使用默认完整配置 | Using default full configuration');
       }
-    } catch (error: Error) {
-      console.error(TAG + ": 加载完整配置失败: " + error.message + " | Failed to load full config: " + error.message);
+    } catch (error) {
+      const appError = handleError(error, 'Failed to load full config');
+      Logger.error(TAG, appError.toString());
       // 加载失败时使用默认配置 | Use default config when loading fails
       this.fullConfig = JSON.parse(JSON.stringify(DEFAULT_FULL_CONFIG));
     }
@@ -753,7 +758,7 @@ export default class ConfigService {
    */
   public async getConfig(key: ConfigKey): Promise<ApiResponse<ConfigValue>> {
     try {
-      console.debug(TAG + `: 正在获取配置项: ${key} | Getting config for key: ${key}`);
+      Logger.debug(TAG, `正在获取配置项: ${key} | Getting config for key: ${key}`);
       
       // 检查缓存 | Check cache
       if (this.configCache.has(key)) {
@@ -765,7 +770,8 @@ export default class ConfigService {
       const defaultValue = DEFAULT_CONFIG[key];
       return ApiResponse.success(defaultValue, `配置[${key}]不存在，返回默认值`);
     } catch (error) {
-      console.error(TAG + `: 获取配置项失败: ${key} | Failed to get config for key: ${key}`);
+      const appError = handleError(error, `Failed to get config for key: ${key}`);
+      Logger.error(TAG, appError.toString());
       // 发生错误时返回默认值 | Return default value when error occurs
       const defaultValue = DEFAULT_CONFIG[key];
       return ApiResponse.success(defaultValue, `获取配置失败，返回默认值`);
@@ -1044,8 +1050,9 @@ export default class ConfigService {
       }
       
       return ApiResponse.success(finalConfigSection, '配置更新成功');
-    } catch (error: Error) {
-      console.error(TAG, `更新部分配置失败: ${String(key)} | Failed to update partial config for key: ${String(key)}`, error.message);
+    } catch (error) {
+      const appError = handleError(error, `Failed to update partial config for key: ${String(key)}`);
+      Logger.error(TAG, appError.toString());
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
     }
   }
@@ -1097,7 +1104,7 @@ export default class ConfigService {
       }
       
       // 获取或创建配置项 | Get or create config item
-      let configItem: ConfigItem;
+      let configItem: ConfigItem = { key: key, value: value, type: typeof value, description: description, defaultValue: defaultValue, isEncrypted: isEncrypted, tags: tags, createdAt: Date.now(), updatedAt: Date.now() };
       
       if (this.configCache.has(key)) {
         // 更新现有配置 | Update existing config

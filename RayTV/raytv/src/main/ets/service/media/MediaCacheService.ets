@@ -3,6 +3,7 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../../service/config/ConfigService';
+import TimerManager from '../../common/util/TimerManager';
 import BusinessError from '@ohos.base';
 import { Context } from '@ohos.ability.featureAbility';
 
@@ -183,6 +184,7 @@ export default class MediaCacheService {
   private cacheListeners: Map<string, CacheListener[]> = new Map();
   private downloadListeners: Map<string, DownloadListener[]> = new Map();
   private cleanTimerId: number | null = null;
+  private timerManager: TimerManager = TimerManager.getInstance();
   private isInitialized: boolean = false;
   private cacheHitCount: number = 0;
   private cacheMissCount: number = 0;
@@ -263,9 +265,16 @@ export default class MediaCacheService {
    */
   private async ensureCacheDirectory(): Promise<void> {
     try {
-      // TODO: 使用文件API创建目录 TODO: Use file API to create directory
-      Logger.debug(TAG, `Ensuring cache directory exists: ${this.cacheDir}`);
-      // TODO: 实现目录创建逻辑 TODO: Implement directory creation logic
+      // 使用fs模块创建目录
+      const fs = await import('@ohos.file.fs');
+      try {
+        fs.access(this.cacheDir);
+        Logger.debug(TAG, `Cache directory already exists: ${this.cacheDir}`);
+      } catch (e) {
+        // 目录不存在，创建它
+        fs.mkdir(this.cacheDir, true);
+        Logger.info(TAG, `Created cache directory: ${this.cacheDir}`);
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to create cache directory: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -363,12 +372,26 @@ export default class MediaCacheService {
    */
   private async checkFileExists(filePath: string): Promise<boolean> {
     try {
-      // TODO: 使用文件API检查文件是否存在 Check if file exists using file API
-      Logger.debug(TAG, `Checking if file exists: ${filePath}`);
-      return false; // 临时返回false，实际需要实现 Temporarily returns false, needs implementation
+      const fs = await import('@ohos.file.fs');
+      fs.access(filePath);
+      return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to check file existence: ${error}`);
+      Logger.debug(TAG, `File does not exist: ${filePath}`);
       return false;
+    }
+  }
+
+  /**
+   * 获取文件实际大小 Get actual file size
+   */
+  private async getFileSize(filePath: string): Promise<number> {
+    try {
+      const fs = await import('@ohos.file.fs');
+      const stat = await fs.stat(filePath);
+      return stat.size || 0;
+    } catch (error) {
+      Logger.warn(TAG, `Failed to get file size: ${filePath}`);
+      return 0;
     }
   }
 
@@ -398,7 +421,7 @@ export default class MediaCacheService {
   private async updateCacheStatistics(): Promise<void> {
     const stats = this.createEmptyCacheStats();
     stats.itemCount = this.cacheItems.size;
-    
+
     let totalUsedSize = 0;
     let cachedCount = 0;
     let cachingCount = 0;
@@ -406,11 +429,14 @@ export default class MediaCacheService {
     let expiredCount = 0;
     let oldestTime = Date.now();
     let newestTime = 0;
-    
+
     const expiryTime = Date.now() - (this.config.cacheExpiryDays * 24 * 60 * 60 * 1000);
-    
+
     for (const item of this.cacheItems.values()) {
-      totalUsedSize += item.size;
+      // 如果文件存在，获取实际文件大小
+      const actualSize = await this.getFileSize(item.filePath);
+      const itemSize = actualSize > 0 ? actualSize : item.size;
+      totalUsedSize += itemSize;
       
       switch (item.status) {
         case CacheStatus.CACHED:
@@ -470,13 +496,13 @@ export default class MediaCacheService {
    */
   private startAutoCleanup(): void {
     this.stopAutoCleanup();
-    
-    this.cleanTimerId = setInterval(() => {
+
+    this.cleanTimerId = this.timerManager.setInterval(() => {
       this.performAutoCleanup().catch(error => {
         Logger.error(TAG, `Auto cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
       });
-    }, this.config.cleanInterval * 1000);
-    
+    }, this.config.cleanInterval * 1000, 'MediaCacheService.autoCleanup');
+
     Logger.info(TAG, `Auto cleanup started with interval: ${this.config.cleanInterval}s`);
   }
 
@@ -485,7 +511,7 @@ export default class MediaCacheService {
    */
   private stopAutoCleanup(): void {
     if (this.cleanTimerId !== null) {
-      clearInterval(this.cleanTimerId);
+      this.timerManager.clearInterval(this.cleanTimerId);
       this.cleanTimerId = null;
       Logger.info(TAG, 'Auto cleanup stopped');
     }
@@ -824,9 +850,9 @@ export default class MediaCacheService {
       
       // 如果重试次数未达到限制，重新尝试 If retries not reached limit, retry
       if (task.retries < 3) {
-        setTimeout(() => {
+        this.timerManager.setTimeout(() => {
           this.retryDownloadTask(task);
-        }, 5000); // 5秒后重试 Retry after 5 seconds
+        }, 5000, 'MediaCacheService.downloadRetry'); // 5秒后重试 Retry after 5 seconds
       }
     } finally {
       this.activeTasks--;
@@ -837,9 +863,9 @@ export default class MediaCacheService {
       
       // 如果任务已完成或失败，从活动任务中移除 If task completed or failed, remove from active tasks
       if (task.status === 'completed' || task.status === 'failed') {
-        setTimeout(() => {
+        this.timerManager.setTimeout(() => {
           this.downloadTasks.delete(task.id);
-        }, 60000); // 1分钟后移除 Remove after 1 minute
+        }, 60000, 'MediaCacheService.taskCleanup'); // 1分钟后移除 Remove after 1 minute
       }
     }
   }
@@ -1099,8 +1125,9 @@ export default class MediaCacheService {
    */
   private async deleteFile(filePath: string): Promise<void> {
     try {
-      // TODO: 使用文件API删除文件
-      Logger.debug(TAG, `Deleting file: ${filePath}`);
+      const fs = await import('@ohos.file.fs');
+      fs.unlink(filePath);
+      Logger.debug(TAG, `Deleted file: ${filePath}`);
     } catch (error) {
       Logger.error(TAG, `Failed to delete file ${filePath}: ${error}`);
     }
@@ -1172,8 +1199,8 @@ export default class MediaCacheService {
     // 应用排序 Apply sorting
     if (options?.sortBy) {
       items.sort((a, b) => {
-        let aValue: number;
-        let bValue: number;
+        let aValue: number = 0;
+        let bValue: number = 0;
         
         switch (options.sortBy) {
           case 'size':

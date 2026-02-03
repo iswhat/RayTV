@@ -235,8 +235,8 @@ export default class DistributedDataService {
               
               try {
                 // ��ȡ���ݲ�֪ͨ������
-                let value;
-                if (this.kvStore !== null && this.kvStore !== undefined) {
+                let value: any = null;
+                if (this.kvStore) {
                   value = await this.kvStore.get(key);
                 }
                 if (value && this.dataListeners.size > 0) {

@@ -1,4 +1,4 @@
-﻿// HistoryRepository.ets - 鍘嗗彶璁板綍鏁版嵁浠撳簱
+// HistoryRepository.ets - 鍘嗗彶璁板綍鏁版嵁浠撳簱
 // 璐熻矗鍘嗗彶璁板綍鐩稿叧鏁版嵁鐨勫瓨鍌ㄣ€佽鍙栧拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
@@ -6,18 +6,20 @@ import { History, HistoryGroup, HistoryType, ContentType } from '../bean/History
 import { HISTORY_TABLE } from '../db/TableSchema';
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
+import BaseRepository from '../../common/util/BaseRepository';
 
 const TAG = 'HistoryRepository';
 const HISTORY_CACHE_PREFIX = 'history_item_';
 const HISTORY_LIST_CACHE = 'history_list_cache';
 const MAX_HISTORY_ITEMS = 1000; // 鏈€澶у巻鍙茶褰曟暟
 
-export class HistoryRepository {
+export class HistoryRepository extends BaseRepository {
   private static instance: HistoryRepository;
   private sqliteHelper: SQLiteHelper;
   private storageUtil: StorageUtil;
-  
+
   private constructor() {
+    super();
     this.sqliteHelper = SQLiteHelper.getInstance();
     this.storageUtil = StorageUtil.getInstance();
   }
@@ -61,7 +63,7 @@ export class HistoryRepository {
         [HISTORY_TABLE.COLUMNS.EXTRA_DATA]: JSON.stringify(history.extraData || {})
       };
       
-      let result;
+      let result: { success: boolean; lastInsertRowId?: number };
       if (existingHistory?.id) {
         // 鏇存柊鐜版湁鍘嗗彶璁板綍
         const conditions: QueryCondition[] = [{

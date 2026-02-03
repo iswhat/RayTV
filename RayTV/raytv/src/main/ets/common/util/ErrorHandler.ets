@@ -3,7 +3,6 @@
  * Provides unified error handling, error parsing and error message generation functionality | 提供统一的错误处理、错误解析和错误信息生成功能
  */
 
-
 // Error type enum | 错误类型枚举
 export enum ErrorType {
   NETWORK_ERROR = 'network_error',
@@ -17,6 +16,15 @@ export enum ErrorType {
 // Error details interface | 错误详情接口
 export interface ErrorData {
   message?: string;
+  code?: string;
+  stack?: string;
+}
+
+// Error response interface | 错误响应接口 - 修复问题5：消除any类型使用
+export interface ErrorResponse {
+  message?: string;
+  msg?: string;
+  error?: string;
   code?: string;
   stack?: string;
 }
@@ -165,10 +173,11 @@ export class ErrorHandler {
    * @returns Error information | 错误信息
    */
   private parseObjectError(error: object, code: string): ErrorInfo {
-    const errorObj = error as any;
+    // 修复问题5：使用明确的类型代替any
+    const errorObj = error as ErrorResponse;
     const message = (errorObj.message || errorObj.msg || errorObj.error || 'An unknown error occurred') as string;
     const errorType = this.detectErrorType(message);
-    
+
     return {
       type: errorType,
       code: (errorObj.code as string) || code,
@@ -223,23 +232,23 @@ export class ErrorHandler {
    * @param error Error object | 错误对象
    * @returns Sanitized error details | 清理后的错误详情
    */
-  private sanitizeErrorDetails(error: any): ErrorDetails | undefined {
+  private sanitizeErrorDetails(error: ErrorResponse): ErrorDetails | undefined {
     try {
       const details = new ErrorDetails();
       let hasDetails = false;
-      
+
       // Extract useful error information | 提取有用的错误信息
       const keys = Object.keys(error);
       for (const key of keys) {
         if (key !== 'message' && key !== 'code' && key !== 'stack') {
-          const value = error[key];
+          const value = error[key as keyof ErrorResponse];
           if (value !== undefined && value !== null && typeof value !== 'object') {
             details.set(key, value as string | number | boolean | null);
             hasDetails = true;
           }
         }
       }
-      
+
       return hasDetails ? details : undefined;
     } catch {
       return undefined;

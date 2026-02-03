@@ -29,6 +29,12 @@ import { AdBlockManager } from './adblock/AdBlockManager';
 import { SiteService } from './spider/SiteService';
 import { CrawlerService } from './spider/CrawlerService';
 
+// 服务接口 Service interface
+export interface Service {
+  initialize?: () => Promise<void>;
+  destroy?: () => Promise<void>;
+}
+
 // 常量定义 Constants
 const TAG = 'AppService';
 const APP_STATE_KEY = 'app_state';
@@ -134,7 +140,7 @@ export interface AppStatistics {
 export default class AppService {
   private static instance: AppService | null = null;
   private state: AppState = AppState.CREATED;
-  private services: Map<string, any> = new Map();
+  private services: Map<string, Service> = new Map();
   private appConfig: AppConfig = this.getDefaultConfig();
   private appInfo: AppInfo = this.getDefaultAppInfo();
   private appStatistics: AppStatistics = this.getDefaultStatistics();
@@ -497,7 +503,7 @@ export default class AppService {
    * @param service 服务实例 Service instance
    * @returns 是否注册成功 Whether registration is successful
    */
-  public async registerService(serviceName: string, service: any): Promise<boolean> {
+  public async registerService(serviceName: string, service: Service): Promise<boolean> {
     try {
       if (!service || !serviceName) {
         Logger.error(TAG, 'Invalid service or service name');

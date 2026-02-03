@@ -352,7 +352,7 @@ export default class SubtitleService {
       // 通知解析开始 Notify parse start
       this.notifyParseStart(track.id);
       
-      let subtitleContent: string;
+      let subtitleContent: string = '';
       
       // 获取字幕内容 Get subtitle content
       if (track.localPath) {
@@ -1177,7 +1177,7 @@ export default class SubtitleService {
       const extension = FileUtil.getExtension(filePath).toLowerCase();
       
       // 确定字幕类型 Determine subtitle type
-      let type: SubtitleType;
+      let type: SubtitleType = SubtitleType.SRT;
       switch (extension) {
         case 'srt':
           type = SubtitleType.SRT;

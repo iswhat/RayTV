@@ -20,6 +20,28 @@ export interface SafeObject {
 }
 
 /**
+ * 通用对象接口 | Generic object interface
+ */
+export interface GenericObject {
+  [key: string]: string | number | boolean | object | null | undefined;
+}
+
+/**
+ * 通用数组接口 | Generic array interface
+ */
+export interface GenericArray {
+  [index: number]: string | number | boolean | object | null | undefined;
+}
+
+/**
+ * 键值对接口 | Key-value pair interface
+ */
+export interface KeyValuePair<K extends string, V> {
+  key: K;
+  value: V;
+}
+
+/**
  * 类型安全辅助工具类 | Type safety helper class
  */
 export class TypeSafetyHelper {
@@ -116,7 +138,7 @@ export class TypeSafetyHelper {
         return defaultValue;
       }
       // 替换in操作符，使用Object.hasOwnProperty检查属性是否存在 | Replace 'in' operator, use Object.hasOwnProperty to check if property exists
-      const objRecord = current as Record<string, unknown>;
+      const objRecord = current as GenericObject;
       if (!Object.hasOwnProperty.call(objRecord, key)) {
         return defaultValue;
       }
@@ -154,10 +176,10 @@ export class TypeSafetyHelper {
       if (typeof current !== 'object' || current === null || Array.isArray(current)) {
         return false;
       }
-      const objRecord = current as Record<string, unknown>;
+      const objRecord = current as GenericObject;
       if (!Object.hasOwnProperty.call(objRecord, key) || objRecord[key] === undefined || objRecord[key] === null) {
         // 创建空对象并使用类型断言 | Create empty object and use type assertion
-        const newObj = {} as Record<string, unknown>;
+        const newObj: GenericObject = {};
         objRecord[key] = newObj;
       }
       const nextValue = objRecord[key];
@@ -169,7 +191,7 @@ export class TypeSafetyHelper {
 
     const lastKey = keys[keys.length - 1];
     // 使用类型断言避免索引访问问题 | Use type assertion to avoid indexed access issues
-    const finalObj = current as Record<string, unknown>;
+    const finalObj = current as GenericObject;
     finalObj[lastKey] = value;
     return true;
   }
@@ -400,7 +422,7 @@ export class TypeSafetyHelper {
         return defaultValue;
       }
       // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
-      const objRecord = current as Record<string, unknown>;
+      const objRecord = current as GenericObject;
       current = objRecord[key] as object;
     }
     return current as T | undefined;
@@ -425,8 +447,8 @@ export class TypeSafetyHelper {
     for (let i = 0; i < targetKeys.length; i++) {
       const key = targetKeys[i];
       // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
-      const targetRecord = target as Record<string, unknown>;
-      const mergedRecord = merged as Record<string, unknown>;
+      const targetRecord = target as GenericObject;
+      const mergedRecord = merged as GenericObject;
       mergedRecord[key] = targetRecord[key];
     }
     for (const source of sources) {
@@ -435,8 +457,8 @@ export class TypeSafetyHelper {
         for (let i = 0; i < sourceKeys.length; i++) {
           const key = sourceKeys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
-          const sourceRecord = source as Record<string, unknown>;
-          const mergedRecord = merged as Record<string, unknown>;
+          const sourceRecord = source as GenericObject;
+          const mergedRecord = merged as GenericObject;
           const sourceValue = sourceRecord[key];
           const targetValue = mergedRecord[key];
           if (typeof targetValue === 'object' && targetValue !== null && typeof sourceValue === 'object' && sourceValue !== null) {
@@ -478,12 +500,12 @@ export class TypeSafetyHelper {
       return clonedArray as T;
     }
     if (typeof obj === 'object') {
-        const clonedObj = {} as Record<string, unknown>;
+        const clonedObj: GenericObject = {};
         const keys = Object.keys(obj as SafeObject);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
-          const objRecord = obj as Record<string, unknown>;
+          const objRecord = obj as GenericObject;
           clonedObj[key] = TypeSafetyHelper.safeClone(objRecord[key]);
         }
         return clonedObj as T;

@@ -6,8 +6,8 @@ import { readFileSync } from 'fs';
 
 export default function configParserTest() {
   describe('ConfigParser测试 // ConfigParser tests', () => {
-    let parser: ConfigParser;
-    let configContent: string;
+    let parser: ConfigParser = ConfigParser.getInstance();
+    let configContent: string = '';
 
     beforeAll(() => {
       // 在所有测试用例开始前执行一次 // Execute once before all test cases

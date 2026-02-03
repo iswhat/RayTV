@@ -34,7 +34,7 @@ export default class DateUtil {
       }
 
       // 根据格式类型获取对应的格式字符串 // Get corresponding format string based on format type
-      let formatStr: string;
+      let formatStr: string = 'YYYY-MM-DD HH:mm:ss';
       if (typeof format !== 'string') {
         switch (format) {
           case DateFormatType.FULL:

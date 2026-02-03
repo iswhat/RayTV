@@ -463,7 +463,7 @@ export default class PlaybackService {
    * 处理状态变化 Handles state change
    */
   private handleStateChange(state: number, reason: number): void {
-    let newState: PlaybackState;
+    let newState: PlaybackState = PlaybackState.IDLE;
     
     switch (state) {
       case 0: // AVPlayState.IDLE

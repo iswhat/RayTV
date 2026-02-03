@@ -370,7 +370,7 @@ export class ParserService {
       
       try {
         // 根据解析器类型执行不同的解析逻辑
-        let result: VideoSourceInfo;
+        let result: VideoSourceInfo = { url: context.sourceUrl, type: 'unknown', quality: 'unknown', subtitles: [] };
         
         switch (context.parserId) {
           case 'direct':

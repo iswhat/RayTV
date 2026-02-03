@@ -11,6 +11,7 @@ import UserRepository from './UserRepository';
 import ConfigRepository from './ConfigRepository';
 import { LocalStorageType } from '@ohos:common@ohos/common/src/main/ets/utils/StorageUtil';
 import { CacheType } from '@ohos:common@ohos/common/src/main/ets/services/CacheService';
+import BaseRepository from '@ohos:common@ohos/common/src/main/ets/util/BaseRepository';
 
 // 瑙嗛绫诲瀷鏋氫妇
 export enum VideoType {
@@ -185,7 +186,7 @@ export interface PlaybackProgress {
 /**
  * 瑙嗛浠撳簱
  */
-export class VideoRepository {
+export class VideoRepository extends BaseRepository {
   private static instance: VideoRepository;
   private logger: Logger;
   private storageUtil: StorageUtil;
@@ -193,7 +194,7 @@ export class VideoRepository {
   private cacheService: CacheService;
   private userRepository: UserRepository;
   private eventBus: any; // EventBus瀹炰緥
-  
+
   // API绔偣閰嶇疆锛屼粠閰嶇疆绯荤粺鑾峰彇
   private apiEndpoints: any;
   private configRepository: ConfigRepository;

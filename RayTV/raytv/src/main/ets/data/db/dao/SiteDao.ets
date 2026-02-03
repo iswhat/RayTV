@@ -317,7 +317,7 @@ export class SiteDao {
                     headersRecord[headerKey] = headerValue;
                   }
                 }
-              } else if (typeof parsedHeaders === 'object' && parsedHeaders !== null) {
+              } else if (parsedHeaders && typeof parsedHeaders === 'object') {
                 // 处理对象格式 | Handle object format
                 const keys = Object.keys(parsedHeaders);
                 for (let i = 0; i < keys.length; i++) {
@@ -448,55 +448,13 @@ export class SiteDao {
           }
           
           // 使用Site接口创建对象，确保所有属性都有明确类型 | Create object using Site interface, ensuring all properties have explicit types
-          let siteHeaders: SiteHeaders;
-          if (headers) {
-            siteHeaders = headers;
-          } else {
-            // 创建符合SiteHeaders接口的默认对象 | Create default object that conforms to SiteHeaders interface
-            siteHeaders = { headers: {} } as SiteHeaders;
-          }
-          
-          let siteAuthObj: SiteAuth;
-          if (siteAuth) {
-            siteAuthObj = siteAuth as SiteAuth;
-          } else {
-            siteAuthObj = {} as SiteAuth;
-          }
-          
-          let siteSearchConfig: SiteSearchConfig;
-          if (searchConfig) {
-            siteSearchConfig = searchConfig as SiteSearchConfig;
-          } else {
-            siteSearchConfig = { enabled: false } as SiteSearchConfig;
-          }
-          
-          let siteFilterConfig: SiteFilterConfig;
-          if (filterConfig) {
-            siteFilterConfig = filterConfig as SiteFilterConfig;
-          } else {
-            siteFilterConfig = { enabled: false } as SiteFilterConfig;
-          }
-          
-          let sitePerformanceConfig: SitePerformanceConfig;
-          if (performanceConfig) {
-            sitePerformanceConfig = performanceConfig as SitePerformanceConfig;
-          } else {
-            sitePerformanceConfig = {} as SitePerformanceConfig;
-          }
-          
-          let siteStats: SiteStats;
-          if (stats) {
-            siteStats = stats as SiteStats;
-          } else {
-            siteStats = { queryCount: 0, errorCount: 0, avgResponseTime: 0 } as SiteStats;
-          }
-          
-          let siteLifecycle: SiteLifecycle;
-          if (lifecycle) {
-            siteLifecycle = lifecycle as SiteLifecycle;
-          } else {
-            siteLifecycle = { initialized: false, loading: false, error: false } as SiteLifecycle;
-          }
+          let siteHeaders: SiteHeaders = headers || { headers: {} } as SiteHeaders;
+          let siteAuthObj: SiteAuth = siteAuth as SiteAuth || {} as SiteAuth;
+          let siteSearchConfig: SiteSearchConfig = searchConfig as SiteSearchConfig || { enabled: false } as SiteSearchConfig;
+          let siteFilterConfig: SiteFilterConfig = filterConfig as SiteFilterConfig || { enabled: false } as SiteFilterConfig;
+          let sitePerformanceConfig: SitePerformanceConfig = performanceConfig as SitePerformanceConfig || {} as SitePerformanceConfig;
+          let siteStats: SiteStats = stats as SiteStats || { queryCount: 0, errorCount: 0, avgResponseTime: 0 } as SiteStats;
+          let siteLifecycle: SiteLifecycle = lifecycle as SiteLifecycle || { initialized: false, loading: false, error: false } as SiteLifecycle;
           
           const site: Site = {
             key,

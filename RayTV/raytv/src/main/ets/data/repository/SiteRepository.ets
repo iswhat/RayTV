@@ -1,11 +1,14 @@
-﻿// SiteRepository.ets - 绔欑偣鏁版嵁浠撳簱
-// 璐熻矗绔欑偣鐩稿叧鏁版嵁鐨勫瓨鍌ㄣ€佽鍙栧拰绠＄悊
+/**
+ * SiteRepository.ets - 站点数据仓库
+ * 负责站点相关数据的存储、获取和管理
+ */
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';
 import { Site, SiteGroup, SiteType, LoaderType, SiteSearchConfig } from '../bean/Site';
 import { SITE_TABLE, SITE_GROUP_TABLE } from '../db/TableSchema';
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
+import { DatabaseError, SiteError, handleError } from '../../common/util/AppError';
 
 const TAG = 'SiteRepository';
 const SITE_CACHE_PREFIX = 'site_data_';
@@ -22,7 +25,7 @@ export class SiteRepository {
   }
   
   /**
-   * 鑾峰彇绔欑偣浠撳簱鍗曚緥瀹炰緥
+   * 获取站点仓库单例实例 | Get site repository singleton instance
    */
   public static getInstance(): SiteRepository {
     if (!SiteRepository.instance) {
@@ -32,48 +35,68 @@ export class SiteRepository {
   }
   
   /**
-   * 淇濆瓨绔欑偣淇℃伅
-   * @param site 绔欑偣淇℃伅
-   * @returns 鏄惁淇濆瓨鎴愬姛
+   * 保存站点信息 | Save site information
+   * @param site 站点信息 | Site information
+   * @returns 是否保存成功 | Whether saved successfully
    */
   public async saveSite(site: Site): Promise<boolean> {
     try {
       Logger.debug(TAG, `Saving site: ${site.name}`);
       
       const siteData = {
-        [SITE_TABLE.COLUMNS.ID]: site.id || null,
+        [SITE_TABLE.COLUMNS.KEY]: site.key || null,
         [SITE_TABLE.COLUMNS.NAME]: site.name,
-        [SITE_TABLE.COLUMNS.URL]: site.url,
-        [SITE_TABLE.COLUMNS.ICON]: site.icon,
         [SITE_TABLE.COLUMNS.TYPE]: site.type,
         [SITE_TABLE.COLUMNS.LOADER_TYPE]: site.loaderType,
-        [SITE_TABLE.COLUMNS.GROUP_ID]: site.groupId || null,
+        [SITE_TABLE.COLUMNS.API]: site.api,
+        [SITE_TABLE.COLUMNS.LOGO]: site.logo,
         [SITE_TABLE.COLUMNS.DESCRIPTION]: site.description || '',
+        [SITE_TABLE.COLUMNS.SITE_AUTH]: site.siteAuth ? JSON.stringify(site.siteAuth) : null,
+        [SITE_TABLE.COLUMNS.HEADERS]: site.headers ? JSON.stringify(site.headers) : null,
+        [SITE_TABLE.COLUMNS.CONFIG]: site.config ? JSON.stringify(site.config) : '{}',
+        [SITE_TABLE.COLUMNS.CONFIG_ITEMS]: site.configItems ? JSON.stringify(site.configItems) : null,
+        [SITE_TABLE.COLUMNS.SEARCH_CONFIG]: JSON.stringify(site.searchConfig),
+        [SITE_TABLE.COLUMNS.FILTER_CONFIG]: JSON.stringify(site.filterConfig),
+        [SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG]: JSON.stringify(site.performanceConfig),
+        [SITE_TABLE.COLUMNS.VERSION]: site.version ? JSON.stringify(site.version) : null,
+        [SITE_TABLE.COLUMNS.STATS]: JSON.stringify(site.stats),
+        [SITE_TABLE.COLUMNS.LIFECYCLE]: JSON.stringify(site.lifecycle),
         [SITE_TABLE.COLUMNS.ENABLED]: site.enabled ? 1 : 0,
-        [SITE_TABLE.COLUMNS.SORT_ORDER]: site.sortOrder || 0,
-        [SITE_TABLE.COLUMNS.CREATE_TIME]: site.createTime || Date.now(),
-        [SITE_TABLE.COLUMNS.UPDATE_TIME]: Date.now(),
-        [SITE_TABLE.COLUMNS.CONFIG]: JSON.stringify(site.config || {}),
-        [SITE_TABLE.COLUMNS.EXTRA_DATA]: JSON.stringify(site.extraData || {})
+        [SITE_TABLE.COLUMNS.ORDER]: site.order || 0,
+        [SITE_TABLE.COLUMNS.GROUP]: site.group || null,
+        [SITE_TABLE.COLUMNS.TAGS]: site.tags ? JSON.stringify(site.tags) : null,
+        [SITE_TABLE.COLUMNS.CUSTOM_CODE]: site.customCode || null,
+        [SITE_TABLE.COLUMNS.SANDBOX_ENABLED]: site.sandboxEnabled ? 1 : 0,
+        [SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY]: site.allowThirdParty ? 1 : 0,
+        [SITE_TABLE.COLUMNS.CREATED_AT]: site.createdAt || Date.now(),
+        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now(),
+        [SITE_TABLE.COLUMNS.LAST_USED_AT]: site.lastUsedAt || null,
+        [SITE_TABLE.COLUMNS.USER_AGENT]: site.userAgent || null,
+        [SITE_TABLE.COLUMNS.REFERER]: site.referer || null,
+        [SITE_TABLE.COLUMNS.PROXY]: site.proxy || null,
+        [SITE_TABLE.COLUMNS.ENCODING]: site.encoding || null,
+        [SITE_TABLE.COLUMNS.CHARSET]: site.charset || null,
+        [SITE_TABLE.COLUMNS.CERTIFICATE]: site.certificate || null
       };
       
-      let result;
-      if (site.id) {
-        // 鏇存柊鐜版湁绔欑偣
+      let result = { success: false, lastInsertRowId: null };
+      if (site.key) {
+        // 更新现有站点 | Update existing site
         const conditions: QueryCondition[] = [{
-          column: SITE_TABLE.COLUMNS.ID,
-          value: site.id
+          column: SITE_TABLE.COLUMNS.KEY,
+          value: site.key
         }];
         result = await this.sqliteHelper.update(SITE_TABLE.TABLE_NAME, siteData, conditions);
       } else {
-        // 鎻掑叆鏂扮珯鐐?        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
+        // 插入新站点 | Insert new site
+        result = await this.sqliteHelper.insert(SITE_TABLE.TABLE_NAME, siteData);
         if (result.success && result.lastInsertRowId) {
-          site.id = result.lastInsertRowId.toString();
+          site.key = result.lastInsertRowId.toString();
         }
       }
       
       if (result.success) {
-        // 鏇存柊缂撳瓨
+        // 更新缓存 | Update cache
         await this.cacheSiteData(site);
         await this.invalidateSiteListCache();
         Logger.info(TAG, `Site ${site.name} saved successfully`);
@@ -81,15 +104,17 @@ export class SiteRepository {
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to save site ${site.name}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to save site ${site.name}`);
+      Logger.error(TAG, appError.toString());
       return false;
     }
   }
   
   /**
-   * 鎵归噺淇濆瓨绔欑偣
-   * @param sites 绔欑偣鍒楄〃
-   * @returns 淇濆瓨鎴愬姛鐨勭珯鐐规暟閲?   */
+   * 批量保存站点 | Batch save sites
+   * @param sites 站点列表 | Site list
+   * @returns 保存成功的站点数量 | Number of successfully saved sites
+   */
   public async saveSites(sites: Site[]): Promise<number> {
     if (!sites || sites.length === 0) {
       return 0;
@@ -109,23 +134,27 @@ export class SiteRepository {
       Logger.info(TAG, `Batch saved ${successCount}/${sites.length} sites`);
       return successCount;
     } catch (error) {
-      Logger.error(TAG, `Failed to batch save sites: ${JSON.stringify(error)}`);
+      const appError = handleError(error, 'Failed to batch save sites');
+      Logger.error(TAG, appError.toString());
       return successCount;
     }
   }
   
   /**
-   * 鑾峰彇鎵€鏈夌珯鐐?   * @param includeDisabled 鏄惁鍖呭惈绂佺敤鐨勭珯鐐?   * @returns 绔欑偣鍒楄〃
+   * 获取所有站点 | Get all sites
+   * @param includeDisabled 是否包含禁用的站点 | Whether to include disabled sites
+   * @returns 站点列表 | Site list
    */
   public async getAllSites(includeDisabled: boolean = false): Promise<Site[]> {
     try {
-      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedList = await this.getCachedSiteList();
+      // 尝试从缓存获取 | Try to get from cache
+      const cachedList = await this.getCachedSiteList();
       if (cachedList && cachedList.length > 0 && includeDisabled === false) {
         Logger.debug(TAG, 'Returning sites from cache');
         return cachedList;
       }
       
-      // 鏋勫缓鏌ヨ鏉′欢
+      // 构建查询条件 | Build query conditions
       const conditions: QueryCondition[] = [];
       if (!includeDisabled) {
         conditions.push({
@@ -134,53 +163,58 @@ export class SiteRepository {
         });
       }
       
-      // 鏋勫缓鎺掑簭閫夐」
+      // 构建排序选项 | Build sort options
       const sortOptions = [{
-        column: SITE_TABLE.COLUMNS.SORT_ORDER,
+        column: SITE_TABLE.COLUMNS.ORDER,
         order: 'ASC'
       }, {
         column: SITE_TABLE.COLUMNS.NAME,
         order: 'ASC'
       }];
       
-      // 鏌ヨ鏁版嵁搴?      const siteRecords = await this.sqliteHelper.query(
+      // 查询数据库 | Query database
+      const siteRecords = await this.sqliteHelper.query(
         SITE_TABLE.TABLE_NAME,
         ['*'],
         conditions,
         sortOptions
       );
       
-      // 杞崲涓篠ite瀵硅薄
+      // 转换为Site对象 | Convert to Site objects
       const sites = this.convertToSiteObjects(siteRecords);
       
-      // 缂撳瓨鍚敤鐨勭珯鐐瑰垪琛?      if (!includeDisabled && sites.length > 0) {
+      // 缓存启用的站点列表 | Cache enabled site list
+      if (!includeDisabled && sites.length > 0) {
         await this.cacheSiteList(sites);
       }
       
       Logger.info(TAG, `Retrieved ${sites.length} sites from database`);
       return sites;
     } catch (error) {
-      Logger.error(TAG, `Failed to get all sites: ${JSON.stringify(error)}`);
+      const appError = handleError(error, 'Failed to get all sites');
+      Logger.error(TAG, appError.toString());
       return [];
     }
   }
   
   /**
-   * 鏍规嵁ID鑾峰彇绔欑偣
-   * @param siteId 绔欑偣ID
-   * @returns 绔欑偣淇℃伅鎴杗ull
+   * 根据key获取站点 | Get site by key
+   * @param siteKey 站点key | Site key
+   * @returns 站点信息或null | Site information or null
    */
-  public async getSiteById(siteId: string): Promise<Site | null> {
+  public async getSiteByKey(siteKey: string): Promise<Site | null> {
     try {
-      // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedSite = await this.getCachedSite(siteId);
+      // 尝试从缓存获取 | Try to get from cache
+      const cachedSite = await this.getCachedSite(siteKey);
       if (cachedSite) {
-        Logger.debug(TAG, `Returning site ${siteId} from cache`);
+        Logger.debug(TAG, `Returning site ${siteKey} from cache`);
         return cachedSite;
       }
       
-      // 鏌ヨ鏁版嵁搴?      const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.ID,
-        value: siteId
+      // 查询数据库 | Query database
+      const conditions: QueryCondition[] = [{
+        column: SITE_TABLE.COLUMNS.KEY,
+        value: siteKey
       }];
       
       const siteRecord = await this.sqliteHelper.getFirst(
@@ -193,24 +227,26 @@ export class SiteRepository {
         return null;
       }
       
-      // 杞崲涓篠ite瀵硅薄
+      // 转换为Site对象 | Convert to Site object
       const site = this.convertToSiteObject(siteRecord);
       
-      // 鏇存柊缂撳瓨
+      // 更新缓存 | Update cache
       await this.cacheSiteData(site);
       
-      Logger.info(TAG, `Retrieved site ${site.name} by ID ${siteId}`);
+      Logger.info(TAG, `Retrieved site ${site.name} by key ${siteKey}`);
       return site;
     } catch (error) {
-      Logger.error(TAG, `Failed to get site by ID ${siteId}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to get site by key ${siteKey}`);
+      Logger.error(TAG, appError.toString());
       return null;
     }
   }
   
   /**
-   * 鏍规嵁绫诲瀷鑾峰彇绔欑偣
-   * @param type 绔欑偣绫诲瀷
-   * @param includeDisabled 鏄惁鍖呭惈绂佺敤鐨勭珯鐐?   * @returns 绔欑偣鍒楄〃
+   * 根据类型获取站点 | Get sites by type
+   * @param type 站点类型 | Site type
+   * @param includeDisabled 是否包含禁用的站点 | Whether to include disabled sites
+   * @returns 站点列表 | Site list
    */
   public async getSitesByType(type: SiteType, includeDisabled: boolean = false): Promise<Site[]> {
     try {
@@ -227,7 +263,7 @@ export class SiteRepository {
       }
       
       const sortOptions = [{
-        column: SITE_TABLE.COLUMNS.SORT_ORDER,
+        column: SITE_TABLE.COLUMNS.ORDER,
         order: 'ASC'
       }, {
         column: SITE_TABLE.COLUMNS.NAME,
@@ -245,20 +281,22 @@ export class SiteRepository {
       Logger.info(TAG, `Retrieved ${sites.length} sites of type ${type}`);
       return sites;
     } catch (error) {
-      Logger.error(TAG, `Failed to get sites by type ${type}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to get sites by type ${type}`);
+      Logger.error(TAG, appError.toString());
       return [];
     }
   }
   
   /**
-   * 鏍规嵁鍒嗙粍鑾峰彇绔欑偣
-   * @param groupId 鍒嗙粍ID
-   * @param includeDisabled 鏄惁鍖呭惈绂佺敤鐨勭珯鐐?   * @returns 绔欑偣鍒楄〃
+   * 根据分组获取站点 | Get sites by group
+   * @param groupId 分组ID | Group ID
+   * @param includeDisabled 是否包含禁用的站点 | Whether to include disabled sites
+   * @returns 站点列表 | Site list
    */
   public async getSitesByGroup(groupId: string, includeDisabled: boolean = false): Promise<Site[]> {
     try {
       const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.GROUP_ID,
+        column: SITE_TABLE.COLUMNS.GROUP,
         value: groupId
       }];
       
@@ -270,7 +308,7 @@ export class SiteRepository {
       }
       
       const sortOptions = [{
-        column: SITE_TABLE.COLUMNS.SORT_ORDER,
+        column: SITE_TABLE.COLUMNS.ORDER,
         order: 'ASC'
       }, {
         column: SITE_TABLE.COLUMNS.NAME,
@@ -288,65 +326,68 @@ export class SiteRepository {
       Logger.info(TAG, `Retrieved ${sites.length} sites from group ${groupId}`);
       return sites;
     } catch (error) {
-      Logger.error(TAG, `Failed to get sites by group ${groupId}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to get sites by group ${groupId}`);
+      Logger.error(TAG, appError.toString());
       return [];
     }
   }
   
   /**
-   * 鍒犻櫎绔欑偣
-   * @param siteId 绔欑偣ID
-   * @returns 鏄惁鍒犻櫎鎴愬姛
+   * 删除站点 | Delete site
+   * @param siteKey 站点key | Site key
+   * @returns 是否删除成功 | Whether deleted successfully
    */
-  public async deleteSite(siteId: string): Promise<boolean> {
+  public async deleteSite(siteKey: string): Promise<boolean> {
     try {
-      Logger.debug(TAG, `Deleting site with ID: ${siteId}`);
+      Logger.debug(TAG, `Deleting site with key: ${siteKey}`);
       
       const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.ID,
-        value: siteId
+        column: SITE_TABLE.COLUMNS.KEY,
+        value: siteKey
       }];
       
       const result = await this.sqliteHelper.delete(SITE_TABLE.TABLE_NAME, conditions);
       
       if (result.success) {
-        // 娓呴櫎缂撳瓨
-        await this.removeCachedSite(siteId);
+        // 清除缓存 | Clear cache
+        await this.removeCachedSite(siteKey);
         await this.invalidateSiteListCache();
-        Logger.info(TAG, `Site ${siteId} deleted successfully`);
+        Logger.info(TAG, `Site ${siteKey} deleted successfully`);
       }
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to delete site ${siteId}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to delete site ${siteKey}`);
+      Logger.error(TAG, appError.toString());
       return false;
     }
   }
   
   /**
-   * 鎵归噺鍒犻櫎绔欑偣
-   * @param siteIds 绔欑偣ID鍒楄〃
-   * @returns 鍒犻櫎鎴愬姛鐨勭珯鐐规暟閲?   */
-  public async deleteSites(siteIds: string[]): Promise<number> {
-    if (!siteIds || siteIds.length === 0) {
+   * 批量删除站点 | Batch delete sites
+   * @param siteKeys 站点key列表 | Site key list
+   * @returns 删除成功的站点数量 | Number of successfully deleted sites
+   */
+  public async deleteSites(siteKeys: string[]): Promise<number> {
+    if (!siteKeys || siteKeys.length === 0) {
       return 0;
     }
     
     try {
-      Logger.debug(TAG, `Deleting ${siteIds.length} sites`);
+      Logger.debug(TAG, `Deleting ${siteKeys.length} sites`);
       
       const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.ID,
+        column: SITE_TABLE.COLUMNS.KEY,
         operator: 'IN',
-        value: siteIds
+        value: siteKeys
       }];
       
       const result = await this.sqliteHelper.delete(SITE_TABLE.TABLE_NAME, conditions);
       
       if (result.success) {
-        // 娓呴櫎缂撳瓨
-        for (const siteId of siteIds) {
-          await this.removeCachedSite(siteId);
+        // 清除缓存 | Clear cache
+        for (const siteKey of siteKeys) {
+          await this.removeCachedSite(siteKey);
         }
         await this.invalidateSiteListCache();
         Logger.info(TAG, `Deleted ${result.affectedRows} sites`);
@@ -354,82 +395,86 @@ export class SiteRepository {
       
       return result.affectedRows || 0;
     } catch (error) {
-      Logger.error(TAG, `Failed to batch delete sites: ${JSON.stringify(error)}`);
+      const appError = handleError(error, 'Failed to batch delete sites');
+      Logger.error(TAG, appError.toString());
       return 0;
     }
   }
   
   /**
-   * 鏇存柊绔欑偣鍚敤鐘舵€?   * @param siteId 绔欑偣ID
-   * @param enabled 鏄惁鍚敤
-   * @returns 鏄惁鏇存柊鎴愬姛
+   * 更新站点启用状态 | Update site enabled status
+   * @param siteKey 站点key | Site key
+   * @param enabled 是否启用 | Whether enabled
+   * @returns 是否更新成功 | Whether updated successfully
    */
-  public async updateSiteEnabled(siteId: string, enabled: boolean): Promise<boolean> {
+  public async updateSiteEnabled(siteKey: string, enabled: boolean): Promise<boolean> {
     try {
       const data = {
         [SITE_TABLE.COLUMNS.ENABLED]: enabled ? 1 : 0,
-        [SITE_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
+        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now()
       };
       
       const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.ID,
-        value: siteId
+        column: SITE_TABLE.COLUMNS.KEY,
+        value: siteKey
       }];
       
       const result = await this.sqliteHelper.update(SITE_TABLE.TABLE_NAME, data, conditions);
       
       if (result.success) {
-        // 娓呴櫎缂撳瓨
-        await this.removeCachedSite(siteId);
+        // 清除缓存 | Clear cache
+        await this.removeCachedSite(siteKey);
         await this.invalidateSiteListCache();
-        Logger.info(TAG, `Site ${siteId} enabled status updated to ${enabled}`);
+        Logger.info(TAG, `Site ${siteKey} enabled status updated to ${enabled}`);
       }
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to update site ${siteId} enabled status: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to update site ${siteKey} enabled status`);
+      Logger.error(TAG, appError.toString());
       return false;
     }
   }
   
   /**
-   * 鏇存柊绔欑偣鎺掑簭
-   * @param siteId 绔欑偣ID
-   * @param sortOrder 鎺掑簭椤哄簭
-   * @returns 鏄惁鏇存柊鎴愬姛
+   * 更新站点排序 | Update site sort order
+   * @param siteKey 站点key | Site key
+   * @param sortOrder 排序顺序 | Sort order
+   * @returns 是否更新成功 | Whether updated successfully
    */
-  public async updateSiteSortOrder(siteId: string, sortOrder: number): Promise<boolean> {
+  public async updateSiteSortOrder(siteKey: string, sortOrder: number): Promise<boolean> {
     try {
       const data = {
-        [SITE_TABLE.COLUMNS.SORT_ORDER]: sortOrder,
-        [SITE_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
+        [SITE_TABLE.COLUMNS.ORDER]: sortOrder,
+        [SITE_TABLE.COLUMNS.UPDATED_AT]: Date.now()
       };
       
       const conditions: QueryCondition[] = [{
-        column: SITE_TABLE.COLUMNS.ID,
-        value: siteId
+        column: SITE_TABLE.COLUMNS.KEY,
+        value: siteKey
       }];
       
       const result = await this.sqliteHelper.update(SITE_TABLE.TABLE_NAME, data, conditions);
       
       if (result.success) {
-        // 娓呴櫎缂撳瓨
-        await this.removeCachedSite(siteId);
+        // 清除缓存 | Clear cache
+        await this.removeCachedSite(siteKey);
         await this.invalidateSiteListCache();
-        Logger.info(TAG, `Site ${siteId} sort order updated to ${sortOrder}`);
+        Logger.info(TAG, `Site ${siteKey} sort order updated to ${sortOrder}`);
       }
       
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to update site ${siteId} sort order: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to update site ${siteKey} sort order`);
+      Logger.error(TAG, appError.toString());
       return false;
     }
   }
   
   /**
-   * 淇濆瓨绔欑偣鍒嗙粍
-   * @param group 绔欑偣鍒嗙粍
-   * @returns 鏄惁淇濆瓨鎴愬姛
+   * 保存站点分组 | Save site group
+   * @param group 站点分组 | Site group
+   * @returns 是否保存成功 | Whether saved successfully
    */
   public async saveSiteGroup(group: SiteGroup): Promise<boolean> {
     try {
@@ -444,16 +489,17 @@ export class SiteRepository {
         [SITE_GROUP_TABLE.COLUMNS.UPDATE_TIME]: Date.now()
       };
       
-      let result;
+      let result: boolean | { success: boolean; lastInsertRowId?: number };
       if (group.id) {
-        // 鏇存柊鐜版湁鍒嗙粍
+        // 更新现有分组 | Update existing group
         const conditions: QueryCondition[] = [{
           column: SITE_GROUP_TABLE.COLUMNS.ID,
           value: group.id
         }];
         result = await this.sqliteHelper.update(SITE_GROUP_TABLE.TABLE_NAME, groupData, conditions);
       } else {
-        // 鎻掑叆鏂板垎缁?        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
+        // 插入新分组 | Insert new group
+        result = await this.sqliteHelper.insert(SITE_GROUP_TABLE.TABLE_NAME, groupData);
         if (result.success && result.lastInsertRowId) {
           group.id = result.lastInsertRowId.toString();
         }
@@ -462,13 +508,15 @@ export class SiteRepository {
       Logger.info(TAG, `Site group ${group.name} saved successfully`);
       return result.success;
     } catch (error) {
-      Logger.error(TAG, `Failed to save site group ${group.name}: ${JSON.stringify(error)}`);
+      const appError = handleError(error, `Failed to save site group ${group.name}`);
+      Logger.error(TAG, appError.toString());
       return false;
     }
   }
   
   /**
-   * 鑾峰彇鎵€鏈夌珯鐐瑰垎缁?   * @returns 绔欑偣鍒嗙粍鍒楄〃
+   * 获取所有站点分组 | Get all site groups
+   * @returns 站点分组列表 | Site group list
    */
   public async getAllSiteGroups(): Promise<SiteGroup[]> {
     try {
@@ -499,44 +547,47 @@ export class SiteRepository {
       Logger.info(TAG, `Retrieved ${groups.length} site groups`);
       return groups;
     } catch (error) {
-      Logger.error(TAG, `Failed to get all site groups: ${JSON.stringify(error)}`);
+      const appError = handleError(error, 'Failed to get all site groups');
+      Logger.error(TAG, appError.toString());
       return [];
     }
   }
   
   /**
-   * 缂撳瓨绔欑偣鏁版嵁
+   * 缓存站点数据 | Cache site data
    */
   private async cacheSiteData(site: Site): Promise<void> {
     try {
-      await this.storageUtil.setObject(`${SITE_CACHE_PREFIX}${site.id}`, site);
+      await this.storageUtil.setObject(`${SITE_CACHE_PREFIX}${site.key}`, site);
     } catch (error) {
-      Logger.warn(TAG, `Failed to cache site ${site.id}: ${JSON.stringify(error)}`);
+      Logger.warn(TAG, `Failed to cache site ${site.key}: ${JSON.stringify(error)}`);
     }
   }
   
   /**
-   * 鑾峰彇缂撳瓨鐨勭珯鐐规暟鎹?   */
-  private async getCachedSite(siteId: string): Promise<Site | null> {
+   * 获取缓存的站点数据 | Get cached site data
+   */
+  private async getCachedSite(siteKey: string): Promise<Site | null> {
     try {
-      return await this.storageUtil.getObject<Site>(`${SITE_CACHE_PREFIX}${siteId}`);
+      return await this.storageUtil.getObject<Site>(`${SITE_CACHE_PREFIX}${siteKey}`);
     } catch (error) {
       return null;
     }
   }
   
   /**
-   * 绉婚櫎缂撳瓨鐨勭珯鐐规暟鎹?   */
-  private async removeCachedSite(siteId: string): Promise<void> {
+   * 移除缓存的站点数据 | Remove cached site data
+   */
+  private async removeCachedSite(siteKey: string): Promise<void> {
     try {
-      await this.storageUtil.remove(`${SITE_CACHE_PREFIX}${siteId}`);
+      await this.storageUtil.remove(`${SITE_CACHE_PREFIX}${siteKey}`);
     } catch (error) {
-      Logger.warn(TAG, `Failed to remove cached site ${siteId}: ${JSON.stringify(error)}`);
+      Logger.warn(TAG, `Failed to remove cached site ${siteKey}: ${JSON.stringify(error)}`);
     }
   }
   
   /**
-   * 缂撳瓨绔欑偣鍒楄〃
+   * 缓存站点列表 | Cache site list
    */
   private async cacheSiteList(sites: Site[]): Promise<void> {
     try {
@@ -547,7 +598,8 @@ export class SiteRepository {
   }
   
   /**
-   * 鑾峰彇缂撳瓨鐨勭珯鐐瑰垪琛?   */
+   * 获取缓存的站点列表 | Get cached site list
+   */
   private async getCachedSiteList(): Promise<Site[] | null> {
     try {
       return await this.storageUtil.getObject<Site[]>(SITE_LIST_CACHE);
@@ -557,7 +609,8 @@ export class SiteRepository {
   }
   
   /**
-   * 浣跨珯鐐瑰垪琛ㄧ紦瀛樺け鏁?   */
+   * 使站点列表缓存失效 | Invalidate site list cache
+   */
   private async invalidateSiteListCache(): Promise<void> {
     try {
       await this.storageUtil.remove(SITE_LIST_CACHE);
@@ -567,29 +620,48 @@ export class SiteRepository {
   }
   
   /**
-   * 灏嗘暟鎹簱璁板綍杞崲涓篠ite瀵硅薄
+   * 将数据库记录转换为Site对象 | Convert database record to Site object
    */
   private convertToSiteObject(record: any): Site {
     return {
-      id: record[SITE_TABLE.COLUMNS.ID]?.toString(),
+      key: record[SITE_TABLE.COLUMNS.KEY]?.toString(),
       name: record[SITE_TABLE.COLUMNS.NAME],
-      url: record[SITE_TABLE.COLUMNS.URL],
-      icon: record[SITE_TABLE.COLUMNS.ICON],
       type: record[SITE_TABLE.COLUMNS.TYPE],
       loaderType: record[SITE_TABLE.COLUMNS.LOADER_TYPE],
-      groupId: record[SITE_TABLE.COLUMNS.GROUP_ID]?.toString(),
+      api: record[SITE_TABLE.COLUMNS.API],
+      logo: record[SITE_TABLE.COLUMNS.LOGO],
       description: record[SITE_TABLE.COLUMNS.DESCRIPTION],
-      enabled: record[SITE_TABLE.COLUMNS.ENABLED] === 1,
-      sortOrder: record[SITE_TABLE.COLUMNS.SORT_ORDER],
-      createTime: record[SITE_TABLE.COLUMNS.CREATE_TIME],
-      updateTime: record[SITE_TABLE.COLUMNS.UPDATE_TIME],
+      siteAuth: record[SITE_TABLE.COLUMNS.SITE_AUTH] ? JSON.parse(record[SITE_TABLE.COLUMNS.SITE_AUTH]) : undefined,
+      headers: record[SITE_TABLE.COLUMNS.HEADERS] ? JSON.parse(record[SITE_TABLE.COLUMNS.HEADERS]) : undefined,
       config: record[SITE_TABLE.COLUMNS.CONFIG] ? JSON.parse(record[SITE_TABLE.COLUMNS.CONFIG]) : {},
-      extraData: record[SITE_TABLE.COLUMNS.EXTRA_DATA] ? JSON.parse(record[SITE_TABLE.COLUMNS.EXTRA_DATA]) : {}
+      configItems: record[SITE_TABLE.COLUMNS.CONFIG_ITEMS] ? JSON.parse(record[SITE_TABLE.COLUMNS.CONFIG_ITEMS]) : undefined,
+      searchConfig: JSON.parse(record[SITE_TABLE.COLUMNS.SEARCH_CONFIG]),
+      filterConfig: JSON.parse(record[SITE_TABLE.COLUMNS.FILTER_CONFIG]),
+      performanceConfig: JSON.parse(record[SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG]),
+      version: record[SITE_TABLE.COLUMNS.VERSION] ? JSON.parse(record[SITE_TABLE.COLUMNS.VERSION]) : undefined,
+      stats: JSON.parse(record[SITE_TABLE.COLUMNS.STATS]),
+      lifecycle: JSON.parse(record[SITE_TABLE.COLUMNS.LIFECYCLE]),
+      enabled: record[SITE_TABLE.COLUMNS.ENABLED] === 1,
+      order: record[SITE_TABLE.COLUMNS.ORDER],
+      group: record[SITE_TABLE.COLUMNS.GROUP],
+      tags: record[SITE_TABLE.COLUMNS.TAGS] ? JSON.parse(record[SITE_TABLE.COLUMNS.TAGS]) : undefined,
+      customCode: record[SITE_TABLE.COLUMNS.CUSTOM_CODE],
+      sandboxEnabled: record[SITE_TABLE.COLUMNS.SANDBOX_ENABLED] === 1,
+      allowThirdParty: record[SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY] === 1,
+      createdAt: record[SITE_TABLE.COLUMNS.CREATED_AT],
+      updatedAt: record[SITE_TABLE.COLUMNS.UPDATED_AT],
+      lastUsedAt: record[SITE_TABLE.COLUMNS.LAST_USED_AT],
+      userAgent: record[SITE_TABLE.COLUMNS.USER_AGENT],
+      referer: record[SITE_TABLE.COLUMNS.REFERER],
+      proxy: record[SITE_TABLE.COLUMNS.PROXY],
+      encoding: record[SITE_TABLE.COLUMNS.ENCODING],
+      charset: record[SITE_TABLE.COLUMNS.CHARSET],
+      certificate: record[SITE_TABLE.COLUMNS.CERTIFICATE]
     };
   }
   
   /**
-   * 灏嗘暟鎹簱璁板綍鍒楄〃杞崲涓篠ite瀵硅薄鍒楄〃
+   * 将数据库记录列表转换为Site对象列表 | Convert database record list to Site object list
    */
   private convertToSiteObjects(records: any[]): Site[] {
     return records.map(record => this.convertToSiteObject(record));

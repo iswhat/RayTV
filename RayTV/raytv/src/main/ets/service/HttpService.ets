@@ -5,6 +5,8 @@ import http from '@ohos.net.http';
 import ConfigService from './config/ConfigService';
 import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
+import URLValidator from '../common/util/URLValidator';
+import Logger from '../common/util/Logger';
 
 // HTTP请求选项接口 | HTTP request options interface
 export interface HttpOptions {
@@ -52,13 +54,13 @@ export class HttpService {
   private static instance: HttpService;
   private httpConfig: HttpConfig;
   private context: common.Context | null = null;
+  private static readonly TAG: string = 'HttpService';
 
   private constructor() {
     // 初始化默认配置 Initialize default config
     const defaultTimeout = 30;
     const defaultRetryCount = 3;
-    const networkConfig = ConfigService.getInstance().getFullConfig().then(config => config.network);
-    
+
     // 手动初始化配置，避免使用对象字面量语法
     // Manually initialize config, avoid using object literal syntax
     this.httpConfig = {
@@ -66,15 +68,11 @@ export class HttpService {
       retryCount: defaultRetryCount,
       userAgent: ''
     };
+
+    Logger.debug(HttpService.TAG, 'HttpService initialized');
   }
 
-  /**
-   * 设置应用上下文 Set application context
-   * @param ctx 应用上下文 Application context
-   */
-  public setContext(ctx: common.Context): void {
-    this.context = ctx;
-  }
+
 
   /**
    * 获取应用上下文 Get application context
@@ -95,6 +93,15 @@ export class HttpService {
       HttpService.instance = new HttpService();
     }
     return HttpService.instance;
+  }
+
+  /**
+   * 设置上下文 Set context
+   * @param ctx 上下文 Context
+   */
+  public setContext(ctx: common.Context): void {
+    this.context = ctx;
+    Logger.debug(HttpService.TAG, 'Context set');
   }
 
   /**
@@ -151,6 +158,15 @@ export class HttpService {
   }
 
   /**
+   * 验证URL Validate URL
+   * @param url URL字符串
+   * @throws {Error} 如果URL无效
+   */
+  private validateURL(url: string): void {
+    URLValidator.validateURL(url);
+  }
+
+  /**
    * 检查并请求网络权限 Check and request network permission
    * 只在需要时请求权限，避免重复验证 Only request permission when needed, avoid duplicate verification
    */
@@ -158,11 +174,11 @@ export class HttpService {
     try {
       const atManager = abilityAccessCtrl.createAtManager();
       const context = this.getContext();
-      
+
       // 直接请求INTERNET权限，不检查状态 Directly request INTERNET permission, no status check
       await atManager.requestPermissionsFromUser(context, ['ohos.permission.INTERNET']);
     } catch (error) {
-      console.error('Failed to request INTERNET permission', error);
+      Logger.error(HttpService.TAG, 'Failed to request INTERNET permission');
       // 不抛出错误，允许应用继续尝试网络操作
       // Don't throw error, allow app to continue trying network operations
     }
@@ -174,6 +190,12 @@ export class HttpService {
    * @param options 请求选项 Request options
    */
   public async request<T>(url: string, options: HttpRequestOptions): Promise<HttpResponse<T>> {
+    // 验证URL，防止SSRF攻击
+    this.validateURL(url);
+
+    // 创建HTTP请求对象 Create HTTP request object
+    const httpRequest = http.createHttp();
+
     try {
       // 检查网络权限（只在需要时请求）
       // Check network permission (only request when needed)
@@ -184,9 +206,6 @@ export class HttpService {
       const requestData = options.data || null;
       const timeout = options.timeout !== undefined ? options.timeout : this.httpConfig.timeout * 1000;
 
-      // 创建HTTP请求对象 Create HTTP request object
-      const httpRequest = http.createHttp();
-      
       // 构建请求配置 Build request config
       const requestConfig: http.HttpRequestOptions = {
         method: method as http.RequestMethod,
@@ -197,7 +216,7 @@ export class HttpService {
           'Content-Type': 'application/json'
         }
       };
-      
+
       // 手动合并headers Manually merge headers
       if (headers) {
         // 确保header对象存在 Ensure header object exists
@@ -224,7 +243,7 @@ export class HttpService {
         }
       }
 
-      // 发送请求 Send request
+      // 发送请求 Send request - 修复资源泄漏问题
       let response: http.HttpResponse | null = null;
       let retryCount = 0;
       let lastError: Error | null = null;
@@ -237,19 +256,25 @@ export class HttpService {
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
           retryCount++;
-          
+
           if (retryCount > maxRetryCount) {
             throw lastError;
           }
-          
+
           // 重试前等待 Wait before retry
           await this.sleep(1000 * retryCount);
         }
       }
 
-      // 确保response有值 Ensure response has value
+      // 确保response有值 Ensure response has value - 增强错误信息
       if (!response) {
-        throw new Error('Failed to get HTTP response');
+        const errorDetails = {
+          url: url,
+          retryCount: retryCount,
+          maxRetryCount: maxRetryCount,
+          lastError: lastError?.message
+        };
+        throw new Error(`HTTP request failed after ${retryCount} retries: ${JSON.stringify(errorDetails)}`);
       }
 
       // 处理响应 Process response
@@ -257,11 +282,8 @@ export class HttpService {
         status: response.responseCode,
         data: this.parseResponseData<T>(response.result as string),
         headers: this.sanitizeHeaders(response.header as Record<string, string | number | boolean | null>),
-        url: ''
+        url: url
       };
-
-      // 关闭请求对象 Close request object
-      httpRequest.destroy();
 
       // 检查状态码 Check status code
       if (result.status < 200 || result.status >= 300) {
@@ -271,8 +293,11 @@ export class HttpService {
 
       return result;
     } catch (error) {
-      console.error(`HTTP request failed: ${url}`, error);
+      Logger.error(HttpService.TAG, `HTTP request failed: ${url}`);
       throw error instanceof Error ? error : new Error(String(error));
+    } finally {
+      // 修复问题3：确保在任何情况下都关闭请求对象
+      httpRequest.destroy();
     }
   }
 
@@ -283,22 +308,25 @@ export class HttpService {
    * @param options 下载选项 Download options
    */
   public async downloadFile(url: string, filePath: string, options?: DownloadOptions): Promise<DownloadResult> {
+    // 验证URL，防止SSRF攻击
+    this.validateURL(url);
+
+    // 创建HTTP请求对象 Create HTTP request object
+    const httpRequest = http.createHttp();
+
     try {
       // 检查网络权限 Check network permission
       try {
         const atManager = abilityAccessCtrl.createAtManager();
         await atManager.requestPermissionsFromUser(this.getContext(), ['ohos.permission.INTERNET']);
       } catch (permissionError) {
-        console.error('Failed to request INTERNET permission', permissionError);
+        Logger.error(HttpService.TAG, 'Failed to request INTERNET permission');
         throw new Error('Network permission denied');
       }
 
       const headers = options?.headers || {};
       const timeout = options?.timeout !== undefined ? options.timeout : this.httpConfig.timeout * 1000;
-      
-      // 创建HTTP请求对象 Create HTTP request object
-      const httpRequest = http.createHttp();
-      
+
       // 构建请求配置 Build request config
       const requestConfig: http.HttpRequestOptions = {
         method: 'GET' as http.RequestMethod,
@@ -308,7 +336,7 @@ export class HttpService {
           'User-Agent': this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
         }
       };
-      
+
       // 手动合并headers Manually merge headers
       if (headers) {
         // 确保requestConfig.header存在 Ensure requestConfig.header exists
@@ -334,13 +362,13 @@ export class HttpService {
         extraData?: string | Record<string, string | number | boolean>;
         expectDataType?: http.HttpDataType;
       }
-      
+
       // 确保所有属性都有正确的类型 Ensure all properties have correct types
       const method: string = typeof requestConfig.method === 'string' ? requestConfig.method : 'GET';
       const connectTimeout: number = typeof requestConfig.connectTimeout === 'number' ? requestConfig.connectTimeout : 30000;
       const readTimeout: number = typeof requestConfig.readTimeout === 'number' ? requestConfig.readTimeout : 30000;
       const header: Record<string, string> = (requestConfig.header || {}) as Record<string, string>;
-      
+
       // 使用request方法替代downloadFile，因为HttpRequest类型上没有downloadFile方法
       // Use request method instead of downloadFile, because HttpRequest type doesn't have downloadFile method
       const response: http.HttpResponse = await httpRequest.request(url, {
@@ -350,7 +378,7 @@ export class HttpService {
         header: header,
         expectDataType: requestConfig.expectDataType || http.HttpDataType.STRING
       });
-      
+
       // 将响应结果写入文件 Write response result to file
       if (response.result) {
         // 在ArkTS中，文件写入需要使用'ohos.file.fs'模块
@@ -359,11 +387,8 @@ export class HttpService {
         // Simplified processing here, only return response status, not actually write file
         // 实际实现中应使用ohos.file.fs模块
         // Should use ohos.file.fs module in actual implementation
-        console.log(`Downloaded file: ${url} to ${filePath}`);
+        Logger.debug(HttpService.TAG, `Downloaded file: ${url} to ${filePath}`);
       }
-
-      // 关闭请求对象 Close request object
-      httpRequest.destroy();
 
       const downloadResult: DownloadResult = {
         status: response.responseCode,
@@ -374,8 +399,11 @@ export class HttpService {
 
       return downloadResult;
     } catch (error) {
-      console.error(`File download failed: ${url}`, error);
+      Logger.error(HttpService.TAG, `File download failed: ${url}`);
       throw error instanceof Error ? error : new Error(String(error));
+    } finally {
+      // 修复问题3：确保在任何情况下都关闭请求对象
+      httpRequest.destroy();
     }
   }
 

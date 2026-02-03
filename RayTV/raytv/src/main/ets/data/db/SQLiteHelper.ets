@@ -4,6 +4,7 @@
 import RelationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from './DatabaseManager';
 import Logger from '../../common/util/Logger';
+import SQLValidator from '../../common/util/SQLValidator';
 
 const TAG = 'SQLiteHelper';
 
@@ -45,9 +46,12 @@ export interface DatabaseResult {
 }
 
 export class SQLiteHelper {
-  private static instance: SQLiteHelper;
+  private static instance: SQLiteHelper | null = null;
+  private static initializationLock: boolean = false;
   private dbManager: DatabaseManager;
-  
+  private operationLock: boolean = false;
+  private pendingOperations: Array<() => Promise<void>> = [];
+
   /**
    * 获取对象的键数组（ArkTS兼容方法） // Get object key array (ArkTS compatible method)
    */
@@ -115,13 +119,20 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取SQLiteHelper单例实例 // Get SQLiteHelper singleton instance
+   * 获取SQLiteHelper单例实例（线程安全） // Get SQLiteHelper singleton instance (thread-safe)
    */
   public static getInstance(): SQLiteHelper {
-    if (!SQLiteHelper.instance) {
-      SQLiteHelper.instance = new SQLiteHelper();
+    if (!SQLiteHelper.instance && !SQLiteHelper.initializationLock) {
+      SQLiteHelper.initializationLock = true;
+      try {
+        if (!SQLiteHelper.instance) {
+          SQLiteHelper.instance = new SQLiteHelper();
+        }
+      } finally {
+        SQLiteHelper.initializationLock = false;
+      }
     }
-    return SQLiteHelper.instance;
+    return SQLiteHelper.instance!;
   }
   
   /**
@@ -133,29 +144,43 @@ export class SQLiteHelper {
   public async insert(tableName: string, values: Record<string, ValueType>): Promise<DatabaseResult> {
     try {
       Logger.debug(TAG, `Inserting data into ${tableName}`);
-      
+
+      // 验证表名，防止SQL注入
+      SQLValidator.validateTableName(tableName);
+
       const database = this.dbManager.getDatabase();
-      
+
       // 构建插入语句 // Build insert statement
       const columns = this.getObjectKeys(values);
       const placeholders = columns.map(() => '?').join(', ');
       const bindArgs = this.getObjectValues(values);
-      
+
       const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
-      
+
       // 执行插入 // Execute insert
       await database.executeSql(sql, bindArgs);
-      
-      // 获取最后插入的ID // Get last inserted ID
+
+      // 获取最后插入的ID - 修复空指针访问和资源泄漏问题
       const result: RelationalStore.ResultSet = await database.querySql(`SELECT last_insert_rowid() as id`);
       let lastInsertRowId = -1;
-      if (result.goToFirstRow()) {
-        const idIndex = result.columnNames.indexOf('id');
-        lastInsertRowId = result.getLong(idIndex) || 0;
+
+      try {
+        if (result.goToFirstRow()) {
+          const idIndex = result.columnNames.indexOf('id');
+          // 修复问题1：检查idIndex是否有效
+          if (idIndex >= 0) {
+            lastInsertRowId = result.getLong(idIndex) || 0;
+          } else {
+            Logger.error(TAG, 'Column "id" not found in result');
+          }
+        }
+      } finally {
+        // 修复问题4：确保关闭ResultSet
+        result.close();
       }
-      
+
       Logger.info(TAG, `Inserted data into ${tableName}, ID: ${lastInsertRowId}`);
-      
+
       return {
         success: true,
         lastInsertRowId,
@@ -223,19 +248,30 @@ export class SQLiteHelper {
     conditions?: Array<QueryCondition>
   ): Promise<DatabaseResult> {
     try {
+      // 验证表名，防止SQL注入
+      SQLValidator.validateTableName(tableName);
+
       const database = this.dbManager.getDatabase();
-      
+
       // 构建更新语句 // Build update statement
       const columns = this.getObjectKeys(values);
+
+      // 验证列名
+      SQLValidator.validateColumnNames(columns);
+
       const setClause = columns
         .map(key => `${key} = ?`)
         .join(', ');
-      
+
       let sql = `UPDATE ${tableName} SET ${setClause}`;
       const bindArgs: ValueType[] = this.getObjectValues(values);
-      
+
       // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
+        // 验证条件中的列名
+        const conditionColumns = conditions.map(cond => cond.column);
+        SQLValidator.validateColumnNames(conditionColumns);
+
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
           if (operator === 'IN' || operator === 'NOT IN') {
@@ -246,9 +282,9 @@ export class SQLiteHelper {
           }
           return `${cond.column} ${operator} ?`;
         }).join(' AND ');
-        
+
         sql += ` WHERE ${whereClause}`;
-        
+
         // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
@@ -268,12 +304,19 @@ export class SQLiteHelper {
       // 执行更新 // Execute update
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行数 // Get affected rows
+      // 获取影响的行数 // Get affected rows - 修复资源泄漏
       const result = await database.querySql('SELECT changes() as affected_rows');
       let affectedRows = 0;
-      if (result.goToFirstRow()) {
-        const index = result.getColumnIndex('affected_rows');
-        affectedRows = result.getLong(index) || 0;
+
+      try {
+        if (result.goToFirstRow()) {
+          const index = result.getColumnIndex('affected_rows');
+          if (index >= 0) {
+            affectedRows = result.getLong(index) || 0;
+          }
+        }
+      } finally {
+        result.close();
       }
       
       Logger.info(TAG, `Updated ${affectedRows} records in ${tableName}`);
@@ -302,13 +345,20 @@ export class SQLiteHelper {
     conditions?: Array<QueryCondition>
   ): Promise<DatabaseResult> {
     try {
+      // 验证表名，防止SQL注入
+      SQLValidator.validateTableName(tableName);
+
       const database = this.dbManager.getDatabase();
-      
+
       let sql = `DELETE FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
-      
+
       // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
+        // 验证条件中的列名
+        const conditionColumns = conditions.map(cond => cond.column);
+        SQLValidator.validateColumnNames(conditionColumns);
+
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
           if (operator === 'IN' || operator === 'NOT IN') {
@@ -319,9 +369,9 @@ export class SQLiteHelper {
           }
           return `${cond.column} ${operator} ?`;
         }).join(' AND ');
-        
+
         sql += ` WHERE ${whereClause}`;
-        
+
         // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
@@ -341,12 +391,19 @@ export class SQLiteHelper {
       // 执行删除 // Execute delete
       await database.executeSql(sql, bindArgs);
       
-      // 获取影响的行 // Get affected rows
+      // 获取影响的行 // Get affected rows - 修复资源泄漏和空指针检查
       const result: RelationalStore.ResultSet = await database.querySql('SELECT changes() as affected_rows');
       let affectedRows = 0;
-      if (result.goToFirstRow()) {
-        const idIndex = result.columnNames.indexOf('affected_rows');
-        affectedRows = result.getLong(idIndex) || 0;
+
+      try {
+        if (result.goToFirstRow()) {
+          const idIndex = result.columnNames.indexOf('affected_rows');
+          if (idIndex >= 0) {
+            affectedRows = result.getLong(idIndex) || 0;
+          }
+        }
+      } finally {
+        result.close();
       }
       
       Logger.info(TAG, `Deleted ${affectedRows} records from ${tableName}`);
@@ -383,14 +440,26 @@ export class SQLiteHelper {
     offset: number = 0
   ): Promise<T[]> {
     try {
+      // 验证表名，防止SQL注入
+      SQLValidator.validateTableName(tableName);
+
+      // 验证列名（除非是*）
+      if (columns[0] !== '*') {
+        SQLValidator.validateColumnNames(columns);
+      }
+
       const database = this.dbManager.getDatabase();
-      
+
       // 构建查询语句 // Build query statement
       let sql = `SELECT ${columns.join(', ')} FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
-      
+
       // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
+        // 验证条件中的列名
+        const conditionColumns = conditions.map(cond => cond.column);
+        SQLValidator.validateColumnNames(conditionColumns);
+
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
           if (operator === 'IN' || operator === 'NOT IN') {
@@ -401,9 +470,9 @@ export class SQLiteHelper {
           }
           return `${cond.column} ${operator} ?`;
         }).join(' AND ');
-        
+
         sql += ` WHERE ${whereClause}`;
-        
+
         // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
@@ -419,65 +488,79 @@ export class SQLiteHelper {
           }
         });
       }
-      
+
       // 添加排序 // Add sorting
       if (sortOptions && sortOptions.length > 0) {
+        // 验证排序列名
+        const sortColumns = sortOptions.map(opt => opt.column);
+        SQLValidator.validateColumnNames(sortColumns);
+
         const orderByClause = sortOptions
-          .map(option => `${option.column} ${option.order || 'ASC'}`)
+          .map(option => {
+            // 验证排序方向
+            const order = (option.order || 'ASC').toUpperCase();
+            SQLValidator.validateOrder(order);
+            return `${option.column} ${order}`;
+          })
           .join(', ');
         sql += ` ORDER BY ${orderByClause}`;
       }
-      
+
       // 添加分页 // Add pagination
       if (limit !== undefined) {
         sql += ` LIMIT ? OFFSET ?`;
         bindArgs.push(limit, offset);
       }
-      
+
       Logger.debug(TAG, `Executing query: ${sql}, args: ${JSON.stringify(bindArgs)}`);
-      
+
       // 执行查询 // Execute query
       const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
-      
-      // 处理结果 // Process results
-      const records: T[] = [];
-      while (result.goToNextRow()) {
-        const record: DatabaseRecord = {};
-        const columnNames = result.columnNames;
-        for (let index = 0; index < columnNames.length; index++) {
-          const column = columnNames[index];
-          
-          // 先尝试获取字符串 // First try to get string
-          const stringValue = result.getString(index);
-          if (stringValue !== null) {
-            record[column] = stringValue;
-          } else {
-            // 尝试获取数字 // Try to get number
-            const longValue = result.getLong(index);
-            if (longValue !== null) {
-              record[column] = longValue;
+
+      // 处理结果 - 确保ResultSet被关闭
+      try {
+        // 处理结果 // Process results
+        const records: T[] = [];
+        while (result.goToNextRow()) {
+          const record: DatabaseRecord = {};
+          const columnNames = result.columnNames;
+          for (let index = 0; index < columnNames.length; index++) {
+            const column = columnNames[index];
+
+            // 先尝试获取字符串 // First try to get string
+            const stringValue = result.getString(index);
+            if (stringValue !== null) {
+              record[column] = stringValue;
             } else {
-              // 尝试获取浮点数 // Try to get float
-              const doubleValue = result.getDouble(index);
-              if (doubleValue !== null && !isNaN(doubleValue)) {
-                record[column] = doubleValue;
+              // 尝试获取数字 // Try to get number
+              const longValue = result.getLong(index);
+              if (longValue !== null) {
+                record[column] = longValue;
               } else {
-                // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
-                const boolLongValue = result.getLong(index);
-                if (boolLongValue !== null) {
-                  record[column] = boolLongValue === 1;
+                // 尝试获取浮点数 // Try to get float
+                const doubleValue = result.getDouble(index);
+                if (doubleValue !== null && !isNaN(doubleValue)) {
+                  record[column] = doubleValue;
                 } else {
-                  record[column] = null;
+                  // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
+                  const boolLongValue = result.getLong(index);
+                  if (boolLongValue !== null) {
+                    record[column] = boolLongValue === 1;
+                  } else {
+                    record[column] = null;
+                  }
                 }
               }
             }
           }
+          records.push(record as T);
         }
-        records.push(record as T);
+
+        Logger.info(TAG, `Retrieved ${records.length} records from ${tableName}`);
+        return records;
+      } finally {
+        result.close();
       }
-      
-      Logger.info(TAG, `Retrieved ${records.length} records from ${tableName}`);
-      return records;
     } catch (error) {
       Logger.error(TAG, `Failed to query ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
@@ -508,13 +591,20 @@ export class SQLiteHelper {
    */
   public async count(tableName: string, conditions?: Array<QueryCondition>): Promise<number> {
     try {
+      // 验证表名，防止SQL注入
+      SQLValidator.validateTableName(tableName);
+
       const database = this.dbManager.getDatabase();
-      
+
       let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
       const bindArgs: ValueType[] = [];
-      
+
       // 添加条件 // Add conditions
       if (conditions && conditions.length > 0) {
+        // 验证条件中的列名
+        const conditionColumns = conditions.map(cond => cond.column);
+        SQLValidator.validateColumnNames(conditionColumns);
+
         const whereClause = conditions.map(cond => {
           const operator = cond.operator || '=';
           if (operator === 'IN' || operator === 'NOT IN') {
@@ -525,9 +615,9 @@ export class SQLiteHelper {
           }
           return `${cond.column} ${operator} ?`;
         }).join(' AND ');
-        
+
         sql += ` WHERE ${whereClause}`;
-        
+
         // 处理IN条件的参数 // Handle IN condition parameters
         conditions.forEach(cond => {
           if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
@@ -543,14 +633,21 @@ export class SQLiteHelper {
           }
         });
       }
-      
+
       const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
-      if (result.goToFirstRow()) {
-        const countIndex = result.columnNames.indexOf('count');
-        const count = result.getLong(countIndex);
-        return count || 0;
+
+      try {
+        if (result.goToFirstRow()) {
+          const countIndex = result.columnNames.indexOf('count');
+          if (countIndex >= 0) {
+            const count = result.getLong(countIndex);
+            return count || 0;
+          }
+        }
+        return 0;
+      } finally {
+        result.close();
       }
-      return 0;
     } catch (error) {
       Logger.error(TAG, `Failed to count ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return 0;
@@ -623,6 +720,150 @@ export class SQLiteHelper {
     } catch (error) {
       Logger.error(TAG, `Failed to execute custom query: ${error instanceof Error ? error.message : String(error)}`);
       return [];
+    }
+  }
+
+  /**
+   * 批量更新数据（事务保护）// Batch update data (with transaction protection)
+   * @param tableName 表名 // Table name
+   * @param updates 更新数据列表 // Update data list
+   * @param conditions 更新条件 // Update conditions
+   * @returns 更新结果 // Update result
+   */
+  public async batchUpdate(
+    tableName: string,
+    updates: Array<{ values: Record<string, ValueType>, conditions: Array<QueryCondition> }>
+  ): Promise<DatabaseResult> {
+    if (!updates || updates.length === 0) {
+      return { success: true, affectedRows: 0 };
+    }
+
+    try {
+      let affectedRows = 0;
+
+      await this.dbManager.executeTransaction(async (db) => {
+        for (const updateData of updates) {
+          const setClause = Object.keys(updateData.values)
+            .map(key => `${key} = ?`)
+            .join(', ');
+
+          const whereClauses = updateData.conditions.map(cond => {
+            const operator = cond.operator || '=';
+            if (operator === 'IN' || operator === 'NOT IN') {
+              const placeholders = Array.isArray(cond.value)
+                ? cond.value.map(() => '?').join(', ')
+                : '?';
+              return `${cond.column} ${operator} (${placeholders})`;
+            }
+            return `${cond.column} ${operator} ?`;
+          }).join(' AND ');
+
+          const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClauses}`;
+
+          const bindArgs: ValueType[] = [];
+          Object.values(updateData.values).forEach(val => bindArgs.push(val));
+          updateData.conditions.forEach(cond => {
+            if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
+              for (let i = 0; i < cond.value.length; i++) {
+                bindArgs.push(cond.value[i] as ValueType);
+              }
+            } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
+              bindArgs.push(cond.value as ValueType);
+            }
+          });
+
+          await db.executeSql(sql, bindArgs);
+          affectedRows++;
+        }
+      });
+
+      Logger.info(TAG, `Batch updated ${affectedRows} records in ${tableName}`);
+      return {
+        success: true,
+        affectedRows
+      };
+    } catch (error) {
+      Logger.error(TAG, `Failed to batch update ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
+      };
+    }
+  }
+
+  /**
+   * 批量删除数据（事务保护）// Batch delete data (with transaction protection)
+   * @param tableName 表名 // Table name
+   * @param conditionsList 删除条件列表 // Delete conditions list
+   * @returns 删除结果 // Delete result
+   */
+  public async batchDelete(
+    tableName: string,
+    conditionsList: Array<Array<QueryCondition>>
+  ): Promise<DatabaseResult> {
+    if (!conditionsList || conditionsList.length === 0) {
+      return { success: true, affectedRows: 0 };
+    }
+
+    try {
+      let affectedRows = 0;
+
+      await this.dbManager.executeTransaction(async (db) => {
+        for (const conditions of conditionsList) {
+          const whereClauses = conditions.map(cond => {
+            const operator = cond.operator || '=';
+            if (operator === 'IN' || operator === 'NOT IN') {
+              const placeholders = Array.isArray(cond.value)
+                ? cond.value.map(() => '?').join(', ')
+                : '?';
+              return `${cond.column} ${operator} (${placeholders})`;
+            }
+            return `${cond.column} ${operator} ?`;
+          }).join(' AND ');
+
+          const sql = `DELETE FROM ${tableName} WHERE ${whereClauses}`;
+
+          const bindArgs: ValueType[] = [];
+          conditions.forEach(cond => {
+            if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
+              for (let i = 0; i < cond.value.length; i++) {
+                bindArgs.push(cond.value[i] as ValueType);
+              }
+            } else if (cond.operator !== 'IN' && cond.operator !== 'NOT IN') {
+              bindArgs.push(cond.value as ValueType);
+            }
+          });
+
+          const result = await db.executeSql(sql, bindArgs);
+          affectedRows += result.rowAffected;
+        }
+      });
+
+      Logger.info(TAG, `Batch deleted ${affectedRows} records from ${tableName}`);
+      return {
+        success: true,
+        affectedRows
+      };
+    } catch (error) {
+      Logger.error(TAG, `Failed to batch delete from ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : JSON.stringify(error)
+      };
+    }
+  }
+
+  /**
+   * 执行事务（事务保护）// Execute transaction (with transaction protection)
+   * @param operation 要执行的操作 // Operation to execute
+   * @returns 执行结果 // Execution result
+   */
+  public async executeTransaction<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await this.dbManager.executeTransaction(operation);
+    } catch (error) {
+      Logger.error(TAG, `Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 }
