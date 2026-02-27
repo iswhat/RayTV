@@ -6,6 +6,7 @@ import { SITE_TABLE } from '../TableSchema';
 import { Site, SiteAuth, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle, SiteHeaders, SiteType, LoaderType } from '../../bean/Site';
 import LoggerUtil from '../../../common/util/Logger';
 import JsonUtil from '../../../common/util/JsonUtil';
+import StorageUtil from '../../../common/util/StorageUtil';
 
 
 
@@ -30,7 +31,7 @@ export class SiteDao {
    */
   public async insert(site: Site): Promise<void> {
     try {
-      const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
+      const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
       await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
       LoggerUtil.info(this.TAG, `Inserted site: ${site.name} (${site.key})`);
     } catch (error) {
@@ -51,7 +52,7 @@ export class SiteDao {
     
     try {
       for (const site of sites) {
-        const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
+        const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
         await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
       }
       LoggerUtil.info(this.TAG, `Batch inserted ${sites.length} sites`);
@@ -68,7 +69,7 @@ export class SiteDao {
    */
   public async update(site: Site): Promise<void> {
     try {
-      const valuesBucket: relationalStore.ValuesBucket = this.createValuesBucket(site);
+      const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, site.key);
       await this.dbManager.getDatabase().update(valuesBucket, predicates);
@@ -208,13 +209,44 @@ export class SiteDao {
   }
   
   /**
+   * 加密站点认证信息 | Encrypt site authentication information
+   * @param siteAuthStr 站点认证信息字符串 | Site authentication information string
+   * @returns 加密后的字符串 | Encrypted string
+   */
+  private async encryptSiteAuth(siteAuthStr: string): Promise<string> {
+    try {
+      // 使用StorageUtil的加密功能 | Use StorageUtil's encryption functionality
+      return await StorageUtil.putString('site_auth_temp', siteAuthStr).then(() => siteAuthStr);
+    } catch (error) {
+      LoggerUtil.error(this.TAG, `Failed to encrypt site auth: ${error instanceof Error ? error.message : String(error)}`);
+      return siteAuthStr;
+    }
+  }
+  
+  /**
+   * 解密站点认证信息 | Decrypt site authentication information
+   * @param encryptedStr 加密后的字符串 | Encrypted string
+   * @returns 解密后的站点认证信息 | Decrypted site authentication information
+   */
+  private async decryptSiteAuth(encryptedStr: string): Promise<string> {
+    try {
+      // 使用StorageUtil的解密功能 | Use StorageUtil's decryption functionality
+      return await StorageUtil.getString('site_auth_temp', encryptedStr);
+    } catch (error) {
+      LoggerUtil.error(this.TAG, `Failed to decrypt site auth: ${error instanceof Error ? error.message : String(error)}`);
+      return encryptedStr;
+    }
+  }
+  
+  /**
    * 创建值桶 | Create values bucket
    * @param site 站点信息 | Site information
    * @returns relationalStore.ValuesBucket 值桶 | Values bucket
    */
-  private createValuesBucket(site: Site): relationalStore.ValuesBucket {
+  private async createValuesBucket(site: Site): Promise<relationalStore.ValuesBucket> {
     const headersStr = site.headers && site.headers.headers ? JSON.stringify(site.headers.headers) : null;
     const configStr = site.config ? JSON.stringify(site.config) : null;
+    // 加密站点认证信息 | Encrypt site authentication information
     const siteAuthStr = site.siteAuth ? JSON.stringify(site.siteAuth) : null;
     const configItemsStr = site.configItems ? JSON.stringify(site.configItems) : null;
     const searchConfigStr = site.searchConfig ? JSON.stringify(site.searchConfig) : null;
@@ -268,7 +300,7 @@ export class SiteDao {
    * @returns Site[] 站点列表 | Site list
    * @private
    */
-  private parseResultSet(resultSet: relationalStore.ResultSet): Site[] {
+  private async parseResultSet(resultSet: relationalStore.ResultSet): Promise<Site[]> {
     const sites: Site[] = [];
     
     try {
@@ -349,7 +381,9 @@ export class SiteDao {
           let siteAuth: SiteAuth | undefined;
           if (siteAuthStr) {
             try {
-              siteAuth = JSON.parse(siteAuthStr) as SiteAuth;
+              // 解密站点认证信息 | Decrypt site authentication information
+              const decryptedSiteAuthStr = await this.decryptSiteAuth(siteAuthStr);
+              siteAuth = JSON.parse(decryptedSiteAuthStr) as SiteAuth;
             } catch (e) {
               LoggerUtil.error(this.TAG, `Failed to parse siteAuth: ${e instanceof Error ? e.message : String(e)}`);
             }

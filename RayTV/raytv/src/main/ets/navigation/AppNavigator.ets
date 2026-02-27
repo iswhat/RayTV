@@ -54,6 +54,14 @@ export interface SerializableHistoryItem {
   route: string;
   url: string;
   timestamp: number;
+  title?: string; // 页面标题，用于面包屑导航
+}
+
+// 面包屑导航项接口 | Breadcrumb navigation item interface
+export interface BreadcrumbItem {
+  route: string;
+  title: string;
+  params?: NavigationParams;
 }
 
 // 路由映射实现类 | Route mapping implementation class
@@ -81,6 +89,7 @@ export interface NavigationHistoryItem {
   url: string;
   params?: NavigationParams;
   timestamp: number;
+  title?: string; // 页面标题，用于面包屑导航
   clone(): NavigationHistoryItem;
 }
 
@@ -90,8 +99,9 @@ export class NavigationHistoryItemImpl implements NavigationHistoryItem {
   url: string = '';
   params?: NavigationParams;
   timestamp: number = 0;
+  title?: string;
   
-  constructor(route?: string, url?: string, params?: NavigationParams, timestamp?: number) {
+  constructor(route?: string, url?: string, params?: NavigationParams, timestamp?: number, title?: string) {
     if (route !== undefined) {
       this.route = route;
     }
@@ -104,6 +114,9 @@ export class NavigationHistoryItemImpl implements NavigationHistoryItem {
     if (timestamp !== undefined) {
       this.timestamp = timestamp;
     }
+    if (title !== undefined) {
+      this.title = title;
+    }
   }
   
   clone(): NavigationHistoryItem {
@@ -111,6 +124,7 @@ export class NavigationHistoryItemImpl implements NavigationHistoryItem {
     clone.route = this.route;
     clone.url = this.url;
     clone.timestamp = this.timestamp;
+    clone.title = this.title;
     if (this.params instanceof NavigationParamsImpl) {
       clone.params = this.params.clone();
     }
@@ -197,7 +211,7 @@ export class AppNavigator {
    * 导航到首页 | Navigate to home page
    */
   async navigateToHome(): Promise<void> {
-    await this.navigateTo(PageRoute.HOME);
+    await this.navigateTo(PageRoute.HOME, undefined, '首页');
   }
 
   /**
@@ -217,21 +231,21 @@ export class AppNavigator {
     navParams.setParam('episodeName', episodeName);
     navParams.setParam('position', position);
     navParams.setParam('fromSearch', fromSearch);
-    await this.navigateTo(PageRoute.VIDEO_PLAY, navParams);
+    await this.navigateTo(PageRoute.VIDEO_PLAY, navParams, '视频播放');
   }
 
   /**
    * 导航到线路管理页面 | Navigate to line manager page
    */
   async navigateToLineManager(): Promise<void> {
-    await this.navigateTo(PageRoute.LINE_MANAGER);
+    await this.navigateTo(PageRoute.LINE_MANAGER, undefined, '线路管理');
   }
 
   /**
    * 导航到设置页面 | Navigate to settings page
    */
   async navigateToSettings(): Promise<void> {
-    await this.navigateTo(PageRoute.SETTINGS);
+    await this.navigateTo(PageRoute.SETTINGS, undefined, '设置');
   }
 
   /**
@@ -242,7 +256,7 @@ export class AppNavigator {
     // 确保关键词始终是字符串 - 使用类型化对象
     const searchParams: NavigationParams = new NavigationParamsImpl();
     searchParams.setParam('keyword', prefilledKeyword || '');
-    await this.navigateTo(PageRoute.SEARCH, searchParams);
+    await this.navigateTo(PageRoute.SEARCH, searchParams, '搜索');
   }
 
   /**
@@ -252,14 +266,14 @@ export class AppNavigator {
   async navigateToSearchResult(keyword: string): Promise<void> {
     const searchParams: NavigationParams = new NavigationParamsImpl();
     searchParams.setParam('keyword', keyword || '');
-    await this.navigateTo(PageRoute.SEARCH_RESULT, searchParams);
+    await this.navigateTo(PageRoute.SEARCH_RESULT, searchParams, `搜索结果: ${keyword}`);
   }
 
   /**
    * 导航到历史记录页面 | Navigate to history page
    */
   async navigateToHistory(): Promise<void> {
-    await this.navigateTo(PageRoute.HISTORY);
+    await this.navigateTo(PageRoute.HISTORY, undefined, '历史记录');
   }
 
   /**
@@ -272,7 +286,7 @@ export class AppNavigator {
     categoryParams.setParam('id', category.id || '');
     categoryParams.setParam('name', category.name);
     categoryParams.setParam('type', category.type || 'vod');
-    await this.navigateTo(PageRoute.CATEGORY, categoryParams);
+    await this.navigateTo(PageRoute.CATEGORY, categoryParams, `分类: ${category.name}`);
   }
 
   /**
@@ -285,22 +299,23 @@ export class AppNavigator {
     navParams.setParam('id', params.id);
     navParams.setParam('siteKey', params.siteKey);
     navParams.setParam('type', params.type);
-    await this.navigateTo(PageRoute.DETAIL, navParams);
+    await this.navigateTo(PageRoute.DETAIL, navParams, '详情');
   }
 
   /**
    * 导航到直播页面 | Navigate to live page
    */
   async navigateToLive(): Promise<void> {
-    await this.navigateTo(PageRoute.LIVE);
+    await this.navigateTo(PageRoute.LIVE, undefined, '直播');
   }
 
   /**
    * 导航到页面 | Navigate to page
    * @param route 页面路由 | Page route
    * @param params 导航参数 | Navigation parameters
+   * @param title 页面标题 | Page title (for breadcrumb navigation)
    */
-  private async navigateTo(route: string, params?: NavigationParams): Promise<void> {
+  private async navigateTo(route: string, params?: NavigationParams, title?: string): Promise<void> {
     try {
       const url = this.getPageUrl(route);
       
@@ -310,13 +325,14 @@ export class AppNavigator {
       historyItem.url = url;
       historyItem.params = params;
       historyItem.timestamp = Date.now();
+      historyItem.title = title || this.getRouteDefaultTitle(route);
       this.addToHistory(historyItem);
 
-      // 使用router.push API
+      // 使用router.pushUrl API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.push({
+      await router.pushUrl({
         url: url,
         params: routerParams
       });
@@ -345,8 +361,8 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用新的router.push API
-      await router.push({
+      // 使用router.pushUrl API
+      await router.pushUrl({
         url: this.getPageUrl(PageRoute.HOME),
         params: {} as Record<string, string | number | boolean | null>
       });
@@ -362,15 +378,16 @@ export class AppNavigator {
    * 替换当前页面 | Replace current page
    * @param route 目标路由 | Target route
    * @param params 导航参数 | Navigation parameters
+   * @param title 页面标题 | Page title (for breadcrumb navigation)
    */
-  async replace(route: string, params?: NavigationParams): Promise<void> {
+  async replace(route: string, params?: NavigationParams, title?: string): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用新的router.replace API
+      // 使用router.replaceUrl API
       const routerParams = params instanceof NavigationParamsImpl ? 
         params.toObject() : 
         (params || {} as Record<string, string | number | boolean | null>);
-      await router.replace({
+      await router.replaceUrl({
         url: url,
         params: routerParams
       });
@@ -381,10 +398,73 @@ export class AppNavigator {
       historyItem.url = url;
       historyItem.params = params;
       historyItem.timestamp = Date.now();
+      historyItem.title = title || this.getRouteDefaultTitle(route);
       this.replaceLastInHistory(historyItem);
     } catch (error: Error) {
       console.error('Navigation replace to ' + route + ' failed: ' + error.message);
       throw new Error('Navigation replace to ' + route + ' failed: ' + error.message);
+    }
+  }
+  
+  /**
+   * 获取路由默认标题
+   * @param route 页面路由
+   * @returns 默认标题
+   */
+  private getRouteDefaultTitle(route: string): string {
+    switch (route) {
+      case PageRoute.HOME:
+        return '首页';
+      case PageRoute.VIDEO_PLAY:
+        return '视频播放';
+      case PageRoute.LINE_MANAGER:
+        return '线路管理';
+      case PageRoute.SETTINGS:
+        return '设置';
+      case PageRoute.SEARCH:
+        return '搜索';
+      case PageRoute.SEARCH_RESULT:
+        return '搜索结果';
+      case PageRoute.HISTORY:
+        return '历史记录';
+      case PageRoute.CATEGORY:
+        return '分类';
+      case PageRoute.DETAIL:
+        return '详情';
+      case PageRoute.LIVE:
+        return '直播';
+      default:
+        return '页面';
+    }
+  }
+  
+  /**
+   * 获取面包屑导航
+   * @returns 面包屑导航项数组
+   */
+  getBreadcrumbs(): BreadcrumbItem[] {
+    return this.navigationHistory.map(item => ({
+      route: item.route,
+      title: item.title || this.getRouteDefaultTitle(item.route),
+      params: item.params
+    }));
+  }
+  
+  /**
+   * 导航到面包屑项
+   * @param index 面包屑项索引
+   */
+  async navigateToBreadcrumb(index: number): Promise<void> {
+    if (index >= 0 && index < this.navigationHistory.length) {
+      // 移除索引之后的所有历史记录
+      this.navigationHistory = this.navigationHistory.slice(0, index + 1);
+      await this.saveNavigationHistory();
+      
+      const item = this.navigationHistory[index];
+      await router.pushUrl({
+        url: item.url,
+        params: item.params instanceof NavigationParamsImpl ? item.params.toObject() : {}
+      });
     }
   }
 
@@ -465,7 +545,8 @@ export class AppNavigator {
         const historyItem: SerializableHistoryItem = {
           route: item.route,
           url: item.url,
-          timestamp: item.timestamp
+          timestamp: item.timestamp,
+          title: item.title
         };
         return historyItem;
       });
@@ -501,6 +582,7 @@ export class AppNavigator {
           newItem.route = item.route;
           newItem.url = item.url;
           newItem.timestamp = item.timestamp;
+          newItem.title = item.title;
           return newItem;
         });
       } else {

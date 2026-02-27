@@ -35,7 +35,8 @@ export enum CacheStrategy {
   LRU = 'lru', // 最近最少使用 Least recently used
   LFU = 'lfu', // 最少使用频率 Least frequently used
   FIFO = 'fifo', // 先进先出 First in first out
-  FILO = 'filo' // 后进先出 First in last out
+  FILO = 'filo', // 后进先出 First in last out
+  SMART = 'smart' // 智能策略 Smart strategy based on usage patterns
 }
 
 // 缓存优先级枚举 Cache priority enum
@@ -276,7 +277,7 @@ const DEFAULT_CACHE_CONFIG: CacheConfig = {
   memoryCacheSize: MAX_MEMORY_CACHE_SIZE,
   diskCacheSize: DEFAULT_DISK_CACHE_SIZE,
   defaultExpiry: DEFAULT_CACHE_EXPIRY,
-  cacheStrategy: CacheStrategy.LRU,
+  cacheStrategy: CacheStrategy.SMART,
   storageLocation: CacheStorageLocation.INTERNAL,
   maxCacheItems: 1000,
   enableAutoCleanup: true,
@@ -520,13 +521,14 @@ export default class CacheService {
       }
       
       // 解析索引 | Parse index
-      const indexData = JsonUtil.parse<Record<string, CacheMetadata>>(indexContent);
+      const parsedData = JsonUtil.parse<Record<string, CacheMetadata>>(indexContent);
+      const indexData: Record<string, CacheMetadata> = parsedData && typeof parsedData === 'object' ? parsedData : {};
       if (!indexData || typeof indexData !== 'object') {
         return;
       }
       
       // 更新缓存索引 | Update cache index
-      const keys = Object.keys(indexData);
+      const keys = this.getObjectKeys(indexData);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         this.cacheIndex.set(key, indexData[key]);
@@ -545,7 +547,7 @@ export default class CacheService {
    */
   private async saveCacheIndex(): Promise<void> {
     try {
-      const indexData: { [key: string]: CacheMetadata } = {};
+      const indexData: Record<string, CacheMetadata> = {};
       
       // 过滤过期的缓存项 | Filter out expired cache items
       const now = Date.now();
@@ -808,7 +810,11 @@ export default class CacheService {
       await this.updateStatistics();
       
       // 从缓存索引中获取缓存项信息 | Get cache item information from cache index
-      const cacheItems: CacheItemDisplay[] = Array.from(this.cacheIndex.entries()).map((entry) => {
+      const cacheEntries = Array.from(this.cacheIndex.entries());
+      const cacheItems: CacheItemDisplay[] = [];
+      
+      for (let i = 0; i < cacheEntries.length; i++) {
+        const entry = cacheEntries[i];
         const key = entry[0];
         const metadata = entry[1];
         let name = key;
@@ -849,13 +855,15 @@ export default class CacheService {
           size: size,
           selected: true
         };
-        return cacheItem;
-      });
+        cacheItems.push(cacheItem);
+      }
       
       // 按名称分组并计算总大小 | Group by name and calculate total size
       const groupedItems = new Map<string, CacheItemGroup>();
       
-      for (const item of cacheItems) {
+      for (let i = 0; i < cacheItems.length; i++) {
+      
+        const item = cacheItems[i];
         if (groupedItems.has(item.name)) {
           const existing = groupedItems.get(item.name)!;
           const existingSize = parseInt(existing.size.toString()) || 0;
@@ -874,7 +882,9 @@ export default class CacheService {
       
       // 转换回数组格式 | Convert back to array format
       const result: CacheItemDisplay[] = [];
-      for (const item of Array.from(groupedItems.values())) {
+      const groupValues = Array.from(groupedItems.values());
+      for (let i = 0; i < groupValues.length; i++) {
+        const item = groupValues[i];
         const displayItem: CacheItemDisplay = {
           id: item.name.toLowerCase().replace(/\s+/g, '_'),
           name: item.name,
@@ -1118,6 +1128,16 @@ export default class CacheService {
           // 按创建时间排序（最晚的先删除） | Sort by creation time (latest first)
           sortedItems = cacheItems.sort((a, b) => b[1].createdAt - a[1].createdAt);
           break;
+        case CacheStrategy.SMART:
+          // 智能策略：综合考虑使用频率、访问时间和优先级
+          // Smart strategy: Consider usage frequency, access time, and priority
+          sortedItems = cacheItems.sort((a, b) => {
+            // 计算智能排序分数
+            const scoreA = this.calculateSmartScore(a[1]);
+            const scoreB = this.calculateSmartScore(b[1]);
+            return scoreA - scoreB; // 分数低的先删除
+          });
+          break;
         default:
           sortedItems = cacheItems.sort((a, b) => a[1].accessedAt - b[1].accessedAt);
       }
@@ -1211,6 +1231,16 @@ export default class CacheService {
           break;
         case CacheStrategy.FILO:
           sortedItems = cacheItems.sort((a, b) => b[1].createdAt - a[1].createdAt);
+          break;
+        case CacheStrategy.SMART:
+          // 智能策略：综合考虑使用频率、访问时间和优先级
+          // Smart strategy: Consider usage frequency, access time, and priority
+          sortedItems = cacheItems.sort((a, b) => {
+            // 计算智能排序分数
+            const scoreA = this.calculateSmartScore(a[1]);
+            const scoreB = this.calculateSmartScore(b[1]);
+            return scoreA - scoreB; // 分数低的先删除
+          });
           break;
         default:
           sortedItems = cacheItems.sort((a, b) => a[1].accessedAt - b[1].accessedAt);
@@ -1360,7 +1390,7 @@ export default class CacheService {
   }
 
   /**
-   * 从磁盘删除缓存项 | Remove cache item from disk
+   * 移除缓存项 | Remove cache item from disk
    */
   private async removeItemFromDisk(key: string): Promise<void> {
     try {
@@ -1368,23 +1398,24 @@ export default class CacheService {
       if (!metadata) {
         return;
       }
-      
+
       // 删除缓存文件 | Delete cache file
       const filePath = this.getCacheFilePath(key);
       if (await FileUtil.fileExists(filePath)) {
         await FileUtil.deleteFile(filePath);
       }
-      
+
       // 从索引中删除 | Remove from index
       this.cacheIndex.delete(key);
-      
+
       // 通知清理监听器 | Notify cleanup listeners
       this.notifyEviction(key, metadata);
-      
+
       console.debug(TAG + `: Removed cache item from disk: ${key}`);
     } catch (error) {
-      console.error(TAG + `: Failed to remove cache item from disk: ${key}`, error instanceof Error ? error.message : String(error));
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'removeItemFromDisk', key);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to remove cache item from disk: ${key}`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'removeItemFromDisk', key);
     }
   }
 
@@ -1470,16 +1501,16 @@ export default class CacheService {
           (cacheType === CacheType.DISK || cacheType === CacheType.MEMORY_DISK)) {
         // 序列化数据 | Serialize data
         let serializedData: string | ArrayBuffer;
-        
+
         try {
           serializedData = typeof data === 'string' ? data : JsonUtil.stringify(data);
         } catch (error) {
           throw new Error('Failed to serialize data for caching');
         }
-        
+
         // 如果需要压缩或加密，在这里处理 | If compression or encryption is needed, handle here
         // ...
-        
+
         // 写入文件 | Write to file
         const filePath = this.getCacheFilePath(fullKey);
         await FileUtil.writeFile(filePath, serializedData, { create: true });
@@ -1518,9 +1549,9 @@ export default class CacheService {
         }
       };
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to set cache item: ${key}`, errorMsg);
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'set', key);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'set', key);
       return {
         success: false,
         error: errorMsg
@@ -1638,8 +1669,9 @@ export default class CacheService {
       
       return data;
     } catch (error) {
-      console.error(TAG + `: Failed to get cache item: ${key}`, error instanceof Error ? error.message : String(error));
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'get', key);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to get cache item: ${key}`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'get', key);
       return null;
     }
   }
@@ -1670,8 +1702,9 @@ export default class CacheService {
       
       return false;
     } catch (error) {
-      console.error(TAG + `: Failed to check cache existence: ${key}`, error instanceof Error ? error.message : String(error));
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'exists', key);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to check cache existence: ${key}`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'exists', key);
       return false;
     }
   }
@@ -1720,8 +1753,9 @@ export default class CacheService {
       };
       return metadataCopy;
     } catch (error) {
-      console.error(TAG + `: Failed to get cache metadata: ${key}`, error instanceof Error ? error.message : String(error));
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'getMetadata', key);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to get cache metadata: ${key}`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'getMetadata', key);
       return null;
     }
   }
@@ -1753,9 +1787,9 @@ export default class CacheService {
         key: fullKey
       };
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to remove cache item: ${key}`, errorMsg);
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'remove', key);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'remove', key);
       return {
         success: false,
         error: errorMsg
@@ -1776,15 +1810,73 @@ export default class CacheService {
         const result = await this.set(item.key, item.data, item.options);
         results.push(result);
       }
-      
+
       return results;
     } catch (error) {
-      console.error(TAG + `: Failed to set multiple cache items`, error instanceof Error ? error.message : String(error));
-      this.recordError(error instanceof Error ? error : new Error(String(error)), 'setMultiple');
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to set multiple cache items`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'setMultiple');
       return [];
     }
   }
 
+  /**
+   * 计算智能排序分数 | Calculate smart sort score
+   * 综合考虑使用频率、访问时间和优先级等因素
+   */
+  private calculateSmartScore(metadata: CacheMetadata): number {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    const oneDay = 24 * oneHour;
+    
+    // 1. 优先级分数 (0-100)
+    const priorityScore = this.getPriorityScore(metadata.priority);
+    
+    // 2. 使用频率分数 (0-100)
+    const frequencyScore = Math.min(metadata.hits * 10, 100);
+    
+    // 3. 最近访问分数 (0-100)
+    const timeSinceAccess = now - metadata.accessedAt;
+    let recencyScore = 100;
+    if (timeSinceAccess > oneDay) {
+      recencyScore = 0;
+    } else if (timeSinceAccess > oneHour) {
+      recencyScore = 100 - (timeSinceAccess / oneDay) * 100;
+    }
+    
+    // 4. 大小惩罚分数 (0-50) - 越大的缓存项越容易被删除
+    const sizePenalty = Math.min((metadata.size / (1024 * 1024)) * 5, 50);
+    
+    // 5. 综合计算最终分数
+    // 优先级权重最高，其次是使用频率和最近访问，最后是大小惩罚
+    const finalScore = (
+      priorityScore * 0.4 +
+      frequencyScore * 0.3 +
+      recencyScore * 0.2 -
+      sizePenalty * 0.1
+    );
+    
+    return finalScore;
+  }
+  
+  /**
+   * 获取优先级分数 | Get priority score
+   */
+  private getPriorityScore(priority: CachePriority): number {
+    switch (priority) {
+      case CachePriority.CRITICAL:
+        return 100;
+      case CachePriority.HIGH:
+        return 75;
+      case CachePriority.NORMAL:
+        return 50;
+      case CachePriority.LOW:
+        return 25;
+      default:
+        return 50;
+    }
+  }
+  
   /**
    * 格式化大小 | Format size
    */
@@ -1804,7 +1896,8 @@ export default class CacheService {
       try {
         listener(deletedCount, freedSpace);
       } catch (error) {
-        console.error(TAG + `: Error in cleanup listener`, error instanceof Error ? error.message : String(error));
+        const errorMsg: string = error instanceof Error ? error.message : String(error);
+        console.error(TAG + `: Error in cleanup listener`, errorMsg);
       }
     }
   }
@@ -1817,7 +1910,8 @@ export default class CacheService {
       try {
         listener(key, metadata);
       } catch (error) {
-        console.error(TAG + `: Error in eviction listener`, error instanceof Error ? error.message : String(error));
+        const errorMsg: string = error instanceof Error ? error.message : String(error);
+        console.error(TAG + `: Error in eviction listener`, errorMsg);
       }
     }
   }

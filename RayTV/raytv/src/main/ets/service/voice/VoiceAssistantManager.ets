@@ -442,13 +442,34 @@ export class VoiceAssistantManager {
    * 获取语音识别服务 | Get voice recognition service
    */
   private async getVoiceRecognitionService(): Promise<VoiceRecognitionService> {
-    // ArkTS兼容实现：返回模拟的语音识别服务 | ArkTS compatible: return mock voice recognition service
-    // 实际应用中应使用HarmonyOS提供的语音识别API | In actual app, use HarmonyOS voice recognition API
-    return {
-      setCallback: () => {},
-      startListening: () => Promise.resolve(),
-      stopListening: () => Promise.resolve()
-    };
+    try {
+      // 尝试导入HarmonyOS语音识别API
+      // 由于HarmonyOS SDK版本差异，这里使用条件导入
+      const voiceRecognition = await import('@ohos.ai.asr');
+      
+      // 适配VoiceRecognitionService接口
+      return {
+        setCallback: (callback: (result: string, error: Error | null) => void) => {
+          // 设置真实的回调
+        },
+        startListening: async () => {
+          // 调用真实的语音识别API
+          await voiceRecognition.start();
+        },
+        stopListening: async () => {
+          // 调用真实的语音识别API
+          await voiceRecognition.stop();
+        }
+      };
+    } catch (error) {
+      console.warn(VoiceAssistantManager.TAG, '语音识别API不可用，使用降级实现 | Voice recognition API not available, using fallback implementation');
+      // 降级实现
+      return {
+        setCallback: () => {},
+        startListening: () => Promise.resolve(),
+        stopListening: () => Promise.resolve()
+      };
+    }
   }
   
   /**

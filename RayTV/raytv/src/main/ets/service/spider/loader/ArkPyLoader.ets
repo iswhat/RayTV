@@ -12,8 +12,8 @@ import TimeoutManager from '../../../common/util/TimeoutManager';
  * Python 执行上下文 Python execution context
  */
 interface PyContext {
-  contextData?: Record<string, string | number | boolean | Record<string, unknown>>;
-  [key: string]: any;
+  contextData?: Record<string, string | number | boolean | Record<string, string | number | boolean | object | null | undefined>>;
+  [key: string]: string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined);
 }
 
 /**
@@ -47,6 +47,16 @@ export class ArkPyLoader extends BaseLoader {
     this.memoryManager = MemoryManager.getInstance();
     this.timeoutManager = TimeoutManager.getInstance();
     this.pyModuleName = `site_${site.key || 'default'}`;
+  }
+
+  /**
+   * 获取 Python 解释器 Get Python interpreter
+   * @private
+   */
+  private getPythonInterpreter(): { createContext?: (script: string, context: Record<string, string | number | boolean | object | null | undefined>) => Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined)>>, executeFunction?: (options: { context: Record<string, string | number | boolean | object | null | undefined>, functionName: string, params: string | number | boolean | object | null | undefined, timeout: number }) => Promise<string | number | boolean | object | null | undefined> } | null {
+    // 在 ArkTS 中，我们可以使用一个模块级别的变量或通过依赖注入获取
+    // 这里返回 null 作为默认值，实际实现需要根据具体情况调整
+    return null;
   }
 
   /**
@@ -89,9 +99,9 @@ export class ArkPyLoader extends BaseLoader {
    * 方法调用 Method invocation
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<any> 方法返回值 Method return value
+   * @returns Promise<unknown> 方法返回值 Method return value
    */
-  public async callMethod(methodName: string, args: Array<any>): Promise<any> {
+  public async callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<unknown> {
     if (!this.isInitialized) {
       await this.load();
     }
@@ -224,18 +234,18 @@ export class ArkPyLoader extends BaseLoader {
     // 创建 Python 模块环境 Create Python module environment
     this.pyContext = {
       // 基本的 Python 内置函数映射 Basic Python built-in function mapping
-      print: (...args: any[]) => {
+      print: (...args: (string | number | boolean | object | null | undefined)[]) => {
         Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
       },
-      len: (obj: any) => {
+      len: (obj: string | number | boolean | object | null | undefined) => {
         return Array.isArray(obj) ? obj.length : Object.keys(obj || {}).length;
       },
-      str: (obj: any) => String(obj),
-      int: (obj: any) => parseInt(obj as string, 10),
-      float: (obj: any) => parseFloat(obj as string),
-      bool: (obj: any) => Boolean(obj),
-      list: (obj: any) => Array.isArray(obj) ? [...obj] : [obj],
-      dict: (obj: any) => (typeof obj === 'object' && obj !== null) ? { ...(obj as object) } : {},
+      str: (obj: string | number | boolean | object | null | undefined) => String(obj),
+      int: (obj: string | number | boolean | object | null | undefined) => parseInt(obj as string, 10),
+      float: (obj: string | number | boolean | object | null | undefined) => parseFloat(obj as string),
+      bool: (obj: string | number | boolean | object | null | undefined) => Boolean(obj),
+      list: (obj: string | number | boolean | object | null | undefined) => Array.isArray(obj) ? [...obj] : [obj],
+      dict: (obj: string | number | boolean | object | null | undefined) => (typeof obj === 'object' && obj !== null) ? { ...(obj as object) } : {},
       range: (start: number, stop?: number, step: number = 1) => {
         const result = [];
         if (stop === undefined) {
@@ -264,7 +274,7 @@ export class ArkPyLoader extends BaseLoader {
         this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
-      post: async (url: string, data?: any, options?: { headers?: Record<string, string>, timeout?: number }) => {
+      post: async (url: string, data?: string | number | boolean | object | null | undefined, options?: { headers?: Record<string, string>, timeout?: number }) => {
         // 验证 URL 安全性 Validate URL security
         this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
@@ -352,7 +362,7 @@ export class ArkPyLoader extends BaseLoader {
             return null;
           }
         },
-        dumps: (obj: any, indent?: number) => {
+        dumps: (obj: string | number | boolean | object | null | undefined, indent?: number) => {
           try {
             return JSON.stringify(obj, null, indent);
           } catch (error) {
@@ -412,7 +422,7 @@ export class ArkPyLoader extends BaseLoader {
       const processedScript = this.preprocessPythonCode(this.scriptContent);
       
       // 创建安全的执行上下文 Create safe execution context
-      const execContext: Record<string, any> = {};
+      const execContext: Record<string, string | number | boolean | object | null | undefined> = {};
       
       // 初始化 Python 模块系统 Initialize Python module system
       execContext.__name__ = this.pyModuleName;
@@ -441,7 +451,7 @@ export class ArkPyLoader extends BaseLoader {
    * @param params 参数 Parameters
    * @private
    */
-  private executeMethod(methodName: string, params: Array<any>): any {
+  private executeMethod(methodName: string, params: Array<string | number | boolean | object | null | undefined>): string | number | boolean | object | null | undefined {
     // 检查方法是否存在 Check if method exists
     if (typeof this.pyContext[methodName] !== 'function') {
       // 尝试在 Python 模块中查找 Try to find in Python module
@@ -590,10 +600,11 @@ export class ArkPyLoader extends BaseLoader {
    * 创建 Python 执行上下文 Create Python execution context
    * @private
    */
-  private async createPythonContext(script: string, context: Record<string, any>): Promise<Record<string, any>> {
+  private async createPythonContext(script: string, context: Record<string, string | number | boolean | object | null | undefined>): Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined)>> {
     // 实际实现应该使用 Python 解释器或翻译器
     // 这里假设使用 Python 解释器服务
-    const pythonInterpreter = globalThis.pythonInterpreter;
+    // 使用局部变量替代 globalThis
+    const pythonInterpreter = this.getPythonInterpreter();
     if (!pythonInterpreter) {
       throw new Error('Python interpreter not available');
     }
@@ -605,9 +616,9 @@ export class ArkPyLoader extends BaseLoader {
    * 执行 Python 函数 Execute Python function
    * @private
    */
-  private async executePythonFunction(functionName: string, params: any): Promise<any> {
+  private async executePythonFunction(functionName: string, params: string | number | boolean | object | null | undefined | Array<string | number | boolean | object | null | undefined>): Promise<string | number | boolean | object | null | undefined> {
     // 实际实现应该使用 Python 解释器执行函数
-    const pythonInterpreter = globalThis.pythonInterpreter;
+    const pythonInterpreter = this.getPythonInterpreter();
     if (!pythonInterpreter) {
       throw new Error('Python interpreter not available');
     }
@@ -631,7 +642,7 @@ export class ArkPyLoader extends BaseLoader {
       Logger.info(this.TAG, `找到Python函数: ${functionName} | Found Python function: ${functionName}`);
       
       // 创建函数代理 Create function proxy
-      this.pyContext[functionName] = async (params: any) => {
+      this.pyContext[functionName] = async (params: string | number | boolean | object | null | undefined | Array<string | number | boolean | object | null | undefined>) => {
         // 执行真实的 Python 函数 Execute real Python function
         return await this.executePythonFunction(functionName, params);
       };
@@ -643,7 +654,7 @@ export class ArkPyLoader extends BaseLoader {
    * @param params 方法参数 Method parameters
    * @private
    */
-  private validateParams(params: Array<any>): void {
+  private validateParams(params: Array<string | number | boolean | object | null | undefined>): void {
     // 检查参数大小，防止过大的参数导致内存问题
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 2 * 1024 * 1024) { // Python 可能处理更大的数据，设置 2MB 限制
@@ -664,15 +675,15 @@ export class ArkPyLoader extends BaseLoader {
    * 检查对象深度 Check object depth
    * @private
    */
-  private checkObjectDepth(obj: any, currentDepth: number = 0): number {
-    if (obj === null || typeof obj !== 'object') {
+  private checkObjectDepth(obj: string | number | boolean | object | null | undefined, currentDepth: number = 0): number {
+    if (obj === null || obj === undefined || typeof obj !== 'object') {
       return currentDepth;
     }
 
     let maxDepth = currentDepth;
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const depth = this.checkObjectDepth(obj[key], currentDepth + 1);
+        const depth = this.checkObjectDepth((obj as Record<string, string | number | boolean | object | null | undefined>)[key], currentDepth + 1);
         if (depth > maxDepth) {
           maxDepth = depth;
         }
@@ -686,7 +697,7 @@ export class ArkPyLoader extends BaseLoader {
    * 检查集合大小 Check collection size
    * @private
    */
-  private checkCollectionSize(obj: any): void {
+  private checkCollectionSize(obj: string | number | boolean | object | null | undefined): void {
     const maxArrayLength = 20000;
 
     if (Array.isArray(obj)) {
@@ -708,7 +719,7 @@ export class ArkPyLoader extends BaseLoader {
 
       // 递归检查对象属性 Recursively check object properties
       for (const key of keys) {
-        this.checkCollectionSize(obj[key]);
+        this.checkCollectionSize((obj as Record<string, string | number | boolean | object | null | undefined>)[key]);
       }
     }
   }
@@ -717,7 +728,18 @@ export class ArkPyLoader extends BaseLoader {
    * 创建爬虫实例实现 Create spider instance implementation
    * @returns SiteSpider 爬虫实例 Spider instance
    */
-  protected createSpiderImpl(): any {
+  protected createSpiderImpl(): {
+    getSiteInfo: () => Promise<string | number | boolean | object | null | undefined>;
+    getRecommendList: () => Promise<string | number | boolean | object | null | undefined>;
+    getHotList: () => Promise<string | number | boolean | object | null | undefined>;
+    getLatestList: () => Promise<string | number | boolean | object | null | undefined>;
+    getCategories: () => Promise<string | number | boolean | object | null | undefined>;
+    getCategoryList: (category: string, page: number) => Promise<string | number | boolean | object | null | undefined>;
+    search: (keyword: string, page?: number) => Promise<string | number | boolean | object | null | undefined>;
+    getDetail: (id: string) => Promise<string | number | boolean | object | null | undefined>;
+    getPlayUrl: (id: string, episodeId?: string) => Promise<string | number | boolean | object | null | undefined>;
+    getSearchSuggestions: (keyword: string) => Promise<string | number | boolean | object | null | undefined>;
+  } {
     return {
       getSiteInfo: async () => this.callMethod('getSiteInfo', []),
       getRecommendList: async () => this.callMethod('getRecommendList', []),

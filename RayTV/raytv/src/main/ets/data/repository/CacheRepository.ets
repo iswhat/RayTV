@@ -36,7 +36,7 @@ export const CacheEventType = {
 /**
  * 缓存变更事件数据 | Cache change event data
  */
-export interface CacheChangeEvent<T = unknown> {
+export interface CacheChangeEvent<T = CacheValue> {
   key: string;          // 缓存键 | Cache key
   type: CacheType;      // 缓存类型 | Cache type
   value?: T;            // 缓存值（添加/更新时） | Cache value (when adding/updating)
@@ -55,7 +55,7 @@ export class CacheRepository {
   private formatUtil = FormatUtil.getInstance();
   
   // 内存缓存 | Memory cache
-  private memoryCache: Map<string, CacheItem<unknown>> = new Map();
+  private memoryCache: Map<string, CacheItem<CacheValue>> = new Map();
   
   // 缓存配置 | Cache configuration
   private cacheConfig: CacheConfig = {
@@ -398,7 +398,7 @@ export class CacheRepository {
     }
     
     try {
-      let removedItem: CacheItem<unknown> | null = null;
+      let removedItem: CacheItem<CacheValue> | null = null;
       
       // 从内存删除 | Remove from memory
       const memoryItem = this.memoryCache.get(key);
@@ -561,16 +561,16 @@ export class CacheRepository {
   }
 
   /**
-   * 搜索缓存 | Search cache
-   * @param params 搜索参数 | Search parameters
-   */
-  public async searchCache(params: CacheSearchParams): Promise<CacheItem<unknown>[]> {
-    if (!this.initialized) {
-      return [];
-    }
-    
-    try {
-      const results: CacheItem<unknown>[] = [];
+ * 搜索缓存 | Search cache
+ * @param params 搜索参数 | Search parameters
+ */
+public async searchCache(params: CacheSearchParams): Promise<CacheItem<CacheValue>[]> {
+  if (!this.initialized) {
+    return [];
+  }
+  
+  try {
+    const results: CacheItem<CacheValue>[] = [];
       
       // 搜索内存缓存 | Search memory cache
       for (const item of this.memoryCache.values()) {

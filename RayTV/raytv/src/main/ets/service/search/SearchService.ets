@@ -440,6 +440,57 @@ export default class SearchService {
   }
 
   /**
+   * 验证搜索关键词，防止注入攻击 Validate search keyword to prevent injection attacks
+   */
+  private validateSearchKeyword(keyword: string): void {
+    if (!keyword) {
+      return;
+    }
+    
+    // 防止SQL注入 Prevent SQL injection
+    const sqlInjectionPatterns = [
+      /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC)\b/i,
+      /\b(OR|AND)\s+1=1\b/i,
+      /'OR'1'='1/,
+      /"OR"1"="1/
+    ];
+    
+    for (const pattern of sqlInjectionPatterns) {
+      if (pattern.test(keyword)) {
+        throw new Error('搜索关键词包含非法字符');
+      }
+    }
+    
+    // 防止XSS攻击 Prevent XSS attack
+    const xssPatterns = [
+      /<script[^>]*>.*?<\/script>/gi,
+      /<iframe[^>]*>.*?<\/iframe>/gi,
+      /javascript:/gi,
+      /on\w+\s*=/gi
+    ];
+    
+    for (const pattern of xssPatterns) {
+      if (pattern.test(keyword)) {
+        throw new Error('搜索关键词包含非法字符');
+      }
+    }
+    
+    // 防止命令注入 Prevent command injection
+    const commandInjectionPatterns = [
+      /;\s*[a-z]+/i,
+      /\|\s*[a-z]+/i,
+      /\$\(.*?\)/,
+      /`.*?`/
+    ];
+    
+    for (const pattern of commandInjectionPatterns) {
+      if (pattern.test(keyword)) {
+        throw new Error('搜索关键词包含非法字符');
+      }
+    }
+  }
+  
+  /**
    * 搜索视频（高级搜索，支持多种过滤条件）Search videos (advanced search, supports multiple filters)
    */
   async search(options: SearchOptions): Promise<SearchResponse> {
@@ -456,6 +507,9 @@ export default class SearchService {
       if (query.length < this.config.minSearchLength) {
         throw new Error(`搜索关键词至少需要${this.config.minSearchLength}个字符`);
       }
+    
+    // 验证搜索关键词，防止注入攻击 Validate search keyword to prevent injection attacks
+    this.validateSearchKeyword(query);
     
     const startTime = Date.now();
     
@@ -535,6 +589,9 @@ export default class SearchService {
     resultTypes: SearchResultType[],
     options?: SearchOptions
   ): Promise<SearchResponse> {
+    // 验证搜索关键词，防止注入攻击 Validate search keyword to prevent injection attacks
+    this.validateSearchKeyword(query);
+    
     // 创建过滤条件，直接使用完整的属性初始化
     // Create filter conditions, directly use complete property initialization
       // 明确初始化所有属性，避免undefined
@@ -794,6 +851,9 @@ export default class SearchService {
     if (!keyword.trim()) {
       return [];
     }
+    
+    // 验证搜索关键词，防止注入攻击 Validate search keyword to prevent injection attacks
+    this.validateSearchKeyword(keyword);
 
     try {
       // 从API获取搜索建议 Get search suggestions from API

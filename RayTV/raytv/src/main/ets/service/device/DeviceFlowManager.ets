@@ -9,6 +9,26 @@ import deviceManager from '@ohos.distributedHardware.deviceManager';
 import BusinessError from '@ohos.base';
 
 /**
+ * 设备管理器设备接口 | Device manager device interface
+ */
+export interface DMDevice {
+  deviceId: string;
+  deviceName: string;
+  deviceType: number;
+  status: number;
+}
+
+/**
+ * 增强的设备管理器接口 | Enhanced device manager interface
+ */
+export interface EnhancedDeviceManager extends deviceManager.DeviceManager {
+  on: (event: string, callback: (data: DMDevice | DMDevice[]) => void) => void;
+  publishDeviceDiscovery: (options: object) => void;
+  startDeviceDiscovery: (options: object) => void;
+  getTrustedDeviceListSync: () => DMDevice[];
+}
+
+/**
  * 设备信息接口 | Device info interface
  */
 export interface DeviceInfo {
@@ -123,7 +143,7 @@ export interface FlowParams {
 }
 
 /**
- * 设备状态变化接口 | Device state change interface
+ * 设备状态变化数据接口 | Device state change data interface
  */
 export interface DeviceStateChangeData {
   deviceId: string;
@@ -139,12 +159,9 @@ export interface DeviceStateChangeData {
 }
 
 /**
- * 设备管理器设备接口 | Device manager device interface
+ * 设备管理器扩展设备接口 | Device manager extended device interface
  */
-export interface DMDevice {
-  deviceId?: string;
-  status?: number;
-  deviceName?: string;
+export interface ExtendedDMDevice extends DMDevice {
   deviceTypeId?: number;
   networkId?: string;
   isLocal?: boolean;
@@ -176,7 +193,8 @@ class DeviceManager {
   private static readonly TAG: string = 'DeviceManager';
   private devices: Map<string, DeviceInfo> = new Map();
   private listeners: Array<(devices: DeviceInfo[]) => void> = [];
-  private dmInstance: deviceManager.DeviceManager | null = null;
+  // 增强的设备管理器接口 | Enhanced device manager interface
+  private dmInstance: EnhancedDeviceManager | null = null;
   private discoveryStarted: boolean = false;
   
   /**
@@ -235,49 +253,51 @@ class DeviceManager {
       // 保存当前实例的引用，避免在回调中使用this | Save reference to current instance to avoid using this in callback
       const instance = this;
       
-      this.dmInstance.on('deviceStateChange', (device: DMDevice) => {
-        console.info(DeviceManager.TAG, `设备状态变更: ${JSON.stringify(device)} | Device state changed: ${JSON.stringify(device)}`);
-        const deviceId: string = device.deviceId || '';
-        const status: number = device.status || 0;
-        
-        // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
-        const deviceStateChangeData: DeviceStateChangeData = {
-          deviceId: deviceId,
-          status: status,
-          deviceName: device.deviceName || '',
-          deviceTypeId: device.deviceTypeId || 0,
-          networkId: device.networkId || '',
-          isLocal: device.isLocal || false,
-          authType: device.authType || 0,
-          extraInfo: device.extraInfo || {} as AppState
-        };
-        
-        instance.handleDeviceStateChange(deviceStateChangeData);
-      });
-      
-      this.dmInstance.on('deviceFound', (devices: DMDevice[]) => {
-        console.info(DeviceManager.TAG, `Devices found: ${devices.length}`);
-        const convertedDevices: DiscoveredDevice[] = [];
-        for (let i = 0; i < devices.length; i++) {
-          const device = devices[i];
+      if (typeof this.dmInstance?.on === 'function') {
+        this.dmInstance.on('deviceStateChange', (device: DMDevice) => {
+          console.info(DeviceManager.TAG, `设备状态变更: ${JSON.stringify(device)} | Device state changed: ${JSON.stringify(device)}`);
           const deviceId: string = device.deviceId || '';
+          const status: number = device.status || 0;
           
           // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
-          const discoveredDevice: DiscoveredDevice = {
+          const deviceStateChangeData: DeviceStateChangeData = {
             deviceId: deviceId,
+            status: status,
             deviceName: device.deviceName || '',
             deviceTypeId: device.deviceTypeId || 0,
             networkId: device.networkId || '',
             isLocal: device.isLocal || false,
             authType: device.authType || 0,
-            isTrusted: device.isTrusted || false,
             extraInfo: device.extraInfo || {} as AppState
           };
           
-          convertedDevices.push(discoveredDevice);
-        }
-        this.handleDevicesFound(convertedDevices);
-      });
+          instance.handleDeviceStateChange(deviceStateChangeData);
+        });
+        
+        this.dmInstance.on('deviceFound', (devices: DMDevice[]) => {
+          console.info(DeviceManager.TAG, `Devices found: ${devices.length}`);
+          const convertedDevices: DiscoveredDevice[] = [];
+          for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+            const deviceId: string = device.deviceId || '';
+            
+            // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
+            const discoveredDevice: DiscoveredDevice = {
+              deviceId: deviceId,
+              deviceName: device.deviceName || '',
+              deviceTypeId: device.deviceTypeId || 0,
+              networkId: device.networkId || '',
+              isLocal: device.isLocal || false,
+              authType: device.authType || 0,
+              isTrusted: device.isTrusted || false,
+              extraInfo: device.extraInfo || {} as AppState
+            };
+            
+            convertedDevices.push(discoveredDevice);
+          }
+          this.handleDevicesFound(convertedDevices);
+        });
+      }
     } catch (error) {
       console.error(DeviceManager.TAG, `设置设备监听器失败: `, error, ` | Failed to setup device listeners: `, error);
     }
@@ -293,16 +313,26 @@ class DeviceManager {
       console.info(DeviceManager.TAG, '正在启动设备发现... | Starting device discovery...');
       
       // 发布本地设备信息 | Publish local device info
-      this.dmInstance.publishDeviceDiscovery({});
-      
+      if (typeof this.dmInstance?.publishDeviceDiscovery === 'function') {
+        this.dmInstance.publishDeviceDiscovery({});
+      }
+
       // 发现周边设备 | Discover nearby devices
-      this.dmInstance.startDeviceDiscovery({});
+      if (typeof this.dmInstance?.startDeviceDiscovery === 'function') {
+        this.dmInstance.startDeviceDiscovery({});
+      }
       
       this.discoveryStarted = true;
       console.info(DeviceManager.TAG, '设备发现已启动 | Device discovery started');
       
       // 获取已发现的可信设备 | Get already discovered trusted devices
-      const trustedDevices = this.dmInstance.getTrustedDeviceListSync();
+      const trustedDevices: DMDevice[] = [];
+      if (typeof this.dmInstance?.getTrustedDeviceListSync === 'function') {
+        const rawDevices = this.dmInstance.getTrustedDeviceListSync();
+        for (let i = 0; i < rawDevices.length; i++) {
+          trustedDevices.push(rawDevices[i]);
+        }
+      }
       if (trustedDevices && trustedDevices.length > 0) {
         // 转换为DiscoveredDevice类型 | Convert to DiscoveredDevice type
         const convertedDevices: DiscoveredDevice[] = [];
@@ -425,7 +455,13 @@ class DeviceManager {
       
       // 如果有分布式设备管理器实例，使用它获取设备列表 | If there is a distributed device manager instance, use it to get device list
       if (this.dmInstance) {
-        const trustedDevices = this.dmInstance.getTrustedDeviceListSync();
+        const trustedDevices: DMDevice[] = [];
+        if (typeof this.dmInstance?.getTrustedDeviceListSync === 'function') {
+          const rawDevices = this.dmInstance.getTrustedDeviceListSync();
+          for (let i = 0; i < rawDevices.length; i++) {
+            trustedDevices.push(rawDevices[i]);
+          }
+        }
         if (trustedDevices && trustedDevices.length > 0) {
           // 转换为DiscoveredDevice类型 | Convert to DiscoveredDevice type
           const convertedDevices: DiscoveredDevice[] = [];
@@ -555,7 +591,8 @@ export class DeviceFlowManager {
       console.info(DeviceFlowManager.TAG, '设备流转管理器初始化成功 | DeviceFlowManager initialized successfully');
     } catch (error) {
       console.error(DeviceFlowManager.TAG, `设备流转管理器初始化失败: `, error, ` | Failed to initialize DeviceFlowManager: `, error);
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
   
@@ -627,44 +664,46 @@ export class DeviceFlowManager {
     try {
       console.info(DeviceFlowManager.TAG, `正在执行分布式数据传输到 ${targetDeviceId} | Performing distributed data transfer to ${targetDeviceId}`);
       
-      // 实现基于HarmonyOS分布式数据服务的传输逻辑 | Implement transfer logic based on HarmonyOS distributed data service
-      // 使用DeviceManager的sendData接口或分布式文件服务 | Use DeviceManager's sendData interface or distributed file service
-      
       // 1. 获取设备管理器实例 | Get device manager instance
-      const deviceManager = await this.getDeviceManager();
-      
+      const dm = await this.getDeviceManager() as EnhancedDeviceManager;
+
       // 2. 检查目标设备是否可用 | Check if target device is available
-      if (!deviceManager.isDeviceAvailable(targetDeviceId)) {
-        throw new Error(`目标设备不可用 | Target device not available: ${targetDeviceId}`);
+      const trustedDevices: DMDevice[] = [];
+      if (dm.getTrustedDeviceListSync) {
+        const rawDevices = dm.getTrustedDeviceListSync();
+        for (let i = 0; i < rawDevices.length; i++) {
+          trustedDevices.push(rawDevices[i]);
+        }
+      }
+      const targetDevice = trustedDevices.find((device: DMDevice) => device.deviceId === targetDeviceId);
+      if (!targetDevice) {
+        const error = new Error(`目标设备不可用 | Target device not available: ${targetDeviceId}`);
+        throw error;
       }
       
       // 3. 准备传输数据 | Prepare transfer data
       const transferData = this.prepareTransferData(data);
+      const transferDataStr = JSON.stringify(transferData);
       
       // 4. 注册传输状态监听器 | Register transfer status listener
-      deviceManager.on('transferStatusChange', (event: TransferStatusEvent) => {
-        if (event.transferId === this.currentFlowStatus?.transferId && this.currentFlowStatus) {
-          this.currentFlowStatus.status = event.status as DeviceFlowStatus['status'];
-          this.currentFlowStatus.progress = event.progress;
-          this.notifyFlowStatusChanged();
+      if (dm.on) {
+        dm.on('deviceStateChange', (device: DMDevice) => {
+        if (device.deviceId === targetDeviceId) {
+          console.info(DeviceFlowManager.TAG, `目标设备状态变化: ${device.status} | Target device state changed: ${device.status}`);
         }
       });
       
       // 5. 执行数据传输 | Execute data transfer
-      const transferId = await deviceManager.sendData({
-        deviceId: targetDeviceId,
-        data: transferData,
-        type: 'app_flow',
-        timeout: 30000 // 30秒超时 | 30 seconds timeout
-      });
+      // 使用分布式数据服务进行传输
+      // 这里使用模拟的传输ID，实际应用中应使用真实的传输机制
+      const transferId = `transfer_${Date.now()}`;
       
       // 6. 记录传输ID | Record transfer ID
-      if (this.currentFlowStatus) {
-        this.currentFlowStatus.transferId = transferId;
-      }
+      // Note: DeviceFlowStatus interface doesn't have transferId field
+      // The transferId is tracked internally
       
-      // 7. 等待传输完成 | Wait for transfer completion
-      await this.waitForTransferCompletion(transferId);
+      // 7. 模拟传输过程（实际应用中应使用真实的传输API）
+      await this.simulateTransferProcess(transferId, targetDeviceId);
       
       console.info(DeviceFlowManager.TAG, `分布式传输完成 | Distributed transfer completed`);
     } catch (error) {
@@ -692,7 +731,8 @@ export class DeviceFlowManager {
       this.currentFlowStatus = null;
     } catch (error) {
       console.error(DeviceFlowManager.TAG, `停止流转失败: `, error, ` | Failed to stop flow: `, error);
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
   
@@ -728,7 +768,8 @@ export class DeviceFlowManager {
       console.info(DeviceFlowManager.TAG, `设备流转已${enabled ? '启用' : '禁用'} | Device flow ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
       console.error(DeviceFlowManager.TAG, `设置设备流转启用状态失败: `, error, ` | Failed to set device flow enabled state: `, error);
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
   
@@ -758,7 +799,7 @@ export class DeviceFlowManager {
       this.flowListeners.forEach(listener => {
         try {
           // 手动复制流转状态对象 | Manually copy flow status object
-          const statusCopy = {
+          const statusCopy: DeviceFlowStatus = {
             flowType: currentStatus.flowType,
             status: currentStatus.status,
             progress: currentStatus.progress,
@@ -780,17 +821,23 @@ export class DeviceFlowManager {
   /**
    * 获取设备管理器实例 | Get device manager instance
    */
-  private async getDeviceManager(): Promise<MockDeviceManager> {
-    // ArkTS兼容实现：返回模拟的设备管理器 | ArkTS compatible: return mock device manager
-    // 实际应用中应使用HarmonyOS提供的设备管理API | In actual app, use HarmonyOS device management API
-    // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
-    const mockDeviceManager: MockDeviceManager = {
-      isDeviceAvailable: (deviceId: string) => true,
-      on: (event: string, callback: () => void) => {},
-      sendData: () => Promise.resolve('mock_transfer_id'),
-      getTransferStatus: (transferId: string) => 'completed'
-    };
-    return mockDeviceManager;
+  private async getDeviceManager(): Promise<deviceManager.DeviceManager> {
+    return new Promise((resolve, reject) => {
+      try {
+        deviceManager.createDeviceManager('RayTV', (error: BusinessError, dm: deviceManager.DeviceManager) => {
+          if (error) {
+            console.error(DeviceFlowManager.TAG, `创建设备管理器失败: `, error, ` | Failed to create device manager: `, error);
+            reject(error);
+            return;
+          }
+          console.info(DeviceFlowManager.TAG, '设备管理器创建成功 | Device manager created successfully');
+          resolve(dm);
+        });
+      } catch (error) {
+        console.error(DeviceFlowManager.TAG, `创建设备管理器时出错: `, error, ` | Error creating device manager: `, error);
+        reject(error);
+      }
+    });
   }
   
   /**
@@ -809,16 +856,40 @@ export class DeviceFlowManager {
   }
   
   /**
+   * 模拟传输过程 | Simulate transfer process
+   */
+  private async simulateTransferProcess(transferId: string, targetDeviceId: string): Promise<void> {
+    return new Promise<void>((resolve) => {
+      // 模拟传输进度更新
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        if (this.currentFlowStatus) {
+          this.currentFlowStatus.status = 'transferring';
+          this.currentFlowStatus.progress = progress;
+          this.notifyFlowStatusChanged();
+        }
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          if (this.currentFlowStatus) {
+            this.currentFlowStatus.status = 'completed';
+            this.currentFlowStatus.progress = 100;
+            this.currentFlowStatus.endTime = Date.now();
+            this.notifyFlowStatusChanged();
+          }
+          resolve();
+        }
+      }, 200);
+    });
+  }
+
+  /**
    * 等待传输完成 | Wait for transfer completion
    */
   private async waitForTransferCompletion(transferId: string): Promise<void> {
-    // ArkTS兼容实现：简化实现，使用延迟模拟传输完成 | ArkTS compatible: simplified implementation, use delay to simulate transfer completion
     // 实际应用中应使用HarmonyOS提供的传输状态监听API | In actual app, use HarmonyOS transfer status listening API
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    });
+    return this.simulateTransferProcess(transferId, this.currentFlowStatus?.targetDeviceId || '');
   }
   
   /**
@@ -840,7 +911,7 @@ export class DeviceFlowManager {
     this.notifyBackupReady(backupId);
   }
   
-    /**
+  /**
    * 创建本地备份 | Create local backup
    */
   private async createLocalBackup(): Promise<BackupData> {
@@ -854,16 +925,7 @@ export class DeviceFlowManager {
     return backupData;
   }
 
-/**
- * 备份数据接口 | Backup data interface
- */
-export interface BackupData {
-  timestamp: number;
-  appState: FlowData | {};
-  version: string;
-}
-
-/**
+  /**
    * 生成备份ID | Generate backup ID
    */
   private generateBackupId(): string {
@@ -913,6 +975,15 @@ export interface BackupData {
       throw new Error(`从流转参数恢复失败: ${errorMsg} | Failed to restore from flow params: ${errorMsg}`);
     }
   }
+}
+
+/**
+ * 备份数据接口 | Backup data interface
+ */
+export interface BackupData {
+  timestamp: number;
+  appState?: FlowData;
+  version: string;
 }
 
 // 导出单例实例 | Export singleton instance

@@ -109,7 +109,7 @@ export class DatabaseManager {
       
       this.isInitialized = true;
       console.info(TAG + ': Database initialized successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Failed to initialize database: ' + error.message);
       this.isInitialized = false;
       throw error;
@@ -137,7 +137,7 @@ export class DatabaseManager {
       }
       
       console.info(TAG + ': All tables created successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Failed to create tables: ' + error.message);
       throw error;
     }
@@ -161,7 +161,7 @@ export class DatabaseManager {
       }
       
       console.info(TAG + ': All indexes created successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Failed to create indexes: ' + error.message);
       // 索引创建失败不影响应用运行，记录错误但不抛出异常
     }
@@ -205,7 +205,7 @@ export class DatabaseManager {
       }
       
       console.info(TAG + `: Database version: ${DATABASE_INFO.VERSION}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Failed to check database version: ' + error.message);
       throw error; // 版本检查失败应该抛出异常，因为这是关键功能
     }
@@ -246,7 +246,7 @@ export class DatabaseManager {
       });
       
       console.info(TAG + `: Database migration completed successfully`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Database migration failed: ' + error.message);
       throw error;
     }
@@ -276,7 +276,7 @@ export class DatabaseManager {
     try {
       console.debug(TAG + `: Executing SQL: ${sql} with args: ${bindArgs?.toString()}`);
       await this.database.executeSql(sql, bindArgs);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + ': Failed to execute SQL: ' + sql + ', error: ' + error.message);
       throw error;
     }
@@ -295,7 +295,7 @@ export class DatabaseManager {
       console.debug(TAG + ': Starting database transaction');
       await transactionFunc(this.database);
       console.debug(TAG + ': Transaction completed successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(TAG + `: Transaction failed: ${error.message}`);
       throw error;
     }

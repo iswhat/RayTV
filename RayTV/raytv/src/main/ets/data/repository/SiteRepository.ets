@@ -10,6 +10,44 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import { DatabaseError, SiteError, handleError } from '../../common/util/AppError';
 
+// 数据库记录接口 | Database record interface
+export interface SiteRecord {
+  [key: string]: any;
+  [SITE_TABLE.COLUMNS.KEY]?: string | number;
+  [SITE_TABLE.COLUMNS.NAME]: string;
+  [SITE_TABLE.COLUMNS.TYPE]: SiteType;
+  [SITE_TABLE.COLUMNS.LOADER_TYPE]: LoaderType;
+  [SITE_TABLE.COLUMNS.API]: string;
+  [SITE_TABLE.COLUMNS.LOGO]?: string;
+  [SITE_TABLE.COLUMNS.DESCRIPTION]?: string;
+  [SITE_TABLE.COLUMNS.SITE_AUTH]?: string;
+  [SITE_TABLE.COLUMNS.HEADERS]?: string;
+  [SITE_TABLE.COLUMNS.CONFIG]: string;
+  [SITE_TABLE.COLUMNS.CONFIG_ITEMS]?: string;
+  [SITE_TABLE.COLUMNS.SEARCH_CONFIG]: string;
+  [SITE_TABLE.COLUMNS.FILTER_CONFIG]: string;
+  [SITE_TABLE.COLUMNS.PERFORMANCE_CONFIG]: string;
+  [SITE_TABLE.COLUMNS.VERSION]?: string;
+  [SITE_TABLE.COLUMNS.STATS]: string;
+  [SITE_TABLE.COLUMNS.LIFECYCLE]: string;
+  [SITE_TABLE.COLUMNS.ENABLED]: number;
+  [SITE_TABLE.COLUMNS.ORDER]: number;
+  [SITE_TABLE.COLUMNS.GROUP]?: string;
+  [SITE_TABLE.COLUMNS.TAGS]?: string;
+  [SITE_TABLE.COLUMNS.CUSTOM_CODE]?: string;
+  [SITE_TABLE.COLUMNS.SANDBOX_ENABLED]: number;
+  [SITE_TABLE.COLUMNS.ALLOW_THIRD_PARTY]: number;
+  [SITE_TABLE.COLUMNS.CREATED_AT]?: number;
+  [SITE_TABLE.COLUMNS.UPDATED_AT]: number;
+  [SITE_TABLE.COLUMNS.LAST_USED_AT]?: number;
+  [SITE_TABLE.COLUMNS.USER_AGENT]?: string;
+  [SITE_TABLE.COLUMNS.REFERER]?: string;
+  [SITE_TABLE.COLUMNS.PROXY]?: string;
+  [SITE_TABLE.COLUMNS.ENCODING]?: string;
+  [SITE_TABLE.COLUMNS.CHARSET]?: string;
+  [SITE_TABLE.COLUMNS.CERTIFICATE]?: string;
+}
+
 const TAG = 'SiteRepository';
 const SITE_CACHE_PREFIX = 'site_data_';
 const SITE_LIST_CACHE = 'site_list_cache';
@@ -622,7 +660,7 @@ export class SiteRepository {
   /**
    * 将数据库记录转换为Site对象 | Convert database record to Site object
    */
-  private convertToSiteObject(record: any): Site {
+  private convertToSiteObject(record: SiteRecord): Site {
     return {
       key: record[SITE_TABLE.COLUMNS.KEY]?.toString(),
       name: record[SITE_TABLE.COLUMNS.NAME],
@@ -663,7 +701,7 @@ export class SiteRepository {
   /**
    * 将数据库记录列表转换为Site对象列表 | Convert database record list to Site object list
    */
-  private convertToSiteObjects(records: any[]): Site[] {
+  private convertToSiteObjects(records: SiteRecord[]): Site[] {
     return records.map(record => this.convertToSiteObject(record));
   }
 }

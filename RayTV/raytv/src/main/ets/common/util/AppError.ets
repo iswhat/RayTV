@@ -4,6 +4,39 @@
  */
 
 /**
+ * 错误详情接口 | Error details interface
+ */
+export interface ErrorDetails {
+  name?: string;
+  message?: string;
+  code?: string;
+  stack?: string;
+  timestamp?: number;
+  originalError?: string;
+  sql?: string;
+  configKey?: string;
+  siteKey?: string;
+  mediaId?: string;
+  status?: string;
+  cacheKey?: string;
+  source?: string;
+  url?: string;
+  statusCode?: number;
+}
+
+/**
+ * 应用错误对象接口 | App error object interface
+ */
+export interface AppErrorObject {
+  name: string;
+  message: string;
+  code: string;
+  details?: ErrorDetails;
+  timestamp: number;
+  stack?: string;
+}
+
+/**
  * 应用错误基础类 | App error base class
  */
 export class AppError extends Error {
@@ -11,31 +44,31 @@ export class AppError extends Error {
    * 错误代码 | Error code
    */
   public code: string;
-  
+
   /**
    * 错误详情 | Error details
    */
-  public details?: any;
-  
+  public details?: ErrorDetails;
+
   /**
    * 错误时间戳 | Error timestamp
    */
   public timestamp: number;
-  
+
   /**
    * 构造函数 | Constructor
    * @param message 错误消息 | Error message
    * @param code 错误代码 | Error code
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string, details?: any) {
+  constructor(message: string, code: string, details?: ErrorDetails) {
     super(message);
     this.name = 'AppError';
     this.code = code;
     this.details = details;
     this.timestamp = Date.now();
   }
-  
+
   /**
    * 转换为字符串 | Convert to string
    * @returns 错误字符串 | Error string
@@ -43,12 +76,12 @@ export class AppError extends Error {
   public toString(): string {
     return `[${this.code}] ${this.message}${this.details ? ` - ${JSON.stringify(this.details)}` : ''}`;
   }
-  
+
   /**
    * 转换为对象 | Convert to object
    * @returns 错误对象 | Error object
    */
-  public toObject(): Record<string, any> {
+  public toObject(): AppErrorObject {
     return {
       name: this.name,
       message: this.message,
@@ -82,7 +115,7 @@ export class NetworkError extends AppError {
    * @param url 请求URL | Request URL
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'NETWORK_ERROR', statusCode?: number, url?: string, details?: any) {
+  constructor(message: string, code: string = 'NETWORK_ERROR', statusCode?: number, url?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'NetworkError';
     this.statusCode = statusCode;
@@ -106,7 +139,7 @@ export class DatabaseError extends AppError {
    * @param sql SQL语句 | SQL statement
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'DATABASE_ERROR', sql?: string, details?: any) {
+  constructor(message: string, code: string = 'DATABASE_ERROR', sql?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'DatabaseError';
     this.sql = sql;
@@ -129,7 +162,7 @@ export class ConfigError extends AppError {
    * @param configKey 配置键 | Configuration key
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'CONFIG_ERROR', configKey?: string, details?: any) {
+  constructor(message: string, code: string = 'CONFIG_ERROR', configKey?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'ConfigError';
     this.configKey = configKey;
@@ -152,7 +185,7 @@ export class SiteError extends AppError {
    * @param siteKey 站点key | Site key
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'SITE_ERROR', siteKey?: string, details?: any) {
+  constructor(message: string, code: string = 'SITE_ERROR', siteKey?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'SiteError';
     this.siteKey = siteKey;
@@ -181,7 +214,7 @@ export class PlaybackError extends AppError {
    * @param status 播放状态 | Playback status
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'PLAYBACK_ERROR', mediaId?: string, status?: string, details?: any) {
+  constructor(message: string, code: string = 'PLAYBACK_ERROR', mediaId?: string, status?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'PlaybackError';
     this.mediaId = mediaId;
@@ -205,7 +238,7 @@ export class CacheError extends AppError {
    * @param cacheKey 缓存键 | Cache key
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'CACHE_ERROR', cacheKey?: string, details?: any) {
+  constructor(message: string, code: string = 'CACHE_ERROR', cacheKey?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'CacheError';
     this.cacheKey = cacheKey;
@@ -228,7 +261,7 @@ export class ParserError extends AppError {
    * @param source 解析源 | Parser source
    * @param details 错误详情 | Error details
    */
-  constructor(message: string, code: string = 'PARSER_ERROR', source?: string, details?: any) {
+  constructor(message: string, code: string = 'PARSER_ERROR', source?: string, details?: ErrorDetails) {
     super(message, code, details);
     this.name = 'ParserError';
     this.source = source;
@@ -243,7 +276,7 @@ export class ParserError extends AppError {
  * @param details 错误详情 | Error details
  * @returns 网络错误实例 | Network error instance
  */
-export function createNetworkError(message: string, statusCode?: number, url?: string, details?: any): NetworkError {
+export function createNetworkError(message: string, statusCode?: number, url?: string, details?: ErrorDetails): NetworkError {
   return new NetworkError(message, 'NETWORK_ERROR', statusCode, url, details);
 }
 
@@ -254,7 +287,7 @@ export function createNetworkError(message: string, statusCode?: number, url?: s
  * @param details 错误详情 | Error details
  * @returns 数据库错误实例 | Database error instance
  */
-export function createDatabaseError(message: string, sql?: string, details?: any): DatabaseError {
+export function createDatabaseError(message: string, sql?: string, details?: ErrorDetails): DatabaseError {
   return new DatabaseError(message, 'DATABASE_ERROR', sql, details);
 }
 
@@ -265,7 +298,7 @@ export function createDatabaseError(message: string, sql?: string, details?: any
  * @param details 错误详情 | Error details
  * @returns 配置错误实例 | Configuration error instance
  */
-export function createConfigError(message: string, configKey?: string, details?: any): ConfigError {
+export function createConfigError(message: string, configKey?: string, details?: ErrorDetails): ConfigError {
   return new ConfigError(message, 'CONFIG_ERROR', configKey, details);
 }
 
@@ -276,7 +309,7 @@ export function createConfigError(message: string, configKey?: string, details?:
  * @param details 错误详情 | Error details
  * @returns 站点错误实例 | Site error instance
  */
-export function createSiteError(message: string, siteKey?: string, details?: any): SiteError {
+export function createSiteError(message: string, siteKey?: string, details?: ErrorDetails): SiteError {
   return new SiteError(message, 'SITE_ERROR', siteKey, details);
 }
 
@@ -288,7 +321,7 @@ export function createSiteError(message: string, siteKey?: string, details?: any
  * @param details 错误详情 | Error details
  * @returns 播放错误实例 | Playback error instance
  */
-export function createPlaybackError(message: string, mediaId?: string, status?: string, details?: any): PlaybackError {
+export function createPlaybackError(message: string, mediaId?: string, status?: string, details?: ErrorDetails): PlaybackError {
   return new PlaybackError(message, 'PLAYBACK_ERROR', mediaId, status, details);
 }
 
@@ -299,7 +332,7 @@ export function createPlaybackError(message: string, mediaId?: string, status?: 
  * @param details 错误详情 | Error details
  * @returns 缓存错误实例 | Cache error instance
  */
-export function createCacheError(message: string, cacheKey?: string, details?: any): CacheError {
+export function createCacheError(message: string, cacheKey?: string, details?: ErrorDetails): CacheError {
   return new CacheError(message, 'CACHE_ERROR', cacheKey, details);
 }
 
@@ -310,7 +343,7 @@ export function createCacheError(message: string, cacheKey?: string, details?: a
  * @param details 错误详情 | Error details
  * @returns 解析错误实例 | Parser error instance
  */
-export function createParserError(message: string, source?: string, details?: any): ParserError {
+export function createParserError(message: string, source?: string, details?: ErrorDetails): ParserError {
   return new ParserError(message, 'PARSER_ERROR', source, details);
 }
 
@@ -320,17 +353,23 @@ export function createParserError(message: string, source?: string, details?: an
  * @param defaultMessage 默认错误消息 | Default error message
  * @returns 标准化的错误对象 | Standardized error object
  */
-export function handleError(error: any, defaultMessage: string = 'Unknown error'): AppError {
+export function handleError(error: Error | string | number | object | null | undefined, defaultMessage: string = 'Unknown error'): AppError {
   if (error instanceof AppError) {
     return error;
   }
-  
+
   if (error instanceof Error) {
-    return new AppError(error.message || defaultMessage, 'UNKNOWN_ERROR', {
-      originalError: error.message,
+    const details: ErrorDetails = {
+      name: error.name,
+      message: error.message,
       stack: error.stack
-    });
+    };
+    return new AppError(error.message || defaultMessage, 'UNKNOWN_ERROR', details);
   }
-  
-  return new AppError(String(error) || defaultMessage, 'UNKNOWN_ERROR', error);
+
+  const errorStr = String(error || defaultMessage);
+  const details: ErrorDetails = {
+    message: errorStr
+  };
+  return new AppError(errorStr, 'UNKNOWN_ERROR', details);
 }

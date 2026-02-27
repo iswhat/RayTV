@@ -162,7 +162,7 @@ export interface CacheCleanOptions {
   sourceId?: string;              // 按源ID清理 Clean by source ID
   quality?: string;               // 按质量清理 Clean by quality
   exceptIds?: string[];           // 排除的ID列表 Excluded ID list
-  dryRun?: boolean;               // 模拟运行 Dry run
+  dryRun?: boolean;               // 测试运行 Test run
 }
 
 // 缓存监听器回调类型 Cache listener callback type

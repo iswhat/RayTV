@@ -567,14 +567,12 @@ export class SearchHistoryRepository {
       
       await StorageUtil.setObject(
         this.storageKeys.searchHistory,
-        updatedHistory,
-        StorageType.PREFERENCES
+        updatedHistory
       );
       
       await StorageUtil.setObject(
         this.storageKeys.favoriteSearches,
-        [],
-        StorageType.PREFERENCES
+        []
       );
       
       console.info('SearchHistoryRepository: 所有收藏搜索已清除 | All favorite searches cleared');
@@ -656,8 +654,7 @@ export class SearchHistoryRepository {
       this.cachedConfig = updatedConfig;
       await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
-        updatedConfig,
-        StorageType.PREFERENCES
+        updatedConfig
       );
       
       // 根据新配置清理数据 | Clean up data based on new configuration
@@ -724,8 +721,7 @@ export class SearchHistoryRepository {
       };
       await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
-        this.defaultConfig,
-        StorageType.PREFERENCES
+        this.defaultConfig
       );
       
       console.info('SearchHistoryRepository: 搜索历史配置已重置为默认值 | Search history configuration reset to default');
@@ -750,8 +746,7 @@ export class SearchHistoryRepository {
   private async loadHistory(): Promise<void> {
     try {
       const historyResult: SearchHistoryItem[] | null = await StorageUtil.getObject<SearchHistoryItem[]>(
-        this.storageKeys.searchHistory, 
-        StorageType.PREFERENCES
+        this.storageKeys.searchHistory
       );
       
       this.cachedHistory = historyResult || [];

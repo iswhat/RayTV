@@ -7,7 +7,7 @@
 
 ## 项目概述
 
-RayTV是一个基于Harmony OS开发的智能电视应用壳程序。
+RayTV是一个基于Harmony OS开发的壳程序。
 
 **重要声明：**
 - 本项目仅用于Harmony OS程序开发学习目的

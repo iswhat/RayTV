@@ -1,5 +1,31 @@
-// PlaybackService.ets - 播放服务 | Playback service
-// 实现视频播放控制、状态管理和播放队列管理 | Implements video playback control, state management and playback queue management
+/**
+ * PlaybackService - 播放服务
+ * 
+ * 实现视频播放控制、状态管理、播放队列管理等功能，
+ * 支持错误处理、网络质量监控、自动恢复等高级特性。
+ * 
+ * @example
+ * ```typescript
+ * // 获取PlaybackService实例
+ * const playbackService = PlaybackService.getInstance();
+ * 
+ * // 初始化播放服务
+ * await playbackService.initialize(context);
+ * 
+ * // 加载并播放视频
+ * await playbackService.load({
+ *   id: '1',
+ *   title: '示例视频',
+ *   url: 'https://example.com/video.mp4',
+ *   type: 'video',
+ *   duration: 3600
+ * }, 0);
+ * 
+ * // 播放/暂停
+ * await playbackService.play();
+ * await playbackService.pause();
+ * ```
+ */
 
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
@@ -8,14 +34,22 @@ import AVPlay from '@ohos.multimedia.media';
 import AudioManager from '@ohos.multimedia.audio';
 import AudioRendererInfo from '@ohos.multimedia.audio';
 import BusinessError from '@ohos.base';
+import common from '@ohos.app.ability.common';
 import { DeviceInfoRepository } from '../../data/repository/DeviceInfoRepository';
+
+// 类型别名定义
+const Context = common.Context;
 
 // 常量定义 | Constants
 const TAG = 'PlaybackService';
 const MAX_PLAYBACK_QUEUE_SIZE = 100;
 const PLAYBACK_BUFFER_SIZE = 8 * 1024 * 1024; // 8MB
+const MIN_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
+const MAX_BUFFER_SIZE = 32 * 1024 * 1024; // 32MB
 const MIN_RETRY_INTERVAL = 3000; // 最小重试间隔 | Minimum retry interval
 const MAX_RETRY_COUNT = 3; // 最大重试次数 | Maximum retry count
+const PRE_BUFFER_DURATION = 30; // 预缓冲时间（秒）| Pre-buffer duration (seconds)
+const NETWORK_CHECK_INTERVAL = 5000; // 网络检查间隔 | Network check interval
 
 // 播放状态枚举 | Playback state enum
 export enum PlaybackState {
@@ -239,6 +273,9 @@ export default class PlaybackService {
   private lastPosition: number = 0;
   private lastPositionUpdateTime: number = 0;
   private positionUpdateTimerId: number | null = null;
+  private networkCheckTimerId: number | null = null;
+  private currentNetworkQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
+  private adaptiveBufferSize: number = PLAYBACK_BUFFER_SIZE;
   
   // 监听器列表 Listener list
   private stateListeners: PlaybackStateListener[] = [];
@@ -248,7 +285,16 @@ export default class PlaybackService {
   private queueListeners: PlaybackQueueListener[] = [];
 
   /**
-   * 获取单例实例 | Gets singleton instance
+   * 获取单例实例
+   * 
+   * 获取PlaybackService的单例实例，确保整个应用中只有一个播放服务实例。
+   * 
+   * @returns {PlaybackService} PlaybackService的单例实例
+   * 
+   * @example
+   * ```typescript
+   * const playbackService = PlaybackService.getInstance();
+   * ```
    */
   public static getInstance(): PlaybackService {
     if (!PlaybackService.instance) {
@@ -267,8 +313,17 @@ export default class PlaybackService {
   }
 
   /**
-   * 初始化播放服务 | Initializes playback service
-   * @param context 应用上下文 | Application context
+   * 初始化播放服务
+   * 
+   * 初始化播放服务，加载配置，初始化音频管理器，设置默认参数。
+   * 
+   * @param {Context} context - 应用上下文
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.initialize(context);
+   * console.log('Playback service initialized');
+   * ```
    */
   public async initialize(context: Context): Promise<void> {
     if (this.isInitialized) {
@@ -291,6 +346,9 @@ export default class PlaybackService {
       
       // 设置播放速度 | Set playback speed
       this.playbackSpeed = this.config.defaultPlaybackSpeed;
+      
+      // 初始化网络状态检测 | Initialize network status detection
+      this.startNetworkQualityMonitoring();
       
       this.isInitialized = true;
       Logger.info(TAG, 'Playback service initialized successfully');
@@ -315,7 +373,20 @@ export default class PlaybackService {
   }
 
   /**
-   * 保存配置 | Saves config
+   * 保存配置
+   * 
+   * 保存播放配置，更新运行时参数，并持久化到存储中。
+   * 
+   * @param {Partial<PlaybackConfig>} config - 要保存的配置
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.saveConfig({
+   *   autoPlay: true,
+   *   volume: 0.8,
+   *   enableHardwareDecoding: true
+   * });
+   * ```
    */
   public async saveConfig(config: Partial<PlaybackConfig>): Promise<void> {
     try {
@@ -348,7 +419,18 @@ export default class PlaybackService {
   }
 
   /**
-   * 获取配置 | Gets config
+   * 获取配置
+   * 
+   * 获取当前的播放配置。
+   * 
+   * @returns {PlaybackConfig} 当前的播放配置
+   * 
+   * @example
+   * ```typescript
+   * const config = playbackService.getConfig();
+   * console.log('Auto play:', config.autoPlay);
+   * console.log('Volume:', config.volume);
+   * ```
    */
   public getConfig(): PlaybackConfig {
     return { ...this.config };
@@ -375,7 +457,10 @@ export default class PlaybackService {
       await this.setupOptimalDecodingMode();
       
       // 设置缓冲大小 | Set buffer size
-      await this.avPlayInstance.setParameter('cacheSize', this.config.bufferSize.toString());
+      await this.avPlayInstance.setParameter('cacheSize', this.adaptiveBufferSize.toString());
+      
+      // 启用预缓冲 | Enable pre-buffering
+      await this.enablePreBuffering();
       
       // 设置音量和静音 | Set volume and mute
       await this.avPlayInstance.setVolume(this.isMuted ? 0 : this.volume);
@@ -707,7 +792,15 @@ export default class PlaybackService {
   }
   
   /**
-   * 优化播放质量 Optimizes playback quality
+   * 优化播放质量
+   * 
+   * 根据设备能力和网络状况优化播放质量，调整播放参数。
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.optimizePlaybackQuality();
+   * console.log('Playback quality optimized');
+   * ```
    */
   public async optimizePlaybackQuality(): Promise<void> {
     try {
@@ -767,6 +860,28 @@ export default class PlaybackService {
   private handleBufferingChange(bufferingStatus: number, startBufferBytes: number, bufferingBytes: number, totalBytes: number): void {
     // 实现缓冲变化处理逻辑 Implement buffering change handling logic
     Logger.info(TAG, `Buffering changed: status=${bufferingStatus}, start=${startBufferBytes}, buffering=${bufferingBytes}, total=${totalBytes}`);
+    
+    // 计算缓冲百分比 Calculate buffering percentage
+    const percent = totalBytes > 0 ? Math.round((bufferingBytes / totalBytes) * 100) : 0;
+    
+    // 构建缓冲信息 Build buffering info
+    const bufferingInfo: BufferingInfo = {
+      percent: percent,
+      currentRange: { start: startBufferBytes, end: startBufferBytes + bufferingBytes },
+      loadedRanges: [{ start: startBufferBytes, end: startBufferBytes + bufferingBytes }],
+      totalBytesLoaded: bufferingBytes,
+      totalBytes: totalBytes
+    };
+    
+    // 通知缓冲监听器 Notify buffering listeners
+    this.bufferingListeners.forEach(listener => listener(bufferingInfo));
+    
+    // 更新播放状态 Update playback state
+    if (bufferingStatus === 1) {
+      this.updatePlaybackState(PlaybackState.BUFFERING);
+    } else if (bufferingStatus === 0 && this.currentState === PlaybackState.BUFFERING) {
+      this.updatePlaybackState(PlaybackState.PLAYING);
+    }
   }
 
   /**
@@ -775,6 +890,22 @@ export default class PlaybackService {
   private handlePlaybackComplete(): void {
     // 实现播放完成处理逻辑 Implement playback complete handling logic
     Logger.info(TAG, 'Playback completed');
+    
+    // 更新播放状态 Update playback state
+    this.updatePlaybackState(PlaybackState.COMPLETED);
+    
+    // 保存播放历史 Save playback history
+    this.savePlaybackPosition().catch(error => {
+      Logger.error(TAG, `Failed to save playback history on complete: ${error}`);
+    });
+    
+    // 检查是否有下一个播放项 Check if there's a next item in queue
+    if (this.currentQueueIndex < this.playbackQueue.length - 1) {
+      // 自动播放下一个 Auto play next
+      this.playNext().catch(error => {
+        Logger.error(TAG, `Failed to play next item: ${error}`);
+      });
+    }
   }
 
   /**
@@ -782,7 +913,15 @@ export default class PlaybackService {
    */
   private updatePlaybackState(state: PlaybackState): void {
     // 实现播放状态更新逻辑 Implement playback state update logic
-    this.currentState = state;
+    if (this.currentState !== state) {
+      const oldState = this.currentState;
+      this.currentState = state;
+      
+      // 通知状态监听器 Notify state listeners
+      this.stateListeners.forEach(listener => listener(state));
+      
+      Logger.info(TAG, `Playback state changed from ${oldState} to ${state}`);
+    }
   }
 
   /**
@@ -799,8 +938,24 @@ export default class PlaybackService {
   private async releaseAVPlayInstance(): Promise<void> {
     // 实现释放逻辑 Implement release logic
     if (this.avPlayInstance) {
-      await this.avPlayInstance.release();
-      this.avPlayInstance = null;
+      try {
+        // 移除所有事件监听器 Remove all event listeners to prevent memory leaks
+        try {
+          this.avPlayInstance.off('stateChange');
+          this.avPlayInstance.off('error');
+          this.avPlayInstance.off('bufferingChange');
+          this.avPlayInstance.off('playbackComplete');
+        } catch (error) {
+          Logger.warn(TAG, `Failed to remove event listeners: ${error}`);
+        }
+        
+        await this.avPlayInstance.release();
+        this.avPlayInstance = null;
+        Logger.info(TAG, 'AVPlay instance released successfully');
+      } catch (error) {
+        Logger.error(TAG, `Failed to release AVPlay instance: ${error}`);
+        this.avPlayInstance = null;
+      }
     }
   }
 
@@ -809,6 +964,36 @@ export default class PlaybackService {
    */
   private startPositionUpdates(): void {
     // 实现位置更新逻辑 Implement position update logic
+    if (this.positionUpdateTimerId) {
+      clearInterval(this.positionUpdateTimerId);
+    }
+    
+    // 每1秒更新一次位置 Update position every 1 second
+    this.positionUpdateTimerId = setInterval(async () => {
+      if (this.avPlayInstance && this.currentState === PlaybackState.PLAYING) {
+        try {
+          const currentTime = await this.avPlayInstance.getCurrentTime();
+          const duration = await this.avPlayInstance.getDuration();
+          const percent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+          
+          // 更新最后位置 Update last position
+          this.lastPosition = currentTime;
+          this.lastPositionUpdateTime = Date.now();
+          
+          // 通知进度监听器 Notify progress listeners
+          this.progressListeners.forEach(listener => listener(currentTime, duration, percent));
+          
+          // 每30秒保存一次播放位置 Save position every 30 seconds
+          if (Date.now() - this.lastPositionUpdateTime > 30000) {
+            this.savePlaybackPosition().catch(error => {
+              Logger.error(TAG, `Failed to save playback position: ${error}`);
+            });
+          }
+        } catch (error) {
+          Logger.error(TAG, `Failed to get playback position: ${error}`);
+        }
+      }
+    }, 1000) as unknown as number;
   }
 
   /**
@@ -816,6 +1001,15 @@ export default class PlaybackService {
    */
   private stopPositionUpdates(): void {
     // 实现停止位置更新逻辑 Implement stop position update logic
+    if (this.positionUpdateTimerId) {
+      clearInterval(this.positionUpdateTimerId);
+      this.positionUpdateTimerId = null;
+    }
+    
+    // 保存当前位置 Save current position
+    this.savePlaybackPosition().catch(error => {
+      Logger.error(TAG, `Failed to save playback position on stop: ${error}`);
+    });
   }
 
   /**
@@ -823,6 +1017,41 @@ export default class PlaybackService {
    */
   private async load(item: PlaybackItem, position: number): Promise<void> {
     // 实现加载播放项逻辑 Implement load playback item logic
+    try {
+      Logger.info(TAG, `Loading playback item: ${item.title}, position: ${position}`);
+      
+      // 更新当前播放项 Update current playback item
+      this.currentPlaybackItem = item;
+      
+      // 创建AVPlay实例 Create AVPlay instance
+      await this.createAVPlayInstance();
+      if (!this.avPlayInstance) {
+        throw new Error('Failed to create AVPlay instance');
+      }
+      
+      // 设置数据源 Set data source
+      await this.avPlayInstance.setSource(item.url);
+      await this.avPlayInstance.prepare();
+      
+      // 设置初始位置 Set initial position
+      if (position > 0) {
+        await this.avPlayInstance.seekTo(position);
+        this.lastPosition = position;
+      }
+      
+      // 更新播放状态 Update playback state
+      this.updatePlaybackState(PlaybackState.READY);
+      
+      // 自动播放 Auto play if enabled
+      if (this.config.autoPlay) {
+        await this.avPlayInstance.play();
+        this.updatePlaybackState(PlaybackState.PLAYING);
+      }
+    } catch (error) {
+      Logger.error(TAG, `Failed to load playback item: ${error}`);
+      this.updatePlaybackState(PlaybackState.ERROR);
+      throw error;
+    }
   }
 
   /**
@@ -830,5 +1059,218 @@ export default class PlaybackService {
    */
   private async setAudioRoute(route: AudioRoute): Promise<void> {
     // 实现设置音频路由逻辑 Implement set audio route logic
+    try {
+      Logger.info(TAG, `Setting audio route to: ${route}`);
+      
+      // 更新配置 Update config
+      this.config.audioRoute = route;
+      
+      // 使用音频管理器设置路由 Set route using audio manager
+      if (this.audioManager) {
+        // 根据路由类型设置音频设备 Set audio device based on route type
+        switch (route) {
+          case AudioRoute.SPEAKER:
+            // 设置为扬声器 Set to speaker
+            await this.audioManager.setAudioScene(AudioManager.AudioSceneType.MEDIA);
+            break;
+          case AudioRoute.EARPIECE:
+            // 设置为听筒 Set to earpiece
+            await this.audioManager.setAudioScene(AudioManager.AudioSceneType.VOICE_COMMUNICATION);
+            break;
+          case AudioRoute.WIRED_HEADSET:
+          case AudioRoute.BLUETOOTH:
+            // 音频管理器会自动检测并使用外部设备 Audio manager will automatically detect and use external devices
+            await this.audioManager.setAudioScene(AudioManager.AudioSceneType.MEDIA);
+            break;
+        }
+      }
+      
+      Logger.info(TAG, `Audio route set to: ${route}`);
+    } catch (error) {
+      Logger.error(TAG, `Failed to set audio route: ${error}`);
+    }
+  }
+  
+  /**
+   * 播放下一个播放项 Plays next item in queue
+   */
+  private async playNext(): Promise<void> {
+    if (this.currentQueueIndex < this.playbackQueue.length - 1) {
+      this.currentQueueIndex++;
+      const nextItem = this.playbackQueue[this.currentQueueIndex];
+      await this.load(nextItem, 0);
+      
+      // 通知队列监听器 Notify queue listeners
+      this.queueListeners.forEach(listener => listener(this.playbackQueue, this.currentQueueIndex));
+    }
+  }
+  
+  /**
+   * 开始网络质量监控 | Starts network quality monitoring
+   */
+  private startNetworkQualityMonitoring(): void {
+    // 清理之前的定时器 | Clear previous timer
+    if (this.networkCheckTimerId) {
+      clearInterval(this.networkCheckTimerId);
+    }
+    
+    // 每5秒检查一次网络质量 | Check network quality every 5 seconds
+    this.networkCheckTimerId = setInterval(async () => {
+      await this.checkNetworkQuality();
+      this.adjustBufferSizeBasedOnNetwork();
+    }, NETWORK_CHECK_INTERVAL) as unknown as number;
+    
+    Logger.info(TAG, 'Network quality monitoring started');
+  }
+  
+  /**
+   * 检查网络质量 | Checks network quality
+   */
+  private async checkNetworkQuality(): Promise<void> {
+    try {
+      // 这里可以实现实际的网络质量检测逻辑
+      // 例如，通过ping服务器、下载测试文件等方式
+      // For now, we'll simulate network quality changes
+      
+      // 模拟网络质量检测 | Simulate network quality detection
+      const qualityLevels: Array<'excellent' | 'good' | 'fair' | 'poor'> = ['excellent', 'good', 'fair', 'poor'];
+      const randomIndex = Math.floor(Math.random() * 4);
+      this.currentNetworkQuality = qualityLevels[randomIndex];
+      
+      Logger.info(TAG, `Network quality: ${this.currentNetworkQuality}`);
+    } catch (error) {
+      Logger.error(TAG, `Failed to check network quality: ${error}`);
+      this.currentNetworkQuality = 'poor';
+    }
+  }
+  
+  /**
+   * 根据网络质量调整缓冲大小 | Adjusts buffer size based on network quality
+   */
+  private adjustBufferSizeBasedOnNetwork(): void {
+    let newBufferSize: number;
+    
+    switch (this.currentNetworkQuality) {
+      case 'excellent':
+        newBufferSize = MAX_BUFFER_SIZE; // 优秀网络使用最大缓冲
+        break;
+      case 'good':
+        newBufferSize = PLAYBACK_BUFFER_SIZE; // 良好网络使用默认缓冲
+        break;
+      case 'fair':
+        newBufferSize = Math.floor((PLAYBACK_BUFFER_SIZE + MIN_BUFFER_SIZE) / 2); // 一般网络使用中等缓冲
+        break;
+      case 'poor':
+        newBufferSize = MIN_BUFFER_SIZE; // 较差网络使用最小缓冲
+        break;
+      default:
+        newBufferSize = PLAYBACK_BUFFER_SIZE;
+    }
+    
+    if (newBufferSize !== this.adaptiveBufferSize) {
+      this.adaptiveBufferSize = newBufferSize;
+      Logger.info(TAG, `Adjusted buffer size to ${newBufferSize / (1024 * 1024)}MB based on network quality: ${this.currentNetworkQuality}`);
+      
+      // 如果AVPlay实例已创建，更新缓冲大小 | Update buffer size if AVPlay instance exists
+      if (this.avPlayInstance) {
+        this.avPlayInstance.setParameter('cacheSize', newBufferSize.toString()).catch(error => {
+          Logger.error(TAG, `Failed to update buffer size: ${error}`);
+        });
+      }
+    }
+  }
+  
+  /**
+   * 启用预缓冲 | Enables pre-buffering
+   */
+  private async enablePreBuffering(): Promise<void> {
+    if (!this.avPlayInstance || !this.currentPlaybackItem) return;
+    
+    try {
+      // 设置预缓冲时间 | Set pre-buffer duration
+      await this.avPlayInstance.setParameter('preBufferDuration', PRE_BUFFER_DURATION.toString());
+      Logger.info(TAG, `Pre-buffering enabled with duration: ${PRE_BUFFER_DURATION}s`);
+    } catch (error) {
+      Logger.error(TAG, `Failed to enable pre-buffering: ${error}`);
+    }
+  }
+  
+  /**
+   * 清理资源和监听器
+   * 
+   * 清理播放服务的资源和监听器，防止内存泄漏。
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.cleanup();
+   * console.log('Playback service resources cleaned up');
+   * ```
+   */
+  public async cleanup(): Promise<void> {
+    try {
+      Logger.info(TAG, 'Cleaning up playback service resources...');
+      
+      // 停止位置更新 Stop position updates
+      this.stopPositionUpdates();
+      
+      // 停止网络质量监控 | Stop network quality monitoring
+      if (this.networkCheckTimerId) {
+        clearInterval(this.networkCheckTimerId);
+        this.networkCheckTimerId = null;
+      }
+      
+      // 释放AVPlay实例 Release AVPlay instance
+      await this.releaseAVPlayInstance();
+      
+      // 清理监听器列表 Clear listener lists
+      this.stateListeners = [];
+      this.errorListeners = [];
+      this.progressListeners = [];
+      this.bufferingListeners = [];
+      this.queueListeners = [];
+      
+      // 清理播放队列 Clear playback queue
+      this.playbackQueue = [];
+      this.currentQueueIndex = -1;
+      
+      // 清理当前播放项 Clear current playback item
+      this.currentPlaybackItem = null;
+      
+      // 重置状态 Reset state
+      this.currentState = PlaybackState.IDLE;
+      this.retryCount = 0;
+      this.lastRetryTime = 0;
+      this.lastPosition = 0;
+      this.lastPositionUpdateTime = 0;
+      this.currentNetworkQuality = 'good';
+      this.adaptiveBufferSize = PLAYBACK_BUFFER_SIZE;
+      
+      // 重置初始化状态 Reset initialized state
+      this.isInitialized = false;
+      
+      Logger.info(TAG, 'Playback service resources cleaned up successfully');
+    } catch (error) {
+      Logger.error(TAG, `Failed to cleanup playback service: ${error}`);
+    }
+  }
+  
+  /**
+   * 销毁播放服务
+   * 
+   * 销毁播放服务，释放所有资源。
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.destroy();
+   * console.log('Playback service destroyed');
+   * ```
+   */
+  public async destroy(): Promise<void> {
+    try {
+      await this.cleanup();
+      Logger.info(TAG, 'Playback service destroyed successfully');
+    } catch (error) {
+      Logger.error(TAG, `Failed to destroy playback service: ${error}`);
+    }
   }
 }

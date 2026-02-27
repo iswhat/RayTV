@@ -16,22 +16,19 @@ export interface SafeAsyncExecuteOptions<T> {
  */
 export interface SafeObject {
   // 基础对象类型，用于替代any | Basic object type to replace any
-  [Symbol.toStringTag]?: string;
+  toStringTag?: string;
 }
 
 /**
  * 通用对象接口 | Generic object interface
+ * 使用 Record 类型支持索引访问 | Use Record type to support indexed access
  */
-export interface GenericObject {
-  [key: string]: string | number | boolean | object | null | undefined;
-}
+export type GenericObject = Record<string, string | number | boolean | object | null | undefined>;
 
 /**
  * 通用数组接口 | Generic array interface
  */
-export interface GenericArray {
-  [index: number]: string | number | boolean | object | null | undefined;
-}
+export type GenericArray = Array<string | number | boolean | object | null | undefined>;
 
 /**
  * 键值对接口 | Key-value pair interface
@@ -117,6 +114,41 @@ export class TypeSafetyHelper {
   }
 
   /**
+   * 安全获取对象属性 | Safely get object property
+   * @param obj 对象 | Object
+   * @param key 属性名 | Property name
+   * @returns 属性值 | Property value
+   */
+  private static getSafeProperty(obj: object, key: string): string | number | boolean | object | null | undefined {
+    try {
+      // 检查属性是否存在
+      if (typeof obj === 'object' && obj !== null) {
+        const keys: string[] = Object.keys(obj);
+        if (keys.includes(key)) {
+          return (obj as GenericObject)[key];
+        }
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * 安全设置对象属性 | Safely set object property
+   * @param obj 对象 | Object
+   * @param key 属性名 | Property name
+   * @param value 属性值 | Property value
+   */
+  private static setSafeProperty(obj: object, key: string, value: string | number | boolean | object | null | undefined): void {
+    try {
+      (obj as GenericObject)[key] = value;
+    } catch {
+      // 忽略设置属性时的错误
+    }
+  }
+
+  /**
    * 安全地获取对象属性 | Safely gets object property
    * @param obj 目标对象 | Target object
    * @param path 属性路径 | Property path
@@ -137,12 +169,13 @@ export class TypeSafetyHelper {
       if (typeof current !== 'object' || current === null || Array.isArray(current)) {
         return defaultValue;
       }
-      // 替换in操作符，使用Object.hasOwnProperty检查属性是否存在 | Replace 'in' operator, use Object.hasOwnProperty to check if property exists
+      // 检查属性是否存在 | Check if property exists
       const objRecord = current as GenericObject;
-      if (!Object.hasOwnProperty.call(objRecord, key)) {
+      const objKeys = Object.keys(objRecord);
+      if (!objKeys.includes(key)) {
         return defaultValue;
       }
-      const nextValue = objRecord[key];
+      const nextValue = TypeSafetyHelper.getSafeProperty(objRecord, key);
       if (typeof nextValue === 'object' && nextValue !== null && !Array.isArray(nextValue)) {
         current = nextValue;
       } else if (i === keys.length - 1) {
@@ -177,13 +210,14 @@ export class TypeSafetyHelper {
         return false;
       }
       const objRecord = current as GenericObject;
-      if (!Object.hasOwnProperty.call(objRecord, key) || objRecord[key] === undefined || objRecord[key] === null) {
+      const objKeys = Object.keys(objRecord);
+      if (!objKeys.includes(key) || TypeSafetyHelper.getSafeProperty(objRecord, key) === undefined || TypeSafetyHelper.getSafeProperty(objRecord, key) === null) {
         // 创建空对象并使用类型断言 | Create empty object and use type assertion
         const newObj: GenericObject = {};
-        objRecord[key] = newObj;
+        TypeSafetyHelper.setSafeProperty(objRecord, key, newObj);
       }
-      const nextValue = objRecord[key];
-      if (typeof nextValue !== 'object' || Array.isArray(nextValue)) {
+      const nextValue = TypeSafetyHelper.getSafeProperty(objRecord, key);
+      if (typeof nextValue !== 'object' || Array.isArray(nextValue) || nextValue === null || nextValue === undefined) {
         return false;
       }
       current = nextValue;
@@ -192,7 +226,7 @@ export class TypeSafetyHelper {
     const lastKey = keys[keys.length - 1];
     // 使用类型断言避免索引访问问题 | Use type assertion to avoid indexed access issues
     const finalObj = current as GenericObject;
-    finalObj[lastKey] = value;
+    TypeSafetyHelper.setSafeProperty(finalObj, lastKey, value);
     return true;
   }
 
@@ -259,7 +293,7 @@ export class TypeSafetyHelper {
       return defaultValue;
     }
     // ArkTS兼容：手动检查枚举值 | ArkTS compatible: manually check enum value
-    const keys = Object.keys(enumObj);
+    const keys: string[] = Object.keys(enumObj);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (enumObj[key] === value) {
@@ -368,7 +402,7 @@ export class TypeSafetyHelper {
       case 'boolean':
         return TypeSafetyHelper.safeBoolean(value, defaultValue as boolean) as T;
       case 'array':
-        return TypeSafetyHelper.safeArray(value, defaultValue as unknown[]) as T;
+        return TypeSafetyHelper.safeArray(value, defaultValue as (string | number | boolean | object | null | undefined)[]) as T;
       case 'object':
         return TypeSafetyHelper.safeObject(value, defaultValue as SafeObject) as T;
       case 'date':
@@ -392,9 +426,9 @@ export class TypeSafetyHelper {
   ): Promise<T | undefined> {
     try {
       return await fn(...args);
-    } catch (error: Error) {
+    } catch (error) {
       if (options && options.onError) {
-        options.onError(error);
+        options.onError(error instanceof Error ? error : new Error(String(error)));
       }
       return options ? options.defaultValue : undefined;
     }
@@ -423,7 +457,14 @@ export class TypeSafetyHelper {
       }
       // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
       const objRecord = current as GenericObject;
-      current = objRecord[key] as object;
+      const value = objRecord[key];
+      if (value !== undefined && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        current = value;
+      } else if (i === keys.length - 1) {
+        return value as T;
+      } else {
+        return defaultValue;
+      }
     }
     return current as T | undefined;
   }
@@ -442,40 +483,38 @@ export class TypeSafetyHelper {
       return target;
     }
     // ArkTS兼容：手动创建合并对象，不使用展开运算符 | ArkTS compatible: manually create merged object, not using spread operator
-    const merged = {} as T;
-    const targetKeys = Object.keys(target);
+    const merged: GenericObject = {};
+    const targetKeys: string[] = Object.keys(target);
     for (let i = 0; i < targetKeys.length; i++) {
       const key = targetKeys[i];
       // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
       const targetRecord = target as GenericObject;
-      const mergedRecord = merged as GenericObject;
-      mergedRecord[key] = targetRecord[key];
+      merged[key] = targetRecord[key];
     }
     for (const source of sources) {
       if (source && typeof source === 'object') {
-        const sourceKeys = Object.keys(source);
+        const sourceKeys: string[] = Object.keys(source);
         for (let i = 0; i < sourceKeys.length; i++) {
           const key = sourceKeys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
           const sourceRecord = source as GenericObject;
-          const mergedRecord = merged as GenericObject;
           const sourceValue = sourceRecord[key];
-          const targetValue = mergedRecord[key];
+          const targetValue = merged[key];
           if (typeof targetValue === 'object' && targetValue !== null && typeof sourceValue === 'object' && sourceValue !== null) {
             // 对于对象类型，直接合并并转换 | For object types, merge directly and convert
             const mergedValue = TypeSafetyHelper.safeMerge(
-              targetValue as SafeObject, 
+              targetValue as SafeObject,
               sourceValue as SafeObject
             );
             // 直接赋值 | Direct assignment
-            mergedRecord[key] = mergedValue;
+            merged[key] = mergedValue;
           } else {
-            mergedRecord[key] = sourceValue;
+            merged[key] = sourceValue;
           }
         }
       }
     }
-    return merged;
+    return merged as T;
   }
 
   /**
@@ -492,16 +531,16 @@ export class TypeSafetyHelper {
     }
     if (Array.isArray(obj)) {
       // ArkTS兼容：手动创建新数组，不使用展开运算符 | ArkTS compatible: manually create new array, not using spread operator
-      const clonedArray = [] as unknown[];
-      for (let i = 0; i < (obj as unknown[]).length; i++) {
-        const arrayItem = (obj as unknown[])[i];
+      const clonedArray = [] as (string | number | boolean | object | null | undefined)[];
+      for (let i = 0; i < (obj as (string | number | boolean | object | null | undefined)[]).length; i++) {
+        const arrayItem = (obj as (string | number | boolean | object | null | undefined)[])[i];
         clonedArray.push(TypeSafetyHelper.safeClone(arrayItem));
       }
       return clonedArray as T;
     }
     if (typeof obj === 'object') {
         const clonedObj: GenericObject = {};
-        const keys = Object.keys(obj as SafeObject);
+        const keys: string[] = Object.keys(obj as SafeObject);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues

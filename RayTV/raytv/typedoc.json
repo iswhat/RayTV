@@ -1,0 +1,20 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/main/ets"],
+  "entryPointStrategy": "expand",
+  "out": "docs/api",
+  "name": "RayTV API Documentation",
+  "theme": "default",
+  "exclude": ["**/node_modules/**", "**/dist/**", "**/build/**"],
+  "includeVersion": true,
+  "sort": "alphabetical",
+  "categorizeByGroup": true,
+  "hideGenerator": false,
+  "pretty": true,
+  "searchInComments": true,
+  "treatWarningsAsErrors": false,
+  "validation": {
+    "notExported": false,
+    "invalidLink": true
+  }
+}

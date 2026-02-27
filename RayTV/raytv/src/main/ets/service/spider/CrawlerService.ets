@@ -7,6 +7,7 @@ import { HttpService } from '../HttpService';
 import { StorageUtil } from '../../common/util/StorageUtil';
 import { ConfigParser } from '../config/ConfigParser';
 import Logger from '../../common/util/Logger';
+import { Inject } from '../../common/di/Container';
 
 /**
  * 视频链接定义 Video link definition
@@ -104,9 +105,15 @@ export class CrawlerService {
   private initialized: boolean = false;
   private readonly TAG: string = 'CrawlerService';
   
+  @Inject('ConfigService')
   private configService: ConfigService;
+  
+  @Inject('HttpService')
   private httpService: HttpService;
+  
+  @Inject('StorageUtil')
   private storageUtil: StorageUtil;
+  
   private configParser: ConfigParser;
   private scriptLoaders: Map<string, ScriptLoader> = new Map();
   private performanceStats: Map<string, {
@@ -121,9 +128,6 @@ export class CrawlerService {
    * 构造函数 Constructor
    */
   private constructor() {
-    this.configService = ConfigService.getInstance();
-    this.httpService = HttpService.getInstance();
-    this.storageUtil = StorageUtil.getInstance();
     this.configParser = new ConfigParser();
   }
   
@@ -549,35 +553,35 @@ export class CrawlerService {
       // 根据方法名调用对应的方法 Call corresponding method based on method name
       switch (methodName) {
         case 'getSiteInfo':
-          result = await spider.getSiteInfo() as unknown as T;
+          result = await spider.getSiteInfo() as T;
           break;
         case 'getRecommendList':
-          result = await spider.getRecommendList() as unknown as T;
+          result = await spider.getRecommendList() as T;
           break;
         case 'getHotList':
-          result = await spider.getHotList() as unknown as T;
+          result = await spider.getHotList() as T;
           break;
         case 'getLatestList':
-          result = await spider.getLatestList() as unknown as T;
+          result = await spider.getLatestList() as T;
           break;
         case 'getCategories':
-          result = await spider.getCategories() as unknown as T;
+          result = await spider.getCategories() as T;
           break;
         case 'getCategoryList':
-          result = await spider.getCategoryList(args[0] as string, args[1] as number) as unknown as T;
+          result = await spider.getCategoryList(args[0] as string, args[1] as number) as T;
           break;
         case 'search':
-          result = await spider.search(args[0] as string, args[1] as number | undefined) as unknown as T;
+          result = await spider.search(args[0] as string, args[1] as number | undefined) as T;
           break;
         case 'getDetail':
-          result = await spider.getDetail(args[0] as string) as unknown as T;
+          result = await spider.getDetail(args[0] as string) as T;
           break;
         case 'getPlayUrl':
-          result = await spider.getPlayUrl(args[0] as string, args[1] as string | undefined) as unknown as T;
+          result = await spider.getPlayUrl(args[0] as string, args[1] as string | undefined) as T;
           break;
         case 'getSearchSuggestions':
           if (typeof spider.getSearchSuggestions === 'function') {
-            result = await spider.getSearchSuggestions(args[0] as string) as unknown as T;
+            result = await spider.getSearchSuggestions(args[0] as string) as T;
           } else {
             throw new Error(`Method ${String(methodName)} not implemented`);
           }

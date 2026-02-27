@@ -10,6 +10,7 @@ import { DeviceFlowManager, RestoreFlowParams, FlowData } from './service/device
 import DataSyncService from './service/sync/DataSyncService';
 import { VoiceAssistantManager } from './service/voice/VoiceAssistantManager';
 import { GestureServiceInstance } from './service/input/GestureService';
+import { initializeDI } from './common/di/ServiceRegistry';
 
 // 定义用户偏好接口 | Define user preferences interface
 export interface UserPreferences {
@@ -84,6 +85,9 @@ export default class MainAbility extends UIAbility {
     // Set up global error handler
     setupGlobalErrorHandler();
     
+    // Initialize dependency injection container
+    initializeDI();
+    
     // Initialize services
     this.initializeServices(want);
   }
@@ -95,10 +99,44 @@ export default class MainAbility extends UIAbility {
    * @param want 包含Ability信息的Want对象
    */
   private initializeServices(want: Want): void {
-    // Initialize DeviceFlowManager
+    console.info('MainAbility: 开始初始化服务 | Starting service initialization');
+    
+    // 1. 首先初始化依赖较少、初始化时间较短的服务
+    // Initialize VoiceAssistantManager (short initialization time, fewer dependencies)
+    const voiceAssistantManager = VoiceAssistantManager.getInstance();
+    voiceAssistantManager.initialize()
+      .then(() => {
+        console.info('MainAbility: VoiceAssistantManager初始化成功 | VoiceAssistantManager initialized successfully');
+      })
+      .catch((error: Error) => {
+        console.error('MainAbility: 初始化VoiceAssistantManager失败: %{public}s | Failed to initialize VoiceAssistantManager: %{public}s', error.message);
+      });
+    
+    // 2. 初始化GestureService
+    try {
+      // GestureServiceInstance is already initialized
+      console.info('MainAbility: GestureService已初始化 | GestureService already initialized');
+    } catch (error: Error) {
+      console.error('MainAbility: 初始化GestureService失败: %{public}s | Failed to initialize GestureService: %{public}s', error.message);
+    }
+    
+    // 3. 然后初始化依赖中等、初始化时间中等的服务
+    // Initialize DataSyncService (medium initialization time, medium dependencies)
+    const dataSyncService = DataSyncService.getInstance();
+    dataSyncService.initialize(this.context)
+      .then(() => {
+        console.info('MainAbility: DataSyncService初始化成功 | DataSyncService initialized successfully');
+      })
+      .catch((error: Error) => {
+        console.error('MainAbility: 初始化DataSyncService失败: %{public}s | Failed to initialize DataSyncService: %{public}s', error.message);
+      });
+    
+    // 4. 最后初始化依赖较多、初始化时间较长的服务
+    // Initialize DeviceFlowManager (longer initialization time, more dependencies)
     const deviceFlowManager = DeviceFlowManager.getInstance();
     deviceFlowManager.initialize()
       .then((): Promise<void> => {
+        console.info('MainAbility: DeviceFlowManager初始化成功 | DeviceFlowManager initialized successfully');
         // Handle cross-device migration params if present
         if (want?.parameters) {
           console.info('MainAbility: 收到跨设备迁移参数 | Received cross-device migration params');
@@ -116,25 +154,7 @@ export default class MainAbility extends UIAbility {
         console.error('MainAbility: 初始化DeviceFlowManager或处理迁移失败: %{public}s | Failed to initialize DeviceFlowManager or handle migration: %{public}s', error.message);
       });
     
-    // Initialize DataSyncService
-    const dataSyncService = DataSyncService.getInstance();
-    dataSyncService.initialize(this.context).catch((error: Error) => {
-      console.error('MainAbility: 初始化DataSyncService失败: %{public}s | Failed to initialize DataSyncService: %{public}s', error.message);
-    });
-    
-    // Initialize VoiceAssistantManager
-    const voiceAssistantManager = VoiceAssistantManager.getInstance();
-    voiceAssistantManager.initialize().catch((error: Error) => {
-      console.error('MainAbility: 初始化VoiceAssistantManager失败: %{public}s | Failed to initialize VoiceAssistantManager: %{public}s', error.message);
-    });
-    
-    // Initialize GestureService
-    try {
-      // GestureServiceInstance is already initialized
-      console.info('MainAbility: GestureService已初始化 | GestureService already initialized');
-    } catch (error: Error) {
-      console.error('MainAbility: 初始化GestureService失败: %{public}s | Failed to initialize GestureService: %{public}s', error.message);
-    }
+    console.info('MainAbility: 服务初始化序列已启动 | Service initialization sequence started');
   }
 
   /**

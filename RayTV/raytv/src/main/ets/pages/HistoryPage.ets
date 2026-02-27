@@ -4,6 +4,8 @@ import { HistoryService } from '../service/media/HistoryService';
 import { MediaService } from '../service/media/MediaService';
 import display from '@ohos.display';
 import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign } from '@ohos/arkui';
+import VirtualList from '../components/VirtualList';
+import { VirtualListItem } from '../types/VirtualListTypes';
 
 // 历史记录项 | History item
 interface HistoryItem {
@@ -400,6 +402,20 @@ struct HistoryPage {
     });
   }
   
+  /**
+   * 将HistoryItem转换为VirtualListItem | Convert HistoryItem to VirtualListItem
+   */
+  private convertToVirtualItems(historyList: HistoryItem[]): VirtualListItem[] {
+    return historyList.map((history, index) => ({
+      id: history.id,
+      index: index,
+      data: history,
+      top: index * (this.isLandscape ? 320 : 280), // 估算的项目高度
+      height: this.isLandscape ? 320 : 280,
+      visible: false
+    }));
+  }
+  
   // 渲染历史记录项 | Render history item
   @Builder
   renderHistoryItem(history: HistoryItem) {
@@ -602,13 +618,21 @@ struct HistoryPage {
       .justifyContent(FlexAlign.Center)
       .height(this.isLandscape ? '80%' : 500)
     } else {
-      Column() {
-        ForEach(this.histories, (history: HistoryItem) => {
-          this.renderHistoryItem(history)
-        }, (history: HistoryItem) => history.id)
-      }
+      // 使用VirtualList优化性能 | Use VirtualList for better performance
+      const virtualItems = this.convertToVirtualItems(this.histories);
+      
+      VirtualList({
+        items: virtualItems,
+        estimatedItemHeight: this.isLandscape ? 320 : 280,
+        bufferSize: 3,
+        renderItem: (item: VirtualListItem) => {
+          const history = item.data as HistoryItem;
+          return this.renderHistoryItem(history);
+        }
+      })
       .width('100%')
       .padding({ bottom: 40 })
+      .height(this.isLandscape ? '80%' : 500)
     }
   }
   

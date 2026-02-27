@@ -6,7 +6,6 @@
 export class URLValidator {
   // 允许的协议
   private static readonly ALLOWED_PROTOCOLS: Set<string> = new Set([
-    'http:',
     'https:'
   ]);
 
@@ -44,23 +43,23 @@ export class URLValidator {
       const parsed = new URL(url);
 
       // 验证协议
-      if (!this.ALLOWED_PROTOCOLS.has(parsed.protocol)) {
+      if (!URLValidator.ALLOWED_PROTOCOLS.has(parsed.protocol)) {
         throw new Error(`Unsupported protocol: ${parsed.protocol}`);
       }
 
       // 验证主机名
-      this.validateHostname(parsed.hostname);
+      URLValidator.validateHostname(parsed.hostname);
 
       // 验证端口（如果指定）
       if (parsed.port) {
-        this.validatePort(parsed.port);
+        URLValidator.validatePort(parsed.port);
       }
 
       // 验证顶级域名
-      this.validateTLD(parsed.hostname);
+      URLValidator.validateTLD(parsed.hostname);
 
       // 验证路径（防止路径遍历）
-      this.validatePath(parsed.pathname);
+      URLValidator.validatePath(parsed.pathname);
 
     } catch (error) {
       if (error instanceof Error) {
@@ -78,7 +77,7 @@ export class URLValidator {
   private static validateHostname(hostname: string): void {
     const lowerHostname = hostname.toLowerCase();
 
-    for (const pattern of this.BLOCKED_PATTERNS) {
+    for (const pattern of URLValidator.BLOCKED_PATTERNS) {
       if (pattern.test(lowerHostname)) {
         throw new Error(`Blocked internal address: ${hostname}`);
       }
@@ -140,7 +139,7 @@ export class URLValidator {
 
     const tld = parts[parts.length - 1].toLowerCase();
     // 如果不在白名单中，记录警告但不阻止（因为可能使用新的TLD）
-    if (!this.ALLOWED_TLDS.has(tld)) {
+    if (!URLValidator.ALLOWED_TLDS.has(tld)) {
       console.warn(`URLValidator: TLD not in whitelist: ${tld}`);
     }
   }

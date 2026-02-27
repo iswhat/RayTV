@@ -3,6 +3,8 @@ import Logger from '../common/util/Logger';
 import LiveStreamService from '../service/live/LiveStreamService';
 import display from '@ohos.display';
 import { FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment } from '@ohos.arkui';
+import VirtualList from '../components/VirtualList';
+import { VirtualListItem } from '../types/VirtualListTypes';
 
 /**
  * 直播界面 | Live page
@@ -294,17 +296,28 @@ struct LivePage {
       .margin({ bottom: 24 })
       
       // 频道列表 | Channel list
-      Column() {
-        Text('频道列表')
-          .fontSize(18)
-          .fontWeight(700)
-          .fontColor('#FFFFFF')
-          .margin({ bottom: 20 })
-        
-        Scroll() {
-          Column() {
-            ForEach(this.getFilteredChannels(), (channel: Channel) => {
-              Text(channel.name)
+        Column() {
+          Text('频道列表')
+            .fontSize(18)
+            .fontWeight(700)
+            .fontColor('#FFFFFF')
+            .margin({ bottom: 20 })
+          
+          // 将Channel转换为VirtualListItem
+          const virtualItems = this.getFilteredChannels().map((channel, index) => ({
+            id: channel.id,
+            index,
+            data: channel
+          }));
+          
+          // 使用VirtualList优化性能
+          VirtualList({
+            items: virtualItems,
+            estimatedItemHeight: 60,
+            bufferSize: 3,
+            renderItem: (item: VirtualListItem, index: number) => {
+              const channel = item.data as Channel;
+              return Text(channel.name)
                 .fontSize(16)
                 .fontWeight(this.currentChannel?.id === channel.id ? 700 : 400)
                 .fontColor(this.currentChannel?.id === channel.id ? '#007AFF' : '#FFFFFF')
@@ -315,16 +328,14 @@ struct LivePage {
                 .onClick(() => this.handleChannelSwitch(channel))
                 .focusable(true)
                 .focusBorderWidth(2)
-                .focusBorderColor('#007AFF')
-            }, (channel: Channel) => channel.id)
-          }
-          .padding(4)
+                .focusBorderColor('#007AFF');
+            }
+          })
         }
-      }
-      .padding(24)
-      .backgroundColor('rgba(0, 0, 0, 0.7)')
-      .borderRadius(16)
-      .height('60%')
+        .padding(24)
+        .backgroundColor('rgba(0, 0, 0, 0.7)')
+        .borderRadius(16)
+        .height('60%')
     }
     .width('35%')
     .height('100%')

@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-02-10T04:06:41.356Z",
+  "coverage": {
+    "totalFiles": 85,
+    "testedFiles": 18,
+    "coveragePercentage": 21.2,
+    "byCategory": {
+      "components": {
+        "total": 12,
+        "tested": 5,
+        "percentage": 41.7,
+        "files": [
+          "Button.ets",
+          "Input.ets",
+          "Card.ets",
+          "Text.ets",
+          "BaseComponent.ets"
+        ]
+      },
+      "services": {
+        "total": 25,
+        "tested": 6,
+        "percentage": 24,
+        "files": [
+          "AppService.ets",
+          "HttpService.ets",
+          "MediaService.ets",
+          "EnhancedContainer.ets",
+          "ConfigService.ets",
+          "CoreServicesIntegration.test.ets"
+        ]
+      },
+      "utils": {
+        "total": 18,
+        "tested": 4,
+        "percentage": 22.2,
+        "files": [
+          "Logger.ets",
+          "EventBus.ets",
+          "TypeSafetyHelper.ets",
+          "PerformanceMonitor.ets"
+        ]
+      },
+      "viewmodels": {
+        "total": 8,
+        "tested": 3,
+        "percentage": 37.5,
+        "files": [
+          "BaseViewModel.ets",
+          "MainViewModel.ets",
+          "ViewModel.test.ets"
+        ]
+      }
+    },
+    "missingTests": [
+      "Layout.ets",
+      "Icon.ets",
+      "Image.ets",
+      "Modal.ets",
+      "Tabs.ets",
+      "Dropdown.ets",
+      "ConfigSourceService.ets",
+      "ContentAggregator.ets",
+      "PlaybackService.ets",
+      "DatabaseManager.ets",
+      "CacheService.ets",
+      "MainPage.ets",
+      "PlaybackPage.ets",
+      "SearchPage.ets",
+      "SettingsPage.ets",
+      "StringUtils.ets",
+      "DateUtils.ets",
+      "ArrayUtils.ets",
+      "ObjectUtils.ets"
+    ],
+    "newTestFiles": [
+      "ConfigService.test.ets",
+      "HttpService.test.ets",
+      "MediaService.test.ets",
+      "CoreServicesIntegration.test.ets"
+    ],
+    "improvement": {
+      "from": 17.6,
+      "to": 21.2,
+      "percentage": 3.6
+    }
+  },
+  "suggestions": [
+    "📌 优先完成核心业务组件测试",
+    "📌 建立基础服务测试框架",
+    "📌 实现关键工具函数测试",
+    "📌 加强核心服务层测试",
+    "📌 完善UI组件测试覆盖",
+    "📌 为新增的测试文件添加更多测试用例",
+    "📌 实现测试自动化，定期运行测试套件",
+    "📌 建立测试覆盖阈值，确保代码质量"
+  ],
+  "summary": {
+    "totalFiles": 85,
+    "testedFiles": 18,
+    "coveragePercentage": 21.2,
+    "improvement": {
+      "from": 17.6,
+      "to": 21.2,
+      "percentage": 3.6
+    },
+    "targetAchieved": false
+  }
+}

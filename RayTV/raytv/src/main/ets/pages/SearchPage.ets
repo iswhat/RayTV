@@ -151,8 +151,9 @@ struct SearchPage {
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
       console.info('Screen info: width=' + this.screenWidth + ', height=' + this.screenHeight + ', landscape=' + this.isLandscape);
-    } catch (error: Error) {
-      console.error('Failed to get screen info: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Failed to get screen info: ' + err.message);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -184,8 +185,9 @@ struct SearchPage {
       await CacheService.getInstance().set<string[]>(cacheKey, this.hotKeywords);
       
       console.info('Loaded ' + this.hotKeywords.length + ' hot keywords');
-    } catch (error: Error) {
-      console.error('Failed to load hot keywords: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Failed to load hot keywords: ' + err.message);
       this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
     }
   }
@@ -198,8 +200,9 @@ struct SearchPage {
       // 由于SearchHistoryRepository.getHistory方法不存在，使用模拟数据
       this.searchHistory = [];
         console.info('Loaded ' + this.searchHistory.length + ' search history items');
-    } catch (error: Error) {
-      console.error('Failed to load search history: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Failed to load search history: ' + err.message);
       this.searchHistory = [];
     }
   }
@@ -216,8 +219,9 @@ struct SearchPage {
       this.searchHistory = history;
       
       console.info('Search history saved: ' + keyword);
-    } catch (error: Error) {
-      console.error('Failed to save search history: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Failed to save search history: ' + err.message);
     }
   }
   
@@ -248,8 +252,9 @@ struct SearchPage {
       // 这里应该调用实际的服务获取推荐，这里简化处理 | Should call actual service to get recommendations, simplified here
       this.pinyinRecommendations = [];
       console.info('Generated pinyin recommendations for: ' + text);
-    } catch (error: Error) {
-      console.error('Failed to generate pinyin recommendations: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Failed to generate pinyin recommendations: ' + err.message);
       this.pinyinRecommendations = [];
     }
   }
@@ -314,8 +319,9 @@ struct SearchPage {
         this.quickResults = [];
       }
       console.info('Quick search for \'' + keyword + '\' returned ' + this.quickResults.length + ' results from service');
-    } catch (error: Error) {
-      console.error('Quick search failed: ' + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Quick search failed: ' + err.message);
       this.quickResults = [];
     } finally {
       this.isSearching = false;
@@ -339,8 +345,9 @@ struct SearchPage {
       AppNavigator.getInstance().navigateToSearchResult(this.searchText);
       
       console.info(`Executing search for: ${this.searchText}`);
-    } catch (error: Error) {
-      console.error(`Search failed: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`Search failed: ${err.message}`);
     } finally {
       this.isSearching = false;
     }

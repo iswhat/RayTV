@@ -8,83 +8,31 @@ import SubtitleService, { SubtitleTrack, SubtitleProvider, SubtitleLanguage } fr
 import TimerManager from '../common/util/TimerManager';
 
 import CacheService, { CachePriority } from '../service/cache/CacheService';
+import { getPlaybackViewModel, PlaybackViewModel } from '../viewmodel/PlaybackViewModel';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign, FlexWrap, KeyEvent, FocusStyle, TouchEvent, GestureEvent, Curve } from '@ohos/arkui';
+import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign, FlexWrap, KeyEvent, FocusStyle, TouchEvent, GestureEvent, Curve, Scroller, Column, Row, Text, Button, Image, Stack } from '@ohos/arkui';
 
 // 导入子组件 | Import sub-components
 import { PlaybackControls } from './playback/PlaybackControls';
 import { SkipSettings } from './playback/SkipSettings';
-import { EpisodeList } from './playback/EpisodeList';
 
-// 解析线路 | Parse line
-interface ParseLine {
-  id: string;
-  name: string;
-  selected: boolean;
-}
+// 导入新创建的组件 | Import newly created components
+import { MediaInfoComponent } from './playback/components/MediaInfoComponent';
+import { EpisodeListComponent } from './playback/components/EpisodeListComponent';
+import { SubtitleOptionsComponent } from './playback/components/SubtitleOptionsComponent';
+import { AudioTrackOptionsComponent } from './playback/components/AudioTrackOptionsComponent';
+import { PlaybackSpeedComponent } from './playback/components/PlaybackSpeedComponent';
 
-// 媒体信息接口 | Media info interface
-export interface MediaInfo {
-  id: string;
-  title: string;
-  cover?: string;
-  description?: string;
-  episodes: Array<{
-    id: string;
-    title: string;
-    episode: number;
-    duration?: string;
-    played?: boolean;
-  }>;
-  parseLines: Array<{
-    id: string;
-    name: string;
-  }>;
-  type: string;
-  siteKey: string;
-  rating?: string;
-  year?: string;
-  region?: string;
-  director?: string;
-  actor?: string;
-}
+// 导入类型定义 | Import type definitions
+import { ParseLine, MediaInfo, AudioTrack, SubtitleStyle, PlaybackSettings, Episode } from './playback/types/PlaybackTypes';
 
-// 音频轨道接口 | Audio track interface
-export interface AudioTrack {
-  id: string;
-  name: string;
-  language?: string;
-  selected?: boolean;
-}
-
-// 字幕样式接口 | Subtitle style interface
-export interface SubtitleStyle {
-  fontSize: number;
-  fontFamily: string;
-  fontWeight: string;
-  color: string;
-  backgroundColor: string;
-  opacity: number;
-  borderWidth: number;
-  borderColor: string;
-}
-
-// 播放设置接口 | Playback settings interface
-export interface PlaybackSettings {
-  playbackSpeed: number;
-  subtitleStyle: SubtitleStyle;
-  selectedSubtitleId?: string;
-  selectedAudioTrackId?: string;
-  skipOpening: boolean;
-  skipEnding: boolean;
-}
+// 导入焦点管理器 | Import focus manager
+import { FocusManager } from './playback/utils/FocusManager';
 
 @Entry
 @Component
 struct PlaybackPage {
   private readonly TAG: string = 'PlaybackPage';
-  private scroller: Scroller = new Scroller();
-  private episodeScroller: Scroller = new Scroller();
   
   // 状态管理 | State management
   
@@ -198,54 +146,173 @@ struct PlaybackPage {
     showChannelList: false, // 是否显示直播频道列表
     showSettings: false, // 是否显示直播设置
   };
+  
+  // ViewModel实例 | ViewModel instance
+  private viewModel: PlaybackViewModel = getPlaybackViewModel();
+  
+  // 焦点样式 | Focus style
+  private focusStyle: FocusStyle = {
+    border: {
+      width: 3,
+      color: '#4CAF50',
+      radius: 8
+    },
+    shadow: {
+      color: '#4CAF50',
+      radius: 10,
+      offsetX: 0,
+      offsetY: 0
+    }
+  };
+  
+  // 焦点管理 | Focus management
+  private focusManager: FocusManager = new FocusManager();
+  
   // 服务实例 | Service instances
-  private mediaService: MediaService = MediaService.getInstance();
-  private playbackService: PlaybackService = PlaybackService.getInstance();
-  private avPlayerService: AVPlayerService = AVPlayerService.getInstance();
-  private timerManager: TimerManager = TimerManager.getInstance();
-  private searchService: SearchService = SearchService.getInstance();
-  private subtitleService: SubtitleService = SubtitleService.getInstance();
-
   private cacheService: CacheService = CacheService.getInstance();
+  private playbackService: PlaybackService = PlaybackService.getInstance();
+  private subtitleService: SubtitleService = SubtitleService.getInstance();
+  private searchService: SearchService = SearchService.getInstance();
+  private timerManager: TimerManager = TimerManager.getInstance();
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info(this.TAG, 'PlaybackPage about to appear');
     
-
-    
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
     
-    // 加载媒体信息 | Load media info
-    this.loadMediaInfo();
+    // 绑定ViewModel状态 | Bind ViewModel state
+    this.bindViewModel();
+    
+    // 初始化播放 | Initialize playback
+    this.initPlayback();
   }
   
   // 初始化屏幕信息 | Initialize screen information
   private initScreenInfo() {
     try {
       const displayInfo = display.getDefaultDisplaySync();
-      this.uiState.screenWidth = displayInfo.width;
-      this.uiState.screenHeight = displayInfo.height;
-      this.uiState.isLandscape = this.uiState.screenWidth > this.uiState.screenHeight;
+      const width = displayInfo.width;
+      const height = displayInfo.height;
       
-      // 计算视频播放器高度 | Calculate video player height
-      if (this.uiState.isLandscape) {
-        // 横屏模式：占据屏幕高度的60% | Landscape mode: 60% of screen height
-        this.uiState.videoPlayerHeight = this.uiState.screenHeight * 0.6;
-      } else {
-        // 竖屏模式：固定高度 | Portrait mode: fixed height
-        this.uiState.videoPlayerHeight = 400;
-      }
+      // 更新ViewModel屏幕信息
+      this.viewModel.updateScreenInfo(width, height);
       
-      Logger.info(this.TAG, `Screen info: width=${this.uiState.screenWidth}, height=${this.uiState.screenHeight}, landscape=${this.uiState.isLandscape}, playerHeight=${this.uiState.videoPlayerHeight}`);
+      Logger.info(this.TAG, `Screen info: width=${width}, height=${height}`);
     } catch (error) {
       Logger.error(this.TAG, `Failed to get screen info: ${error}`);
       // 默认值 | Default values
-      this.uiState.screenWidth = 1920;
-      this.uiState.screenHeight = 1080;
-      this.uiState.isLandscape = true;
-      this.uiState.videoPlayerHeight = 648; // 1080 * 0.6
+      this.viewModel.updateScreenInfo(1920, 1080);
+    }
+  }
+  
+  // 绑定ViewModel状态 | Bind ViewModel state
+  private bindViewModel(): void {
+    // 绑定媒体状态
+    this.viewModel.mediaState.subscribe((mediaState) => {
+      this.mediaState = {
+        info: mediaState.info,
+        episodes: mediaState.episodes,
+        parseLines: mediaState.parseLines,
+        selectedEpisode: mediaState.selectedEpisode,
+        selectedLine: mediaState.selectedLine
+      };
+    });
+    
+    // 绑定播放控制状态
+    this.viewModel.controlState.subscribe((controlState) => {
+      this.playbackState = {
+        isPlaying: controlState.isPlaying,
+        currentTime: controlState.currentTime,
+        duration: controlState.duration,
+        progress: controlState.progress,
+        playbackSpeed: controlState.playbackSpeed,
+        isLoading: controlState.isLoading,
+        isError: controlState.isError,
+        errorMessage: controlState.errorMessage
+      };
+    });
+    
+    // 绑定UI状态
+    this.viewModel.uiState.subscribe((uiState) => {
+      this.uiState = {
+        isLandscape: uiState.isLandscape,
+        screenWidth: uiState.screenWidth,
+        screenHeight: uiState.screenHeight,
+        showControls: uiState.showControls,
+        showEpisodeList: uiState.showEpisodeList,
+        showMoreOptions: uiState.showMoreOptions,
+        showSubtitleOptions: uiState.showSubtitleOptions,
+        showAudioTrackOptions: uiState.showAudioTrackOptions,
+        showSkipOptions: uiState.showSkipOptions,
+        videoPlayerHeight: uiState.videoPlayerHeight,
+        controlHideTimer: uiState.controlHideTimer,
+        currentFocusElement: uiState.currentFocusElement
+      };
+    });
+    
+    // 绑定字幕状态
+    this.viewModel.subtitleState.subscribe((subtitleState) => {
+      this.subtitleState = {
+        tracks: subtitleState.tracks,
+        selectedTrack: subtitleState.selectedTrack,
+        languages: subtitleState.languages,
+        isSearching: subtitleState.isSearching
+      };
+    });
+    
+    // 绑定音轨状态
+    this.viewModel.audioState.subscribe((audioState) => {
+      this.audioState = {
+        tracks: audioState.tracks,
+        selectedTrack: audioState.selectedTrack
+      };
+    });
+    
+    // 绑定跳过设置状态
+    this.viewModel.skipState.subscribe((skipState) => {
+      this.skipState = {
+        skipOpeningTime: skipState.skipOpeningTime,
+        skipEndingTime: skipState.skipEndingTime,
+        isSkipOpeningEnabled: skipState.isSkipOpeningEnabled,
+        isSkipEndingEnabled: skipState.isSkipEndingEnabled
+      };
+    });
+    
+    // 绑定直播状态
+    this.viewModel.liveState.subscribe((liveState) => {
+      this.liveState = {
+        isLiveMode: liveState.isLiveMode,
+        showChannelList: liveState.showChannelList,
+        showSettings: liveState.showSettings
+      };
+    });
+    
+    Logger.info(this.TAG, 'ViewModel state binding completed');
+  }
+  
+  // 初始化播放 | Initialize playback
+  private async initPlayback(): Promise<void> {
+    try {
+      // 获取路由参数
+      const params = AppNavigator.getInstance().getCurrentRouteParams();
+      
+      if (!params || !params.id || !params.siteKey) {
+        Logger.error(this.TAG, 'Missing required route parameters');
+        return;
+      }
+      
+      // 初始化ViewModel
+      await this.viewModel.initialize({
+        id: params.id,
+        siteKey: params.siteKey,
+        type: params.type || 'movie'
+      });
+      
+      Logger.info(this.TAG, 'Playback initialized successfully');
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to initialize playback: ${error}`);
     }
   }
   
@@ -423,6 +490,14 @@ struct PlaybackPage {
    */
   private async handleEpisodeSelect(episode: Episode): Promise<void> {
     try {
+      // 验证剧集数据完整性 | Validate episode data integrity
+      if (!episode || !episode.id || !episode.title) {
+        Logger.error(this.TAG, 'Invalid episode data: missing required fields');
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = '无效的剧集数据';
+        return;
+      }
+
       this.mediaState.selectedEpisode = episode;
       // 更新剧集状态 | Update episode state
       this.mediaState.episodes.forEach(ep => {
@@ -431,16 +506,23 @@ struct PlaybackPage {
       
       // 显示加载状态 | Show loading state
       this.playbackState.isLoading = true;
+      this.playbackState.isError = false;
+      
+      // 验证playbackService是否可用
+      if (!this.playbackService) {
+        throw new Error('Playback service not available');
+      }
       
       // 调用实际的PlaybackService切换剧集 | Call actual PlaybackService to switch episode
       const result = await this.playbackService.switchEpisode(episode);
       
-      if (result.isSuccess()) {
+      if (result && typeof result.isSuccess === 'function' && result.isSuccess()) {
         Logger.info(this.TAG, `Selected episode: ${episode.title}`);
       } else {
-        Logger.error(this.TAG, `Failed to switch episode: ${result.message}`);
+        const errorMessage = result && result.message ? result.message : '切换剧集失败';
+        Logger.error(this.TAG, `Failed to switch episode: ${errorMessage}`);
         this.playbackState.isError = true;
-        this.playbackState.errorMessage = result.message || '切换剧集失败';
+        this.playbackState.errorMessage = errorMessage;
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
@@ -457,6 +539,14 @@ struct PlaybackPage {
    */
   private async handleLineSelect(line: ParseLine): Promise<void> {
     try {
+      // 验证线路数据完整性 | Validate parse line data integrity
+      if (!line || !line.id || !line.name) {
+        Logger.error(this.TAG, 'Invalid parse line data: missing required fields');
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = '无效的解析线路数据';
+        return;
+      }
+
       this.mediaState.selectedLine = line;
       // 更新线路状态 | Update line state
       this.mediaState.parseLines.forEach(l => {
@@ -465,16 +555,23 @@ struct PlaybackPage {
       
       // 显示加载状态 | Show loading state
       this.playbackState.isLoading = true;
+      this.playbackState.isError = false;
+      
+      // 验证playbackService是否可用
+      if (!this.playbackService) {
+        throw new Error('Playback service not available');
+      }
       
       // 调用实际的PlaybackService切换解析线路 | Call actual PlaybackService to switch parse line
       const result = await this.playbackService.switchParseLine(line);
       
-      if (result.isSuccess()) {
+      if (result && typeof result.isSuccess === 'function' && result.isSuccess()) {
         Logger.info(this.TAG, `Selected parse line: ${line.name}`);
       } else {
-        Logger.error(this.TAG, `Failed to switch parse line: ${result.message}`);
+        const errorMessage = result && result.message ? result.message : '切换解析线路失败';
+        Logger.error(this.TAG, `Failed to switch parse line: ${errorMessage}`);
         this.playbackState.isError = true;
-        this.playbackState.errorMessage = result.message || '切换解析线路失败';
+        this.playbackState.errorMessage = errorMessage;
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
@@ -491,23 +588,36 @@ struct PlaybackPage {
    */
   private async handlePlayPause(): Promise<void> {
     try {
-      let result: { isSuccess: () => boolean };
+      // 验证playbackService是否可用
+      if (!this.playbackService) {
+        Logger.error(this.TAG, 'Playback service not available');
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = '播放服务不可用';
+        return;
+      }
+      
+      let result: { isSuccess: () => boolean; message?: string };
       if (this.playbackState.isPlaying) {
         result = await this.playbackService.pause();
       } else {
         result = await this.playbackService.play();
       }
       
-      if (result.isSuccess()) {
+      if (result && typeof result.isSuccess === 'function' && result.isSuccess()) {
         this.playbackState.isPlaying = !this.playbackState.isPlaying;
         
         Logger.info(this.TAG, `${this.playbackState.isPlaying ? 'Playing' : 'Paused'}`);
       } else {
-        Logger.error(this.TAG, `Failed to toggle playback: ${result.message}`);
+        const errorMessage = result && result.message ? result.message : '切换播放状态失败';
+        Logger.error(this.TAG, `Failed to toggle playback: ${errorMessage}`);
+        this.playbackState.isError = true;
+        this.playbackState.errorMessage = errorMessage;
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to toggle playback: ${errorMsg}`);
+      this.playbackState.isError = true;
+      this.playbackState.errorMessage = errorMsg;
     }
   }
   
@@ -669,10 +779,20 @@ struct PlaybackPage {
   /**
    * 处理字幕样式设置 | Handle subtitle style setting
    */
-  private async handleSubtitleStyleChange(style: SubtitleStyle): Promise<void> {
+  private async handleSubtitleStyleChange(): Promise<void> {
     try {
-      await this.subtitleService.setSubtitleStyle(style);
-      await this.playbackService.updateSubtitleStyle(style);
+      const defaultStyle: SubtitleStyle = {
+        fontSize: 24,
+        fontFamily: 'sans-serif',
+        fontWeight: 'normal',
+        color: '#FFFFFF',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        opacity: 1.0,
+        borderWidth: 1,
+        borderColor: '#000000'
+      };
+      await this.subtitleService.setSubtitleStyle(defaultStyle);
+      await this.playbackService.updateSubtitleStyle(defaultStyle);
       Logger.info(this.TAG, 'Updated subtitle style');
     } catch (error) {
       Logger.error(this.TAG, `Failed to update subtitle style: ${error}`);
@@ -704,13 +824,30 @@ struct PlaybackPage {
   private async handleBack(): Promise<void> {
     try {
       // 停止播放 | Stop playback
-      await this.playbackService.stop();
+      if (this.playbackService) {
+        await this.playbackService.stop();
+      }
       
       // 导航返回 | Navigate back
-      await AppNavigator.getInstance().navigateToBack();
-      Logger.info(this.TAG, 'Navigating back');
+      const navigator = AppNavigator.getInstance();
+      if (navigator) {
+        await navigator.navigateToBack();
+        Logger.info(this.TAG, 'Navigating back');
+      } else {
+        Logger.error(this.TAG, 'AppNavigator instance not available');
+      }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to navigate back: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to navigate back: ${errorMsg}`);
+      // 即使出错也要尝试返回，确保用户可以退出页面
+      try {
+        const navigator = AppNavigator.getInstance();
+        if (navigator) {
+          await navigator.navigateToBack();
+        }
+      } catch (navError) {
+        Logger.error(this.TAG, `Failed to navigate back even after error: ${navError}`);
+      }
     }
   }
   
@@ -825,145 +962,6 @@ struct PlaybackPage {
       Logger.error(this.TAG, `Failed to check auto skip: ${error}`);
     }
   }
-  
-  // 渲染跳过选项 | Render skip options
-  @Builder
-  renderSkipOptions() {
-    if (this.uiState.showSkipOptions) {
-      Column() {
-        Text('跳过设置')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        // 跳过片头设置 | Skip opening settings
-        Column() {
-          Text('跳过片头')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            Button() {
-              Text(this.skipState.isSkipOpeningEnabled ? '已开启' : '未开启')
-                .fontSize(14)
-                .fontColor(this.skipState.isSkipOpeningEnabled ? '#4CAF50' : '#9E9E9E')
-                .fontWeight(500)
-            }
-            .width(120)
-            .height(40)
-            .backgroundColor(this.skipState.isSkipOpeningEnabled ? '#E8F5E9' : '#F5F5F5')
-            .borderRadius(8)
-            .margin({ left: 10, right: 15 })
-            .onClick(() => this.skipState.isSkipOpeningEnabled = !this.skipState.isSkipOpeningEnabled)
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, 'Skip opening toggle focused');
-            })
-            
-            Button() {
-              Text('设置当前点')
-                .fontSize(14)
-                .fontColor('#FFFFFF')
-                .fontWeight(500)
-            }
-            .width(150)
-            .height(40)
-            .backgroundColor('#2196F3')
-            .borderRadius(8)
-            .onClick(() => this.handleSkipOpening())
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, 'Set opening point button focused');
-            })
-          }
-          
-          Text(`当前跳过时间: ${this.formatTime(this.skipState.skipOpeningTime)}`)
-            .fontSize(14)
-            .fontColor('#666666')
-            .margin({ top: 8, left: 10 })
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 跳过片尾设置 | Skip ending settings
-        Column() {
-          Text('跳过片尾')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            Button() {
-              Text(this.skipState.isSkipEndingEnabled ? '已开启' : '未开启')
-                .fontSize(14)
-                .fontColor(this.skipState.isSkipEndingEnabled ? '#4CAF50' : '#9E9E9E')
-                .fontWeight(500)
-            }
-            .width(120)
-            .height(40)
-            .backgroundColor(this.skipState.isSkipEndingEnabled ? '#E8F5E9' : '#F5F5F5')
-            .borderRadius(8)
-            .margin({ left: 10, right: 15 })
-            .onClick(() => this.skipState.isSkipEndingEnabled = !this.skipState.isSkipEndingEnabled)
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, 'Skip ending toggle focused');
-            })
-            
-            Button() {
-              Text('设置当前点')
-                .fontSize(14)
-                .fontColor('#FFFFFF')
-                .fontWeight(500)
-            }
-            .width(150)
-            .height(40)
-            .backgroundColor('#2196F3')
-            .borderRadius(8)
-            .onClick(() => this.handleSkipEnding())
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, 'Set ending point button focused');
-            })
-          }
-          
-          Text(`当前跳过时间: ${this.formatTime(this.skipState.skipEndingTime)}`)
-            .fontSize(14)
-            .fontColor('#666666')
-            .margin({ top: 8, left: 10 })
-        }
-        .width('100%')
-      }
-      .width('100%')
-      .padding(25)
-      .backgroundColor('#FFFFFF')
-      .borderRadius(12)
-      .margin({ top: 15, right: 30, left: 30 })
-      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
-    }
-  }
-  
-  // 焦点样式 | Focus style
-  private focusStyle: FocusStyle = {
-    border: {
-      width: 3,
-      color: '#4CAF50',
-      radius: 8
-    },
-    shadow: {
-      color: '#4CAF50',
-      radius: 10,
-      offsetX: 0,
-      offsetY: 0
-    }
-  };
-  
-  // 焦点管理 | Focus management
-  private focusManager: FocusManager = new FocusManager();
   
   // 处理控制条显示 | Handle control bar show
   private showControlsWithTimer(): void {
@@ -1145,214 +1143,101 @@ struct PlaybackPage {
     }
   }
   
-  // 渲染直播频道列表 | Render live channel list
-  @Builder
-  renderLiveChannelList() {
-    if (this.liveState.showChannelList && this.liveState.isLiveMode) {
-      Column() {
-        Text('频道列表')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        // 频道列表内容 | Channel list content
-        // 这里应该从直播服务获取频道列表 | Should get channel list from live service
-      }
-      .width('300px')
-      .height('100%')
-      .padding(25)
-      .backgroundColor('rgba(0, 0, 0, 0.8)')
-      .borderRadius(12)
-      .position({ left: 0, top: 0 })
-    }
-  }
-  
-  // 渲染直播设置 | Render live settings
-  @Builder
-  renderLiveSettings() {
-    if (this.liveState.showSettings && this.liveState.isLiveMode) {
-      Column() {
-        Text('直播设置')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        // 响应超时设置 | Response timeout settings
-        Column() {
-          Text('响应超时设置')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Text('超时时间: 5秒')
-            .fontSize(14)
-            .fontColor('#FFFFFF')
-            .margin({ left: 10, bottom: 5 })
-          
-          Text('超时后切换到下一个频道')
-            .fontSize(14)
-            .fontColor('#FFFFFF')
-            .margin({ left: 10 })
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-      }
-      .width('300px')
-      .height('100%')
-      .padding(25)
-      .backgroundColor('rgba(0, 0, 0, 0.8)')
-      .borderRadius(12)
-      .position({ right: 0, top: 0 })
-    }
-  }
-  
-  // 焦点管理器类 | Focus manager class
-  class FocusManager {
-    private currentFocusIndex: number = 0;
-    private focusableElements: FocusableElement[] = [];
-    
-    // 添加可焦点元素 | Add focusable element
-    addElement(element: FocusableElement): void {
-      this.focusableElements.push(element);
-    }
-    
-    // 移动焦点上 | Move focus up
-    moveUp(): void {
-      // 实现向上导航逻辑 | Implement up navigation logic
-      this.currentFocusIndex = Math.max(0, this.currentFocusIndex - 1);
-      this.updateFocus();
-    }
-    
-    // 移动焦点下 | Move focus down
-    moveDown(): void {
-      // 实现向下导航逻辑 | Implement down navigation logic
-      this.currentFocusIndex = Math.min(this.focusableElements.length - 1, this.currentFocusIndex + 1);
-      this.updateFocus();
-    }
-    
-    // 移动焦点左 | Move focus left
-    moveLeft(): void {
-      // 实现向左导航逻辑 | Implement left navigation logic
-      this.currentFocusIndex = Math.max(0, this.currentFocusIndex - 1);
-      this.updateFocus();
-    }
-    
-    // 移动焦点右 | Move focus right
-    moveRight(): void {
-      // 实现向右导航逻辑 | Implement right navigation logic
-      this.currentFocusIndex = Math.min(this.focusableElements.length - 1, this.currentFocusIndex + 1);
-      this.updateFocus();
-    }
-    
-    // 更新焦点 | Update focus
-    private updateFocus(): void {
-      // 实现焦点更新逻辑 | Implement focus update logic
-      console.log(`Focus updated to index: ${this.currentFocusIndex}`);
-    }
-  }
-  
-  // 可焦点元素接口 | Focusable element interface
-  interface FocusableElement {
-    id: string;
-    type: string;
-    focus(): void;
-    blur(): void;
-  }
-  
   // 渲染视频播放区域 | Render video playback area
   @Builder
   renderVideoPlayer() {
     Column() {
       if (this.playbackState.isLoading) {
-            Column() {
-              // 加载动画 | Loading animation
-              Column() {
-                Text('加载中...')
-                  .fontSize(24)
-                  .fontColor('#FFFFFF')
-                  .margin({ bottom: 20 })
-                // 加载指示器 | Loading indicator
-                Row() {
-                  ForEach([1, 2, 3, 4, 5], (item: number) => {
-                    Column() {
-                      Text('.')
-                        .fontSize(32)
-                        .fontColor('#4CAF50')
-                        .fontWeight(700)
-                    }
-                    .animation({
-                      duration: 800,
-                      tempo: 1,
-                      curve: Curve.EaseInOut,
-                      iterations: -1,
-                      delay: item * 100
-                    })
-                  })
+        Column() {
+          // 加载动画 | Loading animation
+          Column() {
+            Text('加载中...')
+              .fontSize(24)
+              .fontColor('#FFFFFF')
+              .margin({ bottom: 20 })
+            // 加载指示器 | Loading indicator
+            Row() {
+              ForEach([1, 2, 3, 4, 5], (item: number) => {
+                Column() {
+                  Text('.')
+                    .fontSize(32)
+                    .fontColor('#4CAF50')
+                    .fontWeight(700)
                 }
-              }
+                .animation({
+                  duration: 800,
+                  tempo: 1,
+                  curve: Curve.EaseInOut,
+                  iterations: -1,
+                  delay: item * 100
+                })
+              })
             }
-            .justifyContent(FlexAlign.Center)
-            .width('100%')
-            .height(this.uiState.videoPlayerHeight)
-            .backgroundColor('rgba(0, 0, 0, 0.9)')
-            .touchEventListener((e) => this.onTouchEvent(e))
-            .gestureEventListener((e) => this.onGestureEvent(e))
-          } else if (this.playbackState.isError) {
-            Column() {
-              Text('播放失败')
-                .fontSize(28)
-                .fontColor('#FF5722')
-                .fontWeight(700)
-                .margin({ top: 20 })
-              Text(this.playbackState.errorMessage)
-                .fontSize(18)
-                .fontColor('#FFFFFF')
-                .margin({ top: 12, left: 40, right: 40 })
-                .textAlign(TextAlign.Center)
-              Button('重试')
-                .onClick(() => {
-                  this.playbackState.isError = false;
-                  this.loadMediaInfo();
-                })
-                .backgroundColor('#4CAF50')
-                .fontColor('white')
-                .borderRadius(16)
-                .padding({ left: 40, right: 40, top: 15, bottom: 15 })
-                .margin({ top: 30 })
-                .fontSize(18)
-                .fontWeight(600)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Retry button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-              Button('返回')
-                .onClick(() => this.handleBack())
-                .backgroundColor('#607D8B')
-                .fontColor('white')
-                .borderRadius(16)
-                .padding({ left: 40, right: 40, top: 15, bottom: 15 })
-                .margin({ top: 15 })
-                .fontSize(18)
-                .fontWeight(600)
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, 'Back button focused');
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-            }
-            .justifyContent(FlexAlign.Center)
-            .width('100%')
-            .height(this.uiState.videoPlayerHeight)
-            .backgroundColor('rgba(0, 0, 0, 0.9)')
-            .touchEventListener((e) => this.onTouchEvent(e))
-            .gestureEventListener((e) => this.onGestureEvent(e))
-          } else {
+          }
+        }
+        .justifyContent(FlexAlign.Center)
+        .width('100%')
+        .height(this.uiState.videoPlayerHeight)
+        .backgroundColor('rgba(0, 0, 0, 0.9)')
+        .touchEventListener((e) => this.onTouchEvent(e))
+        .gestureEventListener((e) => this.onGestureEvent(e))
+      } else if (this.playbackState.isError) {
+        Column() {
+          Text('播放失败')
+            .fontSize(28)
+            .fontColor('#FF5722')
+            .fontWeight(700)
+            .margin({ top: 20 })
+          Text(this.playbackState.errorMessage)
+            .fontSize(18)
+            .fontColor('#FFFFFF')
+            .margin({ top: 12, left: 40, right: 40 })
+            .textAlign(TextAlign.Center)
+          Button() {
+            Text('重试')
+              .fontSize(18)
+              .fontColor('#FFFFFF')
+              .fontWeight(600)
+          }
+          .padding({ left: 40, right: 40, top: 15, bottom: 15 })
+          .backgroundColor('#4CAF50')
+          .borderRadius(16)
+          .margin({ top: 30 })
+          .onClick(() => {
+            this.playbackState.isError = false;
+            this.loadMediaInfo();
+          })
+          .focusable(true)
+          .focusStyle(this.focusStyle)
+          .onFocus(() => {
+            Logger.info(this.TAG, 'Retry button focused');
+          })
+          .keyEventListener((e) => this.onKeyEvent(e))
+          Button() {
+            Text('返回')
+              .fontSize(18)
+              .fontColor('#FFFFFF')
+              .fontWeight(600)
+          }
+          .padding({ left: 40, right: 40, top: 15, bottom: 15 })
+          .backgroundColor('#607D8B')
+          .borderRadius(16)
+          .margin({ top: 15 })
+          .onClick(() => this.handleBack())
+          .focusable(true)
+          .focusStyle(this.focusStyle)
+          .onFocus(() => {
+            Logger.info(this.TAG, 'Back button focused');
+          })
+          .keyEventListener((e) => this.onKeyEvent(e))
+        }
+        .justifyContent(FlexAlign.Center)
+        .width('100%')
+        .height(this.uiState.videoPlayerHeight)
+        .backgroundColor('rgba(0, 0, 0, 0.9)')
+        .touchEventListener((e) => this.onTouchEvent(e))
+        .gestureEventListener((e) => this.onGestureEvent(e))
+      } else {
         Column() {
           // 视频播放区域 | Video playback area
           Stack() {
@@ -1409,449 +1294,6 @@ struct PlaybackPage {
     }
   }
   
-  // 渲染剧集列表 | Render episode list
-  @Builder
-  renderEpisodeList() {
-    EpisodeList({
-      episodes: this.mediaState.episodes,
-      selectedEpisode: this.mediaState.selectedEpisode,
-      showEpisodeList: this.uiState.showEpisodeList,
-      onEpisodeSelect: (episode: Episode) => this.handleEpisodeSelect(episode)
-    })
-  }
-  
-  // 渲染媒体信息 | Render media info
-  @Builder
-  renderMediaInfo() {
-    if (this.mediaState.info) {
-      Column() {
-        Row() {
-          // 封面 | Cover
-          Image(this.mediaState.info.cover || 'https://via.placeholder.com/200x300?text=No+Image')
-            .width(this.uiState.isLandscape ? 200 : 150)
-            .height(this.uiState.isLandscape ? 300 : 200)
-            .objectFit(ImageFit.Cover)
-            .borderRadius(12)
-            .backgroundColor('#F5F5F5')
-            .margin({ left: this.uiState.isLandscape ? 40 : 30, right: 25 })
-          
-          // 信息 | Info
-          Column() {
-            Text(this.mediaState.info.title)
-              .fontSize(this.uiState.isLandscape ? 28 : 24)
-              .fontWeight(700)
-              .fontColor('#333333')
-              .margin({ bottom: 15 })
-            
-            Text(this.mediaState.info.description || '暂无简介')
-              .fontSize(16)
-              .fontColor('#666666')
-              .maxLines(this.uiState.isLandscape ? 4 : 3)
-              .margin({ bottom: 15 })
-            
-            Row() {
-              Text(`类型: ${this.mediaState.info.type || '未知'}`)
-                .fontSize(16)
-                .fontColor('#666666')
-                .margin({ right: 25 })
-              Text(`评分: ${this.mediaState.info.rating || '暂无'}`)
-                .fontSize(16)
-                .fontColor('#FF9800')
-                .fontWeight(500)
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  // 渲染解析线路选择 | Render parse line selection
-  @Builder
-  renderParseLineSelection() {
-    if (this.mediaState.info) {
-      Column() {
-        Row() {
-          Text('解析线路:')
-            .fontSize(18)
-            .fontColor('#333333')
-            .fontWeight(500)
-            .margin({ right: 15, top: 20 })
-          
-          Scroll(this.scroller) {
-            Row() {
-              ForEach(this.mediaState.parseLines, (line: ParseLine) => {
-                Button() {
-                  Text(line.name)
-                    .fontSize(14)
-                    .fontColor(line.selected ? '#FFFFFF' : '#333333')
-                    .fontWeight(500)
-                }
-                .width(100)
-                .height(40)
-                .backgroundColor(line.selected ? '#2196F3' : '#F5F5F5')
-                .borderRadius(8)
-                .margin({ right: 10 })
-                .onClick(() => this.handleLineSelect(line))
-                .focusable(true)
-                .focusStyle(this.focusStyle)
-                .onFocus(() => {
-                  Logger.info(this.TAG, `Parse line ${line.name} focused`);
-                })
-                .keyEventListener((e) => this.onKeyEvent(e))
-              })
-            }
-          }
-          .width('70%')
-          .height(60)
-        }
-      }
-    }
-  }
-  
-  // 渲染内容信息 | Render content info
-  @Builder
-  renderContentInfo() {
-    if (this.mediaInfo) {
-      Column() {
-        Row() {
-          // 封面 | Cover
-          Image(this.mediaInfo.cover || 'https://via.placeholder.com/200x300?text=No+Image')
-            .width(this.isLandscape ? 200 : 150)
-            .height(this.isLandscape ? 300 : 200)
-            .objectFit(ImageFit.Cover)
-            .borderRadius(12)
-            .backgroundColor('#F5F5F5')
-            .margin({ left: this.isLandscape ? 40 : 30, right: 25 })
-          
-          // 信息 | Info
-          Column() {
-            Text(this.mediaInfo.title)
-              .fontSize(this.isLandscape ? 28 : 24)
-              .fontWeight(700)
-              .fontColor('#333333')
-              .margin({ bottom: 15 })
-            
-            Text(this.mediaInfo.description || '暂无简介')
-              .fontSize(16)
-              .fontColor('#666666')
-              .maxLines(this.isLandscape ? 4 : 3)
-              .margin({ bottom: 15 })
-            
-            Row() {
-              Text(`类型: ${this.mediaInfo.type || '未知'}`)
-                .fontSize(16)
-                .fontColor('#666666')
-                .margin({ right: 25 })
-              Text(`评分: ${this.mediaInfo.rating || '暂无'}`)
-                .fontSize(16)
-                .fontColor('#FF9800')
-                .fontWeight(500)
-            }
-            
-            // 解析线路选择 | Parse line selection
-            Row() {
-              Text('解析线路:')
-                .fontSize(18)
-                .fontColor('#333333')
-                .fontWeight(500)
-                .margin({ right: 15, top: 20 })
-              
-              Scroll(this.scroller) {
-                Row() {
-                  ForEach(this.parseLines, (line: ParseLine) => {
-                    Button() {
-                      Text(line.name)
-                        .fontSize(14)
-                        .fontColor(line.selected ? '#FFFFFF' : '#333333')
-                        .fontWeight(line.selected ? 600 : 400)
-                    }
-                    .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-                    .backgroundColor(line.selected ? '#4CAF50' : '#F5F5F5')
-                    .borderRadius(20)
-                    .margin({ right: 12, top: 20 })
-                    .onClick(() => this.handleLineSelect(line))
-                    .focusable(true)
-                    .onFocus(() => {
-                      Logger.info(this.TAG, `Parse line focused: ${line.name}`);
-                    })
-                  })
-                }
-                .width('100%')
-                .flexWrap(FlexWrap.Wrap)
-              }
-              .scrollDirection(ScrollDirection.Horizontal)
-              .scrollBar(BarState.Auto)
-              .flexGrow(1)
-            }
-          }
-          .flexGrow(1)
-          .margin({ right: this.isLandscape ? 40 : 30 })
-        }
-        .width('100%')
-        .padding({ top: 25, bottom: 25 })
-        .backgroundColor('#FFFFFF')
-      }
-    }
-  }
-  
-  // 渲染剧集列表 | Render episode list
-  @Builder
-  renderEpisodeList() {
-    if (this.episodes.length > 0) {
-      Column() {
-        Row() {
-          Text('剧集列表')
-            .fontSize(20)
-            .fontWeight(700)
-            .fontColor('#333333')
-            .margin({ left: this.isLandscape ? 40 : 30 })
-          
-          Button() {
-            Text('其他线路搜索')
-              .fontSize(16)
-              .fontColor('#FFFFFF')
-              .fontWeight(500)
-          }
-          .width(150)
-          .height(50)
-          .backgroundColor('#2196F3')
-          .borderRadius(8)
-          .margin({ right: this.isLandscape ? 40 : 30 })
-          .onClick(() => this.handleOtherLineSearch())
-          .focusable(true)
-          .onFocus(() => {
-            Logger.info(this.TAG, 'Other lines button focused');
-          })
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .alignItems(VerticalAlign.Center)
-        .margin({ bottom: 20 })
-        
-        Scroll(this.episodeScroller) {
-          Row() {
-            ForEach(this.episodes, (episode: Episode) => {
-              Button() {
-                Text(`第${episode.episode}集`)
-                  .fontSize(14)
-                  .fontColor(episode.current ? '#FFFFFF' : episode.played ? '#4CAF50' : '#333333')
-                  .fontWeight(episode.current ? 600 : 400)
-              }
-              .width(90)
-              .height(45)
-              .backgroundColor(episode.current ? '#4CAF50' : episode.played ? '#E8F5E9' : '#F5F5F5')
-              .borderRadius(8)
-              .margin({ left: this.isLandscape ? 40 : 30, right: 12, bottom: 15 })
-              .onClick(() => this.handleEpisodeSelect(episode))
-              .focusable(true)
-              .onFocus(() => {
-                Logger.info(this.TAG, `Episode ${episode.episode} focused`);
-              })
-            })
-          }
-          .width('100%')
-          .padding({ bottom: 40 })
-          .flexWrap(FlexWrap.Wrap)
-        }
-        .scrollBar(BarState.Auto)
-        .flexGrow(1)
-      }
-      .width('100%')
-      .padding({ top: 25 })
-      .backgroundColor('#F5F5F5')
-    }
-  }
-  
-  // 渲染播放速度选项 | Render playback speed options
-  @Builder
-  renderSpeedOptions() {
-    if (this.showMoreOptions) {
-      Column() {
-        Text('播放速度')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        Row() {
-          ForEach([0.5, 0.75, 1.0, 1.25, 1.5, 2.0], (speed: number) => {
-            Button() {
-              Text(`${speed}x`)
-                .fontSize(16)
-                .fontColor(speed === this.playbackSpeed ? '#FFFFFF' : '#333333')
-                .fontWeight(speed === this.playbackSpeed ? 600 : 400)
-            }
-            .padding({ left: 20, right: 20, top: 12, bottom: 12 })
-            .backgroundColor(speed === this.playbackSpeed ? '#4CAF50' : '#F5F5F5')
-            .borderRadius(20)
-            .margin({ right: 15 })
-            .onClick(() => this.handleSpeedChange(speed))
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, `Speed ${speed}x focused`);
-            })
-          })
-        }
-      }
-      .width('100%')
-      .padding(25)
-      .backgroundColor('#FFFFFF')
-      .borderRadius(12)
-      .margin({ top: 15, right: 30, left: 30 })
-      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
-    }
-  }
-  
-  // 渲染字幕选项 | Render subtitle options
-  @Builder
-  renderSubtitleOptions() {
-    if (this.showSubtitleOptions) {
-      Column() {
-        Text('字幕选项')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        // 字幕轨道列表 | Subtitle track list
-        Column() {
-          Text('可用字幕')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          if (this.isSearchingSubtitles) {
-            Text('搜索字幕中...')
-              .fontSize(14)
-              .fontColor('#999999')
-              .margin({ left: 10 })
-          } else if (this.subtitleTracks.length === 0) {
-            Text('未找到字幕')
-              .fontSize(14)
-              .fontColor('#999999')
-              .margin({ left: 10 })
-          } else {
-            ForEach(this.subtitleTracks, (track: SubtitleTrack) => {
-              Button() {
-                Text(track.name)
-                  .fontSize(14)
-                  .fontColor(track.id === this.selectedSubtitle?.id ? '#FFFFFF' : '#333333')
-                  .fontWeight(track.id === this.selectedSubtitle?.id ? 600 : 400)
-              }
-              .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-              .backgroundColor(track.id === this.selectedSubtitle?.id ? '#4CAF50' : '#F5F5F5')
-              .borderRadius(12)
-              .margin({ bottom: 8, left: 10, right: 10 })
-              .onClick(() => this.handleSubtitleSelect(track))
-              .focusable(true)
-              .onFocus(() => {
-                Logger.info(this.TAG, `Subtitle track focused: ${track.name}`);
-              })
-            })
-          }
-        }
-        .width('100%')
-        .margin({ bottom: 20 })
-        
-        // 字幕样式设置 | Subtitle style settings
-        Column() {
-          Text('字幕样式')
-            .fontSize(16)
-            .fontColor('#666666')
-            .fontWeight(500)
-            .margin({ bottom: 10, left: 10 })
-          
-          Row() {
-            Button() {
-              Text('默认样式')
-                .fontSize(14)
-                .fontColor('#FFFFFF')
-                .fontWeight(500)
-            }
-            .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-            .backgroundColor('#2196F3')
-            .borderRadius(12)
-            .margin({ left: 10, right: 10 })
-            .onClick(() => this.handleSubtitleStyleChange({}))
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, 'Default style button focused');
-            })
-          }
-        }
-        .width('100%')
-      }
-      .width('100%')
-      .padding(25)
-      .backgroundColor('#FFFFFF')
-      .borderRadius(12)
-      .margin({ top: 15, right: 30, left: 30 })
-      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
-    }
-  }
-  
-  /**
-   * 处理音轨选择 | Handle audio track selection
-   */
-  private async handleAudioTrackSelect(track: AudioTrack): Promise<void> {
-    try {
-      this.selectedAudioTrack = track;
-      // 调用实际的PlaybackService切换音轨 | Call actual PlaybackService to switch audio track
-      await this.playbackService.setAudioTrack(track.id);
-      Logger.info(this.TAG, `Selected audio track: ${track.name}`);
-    } catch (error) {
-      Logger.error(this.TAG, `Failed to select audio track: ${error}`);
-    }
-  }
-  
-  // 渲染音轨选项 | Render audio track options
-  @Builder
-  renderAudioTrackOptions() {
-    if (this.showAudioTrackOptions) {
-      Column() {
-        Text('音轨选择')
-          .fontSize(18)
-          .fontColor('#333333')
-          .fontWeight(600)
-          .margin({ bottom: 15 })
-        
-        if (this.audioTracks.length === 0) {
-          Text('未检测到多音轨')
-            .fontSize(14)
-            .fontColor('#999999')
-            .margin({ left: 10 })
-        } else {
-          ForEach(this.audioTracks, (track: AudioTrack) => {
-            Button() {
-              Text(track.name || `音轨 ${track.id}`)
-                .fontSize(14)
-                .fontColor(track.id === this.selectedAudioTrack?.id ? '#FFFFFF' : '#333333')
-                .fontWeight(track.id === this.selectedAudioTrack?.id ? 600 : 400)
-            }
-            .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-            .backgroundColor(track.id === this.selectedAudioTrack?.id ? '#4CAF50' : '#F5F5F5')
-            .borderRadius(12)
-            .margin({ bottom: 8, left: 10, right: 10 })
-            .onClick(() => this.handleAudioTrackSelect(track))
-            .focusable(true)
-            .onFocus(() => {
-              Logger.info(this.TAG, `Audio track focused: ${track.name}`);
-            })
-          })
-        }
-      }
-      .width('100%')
-      .padding(25)
-      .backgroundColor('#FFFFFF')
-      .borderRadius(12)
-      .margin({ top: 15, right: 30, left: 30 })
-      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
-    }
-  }
-  
-
-  
   build() {
     Column() {
       // 顶部导航栏 | Top navigation bar
@@ -1867,7 +1309,7 @@ struct PlaybackPage {
         .height(60)
         .backgroundColor('#4CAF50')
         .borderRadius(12)
-        .margin({ left: this.isLandscape ? 40 : 30 })
+        .margin({ left: this.uiState.isLandscape ? 40 : 30 })
         .onClick(() => this.handleBack())
         .focusable(true)
         .onFocus(() => {
@@ -1880,7 +1322,7 @@ struct PlaybackPage {
           .fontWeight(700)
           .fontColor('#333333')
           .flexGrow(1)
-          .margin({ left: this.isLandscape ? 40 : 30 })
+          .margin({ left: this.uiState.isLandscape ? 40 : 30 })
           .textAlign(TextAlign.Start)
         
         // 更多按钮 | More button
@@ -1894,8 +1336,8 @@ struct PlaybackPage {
         .height(60)
         .backgroundColor('#2196F3')
         .borderRadius(12)
-        .margin({ right: this.isLandscape ? 40 : 30 })
-        .onClick(() => this.showControls = !this.showControls)
+        .margin({ right: this.uiState.isLandscape ? 40 : 30 })
+        .onClick(() => this.uiState.showMoreOptions = !this.uiState.showMoreOptions)
         .focusable(true)
         .onFocus(() => {
           Logger.info(this.TAG, 'More button focused');
@@ -1912,34 +1354,52 @@ struct PlaybackPage {
       // 视频播放区域 | Video playback area
       this.renderVideoPlayer()
       
-      // 内容信息 | Content info
-      this.renderContentInfo()
+      // 媒体信息组件 | Media info component
+      if (this.mediaState.info) {
+        MediaInfoComponent({
+          mediaInfo: this.mediaState.info,
+          parseLines: this.mediaState.parseLines,
+          isLandscape: this.uiState.isLandscape,
+          onLineSelect: (line: ParseLine) => this.handleLineSelect(line),
+          focusStyle: this.focusStyle
+        })
+      }
       
-      // 剧集列表 | Episode list
-      this.renderEpisodeList()
+      // 剧集列表组件 | Episode list component
+      EpisodeListComponent({
+        episodes: this.mediaState.episodes,
+        isLandscape: this.uiState.isLandscape,
+        onEpisodeSelect: (episode: Episode) => this.handleEpisodeSelect(episode),
+        onOtherLineSearch: () => this.handleOtherLineSearch()
+      })
       
-      // 播放速度选项 | Playback speed options
-      this.renderSpeedOptions()
+      // 播放速度选项组件 | Playback speed component
+      PlaybackSpeedComponent({
+        showMoreOptions: this.uiState.showMoreOptions,
+        playbackSpeed: this.playbackState.playbackSpeed,
+        onSpeedChange: (speed: number) => this.handleSpeedChange(speed)
+      })
       
-      // 字幕选项 | Subtitle options
-      this.renderSubtitleOptions()
+      // 字幕选项组件 | Subtitle options component
+      SubtitleOptionsComponent({
+        showSubtitleOptions: this.uiState.showSubtitleOptions,
+        subtitleTracks: this.subtitleState.tracks,
+        selectedSubtitle: this.subtitleState.selectedTrack,
+        isSearchingSubtitles: this.subtitleState.isSearching,
+        onSubtitleSelect: (track: SubtitleTrack) => this.handleSubtitleSelect(track),
+        onSubtitleStyleChange: () => this.handleSubtitleStyleChange()
+      })
       
-
-      
-      // 音轨选项 | Audio track options
-      this.renderAudioTrackOptions()
-      
-      // 跳过选项 | Skip options
-      this.renderSkipOptions()
-      
-      // 直播频道列表 | Live channel list
-      this.renderLiveChannelList()
-      
-      // 直播设置 | Live settings
-      this.renderLiveSettings()
+      // 音轨选项组件 | Audio track options component
+      AudioTrackOptionsComponent({
+        showAudioTrackOptions: this.uiState.showAudioTrackOptions,
+        audioTracks: this.audioState.tracks,
+        selectedAudioTrack: this.audioState.selectedTrack,
+        onAudioTrackSelect: (track: AudioTrack) => {
+          this.audioState.selectedTrack = track;
+          this.playbackService.setAudioTrack(track.id);
+        }
+      })
     }
-    .width('100%')
-    .height('100%')
-    .backgroundColor('#F5F5F5')
   }
 }

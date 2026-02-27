@@ -20,8 +20,15 @@ export enum LoaderType {
 export interface ScriptContext {
   site: Site;
   http: typeof HttpService.getInstance;
-  logger: typeof Logger;
-  [key: string]: any;
+  logger: {
+    debug: (tag: string, message: string, error?: Error) => void;
+    info: (tag: string, message: string, error?: Error) => void;
+    warn: (tag: string, message: string, error?: Error) => void;
+    error: (tag: string, message: string, error?: Error) => void;
+    performance: (tag: string, operation: string, startTime: number, endTime: number) => void;
+    object: (tag: string, message: string, obj: string | number | boolean | object | null | undefined) => void;
+  };
+  [key: string]: string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined) | Site | (() => HttpService);
 }
 
 /**
@@ -57,14 +64,26 @@ export abstract class BaseLoader {
       timeout: 30000,
       retryCount: 3,
       sandboxEnabled: true,
-      allowThirdParty: false,
-      ...options
+      allowThirdParty: false
     };
+    
+    // 手动合并选项
+    if (options.timeout !== undefined) this.options.timeout = options.timeout;
+    if (options.retryCount !== undefined) this.options.retryCount = options.retryCount;
+    if (options.sandboxEnabled !== undefined) this.options.sandboxEnabled = options.sandboxEnabled;
+    if (options.allowThirdParty !== undefined) this.options.allowThirdParty = options.allowThirdParty;
     this.httpService = HttpService.getInstance();
     this.scriptContext = {
       site: this.site,
-      http: HttpService.getInstance,
-      logger: Logger
+      http: () => HttpService.getInstance(),
+      logger: {
+        debug: (tag: string, message: string, error?: Error) => Logger.debug(tag, message, error),
+        info: (tag: string, message: string, error?: Error) => Logger.info(tag, message, error),
+        warn: (tag: string, message: string, error?: Error) => Logger.warn(tag, message, error),
+        error: (tag: string, message: string, error?: Error) => Logger.error(tag, message, error),
+        performance: (tag: string, operation: string, startTime: number, endTime: number) => Logger.performance(tag, operation, startTime, endTime),
+        object: (tag: string, message: string, obj: string | number | boolean | object | null | undefined) => Logger.object(tag, message, obj)
+      }
     };
   }
 
@@ -108,10 +127,10 @@ export abstract class BaseLoader {
       // 如果site.api是URL，下载脚本内容 If site.api is URL, download script content
       if (this.site.api && (this.site.api.startsWith('http://') || this.site.api.startsWith('https://'))) {
         Logger.info(this.TAG, `Downloading script from: ${this.site.api}`);
-        const response = await this.httpService.get(this.site.api, {
+        const response = await this.httpService.get<string>(this.site.api, {
           timeout: this.options.timeout
         });
-        this.scriptContent = response.data as string;
+        this.scriptContent = response.data;
       } else if (this.site.api) {
         // 如果site.api是脚本内容，直接使用 If site.api is script content, use it directly
         this.scriptContent = this.site.api;
@@ -143,9 +162,9 @@ export abstract class BaseLoader {
    * 调用脚本方法 Call script method
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<any> 方法返回值 Method return value
+   * @returns Promise<string | number | boolean | object | null | undefined> 方法返回值 Method return value
    */
-  public abstract callMethod(methodName: string, args: Array<any>): Promise<any>;
+  public abstract callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<string | number | boolean | object | null | undefined>;
 
   /**
    * 创建爬虫实例 Create spider instance
@@ -224,7 +243,7 @@ export class EmptyLoader extends BaseLoader {
     return Promise.resolve();
   }
 
-  public callMethod(methodName: string, args: Array<any>): Promise<any> {
+  public callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<string | number | boolean | object | null | undefined> {
     Logger.warn(this.TAG, `EmptyLoader: Method ${methodName} called with args: ${JSON.stringify(args)}`);
     return Promise.resolve(null);
   }

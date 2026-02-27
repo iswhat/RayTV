@@ -1,5 +1,6 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
+﻿﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
 // 负责管理点播内容的缓存、查询和管理 | Manages VOD content caching, querying and management
+// 包含最近内容、热门内容、详细信息等 | Includes recent content, popular content, detailed information, etc.
 
 import { SQLiteHelper, QueryCondition, SortOption } from '../db/SQLiteHelper';
 import { HISTORY_TABLE } from '../db/TableSchema';
@@ -64,7 +65,7 @@ export class VodRepository {
       console.debug(TAG + ': Caching VOD item: ' + vodItem.id + ' - ' + vodItem.name);
       // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to cache VOD item ' + vodItem.id, errorMessage);
       return false;
@@ -96,7 +97,7 @@ export class VodRepository {
     try {
       // 简化实现，返回null | Simplified implementation, return null
       return null;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to get cached VOD item ${id}`, errorMessage);
       return null;
@@ -113,7 +114,7 @@ export class VodRepository {
     try {
       // 简化实现，返回false | Simplified implementation, return false
       return false;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to check VOD item cache status`, errorMessage);
       return false;
@@ -130,7 +131,7 @@ export class VodRepository {
     try {
       // 简化实现，返回true | Simplified implementation, return true
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to remove cached VOD item ${id}`, errorMessage);
       return false;
@@ -165,7 +166,7 @@ export class VodRepository {
       
       // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to save VOD history', errorMessage);
       return false;
@@ -202,7 +203,7 @@ export class VodRepository {
       
       // 简化实现，仅记录日期 | Simplified implementation, only record date
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to update play progress for ' + vodId, errorMessage);
       return false;
@@ -229,7 +230,7 @@ export class VodRepository {
       
       // 简化实现，返回空数组 | Simplified implementation, return empty array
       return [];
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + `: Failed to get VOD history`, errorMessage);
       return [];
@@ -268,7 +269,7 @@ export class VodRepository {
         console.error(TAG + ': Failed to search VOD: Invalid response format');
         return [];
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to search VOD', errorMessage);
       return [];
@@ -305,7 +306,7 @@ export class VodRepository {
         console.error(TAG + ': Failed to get VODs by category: Invalid response format');
         return [];
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to get VODs by category', errorMessage);
       return [];
@@ -342,7 +343,7 @@ export class VodRepository {
         console.error(TAG + ': Failed to get VODs by tag: Invalid response format');
         return [];
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to get VODs by tag', errorMessage);
       return [];
@@ -396,7 +397,7 @@ export class VodRepository {
       // 简化实现，返回0 | Simplified implementation, return 0
       console.info(TAG + ': Cleared 0 expired VOD cache records');
       return 0;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to clear expired VOD cache', errorMessage);
       return 0;
@@ -415,7 +416,7 @@ export class VodRepository {
       
       console.info(TAG + ': Cleared all VOD cache (0 records)');
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to clear all VOD cache', errorMessage);
       return false;
@@ -436,7 +437,7 @@ export class VodRepository {
       // 简化实现，仅记录日期 | Simplified implementation, only record date
       console.info(TAG + ': Cleared all VOD history (0 records)');
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to clear VOD history', errorMessage);
       return false;
@@ -451,7 +452,7 @@ export class VodRepository {
     try {
       // 简化实现，返回0 | Simplified implementation, return 0
       return 0;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to estimate VOD cache size', errorMessage);
       return 0;
@@ -472,7 +473,7 @@ export class VodRepository {
         newestItemTime: 0
       };
       return stats;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error(TAG + ': Failed to get VOD cache stats', errorMessage);
       const stats: CacheStats = {

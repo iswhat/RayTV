@@ -153,7 +153,8 @@ export interface ConflictResolutionData {
 export interface SyncEventData {
   id: string;
   timestamp: number;
-  [key: string]: string | number | boolean | null;
+  // 使用Map替代索引签名 | Use Map instead of indexed signature
+  additionalData?: Map<string, string | number | boolean | null>;
 }
 
 // 数据提供器接口（适配器模式） | Data provider interface (adapter pattern)
@@ -273,9 +274,10 @@ export default class DataSyncService {
       
       this.isInitialized = true;
       console.info(TAG + ': Data sync service initialized successfully');
-    } catch (error: Error) {
-      console.error(TAG + ": Failed to initialize data sync service: " + error.message);
-      throw new Error("Failed to initialize data sync service: " + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Failed to initialize data sync service: " + err.message);
+      throw new Error("Failed to initialize data sync service: " + err.message);
     }
   }
 
@@ -303,8 +305,9 @@ export default class DataSyncService {
         batchSize: savedConfig.batchSize ?? DEFAULT_DATA_SYNC_CONFIG.batchSize
       };
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to load data sync config: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to load data sync config: ${err.message}`);
     }
   }
 
@@ -337,9 +340,10 @@ export default class DataSyncService {
       } else {
         this.stopAutoSync();
       }
-    } catch (error: Error) {
-      console.error(TAG + ": Failed to save data sync config: " + error.message);
-      throw new Error(error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Failed to save data sync config: " + err.message);
+      throw new Error(err.message);
     }
   }
 
@@ -374,8 +378,9 @@ export default class DataSyncService {
       const records = await this.configService.getConfig<SyncRecord[]>('syncRecords', []);
       this.syncRecords = records;
       console.info(TAG + `: Loaded ${this.syncRecords.length} sync records`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to load sync records: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to load sync records: ${err.message}`);
     }
   }
 
@@ -388,8 +393,9 @@ export default class DataSyncService {
       // 只保留最新100条记录
       const recentRecords = this.syncRecords.slice(-100);
       await this.configService.setConfig('syncRecords', recentRecords);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to save sync records: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to save sync records: ${err.message}`);
     }
   }
 
@@ -411,8 +417,9 @@ export default class DataSyncService {
       this.distributedDataService.addDataChangeListener(
         dataType, (key, data, deviceId) => {
           // 当接收到分布式数据变化时，更新本地数据
-          this.handleRemoteDataChange(dataType, key, data as SyncEntity, deviceId).catch(error: Error => {
-            console.error(TAG + ": Failed to handle remote data change: " + error.message);
+          this.handleRemoteDataChange(dataType, key, data as SyncEntity, deviceId).catch(error => {
+            const err = error instanceof Error ? error : new Error(String(error));
+            console.error(TAG + ": Failed to handle remote data change: " + err.message);
           });
         }
       );
@@ -452,8 +459,9 @@ export default class DataSyncService {
           await provider.saveData([data]);
           break;
       }
-    } catch (error: Error) {
-      console.error(TAG + ": Failed to sync remote data: " + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Failed to sync remote data: " + err.message);
     }
   }
 
@@ -957,7 +965,7 @@ export default class DataSyncService {
    * 记录数据变更
    */
   public async recordDataChange(change: DataChange): Promise<void> {
-    const { entityType } = change;
+    const entityType = change.entityType;
     
     if (!this.pendingChanges.has(entityType)) {
       this.pendingChanges.set(entityType, []);
@@ -967,7 +975,40 @@ export default class DataSyncService {
     
     // 如果启用了自动同步，可以考虑立即同步重要变更
     if (this.config.enabled && this.config.autoSync) {
-      // TODO: 实现立即同步重要变更的逻辑
+      // 实现立即同步重要变更的逻辑
+      await this.syncImportantChange(change);
+    }
+  }
+  
+  /**
+   * 同步重要变更
+   */
+  private async syncImportantChange(change: DataChange): Promise<void> {
+    try {
+      // 定义重要的数据类型
+      const importantDataTypes = [
+        'config',
+        'favorites',
+        'history',
+        'playback_progress'
+      ];
+      
+      // 检查是否为重要数据类型
+      if (importantDataTypes.includes(change.entityType)) {
+        console.info(TAG + `: Syncing important change for type: ${change.entityType}`);
+        
+        // 立即同步该数据类型
+        await this.synchronizeDataType(change.entityType);
+        
+        // 从待处理变更中移除已同步的变更
+        if (this.pendingChanges.has(change.entityType)) {
+          const changes = this.pendingChanges.get(change.entityType)!;
+          const filteredChanges = changes.filter(c => c.entityId !== change.entityId || c.timestamp !== change.timestamp);
+          this.pendingChanges.set(change.entityType, filteredChanges);
+        }
+      }
+    } catch (error: Error) {
+      console.error(TAG + `: Failed to sync important change: ${error.message}`);
     }
   }
 

@@ -60,7 +60,7 @@ export class WallTypeDetector {
           // If cannot judge by extension, try to detect by MIME type
           return await this.detectByMimeType(uri);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to detect wallpaper type: " + errorMessage);
       return WallpaperType.NONE;

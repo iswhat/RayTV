@@ -76,6 +76,28 @@ export class NetworkUtil {
   private static networkStatusListeners: Set<(isOnline: boolean, networkType: string) => void> = new Set();
 
   /**
+   * 清理敏感信息 | Clean sensitive info
+   * @param headers Headers object | 头部对象
+   * @returns Cleaned headers object | 清理后的头部对象
+   */
+  private static cleanSensitiveInfo(headers: Record<string, string>): Record<string, string> {
+    const sensitiveHeaders = ['Authorization', 'token', 'password', 'apiKey', 'secret'];
+    const cleanedHeaders: Record<string, string> = {};
+    
+    for (const [key, value] of Object.entries(headers)) {
+      if (sensitiveHeaders.some(sensitiveKey => 
+        key.toLowerCase().includes(sensitiveKey.toLowerCase())
+      )) {
+        cleanedHeaders[key] = '***';
+      } else {
+        cleanedHeaders[key] = value;
+      }
+    }
+    
+    return cleanedHeaders;
+  }
+
+  /**
    * 发送网络请求 Send Network Request
    * @param config 请求配置 Request Configuration
    * @returns Promise<Response<T>>
@@ -113,7 +135,9 @@ export class NetworkUtil {
           .catch((error: Error) => {
             httpRequest.destroy();
             const errorMessage = error instanceof Error ? error.message : String(error);
-            Logger.error(TAG, `Request failed: ${errorMessage}`);
+            // 清理敏感信息后记录日志 | Log after cleaning sensitive info
+            const cleanedHeaders = this.cleanSensitiveInfo(headers);
+            Logger.error(TAG, `Request failed: ${errorMessage}, URL: ${config.url}, Headers: ${JSON.stringify(cleanedHeaders)}`);
             reject(error instanceof Error ? error : new Error(errorMessage));
           });
       } catch (error) {
@@ -221,8 +245,30 @@ export class NetworkUtil {
   public static isOnline(): Promise<boolean> {
     return new Promise((resolve) => {
       try {
-        // 使用简化的网络状态检测 Use simplified network status detection
-        resolve(true); // 临时总是返回在线，实际项目中需要根据具体API调整 Temporarily always return online, need to adjust according to specific API in actual project
+        // 尝试使用HarmonyOS网络连接API
+        try {
+          // 导入网络连接模块
+          const connection = require('@ohos.net.connection');
+          
+          // 获取网络连接状态
+          const netInfo = connection.getDefaultNetInfoSync();
+          if (netInfo && netInfo.isAvailable) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (harmonyError) {
+          // HarmonyOS API不可用，使用备选方案
+          Logger.warn(TAG, `HarmonyOS network API not available: ${harmonyError instanceof Error ? harmonyError.message : String(harmonyError)}`);
+          
+          // 尝试使用navigator.onLine（如果在Web环境中）
+          if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
+            resolve(navigator.onLine);
+          } else {
+            // 无法检测，默认返回在线
+            resolve(true);
+          }
+        }
       } catch (error) {
         Logger.warn(TAG, `Failed to check online status: ${error instanceof Error ? error.message : String(error)}`);
         resolve(false);
@@ -237,8 +283,51 @@ export class NetworkUtil {
   public static getNetworkType(): Promise<string> {
     return new Promise((resolve) => {
       try {
-        // 使用简化的网络类型检测 Use simplified network type detection
-        resolve('unknown'); // 临时返回unknown，实际项目中需要根据具体API调整 Temporarily return unknown, need to adjust according to specific API in actual project
+        // 尝试使用HarmonyOS网络连接API
+        try {
+          // 导入网络连接模块
+          const connection = require('@ohos.net.connection');
+          
+          // 获取网络连接状态
+          const netInfo = connection.getDefaultNetInfoSync();
+          if (netInfo) {
+            switch (netInfo.type) {
+              case connection.NetBearType.BEARER_CELLULAR:
+                resolve('cellular');
+                break;
+              case connection.NetBearType.BEARER_WIFI:
+                resolve('wifi');
+                break;
+              case connection.NetBearType.BEARER_BLUETOOTH:
+                resolve('bluetooth');
+                break;
+              case connection.NetBearType.BEARER_ETHERNET:
+                resolve('ethernet');
+                break;
+              default:
+                resolve('unknown');
+                break;
+            }
+          } else {
+            resolve('unknown');
+          }
+        } catch (harmonyError) {
+          // HarmonyOS API不可用，使用备选方案
+          Logger.warn(TAG, `HarmonyOS network API not available: ${harmonyError instanceof Error ? harmonyError.message : String(harmonyError)}`);
+          
+          // 尝试使用navigator.connection（如果在Web环境中）
+          if (typeof navigator !== 'undefined' && 'connection' in navigator) {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection && connection.type) {
+              resolve(connection.type);
+            } else {
+              resolve('unknown');
+            }
+          } else {
+            // 无法检测，默认返回unknown
+            resolve('unknown');
+          }
+        }
       } catch (error) {
         Logger.warn(TAG, `Failed to detect network type: ${error instanceof Error ? error.message : String(error)}`);
         resolve('unknown');

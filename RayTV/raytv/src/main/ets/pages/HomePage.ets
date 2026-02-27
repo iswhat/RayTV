@@ -5,7 +5,10 @@ import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
 
 import ApiResponse from '../data/dto/ApiResponse';
-import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos/components';
+import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos/arkui';
+import VirtualList from '../components/VirtualList';
+import { VirtualListItem } from '../types/VirtualListTypes';
+import { SkeletonScreen } from '../components/SkeletonScreen';
 
 // 媒体推荐结果项类型 | Media recommended result item type
 interface RecommendedMediaItem {
@@ -74,8 +77,12 @@ struct HomePage {
 
       Logger.info(this.TAG, 'Loading home page data');
 
-      // 加载推荐内容 | Load recommended content
-      let recommendedResult = await this.mediaService.getRecommendedContent();
+      // 并行加载所有内容 | Load all content in parallel
+      const [recommendedResult, popularResult, newResult] = await Promise.all([
+        this.mediaService.getPersonalizedRecommendations(),
+        this.mediaService.getPopularContent(),
+        this.mediaService.getNewContent()
+      ]);
 
       // 处理推荐内容 | Handle recommended content
       if (isSuccessResponse<RecommendedMediaItem>(recommendedResult)) {
@@ -91,14 +98,44 @@ struct HomePage {
           };
           return mediaItem;
         });
-        // 复制推荐内容到其他列表作为临时解决方案 | Copy recommended content to other lists as temporary solution
-        this.popularMedia = this.recommendedMedia.slice();
-        this.newMedia = this.recommendedMedia.slice();
+      }
+
+      // 处理热门内容 | Handle popular content
+      if (isSuccessResponse<RecommendedMediaItem>(popularResult)) {
+        // 确保data不是undefined | Ensure data is not undefined
+        const data = popularResult.data as RecommendedMediaItem[];
+        this.popularMedia = data.map((item: RecommendedMediaItem) => {
+          const mediaItem: MediaItem = {
+            id: item.id,
+            title: item.title,
+            coverUrl: item.cover || '',
+            siteKey: item.siteKey,
+            score: item.rating || ''
+          };
+          return mediaItem;
+        });
+      }
+
+      // 处理最新上线内容 | Handle new content
+      if (isSuccessResponse<RecommendedMediaItem>(newResult)) {
+        // 确保data不是undefined | Ensure data is not undefined
+        const data = newResult.data as RecommendedMediaItem[];
+        this.newMedia = data.map((item: RecommendedMediaItem) => {
+          const mediaItem: MediaItem = {
+            id: item.id,
+            title: item.title,
+            coverUrl: item.cover || '',
+            siteKey: item.siteKey,
+            score: item.rating || ''
+          };
+          return mediaItem;
+        });
       }
 
       Logger.info(this.TAG, `Home page data loaded: recommended=${this.recommendedMedia.length}, popular=${this.popularMedia.length}, new=${this.newMedia.length}`);
-    } catch (error: Error) {
-      Logger.error(this.TAG, `Failed to load home page data: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to load home page data: ${err.message}`);
       this.errorMessage = '加载数据失败，请稍后重试';
     } finally {
       this.isLoading = false;
@@ -109,13 +146,14 @@ struct HomePage {
    * 处理搜索 | Handle search
    */
   private handleSearch(): void {
-    Logger.info(this.TAG, 'Search button clicked');
-
     try {
+      Logger.info(this.TAG, 'Search button clicked');
+
       // 跳转到搜索页面 | Navigate to search page
       AppNavigator.getInstance().navigateToSearch('');
-    } catch (error: Error) {
-      Logger.error(this.TAG, `Failed to navigate to search page: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to navigate to search page: ${err.message}`);
     }
   }
   
@@ -123,18 +161,53 @@ struct HomePage {
    * 处理媒体项点击 | Handle media item click
    */
   private handleMediaItemClick(media: MediaItem): void {
-    Logger.info(this.TAG, `Media item clicked: ${media.title}`);
-
     try {
+      Logger.info(this.TAG, `Media item clicked: ${media.title}`);
+
+      // 验证媒体数据完整性 | Validate media data integrity
+      if (!media.id || !media.siteKey) {
+        Logger.error(this.TAG, 'Invalid media data: missing required fields');
+        return;
+      }
+
+      // 记录用户行为 | Record user behavior
+      this.mediaService.recordUserBehavior({
+        mediaId: media.id,
+        type: 'click',
+        timestamp: Date.now()
+      });
+
       // 跳转到详情页 | Navigate to detail page
       AppNavigator.getInstance().navigateToDetail({
         id: media.id,
         siteKey: media.siteKey || '',
         type: 'movie'
       });
-    } catch (error: Error) {
-      Logger.error(this.TAG, `Failed to navigate to detail page: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to navigate to detail page: ${err.message}`);
     }
+  }
+  
+  /**
+   * 将MediaItem转换为VirtualListItem | Convert MediaItem to VirtualListItem
+   */
+  private convertToVirtualItems(mediaList: MediaItem[]): VirtualListItem[] {
+    const virtualItems: VirtualListItem[] = [];
+    for (let i = 0; i < mediaList.length; i++) {
+      const media = mediaList[i];
+      const virtualItem: VirtualListItem = {
+        id: media.id,
+        index: i,
+        data: media,
+        top: i * 320, // 估算的项目高度
+        height: 320,
+        visible: false
+      };
+      virtualItems.push(virtualItem);
+    }
+    return virtualItems;
+  }
   }
   
   /**
@@ -194,15 +267,59 @@ struct HomePage {
       .justifyContent(FlexAlign.SpaceBetween)
       .margin({ bottom: 20 })
       
-      Scroll(this.scroller) {
-        Row() {
-          ForEach(mediaList, (media: MediaItem) => {
-            this.renderMediaItem(media)
-          }, (media: MediaItem) => media.id)
+      // 使用虚拟列表提高性能 | Use virtual list for better performance
+      Column() {
+        Scroll(this.scroller) {
+          Row() {
+            ForEach(mediaList, (media: MediaItem) => {
+              this.renderMediaItem(media)
+            }, (media: MediaItem) => media.id)
+          }
+          .width('100%')
+          .padding({ left: 20, right: 20 })
         }
-        .width('100%')
-        .padding({ left: 20, right: 20 })
+        .height(320)
+        .margin({ bottom: 30 })
       }
+    }
+    .width('100%')
+  }
+  
+  /**
+   * 渲染媒体列表（虚拟列表版本）| Render media list (virtual list version)
+   */
+  @Builder
+  private renderMediaSectionWithVirtualList(title: string, mediaList: MediaItem[]) {
+    Column() {
+      Row() {
+        Text(title)
+          .fontSize(20)
+          .fontWeight(700)
+          .fontColor('#333333')
+          .margin({ left: 30 })
+        
+        Button('查看更多')
+          .fontSize(14)
+          .fontColor('#4CAF50')
+          .backgroundColor('transparent')
+          .margin({ right: 30 })
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      .margin({ bottom: 20 })
+      
+      // 使用虚拟列表提高性能 | Use virtual list for better performance
+      const virtualItems = this.convertToVirtualItems(mediaList);
+      
+      VirtualList({
+        items: virtualItems,
+        estimatedItemHeight: 320,
+        bufferSize: 3,
+        renderItem: (item: VirtualListItem) => {
+          const media = item.data as MediaItem;
+          return this.renderMediaItem(media);
+        }
+      })
       .height(320)
       .margin({ bottom: 30 })
     }
@@ -215,10 +332,12 @@ struct HomePage {
   @Builder
   private renderLoading() {
     Column() {
-      Text('加载中...')
-        .fontSize(18)
-        .fontColor('#666666')
-        .margin(40)
+      SkeletonScreen({
+        type: 'card',
+        count: 10,
+        animated: true,
+        animationDuration: 1500
+      })
     }
     .justifyContent(FlexAlign.Center)
     .height('80%')
@@ -285,17 +404,17 @@ struct HomePage {
           Column() {
             // 推荐内容 | Recommended content
             if (this.recommendedMedia.length > 0) {
-              this.renderMediaSection('推荐内容', this.recommendedMedia)
+              this.renderMediaSectionWithVirtualList('推荐内容', this.recommendedMedia)
             }
             
             // 热门内容 | Popular content
             if (this.popularMedia.length > 0) {
-              this.renderMediaSection('热门内容', this.popularMedia)
+              this.renderMediaSectionWithVirtualList('热门内容', this.popularMedia)
             }
             
             // 最新上线 | New releases
             if (this.newMedia.length > 0) {
-              this.renderMediaSection('最新上线', this.newMedia)
+              this.renderMediaSectionWithVirtualList('最新上线', this.newMedia)
             }
             
             // 空状态 | Empty state

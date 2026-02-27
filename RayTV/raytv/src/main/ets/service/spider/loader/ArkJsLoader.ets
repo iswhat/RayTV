@@ -12,7 +12,7 @@ import { SiteSpider } from '../CrawlerService';
 export class ArkJsLoader extends BaseLoader {
   private readonly TAG: string = 'ArkJsLoader';
   private scriptFunction: Function | null = null;
-  private scriptExports: Record<string, any> = {};
+  private scriptExports: Record<string, unknown> = {};
 
   /**
    * 构造函数 Constructor
@@ -81,9 +81,9 @@ export class ArkJsLoader extends BaseLoader {
 
   /**
    * 运行脚本 Run script
-   * @returns Promise<Record<string, any>> 脚本导出对象 Script export object
+   * @returns Promise<Record<string, unknown>> 脚本导出对象 Script export object
    */
-  private async runScript(): Promise<Record<string, any>> {
+  private async runScript(): Promise<Record<string, unknown>> {
     if (!this.scriptFunction) {
       throw new Error('Script function not initialized');
     }
@@ -103,9 +103,9 @@ export class ArkJsLoader extends BaseLoader {
    * 调用脚本方法 Call script method
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<any> 方法返回值 Method return value
+   * @returns Promise<unknown> 方法返回值 Method return value
    */
-  public async callMethod(methodName: string, args: Array<any>): Promise<any> {
+  public async callMethod(methodName: string, args: Array<unknown>): Promise<unknown> {
     try {
       Logger.debug(this.TAG, `Calling method ${methodName} for site ${this.site.key} with args: ${JSON.stringify(args)}`);
       

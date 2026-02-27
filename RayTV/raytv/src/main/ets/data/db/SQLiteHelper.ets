@@ -1,5 +1,29 @@
-// SQLiteHelper.ets - SQLite数据库操作辅助类 // SQLite Database Operation Helper Class
-// 提供基本的CRUD操作和SQL查询构建功能 // Provide basic CRUD operations and SQL query building capabilities
+/**
+ * SQLiteHelper - SQLite数据库操作辅助类
+ * 
+ * 提供基本的CRUD操作、SQL查询构建、事务管理等功能，支持安全的数据库操作。
+ * 实现了单例模式，确保线程安全的数据库访问。
+ * 
+ * @example
+ * ```typescript
+ * // 获取SQLiteHelper实例
+ * const dbHelper = SQLiteHelper.getInstance();
+ * 
+ * // 插入数据
+ * const result = await dbHelper.insert('users', {
+ *   name: 'John Doe',
+ *   age: 30,
+ *   active: true
+ * });
+ * 
+ * // 查询数据
+ * const users = await dbHelper.query('users', ['id', 'name'], [
+ *   { column: 'age', value: 30, operator: '>=' }
+ * ], [
+ *   { column: 'name', order: 'ASC' }
+ * ]);
+ * ```
+ */
 
 import RelationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from './DatabaseManager';
@@ -119,7 +143,16 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取SQLiteHelper单例实例（线程安全） // Get SQLiteHelper singleton instance (thread-safe)
+   * 获取SQLiteHelper单例实例（线程安全）
+   * 
+   * 实现了双重检查锁定模式，确保线程安全的单例初始化。
+   * 
+   * @returns {SQLiteHelper} SQLiteHelper的单例实例
+   * 
+   * @example
+   * ```typescript
+   * const dbHelper = SQLiteHelper.getInstance();
+   * ```
    */
   public static getInstance(): SQLiteHelper {
     if (!SQLiteHelper.instance && !SQLiteHelper.initializationLock) {
@@ -136,10 +169,26 @@ export class SQLiteHelper {
   }
   
   /**
-   * 插入数据 // Insert data
-   * @param tableName 表名 // Table name
-   * @param values 要插入的数据 // Data to insert
-   * @returns 插入结果 // Insert result
+   * 插入数据
+   * 
+   * 向指定表中插入一条新记录，返回插入结果，包含是否成功、影响的行数和最后插入的ID。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Record<string, ValueType>} values - 要插入的数据，键为列名，值为对应的值
+   * @returns {Promise<DatabaseResult>} 插入结果，包含成功状态、影响的行数和最后插入的ID
+   * 
+   * @example
+   * ```typescript
+   * const result = await dbHelper.insert('users', {
+   *   name: 'John Doe',
+   *   age: 30,
+   *   email: 'john@example.com'
+   * });
+   * 
+   * if (result.success) {
+   *   console.log(`Inserted with ID: ${result.lastInsertRowId}`);
+   * }
+   * ```
    */
   public async insert(tableName: string, values: Record<string, ValueType>): Promise<DatabaseResult> {
     try {
@@ -196,10 +245,25 @@ export class SQLiteHelper {
   }
   
   /**
-   * 批量插入数据 // Batch insert data
-   * @param tableName 表名 // Table name
-   * @param dataList 数据列表 // Data list
-   * @returns 插入结果 // Insert result
+   * 批量插入数据
+   * 
+   * 向指定表中批量插入多条记录，使用事务保护确保操作的原子性。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<Record<string, ValueType>>} dataList - 要插入的数据列表
+   * @returns {Promise<DatabaseResult>} 插入结果，包含成功状态和影响的行数
+   * 
+   * @example
+   * ```typescript
+   * const users = [
+   *   { name: 'John', age: 25 },
+   *   { name: 'Jane', age: 30 },
+   *   { name: 'Bob', age: 35 }
+   * ];
+   * 
+   * const result = await dbHelper.batchInsert('users', users);
+   * console.log(`Inserted ${result.affectedRows} users`);
+   * ```
    */
   public async batchInsert(tableName: string, dataList: Array<Record<string, ValueType>>): Promise<DatabaseResult> {
     if (!dataList || dataList.length === 0) {
@@ -236,11 +300,27 @@ export class SQLiteHelper {
   }
   
   /**
-   * 更新数据 // Update data
-   * @param tableName 表名 // Table name
-   * @param values 要更新的数据 // Data to update
-   * @param conditions 更新条件 // Update conditions
-   * @returns 更新结果 // Update result
+   * 更新数据
+   * 
+   * 根据指定条件更新表中的记录，返回更新结果，包含是否成功和影响的行数。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Record<string, ValueType>} values - 要更新的数据，键为列名，值为对应的值
+   * @param {Array<QueryCondition>} [conditions] - 更新条件，可选
+   * @returns {Promise<DatabaseResult>} 更新结果，包含成功状态和影响的行数
+   * 
+   * @example
+   * ```typescript
+   * const result = await dbHelper.update('users',
+   *   { age: 31, active: true },
+   *   [
+   *     { column: 'id', value: 1 },
+   *     { column: 'name', value: 'John Doe' }
+   *   ]
+   * );
+   * 
+   * console.log(`Updated ${result.affectedRows} records`);
+   * ```
    */
   public async update(
     tableName: string,
@@ -335,10 +415,23 @@ export class SQLiteHelper {
   }
   
   /**
-   * 删除数据 // Delete data
-   * @param tableName 表名 // Table name
-   * @param conditions 删除条件 // Delete conditions
-   * @returns 删除结果 // Delete result
+   * 删除数据
+   * 
+   * 根据指定条件删除表中的记录，返回删除结果，包含是否成功和影响的行数。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<QueryCondition>} [conditions] - 删除条件，可选
+   * @returns {Promise<DatabaseResult>} 删除结果，包含成功状态和影响的行数
+   * 
+   * @example
+   * ```typescript
+   * const result = await dbHelper.delete('users', [
+   *   { column: 'id', value: 1 },
+   *   { column: 'active', value: false }
+   * ]);
+   * 
+   * console.log(`Deleted ${result.affectedRows} records`);
+   * ```
    */
   public async delete(
     tableName: string,
@@ -422,14 +515,40 @@ export class SQLiteHelper {
   }
   
   /**
-   * 查询数据 // Query data
-   * @param tableName 表名 // Table name
-   * @param columns 要查询的列 // Columns to query
-   * @param conditions 查询条件 // Query conditions
-   * @param sortOptions 排序选项 // Sort options
-   * @param limit 限制数量 // Limit count
-   * @param offset 偏移量 // Offset
-   * @returns 查询结果列表 // Query result list
+   * 查询数据
+   * 
+   * 根据指定条件查询表中的记录，支持排序、分页等功能，返回查询结果列表。
+   * 
+   * @template T - 泛型类型，用于指定返回记录的类型
+   * @param {string} tableName - 表名
+   * @param {string[]} [columns=['*']] - 要查询的列，默认为所有列
+   * @param {Array<QueryCondition>} [conditions] - 查询条件，可选
+   * @param {Array<SortOption>} [sortOptions] - 排序选项，可选
+   * @param {number} [limit] - 限制返回的记录数量，可选
+   * @param {number} [offset=0] - 偏移量，默认为0
+   * @returns {Promise<T[]>} 查询结果列表
+   * 
+   * @example
+   * ```typescript
+   * // 查询所有用户
+   * const users = await dbHelper.query('users');
+   * 
+   * // 查询特定列，带条件和排序
+   * const activeUsers = await dbHelper.query('users',
+   *   ['id', 'name', 'email'],
+   *   [{ column: 'active', value: true }],
+   *   [{ column: 'name', order: 'ASC' }]
+   * );
+   * 
+   * // 分页查询
+   * const paginatedUsers = await dbHelper.query('users',
+   *   ['*'],
+   *   undefined,
+   *   [{ column: 'created_at', order: 'DESC' }],
+   *   10, // 每页10条
+   *   20  // 从第21条开始
+   * );
+   * ```
    */
   public async query<T extends DatabaseRecord>(
     tableName: string,
@@ -568,11 +687,30 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取单条记录 // Get single record
-   * @param tableName 表名 // Table name
-   * @param columns 要查询的列 // Columns to query
-   * @param conditions 查询条件 // Query conditions
-   * @returns 单条记录或null // Single record or null
+   * 获取单条记录
+   * 
+   * 根据指定条件查询表中的第一条记录，返回单条记录或null。
+   * 
+   * @template T - 泛型类型，用于指定返回记录的类型
+   * @param {string} tableName - 表名
+   * @param {string[]} [columns=['*']] - 要查询的列，默认为所有列
+   * @param {Array<QueryCondition>} [conditions] - 查询条件，可选
+   * @returns {Promise<T | null>} 单条记录或null
+   * 
+   * @example
+   * ```typescript
+   * // 根据ID获取用户
+   * const user = await dbHelper.getFirst('users',
+   *   ['id', 'name', 'email'],
+   *   [{ column: 'id', value: 1 }]
+   * );
+   * 
+   * if (user) {
+   *   console.log(`Found user: ${user.name}`);
+   * } else {
+   *   console.log('User not found');
+   * }
+   * ```
    */
   public async getFirst<T extends DatabaseRecord>(
     tableName: string, 
@@ -584,10 +722,26 @@ export class SQLiteHelper {
   }
   
   /**
-   * 获取记录总数 // Get total record count
-   * @param tableName 表名 // Table name
-   * @param conditions 查询条件 // Query conditions
-   * @returns 记录总数 // Total record count
+   * 获取记录总数
+   * 
+   * 根据指定条件统计表中的记录数量，返回记录总数。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<QueryCondition>} [conditions] - 查询条件，可选
+   * @returns {Promise<number>} 记录总数
+   * 
+   * @example
+   * ```typescript
+   * // 获取所有用户数量
+   * const totalUsers = await dbHelper.count('users');
+   * console.log(`Total users: ${totalUsers}`);
+   * 
+   * // 获取活跃用户数量
+   * const activeUsersCount = await dbHelper.count('users',
+   *   [{ column: 'active', value: true }]
+   * );
+   * console.log(`Active users: ${activeUsersCount}`);
+   * ```
    */
   public async count(tableName: string, conditions?: Array<QueryCondition>): Promise<number> {
     try {
@@ -655,10 +809,27 @@ export class SQLiteHelper {
   }
   
   /**
-   * 检查记录是否存在 // Check if record exists
-   * @param tableName 表名 // Table name
-   * @param conditions 查询条件 // Query conditions
-   * @returns 是否存在 // Whether exists
+   * 检查记录是否存在
+   * 
+   * 根据指定条件检查表中是否存在记录，返回布尔值表示是否存在。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<QueryCondition>} [conditions] - 查询条件，可选
+   * @returns {Promise<boolean>} 是否存在记录
+   * 
+   * @example
+   * ```typescript
+   * // 检查用户是否存在
+   * const userExists = await dbHelper.exists('users',
+   *   [{ column: 'email', value: 'john@example.com' }]
+   * );
+   * 
+   * if (userExists) {
+   *   console.log('User already exists');
+   * } else {
+   *   console.log('User does not exist');
+   * }
+   * ```
    */
   public async exists(tableName: string, conditions?: Array<QueryCondition>): Promise<boolean> {
     const count = await this.count(tableName, conditions);
@@ -666,10 +837,28 @@ export class SQLiteHelper {
   }
   
   /**
-   * 执行自定义SQL查询 // Execute custom SQL query
-   * @param sql SQL语句 // SQL statement
-   * @param bindArgs 绑定参数 // Bind arguments
-   * @returns 查询结果 // Query result
+   * 执行自定义SQL查询
+   * 
+   * 执行自定义的SQL查询语句，返回查询结果列表。
+   * 
+   * @template T - 泛型类型，用于指定返回记录的类型
+   * @param {string} sql - SQL语句
+   * @param {ValueType[]} [bindArgs] - 绑定参数，可选
+   * @returns {Promise<T[]>} 查询结果列表
+   * 
+   * @example
+   * ```typescript
+   * // 执行自定义查询
+   * const results = await dbHelper.executeCustomQuery<{
+   *   id: number;
+   *   name: string;
+   *   age: number;
+   * }>('SELECT id, name, age FROM users WHERE age > ?', [18]);
+   * 
+   * results.forEach(user => {
+   *   console.log(`${user.name} (${user.age})`);
+   * });
+   * ```
    */
   public async executeCustomQuery<T extends Record<string, string | number | boolean | null>>(sql: string, bindArgs?: ValueType[]): Promise<T[]> {
     try {
@@ -679,44 +868,49 @@ export class SQLiteHelper {
       
       const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
       
-      // 处理结果 // Process results
-      const records: T[] = [];
-      while (result.goToNextRow()) {
-        const record: Record<string, string | number | boolean | null> = {};
-        const columnNames = result.columnNames;
-        for (let index = 0; index < columnNames.length; index++) {
-          const column = columnNames[index];
-          
-          // 先尝试获取字符串 // First try to get string
-          const stringValue = result.getString(index);
-          if (stringValue !== null) {
-            record[column] = stringValue;
-          } else {
-            // 尝试获取数字 // Try to get number
-            const longValue = result.getLong(index);
-            if (longValue !== null) {
-              record[column] = longValue;
+      // 处理结果 - 确保ResultSet被关闭
+      try {
+        // 处理结果 // Process results
+        const records: T[] = [];
+        while (result.goToNextRow()) {
+          const record: Record<string, string | number | boolean | null> = {};
+          const columnNames = result.columnNames;
+          for (let index = 0; index < columnNames.length; index++) {
+            const column = columnNames[index];
+            
+            // 先尝试获取字符串 // First try to get string
+            const stringValue = result.getString(index);
+            if (stringValue !== null) {
+              record[column] = stringValue;
             } else {
-              // 尝试获取浮点数 // Try to get float
-              const doubleValue = result.getDouble(index);
-              if (doubleValue !== null && !isNaN(doubleValue)) {
-                record[column] = doubleValue;
+              // 尝试获取数字 // Try to get number
+              const longValue = result.getLong(index);
+              if (longValue !== null) {
+                record[column] = longValue;
               } else {
-                // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
-                const boolLongValue = result.getLong(index);
-                if (boolLongValue !== null) {
-                  record[column] = boolLongValue === 1;
+                // 尝试获取浮点数 // Try to get float
+                const doubleValue = result.getDouble(index);
+                if (doubleValue !== null && !isNaN(doubleValue)) {
+                  record[column] = doubleValue;
                 } else {
-                  record[column] = null;
+                  // 获取布尔值 - 使用getLong判断 // Get boolean value - use getLong to judge
+                  const boolLongValue = result.getLong(index);
+                  if (boolLongValue !== null) {
+                    record[column] = boolLongValue === 1;
+                  } else {
+                    record[column] = null;
+                  }
                 }
               }
             }
           }
+          records.push(record as T);
         }
-        records.push(record as T);
+        
+        return records;
+      } finally {
+        result.close();
       }
-      
-      return records;
     } catch (error) {
       Logger.error(TAG, `Failed to execute custom query: ${error instanceof Error ? error.message : String(error)}`);
       return [];
@@ -724,11 +918,30 @@ export class SQLiteHelper {
   }
 
   /**
-   * 批量更新数据（事务保护）// Batch update data (with transaction protection)
-   * @param tableName 表名 // Table name
-   * @param updates 更新数据列表 // Update data list
-   * @param conditions 更新条件 // Update conditions
-   * @returns 更新结果 // Update result
+   * 批量更新数据（事务保护）
+   * 
+   * 批量更新多条记录，使用事务保护确保操作的原子性。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<{ values: Record<string, ValueType>, conditions: Array<QueryCondition> }>} updates - 更新数据列表，每条包含要更新的值和条件
+   * @returns {Promise<DatabaseResult>} 更新结果，包含成功状态和影响的行数
+   * 
+   * @example
+   * ```typescript
+   * const updates = [
+   *   {
+   *     values: { active: true },
+   *     conditions: [{ column: 'id', value: 1 }]
+   *   },
+   *   {
+   *     values: { active: false },
+   *     conditions: [{ column: 'id', value: 2 }]
+   *   }
+   * ];
+   * 
+   * const result = await dbHelper.batchUpdate('users', updates);
+   * console.log(`Updated ${result.affectedRows} records`);
+   * ```
    */
   public async batchUpdate(
     tableName: string,
@@ -792,10 +1005,25 @@ export class SQLiteHelper {
   }
 
   /**
-   * 批量删除数据（事务保护）// Batch delete data (with transaction protection)
-   * @param tableName 表名 // Table name
-   * @param conditionsList 删除条件列表 // Delete conditions list
-   * @returns 删除结果 // Delete result
+   * 批量删除数据（事务保护）
+   * 
+   * 批量删除多条记录，使用事务保护确保操作的原子性。
+   * 
+   * @param {string} tableName - 表名
+   * @param {Array<Array<QueryCondition>>} conditionsList - 删除条件列表，每个元素是一组删除条件
+   * @returns {Promise<DatabaseResult>} 删除结果，包含成功状态和影响的行数
+   * 
+   * @example
+   * ```typescript
+   * const conditionsList = [
+   *   [{ column: 'id', value: 1 }],
+   *   [{ column: 'id', value: 2 }],
+   *   [{ column: 'active', value: false }]
+   * ];
+   * 
+   * const result = await dbHelper.batchDelete('users', conditionsList);
+   * console.log(`Deleted ${result.affectedRows} records`);
+   * ```
    */
   public async batchDelete(
     tableName: string,
@@ -854,9 +1082,34 @@ export class SQLiteHelper {
   }
 
   /**
-   * 执行事务（事务保护）// Execute transaction (with transaction protection)
-   * @param operation 要执行的操作 // Operation to execute
-   * @returns 执行结果 // Execution result
+   * 执行事务（事务保护）
+   * 
+   * 执行一个包含多个数据库操作的事务，确保操作的原子性。
+   * 
+   * @template T - 泛型类型，用于指定操作的返回类型
+   * @param {() => Promise<T>} operation - 要执行的操作函数
+   * @returns {Promise<T>} 操作的返回结果
+   * 
+   * @example
+   * ```typescript
+   * const result = await dbHelper.executeTransaction(async () => {
+   *   // 插入一条记录
+   *   const insertResult = await dbHelper.insert('users', {
+   *     name: 'John Doe',
+   *     age: 30
+   *   });
+   * 
+   *   // 更新另一条记录
+   *   await dbHelper.update('users',
+   *     { active: true },
+   *     [{ column: 'id', value: insertResult.lastInsertRowId }]
+   *   );
+   * 
+   *   return insertResult.lastInsertRowId;
+   * });
+   * 
+   * console.log(`Transaction completed, new user ID: ${result}`);
+   * ```
    */
   public async executeTransaction<T>(operation: () => Promise<T>): Promise<T> {
     try {

@@ -100,8 +100,9 @@ struct MediaDetailPage {
         createdAt: new Date().getTime(),
         updatedAt: new Date().getTime()
       };
-    } catch (error: Error) {
-      console.error(`加载媒体详情失败: ${error.message} | Failed to load media detail: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`加载媒体详情失败: ${err.message} | Failed to load media detail: ${err.message}`);
     } finally {
       this.isLoading = false;
     }
@@ -121,8 +122,9 @@ struct MediaDetailPage {
         { id: '5', name: '第5集', url: 'https://example.com/episode5' },
         { id: '6', name: '第6集', url: 'https://example.com/episode6' }
       ];
-    } catch (error: Error) {
-      console.error(`加载剧集列表失败: ${error.message} | Failed to load episodes: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`加载剧集列表失败: ${err.message} | Failed to load episodes: ${err.message}`);
     }
   }
 
@@ -137,8 +139,9 @@ struct MediaDetailPage {
         { name: '播放源2', quality: '高清' },
         { name: '播放源3', quality: '标清' }
       ];
-    } catch (error: Error) {
-      console.error(`加载播放源失败: ${error.message} | Failed to load play sources: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`加载播放源失败: ${err.message} | Failed to load play sources: ${err.message}`);
     }
   }
 
@@ -153,8 +156,9 @@ struct MediaDetailPage {
         { title: '相关电影2', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+2', url: 'https://example.com/related2' },
         { title: '相关电影3', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+3', url: 'https://example.com/related3' }
       ];
-    } catch (error: Error) {
-      console.error(`加载相关推荐失败: ${error.message} | Failed to load related media: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`加载相关推荐失败: ${err.message} | Failed to load related media: ${err.message}`);
     }
   }
   

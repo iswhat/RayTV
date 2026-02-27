@@ -550,10 +550,9 @@ export class LineManager {
             
             // 创建HTTP请求对象 | Create HTTP request object
             const httpRequest = http.createHttp();
-            httpRequest.setTimeout({ connectTimeout: timeout });
             
             // 测试源URL | Test source URL
-            const response = await httpRequest.request(site.url, {
+            const response = await httpRequest.request(site.api, {
               method: http.RequestMethod.GET,
               header: {
                 'User-Agent': 'RayTV-HarmonyOS',
@@ -570,7 +569,7 @@ export class LineManager {
               sourceId: site.key,
               sourceName: site.name,
               responseTime,
-              success: response.ok
+              success: response.result?.ret?.code === 0 || response.responseCode >= 200 && response.responseCode < 300
             };
           } catch (error) {
             return {
@@ -597,10 +596,9 @@ export class LineManager {
             
             // 创建HTTP请求对象 | Create HTTP request object
             const httpRequest = http.createHttp();
-            httpRequest.setTimeout({ connectTimeout: timeout });
             
             // 测试源URL | Test source URL
-            const response = await httpRequest.request(site.url, {
+            const response = await httpRequest.request(site.api, {
               method: http.RequestMethod.GET,
               header: {
                 'User-Agent': 'RayTV-HarmonyOS',
@@ -617,7 +615,7 @@ export class LineManager {
               sourceId: site.key,
               sourceName: site.name,
               responseTime,
-              success: response.ok
+              success: response.result?.ret?.code === 0 || response.responseCode >= 200 && response.responseCode < 300
             });
           } catch (error) {
             results.push({

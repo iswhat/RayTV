@@ -1,5 +1,5 @@
-// DistributedDataService.ets - �ֲ�ʽ���ݷ��� | Distributed data service
-// ����HarmonyOS�ֲ�ʽ����ʵ�ֶ��豸����ͬ�� | Based on HarmonyOS distributed capabilities toʵ�� multi-device data synchronization
+// DistributedDataService.ets - 分布式数据服务 | Distributed data service
+// 基于HarmonyOS分布式能力实现多设备数据同步 | Based on HarmonyOS distributed capabilities to implement multi-device data synchronization
 
 
 import distributedKVStore from '@ohos.data.distributedKVStore';
@@ -8,11 +8,11 @@ import ConfigService from '../../service/config/ConfigService';
 import common from '@ohos.app.ability.common';
 import { SyncData, DataChangeListener } from '../../types/common';
 
-// �������� | Constant definition
+// 常量定义 | Constant definition
 const TAG = 'DistributedDataService';
 const STORE_ID = 'raytv_distributed_data';
 
-// ����ͬ������ö�� | Data synchronization type enumeration
+// 数据同步类型枚举 | Data synchronization type enumeration
 export enum SyncDataType {
   HISTORY = 'history',
   FAVORITES = 'favorites',
@@ -21,15 +21,15 @@ export enum SyncDataType {
   DEVICE_INFO = 'device_info'
 }
 
-// ͬ����ͻ�������ö�� | Synchronization conflict resolution strategy enumeration
+// 同步冲突解决策略枚举 | Synchronization conflict resolution strategy enumeration
 export enum ConflictResolutionStrategy {
-  LATEST_WIN = 'latest_win', // ����ʱ������� | Latest timestamp priority
-  LOCAL_WIN = 'local_win',   // ������������ | Local data priority
-  REMOTE_WIN = 'remote_win', // Զ���������� | Remote data priority
-  MERGE = 'merge'            // �ϲ����� | Merge data
+  LATEST_WIN = 'latest_win', // 最新时间戳优先 | Latest timestamp priority
+  LOCAL_WIN = 'local_win',   // 本地数据优先 | Local data priority
+  REMOTE_WIN = 'remote_win', // 远程数据优先 | Remote data priority
+  MERGE = 'merge'            // 合并数据 | Merge data
 }
 
-// ͬ��״̬ö�� | Synchronization status enumeration
+// 同步状态枚举 | Synchronization status enumeration
 export enum SyncStatus {
   IDLE = 'idle',
   SYNCHRONIZING = 'synchronizing',
@@ -38,29 +38,29 @@ export enum SyncStatus {
   CONFLICT = 'conflict'
 }
 
-// ͬ�����ýӿ� | Synchronization configuration interface
+// 同步配置接口 | Synchronization configuration interface
 export interface SyncConfig {
   enabled: boolean;
   autoSync: boolean;
-  syncInterval: number; // �� | Seconds
+  syncInterval: number; // 秒 | Seconds
   conflictStrategy: ConflictResolutionStrategy;
   syncTypes: SyncDataType[];
   allowCellularSync: boolean;
   showSyncNotifications: boolean;
 }
 
-// Ĭ��ͬ������ | Default synchronization configuration
+// 默认同步配置 | Default synchronization configuration
 const DEFAULT_SYNC_CONFIG: SyncConfig = {
   enabled: true,
   autoSync: true,
-  syncInterval: 300, // 5���� | 5 minutes
+  syncInterval: 300, // 5分钟 | 5 minutes
   conflictStrategy: ConflictResolutionStrategy.LATEST_WIN,
   syncTypes: [SyncDataType.HISTORY, SyncDataType.FAVORITES],
   allowCellularSync: false,
   showSyncNotifications: true
 };
 
-// ͬ��״̬�ӿ� | Synchronization status interface
+// 同步状态接口 | Synchronization status interface
 export interface SyncState {
   status: SyncStatus;
   lastSyncTime?: number;
@@ -71,7 +71,7 @@ export interface SyncState {
   syncDataSize?: number;
 }
 
-// �ֲ�ʽ���ݷ����� | Distributed data service class
+// 分布式数据服务类 | Distributed data service class
 export default class DistributedDataService {
   static instance: DistributedDataService;
   kvManager: distributedKVStore.KVManager | null = null;
@@ -86,7 +86,7 @@ export default class DistributedDataService {
   private context: common.Context | null = null;
 
   /**
-   * ��ȡ����ʵ�� | Get singleton instance
+   * 获取单例实例 | Get singleton instance
    */
   static getInstance(): DistributedDataService {
     if (!DistributedDataService.instance) {
@@ -96,15 +96,15 @@ export default class DistributedDataService {
   }
 
   /**
-   * ���캯�� | Constructor
+   * 构造函数 | Constructor
    */
   constructor() {
     this.configService = ConfigService.getInstance();
   }
 
   /**
-   * ��ʼ���ֲ�ʽ���ݷ��� | Initialize distributed data service
-   * @param context Ӧ�������� | Application context
+   * 初始化分布式数据服务 | Initialize distributed data service
+   * @param context 应用上下文 | Application context
    */
   async initialize(context: common.Context): Promise<void> {
     if (this.isInitialized) {
@@ -117,7 +117,7 @@ export default class DistributedDataService {
     try {
       console.info(TAG, 'Initializing distributed data service...');
 
-      // ����KVManager
+      // 创建KVManager
       const managerConfig: distributedKVStore.KVManagerConfig = {
         context: context,
         bundleName: 'com.example.raytv'
@@ -134,7 +134,7 @@ export default class DistributedDataService {
         throw new Error('Failed to create KVManager instance');
       }
 
-      // ��ȡKVStore
+      // 获取KVStore
       const options: distributedKVStore.Options = {
         createIfMissing: true,
         encrypt: false,
@@ -155,13 +155,13 @@ export default class DistributedDataService {
         throw new Error('Failed to get KVStore instance');
       }
 
-      // ����ͬ������
+      // 加载同步配置
       await this.loadSyncConfig();
 
-      // ע�����ݱ仯����
+      // 注册数据变更监听器
       await this.registerDataChangeListener();
 
-      // �����Զ�ͬ��
+      // 启动自动同步
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
         this.startAutoSync();
       }
@@ -175,7 +175,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ����ͬ������ | Load synchronization configuration
+   * 加载同步配置 | Load synchronization configuration
    */
   async loadSyncConfig(): Promise<void> {
     try {
@@ -189,14 +189,14 @@ export default class DistributedDataService {
   }
 
   /**
-   * ����ͬ������ | Save synchronization configuration
+   * 保存同步配置 | Save synchronization configuration
    */
   async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = { ...this.syncConfig, ...config };
       await this.configService.setConfig('syncConfig', this.syncConfig);
       
-      // �������õ����Զ�ͬ��
+      // 根据配置更新自动同步
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
         this.startAutoSync();
       } else {
@@ -209,14 +209,14 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡͬ������ | Get synchronization configuration
+   * 获取同步配置 | Get synchronization configuration
    */
   getSyncConfig(): SyncConfig {
     return { ...this.syncConfig };
   }
 
   /**
-   * ע�����ݱ仯���� | Register data change listener
+   * 注册数据变更监听器 | Register data change listener
    */
   async registerDataChangeListener(): Promise<void> {
     if (!this.kvStore) {
@@ -234,13 +234,13 @@ export default class DistributedDataService {
               const deviceId = entry.deviceId || 'local';
               
               try {
-                // ��ȡ���ݲ�֪ͨ������
+                // 获取数据并通知监听器
                 let value: any = null;
                 if (this.kvStore) {
                   value = await this.kvStore.get(key);
                 }
                 if (value && this.dataListeners.size > 0) {
-                  // ��������ƥ��ļ�����
+                  // 通知匹配的监听器
                   this.notifyRelevantListeners(key, value, deviceId);
                 }
               } catch (error) {
@@ -260,7 +260,7 @@ export default class DistributedDataService {
   }
   
   /**
-   * ֪ͨ��صļ����� | Notify relevant listeners
+   * 通知相关监听器 | Notify relevant listeners
    */
   private notifyRelevantListeners<T>(key: string, value: T, deviceId: string): void {
     for (const [prefix, listeners] of this.dataListeners.entries()) {
@@ -277,9 +277,9 @@ export default class DistributedDataService {
   }
 
   /**
-   * ����ָ�����͵����ݱ仯 | Listen for data changes of specified type
-   * @param dataType �������� | Data type
-   * @param listener �����ص� | Listener callback
+   * 监听指定类型的数据变更 | Listen for data changes of specified type
+   * @param dataType 数据类型 | Data type
+   * @param listener 监听器回调 | Listener callback
    */
   addDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
@@ -293,9 +293,9 @@ export default class DistributedDataService {
   }
 
   /**
-   * �Ƴ����ݱ仯���� | Remove data change listener
-   * @param dataType �������� | Data type
-   * @param listener �����ص� | Listener callback
+   * 移除数据变更监听器 | Remove data change listener
+   * @param dataType 数据类型 | Data type
+   * @param listener 监听器回调 | Listener callback
    */
   removeDataChangeListener(dataType: SyncDataType, listener: DataChangeListener): void {
     const keyPrefix = `${dataType}_`;
@@ -306,7 +306,7 @@ export default class DistributedDataService {
       
       if (index > -1) {
         listeners.splice(index, 1);
-        // ���û�м������ˣ��Ƴ����ǰ׺
+        // 如果没有监听器了，移除对应前缀
         if (listeners.length === 0) {
           this.dataListeners.delete(keyPrefix);
         }
@@ -315,10 +315,10 @@ export default class DistributedDataService {
   }
 
   /**
-   * ����ͬ������ | Save synchronization data
-   * @param dataType �������� | Data type
-   * @param key ���ݼ� | Data key
-   * @param data �������� | Data content
+   * 保存同步数据 | Save synchronization data
+   * @param dataType 数据类型 | Data type
+   * @param key 数据键 | Data key
+   * @param data 数据内容 | Data content
    */
   async saveSyncData<T>(dataType: SyncDataType, key: string, data: T): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
@@ -333,7 +333,7 @@ export default class DistributedDataService {
         deviceId: await this.getLocalDeviceId()
       };
 
-      // �������ݵ�KVStore
+      // 保存数据到KVStore
       await this.kvStore.put(fullKey, syncData);
       console.debug(TAG, `Saved sync data: ${fullKey}`);
     } catch (error) {
@@ -343,9 +343,9 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡͬ������ | Get synchronization data
-   * @param dataType �������� | Data type
-   * @param key ���ݼ� | Data key
+   * 获取同步数据 | Get synchronization data
+   * @param dataType 数据类型 | Data type
+   * @param key 数据键 | Data key
    */
   async getSyncData<T>(dataType: SyncDataType, key: string): Promise<T | null> {
     if (!this.kvStore) {
@@ -369,9 +369,9 @@ export default class DistributedDataService {
   }
 
   /**
-   * ɾ��ͬ������ | Delete synchronization data
-   * @param dataType �������� | Data type
-   * @param key ���ݼ� | Data key
+   * 删除同步数据 | Delete synchronization data
+   * @param dataType 数据类型 | Data type
+   * @param key 数据键 | Data key
    */
   async deleteSyncData(dataType: SyncDataType, key: string): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled) {
@@ -389,10 +389,10 @@ export default class DistributedDataService {
   }
 
   /**
-   * �����Զ�ͬ�� | Start auto synchronization
+   * 启动自动同步 | Start auto synchronization
    */
   private startAutoSync(): void {
-    this.stopAutoSync(); // ��ֹͣ���еĶ�ʱ��
+    this.stopAutoSync(); // 先停止已有的定时器
     
     try {
       this.syncTimerId = setInterval(async () => {
@@ -408,7 +408,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ֹͣ�Զ�ͬ�� | Stop auto synchronization
+   * 停止自动同步 | Stop auto synchronization
    */
   private stopAutoSync(): void {
     if (this.syncTimerId !== null) {
@@ -419,7 +419,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * �ֶ���������ͬ�� | Manually trigger data synchronization
+   * 手动触发数据同步 | Manually trigger data synchronization
    */
   async synchronizeData(): Promise<void> {
     if (!this.kvStore || !this.syncConfig.enabled || this.syncState.status === SyncStatus.SYNCHRONIZING) {
@@ -434,11 +434,11 @@ export default class DistributedDataService {
     try {
       console.info(TAG, 'Starting data synchronization...');
       
-      // ��ȡ�����豸�б�
+      // 获取可用设备列表
       const devices = await this.getAvailableDevices();
       console.debug(TAG, `Available devices: ${JSON.stringify(devices)}`);
       
-      // ͬ��ÿ����������
+      // 同步每种数据类型
       for (const dataType of this.syncConfig.syncTypes) {
         await this.syncDataType(dataType, devices);
       }
@@ -462,7 +462,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡ�����豸 | Get available devices
+   * 获取可用设备 | Get available devices
    */
   private async getAvailableDevices(): Promise<string[]> {
     try {
@@ -480,7 +480,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡ�����豸ID | Get local device ID
+   * 获取本地设备ID | Get local device ID
    */
   private async getLocalDeviceId(): Promise<string> {
     try {
@@ -497,7 +497,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ͬ��ָ���������� | Synchronize specified data type
+   * 同步指定数据类型 | Synchronize specified data type
    */
   private async syncDataType(dataType: SyncDataType, deviceIds: string[]): Promise<void> {
     if (!this.kvStore) {
@@ -508,20 +508,20 @@ export default class DistributedDataService {
     const keyPrefix = `${dataType}_`;
 
     try {
-      // ��ȡ����ƥ��ǰ׺�ļ�
+      // 获取所有匹配前缀的键
       const keys = await this.getAllKeysWithPrefix(keyPrefix);
       console.debug(TAG, `Found ${keys.length} keys for data type ${dataType}`);
 
       for (const fullKey of keys) {
         try {
-          // ��ȡ��������
+          // 获取本地数据
           const localData = await this.kvStore.get(fullKey);
           if (localData) {
             console.debug(TAG, `Data ${fullKey} will be automatically synced to other devices`);
           }
         } catch (error) {
           console.error(TAG, `Error processing key ${fullKey}: ${error instanceof Error ? error.message : String(error)}`);
-          // ����������һ���������ж�����ͬ������
+          // 继续处理下一个键，忽略同步错误
           continue;
         }
       }
@@ -532,7 +532,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡ����ƥ��ǰ׺�ļ� | Get all keys with prefix
+   * 获取所有匹配前缀的键 | Get all keys with prefix
    */
   private async getAllKeysWithPrefix(prefix: string): Promise<string[]> {
     if (!this.kvStore) {
@@ -560,7 +560,7 @@ export default class DistributedDataService {
   }
 
   /**
-   * ����ͬ����ͻ | Handle synchronization conflict
+   * 处理同步冲突 | Handle synchronization conflict
    */
   private async resolveConflict<T>(localData: T, remoteData: T): Promise<T> {
     try {
@@ -574,25 +574,25 @@ export default class DistributedDataService {
           const remoteTime = (remoteData as { timestamp?: number })?.timestamp || 0;
           return localTime >= remoteTime ? localData : remoteData;
         case ConflictResolutionStrategy.MERGE:
-          // ʵ�ֺϲ�����
+          // 实现合并逻辑
           return await this.mergeData(localData, remoteData);
         default:
           return localData;
       }
     } catch (error) {
       console.error(TAG, `Error resolving conflict: ${error instanceof Error ? error.message : String(error)}`);
-      return localData; // ����ʱĬ�ϱ�����������
+      return localData; // 出错时默认使用本地数据
     }
   }
 
   /**
-   * �ϲ����ݣ����ݲ�ͬ��������ʵ�����ܺϲ����ԣ� | Merge data (implement intelligent merge strategy based on different data types)
+   * 合并数据（根据数据类型不同实现智能合并策略） | Merge data (implement intelligent merge strategy based on different data types)
    */
   private async mergeData<T>(localData: T, remoteData: T): Promise<T> {
-    // ������Ը��ݲ�ͬ����������ʵ�ֲ�ͬ�ĺϲ�����
-    // ���磬������ʷ��¼���Ժϲ�ȥ�أ��������ÿ��Ի���ʱ���ѡ��
+    // 根据数据类型不同，实现不同的合并策略
+    // 例如，对于历史记录可以去重，对于收藏可以按时间戳选择
     try {
-      // Ĭ��ʵ�֣�����ʹ�ñ�������
+      // 默认实现：简单使用本地数据
       return localData;
     } catch (error) {
       console.error(TAG, `Error merging data: ${error instanceof Error ? error.message : String(error)}`);
@@ -601,14 +601,14 @@ export default class DistributedDataService {
   }
 
   /**
-   * ��ȡͬ��״̬ | Get synchronization status
+   * 获取同步状态 | Get synchronization status
    */
   getSyncState(): SyncState {
     return { ...this.syncState };
   }
 
   /**
-   * ������Դ | Clean up resources
+   * 清理资源 | Clean up resources
    */
   async cleanup(): Promise<void> {
     this.stopAutoSync();

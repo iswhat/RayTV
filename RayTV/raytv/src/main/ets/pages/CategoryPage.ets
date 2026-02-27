@@ -2,6 +2,8 @@ import { AppNavigator } from '../navigation/AppNavigator';
 // Logger import removed as AnalyticsService was deleted
 import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
+import VirtualList from '../components/VirtualList';
+import { VirtualListItem } from '../types/VirtualListTypes';
 
 // 移除 @ohos.ui 导入，因为它在当前环境中不可用
 
@@ -189,6 +191,20 @@ struct CategoryPage {
       siteKey: media.siteKey,
       type: 'vod'
     });
+  }
+  
+  /**
+   * 将MediaItem转换为VirtualListItem | Convert MediaItem to VirtualListItem
+   */
+  private convertToVirtualItems(mediaList: MediaItem[]): VirtualListItem[] {
+    return mediaList.map((media, index) => ({
+      id: media.id,
+      index: index,
+      data: media,
+      top: index * 140, // 估算的项目高度
+      height: 140,
+      visible: false
+    }));
   }
   
   /**
@@ -394,14 +410,20 @@ struct CategoryPage {
           .justifyContent(FlexAlign.Center)
           .padding(20)
         } else {
-          List() {
-            ForEach(this.mediaList, (item: MediaItem) => {
-              ListItem() {
-                this.renderMediaItem(item)
+            // 使用VirtualList优化性能 | Use VirtualList for better performance
+            const virtualItems = this.convertToVirtualItems(this.mediaList);
+            
+            VirtualList({
+              items: virtualItems,
+              estimatedItemHeight: 140,
+              bufferSize: 3,
+              renderItem: (item: VirtualListItem) => {
+                const media = item.data as MediaItem;
+                return this.renderMediaItem(media);
               }
-            }, (item: MediaItem) => item.id)
-          }
-          .margin(20)
+            })
+            .margin(20)
+            .height('70%')
         }
         
         // 加载更多 | Load more

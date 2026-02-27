@@ -76,13 +76,13 @@ export interface PlaySource {
   rules: Record<string, SearchRuleItem>;
 }
 
-// 站点配置值接�?| Site config value interface
+// 站点配置值接口| Site config value interface
 export interface SiteConfigValue {
   api?: string;
   name?: string;
 }
 
-// 播放源项目接�?| Play source item interface
+// 播放源项目接口| Play source item interface
 export interface PlaySourceItem {
   key: string;
   source: PlaySource;
@@ -112,7 +112,7 @@ export interface SiteConfig {
 }
 
 /**
- * 配置解析器，负责解析和适配各种格式的配置文�?| Config parser, responsible for parsing and adapting various format config files
+ * 配置解析器，负责解析和适配各种格式的配置文件| Config parser, responsible for parsing and adapting various format config files
  */
 export class ConfigParser {
   private static instance: ConfigParser | null = null;
@@ -203,18 +203,19 @@ export class ConfigParser {
         (siteObj as SiteConfig).detail = {};
       }
       
-      // 确保必需的默认�?| Ensure required default values
+      // 确保必需的默认值| Ensure required default values
       this.ensureDefaultValues(siteObj as SiteConfig);
-      
+
       return true;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to validate site: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to validate site: ${err.message}`);
       return false;
     }
   }
   
   /**
-   * 检查是否为有效的站点类�?| Check if it's valid site type
+   * 检查是否为有效的站点类型| Check if it's valid site type
    */
   private isValidSiteType(type: string): boolean {
     const validTypes: SiteType[] = [SiteType.VOD, SiteType.LIVE, SiteType.MIXED];
@@ -265,7 +266,7 @@ export class ConfigParser {
       // 尝试解析为JSON | Try to parse as JSON
       const config = this.parseJsonContent(configContent);
       
-      // 支持不同格式的配置结�?| Support different format config structures
+      // 支持不同格式的配置结构| Support different format config structures
       const sitesData = config.sites || config.subscriptions || config.data || config;
       if (!sitesData) {
         throw new Error('Invalid sites configuration format');
@@ -285,17 +286,19 @@ export class ConfigParser {
           try {
             const site = this.parseSiteItem(siteData);
             sites.push(site);
-          } catch (error: Error) {
-            console.error(TAG + `: Failed to parse site item: ${error.message}`);
+          } catch (error) {
+            const err = error instanceof Error ? error : new Error(String(error));
+            console.error(TAG + `: Failed to parse site item: ${err.message}`);
           }
         }
       }
-      
+
       console.info(TAG + `: Successfully parsed ${sites.length} sites`);
       return sites;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to parse sites configuration: ${error.message}`);
-      throw error;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to parse sites configuration: ${err.message}`);
+      throw err;
     }
   }
   
@@ -379,11 +382,12 @@ export class ConfigParser {
           }
         }
       }
-      
+
       console.info(TAG + `: Converted ${sites.length} sites from Fongmi format`);
       return sites;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to convert Fongmi format: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to convert Fongmi format: ${err.message}`);
       return [];
     }
   }
@@ -400,7 +404,7 @@ export class ConfigParser {
       return this.convertSiteType(type);
     }
     
-    // 通过关键词判�?| Determine by keywords
+    // 通过关键词判断| Determine by keywords
     const name = TypeSafetyHelper.safeString(TypeSafetyHelper.safeGet(siteObj, 'name', '')).toLowerCase();
     const api = TypeSafetyHelper.safeString(TypeSafetyHelper.safeGet(siteObj, 'api', '')).toLowerCase();
     
@@ -421,15 +425,16 @@ export class ConfigParser {
 
   /**
    * 安全解析JSON内容 | Safe parse JSON content
-   * @param content JSON字符串内�?| JSON string content
+   * @param content JSON字符串内容| JSON string content
    */
   public parseJsonContent(content: string): Record<string, string | number | boolean | Record<string, string | number | boolean | string[]>> {
     try {
-      // 预处理，去除注释和多余空�?| Preprocess, remove comments and extra whitespace
+      // 预处理，去除注释和多余空格| Preprocess, remove comments and extra whitespace
       const cleanContent = this.cleanJsonContent(content);
       return JSON.parse(cleanContent) as Record<string, string | number | boolean | Record<string, string | number | boolean | string[]>>;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to parse JSON content: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to parse JSON content: ${err.message}`);
       throw new Error('Invalid JSON format');
     }
   }
@@ -449,9 +454,9 @@ export class ConfigParser {
   }
   
   /**
-   * 解析单个站点配置�?| Parse single site config item
-   * @param siteData 站点数据 | Site data
-   */
+ * 解析单个站点配置项| Parse single site config item
+ * @param siteData 站点数据 | Site data
+ */
   private parseSiteItem(siteData: Record<string, string | number | boolean | Record<string, string | number | boolean>>): Site {
     if (siteData === null || typeof siteData !== 'object' || Array.isArray(siteData)) {
       throw new Error('Invalid site data format');
@@ -465,7 +470,7 @@ export class ConfigParser {
     
     const now = Date.now();
     
-    // 创建完整的Site对象，包含所有必需属�?| Create complete Site object, include all required properties
+    // 创建完整的Site对象，包含所有必需属性| Create complete Site object, include all required properties
     const site: Site = {
       key: key,
       name: name,
@@ -508,9 +513,9 @@ export class ConfigParser {
   }
   
   /**
-   * 生成站点唯一�?| Generate site unique key
-   * @param name 站点名称 | Site name
-   */
+ * 生成站点唯一键| Generate site unique key
+ * @param name 站点名称 | Site name
+ */
   private generateSiteKey(name: string): string {
     return name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   }
@@ -638,7 +643,7 @@ export class ConfigParser {
       };
     }
     
-    // 标准化搜索规则格�?| Standardize search rule format
+    // 标准化搜索规则格式| Standardize search rule format
     const result: SearchRules = {
       // Fongmi格式搜索规则适配 | Fongmi format search rule adaptation
       page: typeof searchData.page === 'boolean' ? searchData.page : true,
@@ -791,8 +796,9 @@ export class ConfigParser {
     try {
       // 简单的URL验证逻辑 | Simple URL validation logic
       return url.startsWith('http://') || url.startsWith('https://');
-    } catch (error: Error) {
-      console.error(TAG + `: Error validating URL: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Error validating URL: ${err.message}`);
       return false;
     }
   }
@@ -826,8 +832,9 @@ export class ConfigParser {
       };
       
       return harmonyConfig;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to parse application configuration: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to parse application configuration: ${err.message}`);
       // 返回默认配置 | Return default config
       return this.getDefaultConfig();
     }
@@ -853,7 +860,7 @@ export class ConfigParser {
       
       for (const item of livesData) {
         if (typeof item === 'object' && item !== null) {
-          // 检查是否为分组格式：检查是否有 group 属性且 channels 是数�?| Check if it's group format: check if there's group property and channels is array
+          // 检查是否为分组格式：检查是否有 group 属性且 channels 是数组| Check if it's group format: check if there's group property and channels is array
           const groupObj = item as LiveGroupConfig;
           if (typeof groupObj.group === 'string' && Array.isArray(groupObj.channels)) {
             // 分组格式 | Group format
@@ -899,8 +906,9 @@ export class ConfigParser {
         version: typeof config.version === 'string' ? config.version : undefined,
         updatedAt: typeof config.updatedAt === 'number' ? config.updatedAt : Date.now()
       };
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to parse live configuration: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to parse live configuration: ${err.message}`);
       return { lives: [] };
     }
   }

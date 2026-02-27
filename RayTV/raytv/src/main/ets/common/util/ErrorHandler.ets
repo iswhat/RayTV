@@ -93,6 +93,25 @@ export class ErrorHandler {
   }
 
   /**
+   * 安全获取对象属性 | Safely get object property
+   * @param obj 对象 | Object
+   * @param key 属性名 | Property name
+   * @returns 属性值 | Property value
+   */
+  private getSafeProperty(obj: object, key: string): string | number | boolean | object | null | undefined {
+    try {
+      // 使用 Object.keys 检查属性是否存在
+      const keys = Object.keys(obj);
+      if (keys.includes(key)) {
+        return (obj as Record<string, string | number | boolean | object | null | undefined>)[key];
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
    * Setup global error handling | 设置全局错误处理
    */
   private setupGlobalErrorHandling(): void {
@@ -241,7 +260,8 @@ export class ErrorHandler {
       const keys = Object.keys(error);
       for (const key of keys) {
         if (key !== 'message' && key !== 'code' && key !== 'stack') {
-          const value = error[key as keyof ErrorResponse];
+          // 使用安全的属性访问方式 | Use safe property access
+          const value = this.getSafeProperty(error, key);
           if (value !== undefined && value !== null && typeof value !== 'object') {
             details.set(key, value as string | number | boolean | null);
             hasDetails = true;
