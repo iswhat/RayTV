@@ -245,6 +245,17 @@ export class ParserService {
    */
   public addParser(parser: ParserInfo): void {
     if (parser && parser.id) {
+      // 检查解析器数量限制 | Check parser count limit
+      if (this.parsers.size >= this.maxParsers) {
+        // 删除最旧的解析器 | Remove oldest parser
+        // 由于ParserInfo没有loadedAt字段，我们使用简单的迭代删除第一个
+        const firstParserId = this.parsers.keys().next().value;
+        if (firstParserId) {
+          this.parsers.delete(firstParserId);
+          Logger.info(ParserService.TAG, `Removed oldest parser to stay within limit`);
+        }
+      }
+      
       this.parsers.set(parser.id, parser);
       Logger.info(ParserService.TAG, `Added custom parser: ${parser.name} (${parser.id})`);
     }
