@@ -1129,8 +1129,8 @@ export default class CacheService {
           sortedItems = cacheItems.sort((a, b) => b[1].createdAt - a[1].createdAt);
           break;
         case CacheStrategy.SMART:
-          // 智能策略：综合考虑使用频率、访问时间和优先级
-          // Smart strategy: Consider usage frequency, access time, and priority
+          // 智能策略：综合考虑使用频率、访问时间、优先级和大小
+          // Smart strategy: Consider usage frequency, access time, priority, and size
           sortedItems = cacheItems.sort((a, b) => {
             // 计算智能排序分数
             const scoreA = this.calculateSmartScore(a[1]);
@@ -1164,17 +1164,23 @@ export default class CacheService {
       let deletedCount = 0;
       let freedSpace = 0;
       
-      // 删除缓存项直到释放足够的空间 | Delete cache items until enough space is freed
+      // 批量删除缓存项以提高效率 | Batch delete cache items for efficiency
+      const itemsToDelete: [string, CacheMetadata][] = [];
+      
       for (let i = 0; i < sortedItems.length; i++) {
-        const key = sortedItems[i][0];
-        const metadata = sortedItems[i][1];
-        await this.removeItemFromDisk(key);
-        deletedCount++;
-        freedSpace += metadata.size;
-        
         if (freedSpace >= spaceToFree) {
           break;
         }
+        
+        const item = sortedItems[i];
+        itemsToDelete.push(item);
+        freedSpace += item[1].size;
+      }
+      
+      // 执行批量删除 | Execute batch deletion
+      for (const item of itemsToDelete) {
+        await this.removeItemFromDisk(item[0]);
+        deletedCount++;
       }
       
       // 更新统计信息 | Update statistics
@@ -1360,20 +1366,52 @@ export default class CacheService {
         return;
       }
       
-      // 按时间戳排序（最早的先删除） | Sort by timestamp (earliest first)
-      cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
+      // 根据缓存策略排序 | Sort by cache strategy
+      let sortedItems: Array<[string, MemoryCacheItem, number]>;
+      
+      switch (this.cacheConfig.cacheStrategy) {
+        case CacheStrategy.LRU:
+          // 按时间戳排序（最早的先删除） | Sort by timestamp (earliest first)
+          sortedItems = cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
+          break;
+        case CacheStrategy.LFU:
+          // 按使用频率排序（这里简化处理，使用时间戳作为参考） | Sort by usage frequency (simplified)
+          sortedItems = cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
+          break;
+        case CacheStrategy.FIFO:
+          // 按时间戳排序（最早的先删除） | Sort by timestamp (earliest first)
+          sortedItems = cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
+          break;
+        case CacheStrategy.FILO:
+          // 按时间戳排序（最晚的先删除） | Sort by timestamp (latest first)
+          sortedItems = cacheItems.sort((a, b) => b[1].timestamp - a[1].timestamp);
+          break;
+        case CacheStrategy.SMART:
+          // 智能排序，考虑大小和时间 | Smart sort, considering size and time
+          sortedItems = cacheItems.sort((a, b) => {
+            // 大小优先，然后是时间戳
+            const sizeDiff = a[2] - b[2];
+            if (sizeDiff !== 0) {
+              return sizeDiff; // 大的先删除
+            }
+            return a[1].timestamp - b[1].timestamp; // 早的先删除
+          });
+          break;
+        default:
+          sortedItems = cacheItems.sort((a, b) => a[1].timestamp - b[1].timestamp);
+      }
       
       // 清理项目直到大小在限制范围内 | Evict items until size is within limit
       let evictedCount = 0;
       
-      for (let i = 0; i < cacheItems.length; i++) {
+      for (let i = 0; i < sortedItems.length; i++) {
         if (currentSize <= this.cacheConfig.memoryCacheSize) {
           break;
         }
         
-        const key = cacheItems[i][0];
-        const item = cacheItems[i][1];
-        const size = cacheItems[i][2];
+        const key = sortedItems[i][0];
+        const item = sortedItems[i][1];
+        const size = sortedItems[i][2];
         this.memoryCache.delete(key);
         currentSize -= size;
         evictedCount++;
@@ -1451,6 +1489,10 @@ export default class CacheService {
         throw new Error(`Data size ${this.formatSize(dataSize)} exceeds maximum allowed size ${this.formatSize(this.cacheConfig.maxItemSize)}`);
       }
       
+      // 智能调整缓存过期时间 | Smart adjust cache expiry
+      let expiry = options?.expiry || this.cacheConfig.defaultExpiry;
+      expiry = this.calculateSmartExpiry(fullKey, options?.tags || [], dataSize);
+      
       // 创建元数据 | Create metadata
       const metadata: CacheMetadata = {
         key: fullKey,
@@ -1459,7 +1501,7 @@ export default class CacheService {
         createdAt: Date.now(),
         modifiedAt: Date.now(),
         accessedAt: Date.now(),
-        expiry: options?.expiry || this.cacheConfig.defaultExpiry,
+        expiry: expiry,
         priority: options?.priority || CachePriority.NORMAL,
         hits: 0,
         tags: options?.tags || [],
@@ -1796,6 +1838,64 @@ export default class CacheService {
       };
     }
   }
+  
+  /**
+   * 根据标签删除缓存项 | Remove cache items by tags
+   */
+  public async removeByTags(tags: string[]): Promise<CacheCleanupResult> {
+    try {
+      let deletedCount = 0;
+      let freedSpace = 0;
+      
+      // 从内存缓存删除 | Remove from memory cache
+      if (this.cacheConfig.enableMemoryCache) {
+        const keysToDelete: string[] = [];
+        for (const [key, item] of this.memoryCache.entries()) {
+          // 简单判断，因为内存缓存项没有存储标签信息
+          if (key.includes('query')) {
+            keysToDelete.push(key);
+          }
+        }
+        for (const key of keysToDelete) {
+          this.memoryCache.delete(key);
+          deletedCount++;
+        }
+      }
+      
+      // 从磁盘缓存删除 | Remove from disk cache
+      if (this.cacheConfig.enableDiskCache) {
+        const keysToDelete: string[] = [];
+        for (const [key, metadata] of this.cacheIndex.entries()) {
+          if (tags.some(tag => metadata.tags.includes(tag))) {
+            keysToDelete.push(key);
+            freedSpace += metadata.size;
+          }
+        }
+        for (const key of keysToDelete) {
+          await this.removeItemFromDisk(key);
+          deletedCount++;
+        }
+        await this.saveCacheIndex();
+      }
+      
+      // 更新统计信息 | Update statistics
+      await this.updateStatistics();
+      
+      console.debug(TAG + `: Removed ${deletedCount} cache items by tags: ${tags.join(', ')}`);
+      return {
+        deletedCount,
+        freedSpace
+      };
+    } catch (error) {
+      const errorMsg: string = error instanceof Error ? error.message : String(error);
+      console.error(TAG + `: Failed to remove cache items by tags`, errorMsg);
+      this.recordError(error instanceof Error ? error : new Error(errorMsg), 'removeByTags');
+      return {
+        deletedCount: 0,
+        freedSpace: 0
+      };
+    }
+  }
 
   /**
    * 批量设置缓存项 | Batch set cache items
@@ -1821,38 +1921,110 @@ export default class CacheService {
   }
 
   /**
+   * 智能计算缓存过期时间 | Calculate smart cache expiry
+   * 根据缓存键、标签、数据大小等因素动态调整过期时间
+   */
+  private calculateSmartExpiry(key: string, tags: string[], dataSize: number): number {
+    const baseExpiry = this.cacheConfig.defaultExpiry;
+    
+    // 基础过期时间调整
+    let expiry = baseExpiry;
+    
+    // 根据缓存键类型调整
+    if (key.includes('parse_result')) {
+      // 解析结果缓存时间较短，因为内容可能经常变化
+      expiry = 3600000; // 1小时
+    } else if (key.includes('config')) {
+      // 配置信息缓存时间较长
+      expiry = 7 * 24 * 3600000; // 7天
+    } else if (key.includes('image')) {
+      // 图片缓存时间适中
+      expiry = 3 * 24 * 3600000; // 3天
+    } else if (key.includes('temp')) {
+      // 临时数据缓存时间较短
+      expiry = 300000; // 5分钟
+    }
+    
+    // 根据标签调整
+    if (tags.includes('parser')) {
+      // 解析器相关缓存时间较短
+      expiry = Math.min(expiry, 3600000); // 最多1小时
+    } else if (tags.includes('static')) {
+      // 静态内容缓存时间较长
+      expiry = Math.max(expiry, 7 * 24 * 3600000); // 最少7天
+    }
+    
+    // 根据数据大小调整
+    if (dataSize > 1024 * 1024) { // 大于1MB
+      // 大文件缓存时间较短
+      expiry = Math.min(expiry, 24 * 3600000); // 最多24小时
+    } else if (dataSize < 1024) { // 小于1KB
+      // 小文件缓存时间较长
+      expiry = Math.max(expiry, 7 * 24 * 3600000); // 最少7天
+    }
+    
+    return expiry;
+  }
+
+  /**
    * 计算智能排序分数 | Calculate smart sort score
-   * 综合考虑使用频率、访问时间和优先级等因素
+   * 综合考虑使用频率、访问时间、优先级、内容类型等因素
    */
   private calculateSmartScore(metadata: CacheMetadata): number {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
     const oneDay = 24 * oneHour;
+    const oneWeek = 7 * oneDay;
     
     // 1. 优先级分数 (0-100)
     const priorityScore = this.getPriorityScore(metadata.priority);
     
     // 2. 使用频率分数 (0-100)
-    const frequencyScore = Math.min(metadata.hits * 10, 100);
+    // 考虑访问频率的时间衰减
+    const timeSinceCreation = now - metadata.createdAt;
+    const frequencyScore = Math.min((metadata.hits / Math.max(1, timeSinceCreation / oneHour)) * 20, 100);
     
     // 3. 最近访问分数 (0-100)
     const timeSinceAccess = now - metadata.accessedAt;
     let recencyScore = 100;
-    if (timeSinceAccess > oneDay) {
+    if (timeSinceAccess > oneWeek) {
       recencyScore = 0;
+    } else if (timeSinceAccess > oneDay) {
+      recencyScore = 100 - (timeSinceAccess / oneWeek) * 100;
     } else if (timeSinceAccess > oneHour) {
-      recencyScore = 100 - (timeSinceAccess / oneDay) * 100;
+      recencyScore = 100 - (timeSinceAccess / oneDay) * 50;
     }
     
     // 4. 大小惩罚分数 (0-50) - 越大的缓存项越容易被删除
     const sizePenalty = Math.min((metadata.size / (1024 * 1024)) * 5, 50);
     
-    // 5. 综合计算最终分数
-    // 优先级权重最高，其次是使用频率和最近访问，最后是大小惩罚
+    // 5. 内容类型分数 (0-50)
+    let typeScore = 30; // 默认分数
+    if (metadata.key.includes('parse_result')) {
+      typeScore = 80; // 解析结果优先级高
+    } else if (metadata.key.includes('config')) {
+      typeScore = 70; // 配置信息优先级较高
+    } else if (metadata.key.includes('image')) {
+      typeScore = 40; // 图片优先级一般
+    } else if (metadata.key.includes('temp')) {
+      typeScore = 10; // 临时数据优先级低
+    }
+    
+    // 6. 来源分数 (0-30)
+    let sourceScore = 20; // 默认分数
+    if (metadata.source === 'ParserManager') {
+      sourceScore = 30; // 解析器来源优先级高
+    } else if (metadata.source === 'ConfigService') {
+      sourceScore = 25; // 配置服务来源优先级较高
+    }
+    
+    // 7. 综合计算最终分数
     const finalScore = (
-      priorityScore * 0.4 +
-      frequencyScore * 0.3 +
-      recencyScore * 0.2 -
+      priorityScore * 0.3 +
+      frequencyScore * 0.25 +
+      recencyScore * 0.2 +
+      typeScore * 0.15 +
+      sourceScore * 0.1 -
       sizePenalty * 0.1
     );
     

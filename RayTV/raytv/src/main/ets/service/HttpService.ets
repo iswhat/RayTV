@@ -134,6 +134,24 @@ export class HttpService {
   private context: common.Context | null = null;
   private cacheService: CacheService;
   private static readonly TAG: string = 'HttpService';
+  
+  /**
+   * HTTP连接池
+   * HTTP connection pool
+   */
+  private connectionPool: Map<string, { httpRequest: http.HttpRequest, lastUsed: number }> = new Map();
+  
+  /**
+   * 连接池最大大小
+   * Connection pool maximum size
+   */
+  private readonly MAX_POOL_SIZE: number = 10;
+  
+  /**
+   * 连接最大空闲时间（毫秒）
+   * Connection maximum idle time (milliseconds)
+   */
+  private readonly MAX_IDLE_TIME: number = 60000; // 60秒
 
   /**
    * 缓存策略配置
@@ -608,8 +626,8 @@ export class HttpService {
       Logger.debug(HttpService.TAG, `Cache miss for ${url}, sending network request`);
     }
 
-    // 创建HTTP请求对象 Create HTTP request object
-    const httpRequest = http.createHttp();
+    // 从连接池获取HTTP请求对象
+    const httpRequest = this.getHttpRequestFromPool(url);
 
     try {
       // 检查网络权限（只在需要时请求）
@@ -739,8 +757,8 @@ export class HttpService {
       Logger.error(HttpService.TAG, `HTTP request failed: ${url}`);
       throw error instanceof Error ? error : new Error(String(error));
     } finally {
-      // 修复问题3：确保在任何情况下都关闭请求对象
-      httpRequest.destroy();
+      // 将HTTP请求对象返回连接池
+      this.returnHttpRequestToPool(url, httpRequest);
     }
   }
 
@@ -758,10 +776,11 @@ export class HttpService {
     }
 
     this.preloadQueue.add(cacheKey);
+    let httpRequest: http.HttpRequest | null = null;
 
     try {
-      // 创建新的HTTP请求对象
-      const httpRequest = http.createHttp();
+      // 从连接池获取HTTP请求对象
+      httpRequest = this.getHttpRequestFromPool(url);
       
       const method = options.method || 'GET';
       const headers = options.headers || {};
@@ -809,6 +828,14 @@ export class HttpService {
     } catch (error) {
       Logger.warn(HttpService.TAG, `Failed to refresh cache for ${url}: ${error}`);
     } finally {
+      // 将HTTP请求对象返回连接池
+      try {
+        if (httpRequest) {
+          this.returnHttpRequestToPool(url, httpRequest);
+        }
+      } catch (error) {
+        Logger.warn(HttpService.TAG, `Failed to return HTTP request to pool: ${error}`);
+      }
       this.preloadQueue.delete(cacheKey);
     }
   }
@@ -1078,8 +1105,8 @@ export class HttpService {
       throw new Error('Invalid file path: potential path traversal detected');
     }
 
-    // 创建HTTP请求对象 Create HTTP request object
-    const httpRequest = http.createHttp();
+    // 从连接池获取HTTP请求对象
+    const httpRequest = this.getHttpRequestFromPool(url);
 
     try {
       // 检查网络权限 Check network permission
@@ -1190,8 +1217,8 @@ export class HttpService {
       Logger.error(HttpService.TAG, `File download failed: ${url}`);
       throw error instanceof Error ? error : new Error(String(error));
     } finally {
-      // 修复问题3：确保在任何情况下都关闭请求对象
-      httpRequest.destroy();
+      // 将HTTP请求对象返回连接池
+      this.returnHttpRequestToPool(url, httpRequest);
     }
   }
 
@@ -1239,6 +1266,131 @@ export class HttpService {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * 从连接池获取HTTP请求对象
+   * Get HTTP request object from connection pool
+   * @param url 请求URL Request URL
+   * @returns HTTP请求对象 HTTP request object
+   */
+  private getHttpRequestFromPool(url: string): http.HttpRequest {
+    // 清理空闲连接
+    this.cleanupIdleConnections();
+    
+    // 生成连接键（基于主机名）
+    const host = this.getHostFromUrl(url);
+    const poolKey = `conn_${host}`;
+    
+    // 检查连接池是否有可用连接
+    const pooledConnection = this.connectionPool.get(poolKey);
+    if (pooledConnection) {
+      // 更新最后使用时间
+      pooledConnection.lastUsed = Date.now();
+      Logger.debug(HttpService.TAG, `Using pooled connection for ${host}`);
+      return pooledConnection.httpRequest;
+    }
+    
+    // 创建新连接
+    const newHttpRequest = http.createHttp();
+    
+    // 如果连接池未满，添加到池
+    if (this.connectionPool.size < this.MAX_POOL_SIZE) {
+      this.connectionPool.set(poolKey, {
+        httpRequest: newHttpRequest,
+        lastUsed: Date.now()
+      });
+      Logger.debug(HttpService.TAG, `Created new connection for ${host}, pool size: ${this.connectionPool.size}`);
+    }
+    
+    return newHttpRequest;
+  }
+
+  /**
+   * 将HTTP请求对象返回连接池
+   * Return HTTP request object to connection pool
+   * @param url 请求URL Request URL
+   * @param httpRequest HTTP请求对象 HTTP request object
+   */
+  private returnHttpRequestToPool(url: string, httpRequest: http.HttpRequest): void {
+    const host = this.getHostFromUrl(url);
+    const poolKey = `conn_${host}`;
+    
+    // 检查连接池是否已满
+    if (this.connectionPool.size < this.MAX_POOL_SIZE) {
+      // 更新或添加到连接池
+      this.connectionPool.set(poolKey, {
+        httpRequest,
+        lastUsed: Date.now()
+      });
+      Logger.debug(HttpService.TAG, `Returned connection to pool for ${host}, pool size: ${this.connectionPool.size}`);
+    } else {
+      // 连接池已满，销毁连接
+      try {
+        httpRequest.destroy();
+        Logger.debug(HttpService.TAG, `Destroyed connection for ${host} (pool full)`);
+      } catch (error) {
+        Logger.warn(HttpService.TAG, `Failed to destroy connection: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * 清理空闲连接
+   * Clean up idle connections
+   */
+  private cleanupIdleConnections(): void {
+    const now = Date.now();
+    const keysToRemove: string[] = [];
+    
+    for (const [key, connection] of this.connectionPool.entries()) {
+      if (now - connection.lastUsed > this.MAX_IDLE_TIME) {
+        keysToRemove.push(key);
+        try {
+          connection.httpRequest.destroy();
+          Logger.debug(HttpService.TAG, `Cleaned up idle connection: ${key}`);
+        } catch (error) {
+          Logger.warn(HttpService.TAG, `Failed to destroy idle connection: ${error}`);
+        }
+      }
+    }
+    
+    // 从连接池移除已清理的连接
+    for (const key of keysToRemove) {
+      this.connectionPool.delete(key);
+    }
+  }
+
+  /**
+   * 从URL中提取主机名
+   * Extract host from URL
+   * @param url URL
+   * @returns 主机名 Hostname
+   */
+  private getHostFromUrl(url: string): string {
+    try {
+      // 简单的主机名提取逻辑
+      const match = url.match(/^https?:\/\/([^/]+)/);
+      return match ? match[1] : 'default';
+    } catch {
+      return 'default';
+    }
+  }
+
+  /**
+   * 清理所有连接
+   * Clean up all connections
+   */
+  private cleanupAllConnections(): void {
+    for (const [key, connection] of this.connectionPool.entries()) {
+      try {
+        connection.httpRequest.destroy();
+        Logger.debug(HttpService.TAG, `Cleaned up connection: ${key}`);
+      } catch (error) {
+        Logger.warn(HttpService.TAG, `Failed to destroy connection: ${error}`);
+      }
+    }
+    this.connectionPool.clear();
   }
 
   /**
@@ -1301,38 +1453,121 @@ export class HttpService {
   }
 
   /**
-   * 批量执行请求
-   * 
-   * 批量执行多个HTTP请求，支持并发控制，提高请求效率。
-   * 
-   * @typeParam T - 响应数据的类型
-   * @param requests 请求列表
-   * @returns Promise<Array<HttpResponse<T>>> - 包含所有请求结果的Promise
-   * @example
-   * ```typescript
-   * const requests = [
-   *   { url: 'https://api.example.com/data1' },
-   *   { url: 'https://api.example.com/data2' },
-   *   { url: 'https://api.example.com/data3' }
-   * ];
-   * 
-   * const results = await httpService.batchRequests<{ data: any }>(requests);
-   * results.forEach((result, index) => {
-   *   console.log(`Request ${index + 1} result:`, result.data);
-   * });
-   * ```
-   */
-  public async batchRequests<T>(requests: Array<{ url: string, options?: HttpRequestOptions }>): Promise<Array<HttpResponse<T>>> {
+ * 批量执行请求
+ * 
+ * 批量执行多个HTTP请求，支持并发控制、优先级排序、超时控制和进度跟踪，提高请求效率。
+ * 
+ * @typeParam T - 响应数据的类型
+ * @param requests 请求列表
+ * @param options 批量请求选项
+ * @returns Promise<Array<HttpResponse<T>>> - 包含所有请求结果的Promise
+ * @example
+ * ```typescript
+ * const requests = [
+ *   { url: 'https://api.example.com/data1', priority: 1 },
+ *   { url: 'https://api.example.com/data2', priority: 2 },
+ *   { url: 'https://api.example.com/data3', priority: 1 }
+ * ];
+ * 
+ * const results = await httpService.batchRequests<{ data: any }>(requests, {
+ *   batchSize: 5,
+ *   timeout: 30000,
+ *   strategy: 'parallel',
+ *   onProgress: (completed, total) => {
+ *     console.log(`Progress: ${completed}/${total}`);
+ *   }
+ * });
+ * 
+ * results.forEach((result, index) => {
+ *   console.log(`Request ${index + 1} result:`, result.data);
+ * });
+ * ```
+ */
+  public async batchRequests<T>(
+    requests: Array<{ url: string, options?: HttpRequestOptions, priority?: number }>,
+    options?: {
+      batchSize?: number;
+      timeout?: number;
+      strategy?: 'sequential' | 'parallel' | 'prioritized';
+      onProgress?: (completed: number, total: number) => void;
+      retryCount?: number;
+    }
+  ): Promise<Array<HttpResponse<T>>> {
     const results: Array<HttpResponse<T>> = [];
-    const batchSize = 4; // 每批处理4个请求
+    const batchSize = options?.batchSize || 4;
+    const timeout = options?.timeout || 30000;
+    const strategy = options?.strategy || 'parallel';
+    const onProgress = options?.onProgress;
+    const retryCount = options?.retryCount || 3;
+    const totalRequests = requests.length;
+    let completedRequests = 0;
 
-    // 分批处理请求
-    for (let i = 0; i < requests.length; i += batchSize) {
-      const batch = requests.slice(i, i + batchSize);
-      const batchResults = await Promise.all(
-        batch.map(req => this.mergeRequest<T>(req.url, req.options))
-      );
-      results.push(...batchResults);
+    // 根据策略处理请求
+    let processedRequests = [...requests];
+    
+    if (strategy === 'prioritized') {
+      // 按优先级排序（优先级数字越小，优先级越高）
+      processedRequests.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+    }
+
+    // 执行请求的函数
+    const executeRequest = async (req: { url: string, options?: HttpRequestOptions }): Promise<HttpResponse<T>> => {
+      let retries = 0;
+      let lastError: Error | null = null;
+      
+      while (retries <= retryCount) {
+        try {
+          // 使用Promise.race实现超时控制
+          const requestPromise = this.mergeRequest<T>(req.url, req.options);
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error(`Request timeout for ${req.url}`)), timeout);
+          });
+          
+          try {
+            // 竞态条件：请求完成或超时
+            const result = await Promise.race([requestPromise, timeoutPromise]);
+            
+            // 更新进度
+            completedRequests++;
+            onProgress?.(completedRequests, totalRequests);
+            
+            return result;
+          } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            retries++;
+            
+            if (retries > retryCount) {
+              throw lastError;
+            }
+            
+            // 重试前等待
+            await this.sleep(1000 * retries);
+          }
+        } catch (error) {
+          // 更新进度
+          completedRequests++;
+          onProgress?.(completedRequests, totalRequests);
+          throw error;
+        }
+      }
+      
+      throw lastError || new Error(`Request failed after ${retryCount} retries`);
+    };
+
+    if (strategy === 'sequential') {
+      // 顺序执行请求
+      for (const req of processedRequests) {
+        const result = await executeRequest(req);
+        results.push(result);
+      }
+    } else {
+      // 并行分批执行请求
+      for (let i = 0; i < processedRequests.length; i += batchSize) {
+        const batch = processedRequests.slice(i, i + batchSize);
+        const batchPromises = batch.map(executeRequest);
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+      }
     }
 
     return results;
