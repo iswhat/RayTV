@@ -60,6 +60,7 @@ export interface ParserConfig {
   retryCount: number;
   fallbackParsers: string[];
   customHeaders?: Record<string, string>;
+  cacheExpiry?: number; // 缓存过期时间（毫秒）
 }
 
 // 解析器管理服务接口 | Parser management service interface

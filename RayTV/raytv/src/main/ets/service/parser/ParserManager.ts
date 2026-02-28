@@ -4,7 +4,7 @@
  */
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
-import CacheService from '../cache/CacheService';
+import CacheService, { CachePriority, CacheType } from '../cache/CacheService';
 import HttpService from '../HttpService';
 import ApiResponse from '../../data/dto/ApiResponse';
 import {
@@ -55,6 +55,7 @@ export class ParserManager implements IParserManager {
   private configs: Map<string, ParserConfig> = new Map();
   private statistics: ParserStatistics = this.getDefaultStatistics();
   private initialized: boolean = false;
+  private maxParsers: number = 50; // 最大解析器数量限制
 
   /**
    * 获取单例实例
@@ -173,6 +174,17 @@ export class ParserManager implements IParserManager {
         metadata
       };
 
+      // 检查解析器数量限制 | Check parser count limit
+      if (this.parsers.size >= this.maxParsers) {
+        // 删除最旧的解析器 | Remove oldest parser
+        const oldestParser = Array.from(this.parsers.values()).sort((a, b) => a.loadedAt - b.loadedAt)[0];
+        if (oldestParser) {
+          this.parsers.delete(oldestParser.id);
+          await this.removeStoredParser(oldestParser.id);
+          this.logger.info(`Removed oldest parser ${oldestParser.name} to stay within limit`);
+        }
+      }
+
       // 注册解析器 | Register parser
       this.parsers.set(parser.id, parser);
       
@@ -277,7 +289,14 @@ export class ParserManager implements IParserManager {
       
       // 缓存成功结果 | Cache successful results
       if (result.success) {
-        await this.cacheService.set(`parse_result_${url}`, result, 3600000); // 1小时缓存
+        const cacheKey = this.generateCacheKey(url, parserId);
+        await this.cacheService.set(cacheKey, result, {
+          expiry: config.cacheExpiry || 3600000, // 1小时缓存，可通过配置覆盖
+          priority: CachePriority.NORMAL,
+          tags: ['parser', 'parse_result', parserId],
+          type: CacheType.MEMORY_DISK,
+          source: 'ParserManager'
+        });
       }
       
       this.logger.info(`Parse execution completed in ${executionTime}ms - Success: ${result.success}`);
@@ -312,7 +331,8 @@ export class ParserManager implements IParserManager {
       this.logger.info(`Executing smart parse for URL: ${url}`);
       
       // 检查缓存 | Check cache first
-      const cachedResult = await this.cacheService.get<ParseResult>(`parse_result_${url}`);
+      const cacheKey = this.generateCacheKey(url);
+      const cachedResult = await this.cacheService.get<ParseResult>(cacheKey);
       if (cachedResult) {
         this.logger.info('Returning cached parse result');
         return ApiResponse.success(cachedResult);
@@ -350,6 +370,145 @@ export class ParserManager implements IParserManager {
     } catch (error) {
       this.logger.error('Smart parse execution failed', error);
       return ApiResponse.failure(`Smart parse failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * 执行并行解析
+   * 
+   * 并行使用多个解析器解析URL，提高解析成功率和速度。
+   * 
+   * @param url 要解析的URL
+   * @param maxConcurrent 最大并发数，默认5
+   * @returns Promise<ApiResponse<ParseResult>> - 包含解析结果的API响应
+   * @example
+   * ```typescript
+   * const result = await parserManager.executeParallelParse('https://example.com/video');
+   * if (result.isSuccess()) {
+   *   console.log('Parallel parse result:', result.data);
+   * } else {
+   *   console.error('Parallel parse failed:', result.message);
+   * }
+   * ```
+   */
+  public async executeParallelParse(url: string, maxConcurrent: number = 5): Promise<ApiResponse<ParseResult>> {
+    try {
+      this.logger.info(`Executing parallel parse for URL: ${url}`);
+      
+      // 检查缓存 | Check cache first
+      const cacheKey = this.generateCacheKey(url);
+      const cachedResult = await this.cacheService.get<ParseResult>(cacheKey);
+      if (cachedResult) {
+        this.logger.info('Returning cached parse result');
+        return ApiResponse.success(cachedResult);
+      }
+
+      // 获取活跃的解析器 | Get active parsers
+      const activeParsers = Array.from(this.parsers.values()).filter(p => p.isActive);
+      if (activeParsers.length === 0) {
+        return ApiResponse.failure('No active parsers available');
+      }
+
+      // 按优先级排序并限制并发数 | Sort by priority and limit concurrent count
+      const sortedParsers = activeParsers.sort((a, b) => {
+        const configA = this.configs.get(a.id) || this.getDefaultParserConfig(a.id);
+        const configB = this.configs.get(b.id) || this.getDefaultParserConfig(b.id);
+        return configB.priority - configA.priority;
+      }).slice(0, maxConcurrent);
+
+      if (sortedParsers.length === 0) {
+        return ApiResponse.failure('No parsers available for parallel execution');
+      }
+
+      // 并行执行解析 | Execute parse in parallel
+      const startTime = Date.now();
+      const parsePromises = sortedParsers.map(parser => {
+        return this.executeParse(url, parser.id).then(result => ({
+          parser: parser.name,
+          result
+        }));
+      });
+
+      const results = await Promise.all(parsePromises);
+      const executionTime = Date.now() - startTime;
+
+      // 查找成功的结果 | Find successful result
+      for (const { parser, result } of results) {
+        if (result.isSuccess() && result.data!.success) {
+          this.logger.info(`Parallel parse succeeded with parser: ${parser} in ${executionTime}ms`);
+          return result;
+        }
+      }
+
+      // 所有解析器都失败 | All parsers failed
+      this.logger.warn('All parallel parsers failed');
+      return ApiResponse.failure('All parsers failed to parse the URL');
+
+    } catch (error) {
+      this.logger.error('Parallel parse execution failed', error);
+      return ApiResponse.failure(`Parallel parse failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * 批量执行解析
+   * 
+   * 批量解析多个URL，支持并行处理。
+   * 
+   * @param urls 要解析的URL列表
+   * @param parserId 解析器ID，不指定则使用智能解析
+   * @param maxConcurrent 最大并发数，默认3
+   * @returns Promise<ApiResponse<Map<string, ParseResult>>> - 包含解析结果映射的API响应
+   * @example
+   * ```typescript
+   * const urls = ['https://example.com/video1', 'https://example.com/video2'];
+   * const result = await parserManager.executeBatchParse(urls);
+   * if (result.isSuccess()) {
+   *   console.log('Batch parse results:', result.data);
+   * }
+   * ```
+   */
+  public async executeBatchParse(
+    urls: string[],
+    parserId?: string,
+    maxConcurrent: number = 3
+  ): Promise<ApiResponse<Map<string, ParseResult>>> {
+    try {
+      this.logger.info(`Executing batch parse for ${urls.length} URLs`);
+
+      if (urls.length === 0) {
+        return ApiResponse.success(new Map());
+      }
+
+      // 限制并发数 | Limit concurrent count
+      const batchSize = Math.min(maxConcurrent, urls.length);
+      const results = new Map<string, ParseResult>();
+
+      // 分批处理 | Process in batches
+      for (let i = 0; i < urls.length; i += batchSize) {
+        const batchUrls = urls.slice(i, i + batchSize);
+        const batchPromises = batchUrls.map(url => {
+          return (parserId ? this.executeParse(url, parserId) : this.executeSmartParse(url))
+            .then(response => ({
+              url,
+              response
+            }));
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(({ url, response }) => {
+          if (response.isSuccess()) {
+            results.set(url, response.data!);
+          }
+        });
+      }
+
+      this.logger.info(`Batch parse completed: ${results.size}/${urls.length} successful`);
+      return ApiResponse.success(results);
+
+    } catch (error) {
+      this.logger.error('Batch parse execution failed', error);
+      return ApiResponse.failure(`Batch parse failed: ${(error as Error).message}`);
     }
   }
 
@@ -602,7 +761,8 @@ export class ParserManager implements IParserManager {
       priority: 1,
       timeout: 10000,
       retryCount: 3,
-      fallbackParsers: []
+      fallbackParsers: [],
+      cacheExpiry: 3600000 // 默认1小时缓存
     };
   }
 
@@ -713,6 +873,21 @@ export class ParserManager implements IParserManager {
     // 模拟文件大小获取 | Simulate file size retrieval
     // 实际实现需要使用文件系统API | Actual implementation needs to use file system API
     return 1024 * 1024; // 1MB模拟 | 1MB simulation
+  }
+
+  /**
+   * 生成缓存键 | Generate cache key
+   * @param url 要解析的URL
+   * @param parserId 解析器ID（可选）
+   * @returns 生成的缓存键
+   */
+  private generateCacheKey(url: string, parserId?: string): string {
+    // 对URL进行哈希处理，避免过长的缓存键
+    const urlHash = btoa(url).substring(0, 32);
+    if (parserId) {
+      return `parse_result_${parserId}_${urlHash}`;
+    }
+    return `parse_result_${urlHash}`;
   }
 
   private async performParsing(url: string, parser: ParserPlugin, config: ParserConfig): Promise<ParseResult> {

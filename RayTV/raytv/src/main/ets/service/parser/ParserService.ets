@@ -6,6 +6,7 @@ import { ParserInfo } from '../../data/repository/NetworkRepository';
 import { NetworkResult, VideoSourceInfo } from '../../data/bean/NetworkResult';
 import ConfigService from '../config/ConfigService';
 import { HttpService } from '../HttpService';
+import parserManager from './ParserManager';
 
 /**
  * 解析器配置接口 | Parser config interface
@@ -40,6 +41,7 @@ export class ParserService {
   private static instance: ParserService | null = null;
   
   private parsers: Map<string, ParserInfo> = new Map();
+  private maxParsers: number = 100; // 最大解析器数量限制
   private defaultConfig: ParserConfig = {
     enabled: true,
     timeout: 30000,
@@ -156,6 +158,53 @@ export class ParserService {
       return { 
         success: false, 
         message: `Parse failed: ${error instanceof Error ? error.message : String(error)}` 
+      };
+    }
+  }
+
+  /**
+   * 并行解析视频源 | Parse video source in parallel
+   * @param sourceUrl 原始视频源URL | Original video source URL
+   * @param maxConcurrent 最大并发数，默认5 | Maximum concurrent count, default 5
+   * @returns Promise<NetworkResult<VideoSourceInfo>>
+   */
+  public async parseVideoSourceParallel(sourceUrl: string, maxConcurrent: number = 5): Promise<NetworkResult<VideoSourceInfo>> {
+    try {
+      Logger.info(ParserService.TAG, `Parsing video source in parallel: ${sourceUrl}, maxConcurrent: ${maxConcurrent}`);
+      
+      // 验证URL Validate URL
+      if (!sourceUrl || typeof sourceUrl !== 'string') {
+        return { success: false, message: 'Invalid source URL' };
+      }
+      
+      // 确保ParserManager已初始化
+      await parserManager.initialize();
+      
+      // 执行并行解析
+      const parseResult = await parserManager.executeParallelParse(sourceUrl, maxConcurrent);
+      
+      if (parseResult.isSuccess() && parseResult.data?.success) {
+        // 转换解析结果为VideoSourceInfo格式
+        const videoSource: VideoSourceInfo = {
+          id: `source_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: `Parallel Source`,
+          url: parseResult.data.urls[0] || sourceUrl,
+          format: this.detectFormat(parseResult.data.urls[0] || sourceUrl),
+          mimeType: this.getMimeType(parseResult.data.urls[0] || sourceUrl),
+          quality: this.detectQuality(parseResult.data.urls[0] || sourceUrl),
+          headers: parseResult.data.headers || {},
+          duration: 0
+        };
+        
+        return { success: true, data: videoSource };
+      } else {
+        return { success: false, message: parseResult.message || 'Parallel parse failed' };
+      }
+    } catch (error) {
+      Logger.error(ParserService.TAG, `Failed to parse video source in parallel: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        message: `Parallel parse failed: ${error instanceof Error ? error.message : String(error)}` 
       };
     }
   }
@@ -545,6 +594,48 @@ export class ParserService {
     }
     
     return 'unknown';
+  }
+
+  /**
+   * 从URL检测视频格式 Detect video format from URL
+   */
+  private detectFormat(url: string): string {
+    const lowercaseUrl = url.toLowerCase();
+    
+    if (lowercaseUrl.includes('.m3u8')) {
+      return 'hls';
+    } else if (lowercaseUrl.includes('.mpd')) {
+      return 'dash';
+    } else if (lowercaseUrl.includes('.mp4')) {
+      return 'mp4';
+    } else if (lowercaseUrl.includes('.flv')) {
+      return 'flv';
+    } else if (lowercaseUrl.includes('.mkv')) {
+      return 'mkv';
+    }
+    
+    return 'unknown';
+  }
+
+  /**
+   * 根据视频格式获取MIME类型 Get MIME type based on video format
+   */
+  private getMimeType(url: string): string {
+    const lowercaseUrl = url.toLowerCase();
+    
+    if (lowercaseUrl.includes('.m3u8')) {
+      return 'application/x-mpegURL';
+    } else if (lowercaseUrl.includes('.mpd')) {
+      return 'application/dash+xml';
+    } else if (lowercaseUrl.includes('.mp4')) {
+      return 'video/mp4';
+    } else if (lowercaseUrl.includes('.flv')) {
+      return 'video/x-flv';
+    } else if (lowercaseUrl.includes('.mkv')) {
+      return 'video/x-matroska';
+    }
+    
+    return 'video/mp4'; // 默认
   }
   
   /**

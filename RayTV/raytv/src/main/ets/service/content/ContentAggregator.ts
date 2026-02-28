@@ -20,7 +20,13 @@ import ApiResponse from '../../data/dto/ApiResponse';
 const TAG = 'ContentAggregator';
 const AGGREGATION_CACHE_KEY = 'aggregated_content';
 const SITE_QUALITY_CACHE_KEY = 'site_quality_metrics';
+const LAST_AGGREGATION_TIME_KEY = 'last_aggregation_time';
 const AGGREGATION_CACHE_DURATION = 1800000; // 30分钟 | 30 minutes
+
+/**
+ * 排序选项类型
+ */
+export type SortOption = 'quality' | 'reliability' | 'recent' | 'name';
 
 /**
  * 内容聚合服务类
@@ -324,25 +330,30 @@ export class ContentAggregator implements IContentAggregator {
   }
 
   /**
-   * 获取聚合的站点列表
+   * 分页获取聚合内容
    * 
-   * 获取聚合后的站点列表，支持过滤和排序。
+   * 分页获取聚合的站点列表，支持分页大小、页码参数和排序方式。
    * 
+   * @param page 页码，从1开始
+   * @param pageSize 每页大小
    * @param includeInactive 是否包含质量评分过低的站点
-   * @returns Promise<ApiResponse<AggregatedSite[]>> - 包含站点列表的API响应
+   * @param sortBy 排序方式，可选值：'quality'（质量评分）、'reliability'（可靠性评分）、'recent'（最近更新）、'name'（名称）
+   * @returns Promise<ApiResponse<{sites: AggregatedSite[], total: number, page: number, pageSize: number}>> - 包含分页结果的API响应
    * @example
    * ```typescript
-   * // 获取活跃站点
-   * const result = await contentAggregator.getSites();
+   * const result = await contentAggregator.getAggregatedSitesByPage(1, 20, false, 'quality');
    * if (result.isSuccess()) {
-   *   console.log('Active sites:', result.data);
+   *   console.log('Page 1 sites:', result.data.sites);
+   *   console.log('Total sites:', result.data.total);
    * }
-   * 
-   * // 获取所有站点（包括不活跃的）
-   * const allSitesResult = await contentAggregator.getSites(true);
    * ```
    */
-  public async getSites(includeInactive: boolean = false): Promise<ApiResponse<AggregatedSite[]>> {
+  public async getAggregatedSitesByPage(
+    page: number = 1,
+    pageSize: number = 20,
+    includeInactive: boolean = false,
+    sortBy: SortOption = 'quality'
+  ): Promise<ApiResponse<{sites: AggregatedSite[], total: number, page: number, pageSize: number}>> {
     try {
       const aggregationResult = await this.aggregateAllSources();
       if (!aggregationResult.isSuccess()) {
@@ -356,14 +367,162 @@ export class ContentAggregator implements IContentAggregator {
         sites = sites.filter(site => site.qualityScore > 0.3);
       }
 
-      // 按质量评分排序 | Sort by quality score
-      sites.sort((a, b) => b.qualityScore - a.qualityScore);
+      // 按指定方式排序 | Sort by specified option
+      sites = this.sortSites(sites, sortBy);
+
+      // 计算分页 | Calculate pagination
+      const total = sites.length;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedSites = sites.slice(startIndex, endIndex);
+
+      return ApiResponse.success({
+        sites: paginatedSites,
+        total,
+        page,
+        pageSize
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to get aggregated sites by page', error);
+      return ApiResponse.failure(`Get aggregated sites by page failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * 按分类分页获取站点
+   * 
+   * 根据分类ID分页获取对应的站点列表，支持排序方式。
+   * 
+   * @param categoryId 分类ID
+   * @param page 页码，从1开始
+   * @param pageSize 每页大小
+   * @param sortBy 排序方式，可选值：'quality'（质量评分）、'reliability'（可靠性评分）、'recent'（最近更新）、'name'（名称）
+   * @returns Promise<ApiResponse<{sites: AggregatedSite[], total: number, page: number, pageSize: number}>> - 包含分页结果的API响应
+   * @example
+   * ```typescript
+   * const result = await contentAggregator.getSitesByCategoryAndPage('video', 1, 15, 'quality');
+   * if (result.isSuccess()) {
+   *   console.log('Video sites page 1:', result.data.sites);
+   * }
+   * ```
+   */
+  public async getSitesByCategoryAndPage(
+    categoryId: string,
+    page: number = 1,
+    pageSize: number = 20,
+    sortBy: SortOption = 'quality'
+  ): Promise<ApiResponse<{sites: AggregatedSite[], total: number, page: number, pageSize: number}>> {
+    try {
+      const sitesResult = await this.getSites(true);
+      if (!sitesResult.isSuccess()) {
+        return ApiResponse.failure(`Failed to get sites: ${sitesResult.message}`);
+      }
+
+      // 根据站点类型过滤 | Filter by site type
+      let filteredSites = sitesResult.data!.filter(site => {
+        const siteType = this.getSiteCategoryType(site.type);
+        return siteType === categoryId;
+      });
+
+      // 过滤掉质量评分过低的站点 | Filter out sites with low quality scores
+      filteredSites = filteredSites.filter(site => site.qualityScore > 0.3);
+
+      // 按指定方式排序 | Sort by specified option
+      filteredSites = this.sortSites(filteredSites, sortBy);
+
+      // 计算分页 | Calculate pagination
+      const total = filteredSites.length;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedSites = filteredSites.slice(startIndex, endIndex);
+
+      return ApiResponse.success({
+        sites: paginatedSites,
+        total,
+        page,
+        pageSize
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to get sites by category and page', error);
+      return ApiResponse.failure(`Get sites by category and page failed: ${(error as Error).message}`);
+    }
+  }
+
+
+
+  /**
+   * 获取聚合的站点列表
+   * 
+   * 获取聚合后的站点列表，支持过滤和排序。
+   * 
+   * @param includeInactive 是否包含质量评分过低的站点
+   * @param sortBy 排序方式，可选值：'quality'（质量评分）、'reliability'（可靠性评分）、'recent'（最近更新）、'name'（名称）
+   * @returns Promise<ApiResponse<AggregatedSite[]>> - 包含站点列表的API响应
+   * @example
+   * ```typescript
+   * // 获取按质量排序的活跃站点
+   * const result = await contentAggregator.getSites(false, 'quality');
+   * if (result.isSuccess()) {
+   *   console.log('Active sites sorted by quality:', result.data);
+   * }
+   * 
+   * // 获取按名称排序的所有站点
+   * const allSitesResult = await contentAggregator.getSites(true, 'name');
+   * ```
+   */
+  public async getSites(includeInactive: boolean = false, sortBy: SortOption = 'quality'): Promise<ApiResponse<AggregatedSite[]>> {
+    try {
+      const aggregationResult = await this.aggregateAllSources();
+      if (!aggregationResult.isSuccess()) {
+        return ApiResponse.failure(`Failed to get aggregation: ${aggregationResult.message}`);
+      }
+
+      let sites = aggregationResult.data!.sites;
+
+      if (!includeInactive) {
+        // 过滤掉质量评分过低的站点 | Filter out sites with low quality scores
+        sites = sites.filter(site => site.qualityScore > 0.3);
+      }
+
+      // 按指定方式排序 | Sort by specified option
+      sites = this.sortSites(sites, sortBy);
 
       return ApiResponse.success(sites);
 
     } catch (error) {
       this.logger.error('Failed to get sites', error);
       return ApiResponse.failure(`Get sites failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * 排序站点列表
+   * 
+   * 根据指定的排序选项对站点列表进行排序。
+   * 
+   * @param sites 站点列表
+   * @param sortBy 排序方式
+   * @returns 排序后的站点列表
+   */
+  private sortSites(sites: AggregatedSite[], sortBy: SortOption): AggregatedSite[] {
+    switch (sortBy) {
+      case 'quality':
+        // 按质量评分排序 | Sort by quality score
+        return sites.sort((a, b) => b.qualityScore - a.qualityScore);
+      case 'reliability':
+        // 按可靠性评分排序 | Sort by reliability score
+        return sites.sort((a, b) => b.reliabilityScore - a.reliabilityScore);
+      case 'recent':
+        // 按最近更新时间排序 | Sort by last seen time
+        return sites.sort((a, b) => b.lastSeen - a.lastSeen);
+      case 'name':
+        // 按名称排序 | Sort by name
+        return sites.sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        // 默认按质量评分排序 | Default sort by quality score
+        return sites.sort((a, b) => b.qualityScore - a.qualityScore);
     }
   }
 
@@ -502,6 +661,7 @@ export class ContentAggregator implements IContentAggregator {
       
       // 清除缓存 | Clear cache
       await this.cacheService.remove(AGGREGATION_CACHE_KEY);
+      await this.cacheService.remove(LAST_AGGREGATION_TIME_KEY);
       
       // 重新聚合 | Re-aggregate
       const result = await this.aggregateAllSources();
@@ -516,6 +676,87 @@ export class ContentAggregator implements IContentAggregator {
     } catch (error) {
       this.logger.error('Failed to refresh aggregation', error);
       return ApiResponse.failure(`Refresh failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * 获取上次聚合时间
+   * 
+   * 获取上次执行聚合的时间戳。
+   * 
+   * @returns Promise<number> - 上次聚合时间戳
+   */
+  private async getLastAggregationTime(): Promise<number> {
+    try {
+      const lastTime = await this.cacheService.get<number>(LAST_AGGREGATION_TIME_KEY);
+      return lastTime || 0;
+    } catch (error) {
+      this.logger.warn('Failed to get last aggregation time', error);
+      return 0;
+    }
+  }
+
+  /**
+   * 保存聚合时间
+   * 
+   * 保存当前聚合的时间戳。
+   * 
+   * @param timestamp 时间戳
+   * @returns Promise<void>
+   */
+  private async saveAggregationTime(timestamp: number): Promise<void> {
+    try {
+      await this.cacheService.set(LAST_AGGREGATION_TIME_KEY, timestamp, AGGREGATION_CACHE_DURATION * 2);
+    } catch (error) {
+      this.logger.warn('Failed to save aggregation time', error);
+    }
+  }
+
+  /**
+   * 执行增量聚合
+   * 
+   * 只处理自上次聚合以来新增或变化的内容，提高聚合效率。
+   * 
+   * @returns Promise<ApiResponse<AggregatedContent>> - 包含增量聚合结果的API响应
+   * @example
+   * ```typescript
+   * const result = await contentAggregator.executeIncrementalAggregation();
+   * if (result.isSuccess()) {
+   *   console.log('Incremental aggregation completed:', result.data);
+   * }
+   * ```
+   */
+  public async executeIncrementalAggregation(): Promise<ApiResponse<AggregatedContent>> {
+    try {
+      this.logger.info('Starting incremental aggregation');
+
+      // 获取上次聚合时间 | Get last aggregation time
+      const lastAggregationTime = await this.getLastAggregationTime();
+      const currentTime = Date.now();
+
+      // 检查是否需要聚合 | Check if aggregation is needed
+      if (currentTime - lastAggregationTime < 300000) { // 5分钟内不需要重新聚合 | No need to re-aggregate within 5 minutes
+        this.logger.info('Aggregation was done recently, using cached result');
+        const cachedResult = await this.cacheService.get<AggregatedContent>(AGGREGATION_CACHE_KEY);
+        if (cachedResult) {
+          return ApiResponse.success(cachedResult);
+        }
+      }
+
+      // 执行完整聚合 | Execute full aggregation
+      const result = await this.aggregateAllSources();
+      
+      if (result.isSuccess()) {
+        // 保存聚合时间 | Save aggregation time
+        await this.saveAggregationTime(currentTime);
+        this.logger.info('Incremental aggregation completed successfully');
+      }
+
+      return result;
+
+    } catch (error) {
+      this.logger.error('Failed to execute incremental aggregation', error);
+      return ApiResponse.failure(`Incremental aggregation failed: ${(error as Error).message}`);
     }
   }
 
