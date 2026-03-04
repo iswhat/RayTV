@@ -101,4 +101,71 @@ export interface NASDirectoryCategory {
   deviceId: string;     // 设备ID
   sourceId: string;     // 网络源ID
   name: string;         // 分类名称
-  path: string;         //
+  path: string;         // 目录路径
+  type: 'root' | 'category' | 'subcategory'; // 分类类型
+  parentId?: string;    // 父分类ID
+  itemCount: number;    // 项目数量
+  icon?: string;        // 图标
+  isBrowsable: boolean; // 是否可浏览
+}
+
+/**
+ * NAS视频项接口
+ */
+export interface NASVideoItem {
+  id: string;                 // 视频唯一标识
+  deviceId: string;           // 设备ID
+  sourceId: string;           // 网络源ID
+  categoryId: string;          // 分类ID
+  fileItem: NASFileItem;       // 文件项
+  watchedProgress?: number;    // 观看进度
+  lastWatched?: number;        // 最后观看时间
+  isFavorite: boolean;         // 是否收藏
+}
+
+/**
+ * NAS内容统计接口
+ */
+export interface NASContentStats {
+  totalVideos: number;         // 总视频数
+  totalDirectories: number;     // 总目录数
+  totalSize: number;           // 总大小
+  videoFormats: Record<string, number>; // 视频格式统计
+  lastIndexed: number;         // 最后索引时间
+}
+
+/**
+ * NAS配置接口
+ */
+export interface NASConfig {
+  deviceId: string;           // 设备ID
+  deviceName: string;         // 设备名称
+  protocol: 'smb' | 'dlna' | 'webdav' | 'http' | 'huawei'; // 协议类型
+  ipAddress: string;          // IP地址
+  port: number;               // 端口号
+  sharePath?: string;         // SMB共享路径
+  username?: string;          // 用户名
+  password?: string;          // 密码
+  enableAuth: boolean;        // 是否启用认证
+  huaweiConfig?: HuaweiSpecificConfig; // 华为特定配置
+}
+
+/**
+ * 华为存储特定配置接口
+ */
+export interface HuaweiSpecificConfig {
+  deviceModel: string;        // 设备型号
+  firmwareVersion: string;    // 固件版本
+  familyMembers?: string[];   // 家庭成员
+  sharedFolders?: string[];   // 共享文件夹
+}
+
+/**
+ * 目录树节点接口
+ */
+export interface DirectoryTreeNode {
+  name: string;              // 节点名称
+  path: string;              // 节点路径
+  type: 'directory';         // 节点类型
+  children: DirectoryTreeNode[]; // 子节点
+}

@@ -1,5 +1,5 @@
 /**
- * PlaybackViewModel.ts
+ * PlaybackViewModel.ets
  * 播放页面ViewModel - 实现复杂的播放状态管理和多媒体控制
  */
 
@@ -52,6 +52,9 @@ export interface PlaybackUIState {
 export interface SubtitleState {
   tracks: MediaTrack[]; // 字幕轨道
   selectedTrack: MediaTrack | null;
+  languages: string[];
+  isSearching: boolean;
+  isEnabled: boolean;
 }
 
 export interface AudioState {
@@ -76,7 +79,7 @@ export interface LiveState {
 
 class ReactiveProperty<T> {
   private _value: T;
-  private subscribers: ((newValue: T, oldValue: T) => void)[] = [];
+  private subscribers: Array<(newValue: T, oldValue: T) => void> = [];
   
   constructor(initialValue: T) {
     this._value = initialValue;
@@ -228,7 +231,7 @@ export class PlaybackViewModel {
     // 进度计算
     this.controlState.subscribe((state) => {
       const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
-      const newState = { ...state, progress };
+      const newState = { ...state, progress: progress };
       this.controlState.value = newState;
     });
     
@@ -333,7 +336,7 @@ export class PlaybackViewModel {
     // 这里可以从服务获取剧集数据
     const episodes = mediaInfo.episodes || [];
     const currentMediaState = this.mediaState.value;
-    this.mediaState.value = { ...currentMediaState, episodes };
+    this.mediaState.value = { ...currentMediaState, episodes: episodes };
   }
   
   /**
@@ -345,7 +348,7 @@ export class PlaybackViewModel {
     
     const parseLines = mediaInfo.parseLines || [];
     const currentMediaState = this.mediaState.value;
-    this.mediaState.value = { ...currentMediaState, parseLines };
+    this.mediaState.value = { ...currentMediaState, parseLines: parseLines };
   }
   
   /**
@@ -546,7 +549,7 @@ export class PlaybackViewModel {
         
         this.mediaState.value = {
           ...this.mediaState.value,
-          episodes,
+          episodes: episodes,
           selectedEpisode: episode
         };
         
@@ -576,7 +579,7 @@ export class PlaybackViewModel {
         
         this.mediaState.value = {
           ...this.mediaState.value,
-          parseLines,
+          parseLines: parseLines,
           selectedLine: line
         };
         
@@ -597,7 +600,7 @@ export class PlaybackViewModel {
    */
   public toggleControls(): void {
     const showControls = !this.uiState.value.showControls;
-    this.uiState.value = { ...this.uiState.value, showControls };
+    this.uiState.value = { ...this.uiState.value, showControls: showControls };
     
     if (showControls) {
       this.startControlAutoHide();
@@ -639,7 +642,7 @@ export class PlaybackViewModel {
       ...this.uiState.value,
       screenWidth: width,
       screenHeight: height,
-      isLandscape
+      isLandscape: isLandscape
     };
     Logger.info(this.TAG, `Screen updated: ${width}x${height}, landscape: ${isLandscape}`);
   }

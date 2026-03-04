@@ -1,5 +1,5 @@
 /**
- * MainViewModel.ts
+ * MainViewModel.ets
  * 主页面ViewModel - 实现响应式数据绑定和状态管理
  */
 
@@ -58,7 +58,7 @@ export interface MainViewState {
 
 class ReactiveProperty<T> {
   private _value: T;
-  private subscribers: ((newValue: T, oldValue: T) => void)[] = [];
+  private subscribers: Array<(newValue: T, oldValue: T) => void> = [];
   
   constructor(initialValue: T) {
     this._value = initialValue;
