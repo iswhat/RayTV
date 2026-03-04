@@ -195,7 +195,7 @@ export class LiveStreamRepository {
   
   // API绔偣閰嶇疆
   private apiEndpoints = {
-    baseUrl: 'https://api.raytv.example.com',
+    baseUrl: 'TODO_CONFIGURE_REAL_API',
     liveStreams: '/live/streams',
     liveStreamDetail: '/live/streams/:id',
     liveStreamChat: '/live/streams/:id/chat',

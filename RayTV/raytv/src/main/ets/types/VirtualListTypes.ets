@@ -5,7 +5,7 @@
 /**
  * 虚拟列表项接口
  */
-export interface VirtualListItem {
+export interface VirtualListItem<T = Record<string, string | number | boolean | object | null>> {
   /** 唯一标识符 */
   id: string;
   
@@ -13,13 +13,19 @@ export interface VirtualListItem {
   index: number;
   
   /** 项目数据 */
-  data: any;
+  data: T;
   
   /** 项目顶部位置 */
   top: number;
   
+  /** 项目左侧位置 */
+  left?: number;
+  
   /** 项目高度 */
   height?: number;
+  
+  /** 项目宽度 */
+  width?: number;
   
   /** 是否可见 */
   visible?: boolean;
@@ -71,16 +77,16 @@ export interface VirtualListState {
 /**
  * 虚拟列表事件接口
  */
-export interface VirtualListEvents {
+export interface VirtualListEvents<T = Record<string, string | number | boolean | object | null>> {
   /** 滚动事件 */
   onScroll?: (state: VirtualListState) => void;
   
   /** 可见项目变化事件 */
-  onVisibleItemsChange?: (items: VirtualListItem[]) => void;
+  onVisibleItemsChange?: (items: VirtualListItem<T>[]) => void;
   
   /** 项目即将进入视口 */
-  onItemWillEnterView?: (item: VirtualListItem) => void;
+  onItemWillEnterView?: (item: VirtualListItem<T>) => void;
   
   /** 项目离开视口 */
-  onItemDidLeaveView?: (item: VirtualListItem) => void;
+  onItemDidLeaveView?: (item: VirtualListItem<T>) => void;
 }

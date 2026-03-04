@@ -2,18 +2,18 @@
 // 为AVPlayerService提供事件发射功能 // Provides event emission functionality for AVPlayerService
 
 export class EventEmitter {
-  private eventListeners: Map<string, Array<(...args: any[]) => void>> = new Map();
+  private eventListeners: Map<string, Array<(...args: unknown[]) => void>> = new Map();
 
   /**
    * 注册事件监听器 // Register event listener
    * @param event 事件名称 // Event name
    * @param listener 事件处理函数 // Event handler function
    */
-  public on(event: string, listener: (...args: any[]) => void): void {
+  public on(event: string, listener: (...args: unknown[]) => void): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
-    const listeners = this.eventListeners.get(event) as Array<(...args: any[]) => void>;
+    const listeners = this.eventListeners.get(event) as Array<(...args: unknown[]) => void>;
     listeners.push(listener);
   }
 
@@ -22,7 +22,7 @@ export class EventEmitter {
    * @param event 事件名称 // Event name
    * @param listener 事件处理函数 // Event handler function
    */
-  public off(event: string, listener: (...args: any[]) => void): void {
+  public off(event: string, listener: (...args: unknown[]) => void): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       const index = listeners.indexOf(listener);
@@ -41,7 +41,7 @@ export class EventEmitter {
    * @param event 事件名称 // Event name
    * @param args 事件参数 // Event arguments
    */
-  public emit(event: string, ...args: any[]): void {
+  public emit(event: string, ...args: unknown[]): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       // 复制监听器数组，避免在事件处理过程中修改 // Copy listener array to avoid modification during event processing
@@ -61,8 +61,8 @@ export class EventEmitter {
    * @param event 事件名称 // Event name
    * @param listener 事件处理函数 // Event handler function
    */
-  public once(event: string, listener: (...args: any[]) => void): void {
-    const onceListener = (...args: any[]) => {
+  public once(event: string, listener: (...args: unknown[]) => void): void {
+    const onceListener = (...args: unknown[]) => {
       this.off(event, onceListener);
       listener(...args);
     };

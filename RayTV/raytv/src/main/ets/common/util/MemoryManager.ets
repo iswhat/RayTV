@@ -3,6 +3,11 @@ import Logger from './Logger';
 
 const TAG = 'MemoryManager';
 
+interface LargeObjectInfo {
+  size: number;
+  timestamp: number;
+}
+
 /**
  * 内存管理工具类
  * 提供内存使用监控、内存限制检查等功能
@@ -13,7 +18,7 @@ export default class MemoryManager {
   private checkInterval: number = 30000; // 30秒检查一次
   private lastCheckTime: number = 0;
   private memoryUsageHistory: number[] = [];
-  private largeObjectCache: Map<string, { size: number, timestamp: number }> = new Map();
+  private largeObjectCache: Map<string, LargeObjectInfo> = new Map();
   private memoryWarningThreshold: number = 0.7; // 内存警告阈值 70%
   private memoryCriticalThreshold: number = 0.9; // 内存临界阈值 90%
 
@@ -268,8 +273,11 @@ export default class MemoryManager {
         // 清理10分钟前的大型对象
         const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
         let cleanedCount = 0;
-        for (const [key, info] of this.largeObjectCache.entries()) {
-          if (info.timestamp < tenMinutesAgo) {
+        const cacheKeys: string[] = Array.from(this.largeObjectCache.keys());
+        for (let i = 0; i < cacheKeys.length; i++) {
+          const key = cacheKeys[i];
+          const info = this.largeObjectCache.get(key);
+          if (info && info.timestamp < tenMinutesAgo) {
             this.largeObjectCache.delete(key);
             cleanedCount++;
           }
@@ -284,40 +292,51 @@ export default class MemoryManager {
   }
 
   /**
-   * 获取内存使用统计信息
-   * @returns 内存使用统计
+   * 内存使用统计接口
    */
-  public getMemoryStats(): {
+  export interface MemoryStats {
     currentUsage: number;
     averageUsage: number;
     maxUsage: number;
     minUsage: number;
     largeObjectsCount: number;
-  } {
-    const current = this.getCurrentMemoryUsage();
-    let average = 0;
-    let max = 0;
-    let min = 1;
-    
+  }
+
+  /**
+   * 获取内存使用统计信息
+   * @returns 内存使用统计
+   */
+  public getMemoryStats(): MemoryStats {
+    const current: number = this.getCurrentMemoryUsage();
+    let average: number = 0;
+    let max: number = 0;
+    let min: number = 1;
+
     if (this.memoryUsageHistory.length > 0) {
-      const sum = this.memoryUsageHistory.reduce((acc, val) => acc + val, 0);
+      const sum: number = this.memoryUsageHistory.reduce((acc: number, val: number) => acc + val, 0);
       average = sum / this.memoryUsageHistory.length;
-      // 使用展开运算符获取最大值和最小值
-      max = Math.max(...this.memoryUsageHistory);
-      min = Math.min(...this.memoryUsageHistory);
+      // 手动获取最大值和最小值
+      max = this.memoryUsageHistory[0];
+      min = this.memoryUsageHistory[0];
+      for (let i = 1; i < this.memoryUsageHistory.length; i++) {
+        const val: number = this.memoryUsageHistory[i];
+        if (val > max) max = val;
+        if (val < min) min = val;
+      }
     } else {
       average = current;
       max = current;
       min = current;
     }
     
-    return {
+    const stats: MemoryStats = {
       currentUsage: current,
       averageUsage: average,
       maxUsage: max,
       minUsage: min,
       largeObjectsCount: this.largeObjectCache.size
     };
+    return stats;
   }
 
   /**
@@ -325,7 +344,7 @@ export default class MemoryManager {
    * @param obj 对象
    * @returns 估算大小(MB)
    */
-  public estimateObjectSize(obj: string | number | boolean | object | null | undefined): number {
+  public estimateObjectSize(obj: string | number | boolean | Record<string, any> | null | undefined): number {
     try {
       if (obj === null || obj === undefined) {
         return 0;
@@ -343,7 +362,7 @@ export default class MemoryManager {
 
       // 数组
       if (Array.isArray(obj)) {
-        let size = 0;
+        let size: number = 0;
         for (const item of obj) {
           size += this.estimateObjectSize(item);
         }
@@ -352,10 +371,10 @@ export default class MemoryManager {
 
       // 对象 - 使用Object.keys替代for...in
       const keys = Object.keys(obj);
-      let size = 0;
+      let size: number = 0;
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        const objRecord = obj as Record<string, string | number | boolean | object | null | undefined>;
+        const objRecord = obj as Record<string, any>;
         size += this.estimateObjectSize(objRecord[key]);
       }
       return size;

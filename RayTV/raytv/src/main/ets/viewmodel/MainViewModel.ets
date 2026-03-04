@@ -386,10 +386,11 @@ export class MainViewModel {
   
   // ==================== 错误处理 ====================
   
-  private handleError(message: string, error: any): void {
+  private handleError(message: string, error: unknown): void {
     this.isError.value = true;
     this.errorMessage.value = message;
-    Logger.error(this.TAG, `${message}: ${error}`);
+    const err = error instanceof Error ? error : new Error(String(error));
+    Logger.error(this.TAG, `${message}: ${err.message}`);
   }
   
   // ==================== 清理方法 ====================

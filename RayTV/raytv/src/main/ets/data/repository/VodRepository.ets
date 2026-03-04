@@ -1,9 +1,10 @@
-﻿﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
+﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
 // 负责管理点播内容的缓存、查询和管理 | Manages VOD content caching, querying and management
 // 包含最近内容、热门内容、详细信息等 | Includes recent content, popular content, detailed information, etc.
 
 import { SQLiteHelper, QueryCondition, SortOption } from '../db/SQLiteHelper';
 import { HISTORY_TABLE } from '../db/TableSchema';
+import { HttpService } from '../../service/HttpService';
 import {
   Vod,
   Episode,
@@ -246,8 +247,6 @@ export class VodRepository {
    */
   public async searchVod(keyword: string, siteId?: string, limit: number = 50): Promise<Vod[]> {
     try {
-      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       // 构建API请求URL | Build API request URL
@@ -286,8 +285,6 @@ export class VodRepository {
    */
   public async getVodsByCategory(categoryId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       // 构建API请求URL | Build API request URL
@@ -323,8 +320,7 @@ export class VodRepository {
    */
   public async getVodsByTag(tagId: string, siteId: string, limit: number = 50, offset: number = 0): Promise<Vod[]> {
     try {
-      // ArkTS兼容实现：直接导入 | ArkTS compatible: use direct import
-      const HttpService = (await import('../../service/HttpService')).HttpService;
+      // 使用静态导入的HttpService
       const httpService = HttpService.getInstance();
       
       // 构建API请求URL | Build API request URL

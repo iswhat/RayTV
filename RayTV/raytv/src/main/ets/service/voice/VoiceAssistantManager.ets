@@ -1,7 +1,6 @@
 
 import ConfigService from '../config/ConfigService';
 import MediaService from '../media/MediaService';
-import PlayerManager from '../media/PlayerManager';
 import AppNavigator from '../../navigation/AppNavigator';
 
 /**
@@ -46,14 +45,16 @@ export interface VoiceRecognitionCallback {
 /**
  * 语音识别服务接口 | Voice recognition service interface
  */
+interface VoiceRecognitionParams {
+  language: string;
+  mode: string;
+  encoding: string;
+  sampleRate: number;
+}
+
 export interface VoiceRecognitionService {
   setCallback: (callback: VoiceRecognitionCallback) => void;
-  startListening: (params: {
-    language: string;
-    mode: string;
-    encoding: string;
-    sampleRate: number;
-  }) => Promise<void>;
+  startListening: (params: VoiceRecognitionParams) => Promise<void>;
   stopListening: () => Promise<void>;
 }
 
@@ -93,7 +94,8 @@ export class VoiceAssistantManager {
       console.info(VoiceAssistantManager.TAG + ': 正在初始化语音助手管理器... | Initializing VoiceAssistantManager...');
       
       // 加载配置 Load config
-      this.isEnabled = await ConfigService.getInstance().getConfig('enableVoiceAssistant', true);
+      const configResponse = await ConfigService.getInstance().getConfig('enableVoiceAssistant');
+      this.isEnabled = configResponse.success && typeof configResponse.data === 'boolean' ? configResponse.data : true;
       
       // 这里应该初始化HarmonyOS的语音识别服务
       // 暂时只进行基本初始化
@@ -171,10 +173,13 @@ export class VoiceAssistantManager {
       
       // 查找匹配的命令 Find matching command
       let matchedCommand: VoiceCommand | null = null;
-      
+
       // 优先精确匹配关键词 First prioritize exact keyword matching
-      for (const [keyword, command] of this.voiceCommands.entries()) {
-        if (lowercaseText.includes(keyword.toLowerCase())) {
+      const commandKeys: string[] = this.getObjectKeys(this.voiceCommands);
+      for (let i = 0; i < commandKeys.length; i++) {
+        const keyword = commandKeys[i];
+        const command = this.voiceCommands.get(keyword);
+        if (command && lowercaseText.includes(keyword.toLowerCase())) {
           matchedCommand = command;
           break;
         }
@@ -346,7 +351,7 @@ export class VoiceAssistantManager {
     
     this.registerCommand({
       keyword: '搜索',
-      action: async () => AppNavigator.getInstance().navigateToSearch(),
+      action: async () => AppNavigator.getInstance().navigateToSearch(''),
       description: '打开搜索页面',
       examples: ['搜索', '打开搜索']
     });
@@ -360,7 +365,10 @@ export class VoiceAssistantManager {
     
     this.registerCommand({
       keyword: '我的收藏',
-      action: async () => AppNavigator.getInstance().navigateToFavorites(),
+      action: async (): Promise<void> => {
+        // 导航到首页作为替代，因为AppNavigator中没有navigateToFavorites方法
+        await AppNavigator.getInstance().navigateToHome();
+      },
       description: '查看收藏内容',
       examples: ['我的收藏', '收藏']
     });
@@ -402,7 +410,7 @@ export class VoiceAssistantManager {
       const recognitionService = await this.getVoiceRecognitionService();
       
       // 2. 设置识别参数 | Set recognition parameters
-      const recognitionParams = {
+      const recognitionParams: VoiceRecognitionParams = {
         language: 'zh-CN',
         mode: 'continuous',
         encoding: 'pcm',
@@ -443,32 +451,36 @@ export class VoiceAssistantManager {
    */
   private async getVoiceRecognitionService(): Promise<VoiceRecognitionService> {
     try {
-      // 尝试导入HarmonyOS语音识别API
-      // 由于HarmonyOS SDK版本差异，这里使用条件导入
-      const voiceRecognition = await import('@ohos.ai.asr');
-      
-      // 适配VoiceRecognitionService接口
-      return {
-        setCallback: (callback: (result: string, error: Error | null) => void) => {
-          // 设置真实的回调
+      // 由于@ohos.ai.asr模块不存在，直接返回降级实现
+      console.warn(VoiceAssistantManager.TAG, '语音识别API不可用，使用降级实现 | Voice recognition API not available, using fallback implementation');
+      // 降级实现
+      const fallbackService: VoiceRecognitionService = {
+        setCallback: (callback: VoiceRecognitionCallback): void => {
+          // 降级实现，无操作
         },
-        startListening: async () => {
-          // 调用真实的语音识别API
-          await voiceRecognition.start();
+        startListening: async (params: VoiceRecognitionParams): Promise<void> => {
+          // 降级实现，无操作
         },
-        stopListening: async () => {
-          // 调用真实的语音识别API
-          await voiceRecognition.stop();
+        stopListening: async (): Promise<void> => {
+          // 降级实现，无操作
         }
       };
+      return fallbackService;
     } catch (error) {
       console.warn(VoiceAssistantManager.TAG, '语音识别API不可用，使用降级实现 | Voice recognition API not available, using fallback implementation');
       // 降级实现
-      return {
-        setCallback: () => {},
-        startListening: () => Promise.resolve(),
-        stopListening: () => Promise.resolve()
+      const fallbackService: VoiceRecognitionService = {
+        setCallback: (callback: VoiceRecognitionCallback): void => {
+          // 降级实现，无操作
+        },
+        startListening: async (params: VoiceRecognitionParams): Promise<void> => {
+          // 降级实现，无操作
+        },
+        stopListening: async (): Promise<void> => {
+          // 降级实现，无操作
+        }
       };
+      return fallbackService;
     }
   }
   
@@ -501,26 +513,28 @@ export class VoiceAssistantManager {
    * 通知识别结果 Notify recognition result
    */
   private notifyRecognitionResult(result: RecognitionResult): void {
-    this.recognitionListeners.forEach(listener => {
+    for (let i = 0; i < this.recognitionListeners.length; i++) {
+      const listener = this.recognitionListeners[i];
       try {
         listener(result);
       } catch (error) {
         console.error(VoiceAssistantManager.TAG + `: Error in recognition listener: ${error instanceof Error ? error.message : String(error)}`);
       }
-    });
+    }
   }
-  
+
   /**
    * 通知状态变化 Notify state change
    */
   private notifyStateChanged(): void {
-    this.stateListeners.forEach(listener => {
+    for (let i = 0; i < this.stateListeners.length; i++) {
+      const listener = this.stateListeners[i];
       try {
         listener(this.isListening);
       } catch (error) {
         console.error(VoiceAssistantManager.TAG + `: Error in state listener: ${error instanceof Error ? error.message : String(error)}`);
       }
-    });
+    }
   }
   
   /**
@@ -535,6 +549,19 @@ export class VoiceAssistantManager {
    */
   public isAssistantEnabled(): boolean {
     return this.isEnabled;
+  }
+
+  /**
+   * 获取对象键 | Get object keys
+   */
+  private getObjectKeys<K>(map: Map<K, Object>): K[] {
+    const keys: K[] = [];
+    // 使用Array.from获取Map的所有键 | Use Array.from to get all keys from Map
+    const mapKeys = Array.from(map.keys());
+    for (let i = 0; i < mapKeys.length; i++) {
+      keys.push(mapKeys[i]);
+    }
+    return keys;
   }
 }
 

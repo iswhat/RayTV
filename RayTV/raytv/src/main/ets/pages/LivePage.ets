@@ -1,10 +1,16 @@
 import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
-import LiveStreamService from '../service/live/LiveStreamService';
+import ContentAccessService from '../service/content/ContentAccessService';
+import LivePlaybackService, { LivePlaybackStatus } from '../service/live/LivePlaybackService';
+import EventBusUtil from '../common/util/EventBusUtil';
 import display from '@ohos.display';
-import { FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment } from '@ohos.arkui';
+import { FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment, TextAlign, BarState, ScrollDirection, EdgeEffect, GestureDirection, GestureEvent, PanGesture, GestureInfo } from '@ohos.arkui';
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
+import ContentSourceBadge from '../components/ContentSourceBadge';
+import DesignSystem from '../design/DesignSystem';
+import AnimationSystem from '../design/AnimationSystem';
+import ThemeProvider, { Theme } from '../design/ThemeProvider';
 
 /**
  * 直播界面 | Live page
@@ -15,26 +21,32 @@ interface ChannelCategory {
   name: string;
 }
 
-interface Channel {
+interface LiveChannelWithSource {
   id: string;
   name: string;
   url: string;
-  categoryId: string;
+  group: string;
+  sourceId: string;
+  sourceName: string;
+  logo?: string;
+  epgUrl?: string;
 }
 
 @Entry
 @Component
 struct LivePage {
   private readonly TAG: string = 'LivePage';
+  private contentService: ContentAccessService = ContentAccessService.getInstance();
+  private scroller: Scroller = new Scroller();
   
   // 状态管理 | State management
   @State isLoading: boolean = true;
   @State isError: boolean = false;
-  @State errorMessage: string = '加载直播内容失败';
-  @State currentChannel: Channel | null = null;
+  @State errorMessage: string = '';
+  @State currentChannel: LiveChannelWithSource | null = null;
   @State channelCategories: ChannelCategory[] = [];
-  @State channels: Channel[] = [];
-  @State selectedCategory: string = '全部';
+  @State channels: LiveChannelWithSource[] = [];
+  @State selectedCategory: string = 'all';
   @State showLeftControl: boolean = false;
   @State showRightControl: boolean = false;
   @State showProgressBar: boolean = false;
@@ -47,21 +59,114 @@ struct LivePage {
   @State currentProgress: number = 0;
   @State totalDuration: number = 3600;
   @State controlAutoHideTimer: number = 0;
+  @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
+  @State showQuickChannelSwitcher: boolean = false;
+  @State recentChannels: LiveChannelWithSource[] = [];
+  @State playbackStatus: LivePlaybackStatus = LivePlaybackStatus.IDLE;
+  @State isReconnecting: boolean = false;
+  @State reconnectAttempt: number = 0;
   
   // 服务实例 | Service instances
-  private liveStreamService: LiveStreamService = LiveStreamService.getInstance();
+  private livePlaybackService: LivePlaybackService = LivePlaybackService.getInstance();
+  private eventBus: EventBusUtil = EventBusUtil.getInstance();
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info(this.TAG, 'LivePage about to appear');
+    // 添加主题变更监听器
+    ThemeProvider.addThemeChangeListener((theme) => {
+      this.currentTheme = theme;
+    });
     this.initScreenInfo();
+    this.initServices();
     this.loadLiveContent();
+  }
+  
+  // 初始化服务 | Initialize services
+  private initServices() {
+    try {
+      // 初始化LivePlaybackService
+      this.livePlaybackService.initialize();
+      Logger.info(this.TAG, 'LivePlaybackService initialized successfully');
+      
+      // 监听播放状态变化
+      this.eventBus.on('live:statusChanged', (data: Record<string, unknown>) => {
+        if (data.status) {
+          this.handlePlaybackStatusChange(data.status as LivePlaybackStatus);
+        }
+      });
+      
+      // 监听错误事件
+      this.eventBus.on('live:error', (data: Record<string, unknown>) => {
+        if (data.error) {
+          const error = data.error as { code: number; message: string };
+          this.handlePlaybackError(error);
+        }
+      });
+      
+      // 监听重连事件
+      this.eventBus.on('live:reconnecting', (data: Record<string, unknown>) => {
+        const attempt = data.attempt as number;
+        Logger.info(this.TAG, `Reconnecting... Attempt ${attempt}`);
+        this.isReconnecting = true;
+        this.reconnectAttempt = attempt;
+      });
+      
+      this.eventBus.on('live:reconnected', () => {
+        Logger.info(this.TAG, 'Reconnected successfully');
+        this.isReconnecting = false;
+        this.reconnectAttempt = 0;
+      });
+      
+    } catch (error) {
+      Logger.error(this.TAG, 'Failed to initialize LivePlaybackService', error as Error);
+    }
   }
   
   aboutToDisappear() {
     if (this.controlAutoHideTimer) {
       clearTimeout(this.controlAutoHideTimer);
     }
+    
+    // 停止播放
+    this.livePlaybackService.stop();
+    
+    // 移除事件监听
+    this.eventBus.off('live:statusChanged');
+    this.eventBus.off('live:error');
+    this.eventBus.off('live:reconnecting');
+    this.eventBus.off('live:reconnected');
+  }
+  
+  // 处理播放状态变化
+  private handlePlaybackStatusChange(status: LivePlaybackStatus): void {
+    this.playbackStatus = status;
+    switch (status) {
+      case LivePlaybackStatus.CONNECTING:
+        Logger.info(this.TAG, 'Connecting to live stream...');
+        break;
+      case LivePlaybackStatus.PLAYING:
+        Logger.info(this.TAG, 'Live stream playing');
+        break;
+      case LivePlaybackStatus.BUFFERING:
+        Logger.info(this.TAG, 'Live stream buffering...');
+        break;
+      case LivePlaybackStatus.ERROR:
+        Logger.error(this.TAG, 'Live stream error');
+        break;
+      case LivePlaybackStatus.STOPPED:
+        Logger.info(this.TAG, 'Live stream stopped');
+        break;
+      default:
+        break;
+    }
+  }
+  
+  // 处理播放错误
+  private handlePlaybackError(error: { code: number; message: string }): void {
+    this.isError = true;
+    this.errorMessage = `播放错误: ${error.message} (错误码: ${error.code})`;
+    Logger.error(this.TAG, `Playback error: ${error.message}`);
   }
   
   // 初始化屏幕信息 | Initialize screen information
@@ -88,74 +193,94 @@ struct LivePage {
       this.isError = false;
       Logger.info(this.TAG, 'Loading live content...');
       
-      // 使用LiveStreamService获取真实数据
-      const result = await this.liveStreamService.getLiveChannels();
+      // 从ContentAccessService获取直播数据
+      const allChannels = this.contentService.getAllLiveChannels();
       
-      if (result.isSuccess() && result.data) {
-        // 处理返回的数据
-        this.channelCategories = result.data.categories || [
+      if (allChannels && allChannels.length > 0) {
+        // 提取分类 | Extract categories
+        const categoriesSet = new Set<string>();
+        
+        allChannels.forEach(channel => {
+          if (channel.group) {
+            categoriesSet.add(channel.group);
+          }
+        });
+        
+        this.channelCategories = [
           { id: 'all', name: '全部' },
-          { id: 'cctv', name: '央视' },
-          { id: 'provincial', name: '卫视' },
-          { id: 'sports', name: '体育' },
-          { id: 'movie', name: '电影' },
-          { id: 'entertainment', name: '娱乐' }
+          ...Array.from(categoriesSet).map(cat => ({ id: cat, name: cat }))
         ];
         
-        this.channels = result.data.channels || [
-          { id: '1', name: 'CCTV-1', url: 'http://example.com/live/cctv1', categoryId: 'cctv' },
-          { id: '2', name: 'CCTV-2', url: 'http://example.com/live/cctv2', categoryId: 'cctv' },
-          { id: '3', name: 'CCTV-3', url: 'http://example.com/live/cctv3', categoryId: 'cctv' },
-          { id: '4', name: '湖南卫视', url: 'http://example.com/live/hunan', categoryId: 'provincial' },
-          { id: '5', name: '江苏卫视', url: 'http://example.com/live/jiangsu', categoryId: 'provincial' },
-          { id: '6', name: '浙江卫视', url: 'http://example.com/live/zhejiang', categoryId: 'provincial' },
-          { id: '7', name: 'CCTV-5', url: 'http://example.com/live/cctv5', categoryId: 'sports' },
-          { id: '8', name: 'CCTV-6', url: 'http://example.com/live/cctv6', categoryId: 'movie' }
-        ];
+        this.channels = allChannels;
         
         // 默认选择第一个频道 | Default select first channel
         if (this.channels.length > 0) {
           this.currentChannel = this.channels[0];
+          this.addToRecentChannels(this.channels[0]);
           this.playChannel(this.channels[0]);
         }
       } else {
-        // 加载失败，设置错误状态 | Loading failed, set error state
+        // 无直播数据 | No live data
         this.isError = true;
-        this.errorMessage = result.message || '加载直播内容失败';
-        Logger.warn(this.TAG, `Failed to load live content: ${this.errorMessage}`);
+        this.errorMessage = '未配置直播源，请在设置中添加网络源';
+        Logger.warn(this.TAG, 'No live data configured');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       Logger.error(this.TAG, `Failed to load live content: ${errorMsg}`);
       this.isError = true;
-      this.errorMessage = errorMsg;
+      this.errorMessage = `加载失败: ${errorMsg}`;
     } finally {
       this.isLoading = false;
     }
   }
   
+  // 添加到最近频道 | Add to recent channels
+  private addToRecentChannels(channel: LiveChannelWithSource) {
+    // 移除已存在的相同频道
+    this.recentChannels = this.recentChannels.filter(c => c.id !== channel.id || c.sourceId !== channel.sourceId);
+    // 添加到开头
+    this.recentChannels.unshift(channel);
+    // 限制最近频道数量
+    if (this.recentChannels.length > 10) {
+      this.recentChannels = this.recentChannels.slice(0, 10);
+    }
+  }
+  
   // 播放频道 | Play channel
-  private async playChannel(channel: Channel) {
+  private async playChannel(channel: LiveChannelWithSource) {
     try {
-      Logger.info(this.TAG, `Playing channel: ${channel.name}, URL: ${channel.url}`);
-      const result = await this.liveStreamService.playChannel(channel);
-      if (!result.isSuccess()) {
-        Logger.error(this.TAG, `Failed to play channel: ${result.message}`);
-        this.isError = true;
-        this.errorMessage = result.message || '播放频道失败';
+      Logger.info(this.TAG, `Playing channel: ${channel.name}, URL: ${channel.url}, Source: ${channel.sourceName}`);
+      
+      // 清除错误状态
+      this.isError = false;
+      this.errorMessage = '';
+      
+      // 播放频道
+      const success = await this.livePlaybackService.playChannel(channel);
+      
+      if (success) {
+        this.currentChannel = channel;
+        this.addToRecentChannels(channel);
+        Logger.info(this.TAG, `Channel ${channel.name} started successfully`);
+      } else {
+        Logger.error(this.TAG, `Failed to start channel ${channel.name}`);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Error playing channel: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to play channel: ${errorMsg}`);
       this.isError = true;
-      this.errorMessage = '播放频道失败';
+      this.errorMessage = `播放失败: ${errorMsg}`;
     }
   }
   
   // 处理频道切换 | Handle channel switch
-  private handleChannelSwitch(channel: Channel) {
-    Logger.info(this.TAG, `Channel switched to: ${channel.name}`);
+  private handleChannelSwitch(channel: LiveChannelWithSource) {
+    Logger.info(this.TAG, `Channel switched to: ${channel.name}, Source: ${channel.sourceName}`);
     this.currentChannel = channel;
+    this.addToRecentChannels(channel);
     this.showLeftControl = false;
+    this.showQuickChannelSwitcher = false;
     this.playChannel(channel);
   }
   
@@ -163,7 +288,6 @@ struct LivePage {
   private handleCategorySwitch(categoryId: string) {
     this.selectedCategory = categoryId;
     Logger.info(this.TAG, `Category switched to: ${categoryId}`);
-    // 这里可以根据分类筛选频道
   }
   
   // 处理屏幕点击 | Handle screen click
@@ -175,12 +299,22 @@ struct LivePage {
       this.showLeftControl = !this.showLeftControl;
       this.showRightControl = false;
       this.showProgressBar = false;
+      this.showQuickChannelSwitcher = false;
       this.resetControlAutoHide();
     }
     // 右侧点击 | Right side click
     else if (x > this.screenWidth * 0.7) {
       this.showRightControl = !this.showRightControl;
       this.showLeftControl = false;
+      this.showProgressBar = false;
+      this.showQuickChannelSwitcher = false;
+      this.resetControlAutoHide();
+    }
+    // 底部点击 | Bottom click
+    else if (y > this.screenHeight * 0.8) {
+      this.showQuickChannelSwitcher = !this.showQuickChannelSwitcher;
+      this.showLeftControl = false;
+      this.showRightControl = false;
       this.showProgressBar = false;
       this.resetControlAutoHide();
     }
@@ -189,6 +323,7 @@ struct LivePage {
       this.showLeftControl = false;
       this.showRightControl = false;
       this.showProgressBar = false;
+      this.showQuickChannelSwitcher = false;
     }
   }
   
@@ -198,6 +333,7 @@ struct LivePage {
     this.showProgressBar = !this.showProgressBar;
     this.showLeftControl = false;
     this.showRightControl = false;
+    this.showQuickChannelSwitcher = false;
     this.resetControlAutoHide();
   }
   
@@ -207,11 +343,12 @@ struct LivePage {
       clearTimeout(this.controlAutoHideTimer);
     }
     
-    if (this.showLeftControl || this.showRightControl || this.showProgressBar) {
+    if (this.showLeftControl || this.showRightControl || this.showProgressBar || this.showQuickChannelSwitcher) {
       this.controlAutoHideTimer = setTimeout(() => {
         this.showLeftControl = false;
         this.showRightControl = false;
         this.showProgressBar = false;
+        this.showQuickChannelSwitcher = false;
       }, 5000);
     }
   }
@@ -220,24 +357,72 @@ struct LivePage {
   private handleVolumeChange(value: number) {
     this.volume = Math.max(0, Math.min(100, value));
     Logger.info(this.TAG, `Volume changed to: ${this.volume}`);
-    // 这里可以调用系统API调节音量
-    this.liveStreamService.setVolume(this.volume);
+    this.livePlaybackService.setVolume(this.volume / 100);
+  }
+  
+  // 增加音量 | Increase volume
+  private increaseVolume(): void {
+    const newVolume = Math.min(100, this.volume + 5);
+    this.setVolume(newVolume);
+  }
+  
+  // 减少音量 | Decrease volume
+  private decreaseVolume(): void {
+    const newVolume = Math.max(0, this.volume - 5);
+    this.setVolume(newVolume);
+  }
+  
+  // 设置音量 | Set volume
+  private setVolume(volume: number): void {
+    this.volume = volume;
+    this.livePlaybackService.setVolume(volume / 100);
+    Logger.debug(this.TAG, `Volume set to ${volume}%`);
+  }
+  
+  // 切换静音 | Toggle mute
+  private toggleMute(): void {
+    const currentVolume = this.livePlaybackService.getVolume();
+    if (currentVolume > 0) {
+      this.livePlaybackService.setVolume(0);
+      this.volume = 0;
+    } else {
+      this.livePlaybackService.setVolume(0.5);
+      this.volume = 50;
+    }
   }
   
   // 处理亮度调节 | Handle brightness adjustment
   private handleBrightnessChange(value: number) {
     this.brightness = Math.max(0, Math.min(100, value));
     Logger.info(this.TAG, `Brightness changed to: ${this.brightness}`);
-    // 这里可以调用系统API调节亮度
-    this.liveStreamService.setBrightness(this.brightness);
   }
   
   // 处理播放速度调节 | Handle playback speed adjustment
   private handlePlaybackSpeedChange(speed: number) {
     this.playbackSpeed = speed;
     Logger.info(this.TAG, `Playback speed changed to: ${this.playbackSpeed}`);
-    // 这里可以调用播放器API调节播放速度
-    this.liveStreamService.setPlaybackSpeed(speed);
+  }
+  
+  // 切换到下一个频道 | Switch to next channel
+  private async switchToNextChannel(): Promise<void> {
+    const success = await this.livePlaybackService.switchToNextChannel();
+    if (success) {
+      const newChannel = this.livePlaybackService.getCurrentChannel();
+      if (newChannel) {
+        this.currentChannel = newChannel;
+      }
+    }
+  }
+  
+  // 切换到上一个频道 | Switch to previous channel
+  private async switchToPreviousChannel(): Promise<void> {
+    const success = await this.livePlaybackService.switchToPreviousChannel();
+    if (success) {
+      const newChannel = this.livePlaybackService.getCurrentChannel();
+      if (newChannel) {
+        this.currentChannel = newChannel;
+      }
+    }
   }
   
   // 处理进度调节 | Handle progress adjustment
@@ -254,16 +439,20 @@ struct LivePage {
   }
   
   // 获取筛选后的频道 | Get filtered channels
-  private getFilteredChannels(): Channel[] {
-    if (this.selectedCategory === '全部') {
+  private getFilteredChannels(): LiveChannelWithSource[] {
+    if (this.selectedCategory === 'all') {
       return this.channels;
     }
-    return this.channels.filter(channel => channel.categoryId === this.selectedCategory);
+    return this.channels.filter(channel => channel.group === this.selectedCategory);
   }
   
   // 渲染左侧控制区 | Render left control area
   @Builder
   renderLeftControl() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     if (!this.showLeftControl) return;
     
     Column() {
@@ -272,40 +461,58 @@ struct LivePage {
         Text('频道分类')
           .fontSize(18)
           .fontWeight(700)
-          .fontColor('#FFFFFF')
-          .margin({ bottom: 20 })
+          .fontColor(colors.text)
+          .margin({ bottom: spacing.lg })
+          .animation({
+            duration: 300,
+            timingFunction: 'ease-out'
+          })
         
         ForEach(this.channelCategories, (category: ChannelCategory) => {
           Text(category.name)
             .fontSize(16)
             .fontWeight(this.selectedCategory === category.id ? 700 : 400)
-            .fontColor(this.selectedCategory === category.id ? '#007AFF' : '#FFFFFF')
-            .padding(12)
-            .backgroundColor(this.selectedCategory === category.id ? 'rgba(0, 122, 255, 0.3)' : 'rgba(0, 0, 0, 0.5)')
-            .borderRadius(12)
-            .margin({ bottom: 12 })
+            .fontColor(this.selectedCategory === category.id ? colors.primary : colors.text)
+            .padding(spacing.md)
+            .backgroundColor(this.selectedCategory === category.id ? `${colors.primary}20` : colors.surface)
+            .borderRadius(borderRadius.md)
+            .margin({ bottom: spacing.sm })
             .onClick(() => this.handleCategorySwitch(category.id))
             .focusable(true)
             .focusBorderWidth(2)
-            .focusBorderColor('#007AFF')
+            .focusBorderColor(colors.primary)
+            .animation({
+              duration: 300,
+              timingFunction: 'ease-out'
+            })
         }, (category: ChannelCategory) => category.id)
       }
-      .padding(24)
-      .backgroundColor('rgba(0, 0, 0, 0.7)')
-      .borderRadius(16)
-      .margin({ bottom: 24 })
+      .padding(spacing.lg)
+      .backgroundColor(colors.surface)
+      .borderRadius(borderRadius.lg)
+      .margin({ bottom: spacing.lg })
+      .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 8 })
+      .animation({
+        duration: 400,
+        timingFunction: 'ease-out'
+      })
       
       // 频道列表 | Channel list
         Column() {
           Text('频道列表')
             .fontSize(18)
             .fontWeight(700)
-            .fontColor('#FFFFFF')
-            .margin({ bottom: 20 })
+            .fontColor(colors.text)
+            .margin({ bottom: spacing.lg })
+            .animation({
+              duration: 300,
+              delay: 100,
+              timingFunction: 'ease-out'
+            })
           
           // 将Channel转换为VirtualListItem
           const virtualItems = this.getFilteredChannels().map((channel, index) => ({
-            id: channel.id,
+            id: `${channel.id}_${channel.sourceId}`,
             index,
             data: channel
           }));
@@ -313,39 +520,64 @@ struct LivePage {
           // 使用VirtualList优化性能
           VirtualList({
             items: virtualItems,
-            estimatedItemHeight: 60,
+            estimatedItemHeight: 80,
             bufferSize: 3,
             renderItem: (item: VirtualListItem, index: number) => {
-              const channel = item.data as Channel;
-              return Text(channel.name)
-                .fontSize(16)
-                .fontWeight(this.currentChannel?.id === channel.id ? 700 : 400)
-                .fontColor(this.currentChannel?.id === channel.id ? '#007AFF' : '#FFFFFF')
-                .padding(14)
-                .backgroundColor(this.currentChannel?.id === channel.id ? 'rgba(0, 122, 255, 0.3)' : 'rgba(0, 0, 0, 0.5)')
-                .borderRadius(12)
-                .margin({ bottom: 12 })
-                .onClick(() => this.handleChannelSwitch(channel))
-                .focusable(true)
-                .focusBorderWidth(2)
-                .focusBorderColor('#007AFF');
+              const channel = item.data as LiveChannelWithSource;
+              return Column() {
+                Row() {
+                  Text(channel.name)
+                    .fontSize(16)
+                    .fontWeight(this.currentChannel?.id === channel.id && this.currentChannel?.sourceId === channel.sourceId ? 700 : 400)
+                    .fontColor(this.currentChannel?.id === channel.id && this.currentChannel?.sourceId === channel.sourceId ? colors.primary : colors.text)
+                    .flexGrow(1)
+                  
+                  ContentSourceBadge({
+                    sourceName: channel.sourceName,
+                    sourceId: channel.sourceId
+                  })
+                }
+                .width('100%')
+              }
+              .padding(spacing.md)
+              .backgroundColor(this.currentChannel?.id === channel.id && this.currentChannel?.sourceId === channel.sourceId ? `${colors.primary}20` : colors.surface)
+              .borderRadius(borderRadius.md)
+              .margin({ bottom: spacing.sm })
+              .onClick(() => this.handleChannelSwitch(channel))
+              .focusable(true)
+              .focusBorderWidth(2)
+              .focusBorderColor(colors.primary)
+              .animation({
+                duration: 300,
+                timingFunction: 'ease-out'
+              });
             }
           })
         }
-        .padding(24)
-        .backgroundColor('rgba(0, 0, 0, 0.7)')
-        .borderRadius(16)
+        .padding(spacing.lg)
+        .backgroundColor(colors.surface)
+        .borderRadius(borderRadius.lg)
         .height('60%')
+        .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 8 })
+        .animation({
+          duration: 400,
+          delay: 100,
+          timingFunction: 'ease-out'
+        })
     }
     .width('35%')
     .height('100%')
-    .padding(24)
+    .padding(spacing.lg)
     .alignItems(HorizontalAlign.Start)
   }
   
   // 渲染右侧控制区 | Render right control area
   @Builder
   renderRightControl() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     if (!this.showRightControl) return;
     
     Column() {
@@ -354,21 +586,24 @@ struct LivePage {
         Text('播放设置')
           .fontSize(18)
           .fontWeight(700)
-          .fontColor('#FFFFFF')
-          .margin({ bottom: 24 })
+          .fontColor(colors.text)
+          .margin({ bottom: spacing.lg })
+          .animation({
+            duration: 300,
+            timingFunction: 'ease-out'
+          })
         
         // 音量调节 | Volume adjustment
         Column() {
           Text(`音量: ${this.volume}%`)
             .fontSize(16)
-            .fontColor('#FFFFFF')
-            .margin({ bottom: 12 })
+            .fontColor(colors.text)
+            .margin({ bottom: spacing.md })
           
           Row() {
-            Text('0')
-              .fontSize(14)
-              .fontColor('#FFFFFF')
-              .margin({ right: 12 })
+            Text('🔇')
+              .fontSize(16)
+              .margin({ right: spacing.sm })
             
             Slider({
               value: this.volume,
@@ -378,31 +613,34 @@ struct LivePage {
               style: SliderStyle.OutSet
             })
             .width('80%')
-            .blockColor('#007AFF')
-            .trackColor('#FFFFFF')
-            .selectedColor('#007AFF')
+            .blockColor(colors.primary)
+            .trackColor(colors.divider)
+            .selectedColor(colors.primary)
             .onChange((value: number) => this.handleVolumeChange(value))
             
-            Text('100')
-              .fontSize(14)
-              .fontColor('#FFFFFF')
-              .margin({ left: 12 })
+            Text('🔊')
+              .fontSize(16)
+              .margin({ left: spacing.sm })
           }
         }
-        .margin({ bottom: 24 })
+        .margin({ bottom: spacing.lg })
+        .animation({
+          duration: 300,
+          delay: 50,
+          timingFunction: 'ease-out'
+        })
         
         // 亮度调节 | Brightness adjustment
         Column() {
           Text(`亮度: ${this.brightness}%`)
             .fontSize(16)
-            .fontColor('#FFFFFF')
-            .margin({ bottom: 12 })
+            .fontColor(colors.text)
+            .margin({ bottom: spacing.md })
           
           Row() {
-            Text('0')
-              .fontSize(14)
-              .fontColor('#FFFFFF')
-              .margin({ right: 12 })
+            Text('🌙')
+              .fontSize(16)
+              .margin({ right: spacing.sm })
             
             Slider({
               value: this.brightness,
@@ -412,97 +650,114 @@ struct LivePage {
               style: SliderStyle.OutSet
             })
             .width('80%')
-            .blockColor('#007AFF')
-            .trackColor('#FFFFFF')
-            .selectedColor('#007AFF')
+            .blockColor(colors.primary)
+            .trackColor(colors.divider)
+            .selectedColor(colors.primary)
             .onChange((value: number) => this.handleBrightnessChange(value))
             
-            Text('100')
-              .fontSize(14)
-              .fontColor('#FFFFFF')
-              .margin({ left: 12 })
+            Text('☀️')
+              .fontSize(16)
+              .margin({ left: spacing.sm })
           }
         }
-        .margin({ bottom: 24 })
+        .margin({ bottom: spacing.lg })
+        .animation({
+          duration: 300,
+          delay: 100,
+          timingFunction: 'ease-out'
+        })
         
         // 播放速度调节 | Playback speed adjustment
         Column() {
           Text(`播放速度: ${this.playbackSpeed}x`)
             .fontSize(16)
-            .fontColor('#FFFFFF')
-            .margin({ bottom: 12 })
+            .fontColor(colors.text)
+            .margin({ bottom: spacing.md })
           
           Row() {
             Button('0.5x')
               .fontSize(14)
               .padding(10)
-              .backgroundColor(this.playbackSpeed === 0.5 ? '#007AFF' : 'rgba(255, 255, 255, 0.3)')
-              .fontColor('#FFFFFF')
-              .borderRadius(8)
-              .margin({ right: 12 })
+              .backgroundColor(this.playbackSpeed === 0.5 ? colors.primary : `${colors.primary}20`)
+              .fontColor(this.playbackSpeed === 0.5 ? colors.surface : colors.primary)
+              .borderRadius(borderRadius.md)
+              .margin({ right: spacing.sm })
               .onClick(() => this.handlePlaybackSpeedChange(0.5))
               .focusable(true)
               .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
+              .focusBorderColor(colors.primary)
             
             Button('1.0x')
               .fontSize(14)
               .padding(10)
-              .backgroundColor(this.playbackSpeed === 1.0 ? '#007AFF' : 'rgba(255, 255, 255, 0.3)')
-              .fontColor('#FFFFFF')
-              .borderRadius(8)
-              .margin({ right: 12 })
+              .backgroundColor(this.playbackSpeed === 1.0 ? colors.primary : `${colors.primary}20`)
+              .fontColor(this.playbackSpeed === 1.0 ? colors.surface : colors.primary)
+              .borderRadius(borderRadius.md)
+              .margin({ right: spacing.sm })
               .onClick(() => this.handlePlaybackSpeedChange(1.0))
               .focusable(true)
               .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
+              .focusBorderColor(colors.primary)
             
             Button('1.5x')
               .fontSize(14)
               .padding(10)
-              .backgroundColor(this.playbackSpeed === 1.5 ? '#007AFF' : 'rgba(255, 255, 255, 0.3)')
-              .fontColor('#FFFFFF')
-              .borderRadius(8)
-              .margin({ right: 12 })
+              .backgroundColor(this.playbackSpeed === 1.5 ? colors.primary : `${colors.primary}20`)
+              .fontColor(this.playbackSpeed === 1.5 ? colors.surface : colors.primary)
+              .borderRadius(borderRadius.md)
+              .margin({ right: spacing.sm })
               .onClick(() => this.handlePlaybackSpeedChange(1.5))
               .focusable(true)
               .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
+              .focusBorderColor(colors.primary)
             
             Button('2.0x')
               .fontSize(14)
               .padding(10)
-              .backgroundColor(this.playbackSpeed === 2.0 ? '#007AFF' : 'rgba(255, 255, 255, 0.3)')
-              .fontColor('#FFFFFF')
-              .borderRadius(8)
+              .backgroundColor(this.playbackSpeed === 2.0 ? colors.primary : `${colors.primary}20`)
+              .fontColor(this.playbackSpeed === 2.0 ? colors.surface : colors.primary)
+              .borderRadius(borderRadius.md)
               .onClick(() => this.handlePlaybackSpeedChange(2.0))
               .focusable(true)
               .focusBorderWidth(2)
-              .focusBorderColor('#007AFF')
+              .focusBorderColor(colors.primary)
           }
         }
+        .animation({
+          duration: 300,
+          delay: 150,
+          timingFunction: 'ease-out'
+        })
       }
-      .padding(24)
-      .backgroundColor('rgba(0, 0, 0, 0.7)')
-      .borderRadius(16)
+      .padding(spacing.lg)
+      .backgroundColor(colors.surface)
+      .borderRadius(borderRadius.lg)
+      .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 8 })
+      .animation({
+        duration: 400,
+        timingFunction: 'ease-out'
+      })
     }
     .width('35%')
     .height('100%')
-    .padding(24)
+    .padding(spacing.lg)
     .alignItems(HorizontalAlign.End)
   }
   
   // 渲染进度条 | Render progress bar
   @Builder
   renderProgressBar() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    
     if (!this.showProgressBar) return;
     
     Column() {
       Row() {
         Text(this.formatTime(this.currentProgress))
           .fontSize(16)
-          .fontColor('#FFFFFF')
-          .margin({ right: 24 })
+          .fontColor(colors.text)
+          .margin({ right: spacing.lg })
         
         Slider({
           value: this.currentProgress,
@@ -512,78 +767,152 @@ struct LivePage {
           style: SliderStyle.OutSet
         })
         .width('80%')
-        .blockColor('#007AFF')
-        .trackColor('#FFFFFF')
-        .selectedColor('#007AFF')
+        .blockColor(colors.primary)
+        .trackColor(colors.divider)
+        .selectedColor(colors.primary)
         .onChange((value: number) => this.handleProgressChange(value))
         
         Text(this.formatTime(this.totalDuration))
           .fontSize(16)
-          .fontColor('#FFFFFF')
-          .margin({ left: 24 })
+          .fontColor(colors.text)
+          .margin({ left: spacing.lg })
       }
     }
     .width('100%')
-    .padding(30)
+    .padding(spacing.lg)
     .position({ y: this.screenHeight * 0.8 })
+    .backgroundColor(`${colors.surface}CC`)
+    .borderRadius(24)
+    .animation({
+      duration: 300,
+      timingFunction: 'ease-out'
+    })
+  }
+  
+  // 渲染快速频道切换器 | Render quick channel switcher
+  @Builder
+  renderQuickChannelSwitcher() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
+    if (!this.showQuickChannelSwitcher) return;
+    
+    Column() {
+      Text('最近频道')
+        .fontSize(16)
+        .fontWeight(600)
+        .fontColor(colors.text)
+        .margin({ bottom: spacing.md })
+        
+      Scroll() {
+        Row() {
+          ForEach(this.recentChannels, (channel: LiveChannelWithSource) => {
+            Column() {
+              Stack() {
+                Column()
+                  .width(80)
+                  .height(80)
+                  .backgroundColor(colors.primary)
+                  .borderRadius(borderRadius.lg)
+                Text('📺')
+                  .fontSize(32)
+                  .fontColor(colors.surface)
+              }
+              Text(channel.name)
+                .fontSize(12)
+                .fontColor(colors.text)
+                .margin({ top: spacing.xs })
+                .maxLines(2)
+                .width(80)
+                .textAlign(TextAlign.Center)
+            }
+            .width(100)
+            .margin({ right: spacing.md })
+            .onClick(() => this.handleChannelSwitch(channel))
+          }, (channel: LiveChannelWithSource) => `${channel.id}_${channel.sourceId}`)
+        }
+      }
+      .scrollable(ScrollDirection.Horizontal)
+      .scrollBar(BarState.Auto)
+    }
+    .width('100%')
+    .padding(spacing.lg)
+    .position({ y: this.screenHeight * 0.7 })
+    .backgroundColor(`${colors.surface}CC`)
+    .borderRadius(24)
+    .animation({
+      duration: 300,
+      timingFunction: 'ease-out'
+    })
   }
   
   // 渲染加载状态 | Render loading state
   @Builder
   renderLoading() {
+    const colors = this.currentTheme.colors;
+    
     Column() {
       Text('正在加载直播内容...')
         .fontSize(18)
-        .fontColor('#FFFFFF')
+        .fontColor(colors.text)
         .margin(30)
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
     .width('100%')
     .height('100%')
-    .backgroundColor('rgba(0, 0, 0, 0.8)')
+    .backgroundColor(`${colors.background}CC`)
   }
   
   // 渲染错误状态 | Render error state
   @Builder
   renderError() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     Column() {
       Text('加载失败')
         .fontSize(20)
-        .fontColor('#FF5252')
-        .margin({ bottom: 12 })
+        .fontColor(colors.error)
+        .margin({ bottom: spacing.sm })
       
       Text(this.errorMessage)
         .fontSize(16)
-        .fontColor('#FFFFFF')
-        .margin({ bottom: 24 })
+        .fontColor(colors.text)
+        .margin({ bottom: spacing.lg })
+        .textAlign(TextAlign.Center)
+        .width('80%')
       
       Button('重试')
-        .backgroundColor('#007AFF')
-        .fontColor('#FFFFFF')
-        .borderRadius(12)
-        .padding({ left: 24, right: 24, top: 12, bottom: 12 })
+        .backgroundColor(colors.primary)
+        .fontColor(colors.surface)
+        .borderRadius(borderRadius.md)
+        .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
         .onClick(() => this.loadLiveContent())
         .focusable(true)
         .focusBorderWidth(2)
-        .focusBorderColor('#007AFF')
+        .focusBorderColor(colors.primary)
+        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
       
       Button('返回')
-        .backgroundColor('#444444')
-        .fontColor('#FFFFFF')
-        .borderRadius(12)
-        .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-        .margin({ top: 16 })
+        .backgroundColor(colors.surface)
+        .fontColor(colors.text)
+        .borderRadius(borderRadius.md)
+        .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+        .margin({ top: spacing.sm })
         .onClick(() => this.handleBack())
         .focusable(true)
         .focusBorderWidth(2)
-        .focusBorderColor('#007AFF')
+        .focusBorderColor(colors.primary)
+        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
     .width('100%')
     .height('100%')
-    .backgroundColor('rgba(0, 0, 0, 0.8)')
+    .backgroundColor(`${colors.background}CC`)
   }
   
   // 格式化时间 | Format time
@@ -599,6 +928,10 @@ struct LivePage {
   }
   
   build() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     Column() {
       // 直播播放区域 | Live playback area
       Stack({
@@ -608,7 +941,7 @@ struct LivePage {
         Column()
           .width('100%')
           .height('100%')
-          .backgroundColor('#000000')
+          .backgroundColor(colors.background)
           .onClick((event) => this.handleScreenClick(event.touches[0].x, event.touches[0].y))
           .onLongPress(() => this.handleScreenLongPress())
         
@@ -623,12 +956,32 @@ struct LivePage {
             // 由于是模拟，使用占位符
             Text(`正在播放: ${this.currentChannel.name}`)
               .fontSize(24)
-              .fontColor('#FFFFFF')
-              .margin(30)
+              .fontColor(colors.text)
+              .margin(spacing.lg)
+              .animation({
+                duration: 500,
+                timingFunction: 'ease-out'
+              })
+            
+            ContentSourceBadge({
+              sourceName: this.currentChannel.sourceName,
+              sourceId: this.currentChannel.sourceId
+            })
+            .margin({ bottom: spacing.lg })
+            .animation({
+              duration: 500,
+              delay: 100,
+              timingFunction: 'ease-out'
+            })
             
             Text('直播内容播放区域')
               .fontSize(18)
-              .fontColor('rgba(255, 255, 255, 0.7)')
+              .fontColor(colors.textSecondary)
+              .animation({
+                duration: 500,
+                delay: 200,
+                timingFunction: 'ease-out'
+              })
           }
           .justifyContent(FlexAlign.Center)
           .alignItems(HorizontalAlign.Center)
@@ -645,23 +998,31 @@ struct LivePage {
         // 进度条 | Progress bar
         this.renderProgressBar()
         
+        // 快速频道切换器 | Quick channel switcher
+        this.renderQuickChannelSwitcher()
+        
         // 返回按钮 | Back button
         Button('返回')
-          .position({ top: 40, left: 40 })
-          .backgroundColor('rgba(0, 0, 0, 0.6)')
-          .fontColor('#FFFFFF')
-          .borderRadius(12)
-          .padding({ left: 20, right: 20, top: 10, bottom: 10 })
+          .position({ top: spacing.lg, left: spacing.lg })
+          .backgroundColor(`${colors.surface}CC`)
+          .fontColor(colors.text)
+          .borderRadius(borderRadius.md)
+          .padding({ left: spacing.md, right: spacing.md, top: spacing.sm, bottom: spacing.sm })
           .onClick(() => this.handleBack())
           .focusable(true)
           .focusBorderWidth(2)
-          .focusBorderColor('#007AFF')
+          .focusBorderColor(colors.primary)
+          .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+          .animation({
+            duration: 300,
+            timingFunction: 'ease-out'
+          })
       }
       .width('100%')
       .height('100%')
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#000000')
+    .backgroundColor(colors.background)
   }
 }

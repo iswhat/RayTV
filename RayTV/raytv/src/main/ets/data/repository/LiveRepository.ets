@@ -11,6 +11,7 @@ import {
 } from '../bean/Live';
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
+import { HttpService } from '../../service/HttpService';
 
 const TAG = 'LiveRepository';
 
@@ -92,7 +93,6 @@ export class LiveRepository {
   public async getChannels(siteId: string): Promise<LiveChannel[]> {
     try {
       // 从后端API获取频道数据 | Get channel data from backend API
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       const response = await httpService.get<LiveChannel[]>(
@@ -157,7 +157,6 @@ export class LiveRepository {
   public async searchChannels(keyword: string, siteId?: string): Promise<LiveChannel[]> {
     try {
       // 从后端API获取搜索结果 | Get search results from backend API
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       let apiUrl = `/api/live/search?keyword=${encodeURIComponent(keyword)}`;
@@ -244,7 +243,6 @@ export class LiveRepository {
   public async getEpgData(siteId: string, channelId: string): Promise<EpgItem[]> {
     try {
       // 从后端API获取EPG数据 | Get EPG data from backend API
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       const response = await httpService.get<EpgItem[]>(
@@ -305,7 +303,6 @@ export class LiveRepository {
   public async getGroups(siteId: string): Promise<LiveGroup[]> {
     try {
       // 从后端API获取分组数据 | Get group data from backend API
-      const HttpService = (await import('../../service/HttpService')).HttpService;
       const httpService = HttpService.getInstance();
       
       const response = await httpService.get<LiveGroup[]>(

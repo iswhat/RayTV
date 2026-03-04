@@ -87,6 +87,19 @@ export interface SyncItem {
   value: Serializable; // Item value | 项值
 }
 
+// Data change entry interface | 数据变更条目接口
+interface DataChangeEntry {
+  key: string | number;
+  deviceId: string;
+}
+
+// Data change event interface | 数据变更事件接口
+interface DataChangeEvent {
+  insertEntries?: DataChangeEntry[];
+  updateEntries?: DataChangeEntry[];
+  deleteEntries?: DataChangeEntry[];
+}
+
 // Distributed data change listener type | 分布式数据变更监听器类型
 type DataChangeListener = <T extends Serializable>(key: string, data: T, deviceId: string) => void;
 
@@ -277,29 +290,30 @@ export default class ModernDistributedDataService {
 
     try {
       // Use new data change listener API | 使用新的数据变更监听API
-      this.kvStore.on('dataChange', (data) => {
+      this.kvStore.on('dataChange', (data: DataChangeEvent) => {
         console.debug(TAG, `检测到数据变更: ${JSON.stringify(data)} | Data change detected: ${JSON.stringify(data)}`);
         
         if (data && data.insertEntries && data.insertEntries.length > 0) {
-          data.insertEntries.forEach(entry => {
+          data.insertEntries.forEach((entry: DataChangeEntry) => {
             const key = entry.key.toString();
             const deviceId = entry.deviceId || 'local';
             
             // Get data and notify listeners | 获取数据并通知监听器
             if (this.kvStore !== null && this.kvStore !== undefined) {
-              this.kvStore.get(key).then((value) => {
+              this.kvStore.get(key).then((value: SyncData<Serializable>) => {
                 if (this.dataListeners.has(key)) {
                   const listeners = this.dataListeners.get(key)!;
                   for (const listener of listeners) {
                     try {
-                      listener(key, value, deviceId);
+                      listener(key, value.data, deviceId);
                     } catch (error) {
                       console.error(TAG, '数据监听器出错 | Error in data listener', error instanceof Error ? error : new Error(String(error)));
                     }
                   }
                 }
-              }).catch((error) => {
-                console.error(TAG, '获取变更数据失败 | Failed to get changed data', error instanceof Error ? error : new Error(String(error)));
+              }).catch((error: Object) => {
+                const err = error instanceof Error ? error : new Error(String(error));
+                console.error(TAG, '获取变更数据失败 | Failed to get changed data', err);
               });
             }
           });
@@ -550,9 +564,9 @@ export default class ModernDistributedDataService {
       console.error(TAG, '数据同步失败 | Data synchronization failed', error instanceof Error ? error : new Error(String(error)));
       this.syncState = {
         status: SyncStatus.FAILED,
-        error: String(error)
+        error: error instanceof Error ? error.message : String(error)
       };
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -583,8 +597,9 @@ export default class ModernDistributedDataService {
         console.debug(TAG, `已自动同步: ${fullKey} | Auto-synced ${fullKey}`);
       }
     } catch (error) {
-      console.error(TAG, `同步数据类型 ${dataType} 失败 | Failed to sync data type ${dataType}`, error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG, `同步数据类型 ${dataType} 失败 | Failed to sync data type ${dataType}`, err);
+      throw err;
     }
   }
 

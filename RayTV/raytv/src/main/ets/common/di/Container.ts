@@ -19,8 +19,8 @@ export interface ServiceDescriptor<T> {
 // 依赖注入容器类 | Dependency injection container class
 export class DIContainer {
   private static instance: DIContainer | null = null;
-  private services: Map<string, ServiceDescriptor<any>> = new Map();
-  private resolvedInstances: Map<string, any> = new Map();
+  private services: Map<string, ServiceDescriptor<unknown>> = new Map();
+  private resolvedInstances: Map<string, unknown> = new Map();
   private logger: Logger;
 
   /**
@@ -171,7 +171,7 @@ export class DIContainer {
    * @param dependencies 依赖的服务标识符 | Dependent service tokens
    * @returns 依赖实例数组 | Dependency instance array
    */
-  private resolveDependencies(dependencies: string[]): any[] {
+  private resolveDependencies(dependencies: string[]): unknown[] {
     return dependencies.map(depToken => {
       try {
         return this.resolve(depToken);

@@ -65,7 +65,7 @@ export class PerformanceMonitor {
    * @param metadata 元数据 | Metadata
    * @returns 测量ID | Measurement ID
    */
-  public startMeasurement(operation: string, metadata?: Record<string, any>): string {
+  public startMeasurement(operation: string, metadata?: Record<string, Object>): string {
     const id = this.generateId();
     const metric: PerformanceMetric = {
       id,
@@ -298,7 +298,7 @@ export function MonitorPerformance(operation: string) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       const monitor = PerformanceMonitor.getInstance();
       const measurementId = monitor.startMeasurement(operation, {
         className: target.constructor.name,

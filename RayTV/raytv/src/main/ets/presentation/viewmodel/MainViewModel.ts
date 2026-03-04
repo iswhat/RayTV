@@ -1,10 +1,17 @@
 import { BaseViewModel } from './BaseViewModel';
 
+export interface ContentItem {
+  id: number | string;
+  title: string;
+  description?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 interface MainState {
   isLoading: boolean;
   error: string | null;
-  content: any[];
-  selectedItem: any | null;
+  content: ContentItem[];
+  selectedItem: ContentItem | null;
 }
 
 class MainViewModel extends BaseViewModel {
@@ -44,7 +51,7 @@ class MainViewModel extends BaseViewModel {
     }
   }
 
-  selectItem(item: any): void {
+  selectItem(item: ContentItem): void {
     this.setState({ selectedItem: item });
     this.emit('itemSelected', item);
   }

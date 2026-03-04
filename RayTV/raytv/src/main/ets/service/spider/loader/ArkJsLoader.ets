@@ -10,9 +10,9 @@ import { SiteSpider } from '../CrawlerService';
  * JavaScript 加载器 JavaScript loader
  */
 export class ArkJsLoader extends BaseLoader {
-  private readonly TAG: string = 'ArkJsLoader';
+  public readonly TAG: string = 'ArkJsLoader';
   private scriptFunction: Function | null = null;
-  private scriptExports: Record<string, unknown> = {};
+  private scriptExports: Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined | Promise<string | number | boolean | object | null | undefined>)> = {};
 
   /**
    * 构造函数 Constructor
@@ -44,8 +44,9 @@ export class ArkJsLoader extends BaseLoader {
       
       Logger.info(this.TAG, `JS script executed successfully for site: ${this.site.key}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to execute JS script:`, error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to execute JS script:`, err);
+      throw err;
     }
   }
 
@@ -81,15 +82,15 @@ export class ArkJsLoader extends BaseLoader {
 
   /**
    * 运行脚本 Run script
-   * @returns Promise<Record<string, unknown>> 脚本导出对象 Script export object
+   * @returns Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined | Promise<string | number | boolean | object | null | undefined>)>> 脚本导出对象 Script export object
    */
-  private async runScript(): Promise<Record<string, unknown>> {
+  private async runScript(): Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined | Promise<string | number | boolean | object | null | undefined>)>> {
     if (!this.scriptFunction) {
       throw new Error('Script function not initialized');
     }
 
     // 执行脚本并获取返回对象 Execute script and get return object
-    const result = this.scriptFunction(this.scriptContext);
+    const result: Object = this.scriptFunction(this.scriptContext) as Object;
     
     // 如果是 Promise，等待其完成 If it's a Promise, wait for it to complete
     if (result instanceof Promise) {
@@ -103,9 +104,9 @@ export class ArkJsLoader extends BaseLoader {
    * 调用脚本方法 Call script method
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<unknown> 方法返回值 Method return value
+   * @returns Promise<any> 方法返回值 Method return value
    */
-  public async callMethod(methodName: string, args: Array<unknown>): Promise<unknown> {
+  public async callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<any> {
     try {
       Logger.debug(this.TAG, `Calling method ${methodName} for site ${this.site.key} with args: ${JSON.stringify(args)}`);
       
@@ -113,7 +114,7 @@ export class ArkJsLoader extends BaseLoader {
       if (typeof method !== 'function') {
         throw new Error(`Method ${methodName} not found in script exports`);
       }
-      
+
       // 调用方法 Call method
       const result = method(...args);
       
@@ -124,8 +125,9 @@ export class ArkJsLoader extends BaseLoader {
       
       return result;
     } catch (error) {
-      Logger.error(this.TAG, `Failed to call method ${methodName}:`, error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to call method ${methodName}:`, err);
+      throw err;
     }
   }
 
@@ -134,7 +136,7 @@ export class ArkJsLoader extends BaseLoader {
    * @returns SiteSpider 爬虫实例 Spider instance
    */
   protected createSpiderImpl(): SiteSpider {
-    return {
+    const spider: SiteSpider = {
       getSiteInfo: async () => this.callMethod('getSiteInfo', []),
       
       getRecommendList: async () => this.callMethod('getRecommendList', []),
@@ -160,6 +162,7 @@ export class ArkJsLoader extends BaseLoader {
         return [];
       }
     };
+    return spider;
   }
 
   /**

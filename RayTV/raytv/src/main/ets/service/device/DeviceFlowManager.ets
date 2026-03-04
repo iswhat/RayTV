@@ -202,20 +202,21 @@ class DeviceManager {
    */
   public async initialize(): Promise<void> {
     try {
-      console.info(DeviceManager.TAG, '正在初始化设备管理器（使用HarmonyOS分布式设备API）... | Initializing DeviceManager with HarmonyOS distributed device API...');
+      Logger.info(DeviceManager.TAG, '正在初始化设备管理器（使用HarmonyOS分布式设备API）... | Initializing DeviceManager with HarmonyOS distributed device API...');
       
       // 获取设备管理器实例 | Get device manager instance
-      this.dmInstance = await this.getDeviceManagerInstance();
+      const dm = await this.getDeviceManagerInstance();
+      this.dmInstance = dm as EnhancedDeviceManager;
       
       // 设置设备状态变化监听 | Set device state change listener
       this.setupDeviceStateListener();
       
       // 开始设备发现 | Start device discovery
-      await this.startDeviceDiscovery();
-      
-      console.info(DeviceManager.TAG, '设备管理器初始化成功 | DeviceManager initialized successfully');
+
+      Logger.info(DeviceManager.TAG, '设备管理器初始化成功 | DeviceManager initialized successfully');
     } catch (error) {
-      console.error(DeviceManager.TAG, `设备管理器初始化失败: `, error, ` | Failed to initialize DeviceManager: `, error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceManager.TAG, `设备管理器初始化失败: ${errorMsg} | Failed to initialize DeviceManager: ${errorMsg}`);
       // 如果分布式设备API失败，回退到基本功能 | If distributed device API fails, fall back to basic functionality
       await this.initializeFallback();
     }
@@ -237,7 +238,7 @@ class DeviceManager {
           resolve(dm);
         });
       } catch (error) {
-        console.error(DeviceManager.TAG, `创建设备管理器时出错: `, error, ` | Error creating device manager: `, error);
+        Logger.error(DeviceManager.TAG, `创建设备管理器时出错: `, error, ` | Error creating device manager: `, error);
         reject(error);
       }
     });
@@ -254,52 +255,66 @@ class DeviceManager {
       const instance = this;
       
       if (typeof this.dmInstance?.on === 'function') {
-        this.dmInstance.on('deviceStateChange', (device: DMDevice) => {
-          console.info(DeviceManager.TAG, `设备状态变更: ${JSON.stringify(device)} | Device state changed: ${JSON.stringify(device)}`);
-          const deviceId: string = device.deviceId || '';
-          const status: number = device.status || 0;
-          
-          // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
-          const deviceStateChangeData: DeviceStateChangeData = {
-            deviceId: deviceId,
-            status: status,
-            deviceName: device.deviceName || '',
-            deviceTypeId: device.deviceTypeId || 0,
-            networkId: device.networkId || '',
-            isLocal: device.isLocal || false,
-            authType: device.authType || 0,
-            extraInfo: device.extraInfo || {} as AppState
-          };
-          
-          instance.handleDeviceStateChange(deviceStateChangeData);
+        this.dmInstance.on('deviceStateChange', (data: DMDevice | DMDevice[]) => {
+          if (Array.isArray(data)) {
+            // 处理设备数组 | Handle device array
+            for (let i = 0; i < data.length; i++) {
+              const device = data[i];
+              this.handleSingleDeviceStateChange(device);
+            }
+          } else {
+            // 处理单个设备 | Handle single device
+            this.handleSingleDeviceStateChange(data);
+          }
         });
         
-        this.dmInstance.on('deviceFound', (devices: DMDevice[]) => {
-          console.info(DeviceManager.TAG, `Devices found: ${devices.length}`);
-          const convertedDevices: DiscoveredDevice[] = [];
-          for (let i = 0; i < devices.length; i++) {
-            const device = devices[i];
-            const deviceId: string = device.deviceId || '';
+        this.dmInstance.on('deviceFound', (data: DMDevice | DMDevice[]) => {
+          if (Array.isArray(data)) {
+            // 处理设备数组 | Handle device array
+            Logger.info(DeviceManager.TAG, `Devices found: ${data.length}`);
+            const convertedDevices: DiscoveredDevice[] = [];
+            for (let i = 0; i < data.length; i++) {
+              const device = data[i];
+              const deviceId: string = device.deviceId || '';
+              
+              // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
+              const discoveredDevice: DiscoveredDevice = {
+                deviceId: deviceId,
+                deviceName: device.deviceName || '',
+                deviceTypeId: device.deviceTypeId || 0,
+                networkId: device.networkId || '',
+                isLocal: device.isLocal || false,
+                authType: device.authType || 0,
+                isTrusted: device.isTrusted || false,
+                extraInfo: device.extraInfo || {} as AppState
+              };
+              
+              convertedDevices.push(discoveredDevice);
+            }
+            this.handleDevicesFound(convertedDevices);
+          } else {
+            // 处理单个设备 | Handle single device
+            Logger.info(DeviceManager.TAG, `Device found: ${data.deviceId}`);
+            const deviceId: string = data.deviceId || '';
             
             // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
             const discoveredDevice: DiscoveredDevice = {
               deviceId: deviceId,
-              deviceName: device.deviceName || '',
-              deviceTypeId: device.deviceTypeId || 0,
-              networkId: device.networkId || '',
-              isLocal: device.isLocal || false,
-              authType: device.authType || 0,
-              isTrusted: device.isTrusted || false,
-              extraInfo: device.extraInfo || {} as AppState
+              deviceName: data.deviceName || '',
+              deviceTypeId: data.deviceTypeId || 0,
+              networkId: data.networkId || '',
+              isLocal: data.isLocal || false,
+              authType: data.authType || 0,
+              isTrusted: data.isTrusted || false,
+              extraInfo: data.extraInfo || {} as AppState
             };
             
-            convertedDevices.push(discoveredDevice);
+            this.handleDevicesFound([discoveredDevice]);
           }
-          this.handleDevicesFound(convertedDevices);
         });
       }
     } catch (error) {
-      console.error(DeviceManager.TAG, `设置设备监听器失败: `, error, ` | Failed to setup device listeners: `, error);
+      Logger.error(DeviceManager.TAG, `设置设备监听器失败: `, error, ` | Failed to setup device listeners: `, error);
     }
   }
   
@@ -310,20 +325,22 @@ class DeviceManager {
     if (!this.dmInstance || this.discoveryStarted) return;
     
     try {
-      console.info(DeviceManager.TAG, '正在启动设备发现... | Starting device discovery...');
+      Logger.info(DeviceManager.TAG, '正在启动设备发现... | Starting device discovery...');
       
       // 发布本地设备信息 | Publish local device info
       if (typeof this.dmInstance?.publishDeviceDiscovery === 'function') {
-        this.dmInstance.publishDeviceDiscovery({});
+        const paramObj: Object = new Object();
+        this.dmInstance.publishDeviceDiscovery(paramObj);
       }
 
       // 发现周边设备 | Discover nearby devices
       if (typeof this.dmInstance?.startDeviceDiscovery === 'function') {
-        this.dmInstance.startDeviceDiscovery({});
+        const paramObj: Object = new Object();
+        this.dmInstance.startDeviceDiscovery(paramObj);
       }
       
       this.discoveryStarted = true;
-      console.info(DeviceManager.TAG, '设备发现已启动 | Device discovery started');
+      Logger.info(DeviceManager.TAG, '设备发现已启动 | Device discovery started');
       
       // 获取已发现的可信设备 | Get already discovered trusted devices
       const trustedDevices: DMDevice[] = [];
@@ -361,9 +378,32 @@ class DeviceManager {
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(DeviceManager.TAG, `启动设备发现失败: ${errorMsg} | Failed to start device discovery: ${errorMsg}`);
+      Logger.error(DeviceManager.TAG, `启动设备发现失败: ${errorMsg} | Failed to start device discovery: ${errorMsg}`);
       throw new Error(`启动设备发现失败: ${errorMsg} | Failed to start device discovery: ${errorMsg}`);
     }
+  }
+  
+  /**
+   * 处理单个设备状态变化 | Handle single device state change
+   */
+  private handleSingleDeviceStateChange(device: DMDevice): void {
+    Logger.info(DeviceManager.TAG, `设备状态变更: ${JSON.stringify(device)} | Device state changed: ${JSON.stringify(device)}`);
+    const deviceId: string = device.deviceId || '';
+    const status: number = device.status || 0;
+    
+    // 使用预定义的接口类型，避免无类型对象字面量 | Use predefined interface type to avoid untyped object literals
+    const deviceStateChangeData: DeviceStateChangeData = {
+      deviceId: deviceId,
+      status: status,
+      deviceName: device.deviceName || '',
+      deviceTypeId: device.deviceTypeId || 0,
+      networkId: device.networkId || '',
+      isLocal: device.isLocal || false,
+      authType: device.authType || 0,
+      extraInfo: device.extraInfo || {} as AppState
+    };
+    
+    this.handleDeviceStateChange(deviceStateChangeData);
   }
   
   /**
@@ -440,7 +480,7 @@ class DeviceManager {
    * 回退初始化（当分布式API失败时） | Fallback initialization (when distributed API fails)
    */
   private async initializeFallback(): Promise<void> {
-    console.warn(DeviceManager.TAG, '正在使用回退设备管理器实现 | Using fallback device manager implementation');
+    Logger.warn(DeviceManager.TAG, '正在使用回退设备管理器实现 | Using fallback device manager implementation');
     
     // 扫描设备（使用简化逻辑） | Scan devices (using simplified logic)
     await this.scanDevices();
@@ -451,7 +491,7 @@ class DeviceManager {
    */
   public async scanDevices(): Promise<void> {
     try {
-      console.info(DeviceManager.TAG, '正在扫描可用设备... | Scanning for available devices...');
+      Logger.info(DeviceManager.TAG, '正在扫描可用设备... | Scanning for available devices...');
       
       // 如果有分布式设备管理器实例，使用它获取设备列表 | If there is a distributed device manager instance, use it to get device list
       if (this.dmInstance) {
@@ -495,7 +535,7 @@ class DeviceManager {
       // 通知监听器（可能是空列表） | Notify listeners (may be empty list)
       this.notifyDeviceListChanged();
     } catch (error) {
-      console.error(DeviceManager.TAG, `扫描设备失败: `, error, ` | Failed to scan devices: `, error);
+      Logger.error(DeviceManager.TAG, `扫描设备失败: `, error, ` | Failed to scan devices: `, error);
       // 确保只抛出Error对象 | Ensure only Error objects are thrown
       const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`扫描设备失败: ${errorMsg} | Failed to scan devices: ${errorMsg}`);
@@ -580,7 +620,7 @@ export class DeviceFlowManager {
    */
   public async initialize(): Promise<void> {
     try {
-      console.info(DeviceFlowManager.TAG, '正在初始化设备流转管理器... | Initializing DeviceFlowManager...');
+      Logger.info(DeviceFlowManager.TAG, '正在初始化设备流转管理器... | Initializing DeviceFlowManager...');
       
       // 加载配置 | Load configuration
       this.isEnabled = await this.configService.getConfig('enableDeviceFlow', true);
@@ -588,9 +628,9 @@ export class DeviceFlowManager {
       // 初始化设备管理器 | Initialize device manager
       await this.deviceManager.initialize();
       
-      console.info(DeviceFlowManager.TAG, '设备流转管理器初始化成功 | DeviceFlowManager initialized successfully');
+      Logger.info(DeviceFlowManager.TAG, '设备流转管理器初始化成功 | DeviceFlowManager initialized successfully');
     } catch (error) {
-      console.error(DeviceFlowManager.TAG, `设备流转管理器初始化失败: `, error, ` | Failed to initialize DeviceFlowManager: `, error);
+      Logger.error(DeviceFlowManager.TAG, `设备流转管理器初始化失败: `, error, ` | Failed to initialize DeviceFlowManager: `, error);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
@@ -633,7 +673,7 @@ export class DeviceFlowManager {
       try {
         await this.performDistributedTransfer(params.targetDeviceId, params.data);
       } catch (distributedError) {
-        console.warn(DeviceFlowManager.TAG, `分布式传输失败，正在使用回退方式: `, distributedError, ` | Distributed transfer failed, using fallback: `, distributedError);
+        Logger.warn(DeviceFlowManager.TAG, `分布式传输失败，正在使用回退方式: `, distributedError, ` | Distributed transfer failed, using fallback: `, distributedError);
         // 如果分布式传输失败，使用本地数据备份作为回退 | If distributed transfer fails, use local data backup as fallback
         await this.performLocalBackupFallback(params.flowType, params.targetDeviceId);
       }
@@ -645,15 +685,16 @@ export class DeviceFlowManager {
       console.info(DeviceFlowManager.TAG, `流转完成成功 | Flow completed successfully`);
       this.notifyFlowStatusChanged();
     } catch (error) {
-      console.error(DeviceFlowManager.TAG, `启动流转失败: `, error, ` | Failed to start flow: `, error);
+      Logger.error(DeviceFlowManager.TAG, `启动流转失败: `, error, ` | Failed to start flow: `, error);
       
       // 更新为失败状态 | Update to failed status
       if (this.currentFlowStatus) {
         this.currentFlowStatus.status = 'failed';
         this.notifyFlowStatusChanged();
       }
-      
-      throw error;
+
+      const err = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
   
@@ -687,11 +728,22 @@ export class DeviceFlowManager {
       
       // 4. 注册传输状态监听器 | Register transfer status listener
       if (dm.on) {
-        dm.on('deviceStateChange', (device: DMDevice) => {
-        if (device.deviceId === targetDeviceId) {
-          console.info(DeviceFlowManager.TAG, `目标设备状态变化: ${device.status} | Target device state changed: ${device.status}`);
-        }
-      });
+        dm.on('deviceStateChange', (data: DMDevice | DMDevice[]) => {
+          if (Array.isArray(data)) {
+            // 处理设备数组 | Handle device array
+            for (let i = 0; i < data.length; i++) {
+              const device = data[i];
+              if (device.deviceId === targetDeviceId) {
+                Logger.info(DeviceFlowManager.TAG, `目标设备状态变化: ${device.status} | Target device state changed: ${device.status}`);
+              }
+            }
+          } else {
+            // 处理单个设备 | Handle single device
+            if (data.deviceId === targetDeviceId) {
+              Logger.info(DeviceFlowManager.TAG, `目标设备状态变化: ${data.status} | Target device state changed: ${data.status}`);
+            }
+          }
+        });
       
       // 5. 执行数据传输 | Execute data transfer
       // 使用分布式数据服务进行传输
@@ -705,9 +757,9 @@ export class DeviceFlowManager {
       // 7. 模拟传输过程（实际应用中应使用真实的传输API）
       await this.simulateTransferProcess(transferId, targetDeviceId);
       
-      console.info(DeviceFlowManager.TAG, `分布式传输完成 | Distributed transfer completed`);
+      Logger.info(DeviceFlowManager.TAG, `分布式传输完成 | Distributed transfer completed`);
     } catch (error) {
-      console.error(DeviceFlowManager.TAG, `分布式传输失败: `, error, ` | Distributed transfer failed: `, error);
+      Logger.error(DeviceFlowManager.TAG, `分布式传输失败: `, error, ` | Distributed transfer failed: `, error);
       const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`分布式传输失败: ${errorMsg} | Distributed transfer failed: ${errorMsg}`);
     }
@@ -721,8 +773,8 @@ export class DeviceFlowManager {
       if (!this.currentFlowStatus || this.currentFlowStatus.status !== 'transferring') {
         throw new Error('No active flow to stop');
       }
-      
-      console.info(DeviceFlowManager.TAG, '正在停止当前流转 | Stopping current flow');
+
+      Logger.info(DeviceFlowManager.TAG, '正在停止当前流转 | Stopping current flow');
       
       this.currentFlowStatus.status = 'cancelled';
       this.notifyFlowStatusChanged();
@@ -730,7 +782,7 @@ export class DeviceFlowManager {
       // 清理资源 | Clean up resources
       this.currentFlowStatus = null;
     } catch (error) {
-      console.error(DeviceFlowManager.TAG, `停止流转失败: `, error, ` | Failed to stop flow: `, error);
+      Logger.error(DeviceFlowManager.TAG, `停止流转失败: `, error, ` | Failed to stop flow: `, error);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
@@ -764,10 +816,10 @@ export class DeviceFlowManager {
     try {
       this.isEnabled = enabled;
       await this.configService.setConfig('enableDeviceFlow', enabled);
-      
-      console.info(DeviceFlowManager.TAG, `设备流转已${enabled ? '启用' : '禁用'} | Device flow ${enabled ? 'enabled' : 'disabled'}`);
+
+      Logger.info(DeviceFlowManager.TAG, `设备流转已${enabled ? '启用' : '禁用'} | Device flow ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
-      console.error(DeviceFlowManager.TAG, `设置设备流转启用状态失败: `, error, ` | Failed to set device flow enabled state: `, error);
+      Logger.error(DeviceFlowManager.TAG, `设置设备流转启用状态失败: `, error, ` | Failed to set device flow enabled state: `, error);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }

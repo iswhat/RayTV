@@ -8,21 +8,21 @@ import { PinyinUtil } from '../common/util/PinyinUtil';
 import display from '@ohos.display';
 import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos.components';
 
-// 搜索过滤器接口 | Search filters interface
+// 鎼滅储杩囨护鍣ㄦ帴鍙?| Search filters interface
 export interface SearchFilters {
-  // 类型过滤器 | Type filter
+  // 绫诲瀷杩囨护鍣?| Type filter
   type?: string[];
-  // 年份过滤器 | Year filter
+  // 骞翠唤杩囨护鍣?| Year filter
   year?: number[];
-  // 评分过滤器 | Rating filter
+  // 璇勫垎杩囨护鍣?| Rating filter
   rating?: string[];
-  // 地区过滤器 | Region filter
+  // 鍦板尯杩囨护鍣?| Region filter
   region?: string[];
-  // 语言过滤器 | Language filter
+  // 璇█杩囨护鍣?| Language filter
   language?: string[];
 }
 
-// 搜索请求接口 | Search request interface
+// 鎼滅储璇锋眰鎺ュ彛 | Search request interface
 export interface SearchRequest {
   query: string;
   pageSize: number;
@@ -36,7 +36,7 @@ export interface SearchRequest {
 
 
 
-// 搜索结果接口 | Search result interface
+// 鎼滅储缁撴灉鎺ュ彛 | Search result interface
 export interface SearchResult {
   id: string;
   title: string;
@@ -45,7 +45,7 @@ export interface SearchResult {
   siteKey?: string;
 }
 
-// 显示信息接口 | Display info interface
+// 鏄剧ず淇℃伅鎺ュ彛 | Display info interface
 interface DisplayInfo {
   width: number;
   height: number;
@@ -54,7 +54,7 @@ interface DisplayInfo {
   refreshRate: number;
 }
 
-// 虚拟键盘按键 | Virtual keyboard key
+// 铏氭嫙閿洏鎸夐敭 | Virtual keyboard key
 interface KeyboardKey {
   value: string;
   type: 'letter' | 'number' | 'symbol' | 'action';
@@ -68,7 +68,7 @@ struct SearchPage {
   private scroller: Scroller = new Scroller();
   private contentScroller: Scroller = new Scroller();
   
-  // 状态管理 | State management
+  // 鐘舵€佺鐞?| State management
   @State searchText: string = '';
   @State searchHistory: string[] = [];
   @State hotKeywords: string[] = [];
@@ -85,9 +85,9 @@ struct SearchPage {
   @State screenHeight: number = 0;
   @State selectedKeyIndex: number = -1;
   
-  // 服务实例将在方法中直接调用 | Service instances will be called directly in methods
+  // 鏈嶅姟瀹炰緥灏嗗湪鏂规硶涓洿鎺ヨ皟鐢?| Service instances will be called directly in methods
   
-  // 虚拟键盘按键 | Virtual keyboard keys
+  // 铏氭嫙閿洏鎸夐敭 | Virtual keyboard keys
   private keyboardKeys: KeyboardKey[] = [
     { value: '1', type: 'number' },
     { value: '2', type: 'number', label: 'ABC' },
@@ -99,8 +99,8 @@ struct SearchPage {
     { value: '8', type: 'number', label: 'TUV' },
     { value: '9', type: 'number', label: 'WXYZ' },
     { value: '0', type: 'number' },
-    { value: 'backspace', type: 'action', label: '删除' },
-    { value: 'clear', type: 'action', label: '清空' },
+    { value: 'backspace', type: 'action', label: '鍒犻櫎' },
+    { value: 'clear', type: 'action', label: '娓呯┖' },
     { value: 'q', type: 'letter' },
     { value: 'w', type: 'letter' },
     { value: 'e', type: 'letter' },
@@ -127,23 +127,23 @@ struct SearchPage {
     { value: 'b', type: 'letter' },
     { value: 'n', type: 'letter' },
     { value: 'm', type: 'letter' },
-    { value: 'space', type: 'action', label: '空格' },
-    { value: 'search', type: 'action', label: '搜索' }
+    { value: 'space', type: 'action', label: '绌烘牸' },
+    { value: 'search', type: 'action', label: '鎼滅储' }
   ];
   
-  // 生命周期 | Lifecycle
+  // 鐢熷懡鍛ㄦ湡 | Lifecycle
   aboutToAppear() {
     console.info('SearchPage about to appear');
     
-    // 初始化屏幕信息 | Initialize screen information
+    // 鍒濆鍖栧睆骞曚俊鎭?| Initialize screen information
     this.initScreenInfo();
     
-    // 加载热门关键词和搜索历史 | Load hot keywords and search history
+    // 鍔犺浇鐑棬鍏抽敭璇嶅拰鎼滅储鍘嗗彶 | Load hot keywords and search history
     this.loadHotKeywords();
     this.loadSearchHistory();
   }
   
-  // 初始化屏幕信息 | Initialize screen information
+  // 鍒濆鍖栧睆骞曚俊鎭?| Initialize screen information
   private initScreenInfo(): void {
     try {
       const displayInfo = display.getDefaultDisplaySync();
@@ -154,7 +154,7 @@ struct SearchPage {
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('Failed to get screen info: ' + err.message);
-      // 默认值 | Default values
+      // 榛樿鍊?| Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
       this.isLandscape = true;
@@ -162,14 +162,14 @@ struct SearchPage {
   }
   
   /**
-   * 加载热门关键词 | Load hot keywords
+   * 鍔犺浇鐑棬鍏抽敭璇?| Load hot keywords
    */
   private async loadHotKeywords(): Promise<void> {
     try {
-      // 生成缓存键 | Generate cache key
+      // 鐢熸垚缂撳瓨閿?| Generate cache key
       const cacheKey = 'hot_keywords';
       
-      // 尝试从缓存获取 | Try to get from cache
+      // 灏濊瘯浠庣紦瀛樿幏鍙?| Try to get from cache
       const cachedKeywords: string[] | null = await CacheService.getInstance().get<string[]>(cacheKey);
       
       if (cachedKeywords && Array.isArray(cachedKeywords) && cachedKeywords.length > 0) {
@@ -178,26 +178,26 @@ struct SearchPage {
         return;
       }
       
-      // 使用默认热门关键词 | Use default hot keywords
-      this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
+      // 浣跨敤榛樿鐑棬鍏抽敭璇?| Use default hot keywords
+      this.hotKeywords = ['鐑棬鐢靛奖', '鏈€鏂板墽闆?, '缁忓吀鍔ㄧ敾', '绉戝够澶х墖', '鐖辨儏鍠滃墽'];
       
-      // 缓存结果 | Cache result
+      // 缂撳瓨缁撴灉 | Cache result
       await CacheService.getInstance().set<string[]>(cacheKey, this.hotKeywords);
       
       console.info('Loaded ' + this.hotKeywords.length + ' hot keywords');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('Failed to load hot keywords: ' + err.message);
-      this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
+      this.hotKeywords = ['鐑棬鐢靛奖', '鏈€鏂板墽闆?, '缁忓吀鍔ㄧ敾', '绉戝够澶х墖', '鐖辨儏鍠滃墽'];
     }
   }
   
   /**
-   * 加载搜索历史 | Load search history
+   * 鍔犺浇鎼滅储鍘嗗彶 | Load search history
    */
   private async loadSearchHistory(): Promise<void> {
     try {
-      // 由于SearchHistoryRepository.getHistory方法不存在，使用模拟数据
+      // 鐢变簬SearchHistoryRepository.getHistory鏂规硶涓嶅瓨鍦紝浣跨敤妯℃嫙鏁版嵁
       this.searchHistory = [];
         console.info('Loaded ' + this.searchHistory.length + ' search history items');
     } catch (error) {
@@ -208,14 +208,14 @@ struct SearchPage {
   }
   
   /**
-   * 保存搜索历史 | Save search history
+   * 淇濆瓨鎼滅储鍘嗗彶 | Save search history
    */
   private async saveSearchHistory(keyword: string): Promise<void> {
     try {
-      // 去重并限制数量 | Remove duplicates and limit quantity
+      // 鍘婚噸骞堕檺鍒舵暟閲?| Remove duplicates and limit quantity
       let history = this.searchHistory.filter(item => item !== keyword);
       history.unshift(keyword);
-      history = history.slice(0, 10); // 最多保存10条 | Save at most 10 items
+      history = history.slice(0, 10); // 鏈€澶氫繚瀛?0鏉?| Save at most 10 items
       this.searchHistory = history;
       
       console.info('Search history saved: ' + keyword);
@@ -226,15 +226,15 @@ struct SearchPage {
   }
   
   /**
-   * 处理搜索输入变化 | Handle search input change
+   * 澶勭悊鎼滅储杈撳叆鍙樺寲 | Handle search input change
    */
   private onSearchTextChange(text: string): void {
     this.searchText = text;
     if (text.length > 0) {
       this.showQuickResults = true;
-      // 快速搜索 | Quick search
+      // 蹇€熸悳绱?| Quick search
       this.quickSearch(text);
-      // 生成拼音推荐 | Generate pinyin recommendations
+      // 鐢熸垚鎷奸煶鎺ㄨ崘 | Generate pinyin recommendations
       this.generatePinyinRecommendations(text);
     } else {
       this.showQuickResults = false;
@@ -244,12 +244,12 @@ struct SearchPage {
   }
   
   /**
-   * 生成拼音推荐 | Generate pinyin recommendations
+   * 鐢熸垚鎷奸煶鎺ㄨ崘 | Generate pinyin recommendations
    */
   private generatePinyinRecommendations(text: string): void {
     try {
-      // 使用PinyinUtil生成拼音首字母推荐 | Use PinyinUtil to generate pinyin initial letter recommendations
-      // 这里应该调用实际的服务获取推荐，这里简化处理 | Should call actual service to get recommendations, simplified here
+      // 浣跨敤PinyinUtil鐢熸垚鎷奸煶棣栧瓧姣嶆帹鑽?| Use PinyinUtil to generate pinyin initial letter recommendations
+      // 杩欓噷搴旇璋冪敤瀹為檯鐨勬湇鍔¤幏鍙栨帹鑽愶紝杩欓噷绠€鍖栧鐞?| Should call actual service to get recommendations, simplified here
       this.pinyinRecommendations = [];
       console.info('Generated pinyin recommendations for: ' + text);
     } catch (error) {
@@ -260,16 +260,16 @@ struct SearchPage {
   }
   
   /**
-   * 快速搜索 | Quick search
+   * 蹇€熸悳绱?| Quick search
    */
   private async quickSearch(keyword: string): Promise<void> {
     try {
       this.isSearching = true;
       
-      // 生成缓存键 | Generate cache key
+      // 鐢熸垚缂撳瓨閿?| Generate cache key
       const cacheKey = 'quick_search_' + keyword;
       
-      // 尝试从缓存获取 | Try to get from cache
+      // 灏濊瘯浠庣紦瀛樿幏鍙?| Try to get from cache
       const cachedResults: SearchResult[] | null = await CacheService.getInstance().get<SearchResult[]>(cacheKey);
       
       if (cachedResults && cachedResults.length > 0) {
@@ -279,7 +279,7 @@ struct SearchPage {
         return;
       }
       
-      // 调用实际的SearchService获取快速搜索结果 | Call actual SearchService to get quick search results
+      // 璋冪敤瀹為檯鐨凷earchService鑾峰彇蹇€熸悳绱㈢粨鏋?| Call actual SearchService to get quick search results
       const searchOptions: SearchOptions = {
         query: keyword,
         pageSize: 10,
@@ -313,7 +313,7 @@ struct SearchPage {
           return searchResult;
         });
         
-        // 缓存结果 | Cache result
+        // 缂撳瓨缁撴灉 | Cache result
         await CacheService.getInstance().set<SearchResult[]>(cacheKey, this.quickResults);
       } else {
         this.quickResults = [];
@@ -329,7 +329,7 @@ struct SearchPage {
   }
   
   /**
-   * 执行搜索 | Execute search
+   * 鎵ц鎼滅储 | Execute search
    */
   private async executeSearch(): Promise<void> {
     if (!this.searchText.trim()) return;
@@ -338,10 +338,10 @@ struct SearchPage {
       this.isSearching = true;
       this.showQuickResults = false;
       
-      // 保存搜索历史 | Save search history
+      // 淇濆瓨鎼滅储鍘嗗彶 | Save search history
       await this.saveSearchHistory(this.searchText);
       
-      // 导航到搜索结果页 | Navigate to search result page
+      // 瀵艰埅鍒版悳绱㈢粨鏋滈〉 | Navigate to search result page
       AppNavigator.getInstance().navigateToSearchResult(this.searchText);
       
       console.info(`Executing search for: ${this.searchText}`);
@@ -354,14 +354,14 @@ struct SearchPage {
   }
   
   /**
-   * 处理快速搜索结果点击 | Handle quick search result click
+   * 澶勭悊蹇€熸悳绱㈢粨鏋滅偣鍑?| Handle quick search result click
    */
   private async handleQuickResultClick(result: SearchResult): Promise<void> {
     try {
-      // 保存搜索历史 | Save search history
+      // 淇濆瓨鎼滅储鍘嗗彶 | Save search history
       await this.saveSearchHistory(this.searchText);
       
-      // 跳转到详情页 | Navigate to detail page
+      // 璺宠浆鍒拌鎯呴〉 | Navigate to detail page
       await AppNavigator.getInstance().navigateToDetail({
         id: result.id,
         siteKey: result.siteKey || '',
@@ -369,64 +369,64 @@ struct SearchPage {
       });
       
       console.info(`Navigating to detail for ${result.title}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Error handling quick search result click: ${error.message}`);
     }
   }
   
   /**
-   * 处理热门关键词点击 | Handle hot keyword click
+   * 澶勭悊鐑棬鍏抽敭璇嶇偣鍑?| Handle hot keyword click
    */
   private async handleHotKeywordClick(keyword: string): Promise<void> {
     try {
       this.searchText = keyword;
       await this.executeSearch();
       console.info(`Searching for hot keyword: ${keyword}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Error handling hot keyword click: ${error.message}`);
     }
   }
   
   /**
-   * 处理搜索历史点击 | Handle search history click
+   * 澶勭悊鎼滅储鍘嗗彶鐐瑰嚮 | Handle search history click
    */
   private async handleHistoryClick(keyword: string): Promise<void> {
     try {
       this.searchText = keyword;
       await this.executeSearch();
       console.info(`Searching for history keyword: ${keyword}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Error handling history click: ${error.message}`);
     }
   }
   
   /**
-   * 处理拼音推荐点击 | Handle pinyin recommendation click
+   * 澶勭悊鎷奸煶鎺ㄨ崘鐐瑰嚮 | Handle pinyin recommendation click
    */
   private async handlePinyinRecommendationClick(recommendation: string): Promise<void> {
     try {
       this.searchText = recommendation;
       await this.executeSearch();
       console.info(`Searching for pinyin recommendation: ${recommendation}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Error handling pinyin recommendation click: ${error.message}`);
     }
   }
   
   /**
-   * 清空搜索历史 | Clear search history
+   * 娓呯┖鎼滅储鍘嗗彶 | Clear search history
    */
   private async clearSearchHistory(): Promise<void> {
     try {
       this.searchHistory = [];
       console.info('Search history cleared');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to clear search history: ${error.message}`);
     }
   }
   
   /**
-   * 处理虚拟键盘按键点击 | Handle virtual keyboard key click
+   * 澶勭悊铏氭嫙閿洏鎸夐敭鐐瑰嚮 | Handle virtual keyboard key click
    */
   private handleKeyboardKeyClick(key: KeyboardKey): void {
     switch (key.type) {
@@ -450,33 +450,33 @@ struct SearchPage {
   }
   
   /**
-   * 处理返回 | Handle back
+   * 澶勭悊杩斿洖 | Handle back
    */
   private async handleBack(): Promise<void> {
     try {
       await AppNavigator.getInstance().navigateToBack();
       console.info('Navigating back');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to navigate back: ${error.message}`);
     }
   }
   
   /**
-   * 切换键盘类型 | Switch keyboard type
+   * 鍒囨崲閿洏绫诲瀷 | Switch keyboard type
    */
   private toggleKeyboardType(): void {
     this.showVirtualKeyboard = !this.showVirtualKeyboard;
     this.showSystemKeyboard = !this.showSystemKeyboard;
   }
   
-  // 渲染搜索栏 | Render search bar
+  // 娓叉煋鎼滅储鏍?| Render search bar
   @Builder
   renderSearchBar() {
     Column() {
       Row() {
-        // 返回按钮 | Back button
+        // 杩斿洖鎸夐挳 | Back button
         Button() {
-          Text('返回')
+          Text('杩斿洖')
             .fontSize(18)
             .fontColor('#FFFFFF')
         }
@@ -487,17 +487,17 @@ struct SearchPage {
         .margin({ left: 40 })
         .onClick(() => this.handleBack())
         
-        // 搜索输入区域 | Search input area
+        // 鎼滅储杈撳叆鍖哄煙 | Search input area
         Column() {
           Row() {
-            Text('搜索: ' + this.searchText)
+            Text('鎼滅储: ' + this.searchText)
               .fontSize(20)
               .fontColor('#FFFFFF')
               .flexGrow(1)
               .margin({ left: 24 })
             
             Button() {
-              Text('切换键盘')
+              Text('鍒囨崲閿洏')
                 .fontSize(16)
                 .fontColor('#FFFFFF')
             }
@@ -514,18 +514,19 @@ struct SearchPage {
           .borderRadius(12)
           .alignItems(VerticalAlign.Center)
           
-          // 快速搜索结果 | Quick search results
+          // 蹇€熸悳绱㈢粨鏋?| Quick search results
           if (this.showQuickResults && this.quickResults.length > 0) {
             Scroll(this.contentScroller) {
               Column() {
                 ForEach(this.quickResults, (result: SearchResult) => {
                   Row() {
-                    Image(result.coverUrl || 'https://via.placeholder.com/100x150?text=No+Image')
+                    Image(result.coverUrl || '')
                       .width(100)
                       .height(150)
                       .objectFit(ImageFit.Cover)
                       .borderRadius(8)
                       .margin({ right: 20 })
+                      .backgroundColor('#2C2C2C')
                     
                     Column() {
                       Text(result.title)
@@ -564,9 +565,9 @@ struct SearchPage {
         .flexGrow(1)
         .margin({ left: 24, right: 24 })
         
-        // 搜索按钮 | Search button
+        // 鎼滅储鎸夐挳 | Search button
         Button() {
-          Text('搜索')
+          Text('鎼滅储')
             .fontSize(20)
             .fontColor('#FFFFFF')
             .fontWeight(600)
@@ -586,20 +587,20 @@ struct SearchPage {
     .padding({ top: 24 })
   }
   
-  // 渲染搜索历史 | Render search history
+  // 娓叉煋鎼滅储鍘嗗彶 | Render search history
   @Builder
   renderSearchHistory() {
     if (this.searchHistory.length > 0 && this.showHistory && !this.searchText) {
       Column() {
         Row() {
-          Text('搜索历史')
+          Text('鎼滅储鍘嗗彶')
             .fontSize(22)
             .fontColor('#FFFFFF')
             .fontWeight(600)
             .margin({ left: 40 })
           
           Button() {
-            Text('清空')
+            Text('娓呯┖')
               .fontSize(18)
               .fontColor('#8E8E93')
           }
@@ -638,13 +639,13 @@ struct SearchPage {
     }
   }
   
-  // 渲染热门关键词 | Render hot keywords
+  // 娓叉煋鐑棬鍏抽敭璇?| Render hot keywords
   @Builder
   renderHotKeywords() {
     if (this.hotKeywords.length > 0 && this.showHotKeywords && !this.searchText) {
       Column() {
         Row() {
-          Text('热门搜索')
+          Text('鐑棬鎼滅储')
             .fontSize(22)
             .fontColor('#FFFFFF')
             .fontWeight(600)
@@ -678,13 +679,13 @@ struct SearchPage {
     }
   }
   
-  // 渲染拼音推荐 | Render pinyin recommendations
+  // 娓叉煋鎷奸煶鎺ㄨ崘 | Render pinyin recommendations
   @Builder
   renderPinyinRecommendations() {
     if (this.pinyinRecommendations.length > 0 && this.searchText) {
       Column() {
         Row() {
-          Text('拼音推荐')
+          Text('鎷奸煶鎺ㄨ崘')
             .fontSize(20)
             .fontColor('#FFFFFF')
             .fontWeight(600)
@@ -718,19 +719,19 @@ struct SearchPage {
     }
   }
   
-  // 渲染虚拟键盘 | Render virtual keyboard
+  // 娓叉煋铏氭嫙閿洏 | Render virtual keyboard
   @Builder
   renderVirtualKeyboard() {
     if (this.showVirtualKeyboard) {
       Column() {
         Row() {
-          Text('虚拟键盘')
+          Text('铏氭嫙閿洏')
             .fontSize(18)
             .fontColor('#8E8E93')
             .margin({ left: 40 })
           
           Button() {
-            Text('使用系统键盘')
+            Text('浣跨敤绯荤粺閿洏')
               .fontSize(16)
               .fontColor('#007AFF')
           }
@@ -743,7 +744,7 @@ struct SearchPage {
         .margin({ bottom: 20 })
         
         Column() {
-          // 字母数字按键 | Letter and number keys
+          // 瀛楁瘝鏁板瓧鎸夐敭 | Letter and number keys
           Row() {
             ForEach(this.keyboardKeys.slice(0, 10), (key: KeyboardKey) => {
               this.renderKeyboardKey(key);
@@ -798,7 +799,7 @@ struct SearchPage {
     }
   }
   
-  // 渲染键盘按键 | Render keyboard key
+  // 娓叉煋閿洏鎸夐敭 | Render keyboard key
   @Builder
   renderKeyboardKey(key: KeyboardKey) {
     Button() {
@@ -823,25 +824,25 @@ struct SearchPage {
   
   build() {
     Column() {
-      // 顶部搜索栏 | Top search bar
+      // 椤堕儴鎼滅储鏍?| Top search bar
       this.renderSearchBar();
       
-      // 主内容区域 | Main content area
+      // 涓诲唴瀹瑰尯鍩?| Main content area
       Column() {
-        // 拼音推荐 | Pinyin recommendations
+        // 鎷奸煶鎺ㄨ崘 | Pinyin recommendations
         this.renderPinyinRecommendations();
         
-        // 搜索历史 | Search history
+        // 鎼滅储鍘嗗彶 | Search history
         this.renderSearchHistory();
         
-        // 热门关键词 | Hot keywords
+        // 鐑棬鍏抽敭璇?| Hot keywords
         this.renderHotKeywords();
       }
       .flexGrow(1)
       .width('100%')
       .backgroundColor('#121212')
       
-      // 虚拟键盘 | Virtual keyboard
+      // 铏氭嫙閿洏 | Virtual keyboard
       this.renderVirtualKeyboard();
     }
     .width('100%')

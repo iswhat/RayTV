@@ -218,8 +218,8 @@ export class PlaybackRepository {
   /**
    * 鑾峰彇瀵硅薄鐨勬墍鏈夊€?   * 鏇夸唬Object.values锛屽吋瀹笰rkTS璇硶
    */
-  private getObjectValues<T extends object>(obj: T): any[] {
-    const values: any[] = [];
+  private getObjectValues<T extends object>(obj: T): unknown[] {
+    const values: unknown[] = [];
     for (const key in obj) {
       if (this.hasOwnProperty(obj, key)) {
         values.push(obj[key]);

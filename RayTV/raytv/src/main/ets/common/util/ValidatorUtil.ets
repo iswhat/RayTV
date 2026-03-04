@@ -292,7 +292,7 @@ export class ValidatorUtil {
    * @param options 验证选项 Validation options
    * @returns 是否有效 Is valid
    */
-  public static isValidArray(arr: any[], options: { minLength?: number; maxLength?: number } = {}): boolean {
+  public static isValidArray<T>(arr: T[], options: { minLength?: number; maxLength?: number } = {}): boolean {
     if (!Array.isArray(arr)) {
       return false;
     }
@@ -315,7 +315,7 @@ export class ValidatorUtil {
    * @param obj 对象 Object
    * @returns 是否为空 Is empty
    */
-  public static isEmptyObject(obj: any): boolean {
+  public static isEmptyObject(obj: unknown): boolean {
     if (obj === null || obj === undefined) {
       return true;
     }

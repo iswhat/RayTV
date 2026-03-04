@@ -40,7 +40,7 @@ export class URLValidator {
     }
 
     try {
-      const parsed = new URL(url);
+      const parsed: URL = new URL(url);
 
       // 验证协议
       if (!URLValidator.ALLOWED_PROTOCOLS.has(parsed.protocol)) {
@@ -175,7 +175,7 @@ export class URLValidator {
    */
   public static isAbsoluteURL(url: string): boolean {
     try {
-      const parsed = new URL(url);
+      const parsed: URL = new URL(url);
       return parsed.protocol && parsed.hostname;
     } catch {
       return false;
@@ -189,7 +189,7 @@ export class URLValidator {
    */
   public static normalizeURL(url: string): string {
     try {
-      const parsed = new URL(url);
+      const parsed: URL = new URL(url);
       return parsed.href;
     } catch {
       return url;
@@ -203,7 +203,7 @@ export class URLValidator {
    */
   public static getDomain(url: string): string {
     try {
-      const parsed = new URL(url);
+      const parsed: URL = new URL(url);
       return parsed.hostname;
     } catch {
       return '';

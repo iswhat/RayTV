@@ -7,7 +7,7 @@ interface Registration<T> {
 }
 
 class EnhancedDIContainer {
-  private registrations: Map<string, Registration<any>> = new Map();
+  private registrations: Map<string, Registration<unknown>> = new Map();
   private lifecycle: ServiceLifecycle = new ServiceLifecycle();
 
   register<T>(key: string, factory: () => T, isSingleton: boolean = true): void {
@@ -19,7 +19,7 @@ class EnhancedDIContainer {
 
   registerMultiple(registrations: Array<{
     key: string;
-    factory: () => any;
+    factory: () => unknown;
     isSingleton?: boolean;
   }>): void {
     registrations.forEach(({ key, factory, isSingleton = true }) => {
@@ -45,7 +45,7 @@ class EnhancedDIContainer {
     return instance;
   }
 
-  resolveAll(keys: string[]): any[] {
+  resolveAll(keys: string[]): unknown[] {
     return keys.map(key => this.resolve(key));
   }
 

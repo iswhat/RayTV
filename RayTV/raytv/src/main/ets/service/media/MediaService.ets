@@ -6,6 +6,7 @@ import ApiResponse from '../../data/dto/ApiResponse';
 import { SiteService } from '../spider/SiteService';
 import { Inject } from '../../common/di/Container';
 import CacheService from '../cache/CacheService';
+import { CachePriority } from '../cache/CacheService';
 
 // 常量定义 | Constant definition
 const TAG = 'MediaService';
@@ -73,7 +74,14 @@ export interface RecommendationConfig {
   personalWeight: number;
   diversityWeight: number;
   maxRecommendations: number;
-}","}}}
+}
+
+// 站点接口 | Site interface
+export interface Site {
+  key: string;
+  name: string;
+  enabled: boolean;
+}
 
 /**
  * 媒体服务类 | Media service class
@@ -138,9 +146,10 @@ export class MediaService {
       
       this.isInitialized = true;
       console.info(TAG + ': Media service initialized successfully');
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to initialize media service: ${error.message}`);
-      throw error;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to initialize media service: ${err.message}`);
+      throw err;
     }
   }
 
@@ -224,9 +233,20 @@ export class MediaService {
   /**
    * 获取推荐内容 | Get recommended content
    */
-  public async getRecommendedContent(): Promise<ApiResponse<RecommendedContent[]>> {
+  /**
+   * 通用内容获取方法
+   */
+  private async fetchContent(
+    contentType: string,
+    cacheKey: string,
+    siteMethod: string,
+    cacheExpiry: number,
+    cacheTags: string[],
+    successMessage: string,
+    errorMessage: string
+  ): Promise<ApiResponse<RecommendedContent[]>> {
     try {
-      console.info(TAG + ': Getting recommended content...');
+      console.info(TAG + `: Getting ${contentType} content...`);
       
       // 验证依赖服务是否可用
       if (!this.cacheService) {
@@ -239,38 +259,37 @@ export class MediaService {
         return ApiResponse.error(500, '站点服务不可用');
       }
       
-      // 生成缓存键 | Generate cache key
-      const cacheKey = 'recommended_content';
-      
-      // 尝试从缓存获取 | Try to get from cache
+      // 尝试从缓存获取
       try {
         const cachedData = await this.cacheService.get<RecommendedContent[]>(cacheKey);
         if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
-          console.info(TAG + ': Loaded recommended content from cache');
-          return ApiResponse.success(cachedData, '获取推荐内容成功');
+          console.info(TAG + `: Loaded ${contentType} content from cache`);
+          return ApiResponse.success(cachedData, successMessage);
         }
       } catch (cacheError) {
-        console.warn(TAG + ': Failed to get cached content:', cacheError);
+        const err = cacheError instanceof Error ? cacheError : new Error(String(cacheError));
+        console.warn(TAG + ': Failed to get cached content:', err);
         // 缓存失败不影响主流程，继续从站点获取
       }
       
-      // 从实际站点获取推荐内容 | Get recommended content from actual sites
-      // 1. 获取所有启用的站点 | 1. Get all enabled sites
+      // 从实际站点获取内容
+      // 1. 获取所有启用的站点
       let enabledSites: Site[] = [];
       try {
         enabledSites = await this.siteService.getEnabledSites();
       } catch (siteError) {
-        console.error(TAG + ': Failed to get enabled sites:', siteError);
-        return ApiResponse.success([], '获取推荐内容成功');
+        const err = siteError instanceof Error ? siteError : new Error(String(siteError));
+        console.error(TAG + ': Failed to get enabled sites:', err);
+        return ApiResponse.success([], successMessage);
       }
       
-      // 2. 如果没有启用的站点，返回空列表 | 2. If no enabled sites, return empty list
+      // 2. 如果没有启用的站点，返回空列表
       if (!Array.isArray(enabledSites) || enabledSites.length === 0) {
         console.warn(TAG + ': No enabled sites found');
-        return ApiResponse.success([], '获取推荐内容成功');
+        return ApiResponse.success([], successMessage);
       }
       
-      // 3. 从每个启用的站点获取推荐内容（并行请求） | 3. Get recommended content from each enabled site (parallel requests)
+      // 3. 从每个启用的站点获取内容（并行请求）
       const sitePromises = enabledSites.map(async (site) => {
         try {
           // 验证站点数据完整性
@@ -279,16 +298,16 @@ export class MediaService {
             return [];
           }
           
-          // 调用站点的推荐内容方法 | Call site's recommendation method
+          // 调用站点的内容方法
           const siteContent = await this.siteService.callSiteMethod(
             site.key,
-            'getRecommendations',
+            siteMethod,
             [],
             { timeout: 10000 }
           ) as SiteRecommendedItem[];
           
           if (Array.isArray(siteContent) && siteContent.length > 0) {
-            // 添加站点标识并处理结果 | Add site identifier and process results
+            // 添加站点标识并处理结果
             return siteContent
               .filter(item => item && typeof item === 'object')
               .map(item => {
@@ -306,306 +325,95 @@ export class MediaService {
           return [];
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn(TAG + `: Failed to get recommendations from site ${site?.name || 'unknown'}: ${errorMessage}`);
+          console.warn(TAG + `: Failed to get ${contentType} content from site ${site?.name || 'unknown'}: ${errorMessage}`);
           return [];
         }
       });
       
-      // 等待所有请求完成 | Wait for all requests to complete
-      let siteResults: Array<Array<RecommendedMediaItem>> = [];
+      // 等待所有请求完成
+      let siteResults: Array<Array<RecommendedContent>> = [];
       try {
         siteResults = await Promise.all(sitePromises);
       } catch (promiseError) {
-        console.error(TAG + ': Failed to get site recommendations:', promiseError);
-        return ApiResponse.success([], '获取推荐内容成功');
+        const err = promiseError instanceof Error ? promiseError : new Error(String(promiseError));
+        console.error(TAG + `: Failed to get site ${contentType} content:`, err);
+        return ApiResponse.success([], successMessage);
       }
       
-      // 合并结果 | Merge results
-      const recommendedContent = Array.isArray(siteResults) ? siteResults.flat() : [];
+      // 合并结果
+      const content = Array.isArray(siteResults) ? siteResults.flat() : [];
       
-      // 4. 如果没有获取到推荐内容，返回空数据 | 4. If no recommended content obtained, return empty data
-      if (!Array.isArray(recommendedContent) || recommendedContent.length === 0) {
-        console.warn(TAG + ': No recommended content found from any site');
-        return ApiResponse.success([], '获取推荐内容成功');
+      // 4. 如果没有获取到内容，返回空数据
+      if (!Array.isArray(content) || content.length === 0) {
+        console.warn(TAG + `: No ${contentType} content found from any site`);
+        return ApiResponse.success([], successMessage);
       }
       
-      // 缓存结果 | Cache results
+      // 缓存结果
       try {
-        await this.cacheService.set(cacheKey, recommendedContent, {
-          expiry: 300000, // 5分钟缓存
-          priority: 'high',
-          tags: ['recommended', 'content']
+        await this.cacheService.set(cacheKey, content, {
+          expiry: cacheExpiry,
+          priority: CachePriority.HIGH,
+          tags: cacheTags
         });
       } catch (cacheError) {
-        console.error(TAG + ': Failed to cache recommended content:', cacheError);
+        const err = cacheError instanceof Error ? cacheError : new Error(String(cacheError));
+        console.error(TAG + `: Failed to cache ${contentType} content:`, err);
         // 缓存失败不影响主流程
       }
       
-      console.info(TAG + `: Retrieved ${recommendedContent.length} recommended content items from ${enabledSites.length} sites`);
-      return ApiResponse.success(recommendedContent, '获取推荐内容成功');
+      console.info(TAG + `: Retrieved ${content.length} ${contentType} content items from ${enabledSites.length} sites`);
+      return ApiResponse.success(content, successMessage);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to get recommended content: ${errorMessage}`);
-      return ApiResponse.error(500, '获取推荐内容失败');
+      console.error(TAG + `: Failed to get ${contentType} content: ${errorMessage}`);
+      return ApiResponse.error(500, errorMessage);
     }
+  }
+
+  /**
+   * 获取推荐内容 | Get recommended content
+   */
+  public async getRecommendedContent(): Promise<ApiResponse<RecommendedContent[]>> {
+    return this.fetchContent(
+      'recommended',
+      'recommended_content',
+      'getRecommendations',
+      300000, // 5分钟缓存
+      ['recommended', 'content'],
+      '获取推荐内容成功',
+      '获取推荐内容失败'
+    );
   }
 
   /**
    * 获取热门内容 | Get popular content
    */
   public async getPopularContent(): Promise<ApiResponse<RecommendedContent[]>> {
-    try {
-      console.info(TAG + ': Getting popular content...');
-      
-      // 验证依赖服务是否可用
-      if (!this.cacheService) {
-        console.error(TAG + ': Cache service not available');
-        return ApiResponse.error(500, '缓存服务不可用');
-      }
-      
-      if (!this.siteService) {
-        console.error(TAG + ': Site service not available');
-        return ApiResponse.error(500, '站点服务不可用');
-      }
-      
-      // 生成缓存键 | Generate cache key
-      const cacheKey = 'popular_content';
-      
-      // 尝试从缓存获取 | Try to get from cache
-      try {
-        const cachedData = await this.cacheService.get<RecommendedContent[]>(cacheKey);
-        if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
-          console.info(TAG + ': Loaded popular content from cache');
-          return ApiResponse.success(cachedData, '获取热门内容成功');
-        }
-      } catch (cacheError) {
-        console.warn(TAG + ': Failed to get cached content:', cacheError);
-        // 缓存失败不影响主流程，继续从站点获取
-      }
-      
-      // 从实际站点获取热门内容 | Get popular content from actual sites
-      // 1. 获取所有启用的站点 | 1. Get all enabled sites
-      let enabledSites: Site[] = [];
-      try {
-        enabledSites = await this.siteService.getEnabledSites();
-      } catch (siteError) {
-        console.error(TAG + ': Failed to get enabled sites:', siteError);
-        return ApiResponse.success([], '获取热门内容成功');
-      }
-      
-      // 2. 如果没有启用的站点，返回空列表 | 2. If no enabled sites, return empty list
-      if (!Array.isArray(enabledSites) || enabledSites.length === 0) {
-        console.warn(TAG + ': No enabled sites found');
-        return ApiResponse.success([], '获取热门内容成功');
-      }
-      
-      // 3. 从每个启用的站点获取热门内容（并行请求） | 3. Get popular content from each enabled site (parallel requests)
-      const sitePromises = enabledSites.map(async (site) => {
-        try {
-          // 验证站点数据完整性
-          if (!site || !site.key || !site.name) {
-            console.warn(TAG + ': Invalid site data');
-            return [];
-          }
-          
-          // 尝试调用站点的热门内容方法 | Try calling site's popular content method
-          const siteContent = await this.siteService.callSiteMethod(
-            site.key,
-            'getPopularContent',
-            [],
-            { timeout: 10000 }
-          ) as SiteRecommendedItem[];
-          
-          if (Array.isArray(siteContent) && siteContent.length > 0) {
-            // 添加站点标识并处理结果 | Add site identifier and process results
-            return siteContent
-              .filter(item => item && typeof item === 'object')
-              .map(item => {
-                const recommendedItem: RecommendedContent = {
-                  id: item.id || '',
-                  title: item.title || '',
-                  cover: item.cover,
-                  type: item.type || '',
-                  siteKey: site.key,
-                  rating: item.rating
-                };
-                return recommendedItem;
-              });
-          }
-          return [];
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn(TAG + `: Failed to get popular content from site ${site?.name || 'unknown'}: ${errorMessage}`);
-          return [];
-        }
-      });
-      
-      // 等待所有请求完成 | Wait for all requests to complete
-      let siteResults: Array<Array<RecommendedMediaItem>> = [];
-      try {
-        siteResults = await Promise.all(sitePromises);
-      } catch (promiseError) {
-        console.error(TAG + ': Failed to get site popular content:', promiseError);
-        return ApiResponse.success([], '获取热门内容成功');
-      }
-      
-      // 合并结果 | Merge results
-      const popularContent = Array.isArray(siteResults) ? siteResults.flat() : [];
-      
-      // 4. 如果没有获取到热门内容，返回空数据 | 4. If no popular content obtained, return empty data
-      if (!Array.isArray(popularContent) || popularContent.length === 0) {
-        console.warn(TAG + ': No popular content found from any site');
-        return ApiResponse.success([], '获取热门内容成功');
-      }
-      
-      // 缓存结果 | Cache results
-      try {
-        await this.cacheService.set(cacheKey, popularContent, {
-          expiry: 600000, // 10分钟缓存
-          priority: 'high',
-          tags: ['popular', 'content']
-        });
-      } catch (cacheError) {
-        console.error(TAG + ': Failed to cache popular content:', cacheError);
-        // 缓存失败不影响主流程
-      }
-      
-      console.info(TAG + `: Retrieved ${popularContent.length} popular content items from ${enabledSites.length} sites`);
-      return ApiResponse.success(popularContent, '获取热门内容成功');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to get popular content: ${errorMessage}`);
-      return ApiResponse.error(500, '获取热门内容失败');
-    }
+    return this.fetchContent(
+      'popular',
+      'popular_content',
+      'getPopularContent',
+      600000, // 10分钟缓存
+      ['popular', 'content'],
+      '获取热门内容成功',
+      '获取热门内容失败'
+    );
   }
 
   /**
    * 获取最新上线内容 | Get new content
    */
   public async getNewContent(): Promise<ApiResponse<RecommendedContent[]>> {
-    try {
-      console.info(TAG + ': Getting new content...');
-      
-      // 验证依赖服务是否可用
-      if (!this.cacheService) {
-        console.error(TAG + ': Cache service not available');
-        return ApiResponse.error(500, '缓存服务不可用');
-      }
-      
-      if (!this.siteService) {
-        console.error(TAG + ': Site service not available');
-        return ApiResponse.error(500, '站点服务不可用');
-      }
-      
-      // 生成缓存键 | Generate cache key
-      const cacheKey = 'new_content';
-      
-      // 尝试从缓存获取 | Try to get from cache
-      try {
-        const cachedData = await this.cacheService.get<RecommendedContent[]>(cacheKey);
-        if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
-          console.info(TAG + ': Loaded new content from cache');
-          return ApiResponse.success(cachedData, '获取最新上线内容成功');
-        }
-      } catch (cacheError) {
-        console.warn(TAG + ': Failed to get cached content:', cacheError);
-        // 缓存失败不影响主流程，继续从站点获取
-      }
-      
-      // 从实际站点获取最新上线内容 | Get new content from actual sites
-      // 1. 获取所有启用的站点 | 1. Get all enabled sites
-      let enabledSites: Site[] = [];
-      try {
-        enabledSites = await this.siteService.getEnabledSites();
-      } catch (siteError) {
-        console.error(TAG + ': Failed to get enabled sites:', siteError);
-        return ApiResponse.success([], '获取最新上线内容成功');
-      }
-      
-      // 2. 如果没有启用的站点，返回空列表 | 2. If no enabled sites, return empty list
-      if (!Array.isArray(enabledSites) || enabledSites.length === 0) {
-        console.warn(TAG + ': No enabled sites found');
-        return ApiResponse.success([], '获取最新上线内容成功');
-      }
-      
-      // 3. 从每个启用的站点获取最新上线内容（并行请求） | 3. Get new content from each enabled site (parallel requests)
-      const sitePromises = enabledSites.map(async (site) => {
-        try {
-          // 验证站点数据完整性
-          if (!site || !site.key || !site.name) {
-            console.warn(TAG + ': Invalid site data');
-            return [];
-          }
-          
-          // 尝试调用站点的最新上线内容方法 | Try calling site's new content method
-          const siteContent = await this.siteService.callSiteMethod(
-            site.key,
-            'getNewContent',
-            [],
-            { timeout: 10000 }
-          ) as SiteRecommendedItem[];
-          
-          if (Array.isArray(siteContent) && siteContent.length > 0) {
-            // 添加站点标识并处理结果 | Add site identifier and process results
-            return siteContent
-              .filter(item => item && typeof item === 'object')
-              .map(item => {
-                const recommendedItem: RecommendedContent = {
-                  id: item.id || '',
-                  title: item.title || '',
-                  cover: item.cover,
-                  type: item.type || '',
-                  siteKey: site.key,
-                  rating: item.rating
-                };
-                return recommendedItem;
-              });
-          }
-          return [];
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn(TAG + `: Failed to get new content from site ${site?.name || 'unknown'}: ${errorMessage}`);
-          return [];
-        }
-      });
-      
-      // 等待所有请求完成 | Wait for all requests to complete
-      let siteResults: Array<Array<RecommendedMediaItem>> = [];
-      try {
-        siteResults = await Promise.all(sitePromises);
-      } catch (promiseError) {
-        console.error(TAG + ': Failed to get site new content:', promiseError);
-        return ApiResponse.success([], '获取最新上线内容成功');
-      }
-      
-      // 合并结果 | Merge results
-      const newContent = Array.isArray(siteResults) ? siteResults.flat() : [];
-      
-      // 4. 如果没有获取到最新上线内容，返回空数据 | 4. If no new content obtained, return empty data
-      if (!Array.isArray(newContent) || newContent.length === 0) {
-        console.warn(TAG + ': No new content found from any site');
-        return ApiResponse.success([], '获取最新上线内容成功');
-      }
-      
-      // 缓存结果 | Cache results
-      try {
-        await this.cacheService.set(cacheKey, newContent, {
-          expiry: 1800000, // 30分钟缓存
-          priority: 'high',
-          tags: ['new', 'content']
-        });
-      } catch (cacheError) {
-        console.error(TAG + ': Failed to cache new content:', cacheError);
-        // 缓存失败不影响主流程
-      }
-      
-      console.info(TAG + `: Retrieved ${newContent.length} new content items from ${enabledSites.length} sites`);
-      return ApiResponse.success(newContent, '获取最新上线内容成功');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to get new content: ${errorMessage}`);
-      return ApiResponse.error(500, '获取最新上线内容失败');
-    }
+    return this.fetchContent(
+      'new',
+      'new_content',
+      'getNewContent',
+      1800000, // 30分钟缓存
+      ['new', 'content'],
+      '获取最新上线内容成功',
+      '获取最新上线内容失败'
+    );
   }
 
   /**
@@ -641,9 +449,14 @@ export class MediaService {
     
     // 计算各类型的权重
     this.userPreferences = [];
-    for (const [type, count] of typeCount.entries()) {
-      const weight = totalInteractions > 0 ? count / totalInteractions : 0;
-      this.userPreferences.push({ mediaType: type, weight });
+    const types: string[] = this.getObjectKeys(typeCount);
+    for (let i = 0; i < types.length; i++) {
+      const type = types[i];
+      const count = typeCount.get(type);
+      if (count) {
+        const weight = totalInteractions > 0 ? count / totalInteractions : 0;
+        this.userPreferences.push({ mediaType: type, weight });
+      }
     }
     
     // 按权重排序
@@ -681,9 +494,13 @@ export class MediaService {
    */
   private optimizeRecommendations(contentList: RecommendedContent[]): RecommendedContent[] {
     // 计算每个内容的推荐分数
-    const contentWithScores = contentList.map(content => {
+    interface ContentWithScore extends RecommendedContent {
+      score: number;
+    }
+
+    const contentWithScores: ContentWithScore[] = contentList.map((content): ContentWithScore => {
       const score = this.calculateRecommendationScore(content);
-      const contentWithScore: RecommendedContent & { score?: number } = {
+      const contentWithScore: ContentWithScore = {
         id: content.id,
         title: content.title,
         cover: content.cover,
@@ -721,8 +538,9 @@ export class MediaService {
       
       console.info(TAG + `: Generated ${optimizedRecommendations.length} personalized recommendations`);
       return ApiResponse.success(optimizedRecommendations, '获取个性化推荐内容成功');
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to get personalized recommendations: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to get personalized recommendations: ${err.message}`);
       return ApiResponse.error(500, '获取个性化推荐内容失败');
     }
   }

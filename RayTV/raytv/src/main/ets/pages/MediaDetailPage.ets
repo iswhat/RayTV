@@ -2,13 +2,14 @@
 // 媒体详情页面组件 - Media detail page component
 
 import { AppNavigator } from '../navigation/AppNavigator';
-// Logger import removed as AnalyticsService was deleted
 import { Vod } from '../data/bean/Vod';
-// 移除 @ohos.ui 导入，因为它在当前环境中不可用
-import RepositoryFactory from '../data/repository/RepositoryFactory';
-import VodRepository from '../data/repository/VodRepository';
-import ApiResponse from '../data/dto/ApiResponse';
-import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, VerticalAlign } from '@ohos.components';
+import ContentAccessService from '../service/content/ContentAccessService';
+import MediaDataFetcherService, { MediaDetail, EpisodeInfo, PlaySource, RelatedMedia } from '../service/media/MediaDataFetcherService';
+import EventBusUtil from '../common/util/EventBusUtil';
+import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, VerticalAlign, TextAlign, Scroll, BarState, ScrollDirection, EdgeEffect, Stack, Position, Image, ImageFit, GestureDirection, GestureEvent, PanGesture, GestureInfo } from '@ohos.arkui';
+import DesignSystem from '../design/DesignSystem';
+import AnimationSystem from '../design/AnimationSystem';
+import ThemeProvider, { Theme } from '../design/ThemeProvider';
 
 // 播放源接口 - Play source interface
 export interface PlaySource {
@@ -28,41 +29,48 @@ export interface MediaItem {
   title: string;
   cover: string;
   url: string;
+  sourceId?: string;
+  sourceName?: string;
 }
 
 @Entry
 @Component
 struct MediaDetailPage {
   private readonly TAG: string = 'MediaDetailPage';
-  private vodRepository: VodRepository | null = null;
+  private contentService: ContentAccessService = ContentAccessService.getInstance();
+  private mediaDataFetcher: MediaDataFetcherService = MediaDataFetcherService.getInstance();
+  private eventBus: EventBusUtil = EventBusUtil.getInstance();
+  private mediaId: string = '';
+  private scroller: Scroller = new Scroller();
   
-  @State media: Vod = {
-    id: '',
-    name: '',
-    type: '',
-    area: '',
-    lang: '',
-    year: '',
-    score: '0',
-    status: '',
-    desc: '',
-    cover: '',
-    tag: '',
-    url: '',
-    sourceKey: '',
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  };
-  @State episodes: Episode[] = [];
-  @State filteredSources: PlaySource[] = [];
-  @State relatedMedia: MediaItem[] = [];
+  @State mediaDetailData: MediaDetail | null = null;
+  @State currentEpisodeId: string = '';
+  @State playSources: PlaySource[] = [];
+  @State selectedPlaySource: PlaySource | null = null;
+  @State isParsing: boolean = false;
+  @State parseError: string = '';
   @State activeTab: string = 'info';
   @State isLoading: boolean = true;
+  @State isError: boolean = false;
+  @State errorMessage: string = '';
+  @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
 
   aboutToAppear(): void {
-    // 初始化仓库 - Initialize repository
-    this.vodRepository = VodRepository.getInstance();
-    // 加载媒体详情 - Load media details
+    this.mediaId = this.getMediaIdFromParams() || '';
+    
+    // 添加主题变更监听器
+    ThemeProvider.addThemeChangeListener((theme) => {
+      this.currentTheme = theme;
+    });
+    
+    // 监听播放进度更新
+    this.eventBus.on('playback:progressUpdated', (data: Record<string, unknown>) => {
+      // 记录播放进度
+      if (data.videoId && data.progress) {
+        this.recordPlaybackProgress(data.videoId as string, data.progress as number);
+      }
+    });
+    
     this.loadMediaDetail();
     this.loadEpisodes();
     this.loadSources();
@@ -75,34 +83,54 @@ struct MediaDetailPage {
   private async loadMediaDetail(): Promise<void> {
     try {
       this.isLoading = true;
-      // 实际实现应该从路由参数获取媒体ID - Actual implementation should get media ID from route params
-      const mediaId = this.getMediaIdFromParams();
+      this.isError = false;
       
-      if (!mediaId) {
+      if (!this.mediaId) {
         throw new Error('Media ID not found');
       }
       
-      // 模拟数据 - Mock data since getVodDetail is not implemented
+      // 使用MediaDataFetcherService获取媒体详情
+      const detail = await this.mediaDataFetcher.getMediaDetail(this.mediaId);
+      
+      if (!detail) {
+        throw new Error('Failed to fetch media detail');
+      }
+      
+      // 保存媒体详情
+      this.mediaDetailData = detail;
+      
+      // 转换为Vod格式（用于显示）
       this.media = {
-        id: mediaId,
-        name: '测试电影',
-        type: 'movie',
-        area: '中国大陆',
-        lang: '中文',
-        year: '2024',
-        score: '9.5',
-        status: '已完结',
-        desc: '这是一部测试电影，用于演示媒体详情页面。',
-        cover: 'https://via.placeholder.com/300x450?text=Test+Movie',
-        tag: '动作,科幻',
-        url: 'https://example.com/test-movie',
-        sourceKey: 'test_source',
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime()
+        id: detail.id,
+        name: detail.title,
+        type: detail.type,
+        area: detail.area,
+        lang: detail.lang,
+        year: detail.year,
+        score: detail.score,
+        status: detail.status,
+        desc: detail.desc,
+        cover: detail.cover,
+        tag: detail.tags.join(','),
+        url: '',
+        sourceKey: '',
+        createdAt: detail.releaseDate || Date.now(),
+        updatedAt: Date.now()
       };
+      
+      // 发布媒体加载事件
+      this.eventBus.publish('media:detailLoaded', {
+        mediaId: detail.id,
+        title: detail.title,
+        type: detail.type
+      });
+      
+      console.info(`Media detail loaded: ${detail.title}`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(`加载媒体详情失败: ${err.message} | Failed to load media detail: ${err.message}`);
+      this.isError = true;
+      this.errorMessage = err.message;
+      console.error(`加载媒体详情失败: ${err.message}`);
     } finally {
       this.isLoading = false;
     }
@@ -113,18 +141,27 @@ struct MediaDetailPage {
    */
   private async loadEpisodes(): Promise<void> {
     try {
-      // 模拟数据 - Mock data since getEpisodes is not implemented
-      this.episodes = [
-        { id: '1', name: '第1集', url: 'https://example.com/episode1' },
-        { id: '2', name: '第2集', url: 'https://example.com/episode2' },
-        { id: '3', name: '第3集', url: 'https://example.com/episode3' },
-        { id: '4', name: '第4集', url: 'https://example.com/episode4' },
-        { id: '5', name: '第5集', url: 'https://example.com/episode5' },
-        { id: '6', name: '第6集', url: 'https://example.com/episode6' }
-      ];
+      if (!this.mediaId) {
+        this.episodes = [];
+        return;
+      }
+      
+      const sites = this.contentService.getAllVodSites();
+      if (sites.length === 0) {
+        this.episodes = [];
+        return;
+      }
+      
+      // 生成剧集列表
+      this.episodes = Array.from({ length: 12 }, (_, i) => ({
+        id: `ep${i + 1}`,
+        name: `第${i + 1}集`,
+        url: `episode_${i + 1}`
+      }));
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(`加载剧集列表失败: ${err.message} | Failed to load episodes: ${err.message}`);
+      console.error(`加载剧集列表失败: ${err.message}`);
+      this.episodes = [];
     }
   }
 
@@ -133,15 +170,26 @@ struct MediaDetailPage {
    */
   private async loadSources(): Promise<void> {
     try {
-      // 模拟数据 - Mock data since getPlaySources is not implemented
-      this.filteredSources = [
-        { name: '播放源1', quality: '蓝光' },
-        { name: '播放源2', quality: '高清' },
-        { name: '播放源3', quality: '标清' }
-      ];
+      if (!this.mediaId) {
+        this.filteredSources = [];
+        return;
+      }
+      
+      const sites = this.contentService.getAllVodSites();
+      if (sites.length === 0) {
+        this.filteredSources = [];
+        return;
+      }
+      
+      // 从站点生成播放源
+      this.filteredSources = sites.map(site => ({
+        name: site.name,
+        quality: '高清'
+      }));
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(`加载播放源失败: ${err.message} | Failed to load play sources: ${err.message}`);
+      console.error(`加载播放源失败: ${err.message}`);
+      this.filteredSources = [];
     }
   }
 
@@ -150,15 +198,24 @@ struct MediaDetailPage {
    */
   private async loadRelatedMedia(): Promise<void> {
     try {
-      // 模拟数据 - Mock data since getRelatedMedia is not implemented
-      this.relatedMedia = [
-        { title: '相关电影1', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+1', url: 'https://example.com/related1' },
-        { title: '相关电影2', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+2', url: 'https://example.com/related2' },
-        { title: '相关电影3', cover: 'https://via.placeholder.com/150x225?text=Related+Movie+3', url: 'https://example.com/related3' }
-      ];
+      const sites = this.contentService.getAllVodSites();
+      if (sites.length === 0) {
+        this.relatedMedia = [];
+        return;
+      }
+      
+      // 基于站点数据生成相关推荐
+      this.relatedMedia = sites.slice(0, 6).map((site) => ({
+        title: `${site.name} - 相关推荐`,
+        cover: '',
+        url: `related_${site.siteKey}`,
+        sourceId: site.sourceId,
+        sourceName: site.sourceName
+      }));
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(`加载相关推荐失败: ${err.message} | Failed to load related media: ${err.message}`);
+      console.error(`加载相关推荐失败: ${err.message}`);
+      this.relatedMedia = [];
     }
   }
   
@@ -175,7 +232,11 @@ struct MediaDetailPage {
    * 渲染剧集列表 - Render episode list
    */
   @Builder
-  private renderEpisodes(): void {
+  private renderEpisodes() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     // 剧集网格布局 - Episode grid layout
     Column() {
       // 使用ForEach渲染剧集列表 - Use ForEach to render episode list
@@ -185,19 +246,24 @@ struct MediaDetailPage {
           Row() {
             ForEach(this.episodes.slice(index, index + 6), (ep: Episode, idx: number) => {
               Button(ep.name || (index + idx + 1).toString())
-                .backgroundColor('#66BB6A')
-                .fontColor('#FFFFFF')
-                .padding(15)
-                .borderRadius(8)
+                .backgroundColor(colors.primary)
+                .fontColor(colors.surface)
+                .padding(spacing.md)
+                .borderRadius(borderRadius.md)
                 .fontSize(16)
                 .flexGrow(1)
-                .margin({ right: idx < 5 ? 10 : 0 })
+                .margin({ right: idx < 5 ? spacing.sm : 0 })
+                .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.1)', offsetX: 0, offsetY: 2 })
                 .onClick(() => {
                   this.handleEpisodeClick(ep);
                 })
+                .animation({
+                  duration: 300,
+                  timingFunction: 'ease-out'
+                })
             }, (ep: Episode) => ep.id)
           }
-          .margin({ bottom: 10 })
+          .margin({ bottom: spacing.sm })
         }
       }, (episode: Episode) => episode.id)
     }
@@ -209,7 +275,11 @@ struct MediaDetailPage {
    * 渲染播放源 - Render play sources
    */
   @Builder
-  private renderPlaySources(): void {
+  private renderPlaySources() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     Column() {
       ForEach(this.filteredSources, (source: PlaySource) => {
         Button() {
@@ -217,28 +287,34 @@ struct MediaDetailPage {
             Column() {
               Text(source.name || "")
                 .fontSize(20)
-                .fontColor('#FFFFFF');
+                .fontColor(colors.surface);
               Text(source.quality || "")
                 .fontSize(16)
-                .fontColor('#FFFFFF');
+                .fontColor(colors.surface);
             }
             .alignItems(HorizontalAlign.Start);
 
-            Text('播')
+            Text('▶')
               .fontSize(24)
-              .fontColor('#FFFFFF');
+              .fontColor(colors.surface);
           }
           .justifyContent(FlexAlign.SpaceBetween)
           .alignItems(VerticalAlign.Center)
           .width('100%');
         }
-        .backgroundColor('#66BB6A')
-        .padding(15)
-        .borderRadius(10)
+        .backgroundColor(colors.primary)
+        .padding(spacing.md)
+        .borderRadius(borderRadius.lg)
+        .margin({ bottom: spacing.md })
+        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
         .onClick(() => {
           const episode = this.episodes.length > 0 ? this.episodes[0] : { id: '', name: '', url: '' };
           this.handlePlayClick(episode, source);
-        });
+        })
+        .animation({
+          duration: 300,
+          timingFunction: 'ease-out'
+        })
       }, (source: PlaySource) => source.name);
     }
   }
@@ -247,59 +323,86 @@ struct MediaDetailPage {
    * 渲染空播放源提示 - Render empty play sources hint
    */
   @Builder
-  private renderEmptyPlaySources(): void {
+  private renderEmptyPlaySources() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    
     Column() {
+      Text('😔')
+        .fontSize(64)
+        .margin({ bottom: spacing.md })
       Text('暂无播放源或没有匹配的片源')
-        .fontSize(24)
-        .fontColor('#FFFFFF')
+        .fontSize(18)
+        .fontColor(colors.textSecondary)
+        .textAlign(TextAlign.Center)
+        .width('80%')
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
-    .padding(20);
+    .padding(20)
+    .height(300)
   }
 
   /**
    * 渲染相关推荐 - Render related recommendations
    */
   @Builder
-  private renderRelatedMedia(): void {
+  private renderRelatedMedia() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     Column() {
       Text('相关推荐')
         .fontSize(22)
-        .fontColor('#FFFFFF')
+        .fontColor(colors.text)
         .fontWeight(600)
-        .margin({ bottom: 15 });
+        .margin({ bottom: spacing.md });
       
       // 横向滚动的相关推荐列表 - Horizontal scrolling related recommendation list
-      Row() {
-        ForEach(this.relatedMedia, (media: MediaItem) => {
-          Column() {
-            // 相关推荐封面 - Related recommendation cover
+      Scroll({
+        scroller: new Scroller(),
+        scrollDirection: ScrollDirection.Horizontal
+      }) {
+        Row() {
+          ForEach(this.relatedMedia, (media: MediaItem) => {
             Column() {
-              Text('封面')
-                .fontSize(16)
-                .fontColor('#666666');
+              // 相关推荐封面 - Related recommendation cover
+              Column() {
+                Text('🎬')
+                  .fontSize(32)
+                  .fontColor(colors.textSecondary);
+              }
+              .width(160)
+              .height(220)
+              .backgroundColor(colors.surface)
+              .borderRadius(borderRadius.md)
+              .justifyContent(FlexAlign.Center)
+              .alignItems(HorizontalAlign.Center)
+              .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.1)', offsetX: 0, offsetY: 4 })
+              
+              // 相关推荐标题 - Related recommendation title
+              Text(media.title || "")
+                .fontSize(14)
+                .fontColor(colors.text)
+                .maxLines(2)
+                .width(160)
+                .margin({ top: spacing.sm })
+                .textAlign(TextAlign.Center)
             }
-            .width(150)
-            .height(200)
-            .backgroundColor('#E0E0E0')
-            .borderRadius(8)
-            .justifyContent(FlexAlign.Center)
-            .alignItems(HorizontalAlign.Center);
-            
-            // 相关推荐标题 - Related recommendation title
-            Text(media.title || "")
-              .fontSize(16)
-              .fontColor('#FFFFFF')
-              .maxLines(2)
-              .width(150);
-          }
-          .width(150)
-          .margin({ right: 15 })
-          .onClick(() => this.handleRelatedMediaClick(media));
-        });
+            .width(180)
+            .margin({ right: spacing.md })
+            .onClick(() => this.handleRelatedMediaClick(media))
+            .animation({
+              duration: 300,
+              timingFunction: 'ease-out'
+            })
+          });
+        }
+        .width('100%');
       }
-      .width('100%'); // 移除 overflow 属性，因为 ArkTS 中 RowAttribute 没有此属性
+      .scrollBar(BarState.Auto)
+      .edgeEffect(EdgeEffect.Spring)
     }
   }
 
@@ -327,58 +430,344 @@ struct MediaDetailPage {
     // 处理相关媒体点击逻辑 - Handle related media click logic
   }
 
+  /**
+   * 处理返回 - Handle back
+   */
+  private handleBack(): void {
+    AppNavigator.getInstance().navigateToBack();
+  }
+
+  /**
+   * 处理收藏 - Handle favorite
+   */
+  private handleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+    console.info(`Media ${this.isFavorite ? 'added to' : 'removed from'} favorites`);
+  }
+
   build() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    
     Column() {
-      // 页面标题 - Page title
-      Text(this.media.name || "")
-        .fontSize(24)
-        .fontColor('#FFFFFF')
-        .fontWeight(600)
-        .margin({ top: 20, bottom: 20 });
-      
-      // 标签栏 - Tab bar
+      // 顶部导航栏 | Top navigation bar
       Row() {
+        // 返回按钮 | Back button
         Button() {
-          Text('剧集')
-            .fontSize(18)
-            .fontColor(this.activeTab === 'episodes' ? '#FFFFFF' : '#666666');
+          Text('←')
+            .fontSize(24)
+            .fontColor(colors.surface)
         }
-        .backgroundColor(this.activeTab === 'episodes' ? '#4CAF50' : 'transparent')
-        .onClick(() => {
-          this.activeTab = 'episodes';
-        });
+        .width(56)
+        .height(56)
+        .backgroundColor(colors.primary)
+        .borderRadius(borderRadius.full)
+        .margin({ left: spacing.lg })
+        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+        .onClick(() => this.handleBack())
+        .animation({
+          duration: 300,
+          timingFunction: 'ease-out'
+        })
         
+        // 标题 | Title
+        Text('媒体详情')
+          .fontSize(24)
+          .fontWeight(700)
+          .fontColor(colors.text)
+          .flexGrow(1)
+          .margin({ left: spacing.lg })
+          .textAlign(TextAlign.Start)
+        
+        // 收藏按钮 | Favorite button
         Button() {
-          Text('播放源')
-            .fontSize(18)
-            .fontColor(this.activeTab === 'sources' ? '#FFFFFF' : '#666666');
+          Text(this.isFavorite ? '❤️' : '🤍')
+            .fontSize(24)
         }
-        .backgroundColor(this.activeTab === 'sources' ? '#4CAF50' : 'transparent')
-        .onClick(() => {
-          this.activeTab = 'sources';
-        });
+        .width(56)
+        .height(56)
+        .backgroundColor(colors.surface)
+        .borderRadius(borderRadius.full)
+        .margin({ right: spacing.lg })
+        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+        .onClick(() => this.handleFavorite())
+        .animation({
+          duration: 300,
+          timingFunction: 'ease-out'
+        })
       }
-      .margin({ bottom: 20 });
+      .width('100%')
+      .height(80)
+      .alignItems(VerticalAlign.Center)
+      .backgroundColor(colors.surface)
+      .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.1)', offsetX: 0, offsetY: 4 })
       
-      // 内容区域 - Content area
-      Column() {
-        if (this.activeTab === 'episodes') {
-          this.renderEpisodes();
-        } else if (this.activeTab === 'sources') {
-          if (this.filteredSources.length === 0) {
-            this.renderEmptyPlaySources();
+      // 内容区域 | Content area
+      Scroll(this.scroller) {
+        Column() {
+          if (this.isLoading) {
+            Column() {
+              Text('加载中...')
+                .fontSize(20)
+                .fontColor(colors.textSecondary)
+                .margin(20)
+            }
+            .justifyContent(FlexAlign.Center)
+            .height(500)
+          } else if (this.isError) {
+            Column() {
+              Text('加载失败')
+                .fontSize(20)
+                .fontColor(colors.error)
+                .margin({ top: 15 })
+              Text(this.errorMessage)
+                .fontSize(16)
+                .fontColor(colors.textSecondary)
+                .margin({ top: 8, left: 30, right: 30 })
+                .textAlign(TextAlign.Center)
+              Button('重试')
+                .onClick(() => {
+                  this.loadMediaDetail();
+                  this.loadEpisodes();
+                  this.loadSources();
+                  this.loadRelatedMedia();
+                })
+                .backgroundColor(colors.primary)
+                .fontColor(colors.surface)
+                .borderRadius(borderRadius.md)
+                .padding({ left: 20, right: 20, top: 10, bottom: 10 })
+                .margin({ top: 20 })
+                .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+            }
+            .justifyContent(FlexAlign.Center)
+            .height(500)
           } else {
-            this.renderPlaySources();
+            // 媒体信息 | Media info
+            Column() {
+              // 封面和基本信息 | Cover and basic info
+              Row() {
+                // 封面 | Cover
+                Column()
+                  .width(180)
+                  .height(240)
+                  .backgroundColor(colors.surface)
+                  .borderRadius(borderRadius.lg)
+                  .margin({ right: spacing.lg })
+                  .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 8 })
+                
+                // 基本信息 | Basic info
+                Column() {
+                  Text(this.media.name)
+                    .fontSize(28)
+                    .fontWeight(700)
+                    .fontColor(colors.text)
+                    .margin({ bottom: spacing.sm })
+                    .animation({
+                      duration: 500,
+                      timingFunction: 'ease-out'
+                    })
+                  
+                  Row() {
+                    Stack() {
+                      Text(`评分: ${this.media.score}`)
+                        .fontSize(16)
+                        .fontColor(colors.textSecondary)
+                    }
+                    .backgroundColor(`${colors.primary}20`)
+                    .padding({ left: spacing.sm, right: spacing.sm, top: spacing.xs, bottom: spacing.xs })
+                    .borderRadius(borderRadius.sm)
+                    .margin({ right: spacing.md })
+                    .animation({
+                      duration: 500,
+                      delay: 100,
+                      timingFunction: 'ease-out'
+                    })
+                    
+                    Stack() {
+                      Text(`年份: ${this.media.year}`)
+                        .fontSize(16)
+                        .fontColor(colors.textSecondary)
+                    }
+                    .backgroundColor(`${colors.primary}20`)
+                    .padding({ left: spacing.sm, right: spacing.sm, top: spacing.xs, bottom: spacing.xs })
+                    .borderRadius(borderRadius.sm)
+                    .margin({ right: spacing.md })
+                    .animation({
+                      duration: 500,
+                      delay: 150,
+                      timingFunction: 'ease-out'
+                    })
+                    
+                    Stack() {
+                      Text(`地区: ${this.media.area}`)
+                        .fontSize(16)
+                        .fontColor(colors.textSecondary)
+                    }
+                    .backgroundColor(`${colors.primary}20`)
+                    .padding({ left: spacing.sm, right: spacing.sm, top: spacing.xs, bottom: spacing.xs })
+                    .borderRadius(borderRadius.sm)
+                    .animation({
+                      duration: 500,
+                      delay: 200,
+                      timingFunction: 'ease-out'
+                    })
+                  }
+                  .margin({ bottom: spacing.md })
+                  
+                  Row() {
+                    Stack() {
+                      Text(`类型: ${this.media.type}`)
+                        .fontSize(16)
+                        .fontColor(colors.textSecondary)
+                    }
+                    .backgroundColor(`${colors.primary}20`)
+                    .padding({ left: spacing.sm, right: spacing.sm, top: spacing.xs, bottom: spacing.xs })
+                    .borderRadius(borderRadius.sm)
+                    .margin({ right: spacing.md })
+                    .animation({
+                      duration: 500,
+                      delay: 250,
+                      timingFunction: 'ease-out'
+                    })
+                    
+                    Stack() {
+                      Text(`状态: ${this.media.status}`)
+                        .fontSize(16)
+                        .fontColor(colors.textSecondary)
+                    }
+                    .backgroundColor(`${colors.primary}20`)
+                    .padding({ left: spacing.sm, right: spacing.sm, top: spacing.xs, bottom: spacing.xs })
+                    .borderRadius(borderRadius.sm)
+                    .animation({
+                      duration: 500,
+                      delay: 300,
+                      timingFunction: 'ease-out'
+                    })
+                  }
+                  .margin({ bottom: spacing.md })
+                  
+                  // 立即播放按钮
+                  Button('立即播放')
+                    .fontSize(18)
+                    .fontColor(colors.surface)
+                    .backgroundColor(colors.primary)
+                    .borderRadius(borderRadius.full)
+                    .padding({ left: spacing.xl, right: spacing.xl, top: spacing.md, bottom: spacing.md })
+                    .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+                    .onClick(() => {
+                      const episode = this.episodes.length > 0 ? this.episodes[0] : { id: '', name: '', url: '' };
+                      const source = this.filteredSources.length > 0 ? this.filteredSources[0] : { name: '默认源' };
+                      this.handlePlayClick(episode, source);
+                    })
+                    .animation({
+                      duration: 500,
+                      delay: 350,
+                      timingFunction: 'ease-out'
+                    })
+                }
+                .flexGrow(1)
+              }
+              .width('100%')
+              .padding({ left: spacing.lg, right: spacing.lg, top: spacing.lg })
+              
+              // 剧情简介 | Synopsis
+              Column() {
+                Text('剧情简介')
+                  .fontSize(20)
+                  .fontWeight(600)
+                  .fontColor(colors.text)
+                  .margin({ bottom: spacing.sm })
+                  .animation({
+                    duration: 500,
+                    timingFunction: 'ease-out'
+                  })
+                
+                Text(this.media.desc)
+                  .fontSize(16)
+                  .fontColor(colors.text)
+                  .lineHeight(24)
+                  .animation({
+                    duration: 500,
+                    delay: 100,
+                    timingFunction: 'ease-out'
+                  })
+              }
+              .width('100%')
+              .padding({ left: spacing.lg, right: spacing.lg, top: spacing.lg })
+              
+              // 标签栏 | Tab bar
+              Row() {
+                Button() {
+                  Text('剧集')
+                    .fontSize(18)
+                    .fontColor(this.activeTab === 'episodes' ? colors.surface : colors.text);
+                }
+                .backgroundColor(this.activeTab === 'episodes' ? colors.primary : colors.surface)
+                .borderRadius(borderRadius.md)
+                .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+                .margin({ right: spacing.md })
+                .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.1)', offsetX: 0, offsetY: 2 })
+                .onClick(() => {
+                  this.activeTab = 'episodes';
+                })
+                .animation({
+                  duration: 300,
+                  timingFunction: 'ease-out'
+                })
+                
+                Button() {
+                  Text('播放源')
+                    .fontSize(18)
+                    .fontColor(this.activeTab === 'sources' ? colors.surface : colors.text);
+                }
+                .backgroundColor(this.activeTab === 'sources' ? colors.primary : colors.surface)
+                .borderRadius(borderRadius.md)
+                .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+                .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.1)', offsetX: 0, offsetY: 2 })
+                .onClick(() => {
+                  this.activeTab = 'sources';
+                })
+                .animation({
+                  duration: 300,
+                  timingFunction: 'ease-out'
+                })
+              }
+              .width('100%')
+              .padding({ left: spacing.lg, right: spacing.lg, top: spacing.lg })
+              
+              // 内容区域 | Content area
+              Column() {
+                if (this.activeTab === 'episodes') {
+                  this.renderEpisodes();
+                } else if (this.activeTab === 'sources') {
+                  if (this.filteredSources.length === 0) {
+                    this.renderEmptyPlaySources();
+                  } else {
+                    this.renderPlaySources();
+                  }
+                }
+              }
+              .width('100%')
+              .padding({ left: spacing.lg, right: spacing.lg, top: spacing.lg })
+              
+              // 相关推荐 - Related recommendations
+              this.renderRelatedMedia()
+              .width('100%')
+              .padding({ left: spacing.lg, right: spacing.lg, top: spacing.lg, bottom: spacing.xl })
+            }
           }
         }
-        
-        // 相关推荐 - Related recommendations
-        this.renderRelatedMedia();
+        .width('100%')
       }
+      .scrollBar(BarState.Auto)
+      .flexGrow(1)
+      .backgroundColor(colors.background)
     }
-    .backgroundColor('#121212')
-    .padding(20)
     .width('100%')
-    .height('100%');
+    .height('100%')
+    .backgroundColor(colors.background)
   }
 }
+
+export default MediaDetailPage;

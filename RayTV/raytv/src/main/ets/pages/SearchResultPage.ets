@@ -259,7 +259,7 @@ struct SearchResultPage {
   @Builder
   renderResultItem(result: SearchResult) {
     Column() {
-      Image(result.cover || 'https://via.placeholder.com/300x450?text=No+Image')
+      Image(result.cover || '')
         .width(this.resultItemWidth)
         .height(this.resultItemWidth * 1.5)
         .objectFit(ImageFit.Cover)

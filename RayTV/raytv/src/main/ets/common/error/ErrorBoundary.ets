@@ -8,7 +8,11 @@ export interface ErrorInfoDetail {
   componentStack?: string;
   componentName?: string;
   timestamp?: number;
-  [key: string]: string | number | boolean | null | undefined;
+  errorId?: string;
+  errorMessage?: string;
+  errorCode?: number;
+  stackTrace?: string;
+  additionalInfo?: string;
 }
 
 export interface ErrorBoundaryState {
@@ -126,11 +130,12 @@ export class ErrorBoundary {
   /**
    * 异步函数错误包装
    */
-  async wrapAsync<T extends (...args: any[]) => Promise<any>>(func: T, componentName?: string): Promise<ReturnType<T> | undefined> {
+  async wrapAsync<T extends (...args: unknown[]) => Promise<unknown>>(func: T, componentName?: string): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
-      return await func();
+      return await func() as Awaited<ReturnType<T>>;
     } catch (error) {
-      this.catchError(error as Error, {}, componentName);
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.catchError(err, {}, componentName);
       return undefined;
     }
   }
@@ -143,7 +148,7 @@ export const ErrorUtils = {
   /**
    * 安全执行函数
    */
-  safeExecute<T extends (...args: any[]) => any>(func: T, fallback?: ReturnType<T>): ReturnType<T> | undefined {
+  safeExecute<T extends (...args: unknown[]) => unknown>(func: T, fallback?: ReturnType<T>): ReturnType<T> | undefined {
     try {
       return func();
     } catch (error) {
@@ -155,7 +160,7 @@ export const ErrorUtils = {
   /**
    * 安全执行异步函数
    */
-  async safeExecuteAsync<T extends (...args: any[]) => Promise<any>>(func: T, fallback?: Awaited<ReturnType<T>>): Promise<Awaited<ReturnType<T>> | undefined> {
+  async safeExecuteAsync<T extends (...args: unknown[]) => Promise<unknown>>(func: T, fallback?: Awaited<ReturnType<T>>): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       return await func();
     } catch (error) {

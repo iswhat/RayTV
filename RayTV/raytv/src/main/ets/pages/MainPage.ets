@@ -1,14 +1,9 @@
 import { AppNavigator, DetailParams } from '../navigation/AppNavigator';
-// Logger import removed as AnalyticsService was deleted
-import ConfigService from '../service/config/ConfigService';
-import { MediaService, RecommendedContent } from '../service/media/MediaService';
-import CacheService from '../service/cache/CacheService';
-import { ImageLazyLoader } from '../components/ImageLazyLoader';
-
-import ApiResponse from '../data/dto/ApiResponse';
+import Logger from '../common/util/Logger';
+import ContentAccessService from '../service/content/ContentAccessService';
 import display from '@ohos.display';
-import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, ImageFit, BarState, HorizontalAlign, Alignment, Curve, List, ListItem, Axis } from '@ohos/arkui';
-
+import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, ImageFit, BarState, HorizontalAlign, Alignment, Curve, List, ListItem, Axis, Stack } from '@ohos/arkui';
+import ContentSourceBadge from '../components/ContentSourceBadge';
 
 /**
  * 应用主页面 | Application main page
@@ -17,6 +12,7 @@ import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign
 interface TabItem {
   key: string;
   name: string;
+  icon?: string;
 }
 
 interface FeaturedMediaItem {
@@ -26,29 +22,13 @@ interface FeaturedMediaItem {
   type: string;
   siteKey?: string;
   rating?: string;
-}
-
-interface MediaServiceItem {
-  id: string;
-  title: string;
-  cover?: string;
-  type?: string;
-  siteKey?: string;
-  rating?: string;
+  sourceId?: string;
+  sourceName?: string;
 }
 
 interface CategoryTab {
   id: string;
   name: string;
-}
-
-/**
- * 响应数据接口 | Response data interface
- */
-interface SuccessMediaResponse {
-  isSuccess: () => boolean;
-  data: MediaServiceItem[];
-  message?: string;
 }
 
 @Entry
@@ -60,6 +40,8 @@ struct MainPage {
   
   // 状态管理 | State management
   @State featuredMedia: FeaturedMediaItem[] = [];
+  @State popularMedia: FeaturedMediaItem[] = [];
+  @State newMedia: FeaturedMediaItem[] = [];
   @State isLoading: boolean = true;
   @State isError: boolean = false;
   @State errorMessage: string = '推荐内容加载失败';
@@ -68,9 +50,6 @@ struct MainPage {
   @State isLandscape: boolean = false;
   @State screenWidth: number = 0;
   @State screenHeight: number = 0;
-  @State currentSite: string = '默认片源';
-  @State showSiteDialog: boolean = false;
-  @State categories: CategoryTab[] = [];
   @State currentDate: string = '';
   
   // 导航标签数据 | Navigation tab data
@@ -79,19 +58,16 @@ struct MainPage {
     { key: 'live', name: '直播' },
     { key: 'search', name: '搜索' },
     { key: 'history', name: '历史' },
-    { key: 'config', name: '配置源' },
     { key: 'settings', name: '设置' }
   ];
   
   // 服务实例 | Service instances
-  private configService: ConfigService = ConfigService.getInstance();
-  private mediaService: MediaService = MediaService.getInstance();
-  private cacheService: CacheService = CacheService.getInstance();
+  private contentService: ContentAccessService = ContentAccessService.getInstance();
 
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
-    console.info('MainPage about to appear');
+    Logger.info(this.TAG, 'MainPage about to appear');
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
@@ -103,9 +79,6 @@ struct MainPage {
     setInterval(() => {
       this.updateCurrentDate();
     }, 60000);
-    
-    // 加载分类 | Load categories
-    this.loadCategories();
     
     // 加载推荐内容 | Load recommended content
     this.loadFeaturedMedia();
@@ -129,10 +102,10 @@ struct MainPage {
       this.screenWidth = displayInfo.width;
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
-      console.info('Screen info: width=' + this.screenWidth + ', height=' + this.screenHeight + ', landscape=' + this.isLandscape);
+      Logger.info(this.TAG, `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error('Failed to get screen info: ' + err.message);
+      Logger.error(this.TAG, `Failed to get screen info: ${err.message}`);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -146,104 +119,135 @@ struct MainPage {
       this.isLoading = true;
       this.isError = false;
       
-      // 生成缓存键 | Generate cache key
-      const cacheKey = `featured_${this.selectedTab}_${this.selectedCategory}_${this.currentSite}`;
-      
-      // 尝试从缓存获取 | Try to get from cache
-      const cachedData = await this.cacheService.get<FeaturedMediaItem[]>(cacheKey);
-      if (cachedData && cachedData.length > 0) {
-        this.featuredMedia = cachedData;
-        this.isLoading = false;
-        console.info('Loaded featured media from cache');
-        return;
-      }
-      
-      // 调用真实的API获取推荐内容 | Call real API to get recommended content
-      const response = await this.mediaService.getPersonalizedRecommendations();
-      
-      if (response.isSuccess() && response.data && response.data.length > 0) {
-        // 转换数据格式 | Convert data format
-        this.featuredMedia = response.data.map(item => ({
-          id: item.id,
-          title: item.title,
-          cover: item.cover,
-          type: item.type,
-          siteKey: item.siteKey,
-          rating: item.rating
-        }));
-        
-        // 缓存数据 | Cache data
-        this.cacheService.set(cacheKey, this.featuredMedia, {
-          expiry: 3600000, // 1小时缓存
-          priority: 'high',
-          tags: ['featured', 'media']
-        }).catch(error => {
-          console.error('Failed to cache featured media:', error);
-        });
-      } else {
-        // 如果没有数据，使用空数组 | Use empty array if no data
-        this.featuredMedia = [];
-      }
+      // 模拟数据 - 实际应该从ContentAccessService获取
+      // 这里使用模拟数据以便展示
+      this.featuredMedia = [
+        {
+          id: '1',
+          title: '星际穿越',
+          cover: 'https://example.com/cover1.jpg',
+          type: 'movie',
+          siteKey: 'site1',
+          rating: '9.3',
+          sourceId: 'source1',
+          sourceName: '源A'
+        },
+        {
+          id: '2',
+          title: '盗梦空间',
+          cover: 'https://example.com/cover2.jpg',
+          type: 'movie',
+          siteKey: 'site2',
+          rating: '9.0',
+          sourceId: 'source2',
+          sourceName: '源B'
+        },
+        {
+          id: '3',
+          title: '流浪地球2',
+          cover: 'https://example.com/cover3.jpg',
+          type: 'movie',
+          siteKey: 'site3',
+          rating: '8.5',
+          sourceId: 'source1',
+          sourceName: '源A'
+        },
+        {
+          id: '4',
+          title: '阿凡达',
+          cover: 'https://example.com/cover4.jpg',
+          type: 'movie',
+          siteKey: 'site4',
+          rating: '8.8',
+          sourceId: 'source3',
+          sourceName: '源C'
+        },
+        {
+          id: '5',
+          title: '复仇者联盟4',
+          cover: 'https://example.com/cover5.jpg',
+          type: 'movie',
+          siteKey: 'site1',
+          rating: '8.7',
+          sourceId: 'source1',
+          sourceName: '源A'
+        }
+      ];
+
+      this.popularMedia = [
+        {
+          id: '6',
+          title: '泰坦尼克号',
+          cover: 'https://example.com/cover6.jpg',
+          type: 'movie',
+          siteKey: 'site2',
+          rating: '9.2',
+          sourceId: 'source2',
+          sourceName: '源B'
+        },
+        {
+          id: '7',
+          title: '肖申克的救赎',
+          cover: 'https://example.com/cover7.jpg',
+          type: 'movie',
+          siteKey: 'site3',
+          rating: '9.7',
+          sourceId: 'source1',
+          sourceName: '源A'
+        },
+        {
+          id: '8',
+          title: '霸王别姬',
+          cover: 'https://example.com/cover8.jpg',
+          type: 'movie',
+          siteKey: 'site1',
+          rating: '9.6',
+          sourceId: 'source3',
+          sourceName: '源C'
+        }
+      ];
+
+      this.newMedia = [
+        {
+          id: '9',
+          title: '沙丘2',
+          cover: 'https://example.com/cover9.jpg',
+          type: 'movie',
+          siteKey: 'site1',
+          rating: '8.6',
+          sourceId: 'source3',
+          sourceName: '源C'
+        },
+        {
+          id: '10',
+          title: '哥斯拉-1.0',
+          cover: 'https://example.com/cover10.jpg',
+          type: 'movie',
+          siteKey: 'site2',
+          rating: '8.3',
+          sourceId: 'source2',
+          sourceName: '源B'
+        }
+      ];
       
       this.isLoading = false;
       
     } catch (error) {
-      console.error('Failed to load featured media:', error);
+      Logger.error(this.TAG, `Failed to load featured media: ${error}`);
       this.isError = true;
       this.errorMessage = '推荐内容加载失败';
       this.isLoading = false;
     }
   }
   
-  // 加载分类 | Load categories
-  private async loadCategories(): Promise<void> {
-    try {
-      // 生成缓存键 | Generate cache key
-      const cacheKey = 'categories';
-      
-      // 尝试从缓存获取 | Try to get from cache
-      const cachedData = await this.cacheService.get<CategoryTab[]>(cacheKey);
-      if (cachedData && cachedData.length > 0) {
-        this.categories = cachedData;
-        console.info('Loaded categories from cache');
-        return;
-      }
-      
-      // 从实际站点获取分类数据 | Get category data from actual sites
-      // 这里我们使用固定的分类列表，因为分类通常是相对固定的
-      // Use fixed category list since categories are usually relatively fixed
-      this.categories = [
-        { id: '全部', name: '全部' },
-        { id: '电影', name: '电影' },
-        { id: '电视剧', name: '电视剧' },
-        { id: '综艺', name: '综艺' },
-        { id: '动漫', name: '动漫' },
-        { id: '纪录片', name: '纪录片' }
-      ];
-      
-      // 缓存数据 | Cache data
-      this.cacheService.set(cacheKey, this.categories, {
-        expiry: 86400000, // 24小时缓存
-        priority: 'high',
-        tags: ['categories']
-      }).catch(error => {
-        console.error('Failed to cache categories:', error);
-      });
-      
-    } catch (error) {
-      console.error('Failed to load categories:', error);
-      this.categories = [{ id: '全部', name: '全部' }];
-    }
-  }
-  
   // 处理主菜单点击 | Handle main menu click
   private handleMainMenuClick(key: string): void {
     try {
-      console.info('Main menu clicked: ' + key);
+      Logger.info(this.TAG, `Main menu clicked: ${key}`);
 
       // 验证菜单键值 | Validate menu key
       if (!key) {
-        console.error('Invalid menu key');
+        Logger.error(this.TAG, 'Invalid menu key');
         return;
       }
 
@@ -261,29 +265,26 @@ struct MainPage {
         case 'history':
           AppNavigator.getInstance().navigateToHistory();
           break;
-        case 'config':
-          AppNavigator.getInstance().navigateToLineManager();
-          break;
         case 'settings':
           AppNavigator.getInstance().navigateToSettings();
           break;
         default:
-          console.warn('Unknown menu key: ' + key);
+          Logger.warn(this.TAG, `Unknown menu key: ${key}`);
           break;
       }
     } catch (error) {
-      console.error('Failed to handle main menu click:', error);
+      Logger.error(this.TAG, `Failed to handle main menu click: ${error}`);
     }
   }
   
   // 处理分类标签点击 | Handle category tab click
   private handleCategoryClick(categoryId: string): void {
     try {
-      console.info('Category clicked: ' + categoryId);
+      Logger.info(this.TAG, `Category clicked: ${categoryId}`);
 
       // 验证分类ID | Validate category ID
       if (!categoryId) {
-        console.error('Invalid category ID');
+        Logger.error(this.TAG, 'Invalid category ID');
         return;
       }
 
@@ -292,28 +293,18 @@ struct MainPage {
       // 这里可以根据分类加载对应内容
       this.loadFeaturedMedia();
     } catch (error) {
-      console.error('Failed to handle category click:', error);
-    }
-  }
-  
-  // 处理片源切换 | Handle site switch
-  private handleSiteSwitch(): void {
-    try {
-      console.info('Site switch requested');
-      this.showSiteDialog = true;
-    } catch (error) {
-      console.error('Failed to handle site switch:', error);
+      Logger.error(this.TAG, `Failed to handle category click: ${error}`);
     }
   }
   
   // 处理影视点击 | Handle media click
   private handleMediaClick(media: FeaturedMediaItem): void {
     try {
-      console.info('Media clicked: ' + media.title);
+      Logger.info(this.TAG, `Media clicked: ${media.title}, Source: ${media.sourceName}`);
 
       // 验证媒体数据完整性 | Validate media data integrity
       if (!media.id || !media.siteKey) {
-        console.error('Invalid media data: missing required fields');
+        Logger.error(this.TAG, 'Invalid media data: missing required fields');
         return;
       }
 
@@ -324,122 +315,99 @@ struct MainPage {
       };
       AppNavigator.getInstance().navigateToDetail(params);
     } catch (error) {
-      console.error('Failed to handle media click:', error);
+      Logger.error(this.TAG, `Failed to handle media click: ${error}`);
     }
   }
-  
-
   
   // 渲染媒体项 | Render media item
   @Builder
   private renderMediaItem(media: FeaturedMediaItem): void {
     Column() {
-      ImageLazyLoader({
-        src: media.cover || 'https://via.placeholder.com/300x450?text=No+Image',
-        placeholder: 'https://via.placeholder.com/300x450?text=Loading',
-        errorPlaceholder: 'https://via.placeholder.com/300x450?text=Error',
-        width: '100%',
-        height: this.isLandscape ? 320 : 240,
-        borderRadius: 8,
-        onLoad: (src: string) => {
-          console.info('Image loaded: ' + src);
-        },
-        onError: (error: Error) => {
-          console.warn('Failed to load cover image: ' + media.cover);
+      Stack() {
+        Image(media.cover || '')
+          .width('100%')
+          .height(this.isLandscape ? 320 : 240)
+          .objectFit(ImageFit.Cover)
+          .borderRadius(12)
+          .backgroundColor('#2C2C2C')
+        
+        // 来源标识 | Source badge
+        if (media.sourceName) {
+          ContentSourceBadge({
+            sourceName: media.sourceName,
+            sourceId: media.sourceId || ''
+          })
+          .position({ top: 8, right: 8 })
         }
-      })
+        
+        // 评分标识 | Rating badge
+        if (media.rating) {
+          Row() {
+            Text(media.rating)
+              .fontSize(14)
+              .fontWeight(600)
+              .fontColor('#FFFFFF')
+          }
+          .backgroundColor('#FF6B35')
+          .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+          .borderRadius(8)
+          .position({ bottom: 8, right: 8 })
+        }
+      }
+      .margin({ bottom: 12 })
       
       Text(media.title)
         .fontSize(16)
+        .fontWeight(600)
         .maxLines(2)
-        .margin({ top: 12, left: 8, right: 8 })
+        .margin({ left: 8, right: 8 })
         .textAlign(TextAlign.Center)
         .fontColor('#FFFFFF')
-      
-      if (media.rating) {
-        Text(media.rating)
-          .fontSize(14)
-          .fontColor('#FF9800')
-          .margin({ top: 4, bottom: 12 })
-      }
     }
     .padding(12)
     .backgroundColor('#2C2C2C')
-    .borderRadius(12)
-    .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.3)', offsetY: 4 })
+    .borderRadius(16)
+    .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.4)', offsetY: 6 })
     .onClick(() => this.handleMediaClick(media))
-    .width(this.isLandscape ? 240 : 180)
-    .height(this.isLandscape ? 420 : 350)
+    .width(this.isLandscape ? 260 : 200)
+    .height(this.isLandscape ? 440 : 370)
+    .focusable(true)
+    .focusBorderWidth(2)
+    .focusBorderColor('#007AFF')
   }
   
-  // 渲染片源选择弹窗 | Render site selection dialog
+  // 渲染内容区域 | Render content section
   @Builder
-  private renderSiteDialog(): void {
-    Stack({
-      alignContent: Alignment.Center
-    }) {
-      // 半透明背景 | Semi-transparent background
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor('rgba(0, 0, 0, 0.8)')
-        .onClick(() => this.showSiteDialog = false)
-      
-      // 弹窗内容 | Dialog content
-      Column() {
-        Text('选择片源')
-          .fontSize(24)
+  private renderContentSection(title: string, mediaList: FeaturedMediaItem[]) {
+    Column() {
+      // 内容标题 | Content title
+      Row() {
+        Text(title)
+          .fontSize(20)
           .fontWeight(700)
           .fontColor('#FFFFFF')
-          .margin({ bottom: 24 })
-        
-        // 片源列表 | Site list
-        Column() {
-          Text('默认片源')
-            .fontSize(18)
-            .fontColor('#4CAF50')
-            .padding(20)
-            .backgroundColor('#2C2C2C')
-            .borderRadius(12)
-            .margin({ bottom: 12 })
-            .onClick(() => {
-              this.currentSite = '默认片源';
-              this.showSiteDialog = false;
-              this.loadFeaturedMedia();
-            })
-          
-          Text('备用片源')
-            .fontSize(18)
-            .fontColor('#FFFFFF')
-            .padding(20)
-            .backgroundColor('#1E1E1E')
-            .borderRadius(12)
-            .onClick(() => {
-              this.currentSite = '备用片源';
-              this.showSiteDialog = false;
-              this.loadFeaturedMedia();
-            })
-        }
-        .width('80%')
-        
-        // 取消按钮 | Cancel button
-        Button('取消')
-          .width('80%')
-          .margin({ top: 24 })
-          .backgroundColor('#444444')
-          .fontColor('#FFFFFF')
-          .borderRadius(12)
-          .padding(16)
-          .onClick(() => this.showSiteDialog = false)
+          .margin({ left: 30, top: 24, bottom: 16 })
       }
-      .width('60%')
-      .padding(24)
-      .backgroundColor('#1A1A1A')
-      .borderRadius(16)
-      .alignItems(HorizontalAlign.Center)
+      
+      // 内容区域 | Content area - 使用List实现虚拟列表
+      List({
+        scroller: this.contentScroller,
+        initialIndex: 0,
+        space: 20
+      }) {
+        ForEach(mediaList, (item: FeaturedMediaItem) => {
+          ListItem() {
+            this.renderMediaItem(item)
+          }
+          .width(this.isLandscape ? 260 : 200)
+          .height(this.isLandscape ? 440 : 370)
+        }, (item: FeaturedMediaItem) => `${item.id}_${item.sourceId || 'default'}`)
+      }
+      .listDirection(Axis.Horizontal)
+      .scrollBar(BarState.Auto)
+      .height(this.isLandscape ? 500 : 400)
+      .padding({ left: 30, right: 30, bottom: 30 })
     }
-    .width('100%')
-    .height('100%')
   }
   
   build() {
@@ -448,13 +416,12 @@ struct MainPage {
       Column() {
         // 顶部信息栏 | Top info bar
         Row() {
-          // 片源名称 | Site name
-          Text(this.currentSite)
-            .fontSize(20)
-            .fontWeight(600)
+          // 应用标题 | App title
+          Text('RayTV')
+            .fontSize(24)
+            .fontWeight(700)
             .fontColor('#FFFFFF')
             .margin({ left: 40 })
-            .onClick(() => this.handleSiteSwitch())
           
           // 日期显示 | Date display
           Text(this.currentDate)
@@ -465,7 +432,7 @@ struct MainPage {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         .alignItems(VerticalAlign.Center)
-        .height(70)
+        .height(80)
         .backgroundColor('#007AFF')
         
         // 主功能菜单 | Main function menu
@@ -477,8 +444,12 @@ struct MainPage {
                 .fontWeight(this.selectedTab === item.key ? 700 : 400)
                 .fontColor(this.selectedTab === item.key ? '#007AFF' : '#FFFFFF')
                 .padding({ left: 30, right: 30, top: 16, bottom: 16 })
+                .borderBottom(this.selectedTab === item.key ? { width: 3, color: '#007AFF' } : { width: 0, color: 'transparent' })
             }
             .onClick(() => this.handleMainMenuClick(item.key))
+            .focusable(true)
+            .focusBorderWidth(2)
+            .focusBorderColor('#007AFF')
           }, (item: TabItem) => item.key)
         }
         .width('100%')
@@ -486,187 +457,108 @@ struct MainPage {
         .alignItems(VerticalAlign.Center)
         .backgroundColor('#1E1E1E')
         .padding({ left: 30 })
-        
-        // 分类标签栏 | Category tab bar
-        if (this.selectedTab === 'vod') {
-          Scroll(this.scroller) {
-            Row() {
-              ForEach(this.categories, (category: CategoryTab) => {
-                Text(category.name)
-                  .fontSize(16)
-                  .fontWeight(this.selectedCategory === category.id ? 700 : 400)
-                  .fontColor(this.selectedCategory === category.id ? '#007AFF' : '#E0E0E0')
-                  .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-                  .backgroundColor(this.selectedCategory === category.id ? 'rgba(0, 122, 255, 0.2)' : 'transparent')
-                  .borderRadius(24)
-                  .margin({ right: 16 })
-                  .onClick(() => this.handleCategoryClick(category.id))
-              }, (category: CategoryTab) => category.id)
-            }
-            .width('100%')
-            .padding({ left: 30, right: 30, top: 16, bottom: 16 })
-          }
-          .scrollBar(BarState.Off)
-          .backgroundColor('#121212')
-        }
       }
       
       // 主内容区域 | Main content area
       if (this.selectedTab === 'vod') {
-        Column() {
-          if (this.isLoading) {
-            Column() {
-              Text('正在加载推荐内容...')
-                .fontSize(18)
-                .fontColor('#8E8E93')
-                .margin({ top: 30, bottom: 20 })
-              
-              // 骨架屏 | Skeleton screen
-              Row() {
-                ForEach([1, 2, 3, 4, 5], (item: number) => {
-                  Column() {
-                    // 图片骨架 | Image skeleton
-                    Column()
-                      .width(this.isLandscape ? 216 : 156)
-                      .height(this.isLandscape ? 320 : 240)
-                      .backgroundColor('#2C2C2C')
-                      .borderRadius(8)
-                      .animation({
-                        duration: 1000,
-                        tempo: 1,
-                        curve: Curve.EaseInOut,
-                        iterations: -1,
-                        delay: item * 100
-                      })
-                    
-                    // 标题骨架 | Title skeleton
-                    Column()
-                      .width(this.isLandscape ? 192 : 144)
-                      .height(40)
-                      .backgroundColor('#2C2C2C')
-                      .borderRadius(4)
-                      .margin({ top: 12 })
-                      .animation({
-                        duration: 1000,
-                        tempo: 1,
-                        curve: Curve.EaseInOut,
-                        iterations: -1,
-                        delay: item * 150
-                      })
-                    
-                    // 评分骨架 | Rating skeleton
-                    Column()
-                      .width(this.isLandscape ? 60 : 48)
-                      .height(20)
-                      .backgroundColor('#2C2C2C')
-                      .borderRadius(4)
-                      .margin({ top: 8 })
-                      .animation({
-                        duration: 1000,
-                        tempo: 1,
-                        curve: Curve.EaseInOut,
-                        iterations: -1,
-                        delay: item * 200
-                      })
-                  }
-                  .padding(12)
-                  .width(this.isLandscape ? 240 : 180)
-                  .height(this.isLandscape ? 420 : 350)
-                })
+        Scroll(this.contentScroller) {
+          Column() {
+            if (this.isLoading) {
+              Column() {
+                Text('正在加载推荐内容...')
+                  .fontSize(18)
+                  .fontColor('#8E8E93')
+                  .margin({ top: 30, bottom: 20 })
+                
+                // 骨架屏 | Skeleton screen
+                Row() {
+                  ForEach([1, 2, 3, 4, 5], (item: number) => {
+                    Column() {
+                      // 图片骨架 | Image skeleton
+                      Column()
+                        .width(this.isLandscape ? 234 : 176)
+                        .height(this.isLandscape ? 320 : 240)
+                        .backgroundColor('#2C2C2C')
+                        .borderRadius(12)
+                        .animation({
+                          duration: 1000,
+                          tempo: 1,
+                          curve: Curve.EaseInOut,
+                          iterations: -1,
+                          delay: item * 100
+                        })
+                      
+                      // 标题骨架 | Title skeleton
+                      Column()
+                        .width(this.isLandscape ? 216 : 168)
+                        .height(40)
+                        .backgroundColor('#2C2C2C')
+                        .borderRadius(4)
+                        .margin({ top: 12 })
+                        .animation({
+                          duration: 1000,
+                          tempo: 1,
+                          curve: Curve.EaseInOut,
+                          iterations: -1,
+                          delay: item * 150
+                        })
+                    }
+                    .padding(12)
+                    .width(this.isLandscape ? 260 : 200)
+                    .height(this.isLandscape ? 440 : 370)
+                  })
+                }
+                .padding({ left: 30, right: 30, bottom: 30 })
               }
-              .padding({ left: 30, right: 30, bottom: 30 })
-            }
-            .justifyContent(FlexAlign.Start)
-            .height(this.isLandscape ? 500 : 400)
-          } else if (this.isError) {
-            Column() {
-              Text('推荐内容加载失败')
-                .fontSize(18)
-                .fontColor('#FF5252')
-                .margin({ top: 20 })
-              Text(this.errorMessage)
-                .fontSize(16)
-                .fontColor('#FF9800')
-                .margin({ top: 12 })
-              Row() {
+              .justifyContent(FlexAlign.Start)
+              .height(this.isLandscape ? 500 : 400)
+            } else if (this.isError) {
+              Column() {
+                Text('推荐内容加载失败')
+                  .fontSize(18)
+                  .fontColor('#FF5252')
+                  .margin({ top: 20 })
+                Text(this.errorMessage)
+                  .fontSize(16)
+                  .fontColor('#FF9800')
+                  .margin({ top: 12 })
                 Button('重试')
                   .onClick(() => this.loadFeaturedMedia())
                   .backgroundColor('#007AFF')
                   .fontColor('white')
-                  .borderRadius(18)
-                  .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-                  .margin({ top: 20, right: 16 })
+                  .borderRadius(20)
+                  .padding({ left: 30, right: 30, top: 14, bottom: 14 })
+                  .margin({ top: 20 })
                   .fontSize(16)
-                Button('切换源')
-                  .onClick(() => this.handleSiteSwitch())
-                  .backgroundColor('#34C759')
-                  .fontColor('white')
-                  .borderRadius(18)
-                  .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-                  .margin({ top: 20, left: 16 })
-                  .fontSize(16)
+                  .focusable(true)
+                  .focusBorderWidth(2)
+                  .focusBorderColor('#007AFF')
+              }
+              .justifyContent(FlexAlign.Center)
+              .height(this.isLandscape ? 500 : 400)
+            } else {
+              // 推荐内容 | Recommended content
+              if (this.featuredMedia.length > 0) {
+                this.renderContentSection('为你推荐', this.featuredMedia);
+              }
+              
+              // 热门内容 | Popular content
+              if (this.popularMedia.length > 0) {
+                this.renderContentSection('热门内容', this.popularMedia);
+              }
+              
+              // 最新内容 | New content
+              if (this.newMedia.length > 0) {
+                this.renderContentSection('最新上线', this.newMedia);
               }
             }
-            .justifyContent(FlexAlign.Center)
-            .height(this.isLandscape ? 500 : 400)
-          } else if (this.featuredMedia.length > 0) {
-            // 内容标题 | Content title
-            Row() {
-              Text('推荐内容')
-                .fontSize(24)
-                .fontWeight(700)
-                .fontColor('#FFFFFF')
-                .margin({ left: 30, top: 24, bottom: 16 })
-            }
-            
-            // 内容区域 | Content area - 使用List实现虚拟列表
-            List({
-              scroller: this.contentScroller,
-              initialIndex: 0,
-              space: 16
-            }) {
-              ForEach(this.featuredMedia, (item: FeaturedMediaItem) => {
-                ListItem() {
-                  this.renderMediaItem(item)
-                }
-                .width(this.isLandscape ? 240 : 180)
-                .height(this.isLandscape ? 420 : 350)
-              }, (item: FeaturedMediaItem) => item.id)
-            }
-            .listDirection(Axis.Horizontal)
-            .scrollBar(BarState.Auto)
-            .height(this.isLandscape ? 500 : 400)
-            .padding({ left: 30, right: 30, bottom: 30 })
-          } else {
-            Column() {
-              Text('无推荐内容')
-                .fontSize(18)
-                .fontColor('#8E8E93')
-                .margin({ top: 20 })
-              Text('请确保已配置视频源')
-                .fontSize(16)
-                .fontColor('#8E8E93')
-                .margin({ top: 12 })
-              Button('去配置')
-                .onClick(() => AppNavigator.getInstance().navigateToSettings())
-                .backgroundColor('#007AFF')
-                .fontColor('white')
-                .borderRadius(18)
-                .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-                .margin({ top: 20 })
-                .fontSize(16)
-            }
-            .justifyContent(FlexAlign.Center)
-            .height(this.isLandscape ? 500 : 400)
           }
+          .width('100%')
         }
+        .scrollable(Axis.Vertical)
+        .scrollBar(BarState.Auto)
         .flexGrow(1)
         .backgroundColor('#121212')
-      }
-      
-      // 片源选择弹窗 | Site selection dialog
-      if (this.showSiteDialog) {
-        this.renderSiteDialog()
       }
     }
     .width('100%')

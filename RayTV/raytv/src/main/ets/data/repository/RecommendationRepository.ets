@@ -130,10 +130,11 @@ export class RecommendationRepository {
   private readonly cacheService: CacheService;
   private readonly userRepository: UserRepository;
   private readonly searchHistoryRepository: SearchHistoryRepository;
+  private readonly recommendationAlgorithm: LocalRecommendationAlgorithm;
   
   // API绔偣閰嶇疆
   private readonly apiEndpoints = {
-    baseUrl: 'https://api.raytv.example.com',
+    baseUrl: 'TODO_CONFIGURE_REAL_API',
     recommendations: '/recommendations',
     personalized: '/recommendations/personalized',
     similar: '/recommendations/similar/:id',
@@ -196,6 +197,7 @@ export class RecommendationRepository {
     this.cacheService = CacheService.getInstance();
     this.userRepository = UserRepository.getInstance();
     this.searchHistoryRepository = SearchHistoryRepository.getInstance();
+    this.recommendationAlgorithm = LocalRecommendationAlgorithm.getInstance();
     
     this.logger.info('RecommendationRepository initialized');
     this.setupEventListeners();
@@ -235,7 +237,10 @@ export class RecommendationRepository {
    * 鍒濆鍖栨帹鑽愪粨搴?   */
   public async initialize(): Promise<void> {
     try {
-      // 鍔犺浇閰嶇疆
+      // 初始化本地推荐算法
+      await this.recommendationAlgorithm.initialize();
+      
+      // 加载配置
       await this.loadConfig();
       
       // 鍔犺浇鐢ㄦ埛鍋忓ソ
@@ -426,8 +431,8 @@ export class RecommendationRepository {
         };
       }
       
-      // 浠庢湇鍔″櫒鑾峰彇鎺ㄨ崘
-      const response = await this.fetchRecommendationsFromServer(request);
+      // 使用本地推荐算法生成推荐
+      const response = await this.generateRecommendations(request);
       
       // 缂撳瓨鍝嶅簲
       const cacheDuration = this.cachedConfig?.cacheDuration[request.type] || 300;
@@ -449,6 +454,115 @@ export class RecommendationRepository {
       });
       
       // 灏濊瘯浠庣绾跨紦瀛樿幏鍙?      return await this.getOfflineRecommendations(request);
+    }
+  }
+  
+  /**
+   * 使用本地算法生成推荐
+   */
+  private async generateRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
+    const limit = request.limit || 20;
+    
+    switch (request.type) {
+      case RecommendationType.PERSONALIZED:
+        const personalized = await this.recommendationAlgorithm.generatePersonalizedRecommendations(
+          limit,
+          request.excludeIds
+        );
+        return {
+          items: personalized,
+          total: personalized.length,
+          type: RecommendationType.PERSONALIZED,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
+        
+      case RecommendationType.TRENDING:
+        const trending = await this.recommendationAlgorithm.generateTrendingRecommendations(
+          limit,
+          request.excludeIds
+        );
+        return {
+          items: trending,
+          total: trending.length,
+          type: RecommendationType.TRENDING,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
+        
+      case RecommendationType.SIMILAR:
+        if (!request.videoId) {
+          throw new Error('videoId is required for similar recommendations');
+        }
+        const similar = await this.recommendationAlgorithm.generateSimilarRecommendations(
+          request.videoId,
+          limit,
+          request.excludeIds
+        );
+        return {
+          items: similar,
+          total: similar.length,
+          type: RecommendationType.SIMILAR,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
+        
+      case RecommendationType.CONTINUE_WATCHING:
+        const continueWatching = await this.recommendationAlgorithm.generateContinueWatchingRecommendations(
+          limit
+        );
+        return {
+          items: continueWatching,
+          total: continueWatching.length,
+          type: RecommendationType.CONTINUE_WATCHING,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
+        
+      case RecommendationType.NEW_RELEASES:
+        const newReleases = await this.recommendationAlgorithm.generateNewReleasesRecommendations(
+          limit,
+          request.excludeIds
+        );
+        return {
+          items: newReleases,
+          total: newReleases.length,
+          type: RecommendationType.NEW_RELEASES,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
+        
+      default:
+        // 默认使用热门推荐
+        const defaultItems = await this.recommendationAlgorithm.generateTrendingRecommendations(
+          limit,
+          request.excludeIds
+        );
+        return {
+          items: defaultItems,
+          total: defaultItems.length,
+          type: request.type,
+          generatedAt: Date.now(),
+          metadata: {
+            algorithmVersion: 'local-1.0',
+            cacheHit: false
+          }
+        };
     }
   }
   

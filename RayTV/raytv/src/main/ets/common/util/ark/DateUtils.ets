@@ -14,7 +14,7 @@ export const DateUtils = {
   /**
    * 检查值是否为Date对象 Checks if value is a Date object
    */
-  isDate(value: any): boolean {
+  isDate(value: unknown): boolean {
     return value instanceof Date && !isNaN(value.getTime());
   },
 

@@ -15,7 +15,7 @@ export const StringUtils = {
   /**
    * 检查值是否为字符串 Checks if value is a string
    */
-  isString(value: any): boolean {
+  isString(value: unknown): boolean {
     return TypeUtils.isString(value);
   },
 

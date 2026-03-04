@@ -15,7 +15,7 @@ export const JsonUtils = {
   /**
    * 检查值是否可以被序列化 Checks if value can be serialized
    */
-  isSerializable(value: any): boolean {
+  isSerializable(value: unknown): boolean {
     try {
       JSON.stringify(value);
       return true;
@@ -28,7 +28,7 @@ export const JsonUtils = {
    * 安全的JSON序列化函数 Safe JSON stringify function
    * 替代JSON.stringify Replaces JSON.stringify
    */
-  stringify(value: any, replacer?: (key: string, value: SafeAny) => SafeAny | Array<number | string>, space?: string | number): string | null {
+  stringify(value: unknown, replacer?: (key: string, value: unknown) => unknown | Array<number | string>, space?: string | number): string | null {
     try {
       return JSON.stringify(value, replacer, space);
     } catch (e) {

@@ -5,6 +5,11 @@ import taskPool from '@ohos.taskpool';
 import MemoryManager from '../../common/util/MemoryManager';
 import { Serializable } from '../../types/commonTypes';
 
+/**
+ * 任务结果类型定义 // Task result type definition
+ */
+export type TaskResult = Record<string, string | number | boolean | null | TaskResult>;
+
 const TAG = 'TaskPoolManager';
 
 /**
@@ -31,7 +36,7 @@ export enum TaskStatus {
 /**
  * 任务接口定义 // Task interface definition
  */
-export interface Task<T = unknown> {
+export interface Task<T> {
   id: string;
   priority: TaskPriority;
   execute: () => Promise<T>;
@@ -47,8 +52,8 @@ export interface Task<T = unknown> {
  */
 export class TaskPoolManager {
   static instance: TaskPoolManager;
-  taskQueue: Task[] = [];
-  runningTasks: Map<string, Task> = new Map();
+  taskQueue: Task<TaskResult>[] = [];
+  runningTasks: Map<string, Task<TaskResult>> = new Map();
   maxConcurrentTasks: number = 3;
   isProcessing: boolean = false;
   memoryManager: MemoryManager;
@@ -88,7 +93,7 @@ export class TaskPoolManager {
    * 提交任务到队列 // Submit task to queue
    * @param task 任务对象 // Task object
    */
-  submit<T = unknown>(task: Task<T>): void {
+  submit<T>(task: Task<T>): void {
     if (!task || !task.execute) {
       Logger.error(TAG, 'Invalid task submitted');
       return;
@@ -127,7 +132,7 @@ export class TaskPoolManager {
    * 按优先级排序任务队列 // Sort task queue by priority
    */
   sortTasks(): void {
-    this.taskQueue.sort((a, b) => b.priority - a.priority);
+    this.taskQueue.sort((a: Task, b: Task) => b.priority - a.priority);
   }
 
   /**
@@ -150,9 +155,9 @@ export class TaskPoolManager {
     }
 
     // 检查队列中的任务 // Check queued tasks
-    const index = this.taskQueue.findIndex(task => task.id === taskId);
+    const index = this.taskQueue.findIndex((task: Task) => task.id === taskId);
     if (index !== -1) {
-      const task = this.taskQueue[index];
+      const task: Task = this.taskQueue[index];
       // 执行取消回调 // Execute cancel callback
       if (task.onCancel) {
         task.onCancel();
@@ -172,12 +177,12 @@ export class TaskPoolManager {
    */
   cancelAllTasks(): void {
     // 取消运行中的任务 // Cancel running tasks
-    this.runningTasks.forEach((task, id) => {
+    this.runningTasks.forEach((task: Task, id: string) => {
       this.cancelTask(id);
     });
 
     // 清空任务队列 // Clear task queue
-    this.taskQueue.forEach(task => {
+    this.taskQueue.forEach((task: Task) => {
       if (task.onCancel) {
         task.onCancel();
       }
@@ -225,7 +230,7 @@ export class TaskPoolManager {
       }
 
       // 获取下一个任务 // Get next task
-      const task = this.taskQueue.shift()!;
+      const task: Task<TaskResult> = this.taskQueue.shift()!;
       this.runningTasks.set(task.id, task);
       Logger.debug(TAG, `Starting task ${task.id}, priority: ${task.priority}`);
 
@@ -269,7 +274,7 @@ export class TaskPoolManager {
    * 执行任务 // Execute task
    * @param task 要执行的任务 // Task to execute
    */
-  private async executeTask(task: Task): Promise<void> {
+  private async executeTask(task: Task<TaskResult>): Promise<void> {
     const startTime = Date.now();
     // 记录任务开始前的内存使用情况 // Record memory usage before task starts
     const startMemoryUsage = this.memoryManager.getCurrentMemoryUsage();
@@ -284,12 +289,8 @@ export class TaskPoolManager {
       };
 
       // 执行任务 // Execute task
-      const taskFunction = async () => {
-        return await task.execute();
-      };
-
-      // 执行任务 // Execute task
-      const result = await taskPool.execute(taskFunction, taskOptions);
+      // 直接调用task.execute()，因为taskPool.execute需要@Concurrent装饰的函数
+      const result = await task.execute();
       // 处理完成 // Handle completion
       this.handleTaskComplete(task, result);
 
@@ -325,7 +326,7 @@ export class TaskPoolManager {
    * @param task 出错的任务 // Task with error
    * @param error 错误信息 // Error message
    */
-  private handleTaskError(task: Task, error: Error): void {
+  private handleTaskError(task: Task<TaskResult>, error: Error): void {
     Logger.error(TAG, `Task ${task.id} failed: ${error.message}`, error);
     if (task.onError) {
       task.onError(error);

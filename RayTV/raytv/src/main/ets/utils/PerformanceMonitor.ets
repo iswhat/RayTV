@@ -152,7 +152,13 @@ export class PerformanceMonitor {
   }
   
   // 私有辅助方法
-  private addMetric(name: string, data: any): void {
+  interface MetricData {
+    duration: number;
+    timestamp: number;
+    label?: string;
+  }
+
+  private addMetric(name: string, data: MetricData): void {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, [])
     }
@@ -170,18 +176,24 @@ export class PerformanceMonitor {
       values.shift()
     }
   }
-  
-  private calculateAverage(values: any[]): number {
+
+  interface PerformanceValue {
+    duration: number;
+    timestamp: number;
+    label?: string;
+  }
+
+  private calculateAverage(values: PerformanceValue[]): number {
     if (values.length === 0) return 0
     const sum = values.reduce((acc, val) => acc + (val.duration || 0), 0)
     return sum / values.length
   }
-  
-  private calculateMax(values: any[]): number {
+
+  private calculateMax(values: PerformanceValue[]): number {
     return Math.max(...values.map(val => val.duration || 0))
   }
-  
-  private calculateMin(values: any[]): number {
+
+  private calculateMin(values: PerformanceValue[]): number {
     return Math.min(...values.map(val => val.duration || 0))
   }
   
@@ -210,11 +222,11 @@ export class PerformanceMonitor {
 
 // 性能装饰器
 export function MonitorPerformance(metricName: string) {
-  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function(target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
     const monitor = PerformanceMonitor.getInstance()
-    
-    descriptor.value = function(...args: any[]) {
+
+    descriptor.value = function(...args: unknown[]) {
       const measurementId = monitor.startMeasurement(metricName)
       const result = originalMethod.apply(this, args)
       

@@ -47,6 +47,7 @@ export interface RequestData {
   sortBy?: string;
   sortOrder?: string;
   limit?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 // 定义请求配置类型 | Define request configuration type
@@ -1198,11 +1199,11 @@ export default class DefaultNetworkRepository implements NetworkRepository {
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async checkUpdate(currentVersion: string): Promise<NetworkResult<RequestData>> { 
+  async checkUpdate(currentVersion: string): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   
-  async getAppConfig(): Promise<NetworkResult<RequestData>> { 
+  async getAppConfig(): Promise<NetworkResult<Record<string, string | number | boolean>>> { 
     return { success: false, message: 'Not implemented' }; 
   }
   

@@ -5,7 +5,6 @@ import { LazyLoadStrategy } from '../types/LazyLoadTypes';
  * 图片懒加载组件
  * 支持多种加载策略和缓存机制
  */
-@Entry
 @Component
 struct ImageLazyLoader {
   @State private isLoading: boolean = false;

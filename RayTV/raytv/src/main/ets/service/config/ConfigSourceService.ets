@@ -45,18 +45,18 @@ const DEFAULT_CONFIG_SOURCES = [
 
 /**
  * 配置源服务类
- * 
+ *
  * 壳应用的核心服务，负责配置源的加载、解析和管理。
  * 提供配置源的添加、删除、更新、健康检查等功能，支持缓存和优先级管理。
- * 
+ *
  * @example
  * ```typescript
  * // 获取ConfigSourceService实例
  * import configSourceService from './service/config/ConfigSourceService';
- * 
+ *
  * // 初始化服务
  * await configSourceService.initialize();
- * 
+ *
  * // 加载配置源
  * const result = await configSourceService.loadConfigSource('https://example.com/config.json');
  * if (result.isSuccess()) {
@@ -73,9 +73,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 获取单例实例
-   * 
+   *
    * 实现了单例模式，确保全局只有一个ConfigSourceService实例。
-   * 
+   *
    * @returns ConfigSourceService单例实例
    * @example
    * ```typescript
@@ -100,9 +100,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 初始化服务
-   * 
+   *
    * 初始化配置源服务，加载默认配置源。
-   * 
+   *
    * @returns Promise<void>
    * @throws Error - 当初始化失败时抛出错误
    * @example
@@ -146,9 +146,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 加载远程配置源
-   * 
+   *
    * 从指定URL加载配置源，支持缓存和格式验证。
-   * 
+   *
    * @param url 配置源URL
    * @returns Promise<ApiResponse<ConfigSource>> - 包含配置源的API响应
    * @example
@@ -164,11 +164,11 @@ export class ConfigSourceService implements IConfigSourceService {
   public async loadConfigSource(url: string): Promise<ApiResponse<ConfigSource>> {
     try {
       this.logger.info(`Loading config source from: ${url}`);
-      
+
       // 检查缓存 | Check cache first
       const cacheKey = `config_${this.generateUrlHash(url)}`;
       const cachedResult = await this.cacheService.get<ConfigSource>(cacheKey);
-      
+
       if (cachedResult) {
         this.logger.info(`Returning cached config for: ${url}`);
         return ApiResponse.success(cachedResult);
@@ -230,9 +230,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 解析配置内容
-   * 
+   *
    * 解析配置源的JSON内容，验证格式并提取各个部分。
-   * 
+   *
    * @param content 配置内容字符串
    * @returns Promise<ApiResponse<ParsedConfig>> - 包含解析结果的API响应
    * @example
@@ -246,8 +246,8 @@ export class ConfigSourceService implements IConfigSourceService {
    */
   public async parseConfigContent(content: string): Promise<ApiResponse<ParsedConfig>> {
     try {
-      let configData: any;
-      
+      let configData: unknown;
+
       // 尝试解析JSON | Try to parse JSON
       try {
         configData = JSON.parse(content);
@@ -281,9 +281,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 验证配置格式
-   * 
+   *
    * 验证配置源的格式是否正确，检查必需字段。
-   * 
+   *
    * @param config 配置对象
    * @returns boolean - 配置格式是否有效
    * @example
@@ -293,7 +293,7 @@ export class ConfigSourceService implements IConfigSourceService {
    * console.log('Config format is valid:', isValid);
    * ```
    */
-  public validateConfigFormat(config: any): boolean {
+  public validateConfigFormat(config: Record<string, Object>): boolean {
     if (!config || typeof config !== 'object') {
       return false;
     }
@@ -305,9 +305,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 获取所有激活的配置源
-   * 
+   *
    * 获取所有处于激活状态的配置源，并按优先级排序。
-   * 
+   *
    * @returns Promise<ApiResponse<ConfigSource[]>> - 包含激活配置源列表的API响应
    * @example
    * ```typescript
@@ -321,10 +321,10 @@ export class ConfigSourceService implements IConfigSourceService {
     try {
       const allSources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY) || [];
       const activeSources = allSources.filter(source => source.isActive);
-      
+
       // 按优先级排序 | Sort by priority
       activeSources.sort((a, b) => a.priority - b.priority);
-      
+
       return ApiResponse.success(activeSources);
     } catch (error) {
       this.logger.error('Failed to get active sources', error);
@@ -334,9 +334,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 添加新的配置源
-   * 
+   *
    * 添加新的配置源到存储中，包括URL验证和重复检查。
-   * 
+   *
    * @param url 配置源URL
    * @param name 配置源名称
    * @returns Promise<ApiResponse<ConfigSource>> - 包含新配置源的API响应
@@ -390,9 +390,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 删除配置源
-   * 
+   *
    * 根据ID删除指定的配置源。
-   * 
+   *
    * @param id 配置源ID
    * @returns Promise<ApiResponse<boolean>> - 包含删除结果的API响应
    * @example
@@ -409,7 +409,7 @@ export class ConfigSourceService implements IConfigSourceService {
     try {
       const sources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY) || [];
       const filteredSources = sources.filter(source => source.id !== id);
-      
+
       if (filteredSources.length === sources.length) {
         return ApiResponse.failure('Config source not found');
       }
@@ -426,9 +426,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 更新配置源状态
-   * 
+   *
    * 更新指定配置源的激活状态。
-   * 
+   *
    * @param id 配置源ID
    * @param isActive 是否激活
    * @returns Promise<ApiResponse<boolean>> - 包含更新结果的API响应
@@ -446,14 +446,14 @@ export class ConfigSourceService implements IConfigSourceService {
     try {
       const sources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY) || [];
       const sourceIndex = sources.findIndex(source => source.id === id);
-      
+
       if (sourceIndex === -1) {
         return ApiResponse.failure('Config source not found');
       }
 
       sources[sourceIndex].isActive = isActive;
       sources[sourceIndex].lastUpdated = Date.now();
-      
+
       await StorageUtil.setItem(CONFIG_SOURCE_STORAGE_KEY, sources);
       this.logger.info(`Updated config source status: ${id} -> ${isActive}`);
       return ApiResponse.success(true);
@@ -466,9 +466,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 获取解析后的媒体站点
-   * 
+   *
    * 获取指定配置源解析后的媒体站点列表，支持缓存。
-   * 
+   *
    * @param sourceId 配置源ID
    * @returns Promise<ApiResponse<MediaSite[]>> - 包含媒体站点列表的API响应
    * @example
@@ -485,7 +485,7 @@ export class ConfigSourceService implements IConfigSourceService {
     try {
       const sources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY) || [];
       const source = sources.find(s => s.id === sourceId);
-      
+
       if (!source) {
         return ApiResponse.failure('Config source not found');
       }
@@ -497,7 +497,7 @@ export class ConfigSourceService implements IConfigSourceService {
 
       const cacheKey = `parsed_sites_${sourceId}`;
       const cachedSites = await this.cacheService.get<MediaSite[]>(cacheKey);
-      
+
       if (cachedSites) {
         return ApiResponse.success(cachedSites);
       }
@@ -519,9 +519,9 @@ export class ConfigSourceService implements IConfigSourceService {
 
   /**
    * 检查配置源健康状态
-   * 
+   *
    * 检查指定配置源的健康状态，包括响应时间和可用性。
-   * 
+   *
    * @param id 配置源ID
    * @returns Promise<ApiResponse<'healthy' | 'warning' | 'error'>> - 包含健康状态的API响应
    * @example
@@ -538,7 +538,7 @@ export class ConfigSourceService implements IConfigSourceService {
     try {
       const sources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY) || [];
       const source = sources.find(s => s.id === id);
-      
+
       if (!source) {
         return ApiResponse.failure('Config source not found');
       }
@@ -563,7 +563,7 @@ export class ConfigSourceService implements IConfigSourceService {
       };
 
       await StorageUtil.setItem(CONFIG_SOURCE_STORAGE_KEY, sources);
-      
+
       return ApiResponse.success(healthStatus);
 
     } catch (error) {
@@ -572,13 +572,121 @@ export class ConfigSourceService implements IConfigSourceService {
     }
   }
 
+  /**
+   * 获取所有配置源
+   *
+   * 获取存储中的所有配置源，不进行过滤。
+   *
+   * @returns Promise<ConfigSource[]> - 所有配置源的数组
+   * @example
+   * ```typescript
+   * const allSources = await configSourceService.getAllSources();
+   * console.log('Total sources:', allSources.length);
+   * ```
+   */
+  public async getAllSources(): Promise<ConfigSource[]> {
+    try {
+      const sources = await StorageUtil.getItem<ConfigSource[]>(CONFIG_SOURCE_STORAGE_KEY);
+      return sources || [];
+    } catch (error) {
+      this.logger.error('Failed to get all sources', error);
+      return [];
+    }
+  }
+
+  /**
+   * 从URL获取解析后的配置
+   *
+   * 获取指定URL的配置内容并解析。
+   *
+   * @param url 配置源URL
+   * @returns Promise<ParsedConfig | null> - 解析后的配置，失败返回null
+   * @example
+   * ```typescript
+   * const config = await configSourceService.getParsedConfig('https://example.com/config.json');
+   * if (config) {
+   *   console.log('Sites:', config.sites);
+   * }
+   * ```
+   */
+  public async getParsedConfig(url: string): Promise<ParsedConfig | null> {
+    try {
+      const result = await this.loadConfigSource(url);
+      if (!result.isSuccess() || !result.data) {
+        return null;
+      }
+
+      const parsedResult = await this.parseConfigContent(JSON.stringify(result.data));
+      if (!parsedResult.isSuccess() || !parsedResult.data) {
+        return null;
+      }
+
+      return parsedResult.data;
+    } catch (error) {
+      this.logger.error(`Failed to get parsed config from ${url}`, error);
+      return null;
+    }
+  }
+
+  /**
+   * 从URL获取直播数据
+   *
+   * 获取指定URL的直播频道数据。
+   *
+   * @param url 配置源URL
+   * @returns Promise<LiveSource[]> - 直播频道数组
+   * @example
+   * ```typescript
+   * const liveChannels = await configSourceService.getLiveDataFromUrl('https://example.com/config.json');
+   * console.log('Live channels:', liveChannels.length);
+   * ```
+   */
+  public async getLiveDataFromUrl(url: string): Promise<LiveSource[]> {
+    try {
+      const parsedConfig = await this.getParsedConfig(url);
+      if (!parsedConfig || !parsedConfig.lives) {
+        return [];
+      }
+      return parsedConfig.lives;
+    } catch (error) {
+      this.logger.error(`Failed to get live data from ${url}`, error);
+      return [];
+    }
+  }
+
   // 私有辅助方法 | Private helper methods
 
-  private validateRequiredFields(config: any): boolean {
+  interface ConfigObject {
+    sites?: unknown[];
+    [key: string]: unknown;
+  }
+
+  private validateRequiredFields(config: ConfigObject): boolean {
     return 'sites' in config;
   }
 
-  private parseSites(sites: any[]): MediaSite[] {
+  export interface SiteConfig {
+    key?: string;
+    name?: string;
+    type?: number;
+    api?: string;
+    searchable?: unknown;
+    quickSearch?: unknown;
+    filterable?: unknown;
+    ext?: string;
+    jar?: string;
+    playerType?: string;
+    header?: Record<string, string>;
+    timeout?: number;
+    changeable?: unknown;
+    style?: {
+      type?: string;
+      ratio?: number;
+    };
+    [key: string]: unknown;
+  }
+
+  private parseSites(sites: SiteConfig[]): MediaSite[] {
     return sites.map(site => ({
       key: site.key || '',
       name: site.name || '',
@@ -600,7 +708,12 @@ export class ConfigSourceService implements IConfigSourceService {
     })).filter(site => site.key && site.name && site.api);
   }
 
-  private parseParsers(parsers: any[]): ParserConfig[] {
+  interface ParserConfigData {
+    name?: string;
+    [key: string]: unknown;
+  }
+
+  private parseParsers(parsers: ParserConfigData[]): ParserConfig[] {
     return parsers.map(parser => ({
       name: parser.name || '',
       type: parser.type || 0,
@@ -611,7 +724,12 @@ export class ConfigSourceService implements IConfigSourceService {
     })).filter(parser => parser.name && parser.url);
   }
 
-  private parseRules(rules: any[]): RuleConfig[] {
+  interface RuleConfigData {
+    name?: string;
+    [key: string]: unknown;
+  }
+
+  private parseRules(rules: RuleConfigData[]): RuleConfig[] {
     return rules.map(rule => ({
       name: rule.name || '',
       hosts: Array.isArray(rule.hosts) ? rule.hosts : [],
@@ -629,7 +747,12 @@ export class ConfigSourceService implements IConfigSourceService {
     return [];
   }
 
-  private parseLiveSources(lives: any[]): LiveSource[] {
+  interface LiveSourceData {
+    name?: string;
+    [key: string]: unknown;
+  }
+
+  private parseLiveSources(lives: LiveSourceData[]): LiveSource[] {
     return lives.map(live => ({
       name: live.name || '',
       type: live.type || 0,

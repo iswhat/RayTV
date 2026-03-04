@@ -4,7 +4,7 @@
     "pages/MainPage",
     "pages/CategoryPage",
     "pages/SearchPage",
-    "pages/SettingsPage",
+    "pages/ModernSettingsPage",
     "pages/MediaDetailPage"
   ]
 }

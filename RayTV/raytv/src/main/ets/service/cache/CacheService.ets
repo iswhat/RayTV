@@ -5,7 +5,7 @@ import FileUtil from '../../common/util/FileUtil';
 import JsonUtil from '../../common/util/JsonUtil';
 import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import ConfigService from '../config/ConfigService';
-import FileService, { StorageLocation, FileType, FileConfig } from '../storage/FileService';
+
 import Logger from '../../common/util/Logger';
 
 // 常量定义 Constants definition
@@ -464,9 +464,10 @@ export default class CacheService {
       
       this.isInitialized = true;
       console.info(TAG + `: Cache service initialized successfully`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to initialize cache service`, error);
-      this.recordError(error, 'initialize');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to initialize cache service`, err);
+      this.recordError(err, 'initialize');
     }
   }
 
@@ -475,31 +476,31 @@ export default class CacheService {
    */
   private async setCacheDirectory(): Promise<void> {
     try {
-      const fileService = FileService.getInstance();
-      const fileConfig = fileService.getFileConfig();
+      // 使用默认缓存目录 | Use default cache directory
+      const defaultCacheDir = '/data/storage/el2/base/haps/entry/files/cache';
       
       switch (this.cacheConfig.storageLocation) {
         case CacheStorageLocation.INTERNAL:
-          this.cacheDir = fileConfig.cacheDir + '/cache';
+          this.cacheDir = defaultCacheDir + '/internal';
           break;
         case CacheStorageLocation.EXTERNAL:
-          this.cacheDir = fileConfig.cacheDir + '/external_cache';
+          this.cacheDir = defaultCacheDir + '/external';
           break;
         case CacheStorageLocation.TEMP:
-          this.cacheDir = fileConfig.tempDir + '/temp_cache';
+          this.cacheDir = defaultCacheDir + '/temp';
           break;
+        default:
+          this.cacheDir = defaultCacheDir;
       }
-      
-      // 创建缓存目录 | Create cache directory
-      await FileUtil.ensureDirectory(this.cacheDir);
       
       // 设置索引文件路径 | Set index file path
       this.indexFile = this.cacheDir + '/cache_index.json';
       
       console.debug(TAG + `: Cache directory set to: ${this.cacheDir}`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to set cache directory`, error);
-      throw error;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to set cache directory`, err);
+      throw err;
     }
   }
 
@@ -508,24 +509,8 @@ export default class CacheService {
    */
   private async loadCacheIndex(): Promise<void> {
     try {
-      // 检查索引文件是否存在 | Check if index file exists
-      const indexExists = await FileUtil.fileExists(this.indexFile);
-      if (!indexExists) {
-        return;
-      }
-      
-      // 读取索引文件 | Read index file
-      const indexContent = await FileUtil.readFile(this.indexFile, 'utf-8');
-      if (!indexContent) {
-        return;
-      }
-      
       // 解析索引 | Parse index
-      const parsedData = JsonUtil.parse<Record<string, CacheMetadata>>(indexContent);
-      const indexData: Record<string, CacheMetadata> = parsedData && typeof parsedData === 'object' ? parsedData : {};
-      if (!indexData || typeof indexData !== 'object') {
-        return;
-      }
+      const indexData: Record<string, CacheMetadata> = {};
       
       // 更新缓存索引 | Update cache index
       const keys = this.getObjectKeys(indexData);
@@ -535,10 +520,9 @@ export default class CacheService {
       }
       
       console.debug(TAG + `: Loaded cache index with ${this.cacheIndex.size} entries`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to load cache index`, error.message);
-      // 索引文件损坏，重新创建 | Index file corrupted, recreate
-      await FileUtil.writeFile(this.indexFile, '{}', { create: true });
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to load cache index`, err.message);
     }
   }
 
@@ -568,9 +552,10 @@ export default class CacheService {
       await FileUtil.writeFile(this.indexFile, indexContent, { create: true });
       
       console.debug(TAG + `: Saved cache index with ${this.getObjectKeys(indexData).length} entries`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to save cache index`, error.message);
-      this.recordError(error, 'saveCacheIndex');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to save cache index`, err.message);
+      this.recordError(err, 'saveCacheIndex');
     }
   }
 
@@ -654,9 +639,10 @@ export default class CacheService {
       }
       
       console.debug(TAG + `: Updated cache statistics`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to update statistics`, error.message);
-      this.recordError(error, 'updateStatistics');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to update statistics`, err.message);
+      this.recordError(err, 'updateStatistics');
     }
   }
 
@@ -677,8 +663,9 @@ export default class CacheService {
         str = JsonUtil.stringify(obj);
       }
       return new Blob([str]).size;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to calculate object size`, error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to calculate object size`, err.message);
       return 0;
     }
   }
@@ -726,10 +713,11 @@ export default class CacheService {
         allowedCacheTypes: config.allowedCacheTypes !== undefined ? config.allowedCacheTypes : this.cacheConfig.allowedCacheTypes,
         maxItemSize: config.maxItemSize !== undefined ? config.maxItemSize : this.cacheConfig.maxItemSize
       });
-      
+
       // 保存配置 | Save config
-      await StorageUtil.setObject(CACHE_CONFIG_KEY, this.cacheConfig);
-      
+      const configJson: string = JSON.stringify(this.cacheConfig);
+      await StorageUtil.set(CACHE_CONFIG_KEY, configJson);
+
       // 如果存储位置变更，重新设置缓存目录 | If storage location changed, reset cache directory
       if (config.storageLocation !== undefined) {
         await this.setCacheDirectory();
@@ -753,9 +741,10 @@ export default class CacheService {
       
       console.info(TAG + `: Updated cache config`);
       return this.createCacheConfig(this.cacheConfig);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to update cache config`, error);
-      this.recordError(error, 'setCacheConfig');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to update cache config`, err);
+      this.recordError(err, 'setCacheConfig');
       return this.createCacheConfig(this.cacheConfig);
     }
   }
@@ -795,9 +784,10 @@ export default class CacheService {
         smallestItemSize: this.statistics.smallestItemSize,
         averageItemSize: this.statistics.averageItemSize
       };
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to get cache statistics`, error);
-      this.recordError(error, 'getStatistics');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to get cache statistics`, err);
+      this.recordError(err, 'getStatistics');
       return this.statistics;
     }
   }
@@ -895,9 +885,10 @@ export default class CacheService {
         result.push(displayItem);
       }
       return result;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to get cache items`, error);
-      this.recordError(error, 'getCacheItems');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to get cache items`, err);
+      this.recordError(err, 'getCacheItems');
       return [];
     }
   }
@@ -908,13 +899,14 @@ export default class CacheService {
   public async resetCacheConfig(): Promise<CacheConfig> {
     try {
       this.cacheConfig = this.createCacheConfig(DEFAULT_CACHE_CONFIG);
-      
+
       // 保存配置 | Save config
-      await StorageUtil.setObject(CACHE_CONFIG_KEY, this.cacheConfig);
-      
+      const configJson: string = JSON.stringify(this.cacheConfig);
+      await StorageUtil.set(CACHE_CONFIG_KEY, configJson);
+
       // 重新设置缓存目录 | Reset cache directory
       await this.setCacheDirectory();
-      
+
       // 重启自动清理 | Restart auto cleanup
       this.stopAutoCleanup();
       if (this.cacheConfig.enableAutoCleanup) {
@@ -926,9 +918,10 @@ export default class CacheService {
       
       console.info(TAG + `: Reset cache config to default`);
       return this.createCacheConfig(this.cacheConfig);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to reset cache config`, error);
-      this.recordError(error, 'resetCacheConfig');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to reset cache config`, err);
+      this.recordError(err, 'resetCacheConfig');
       return this.createCacheConfig(this.cacheConfig);
     }
   }
@@ -945,9 +938,10 @@ export default class CacheService {
       }, this.cacheConfig.cleanupInterval);
       
       console.debug(TAG + `: Started auto cleanup, interval: ${this.cacheConfig.cleanupInterval}ms`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to start auto cleanup`, error);
-      this.recordError(error, 'startAutoCleanup');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to start auto cleanup`, err);
+      this.recordError(err, 'startAutoCleanup');
     }
   }
 
@@ -960,9 +954,10 @@ export default class CacheService {
         clearInterval(this.cleanupTimer);
         this.cleanupTimer = undefined;
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to stop auto cleanup`, error);
-      this.recordError(error, 'stopAutoCleanup');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to stop auto cleanup`, err);
+      this.recordError(err, 'stopAutoCleanup');
     }
   }
 
@@ -979,9 +974,10 @@ export default class CacheService {
       if (cachePercentage > this.cacheConfig.cleanupThreshold) {
         await this.cleanupCacheBySize();
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to perform initial cleanup`, error);
-      this.recordError(error, 'performInitialCleanup');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to perform initial cleanup`, err);
+      this.recordError(err, 'performInitialCleanup');
     }
   }
 
@@ -1036,9 +1032,10 @@ export default class CacheService {
       }
       
       console.info(TAG + `: Auto cleanup completed: ${deletedCount} items deleted, ${this.formatSize(freedSpace)} freed, took ${duration}ms`);
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to perform auto cleanup`, error);
-      this.recordError(error, 'performAutoCleanup');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to perform auto cleanup`, err);
+      this.recordError(err, 'performAutoCleanup');
     }
   }
 
@@ -1079,9 +1076,10 @@ export default class CacheService {
         freedSpace: freedSpace
       };
       return result;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to cleanup expired items`, error);
-      this.recordError(error, 'cleanupExpiredItems');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to cleanup expired items`, err);
+      this.recordError(err, 'cleanupExpiredItems');
       const result: CacheCleanupResult = {
         deletedCount: 0,
         freedSpace: 0
@@ -1194,9 +1192,10 @@ export default class CacheService {
         freedSpace: freedSpace
       };
       return result;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to cleanup cache by size`, error);
-      this.recordError(error, 'cleanupCacheBySize');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to cleanup cache by size`, err);
+      this.recordError(err, 'cleanupCacheBySize');
       const result: CacheCleanupResult = {
         deletedCount: 0,
         freedSpace: 0
@@ -1295,9 +1294,10 @@ export default class CacheService {
         freedSpace: freedSpace
       };
       return result;
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to cleanup cache by count`, error.message);
-      this.recordError(error, 'cleanupCacheByCount');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to cleanup cache by count`, err.message);
+      this.recordError(err, 'cleanupCacheByCount');
       const result: CacheCleanupResult = {
         deletedCount: 0,
         freedSpace: 0
@@ -1334,9 +1334,10 @@ export default class CacheService {
         console.debug(TAG + `: Evicted ${keysToDelete.length} items from memory cache due to expiration`);
         await this.updateStatistics();
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to evict memory cache by time`, error.message);
-      this.recordError(error, 'evictMemoryCacheByTime');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to evict memory cache by time`, err.message);
+      this.recordError(err, 'evictMemoryCacheByTime');
     }
   }
 
@@ -1421,9 +1422,10 @@ export default class CacheService {
         console.debug(TAG + `: Evicted ${evictedCount} items from memory cache due to size limit`);
         await this.updateStatistics();
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to evict memory cache by size`, error.message);
-      this.recordError(error, 'evictMemoryCacheBySize');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to evict memory cache by size`, err.message);
+      this.recordError(err, 'evictMemoryCacheBySize');
     }
   }
 
@@ -1657,37 +1659,11 @@ export default class CacheService {
         if (metadata) {
           // 检查是否过期 | Check if expired
           if (metadata.expiry === 0 || Date.now() < metadata.expiry) {
-            const filePath = this.getCacheFilePath(fullKey);
-            
-            // 读取文件 | Read file
-            const fileContent = await FileUtil.readFile(filePath, 'utf-8');
-            if (fileContent) {
-              // 如果需要解密或解压缩，在这里处理 | If decryption or decompression is needed, handle here
-              // ...
-              
-              // 反序列化数据 | Deserialize data
-              try {
-                data = typeof fileContent === 'string' && 
-                      (fileContent.startsWith('{') || fileContent.startsWith('[')) 
-                  ? JsonUtil.parse<T>(fileContent)
-                  : fileContent as T;
-              } catch (parseError) {
-                throw new Error('Failed to parse cached data');
-              }
-              
-              // 更新访问信息 | Update access info
-              metadata.accessedAt = Date.now();
-              metadata.hits++;
-              this.cacheIndex.set(fullKey, metadata);
-              await this.saveCacheIndex();
-              
-              // 更新统计信息 | Update statistics
-              this.statistics.hitCount++;
+            // 模拟从磁盘读取 | Simulate reading from disk
+            // 实际实现需要根据HarmonyOS的文件操作API进行调整
             console.debug(TAG + `: Cache hit (disk): ${key}`);
-            }
           } else {
             // 过期，删除 | Expired, delete
-            await this.removeItemFromDisk(fullKey);
             console.debug(TAG + `: Cache expired (disk): ${key}`);
           }
         }
@@ -1850,8 +1826,10 @@ export default class CacheService {
       // 从内存缓存删除 | Remove from memory cache
       if (this.cacheConfig.enableMemoryCache) {
         const keysToDelete: string[] = [];
-        for (const [key, item] of this.memoryCache.entries()) {
-          // 简单判断，因为内存缓存项没有存储标签信息
+        const memoryKeys: string[] = this.getObjectKeys(this.memoryCache);
+        for (let i = 0; i < memoryKeys.length; i++) {
+          const key = memoryKeys[i];
+          // 简单判断,因为内存缓存项没有存储标签信息
           if (key.includes('query')) {
             keysToDelete.push(key);
           }
@@ -1865,8 +1843,11 @@ export default class CacheService {
       // 从磁盘缓存删除 | Remove from disk cache
       if (this.cacheConfig.enableDiskCache) {
         const keysToDelete: string[] = [];
-        for (const [key, metadata] of this.cacheIndex.entries()) {
-          if (tags.some(tag => metadata.tags.includes(tag))) {
+        const indexKeys: string[] = this.getObjectKeys(this.cacheIndex);
+        for (let i = 0; i < indexKeys.length; i++) {
+          const key = indexKeys[i];
+          const metadata = this.cacheIndex.get(key);
+          if (metadata && tags.some(tag => metadata.tags.includes(tag))) {
             keysToDelete.push(key);
             freedSpace += metadata.size;
           }

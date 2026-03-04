@@ -3,11 +3,21 @@
  */
 import { Component, State, Prop } from '@ohos/arkui'
 
+export interface GridItem {
+  id: string;
+  title: string;
+  cover?: string;
+  description?: string;
+  rating?: string;
+  tags?: string[];
+  isFavorite?: boolean;
+}
+
 @Component
 export struct SimpleTVGrid {
-  @Prop items: any[] = []
+  @Prop items: GridItem[] = []
   @Prop columns: number = 3
-  @Prop onItemClick: (item: any) => void = () => {}
+  @Prop onItemClick: (item: GridItem) => void = () => {}
   
   build() {
     Grid()
@@ -17,7 +27,7 @@ export struct SimpleTVGrid {
     .rowsGap('16px')
     .width('100%')
     {
-      ForEach(this.items, (item: any, index: number) => {
+      ForEach(this.items, (item: GridItem, index: number) => {
         Stack()
         .width('100%')
         .height('120px')

@@ -7,7 +7,7 @@ import { RemoteControlManager } from './RemoteControlManager'
 
 export interface GridItem {
   id: string
-  data: any
+  data: Record<string, unknown>
 }
 
 @Component

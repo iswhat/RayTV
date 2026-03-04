@@ -2,12 +2,12 @@
  * 基础TV页面
  */
 import { Component, State } from '@ohos/arkui'
-import { BasicTVGrid } from '../component/tv/BasicTVGrid'
+import { BasicTVGrid, GridItem } from '../component/tv/BasicTVGrid'
 
 @Entry
 @Component
 struct BasicTVPage {
-  @State items: any[] = []
+  @State items: GridItem[] = []
   @State selectedContent: string = '请选择内容'
   
   aboutToAppear() {
@@ -27,7 +27,7 @@ struct BasicTVPage {
       
       BasicTVGrid({
         items: this.items,
-        onItemClick: (item: any) => {
+        onItemClick: (item: GridItem) => {
           this.selectedContent = `选择了: ${item.title}`
         }
       })

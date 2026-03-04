@@ -50,16 +50,13 @@ export interface PlaybackUIState {
 }
 
 export interface SubtitleState {
-  tracks: any[]; // 字幕轨道
-  selectedTrack: any | null;
-  languages: any[]; // 字幕语言
-  isSearching: boolean;
-  isEnabled: boolean;
+  tracks: MediaTrack[]; // 字幕轨道
+  selectedTrack: MediaTrack | null;
 }
 
 export interface AudioState {
-  tracks: any[]; // 音轨
-  selectedTrack: any | null;
+  tracks: MediaTrack[]; // 音轨
+  selectedTrack: MediaTrack | null;
 }
 
 export interface SkipState {
@@ -649,14 +646,15 @@ export class PlaybackViewModel {
   
   // ==================== 错误处理 ====================
   
-  private handleError(message: string, error: any): void {
+  private handleError(message: string, error: unknown): void {
+    const err = error instanceof Error ? error : new Error(String(error));
     this.controlState.value = {
       ...this.controlState.value,
       isError: true,
       errorMessage: message,
       isLoading: false
     };
-    Logger.error(this.TAG, `${message}: ${error}`);
+    Logger.error(this.TAG, `${message}: ${err.message}`);
   }
   
   // ==================== 清理方法 ====================
@@ -668,7 +666,15 @@ export class PlaybackViewModel {
   
   // ==================== 状态快照 ====================
   
-  public getStateSnapshot(): any {
+  public getStateSnapshot(): {
+    mediaState: PlaybackMediaState;
+    controlState: PlaybackControlState;
+    uiState: PlaybackUIState;
+    subtitleState: SubtitleState;
+    audioState: AudioState;
+    skipState: SkipState;
+    liveState: LiveState;
+  } {
     return {
       mediaState: this.mediaState.value,
       controlState: this.controlState.value,

@@ -3,15 +3,25 @@
  */
 import { Component, Prop } from '@ohos/arkui'
 
+export interface GridItem {
+  id: string;
+  title: string;
+  cover?: string;
+  description?: string;
+  rating?: string;
+  tags?: string[];
+  isFavorite?: boolean;
+}
+
 @Component
 export struct BasicTVGrid {
-  @Prop items: any[] = []
-  @Prop onItemClick: (item: any) => void = () => {}
+  @Prop items: GridItem[] = []
+  @Prop onItemClick: (item: GridItem) => void = () => {}
   
   build() {
     Grid()
     {
-      ForEach(this.items, (item: any, index: number) => {
+      ForEach(this.items, (item: GridItem, index: number) => {
         Stack()
         {
           Text(item.title || `Item ${index + 1}`)

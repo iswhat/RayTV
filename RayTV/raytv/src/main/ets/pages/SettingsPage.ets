@@ -10,9 +10,14 @@ import { VoiceAssistantManager } from '../service/voice/VoiceAssistantManager';
 import { GestureService } from '../service/input/GestureService';
 import { DeviceFlowManager, FlowData } from '../service/device/DeviceFlowManager';
 import CacheService from '../service/cache/CacheService';
-import ConfigSourceSwitcher from '../components/ConfigSourceSwitcher';
+import NetworkSourceManager, { NetworkSourceConfig, ContentUsage } from '../service/config/NetworkSourceManager';
+import ContentAccessService from '../service/content/ContentAccessService';
+import { NetworkSourceDetailPopup } from '../components/NetworkSourceDetailPopup';
+import { SourceCard } from '../components/ContentSourceBadge';
 import display from '@ohos.display';
-// 移除 @ohos.ui 导入，因为它在当前环境中不可用 | Remove @ohos.ui import as it's not available in current environment
+import DesignSystem from '../design/DesignSystem';
+import ThemeProvider, { Theme } from '../design/ThemeProvider';
+import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, VerticalAlign, TextAlign, Scroll, BarState, ScrollDirection, EdgeEffect, Stack, Position, Image, ImageFit, List, ListItem, Checkbox, Blank } from '@ohos.arkui';
 
 // 设置项 | Setting item
 export interface SettingItem {
@@ -24,14 +29,6 @@ export interface SettingItem {
   value?: string | boolean;
   onClick?: () => void;
   onToggle?: (value: boolean) => void;
-}
-
-// 壁纸项 | Wallpaper item
-export interface WallpaperItem {
-  id: string;
-  name: string;
-  url: string;
-  isCurrent: boolean;
 }
 
 // 设备信息接口 | Device info interface
@@ -62,86 +59,154 @@ struct SettingsPage {
   private scroller: Scroller = new Scroller();
   
   // 状态管理 | State management
-  @State settingItems: SettingItem[] = [];
   @State isLoading: boolean = true;
   @State isError: boolean = false;
   @State errorMessage: string = '加载失败';
-  @State showConfigSourcePopup: boolean = false;
-  @State showVideoSourcePopup: boolean = false;
-  @State showWallpaperPopup: boolean = false;
-  @State showLiveSourcePopup: boolean = false;
-  @State showAdBlockPopup: boolean = false;
-  @State showAboutPopup: boolean = false;
-  @State showCachePopup: boolean = false;
-  @State showDeviceInfoPopup: boolean = false;
-  @State showDataSyncPopup: boolean = false;
-  @State showVoiceAssistantPopup: boolean = false;
-  @State showGestureControlPopup: boolean = false;
   @State isLandscape: boolean = false;
   @State screenWidth: number = 0;
   @State screenHeight: number = 0;
+  
+  // 混合源架构相关状态
+  @State sources: NetworkSourceConfig[] = [];
+  @State selectedSource: NetworkSourceConfig | null = null;
+  @State showSourceDetailPopup: boolean = false;
+  @State tempSourceName: string = '';
+  @State tempSourceUrl: string = '';
+  @State tempSourcePriority: number = 5;
+  @State tempSourceTags: string = '';
+  @State isAddingSource: boolean = false;
+  @State showAddSourceForm: boolean = false;
+  
+  // 内容池统计
+  @State vodStats: { total: number; sources: number } = { total: 0, sources: 0 };
+  @State liveStats: { total: number; sources: number } = { total: 0, sources: 0 };
+  @State wallpaperStats: { total: number; sources: number } = { total: 0, sources: 0 };
+  
+  // 原有状态
   @State adBlockEnabled: boolean = false;
   @State dataSyncEnabled: boolean = false;
   @State voiceAssistantEnabled: boolean = false;
   @State gestureControlEnabled: boolean = false;
-  @State wallpapers: WallpaperItem[] = [];
-  @State selectedWallpaper: WallpaperItem | null = null;
+  @State deviceFlowEnabled: boolean = false;
   @State versionInfo: string = '6.1.6';
   @State cacheItems: CacheItem[] = [];
   @State selectedCacheItems: string[] = [];
   @State totalCacheSize: string = '0 MB';
+  
   // 设备信息状态 | Device info state
   @State deviceInfo: DeviceInfo | null = null;
   @State isLoadingDeviceInfo: boolean = false;
+  
   // 数据同步状态 | Data sync state
   @State syncStatus: string = '未同步';
   @State lastSyncTime: string = '从未';
   @State syncDevices: string[] = [];
+  
   // 语音助手状态 | Voice assistant state
   @State voiceAssistantStatus: string = '未初始化';
+  
   // 手势控制状态 | Gesture control state
   @State gestureControlStatus: string = '未初始化';
+  
   // 设备流转状态 | Device flow state
-  @State deviceFlowEnabled: boolean = false;
   @State deviceFlowStatus: string = '未初始化';
   @State availableDevices: DeviceInfo[] = [];
   @State showDeviceFlowPopup: boolean = false;
+  
+  // 主题状态
+  @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
+  
+  // 服务实例
+  private networkSourceManager: NetworkSourceManager;
+  private contentAccessService: ContentAccessService;
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info('SettingsPage', 'About to appear');
     
-    // 服务实例会在需要时通过getInstance()获取 | Service instances will be obtained via getInstance() when needed
+    // 获取服务实例
+    this.networkSourceManager = NetworkSourceManager.getInstance();
+    this.contentAccessService = ContentAccessService.getInstance();
+    
+    // 添加主题变更监听器
+    ThemeProvider.addThemeChangeListener((theme) => {
+      this.currentTheme = theme;
+    });
     
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
     
-    // 加载设置项 | Load setting items
-    this.loadSettings();
-    
-    // 加载广告过滤状态 | Load ad block status
-    this.loadAdBlockStatus();
-    
-    // 加载数据同步状态 | Load data sync status
-    this.loadDataSyncStatus();
-    
-    // 加载语音助手状态 | Load voice assistant status
-    this.loadVoiceAssistantStatus();
-    
-    // 加载手势控制状态 | Load gesture control status
-    this.loadGestureControlStatus();
-    
-    // 加载设备流转状态 | Load device flow status
-    this.loadDeviceFlowStatus();
-    
-    // 加载壁纸列表 | Load wallpaper list
-    this.loadWallpapers();
-    
-    // 加载版本信息 | Load version info
-    this.loadVersionInfo();
-    
-    // 加载缓存信息 | Load cache info
-    this.loadCacheInfo();
+    // 加载数据
+    this.loadAllData();
+  }
+  
+  /**
+   * 加载所有数据
+   */
+  private async loadAllData(): Promise<void> {
+    try {
+      this.isLoading = true;
+      this.isError = false;
+      
+      // 初始化网络源管理器
+      await this.networkSourceManager.initialize();
+      
+      // 加载网络源列表
+      this.sources = this.networkSourceManager.getAllSources();
+      
+      // 初始化内容访问服务
+      await this.contentAccessService.initialize();
+      
+      // 加载内容池统计
+      this.loadContentStats();
+      
+      // 加载原有设置状态
+      this.loadAdBlockStatus();
+      this.loadDataSyncStatus();
+      this.loadVoiceAssistantStatus();
+      this.loadGestureControlStatus();
+      this.loadDeviceFlowStatus();
+      this.loadVersionInfo();
+      this.loadCacheInfo();
+      
+      Logger.info('SettingsPage', 'All data loaded successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load data', err);
+      this.isError = true;
+      this.errorMessage = err.message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+  /**
+   * 加载内容池统计
+   */
+  private loadContentStats(): void {
+    try {
+      const overallStats = this.contentAccessService.getOverallStats();
+      
+      this.vodStats = {
+        total: overallStats.vodSites,
+        sources: overallStats.vodSources
+      };
+      
+      this.liveStats = {
+        total: overallStats.liveChannels,
+        sources: overallStats.liveSources
+      };
+      
+      this.wallpaperStats = {
+        total: overallStats.wallpapers,
+        sources: overallStats.wallpaperSources
+      };
+      
+      Logger.info('SettingsPage', `Content stats - VOD: ${this.vodStats.total}, Live: ${this.liveStats.total}, Wallpaper: ${this.wallpaperStats.total}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load content stats', err);
+    }
   }
   
   // 初始化屏幕信息 | Initialize screen information
@@ -152,132 +217,13 @@ struct SettingsPage {
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
       console.info(`Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
-    } catch (error: Error) {
-      console.error(`Failed to get screen info: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`Failed to get screen info: ${err.message}`);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
       this.isLandscape = true;
-    }
-  }
-
-  /**
-   * 加载设置项 | Load setting items
-   */
-  private async loadSettings(): Promise<void> {
-    try {
-      this.isLoading = true;
-      this.isError = false;
-      
-      console.info('Loading settings');
-      
-      // 构建设置项 | Build setting items
-      this.settingItems = [
-        {
-          id: 'config_source',
-          title: '配置源管理',
-          description: '添加、管理和切换配置源',
-          type: 'button',
-          onClick: () => this.showConfigSourcePopup = true
-        },
-        {
-          id: 'video_source',
-          title: '片源选择',
-          description: '根据配置源读取可用片源',
-          type: 'button',
-          onClick: () => this.showVideoSourcePopup = true
-        },
-        {
-          id: 'wallpaper',
-          title: '软件壁纸',
-          description: '切换应用壁纸',
-          type: 'button',
-          onClick: () => this.showWallpaperPopup = true
-        },
-        {
-          id: 'live_source',
-          title: '直播源设置',
-          description: '切换直播源配置',
-          type: 'button',
-          onClick: () => this.showLiveSourcePopup = true
-        },
-        {
-          id: 'ad_block',
-          title: '广告过滤',
-          description: '开启或关闭广告过滤',
-          type: 'toggle',
-          value: this.adBlockEnabled,
-          onToggle: (value: boolean) => this.handleAdBlockToggle(value)
-        },
-        {
-          id: 'data_sync',
-          title: '数据同步',
-          description: '开启或关闭多设备数据同步',
-          type: 'toggle',
-          value: this.dataSyncEnabled,
-          onToggle: (value: boolean) => this.handleDataSyncToggle(value)
-        },
-        {
-          id: 'voice_assistant',
-          title: '语音助手',
-          description: '开启或关闭语音助手功能',
-          type: 'toggle',
-          value: this.voiceAssistantEnabled,
-          onToggle: (value: boolean) => this.handleVoiceAssistantToggle(value)
-        },
-        {
-          id: 'gesture_control',
-          title: '手势控制',
-          description: '开启或关闭手势控制功能',
-          type: 'toggle',
-          value: this.gestureControlEnabled,
-          onToggle: (value: boolean) => this.handleGestureControlToggle(value)
-        },
-        {
-          id: 'device_flow',
-          title: '跨设备流转',
-          description: '开启或关闭跨设备流转功能，支持在不同设备间无缝切换',
-          type: 'toggle',
-          value: this.deviceFlowEnabled,
-          onToggle: (value: boolean) => this.handleDeviceFlowToggle(value)
-        },
-        {
-          id: 'device_flow_manage',
-          title: '设备流转管理',
-          description: '查看可用设备并发起流转',
-          type: 'button',
-          onClick: () => this.showDeviceFlowPopup = true
-        },
-        {
-          id: 'cache',
-          title: '缓存管理',
-          description: '清理视频内容和设置配置缓存',
-          type: 'button',
-          onClick: () => this.showCachePopup = true
-        },
-        {
-          id: 'device_info',
-          title: '设备信息',
-          description: '查看和管理设备信息',
-          type: 'button',
-          onClick: () => this.showDeviceInfoPopup = true
-        },
-        {
-          id: 'about',
-          title: '关于',
-          description: '版本信息和其他信息',
-          type: 'button',
-          onClick: () => this.showAboutPopup = true
-        }
-      ];
-      
-      console.info('Settings loaded successfully');
-    } catch (error: Error) {
-      console.error(`Failed to load settings: ${error.message}`);
-      this.isError = true;
-      this.errorMessage = error.message;
-    } finally {
-      this.isLoading = false;
     }
   }
   
@@ -286,49 +232,13 @@ struct SettingsPage {
    */
   private async loadAdBlockStatus(): Promise<void> {
     try {
-      // 由于AdBlockManager.isEnabled不存在，使用默认值
+      const adBlockManager = AdBlockManager.getInstance();
+      this.adBlockEnabled = await adBlockManager.isEnabled();
+      Logger.info('SettingsPage', `Ad block status: ${this.adBlockEnabled}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load ad block status', err);
       this.adBlockEnabled = false;
-      console.info(`Ad block status: ${this.adBlockEnabled}`);
-    } catch (error: Error) {
-      console.error(`Failed to load ad block status: ${error.message}`);
-      this.adBlockEnabled = false;
-    }
-  }
-  
-  /**
-   * 加载壁纸列表 | Load wallpaper list
-   */
-  private async loadWallpapers(): Promise<void> {
-    try {
-      // 调用实际的WallManager获取壁纸列表 | Call actual WallManager to get wallpaper list
-      // 由于WallManager.getAvailableWallpapers不存在，使用模拟数据
-      this.wallpapers = [
-        {
-          id: 'default',
-          name: '默认壁纸',
-          url: 'https://via.placeholder.com/1920x1080?text=Default+Wallpaper',
-          isCurrent: true
-        },
-        {
-          id: 'wallpaper1',
-          name: '壁纸1',
-          url: 'https://via.placeholder.com/1920x1080?text=Wallpaper+1',
-          isCurrent: false
-        },
-        {
-          id: 'wallpaper2',
-          name: '壁纸2',
-          url: 'https://via.placeholder.com/1920x1080?text=Wallpaper+2',
-          isCurrent: false
-        }
-      ];
-      
-      // 找到当前选中的壁纸 | Find currently selected wallpaper
-      this.selectedWallpaper = this.wallpapers.find(wallpaper => wallpaper.isCurrent) || null;
-      console.info('Loaded ' + this.wallpapers.length + ' wallpapers');
-    } catch (error: Error) {
-      console.error('Failed to load wallpapers: ' + error.message);
-      this.wallpapers = [];
     }
   }
   
@@ -337,12 +247,11 @@ struct SettingsPage {
    */
   private async loadVersionInfo(): Promise<void> {
     try {
-      // 调用实际的SettingService获取版本信息 | Call actual SettingService to get version info
-      // 由于SettingService.getVersionInfo不存在，使用默认值
       this.versionInfo = '6.1.6';
-      console.info('Version info: ' + this.versionInfo);
-    } catch (error: Error) {
-      console.error('Failed to load version info: ' + error.message);
+      Logger.info('SettingsPage', 'Version info: ' + this.versionInfo);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load version info', err);
     }
   }
   
@@ -351,17 +260,13 @@ struct SettingsPage {
    */
   private async handleAdBlockToggle(value: boolean): Promise<void> {
     try {
-      // 调用实际的AdBlockManager切换广告过滤状态 | Call actual AdBlockManager to toggle ad block status
-      // 由于AdBlockManager.setEnabled不存在，直接更新状态
+      const adBlockManager = AdBlockManager.getInstance();
+      await adBlockManager.setEnabled(value);
       this.adBlockEnabled = value;
-      // 更新设置项值 | Update setting item value
-      const adBlockItem = this.settingItems.find(item => item.id === 'ad_block');
-      if (adBlockItem) {
-        adBlockItem.value = value;
-      }
-      console.info('Ad block ' + (value ? 'enabled' : 'disabled'));
-    } catch (error: Error) {
-      console.error('Failed to toggle ad block: ' + error.message);
+      Logger.info('SettingsPage', 'Ad block ' + (value ? 'enabled' : 'disabled'));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle ad block', err);
     }
   }
   
@@ -370,17 +275,14 @@ struct SettingsPage {
    */
   private async loadDataSyncStatus(): Promise<void> {
     try {
-      // 由于DataSyncService.isEnabled不存在，使用默认值
-      this.dataSyncEnabled = false;
-      // 更新设置项值 | Update setting item value
-      const dataSyncItem = this.settingItems.find(item => item.id === 'data_sync');
-      if (dataSyncItem) {
-        dataSyncItem.value = false;
-      }
-      
-      console.info('Data sync status: ' + this.dataSyncEnabled + ', sync status: ' + this.syncStatus);
-    } catch (error: Error) {
-      console.error('Failed to load data sync status: ' + error.message);
+      const dataSyncService = DataSyncService.getInstance();
+      this.dataSyncEnabled = await dataSyncService.isEnabled();
+      this.syncStatus = await dataSyncService.getSyncStatus();
+      this.lastSyncTime = await dataSyncService.getLastSyncTime();
+      Logger.info('SettingsPage', 'Data sync status: ' + this.dataSyncEnabled + ', sync status: ' + this.syncStatus);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load data sync status', err);
       this.dataSyncEnabled = false;
     }
   }
@@ -390,23 +292,16 @@ struct SettingsPage {
    */
   private async handleDataSyncToggle(value: boolean): Promise<void> {
     try {
-      // 调用实际的DataSyncService切换数据同步状态 | Call actual DataSyncService to toggle data sync status
-      // 由于DataSyncService.setEnabled不存在，直接更新状态
       this.dataSyncEnabled = value;
-      // 更新设置项值 | Update setting item value
-      const dataSyncItem = this.settingItems.find(item => item.id === 'data_sync');
-      if (dataSyncItem) {
-        dataSyncItem.value = value;
-      }
       
-      // 如果开启同步，立即执行一次同步 | If enabled, perform a sync immediately
       if (value) {
         await this.performSync();
       }
       
-      console.info('Data sync ' + (value ? 'enabled' : 'disabled'));
-    } catch (error: Error) {
-      console.error('Failed to toggle data sync: ' + error.message);
+      Logger.info('SettingsPage', 'Data sync ' + (value ? 'enabled' : 'disabled'));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle data sync', err);
     }
   }
   
@@ -416,17 +311,18 @@ struct SettingsPage {
   private async performSync(): Promise<void> {
     try {
       this.syncStatus = '同步中...';
-      
-      // 由于DataSyncService.syncData不存在，模拟同步
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
+      const dataSyncService = DataSyncService.getInstance();
+      await dataSyncService.syncToCloud();
+
       this.syncStatus = '同步成功';
       this.lastSyncTime = new Date().toLocaleString();
-      
-      console.info('Data sync completed successfully');
-    } catch (error: Error) {
+
+      Logger.info('SettingsPage', 'Data sync completed successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
       this.syncStatus = '同步失败';
-      console.error('Failed to sync data: ' + error.message);
+      Logger.error('SettingsPage', 'Failed to sync data', err);
     }
   }
   
@@ -435,17 +331,13 @@ struct SettingsPage {
    */
   private async loadVoiceAssistantStatus(): Promise<void> {
     try {
-      // 由于VoiceAssistantManager.isEnabled不存在，使用默认值
-      this.voiceAssistantEnabled = false;
-      // 更新设置项值 | Update setting item value
-      const voiceAssistantItem = this.settingItems.find(item => item.id === 'voice_assistant');
-      if (voiceAssistantItem) {
-        voiceAssistantItem.value = false;
-      }
-      
-      console.info('Voice assistant status: ' + this.voiceAssistantEnabled + ', status: ' + this.voiceAssistantStatus);
-    } catch (error: Error) {
-      console.error('Failed to load voice assistant status: ' + error.message);
+      const voiceAssistantManager = VoiceAssistantManager.getInstance();
+      this.voiceAssistantEnabled = await voiceAssistantManager.isEnabled();
+      this.voiceAssistantStatus = await voiceAssistantManager.getStatus();
+      Logger.info('SettingsPage', 'Voice assistant status: ' + this.voiceAssistantEnabled + ', status: ' + this.voiceAssistantStatus);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load voice assistant status', err);
       this.voiceAssistantEnabled = false;
     }
   }
@@ -455,18 +347,13 @@ struct SettingsPage {
    */
   private async handleVoiceAssistantToggle(value: boolean): Promise<void> {
     try {
-      // 调用实际的VoiceAssistantManager切换语音助手状态 | Call actual VoiceAssistantManager to toggle voice assistant status
-      // 由于VoiceAssistantManager.setEnabled不存在，直接更新状态
+      const voiceAssistantManager = VoiceAssistantManager.getInstance();
+      await voiceAssistantManager.setEnabled(value);
       this.voiceAssistantEnabled = value;
-      // 更新设置项值 | Update setting item value
-      const voiceAssistantItem = this.settingItems.find(item => item.id === 'voice_assistant');
-      if (voiceAssistantItem) {
-        voiceAssistantItem.value = value;
-      }
-      
-      console.info('Voice assistant ' + (value ? 'enabled' : 'disabled'));
-    } catch (error: Error) {
-      console.error('Failed to toggle voice assistant: ' + error.message);
+      Logger.info('SettingsPage', 'Voice assistant ' + (value ? 'enabled' : 'disabled'));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle voice assistant', err);
     }
   }
   
@@ -475,17 +362,13 @@ struct SettingsPage {
    */
   private async loadGestureControlStatus(): Promise<void> {
     try {
-      // 由于GestureService.isEnabled不存在，使用默认值
-      this.gestureControlEnabled = false;
-      // 更新设置项值 | Update setting item value
-      const gestureControlItem = this.settingItems.find(item => item.id === 'gesture_control');
-      if (gestureControlItem) {
-        gestureControlItem.value = false;
-      }
-      
-      console.info('Gesture control status: ' + this.gestureControlEnabled + ', status: ' + this.gestureControlStatus);
-    } catch (error: Error) {
-      console.error('Failed to load gesture control status: ' + error.message);
+      const gestureService = GestureService.getInstance();
+      this.gestureControlEnabled = await gestureService.isEnabled();
+      this.gestureControlStatus = await gestureService.getStatus();
+      Logger.info('SettingsPage', 'Gesture control status: ' + this.gestureControlEnabled + ', status: ' + this.gestureControlStatus);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load gesture control status', err);
       this.gestureControlEnabled = false;
     }
   }
@@ -495,22 +378,19 @@ struct SettingsPage {
    */
   private async loadDeviceFlowStatus(): Promise<void> {
     try {
-      // 由于DeviceFlowManager.isEnabled不存在，使用默认值
+      const deviceFlowManager = DeviceFlowManager.getInstance();
+      this.deviceFlowEnabled = await deviceFlowManager.isEnabled();
+      this.availableDevices = await deviceFlowManager.getAvailableDevices();
+      this.deviceFlowStatus = this.availableDevices.length > 0
+        ? '已发现 ' + this.availableDevices.length + ' 个设备'
+        : '未发现设备';
+
+      Logger.info('SettingsPage', 'Device flow status: ' + this.deviceFlowEnabled + ', devices: ' + this.availableDevices.length);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load device flow status', err);
       this.deviceFlowEnabled = false;
-      // 更新设置项值 | Update setting item value
-      const deviceFlowItem = this.settingItems.find(item => item.id === 'device_flow');
-      if (deviceFlowItem) {
-        deviceFlowItem.value = false;
-      }
-      
-      // 加载可用设备列表 | Load available devices list
       this.availableDevices = [];
-      this.deviceFlowStatus = this.availableDevices.length > 0 ? '已发现 ' + this.availableDevices.length + ' 个设备' : '未发现设备';
-      
-      console.info('Device flow status: ' + this.deviceFlowEnabled + ', devices: ' + this.availableDevices.length);
-    } catch (error: Error) {
-      console.error('Failed to load device flow status: ' + error.message);
-      this.deviceFlowEnabled = false;
       this.deviceFlowStatus = '加载失败';
     }
   }
@@ -520,18 +400,11 @@ struct SettingsPage {
    */
   private async handleGestureControlToggle(value: boolean): Promise<void> {
     try {
-      // 调用实际的GestureService切换手势控制状态 | Call actual GestureService to toggle gesture control status
-      // 由于GestureService.setEnabled不存在，直接更新状态
       this.gestureControlEnabled = value;
-      // 更新设置项值 | Update setting item value
-      const gestureControlItem = this.settingItems.find(item => item.id === 'gesture_control');
-      if (gestureControlItem) {
-        gestureControlItem.value = value;
-      }
-      
-      console.info('Gesture control ' + (value ? 'enabled' : 'disabled'));
-    } catch (error: Error) {
-      console.error('Failed to toggle gesture control: ' + error.message);
+      Logger.info('SettingsPage', 'Gesture control ' + (value ? 'enabled' : 'disabled'));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle gesture control', err);
     }
   }
   
@@ -540,18 +413,11 @@ struct SettingsPage {
    */
   private async handleDeviceFlowToggle(value: boolean): Promise<void> {
     try {
-      // 调用实际的DeviceFlowManager切换设备流转状态 | Call actual DeviceFlowManager to toggle device flow status
-      // 由于DeviceFlowManager.setEnabled不存在，直接更新状态
       this.deviceFlowEnabled = value;
-      // 更新设置项值 | Update setting item value
-      const deviceFlowItem = this.settingItems.find(item => item.id === 'device_flow');
-      if (deviceFlowItem) {
-        deviceFlowItem.value = value;
-      }
-      
-      console.info('Device flow ' + (value ? 'enabled' : 'disabled'));
-    } catch (error: Error) {
-      console.error('Failed to toggle device flow: ' + error.message);
+      Logger.info('SettingsPage', 'Device flow ' + (value ? 'enabled' : 'disabled'));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle device flow', err);
     }
   }
   
@@ -560,9 +426,8 @@ struct SettingsPage {
    */
   private async handleDeviceFlowStart(deviceId: string): Promise<void> {
     try {
-      console.info('Starting device flow to device: ' + deviceId);
+      Logger.info('SettingsPage', 'Starting device flow to device: ' + deviceId);
       
-      // 准备流转数据 | Prepare flow data
       const flowData: FlowData = {
         mediaInfo: {
           title: '当前播放内容',
@@ -574,32 +439,12 @@ struct SettingsPage {
         }
       };
       
-      // 发起流转 | Start flow
-      // 由于DeviceFlowManager.startFlow不存在，使用模拟实现
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.info('Device flow started successfully');
-    } catch (error: Error) {
-      console.error('Failed to start device flow: ' + error.message);
-    }
-  }
-  
-  /**
-   * 处理壁纸选择 | Handle wallpaper selection
-   */
-  private async handleWallpaperSelect(wallpaper: WallpaperItem): Promise<void> {
-    try {
-      // 调用实际的WallManager设置壁纸 | Call actual WallManager to set wallpaper
-      // 由于WallManager.setWallpaper不存在，直接更新状态
-      this.wallpapers.forEach(w => {
-        w.isCurrent = w.id === wallpaper.id;
-      });
-      this.selectedWallpaper = wallpaper;
-      // 关闭弹窗 | Close popup
-      this.showWallpaperPopup = false;
-      console.info('Wallpaper set to: ' + wallpaper.name);
-    } catch (error: Error) {
-      console.error('Failed to set wallpaper: ' + error.message);
+      Logger.info('SettingsPage', 'Device flow started successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to start device flow', err);
     }
   }
   
@@ -609,9 +454,10 @@ struct SettingsPage {
   private async handleBack(): Promise<void> {
     try {
       await AppNavigator.getInstance().navigateToBack();
-      console.info('Navigating back');
-    } catch (error: Error) {
-      console.error('Failed to navigate back: ' + error.message);
+      Logger.info('SettingsPage', 'Navigating back');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to navigate back', err);
     }
   }
   
@@ -620,17 +466,14 @@ struct SettingsPage {
    */
   private async handleResetSettings(): Promise<void> {
     try {
-      // 调用实际的ConfigService重置设置 | Call actual ConfigService to reset settings
-      // 由于ConfigService.resetAllConfig不存在，使用模拟实现
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 重新加载设置 | Reload settings
-      await this.loadSettings();
-      await this.loadAdBlockStatus();
-      await this.loadWallpapers();
-      console.info('Settings reset successfully');
-    } catch (error: Error) {
-      console.error('Failed to reset settings: ' + error.message);
+      await this.loadAllData();
+      
+      Logger.info('SettingsPage', 'Settings reset successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to reset settings', err);
     }
   }
   
@@ -639,42 +482,42 @@ struct SettingsPage {
    */
   private async loadCacheInfo(): Promise<void> {
     try {
-      console.info('Loading cache info');
-      
-      // 由于CacheService.getStatistics和CacheService.getCacheItems不存在，使用模拟数据
+      Logger.info('SettingsPage', 'Loading cache info');
+
+      const cacheService = CacheService.getInstance();
+      const cacheStats = await cacheService.getCacheStats();
+
       this.cacheItems = [
         {
           id: 'video_cache',
           name: '视频缓存',
           description: '已观看视频的缓存文件',
-          size: '0 MB',
+          size: this.formatSize(cacheStats.videoCacheSize),
           selected: false
         },
         {
           id: 'image_cache',
           name: '图片缓存',
           description: '应用图片资源缓存',
-          size: '0 MB',
+          size: this.formatSize(cacheStats.imageCacheSize),
           selected: false
         },
         {
           id: 'config_cache',
           name: '配置缓存',
           description: '应用配置缓存',
-          size: '0 MB',
+          size: this.formatSize(cacheStats.configCacheSize),
           selected: false
         }
       ];
-      
-      // 更新总缓存大小 | Update total cache size
-      this.totalCacheSize = '0 MB';
-      
-      // 初始化选中项 | Initialize selected items
+
+      this.totalCacheSize = this.formatSize(cacheStats.totalCacheSize);
       this.selectedCacheItems = [];
-      
-      console.info('Loaded cache info: ' + this.totalCacheSize);
-    } catch (error: Error) {
-      console.error('Failed to load cache info: ' + error.message);
+
+      Logger.info('SettingsPage', 'Loaded cache info: ' + this.totalCacheSize);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load cache info', err);
       this.cacheItems = [];
       this.totalCacheSize = '0 MB';
     }
@@ -687,8 +530,6 @@ struct SettingsPage {
     const item = this.cacheItems.find(item => item.id === itemId);
     if (item) {
       item.selected = !item.selected;
-      
-      // 更新选中项列表 | Update selected items list
       this.selectedCacheItems = this.cacheItems.filter(item => item.selected).map(item => item.id);
     }
   }
@@ -699,22 +540,20 @@ struct SettingsPage {
   private async handleCacheClear(): Promise<void> {
     try {
       if (this.selectedCacheItems.length === 0) {
-        console.warn('No cache items selected for clearing');
+        Logger.warn('SettingsPage', 'No cache items selected for clearing');
         return;
       }
       
-      console.info('Clearing selected cache items: ' + this.selectedCacheItems.join(', '));
+      Logger.info('SettingsPage', 'Clearing selected cache items: ' + this.selectedCacheItems.join(', '));
       
-      // 调用实际的CacheService清理缓存 | Call actual CacheService to clear cache
-      // 由于CacheService.clearAllCache不存在，使用模拟实现
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 重新加载缓存信息 | Reload cache info
       await this.loadCacheInfo();
       
-      console.info('Cache cleared successfully');
-    } catch (error: Error) {
-      console.error('Failed to clear cache: ' + error.message);
+      Logger.info('SettingsPage', 'Cache cleared successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to clear cache', err);
     }
   }
   
@@ -724,27 +563,30 @@ struct SettingsPage {
   private async loadDeviceInfo(): Promise<void> {
     try {
       this.isLoadingDeviceInfo = true;
-      console.info('Loading device info');
-      
-      // 调用实际的DeviceService获取设备信息 | Call actual DeviceService to get device info
-      // 由于DeviceService.getDeviceInfo不存在，使用模拟数据
-      const deviceInfo: DeviceInfo = {
-        name: '设备名称',
-        model: '设备型号',
-        osVersion: 'HarmonyOS 4.0',
-        sn: '1234567890',
-        mac: '00:11:22:33:44:55',
-        ip: '192.168.1.100'
-      };
-      this.deviceInfo = deviceInfo;
-      
-      console.info('Device info loaded successfully');
-    } catch (error: Error) {
-      console.error('Failed to load device info: ' + error.message);
+      Logger.info('SettingsPage', 'Loading device info');
+
+      const deviceService = DeviceService.getInstance();
+      this.deviceInfo = await deviceService.getDeviceInfo();
+
+      Logger.info('SettingsPage', 'Device info loaded successfully');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to load device info', err);
       this.deviceInfo = null;
     } finally {
       this.isLoadingDeviceInfo = false;
     }
+  }
+
+  /**
+   * 格式化文件大小 | Format file size
+   */
+  private formatSize(bytes: number): string {
+    if (bytes === 0) return '0 MB';
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1) return (bytes / 1024).toFixed(2) + ' KB';
+    if (mb < 1024) return mb.toFixed(2) + ' MB';
+    return (mb / 1024).toFixed(2) + ' GB';
   }
   
   /**
@@ -755,11 +597,82 @@ struct SettingsPage {
       item.selected = selectAll;
     });
     
-    // 更新选中项列表 | Update selected items list
     this.selectedCacheItems = selectAll ? this.cacheItems.map(item => item.id) : [];
   }
   
+  /**
+   * 处理源启用切换
+   */
+  private async handleSourceToggle(sourceId: string, isActive: boolean): Promise<void> {
+    try {
+      await this.networkSourceManager.toggleSource(sourceId, isActive);
+      this.sources = this.networkSourceManager.getAllSources();
+      this.loadContentStats();
+      Logger.info('SettingsPage', `Source ${sourceId} toggled to ${isActive}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to toggle source', err);
+    }
+  }
+  
+  /**
+   * 处理源编辑
+   */
+  private handleSourceEdit(source: NetworkSourceConfig): void {
+    this.selectedSource = source;
+    this.showSourceDetailPopup = true;
+  }
+  
+  /**
+   * 处理源详情更新
+   */
+  private async handleSourceUpdate(source: NetworkSourceConfig): Promise<void> {
+    try {
+      await this.networkSourceManager.updateSource(source);
+      this.sources = this.networkSourceManager.getAllSources();
+      this.loadContentStats();
+      Logger.info('SettingsPage', `Source ${source.name} updated`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to update source', err);
+    }
+  }
+  
+  /**
+   * 处理源删除
+   */
+  private async handleSourceDelete(sourceId: string): Promise<void> {
+    try {
+      await this.networkSourceManager.removeSource(sourceId);
+      this.sources = this.networkSourceManager.getAllSources();
+      this.loadContentStats();
+      Logger.info('SettingsPage', `Source ${sourceId} deleted`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to delete source', err);
+    }
+  }
+  
+  /**
+   * 处理健康检查
+   */
+  private async handleHealthCheck(): Promise<void> {
+    try {
+      await this.networkSourceManager.checkAllSourcesHealth();
+      this.sources = this.networkSourceManager.getAllSources();
+      Logger.info('SettingsPage', 'Health check completed');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to perform health check', err);
+    }
+  }
+  
   build() {
+    const colors = this.currentTheme.colors;
+    const spacing = DesignSystem.Spacing;
+    const borderRadius = DesignSystem.BorderRadius;
+    const shadows = this.currentTheme.shadows;
+    
     Column() {
       // 顶部导航栏 | Top navigation bar
       Row() {
@@ -767,41 +680,41 @@ struct SettingsPage {
         Button() {
           Text('返回')
             .fontSize(18)
-            .fontColor('#FFFFFF')
+            .fontColor(colors.surface)
         }
         .width(80)
         .height(50)
-        .backgroundColor('#4CAF50')
-        .borderRadius(8)
-        .margin({ left: 30 })
+        .backgroundColor(colors.primary)
+        .borderRadius(borderRadius.md)
+        .margin({ left: spacing.lg })
         .onClick(() => this.handleBack())
         
         // 标题 | Title
         Text('设置')
           .fontSize(24)
           .fontWeight(700)
-          .fontColor('#333333')
+          .fontColor(colors.text)
           .flexGrow(1)
-          .margin({ left: 30 })
+          .margin({ left: spacing.lg })
           .textAlign(TextAlign.Start)
         
         // 重置按钮 | Reset button
         Button() {
           Text('重置')
             .fontSize(16)
-            .fontColor('#FFFFFF')
+            .fontColor(colors.surface)
         }
         .width(80)
         .height(50)
-        .backgroundColor('#F44336')
-        .borderRadius(8)
-        .margin({ right: 30 })
+        .backgroundColor(colors.error)
+        .borderRadius(borderRadius.md)
+        .margin({ right: spacing.lg })
         .onClick(() => this.handleResetSettings())
       }
       .width('100%')
       .height(70)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor('#FFFFFF')
+      .backgroundColor(colors.surface)
       
       // 设置项列表 | Setting item list
       Scroll(this.scroller) {
@@ -810,8 +723,8 @@ struct SettingsPage {
             Column() {
               Text('加载中...')
                 .fontSize(20)
-                .fontColor('#666666')
-                .margin(20)
+                .fontColor(colors.textSecondary)
+                .margin(spacing.lg)
             }
             .justifyContent(FlexAlign.Center)
             .height(500)
@@ -819,101 +732,523 @@ struct SettingsPage {
             Column() {
               Text('加载失败')
                 .fontSize(20)
-                .fontColor('#FF5252')
-                .margin({ top: 15 })
+                .fontColor(colors.error)
+                .margin({ top: spacing.md })
               Text(this.errorMessage)
                 .fontSize(16)
-                .fontColor('#FF9800')
-                .margin({ top: 8, left: 30, right: 30 })
+                .fontColor(colors.warning)
+                .margin({ top: spacing.sm, left: spacing.lg, right: spacing.lg })
                 .textAlign(TextAlign.Center)
               Button('重试')
-                .onClick(() => this.loadSettings())
-                .backgroundColor('#4CAF50')
-                .fontColor('white')
-                .borderRadius(8)
-                .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-                .margin({ top: 20 })
+                .onClick(() => this.loadAllData())
+                .backgroundColor(colors.primary)
+                .fontColor(colors.surface)
+                .borderRadius(borderRadius.md)
+                .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+                .margin({ top: spacing.lg })
             }
             .justifyContent(FlexAlign.Center)
             .height(500)
           } else {
-            ForEach(this.settingItems, (item: SettingItem) => {
-              Column() {
-                Row() {
-                  // 设置项信息 | Setting item info
-                  Column() {
-                    Text(item.title)
-                      .fontSize(18)
-                      .fontWeight(600)
-                      .fontColor('#333333')
-                      .margin({ bottom: 5 })
-                    
-                    Text(item.description)
-                      .fontSize(14)
-                      .fontColor('#666666')
-                  }
-                  .flexGrow(1)
-                  .alignItems(HorizontalAlign.Start)
-                  
-                  // 操作区域 | Action area
-                  Column() {
-                    if (item.type === 'button') {
-                      Button() {
-                        Text('设置')
-                          .fontSize(16)
-                          .fontColor('#FFFFFF')
-                      }
-                      .width(100)
-                      .height(40)
-                      .backgroundColor('#4CAF50')
-                      .borderRadius(6)
-                      .onClick(() => {
-                        if (item.onClick) {
-                          item.onClick();
-                        }
-                      })
-                    } else if (item.type === 'toggle') {
-                      Button() {
-                        Text(item.value === true ? '开启' : '关闭')
-                          .fontSize(14)
-                          .fontColor('#FFFFFF')
-                      }
-                      .width(80)
-                      .height(40)
-                      .backgroundColor(item.value === true ? '#4CAF50' : '#9E9E9E')
-                      .borderRadius(6)
-                      .onClick(() => {
-                        if (item.onToggle) {
-                          item.onToggle(item.value !== true);
-                        }
-                      })
-                    } else if (item.type === 'info') {
-                      Text(item.value as string)
-                        .fontSize(14)
-                        .fontColor('#666666')
-                    }
-                  }
-                  .margin({ left: 20 })
-                }
-                .width('100%')
-                .padding(20)
-                .backgroundColor('#FFFFFF')
-                .borderRadius(10)
-                .margin({ bottom: 15 })
-                .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
+            // 网络源管理区域
+            Column() {
+              Row() {
+                Text('网络源管理')
+                  .fontSize(18)
+                  .fontWeight(600)
+                  .fontColor(colors.text)
+                
+                Blank()
+                
+                Text(`已启用: ${this.sources.filter(s => s.isActive).length}个源`)
+                  .fontSize(14)
+                  .fontColor(colors.textSecondary)
+                  .margin({ right: spacing.md })
               }
-            }, (item: SettingItem) => item.id)
+              .width('100%')
+              .padding({ left: spacing.md, top: spacing.md, bottom: spacing.md })
+              .borderRadius({ topLeft: borderRadius.lg, topRight: borderRadius.lg })
+              
+              // 源列表
+              Column() {
+                ForEach(this.sources, (source: NetworkSourceConfig) => {
+                  SourceCard({
+                    sourceName: source.name,
+                    sourceId: source.id,
+                    sourceUrl: source.url,
+                    isActive: source.isActive,
+                    healthStatus: source.healthStatus,
+                    priority: source.priority,
+                    tags: source.tags || [],
+                    contentUsage: source.contentUsage,
+                    onToggle: (isActive: boolean) => this.handleSourceToggle(source.id, isActive),
+                    onClick: () => this.handleSourceEdit(source)
+                  })
+                }, (source: NetworkSourceConfig) => source.id)
+              }
+              .width('100%')
+              .padding({ left: spacing.md, right: spacing.md, bottom: spacing.md })
+              
+              // 添加新源按钮
+              Button('+ 添加网络源')
+                .width('100%')
+                .height(45)
+                .margin({ left: spacing.md, right: spacing.md, bottom: spacing.md })
+                .backgroundColor(colors.secondary)
+                .fontColor(colors.surface)
+                .borderRadius(borderRadius.md)
+                .onClick(() => {
+                  this.openAddSourceForm();
+                })
+            }
+            .width('100%')
+            .backgroundColor(colors.surface)
+            .borderRadius(borderRadius.lg)
+            .margin({ bottom: spacing.md })
+            .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
+            
+            // 点播站点配置区域
+            Column() {
+              Row() {
+                Text('点播站点配置')
+                  .fontSize(18)
+                  .fontWeight(600)
+                  .fontColor(colors.text)
+                
+                Blank()
+                
+                Text(`可用站点: ${this.vodStats.total}个 来自${this.vodStats.sources}个源`)
+                  .fontSize(14)
+                  .fontColor(colors.textSecondary)
+                  .margin({ right: spacing.md })
+              }
+              .width('100%')
+              .padding({ left: spacing.md, top: spacing.md, bottom: spacing.md })
+              .borderRadius({ topLeft: borderRadius.lg, topRight: borderRadius.lg })
+            }
+            .width('100%')
+            .backgroundColor(colors.surface)
+            .borderRadius(borderRadius.lg)
+            .margin({ bottom: spacing.md })
+            .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
+            
+            // 直播频道配置区域
+            Column() {
+              Row() {
+                Text('直播频道配置')
+                  .fontSize(18)
+                  .fontWeight(600)
+                  .fontColor(colors.text)
+                
+                Blank()
+                
+                Text(`可用频道: ${this.liveStats.total}个 来自${this.liveStats.sources}个源`)
+                  .fontSize(14)
+                  .fontColor(colors.textSecondary)
+                  .margin({ right: spacing.md })
+              }
+              .width('100%')
+              .padding({ left: spacing.md, top: spacing.md, bottom: spacing.md })
+              .borderRadius({ topLeft: borderRadius.lg, topRight: borderRadius.lg })
+            }
+            .width('100%')
+            .backgroundColor(colors.surface)
+            .borderRadius(borderRadius.lg)
+            .margin({ bottom: spacing.md })
+            .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
+            
+            // 壁纸设置区域
+            Column() {
+              Row() {
+                Text('壁纸设置')
+                  .fontSize(18)
+                  .fontWeight(600)
+                  .fontColor(colors.text)
+                
+                Blank()
+                
+                Text(`可用壁纸: ${this.wallpaperStats.total}张 来自${this.wallpaperStats.sources}个源`)
+                  .fontSize(14)
+                  .fontColor(colors.textSecondary)
+                  .margin({ right: spacing.md })
+              }
+              .width('100%')
+              .padding({ left: spacing.md, top: spacing.md, bottom: spacing.md })
+              .borderRadius({ topLeft: borderRadius.lg, topRight: borderRadius.lg })
+            }
+            .width('100%')
+            .backgroundColor(colors.surface)
+            .borderRadius(borderRadius.lg)
+            .margin({ bottom: spacing.md })
+            .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
+            
+            // 高级设置区域
+            Column() {
+              Text('高级设置')
+                .fontSize(18)
+                .fontWeight(600)
+                .fontColor(colors.text)
+                .width('100%')
+                .padding({ left: spacing.md, top: spacing.md, bottom: spacing.md })
+                .borderRadius({ topLeft: borderRadius.lg, topRight: borderRadius.lg })
+              
+              // 源健康检查按钮
+              Row() {
+                Text('源健康检查')
+                  .fontSize(16)
+                  .fontColor(colors.text)
+                  .flexGrow(1)
+                
+                Button('检查全部')
+                  .fontSize(14)
+                  .fontColor(colors.surface)
+                  .backgroundColor(colors.warning)
+                  .borderRadius(borderRadius.md)
+                  .onClick(() => this.handleHealthCheck())
+              }
+              .width('100%')
+              .padding({ left: spacing.md, right: spacing.md, top: spacing.sm, bottom: spacing.sm })
+              
+              // 广告过滤开关
+              Row() {
+                Text('广告过滤')
+                  .fontSize(16)
+                  .fontColor(colors.text)
+                  .flexGrow(1)
+                
+                Button(this.adBlockEnabled ? '开启' : '关闭')
+                  .fontSize(14)
+                  .fontColor(colors.surface)
+                  .width(80)
+                  .backgroundColor(this.adBlockEnabled ? colors.primary : colors.textSecondary)
+                  .borderRadius(borderRadius.md)
+                  .onClick(() => this.handleAdBlockToggle(!this.adBlockEnabled))
+              }
+              .width('100%')
+              .padding({ left: spacing.md, right: spacing.md, top: spacing.sm, bottom: spacing.sm })
+            }
+            .width('100%')
+            .backgroundColor(colors.surface)
+            .borderRadius(borderRadius.lg)
+            .margin({ bottom: spacing.md })
+            .shadow({ radius: 2, color: 'rgba(0, 0, 0, 0.1)', offsetY: 2 })
           }
         }
         .width('100%')
-        .padding({ top: 30, left: 30, right: 30, bottom: 50 })
+        .padding({ top: spacing.xl, left: spacing.lg, right: spacing.lg, bottom: spacing.xl })
       }
       .scrollBar(BarState.Auto)
       .flexGrow(1)
-      .backgroundColor('#F5F5F5')
+      .backgroundColor(colors.background)
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor(colors.background)
+    .bindContentCover(this.showSourceDetailPopup && this.selectedSource, this.SourceDetailPopupBuilder(), {
+      modalTransition: 0
+    })
+  }
+  
+  /**
+   * 源详情弹窗构建器
+   */
+  @Builder
+  SourceDetailPopupBuilder(): void {
+    if (this.showSourceDetailPopup) {
+      const colors = this.currentTheme.colors;
+      const spacing = DesignSystem.Spacing;
+      const borderRadius = DesignSystem.BorderRadius;
+
+      Column() {
+        // 半透明背景
+        Column()
+          .width('100%')
+          .height('100%')
+          .backgroundColor('rgba(0, 0, 0, 0.5)')
+          .onClick(() => {
+            this.closePopup();
+          })
+
+        // 弹窗内容 - 当selectedSource为null时显示添加表单，否则显示详情/编辑
+        if (this.selectedSource) {
+          // 显示源详情 - 使用 NetworkSourceDetailPopup 组件
+          NetworkSourceDetailPopup({
+            source: this.selectedSource,
+            networkSourceManager: this.networkSourceManager,
+            onClose: () => {
+              this.closePopup();
+            },
+            onSave: async (source) => {
+              await this.handleSourceUpdate(source);
+              this.closePopup();
+            },
+            onDelete: async (sourceId) => {
+              await this.handleSourceDelete(sourceId);
+              this.closePopup();
+            }
+          })
+        } else if (this.showAddSourceForm) {
+          // 显示添加表单
+          Column() {
+            // 标题栏
+            Row() {
+              Text('添加网络源')
+                .fontSize(20)
+                .fontWeight(700)
+                .fontColor(colors.text)
+
+              Blank()
+
+              Button() {
+                Text('关闭')
+                  .fontSize(16)
+                  .fontColor(colors.textSecondary)
+              }
+              .backgroundColor('transparent')
+              .onClick(() => {
+                this.closePopup();
+              })
+            }
+            .width('100%')
+            .padding(spacing.lg)
+            .borderBottomWidth(1)
+            .borderBottomColor(colors.divider)
+
+            // 添加表单
+            Column() {
+              // 源名称输入
+              Column() {
+                Text('源名称 *')
+                  .fontSize(14)
+                  .fontColor(colors.text)
+                  .margin({ bottom: spacing.sm })
+
+                TextInput({ placeholder: '请输入源名称' })
+                  .width('100%')
+                  .fontSize(14)
+                  .height(44)
+                  .backgroundColor(colors.background)
+                  .borderRadius(borderRadius.md)
+                  .onChange((value: string) => {
+                    this.tempSourceName = value;
+                  })
+              }
+              .width('100%')
+              .margin({ bottom: spacing.lg })
+
+              // 源URL输入
+              Column() {
+                Text('源URL *')
+                  .fontSize(14)
+                  .fontColor(colors.text)
+                  .margin({ bottom: spacing.sm })
+
+                TextInput({ placeholder: '请输入源URL (https://...)' })
+                  .width('100%')
+                  .fontSize(14)
+                  .height(44)
+                  .backgroundColor(colors.background)
+                  .borderRadius(borderRadius.md)
+                  .onChange((value: string) => {
+                    this.tempSourceUrl = value;
+                  })
+              }
+              .width('100%')
+              .margin({ bottom: spacing.lg })
+
+              // 优先级选择
+              Column() {
+                Text('优先级 (1-10)')
+                  .fontSize(14)
+                  .fontColor(colors.text)
+                  .margin({ bottom: spacing.sm })
+
+                Row() {
+                  Text(`当前优先级: ${this.tempSourcePriority}`)
+                    .fontSize(14)
+                    .fontColor(colors.text)
+                    .margin({ right: spacing.sm })
+
+                  Button('-')
+                    .fontSize(14)
+                    .width(36)
+                    .height(36)
+                    .backgroundColor(colors.primary)
+                    .onClick(() => {
+                      if (this.tempSourcePriority > 1) {
+                        this.tempSourcePriority--;
+                      }
+                    })
+
+                  Button('+')
+                    .fontSize(14)
+                    .width(36)
+                    .height(36)
+                    .backgroundColor(colors.primary)
+                    .margin({ left: spacing.sm })
+                    .onClick(() => {
+                      if (this.tempSourcePriority < 10) {
+                        this.tempSourcePriority++;
+                      }
+                    })
+                }
+                .width('100%')
+              }
+              .width('100%')
+              .margin({ bottom: spacing.lg })
+
+              // 标签输入
+              Column() {
+                Text('标签 (可选，用逗号分隔)')
+                  .fontSize(14)
+                  .fontColor(colors.text)
+                  .margin({ bottom: spacing.sm })
+
+                TextInput({ placeholder: '例如: 高清, 免费, 中文' })
+                  .width('100%')
+                  .fontSize(14)
+                  .height(44)
+                  .backgroundColor(colors.background)
+                  .borderRadius(borderRadius.md)
+                  .onChange((value: string) => {
+                    this.tempSourceTags = value;
+                  })
+              }
+              .width('100%')
+              .margin({ bottom: spacing.xl })
+
+              // 按钮组
+              Row() {
+                Button('取消')
+                  .fontSize(16)
+                  .width(120)
+                  .height(44)
+                  .backgroundColor(colors.surface)
+                  .fontColor(colors.text)
+                  .borderRadius(borderRadius.md)
+                  .onClick(() => {
+                    this.closePopup();
+                  })
+
+                Blank()
+
+                Button(this.isAddingSource ? '添加中...' : '确认添加')
+                  .fontSize(16)
+                  .width(140)
+                  .height(44)
+                  .backgroundColor(colors.primary)
+                  .fontColor('#FFFFFF')
+                  .borderRadius(borderRadius.md)
+                  .enabled(!this.isAddingSource && this.tempSourceName && this.tempSourceUrl)
+                  .onClick(async () => {
+                    await this.handleAddSource();
+                  })
+              }
+              .width('100%')
+            }
+            .width('100%')
+            .padding(spacing.lg)
+          }
+          .width('80%')
+          .maxWidth(600)
+          .maxHeight('80%')
+          .backgroundColor(colors.surface)
+          .borderRadius(borderRadius.xl)
+          .shadow({ radius: 16, color: 'rgba(0, 0, 0, 0.15)' })
+        }
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .alignItems(HorizontalAlign.Center)
+      .position({ x: 0, y: 0 })
+    }
+  }
+
+  /**
+   * 关闭弹窗
+   */
+  private closePopup(): void {
+    this.showSourceDetailPopup = false;
+    this.selectedSource = null;
+    this.showAddSourceForm = false;
+    this.tempSourceName = '';
+    this.tempSourceUrl = '';
+    this.tempSourcePriority = 5;
+    this.tempSourceTags = '';
+    this.isAddingSource = false;
+  }
+
+  /**
+   * 打开添加源表单
+   */
+  private openAddSourceForm(): void {
+    this.selectedSource = null;
+    this.showAddSourceForm = true;
+    this.showSourceDetailPopup = true;
+    this.tempSourceName = '';
+    this.tempSourceUrl = '';
+    this.tempSourcePriority = 5;
+    this.tempSourceTags = '';
+    this.isAddingSource = false;
+  }
+
+  /**
+   * 处理添加源
+   */
+  private async handleAddSource(): Promise<void> {
+    if (!this.tempSourceName || !this.tempSourceUrl) {
+      Logger.warn('SettingsPage', 'Source name or URL is empty');
+      return;
+    }
+
+    this.isAddingSource = true;
+
+    try {
+      // 验证URL格式
+      try {
+        new URL(this.tempSourceUrl);
+      } catch (error) {
+        Logger.error('SettingsPage', 'Invalid URL format');
+        this.isAddingSource = false;
+        return;
+      }
+
+      // 解析标签
+      const tags = this.tempSourceTags
+        ? this.tempSourceTags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : [];
+
+      // 创建新源
+      const newSource: NetworkSourceConfig = {
+        id: `source_${Date.now()}`,
+        name: this.tempSourceName,
+        url: this.tempSourceUrl,
+        type: 'json',
+        version: '1.0.0',
+        isActive: true,
+        priority: this.tempSourcePriority,
+        tags: tags,
+        contentUsage: {
+          vodSites: true,
+          liveChannels: true,
+          wallpapers: true,
+          adBlockRules: true,
+          decoderConfigs: true
+        }
+      };
+
+      await this.networkSourceManager.addSource(newSource);
+      this.sources = this.networkSourceManager.getAllSources();
+      await this.loadContentStats();
+
+      Logger.info('SettingsPage', `Source added: ${newSource.name}`);
+      this.closePopup();
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error('SettingsPage', 'Failed to add source', err);
+    } finally {
+      this.isAddingSource = false;
+    }
   }
 }

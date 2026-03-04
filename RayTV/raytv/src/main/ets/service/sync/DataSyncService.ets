@@ -264,8 +264,9 @@ export default class DataSyncService {
       
       // 如果启用了启动时同步，执行同步
       if (this.config.syncOnStart && this.config.enabled) {
-        this.synchronizeAll().catch(error => {
-          console.error(TAG + `: Failed to sync on start: ${error}`);
+        this.synchronizeAll().catch((error: Object) => {
+          const err = error instanceof Error ? error : new Error(String(error));
+          console.error(TAG + `: Failed to sync on start: ${err.message}`);
         });
       }
       
@@ -413,11 +414,11 @@ export default class DataSyncService {
       SyncDataType.DEVICE_INFO
     ];
     
-    syncDataTypes.forEach(dataType => {
+    syncDataTypes.forEach((dataType: string) => {
       this.distributedDataService.addDataChangeListener(
-        dataType, (key, data, deviceId) => {
+        dataType, (key: string, data: Object, deviceId: string) => {
           // 当接收到分布式数据变化时，更新本地数据
-          this.handleRemoteDataChange(dataType, key, data as SyncEntity, deviceId).catch(error => {
+          this.handleRemoteDataChange(dataType, key, data as SyncEntity, deviceId).catch((error: Object) => {
             const err = error instanceof Error ? error : new Error(String(error));
             console.error(TAG + ": Failed to handle remote data change: " + err.message);
           });
@@ -634,8 +635,9 @@ export default class DataSyncService {
         timestamp: Date.now()
       };
       this.notifyEvent(SyncEvent.CONFLICT_RESOLVED, resolvedData);
-    } catch (error: Error) {
-      console.error(TAG + ": Failed to resolve conflict: " + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Failed to resolve conflict: " + err.message);
     }
   }
 
@@ -709,8 +711,9 @@ export default class DataSyncService {
         // 通知自动同步开始事件，使用SyncEntity类型
         this.notifyEvent(SyncEvent.AUTO_SYNC_STARTED, { id: "auto_sync", timestamp: Date.now() });
         await this.synchronizeAll();
-      } catch (error: Error) {
-          console.error(TAG + ": Auto sync failed: " + error.message);
+      } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          console.error(TAG + ": Auto sync failed: " + err.message);
         } finally {
         // 通知自动同步停止事件，使用SyncEntity类型
         this.notifyEvent(SyncEvent.AUTO_SYNC_STOPPED, { id: "auto_sync", timestamp: Date.now() });
@@ -769,8 +772,9 @@ export default class DataSyncService {
       });
       
       console.info(TAG + `: Full data synchronization completed in ${duration}ms`);
-    } catch (error: Error) {
-      console.error(TAG + ": Full data synchronization failed: " + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Full data synchronization failed: " + err.message);
       
       // 记录失败的同步
       const duration = Date.now() - startTime;
@@ -783,7 +787,7 @@ export default class DataSyncService {
         failedRecords: 0,
         conflictRecords: 0,
         success: false,
-        errorMessage: error.message
+        errorMessage: err.message
       });
     } finally {
       this.isRunning = false;
@@ -842,11 +846,12 @@ export default class DataSyncService {
       };
       this.notifyEvent(SyncEvent.SYNC_COMPLETED, completedData);
       
-    } catch (error: Error) {
-      console.error(TAG + ": Failed to sync data type " + dataType + ": " + error.message);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Failed to sync data type " + dataType + ": " + err.message);
       
       task.state = SyncState.FAILED;
-      task.error = error.message;
+      task.error = err.message;
       task.endTime = Date.now();
       
       this.notifyTaskUpdate(task);
@@ -896,8 +901,9 @@ export default class DataSyncService {
           );
           successCount++;
         }
-      } catch (error: Error) {
-        console.error(TAG + ": Failed to upload change for " + change.entityId + ": " + error.message);
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error(TAG + ": Failed to upload change for " + change.entityId + ": " + err.message);
         failedCount++;
       }
       
@@ -950,14 +956,15 @@ export default class DataSyncService {
    */
   private async retrySync(task: SyncTask): Promise<void> {
     console.info(TAG + `: Retrying sync task ${task.id} (attempt ${task.retryCount}/${this.config.maxSyncRetry})`);
-    
+
     // 等待重试间隔
-    await new Promise(resolve => setTimeout(resolve, this.config.retryInterval * 1000));
+    await new Promise<void>((resolve: () => void) => setTimeout(resolve, this.config.retryInterval * 1000));
     
     try {
       await this.synchronizeDataType(task.dataType);
-    } catch (error: Error) {
-      console.error(TAG + `: Retry failed for task ${task.id}: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Retry failed for task ${task.id}: ${err.message}`);
     }
   }
 
@@ -1007,8 +1014,9 @@ export default class DataSyncService {
           this.pendingChanges.set(change.entityType, filteredChanges);
         }
       }
-    } catch (error: Error) {
-      console.error(TAG + `: Failed to sync important change: ${error.message}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + `: Failed to sync important change: ${err.message}`);
     }
   }
 
@@ -1099,8 +1107,9 @@ export default class DataSyncService {
           retryCount: task.retryCount
         };
         listener(taskCopy);
-      } catch (error: Error) {
-          console.error(TAG + ": Error in sync listener: " + error.message);
+      } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          console.error(TAG + ": Error in sync listener: " + err.message);
         }
     }
     
@@ -1174,8 +1183,9 @@ export default class DataSyncService {
         const listener = listeners[i];
         try {
           listener(event, safeData);
-        } catch (error: Error) {
-          console.error(TAG + ": Error in sync event listener: " + error.message);
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          console.error(TAG + ": Error in sync event listener: " + err.message);
         }
       }
     }
@@ -1192,8 +1202,9 @@ export default class DataSyncService {
     this.stopAutoSync();
     
     // 保存所有数据
-    this.saveSyncRecords().catch(error: Error => {
-      console.error(TAG + ": Error saving sync records on close: " + error.message);
+    this.saveSyncRecords().catch((error: Object) => {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(TAG + ": Error saving sync records on close: " + err.message);
     });
 
     this.isInitialized = false;

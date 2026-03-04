@@ -2,6 +2,7 @@
 // 实现站点脚本的加载和执行 Implements loading and execution of site scripts
 import Logger from '../../../common/util/Logger';
 import { Site } from '../../../data/bean/Site';
+import { VodDetail } from '../../../data/bean/Vod';
 import { HttpService } from '../../HttpService';
 import { SiteSpider } from '../CrawlerService';
 
@@ -17,18 +18,19 @@ export enum LoaderType {
 /**
  * 脚本执行上下文 Script execution context
  */
+interface LoggerInterface {
+  debug: (tag: string, message: string, error?: Error) => void;
+  info: (tag: string, message: string, error?: Error) => void;
+  warn: (tag: string, message: string, error?: Error) => void;
+  error: (tag: string, message: string, error?: Error) => void;
+  performance: (tag: string, operation: string, startTime: number, endTime: number) => void;
+  object: (tag: string, message: string, obj: string | number | boolean | Object | null | undefined) => void;
+}
+
 export interface ScriptContext {
   site: Site;
-  http: typeof HttpService.getInstance;
-  logger: {
-    debug: (tag: string, message: string, error?: Error) => void;
-    info: (tag: string, message: string, error?: Error) => void;
-    warn: (tag: string, message: string, error?: Error) => void;
-    error: (tag: string, message: string, error?: Error) => void;
-    performance: (tag: string, operation: string, startTime: number, endTime: number) => void;
-    object: (tag: string, message: string, obj: string | number | boolean | object | null | undefined) => void;
-  };
-  [key: string]: string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined) | Site | (() => HttpService);
+  http: () => HttpService;
+  logger: LoggerInterface;
 }
 
 /**
@@ -45,7 +47,7 @@ export interface LoaderOptions {
  * 加载器基类 Loader base class
  */
 export abstract class BaseLoader {
-  protected readonly TAG: string = 'BaseLoader';
+  public readonly TAG: string = 'BaseLoader';
   protected site: Site;
   protected options: LoaderOptions;
   protected loaded: boolean = false;
@@ -73,17 +75,20 @@ export abstract class BaseLoader {
     if (options.sandboxEnabled !== undefined) this.options.sandboxEnabled = options.sandboxEnabled;
     if (options.allowThirdParty !== undefined) this.options.allowThirdParty = options.allowThirdParty;
     this.httpService = HttpService.getInstance();
+
+    const logger: LoggerInterface = {
+      debug: (tag: string, message: string, error?: Error) => Logger.debug(tag, message, error),
+      info: (tag: string, message: string, error?: Error) => Logger.info(tag, message, error),
+      warn: (tag: string, message: string, error?: Error) => Logger.warn(tag, message, error),
+      error: (tag: string, message: string, error?: Error) => Logger.error(tag, message, error),
+      performance: (tag: string, operation: string, startTime: number, endTime: number) => Logger.performance(tag, operation, startTime, endTime),
+      object: (tag: string, message: string, obj: string | number | boolean | Object | null | undefined) => Logger.object(tag, message, obj)
+    };
+
     this.scriptContext = {
       site: this.site,
       http: () => HttpService.getInstance(),
-      logger: {
-        debug: (tag: string, message: string, error?: Error) => Logger.debug(tag, message, error),
-        info: (tag: string, message: string, error?: Error) => Logger.info(tag, message, error),
-        warn: (tag: string, message: string, error?: Error) => Logger.warn(tag, message, error),
-        error: (tag: string, message: string, error?: Error) => Logger.error(tag, message, error),
-        performance: (tag: string, operation: string, startTime: number, endTime: number) => Logger.performance(tag, operation, startTime, endTime),
-        object: (tag: string, message: string, obj: string | number | boolean | object | null | undefined) => Logger.object(tag, message, obj)
-      }
+      logger: logger
     };
   }
 
@@ -138,8 +143,9 @@ export abstract class BaseLoader {
         throw new Error('No script content or URL provided');
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to download script:`, error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `Failed to download script:`, err);
+      throw err;
     }
   }
 
@@ -249,7 +255,16 @@ export class EmptyLoader extends BaseLoader {
   }
 
   protected createSpiderImpl(): SiteSpider {
-    return {
+    const detailResult: VodDetail = {
+      id: '',
+      title: '未知标题',
+      cover: '',
+      description: '暂无描述',
+      playSources: [],
+      episodes: []
+    };
+
+    const spider: SiteSpider = {
       getSiteInfo: async () => this.site,
       getRecommendList: async () => [],
       getHotList: async () => [],
@@ -257,16 +272,10 @@ export class EmptyLoader extends BaseLoader {
       getCategories: async () => [],
       getCategoryList: async () => [],
       search: async () => [],
-      getDetail: async () => ({
-        id: '',
-        title: '未知标题',
-        cover: '',
-        description: '暂无描述',
-        playSources: [],
-        episodes: []
-      }),
+      getDetail: async () => detailResult,
       getPlayUrl: async () => ''
     };
+    return spider;
   }
 
   public getType(): string {

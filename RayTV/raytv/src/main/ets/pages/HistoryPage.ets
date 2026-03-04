@@ -447,7 +447,7 @@ struct HistoryPage {
         }
         
         // 封面 | Cover
-        Image(media?.coverUrl || history.cover || 'https://via.placeholder.com/150x200?text=No+Image')
+        Image(media?.coverUrl || history.cover || '')
           .width(this.coverWidth)
           .height(this.coverHeight)
           .objectFit(ImageFit.Cover)

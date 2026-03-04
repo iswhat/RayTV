@@ -64,6 +64,25 @@ export interface BreadcrumbItem {
   params?: NavigationParams;
 }
 
+// 面包屑导航项实现类 | Breadcrumb navigation item implementation class
+export class BreadcrumbItemImpl implements BreadcrumbItem {
+  route: string = '';
+  title: string = '';
+  params?: NavigationParams;
+  
+  constructor(route?: string, title?: string, params?: NavigationParams) {
+    if (route !== undefined) {
+      this.route = route;
+    }
+    if (title !== undefined) {
+      this.title = title;
+    }
+    if (params !== undefined) {
+      this.params = params;
+    }
+  }
+}
+
 // 路由映射实现类 | Route mapping implementation class
 export class RouteMappingImpl implements RouteMapping {
   url: string = '';
@@ -328,17 +347,17 @@ export class AppNavigator {
       historyItem.title = title || this.getRouteDefaultTitle(route);
       this.addToHistory(historyItem);
 
-      // 使用router.pushUrl API
-      const routerParams = params instanceof NavigationParamsImpl ? 
-        params.toObject() : 
+      // 使用router.pushUrl API - 新版本需要添加模式参数
+      const routerParams = params instanceof NavigationParamsImpl ?
+        params.toObject() :
         (params || {} as Record<string, string | number | boolean | null>);
       await router.pushUrl({
         url: url,
         params: routerParams
-      });
-    } catch (error: Error) {
-      console.error('Navigation to ' + route + ' failed: ' + error.message);
-      throw new Error('Navigation to ' + route + ' failed: ' + error.message);
+      }, router.RouterMode.Standard);
+    } catch (error) {
+      console.error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -347,12 +366,12 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
-      // 使用router.back方法
+      // 使用最新的router.back API
       await router.back();
       this.removeLastFromHistory();
-    } catch (error: Error) {
-      console.error('Navigation back failed: ' + error.message);
-      throw new Error('Navigation back failed: ' + error.message);
+    } catch (error) {
+      console.error('Navigation back failed: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Navigation back failed: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -361,16 +380,16 @@ export class AppNavigator {
    */
   async backToHome(): Promise<void> {
     try {
-      // 使用router.pushUrl API
+      // 使用router.pushUrl API - 添加模式参数
       await router.pushUrl({
         url: this.getPageUrl(PageRoute.HOME),
         params: {} as Record<string, string | number | boolean | null>
-      });
+      }, router.RouterMode.Standard);
       this.navigationHistory = [];
       await this.saveNavigationHistory();
-    } catch (error: Error) {
-      console.error('Navigation back to home failed: ' + error.message);
-      throw new Error('Navigation back to home failed: ' + error.message);
+    } catch (error) {
+      console.error('Navigation back to home failed: ' + (error instanceof Error ? error.message : String(error)));
+      throw new Error('Navigation back to home failed: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -383,14 +402,14 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams, title?: string): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用router.replaceUrl API
-      const routerParams = params instanceof NavigationParamsImpl ? 
-        params.toObject() : 
+      // 使用router.replaceUrl API - 添加模式参数
+      const routerParams = params instanceof NavigationParamsImpl ?
+        params.toObject() :
         (params || {} as Record<string, string | number | boolean | null>);
       await router.replaceUrl({
         url: url,
         params: routerParams
-      });
+      }, router.RouterMode.Standard);
       
       // 创建符合接口定义的历史记录
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
@@ -400,9 +419,10 @@ export class AppNavigator {
       historyItem.timestamp = Date.now();
       historyItem.title = title || this.getRouteDefaultTitle(route);
       this.replaceLastInHistory(historyItem);
-    } catch (error: Error) {
-      console.error('Navigation replace to ' + route + ' failed: ' + error.message);
-      throw new Error('Navigation replace to ' + route + ' failed: ' + error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Navigation replace to ' + route + ' failed: ' + errorMessage);
+      throw new Error('Navigation replace to ' + route + ' failed: ' + errorMessage);
     }
   }
   
@@ -443,11 +463,13 @@ export class AppNavigator {
    * @returns 面包屑导航项数组
    */
   getBreadcrumbs(): BreadcrumbItem[] {
-    return this.navigationHistory.map(item => ({
-      route: item.route,
-      title: item.title || this.getRouteDefaultTitle(item.route),
-      params: item.params
-    }));
+    return this.navigationHistory.map((item): BreadcrumbItem => {
+      const crumb: BreadcrumbItem = new BreadcrumbItemImpl();
+      crumb.route = item.route;
+      crumb.title = item.title || this.getRouteDefaultTitle(item.route);
+      crumb.params = item.params;
+      return crumb;
+    });
   }
   
   /**
@@ -461,10 +483,11 @@ export class AppNavigator {
       await this.saveNavigationHistory();
       
       const item = this.navigationHistory[index];
+      const paramsObj = item.params instanceof NavigationParamsImpl ? item.params.toObject() : {} as Record<string, string | number | boolean | null>;
       await router.pushUrl({
         url: item.url,
-        params: item.params instanceof NavigationParamsImpl ? item.params.toObject() : {}
-      });
+        params: paramsObj
+      }, router.RouterMode.Standard);
     }
   }
 
@@ -482,7 +505,7 @@ export class AppNavigator {
       case PageRoute.LINE_MANAGER:
         return 'pages/LineManagerPage'; // 线路管理页面存在
       case PageRoute.SETTINGS:
-        return 'pages/SettingsPage'; // 设置页面存在
+        return 'pages/ModernSettingsPage'; // 现代设置页面
       case PageRoute.SEARCH:
         return 'pages/SearchPage'; // 搜索页面存在
       case PageRoute.SEARCH_RESULT:
@@ -553,8 +576,8 @@ export class AppNavigator {
       // 转换为JSON字符串保存，避免类型不兼容问题
       const historyJson = JSON.stringify(serializableHistory);
       await StorageUtil.set('navigationHistory', historyJson);
-    } catch (error: Error) {
-      console.error('Failed to save navigation history: ' + error.message);
+    } catch (error) {
+      console.error('Failed to save navigation history: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -588,8 +611,8 @@ export class AppNavigator {
       } else {
         this.navigationHistory = [];
       }
-    } catch (error: Error) {
-      console.error('Failed to load navigation history: ' + error.message);
+    } catch (error) {
+      console.error('Failed to load navigation history: ' + (error instanceof Error ? error.message : String(error)));
       this.navigationHistory = [];
     }
   }

@@ -157,10 +157,10 @@ export class GestureServiceImpl implements GestureService {
       
       // 订阅手势事件 | Subscribe to gesture events
       this.subscribeToGestureEvents();
-      
+
       this.isInitialized = true;
       console.log('Gesture service initialized successfully');
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to initialize gesture service: " + errorMessage);
       throw new Error(errorMessage);
@@ -215,7 +215,7 @@ export class GestureServiceImpl implements GestureService {
       this.isInitialized = false;
       
       console.log('Gesture service destroyed');
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to destroy gesture service: " + errorMessage);
     }
@@ -231,7 +231,7 @@ export class GestureServiceImpl implements GestureService {
       });
       
       console.log('Gesture events subscribed');
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to subscribe to gesture events: " + errorMessage);
     }
@@ -256,7 +256,7 @@ export class GestureServiceImpl implements GestureService {
       if (specificCallback) {
         specificCallback(gestureEvent);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to handle gesture event: " + errorMessage);
     }
@@ -360,7 +360,7 @@ export class GestureServiceImpl implements GestureService {
         default:
           return null;
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage: string = error instanceof Error ? error.message : String(error);
       console.error("Failed to build gesture event: " + errorMessage);
       return null;

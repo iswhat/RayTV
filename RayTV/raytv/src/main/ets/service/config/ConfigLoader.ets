@@ -1,4 +1,4 @@
-// ConfigLoader - 配置加载器 | Config loader
+// ConfigLoader - 閰嶇疆鍔犺浇鍣?| Config loader
 
 import http from '@ohos.net.http';
 import fs from '@ohos.file.fs';
@@ -6,31 +6,31 @@ import { Site } from '../../data/bean/Site';
 import { AppConfig } from '../../data/bean/Config';
 
 /**
- * 配置对象接口，用于规范化处理各种配置格式 | Config object interface for standardized processing of various config formats
+ * 閰嶇疆瀵硅薄鎺ュ彛锛岀敤浜庤鑼冨寲澶勭悊鍚勭閰嶇疆鏍煎紡 | Config object interface for standardized processing of various config formats
  */
 interface ConfigObject {
   sites?: Site[];
   data?: Site[];
   appConfig?: AppConfig;
-  // 移除any类型的通用键名，使用更具体的属性定义 | Remove generic any type keys, use more specific property definitions
+  // 绉婚櫎any绫诲瀷鐨勯€氱敤閿悕锛屼娇鐢ㄦ洿鍏蜂綋鐨勫睘鎬у畾涔?| Remove generic any type keys, use more specific property definitions
 }
 
 
 
 /**
- * 配置加载器，提供多源配置加载能力 | Config loader, providing multi-source config loading capability
+ * 閰嶇疆鍔犺浇鍣紝鎻愪緵澶氭簮閰嶇疆鍔犺浇鑳藉姏 | Config loader, providing multi-source config loading capability
  */
 export class ConfigLoader {
   private static instance: ConfigLoader | null = null;
   private cachePath: string;
   
   private constructor() {
-    // 初始化缓存路径 | Initialize cache path
+    // 鍒濆鍖栫紦瀛樿矾寰?| Initialize cache path
     this.cachePath = this.getCachePath();
   }
   
   /**
-   * 获取单例实例 | Get singleton instance
+   * 鑾峰彇鍗曚緥瀹炰緥 | Get singleton instance
    */
   public static getInstance(): ConfigLoader {
     if (!ConfigLoader.instance) {
@@ -40,19 +40,19 @@ export class ConfigLoader {
   }
   
   /**
-   * 从URL加载配置 | Load config from URL
-   * @param url 配置URL | Config URL
-   * @param cacheHours 缓存时间（小时），默认使用默认值 | Cache time (hours), default to use default value
-   * @param forceRefresh 是否强制刷新（绕过缓存） | Whether to force refresh (bypass cache)
+   * 浠嶶RL鍔犺浇閰嶇疆 | Load config from URL
+   * @param url 閰嶇疆URL | Config URL
+   * @param cacheHours 缂撳瓨鏃堕棿锛堝皬鏃讹級锛岄粯璁や娇鐢ㄩ粯璁ゅ€?| Cache time (hours), default to use default value
+   * @param forceRefresh 鏄惁寮哄埗鍒锋柊锛堢粫杩囩紦瀛橈級 | Whether to force refresh (bypass cache)
    */
   public async loadFromUrl(url: string, cacheHours?: number, forceRefresh: boolean = false): Promise<string> {
     try {
       console.log(`Loading config from URL: ${url}`);
       
-      // 验证缓存时间 | Validate cache time
+      // 楠岃瘉缂撳瓨鏃堕棿 | Validate cache time
       const normalizedCacheHours = this.normalizeCacheTime(cacheHours);
       
-      // 如果不是强制刷新，先尝试从缓存加载 | If not force refresh, try to load from cache first
+      // 濡傛灉涓嶆槸寮哄埗鍒锋柊锛屽厛灏濊瘯浠庣紦瀛樺姞杞?| If not force refresh, try to load from cache first
       if (!forceRefresh) {
         try {
           const cachedContent = await this.loadFromCache(url, normalizedCacheHours);
@@ -60,14 +60,14 @@ export class ConfigLoader {
             console.log(`Using cached config (${normalizedCacheHours}h)`);
             return cachedContent;
           }
-        } catch (cacheError: Error) {
-          console.error(`Failed to load cached config: ${cacheError.message}`);
+        } catch (cacheError) {
+          console.error(`Failed to load cached config: ${cacheError instanceof Error ? cacheError.message : String(cacheError)}`);
         }
       } else {
         console.log(`Force refresh enabled, bypassing cache`);
       }
       
-      // 创建HTTP请求 | Create HTTP request
+      // 鍒涘缓HTTP璇锋眰 | Create HTTP request
       const request = http.createHttp();
       const response = await request.request(url, {
         method: http.RequestMethod.GET,
@@ -83,24 +83,24 @@ export class ConfigLoader {
         const configContent = response.result as string;
         console.log(`Successfully loaded config from URL`);
         
-        // 缓存配置 | Cache config
+        // 缂撳瓨閰嶇疆 | Cache config
         await this.cacheConfig(url, configContent);
         
         return configContent;
       } else {
         throw new Error(`Failed to load config, status code: ${response.responseCode}`);
       }
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to load config from URL`, error);
       
-      // 尝试从缓存加载 | Try to load from cache
+      // 灏濊瘯浠庣紦瀛樺姞杞?| Try to load from cache
       try {
         const cachedContent = await this.loadFromCache(url);
         if (cachedContent) {
           console.warn(`Using cached config since network failed`);
           return cachedContent;
         }
-      } catch (cacheError: Error) {
+      } catch (cacheError) {
         console.error(`Failed to load cached config`, cacheError);
       }
       
@@ -109,83 +109,83 @@ export class ConfigLoader {
   }
   
   /**
-   * 从本地文件加载配置 | Load config from local file
-   * @param filePath 文件路径 | File path
+   * 浠庢湰鍦版枃浠跺姞杞介厤缃?| Load config from local file
+   * @param filePath 鏂囦欢璺緞 | File path
    */
   public async loadFromFile(filePath: string): Promise<string> {
     try {
       console.log(`Loading config from file: ${filePath}`);
       
-      // 检查文件是否存在 | Check if file exists
+      // 妫€鏌ユ枃浠舵槸鍚﹀瓨鍦?| Check if file exists
       const fileInfo = await fs.getFileStat(filePath);
       if (!fileInfo.isFile) {
         throw new Error('Path is not a file');
       }
       
-      // 读取文件内容 | Read file content
+      // 璇诲彇鏂囦欢鍐呭 | Read file content
       const file = await fs.open(filePath, fs.OpenMode.READ_ONLY);
       const fileContent = await fs.readText(file.fd);
       await fs.close(file.fd);
       
       console.log(`Successfully loaded config from file`);
       return fileContent;
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to load config from file`, error);
       throw error;
     }
   }
   
   /**
-   * 解析配置内容 | Parse config content
-   * @param content 配置内容 | Config content
+   * 瑙ｆ瀽閰嶇疆鍐呭 | Parse config content
+   * @param content 閰嶇疆鍐呭 | Config content
    */
   public parseConfig(content: string): { sites: Site[]; appConfig?: AppConfig } {
     try {
       console.log('Parsing config content');
       
-      // 尝试解析为纯JSON | Try to parse as pure JSON
+      // 灏濊瘯瑙ｆ瀽涓虹函JSON | Try to parse as pure JSON
       try {
         const config = JSON.parse(content) as ConfigObject | Site[];
         return this.processConfigObject(config);
       } catch (jsonError) {
-        // 如果不是纯JSON，尝试解析为JavaScript格式 | If not pure JSON, try to parse as JavaScript format
+        // 濡傛灉涓嶆槸绾疛SON锛屽皾璇曡В鏋愪负JavaScript鏍煎紡 | If not pure JSON, try to parse as JavaScript format
         console.log('Not pure JSON, trying to parse as JavaScript');
         return this.parseJavaScriptConfig(content);
       }
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to parse config`, error);
       throw new Error('Invalid config format');
     }
   }
   
   /**
-   * 处理配置对象 | Process config object
-   * @param config 配置对象 | Config object
+   * 澶勭悊閰嶇疆瀵硅薄 | Process config object
+   * @param config 閰嶇疆瀵硅薄 | Config object
    */
   private processConfigObject(config: ConfigObject | Site[]): { sites: Site[]; appConfig?: AppConfig } {
     const sites: Site[] = [];
     let appConfig: AppConfig | undefined;
     
-    // 检查是否为Site数组 | Check if it's Site array
+    // 妫€鏌ユ槸鍚︿负Site鏁扮粍 | Check if it's Site array
     if (Array.isArray(config)) {
-      // 直接是站点数组 | Directly site array
+      // 鐩存帴鏄珯鐐规暟缁?| Directly site array
       for (let i = 0; i < config.length; i++) {
         sites.push(config[i]);
       }
     } else {
-      // 处理站点配置 | Process site config
+      // 澶勭悊绔欑偣閰嶇疆 | Process site config
       if (config.sites && Array.isArray(config.sites)) {
         for (let i = 0; i < config.sites.length; i++) {
           sites.push(config.sites[i]);
         }
       } else if (config.data && Array.isArray(config.data)) {
-        // 兼容旧版配置格式 | Compatible with old config format
+        // 鍏煎鏃х増閰嶇疆鏍煎紡 | Compatible with old config format
         for (let i = 0; i < config.data.length; i++) {
           sites.push(config.data[i]);
         }
       }
       
-      // 处理应用配置 | Process app config
+      // 澶勭悊搴旂敤閰嶇疆 | Process app config
       if (config.appConfig) {
         appConfig = config.appConfig;
       }
@@ -196,19 +196,19 @@ export class ConfigLoader {
   }
   
   /**
-   * 解析JavaScript格式配置 | Parse JavaScript format config
-   * @param content JavaScript配置内容 | JavaScript config content
+   * 瑙ｆ瀽JavaScript鏍煎紡閰嶇疆 | Parse JavaScript format config
+   * @param content JavaScript閰嶇疆鍐呭 | JavaScript config content
    */
   private parseJavaScriptConfig(content: string): { sites: Site[]; appConfig?: AppConfig } {
     try {
-      // 尝试提取config变量 | Try to extract config variable
+      // 灏濊瘯鎻愬彇config鍙橀噺 | Try to extract config variable
       const configMatch = content.match(/var\s+config\s*=\s*([\s\S]*?);/);
       if (configMatch && configMatch[1]) {
         const configObj = JSON.parse(configMatch[1]) as ConfigObject | Site[];
         return this.processConfigObject(configObj);
       }
       
-      // 尝试提取data变量 | Try to extract data variable
+      // 灏濊瘯鎻愬彇data鍙橀噺 | Try to extract data variable
       const dataMatch = content.match(/var\s+data\s*=\s*([\s\S]*?);/);
       if (dataMatch && dataMatch[1]) {
         const dataObj = JSON.parse(dataMatch[1]) as ConfigObject | Site[];
@@ -216,70 +216,70 @@ export class ConfigLoader {
       }
       
       throw new Error('Could not find valid JavaScript config');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to parse JavaScript config`, error);
       throw new Error('Invalid JavaScript config format');
     }
   }
   
   /**
-   * 缓存配置 | Cache config
-   * @param url 配置URL | Config URL
-   * @param content 配置内容 | Config content
+   * 缂撳瓨閰嶇疆 | Cache config
+   * @param url 閰嶇疆URL | Config URL
+   * @param content 閰嶇疆鍐呭 | Config content
    */
   private async cacheConfig(url: string, content: string): Promise<void> {
     try {
-      // 生成缓存文件名 | Generate cache file name
+      // 鐢熸垚缂撳瓨鏂囦欢鍚?| Generate cache file name
       const cacheFileName = this.getCacheFileName(url);
       const cacheFilePath = `${this.cachePath}/${cacheFileName}`;
       
-      // 确保缓存目录存在 | Ensure cache directory exists
+      // 纭繚缂撳瓨鐩綍瀛樺湪 | Ensure cache directory exists
       await this.ensureCacheDir();
       
-      // 写入缓存文件 | Write to cache file
+      // 鍐欏叆缂撳瓨鏂囦欢 | Write to cache file
       const file = await fs.open(cacheFilePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNCATE);
       await fs.writeText(file.fd, content);
       await fs.close(file.fd);
       
       console.debug(`Config cached to ${cacheFilePath}`);
-    } catch (error: Error) {
+    } catch (error) {
       console.warn(`Failed to cache config`, error);
-      // 缓存失败不影响主要功能 | Cache failure does not affect main functionality
+      // 缂撳瓨澶辫触涓嶅奖鍝嶄富瑕佸姛鑳?| Cache failure does not affect main functionality
     }
   }
   
-  // 缓存过期时间配置（小时） | Cache expiration time configuration (hours)
-  private minCacheHours: number = 24;     // 最小24小时 | Minimum 24 hours
-  private maxCacheHours: number = 72;     // 最大72小时 | Maximum 72 hours
-  private defaultCacheHours: number = 24; // 默认24小时 | Default 24 hours
+  // 缂撳瓨杩囨湡鏃堕棿閰嶇疆锛堝皬鏃讹級 | Cache expiration time configuration (hours)
+  private minCacheHours: number = 24;     // 鏈€灏?4灏忔椂 | Minimum 24 hours
+  private maxCacheHours: number = 72;     // 鏈€澶?2灏忔椂 | Maximum 72 hours
+  private defaultCacheHours: number = 24; // 榛樿24灏忔椂 | Default 24 hours
 
   /**
-   * 从缓存加载配置 | Load config from cache
-   * @param url 配置URL | Config URL
-   * @param cacheHours 缓存时间（小时） | Cache time (hours)
+   * 浠庣紦瀛樺姞杞介厤缃?| Load config from cache
+   * @param url 閰嶇疆URL | Config URL
+   * @param cacheHours 缂撳瓨鏃堕棿锛堝皬鏃讹級 | Cache time (hours)
    */
   private async loadFromCache(url: string, cacheHours: number = this.defaultCacheHours): Promise<string | null> {
     try {
       const cacheFileName = this.getCacheFileName(url);
       const cacheFilePath = `${this.cachePath}/${cacheFileName}`;
       
-      // 检查缓存文件是否存在 | Check if cache file exists
+      // 妫€鏌ョ紦瀛樻枃浠舵槸鍚﹀瓨鍦?| Check if cache file exists
       try {
         await fs.getFileStat(cacheFilePath);
       } catch {
         return null;
       }
       
-      // 读取缓存文件 | Read cache file
+      // 璇诲彇缂撳瓨鏂囦欢 | Read cache file
       const file = await fs.open(cacheFilePath, fs.OpenMode.READ_ONLY);
       const content = await fs.readText(file.fd);
       await fs.close(file.fd);
       
-      // 检查缓存是否过期 | Check if cache is expired
+      // 妫€鏌ョ紦瀛樻槸鍚﹁繃鏈?| Check if cache is expired
       const cacheInfo = await fs.getFileStat(cacheFilePath);
       const cacheTime = cacheInfo.mtimeMs || cacheInfo.ctimeMs || Date.now();
       const now = Date.now();
-      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 转换为毫秒 | Convert to milliseconds
+      const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000; // 杞崲涓烘绉?| Convert to milliseconds
       if (now - cacheTime > cacheExpiry) {
         console.debug(`Cache expired, ignoring`);
         return null;
@@ -287,82 +287,82 @@ export class ConfigLoader {
       
       console.debug(`Loaded config from cache`);
       return content;
-    } catch (error: Error) {
+    } catch (error) {
       console.warn(`Failed to load from cache`, error);
       return null;
     }
   }
   
   /**
-   * 保存站点配置为文件 | Save site config to file
-   * @param sites 站点配置 | Site config
-   * @param filePath 保存路径 | Save path
+   * 淇濆瓨绔欑偣閰嶇疆涓烘枃浠?| Save site config to file
+   * @param sites 绔欑偣閰嶇疆 | Site config
+   * @param filePath 淇濆瓨璺緞 | Save path
    */
   public async saveConfigToFile(sites: Site[], filePath: string): Promise<void> {
     try {
       console.log(`Saving config to file: ${filePath}`);
       
-      // 创建配置对象 | Create config object
+      // 鍒涘缓閰嶇疆瀵硅薄 | Create config object
       const config = { sites };
       
-      // 转换为JSON | Convert to JSON
+      // 杞崲涓篔SON | Convert to JSON
       const configJson = JSON.stringify(config, null, 2);
       
-      // 写入文件 | Write to file
+      // 鍐欏叆鏂囦欢 | Write to file
       const file = await fs.open(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNCATE);
       await fs.writeText(file.fd, configJson);
       await fs.close(file.fd);
       
       console.log(`Successfully saved config to file`);
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to save config to file`, error);
       throw error;
     }
   }
   
   /**
-   * 获取缓存路径 | Get cache path
+   * 鑾峰彇缂撳瓨璺緞 | Get cache path
    */
   private getCachePath(): string {
-    // 在实际应用中，这里应该使用应用的缓存目录 | In actual application, should use app's cache directory
-    // 这里简化处理 | Simplify here
+    // 鍦ㄥ疄闄呭簲鐢ㄤ腑锛岃繖閲屽簲璇ヤ娇鐢ㄥ簲鐢ㄧ殑缂撳瓨鐩綍 | In actual application, should use app's cache directory
+    // 杩欓噷绠€鍖栧鐞?| Simplify here
     return '/data/storage/el2/base/cache/raytv/config';
   }
   
   /**
-   * 确保缓存目录存在 | Ensure cache directory exists
+   * 纭繚缂撳瓨鐩綍瀛樺湪 | Ensure cache directory exists
    */
   private async ensureCacheDir(): Promise<void> {
     try {
-      // 检查目录是否存在 | Check if directory exists
+      // 妫€鏌ョ洰褰曟槸鍚﹀瓨鍦?| Check if directory exists
       try {
         const dirInfo = await fs.getFileStat(this.cachePath);
         if (!dirInfo.isDir) {
           await fs.unlink(this.cachePath);
         }
       } catch {
-        // 目录不存在，创建目录 | Directory not exists, create directory
+        // 鐩綍涓嶅瓨鍦紝鍒涘缓鐩綍 | Directory not exists, create directory
         await fs.mkdir(this.cachePath, true);
       }
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to ensure cache directory`, error);
       throw error;
     }
   }
   
   /**
-   * 生成缓存文件名 | Generate cache file name
+   * 鐢熸垚缂撳瓨鏂囦欢鍚?| Generate cache file name
    * @param url URL
    */
   private getCacheFileName(url: string): string {
-    // 简单的URL哈希作为缓存文件名 | Simple URL hash as cache file name
+    // 绠€鍗曠殑URL鍝堝笇浣滀负缂撳瓨鏂囦欢鍚?| Simple URL hash as cache file name
     const hash = this.simpleHash(url);
     return `config_${hash}.json`;
   }
   
   /**
-   * 简单的字符串哈希函数 | Simple string hash function
-   * @param str 输入字符串 | Input string
+   * 绠€鍗曠殑瀛楃涓插搱甯屽嚱鏁?| Simple string hash function
+   * @param str 杈撳叆瀛楃涓?| Input string
    */
   private simpleHash(str: string): string {
     let hash = 0;
@@ -375,16 +375,16 @@ export class ConfigLoader {
   }
   
   /**
-   * 清除配置缓存 | Clear config cache
+   * 娓呴櫎閰嶇疆缂撳瓨 | Clear config cache
    */
   public async clearCache(): Promise<void> {
     try {
       console.log('Clearing config cache');
       
-      // 读取缓存目录 | Read cache directory
+      // 璇诲彇缂撳瓨鐩綍 | Read cache directory
       const files = await fs.listFile(this.cachePath);
       
-      // 删除所有缓存文件 | Delete all cache files
+      // 鍒犻櫎鎵€鏈夌紦瀛樻枃浠?| Delete all cache files
       for (const file of files) {
         if (file.name.startsWith('config_') && file.name.endsWith('.json')) {
           const filePath = `${this.cachePath}/${file.name}`;
@@ -394,26 +394,26 @@ export class ConfigLoader {
       }
       
       console.log('Cache cleared successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error(`Failed to clear cache`, error);
       throw error;
     }
   }
   
   /**
-   * 清理过期缓存 | Clean expired cache
-   * @param cacheHours 使用的缓存时间阈值（小时），默认使用最小缓存时间 | Used cache time threshold (hours), default to use minimum cache time
+   * 娓呯悊杩囨湡缂撳瓨 | Clean expired cache
+   * @param cacheHours 浣跨敤鐨勭紦瀛樻椂闂撮槇鍊硷紙灏忔椂锛夛紝榛樿浣跨敤鏈€灏忕紦瀛樻椂闂?| Used cache time threshold (hours), default to use minimum cache time
    */
   public async cleanExpiredCache(cacheHours: number = this.minCacheHours): Promise<void> {
     try {
       console.log(`Cleaning expired cache (threshold: ${cacheHours}h)`);
       
-      // 读取缓存目录 | Read cache directory
+      // 璇诲彇缂撳瓨鐩綍 | Read cache directory
       const files = await fs.listFile(this.cachePath);
       const now = Date.now();
       const cacheExpiry = this.normalizeCacheTime(cacheHours) * 60 * 60 * 1000;
       
-      // 删除过期缓存文件 | Delete expired cache files
+      // 鍒犻櫎杩囨湡缂撳瓨鏂囦欢 | Delete expired cache files
       for (const file of files) {
         if (file.name.startsWith('config_') && file.name.endsWith('.json')) {
           const filePath = `${this.cachePath}/${file.name}`;
@@ -425,20 +425,20 @@ export class ConfigLoader {
               await fs.unlink(filePath);
               console.debug(`Deleted expired cache file: ${file.name}`);
             }
-          } catch (fileError: Error) {
+          } catch (fileError) {
             console.error(`Failed to check/delete cache file ${file.name}`, fileError);
           }
         }
       }
       
       console.log('Expired cache cleaned successfully');
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Failed to clean expired cache', error);
     }
   }
   
   /**
-   * 获取缓存信息 | Get cache info
+   * 鑾峰彇缂撳瓨淇℃伅 | Get cache info
    */
   public async getCacheInfo(): Promise<{
     cacheSize: number;
@@ -468,7 +468,7 @@ export class ConfigLoader {
         cacheFiles: configFiles.length,
         lastCacheTime: lastTime
       };
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Failed to get cache info', error);
       return {
         cacheSize: 0,
@@ -479,8 +479,8 @@ export class ConfigLoader {
   }
   
   /**
-   * 规范化缓存时间 | Normalize cache time
-   * @param hours 缓存时间（小时） | Cache time (hours)
+   * 瑙勮寖鍖栫紦瀛樻椂闂?| Normalize cache time
+   * @param hours 缂撳瓨鏃堕棿锛堝皬鏃讹級 | Cache time (hours)
    */
   private normalizeCacheTime(hours?: number): number {
     if (hours === undefined) {
@@ -490,14 +490,14 @@ export class ConfigLoader {
   }
   
   /**
-   * 设置缓存时间范围 | Set cache time range
-   * @param minHours 最小缓存时间（小时） | Minimum cache time (hours)
-   * @param maxHours 最大缓存时间（小时） | Maximum cache time (hours)
+   * 璁剧疆缂撳瓨鏃堕棿鑼冨洿 | Set cache time range
+   * @param minHours 鏈€灏忕紦瀛樻椂闂达紙灏忔椂锛?| Minimum cache time (hours)
+   * @param maxHours 鏈€澶х紦瀛樻椂闂达紙灏忔椂锛?| Maximum cache time (hours)
    */
   public setCacheTimeRange(minHours: number, maxHours: number): void {
     this.minCacheHours = Math.max(24, minHours);
     this.maxCacheHours = Math.min(72, Math.max(this.minCacheHours, maxHours));
-    this.defaultCacheHours = this.minCacheHours; // 默认使用最小缓存时间 | Default to use minimum cache time
+    this.defaultCacheHours = this.minCacheHours; // 榛樿浣跨敤鏈€灏忕紦瀛樻椂闂?| Default to use minimum cache time
     console.log(`Cache time range set to ${this.minCacheHours}-${this.maxCacheHours} hours`);
   }
 }

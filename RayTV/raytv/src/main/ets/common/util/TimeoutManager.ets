@@ -5,6 +5,30 @@ import Logger from './Logger';
 const TAG = 'TimeoutManager';
 
 /**
+ * 超时控制结果接口
+ */
+export interface TimeoutResult<T> {
+  /** 执行结果的Promise */
+  promise: Promise<T>;
+  /** 取消函数 */
+  cancel: () => void;
+}
+
+/**
+ * 重试选项接口
+ */
+export interface RetryOptions {
+  /** 最大重试次数 */
+  maxRetries?: number;
+  /** 重试延迟时间(毫秒) */
+  retryDelay?: number;
+  /** 超时时间(毫秒) */
+  timeout?: number;
+  /** 重试回调函数 */
+  onRetry?: (attempt: number, error: Error) => void;
+}
+
+/**
  * 超时管理器 Timeout Manager
  * 提供统一的超时控制和管理功能 Provides unified timeout control and management functionality
  */
@@ -153,10 +177,7 @@ export default class TimeoutManager {
    * @param delay 延迟时间(毫秒) Delay time (milliseconds)
    * @returns 包含promise和cancel方法的对象 Object with promise and cancel method
    */
-  public delay(delay: number): {
-    promise: Promise<void>;
-    cancel: () => void;
-  } {
+  public delay(delay: number): TimeoutResult<void> {
     const id = `delay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     let cancelled = false;
 
@@ -173,7 +194,11 @@ export default class TimeoutManager {
       this.clearTimeout(id);
     };
 
-    return { promise, cancel };
+    const result: TimeoutResult<void> = {
+      promise,
+      cancel
+    };
+    return result;
   }
 
   /**
@@ -184,12 +209,7 @@ export default class TimeoutManager {
    */
   public async withRetry<T>(
     fn: () => Promise<T>,
-    options: {
-      maxRetries?: number;
-      retryDelay?: number;
-      timeout?: number;
-      onRetry?: (attempt: number, error: Error) => void;
-    } = {}
+    options: RetryOptions = {}
   ): Promise<T> {
     try {
       const maxRetries = options.maxRetries ?? 3;

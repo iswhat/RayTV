@@ -8,7 +8,7 @@ export interface ComponentProps {
   // 组件通用属性
   id?: string
   className?: string
-  style?: Record<string, any>
+  style?: Record<string, string | number | boolean>
   disabled?: boolean
   visible?: boolean
 }
@@ -132,7 +132,7 @@ export abstract class BaseComponent<T extends ComponentProps = ComponentProps> e
   /**
    * 发射事件
    */
-  protected emit(eventName: string, data?: any): void {
+  protected emit(eventName: string, data?: Record<string, unknown>): void {
     // 事件发射逻辑
     console.log(`[${this.componentName}] Emitting event: ${eventName}`, data)
   }
@@ -192,21 +192,21 @@ export abstract class BaseComponent<T extends ComponentProps = ComponentProps> e
   /**
    * 组件渲染方法 - 需要子类实现
    */
-  abstract render(): any
-  
+  abstract render(): Component | null
+
   /**
    * 组件构建方法
    */
-  build(): any {
+  build(): Component | null {
     if (!this.state.initialized) {
       this.initialize()
     }
-    
+
     if (!this.state.mounted) {
       this.onBeforeMount()
       this.onMounted()
     }
-    
+
     return this.render()
   }
 }

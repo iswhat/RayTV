@@ -788,7 +788,7 @@ export class ThemeManager {
 
 @Component
 export struct ThemeProvider {
-  @Prop children: any[]
+  @Prop children: CustomNode[] = []
   @State currentTheme: ThemeConfig = ThemeManager.getInstance().getCurrentTheme()
   private themeManager: ThemeManager = ThemeManager.getInstance()
   
@@ -839,7 +839,7 @@ export function useSpacing(): ThemeSpacing {
 
 // ==================== 便捷工厂方法 ====================
 
-export const createThemeProvider = (children: any[]): ThemeProvider => {
+export const createThemeProvider = (children: CustomNode[]): ThemeProvider => {
   return new ThemeProvider({ children })
 }
 

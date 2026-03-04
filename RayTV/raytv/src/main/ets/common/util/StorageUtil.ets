@@ -44,7 +44,7 @@ class EncryptionUtil {
     try {
       // 简单的Base64编码作为示例，实际应用中应使用AES等加密算法
       // Simple Base64 encoding as example, should use AES or other encryption algorithm in production
-      const encoder = new TextEncoder();
+      const encoder: TextEncoder = new TextEncoder();
       const data: Uint8Array = encoder.encode(text);
       const bufferData: buffer.Buffer = buffer.from(data);
       return bufferData.toString('base64');
@@ -60,7 +60,7 @@ class EncryptionUtil {
       // 简单的Base64解码作为示例，实际应用中应使用AES等加密算法
       // Simple Base64 decoding as example, should use AES or other encryption algorithm in production
       const data: buffer.Buffer = buffer.from(encryptedText, 'base64');
-      const decoder = new TextDecoder();
+      const decoder: TextDecoder = new TextDecoder();
       return decoder.decode(data);
     } catch (error) {
       console.error('StorageUtil: Decryption failed', error);
@@ -187,12 +187,12 @@ export class StorageUtil {
 
   /**
    * 存储字符串值
-   * 
+   *
    * 存储字符串值到偏好设置中，自动进行加密处理。
-   * 
+   *
    * @param {string} key - 键
    * @param {string} value - 值
-   * 
+   *
    * @example
    * ```typescript
    * await StorageUtil.putString('username', 'John Doe');
@@ -201,10 +201,10 @@ export class StorageUtil {
    */
   public static async putString(key: string, value: string): Promise<void> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         // 加密存储值 | Encrypt storage value
-        const encryptedValue = EncryptionUtil.encrypt(value);
+        const encryptedValue: string = EncryptionUtil.encrypt(value);
         await preferences.put(key, encryptedValue);
         await preferences.flush();
       }
@@ -216,14 +216,14 @@ export class StorageUtil {
 
   /**
    * 获取字符串值
-   * 
+   *
    * 从偏好设置中获取字符串值，自动进行解密处理。
-   * 
+   *
    * @param {string} key - 键
    * @param {string} [defaultValue=''] - 默认值，当键不存在时返回
    * @param {StorageType} [storageType=StorageType.PREFERENCES] - 存储类型
    * @returns {Promise<string>} 字符串值
-   * 
+   *
    * @example
    * ```typescript
    * const username = await StorageUtil.getString('username', 'Guest');
@@ -232,10 +232,11 @@ export class StorageUtil {
    */
   public static async getString(key: string, defaultValue: string = '', storageType: StorageType = StorageType.PREFERENCES): Promise<string> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const encryptedResult: string = await preferences.get<string>(key, defaultValue);
+        const encryptedValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const encryptedResult: string = encryptedValue as string;
         // 解密存储值 | Decrypt storage value
         const result: string = EncryptionUtil.decrypt(encryptedResult);
         return result;
@@ -250,12 +251,12 @@ export class StorageUtil {
 
   /**
    * 存储数值
-   * 
+   *
    * 存储数值到偏好设置中。
-   * 
+   *
    * @param {string} key - 键
    * @param {number} value - 值
-   * 
+   *
    * @example
    * ```typescript
    * await StorageUtil.putNumber('age', 30);
@@ -264,7 +265,7 @@ export class StorageUtil {
    */
   public static async putNumber(key: string, value: number): Promise<void> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.put(key, value);
         await preferences.flush();
@@ -277,13 +278,13 @@ export class StorageUtil {
 
   /**
    * 获取数值
-   * 
+   *
    * 从偏好设置中获取数值。
-   * 
+   *
    * @param {string} key - 键
    * @param {number} [defaultValue=0] - 默认值，当键不存在时返回
    * @returns {Promise<number>} 数值
-   * 
+   *
    * @example
    * ```typescript
    * const age = await StorageUtil.getNumber('age', 0);
@@ -292,10 +293,11 @@ export class StorageUtil {
    */
   public static async getNumber(key: string, defaultValue: number = 0): Promise<number> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const result: number = await preferences.get<number>(key, defaultValue);
+        const resultValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const result: number = resultValue as number;
         return result;
       }
       return defaultValue;
@@ -308,12 +310,12 @@ export class StorageUtil {
 
   /**
    * 存储布尔值
-   * 
+   *
    * 存储布尔值到偏好设置中。
-   * 
+   *
    * @param {string} key - 键
    * @param {boolean} value - 值
-   * 
+   *
    * @example
    * ```typescript
    * await StorageUtil.putBoolean('autoPlay', true);
@@ -322,7 +324,7 @@ export class StorageUtil {
    */
   public static async putBoolean(key: string, value: boolean): Promise<void> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.put(key, value);
         await preferences.flush();
@@ -335,13 +337,13 @@ export class StorageUtil {
 
   /**
    * 获取布尔值
-   * 
+   *
    * 从偏好设置中获取布尔值。
-   * 
+   *
    * @param {string} key - 键
    * @param {boolean} [defaultValue=false] - 默认值，当键不存在时返回
    * @returns {Promise<boolean>} 布尔值
-   * 
+   *
    * @example
    * ```typescript
    * const autoPlay = await StorageUtil.getBoolean('autoPlay', false);
@@ -350,10 +352,11 @@ export class StorageUtil {
    */
   public static async getBoolean(key: string, defaultValue: boolean = false): Promise<boolean> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const result: boolean = await preferences.get<boolean>(key, defaultValue);
+        const resultValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const result: boolean = resultValue as boolean;
         return result;
       }
       return defaultValue;
@@ -401,11 +404,11 @@ export class StorageUtil {
 
   /**
    * 移除存储项
-   * 
+   *
    * 从偏好设置中移除指定的存储项。
-   * 
+   *
    * @param {string} key - 键
-   * 
+   *
    * @example
    * ```typescript
    * await StorageUtil.remove('username');
@@ -414,7 +417,7 @@ export class StorageUtil {
    */
   public static async remove(key: string): Promise<void> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.delete(key);
         await preferences.flush();
@@ -427,12 +430,12 @@ export class StorageUtil {
 
   /**
    * 检查存储项是否存在
-   * 
+   *
    * 检查偏好设置中是否存在指定的存储项。
-   * 
+   *
    * @param {string} key - 键
    * @returns {Promise<boolean>} 是否存在
-   * 
+   *
    * @example
    * ```typescript
    * const hasUsername = await StorageUtil.contains('username');
@@ -445,7 +448,7 @@ export class StorageUtil {
    */
   public static async contains(key: string): Promise<boolean> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         return await preferences.has(key);
       }
@@ -459,9 +462,9 @@ export class StorageUtil {
 
   /**
    * 清除所有存储项
-   * 
+   *
    * 清除偏好设置中的所有存储项。
-   * 
+   *
    * @example
    * ```typescript
    * await StorageUtil.clear();
@@ -470,9 +473,9 @@ export class StorageUtil {
    */
   public static async clear(): Promise<void> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
-        const allItems: Record<string, string | number | boolean> = await preferences.getAll() as Record<string, string | number | boolean>;
+        const allItems: Preferences.Value = await preferences.getAll();
         // 确保allItems是对象类型
         if (typeof allItems === 'object' && allItems !== null) {
           // 使用Object.keys获取所有键
@@ -502,11 +505,11 @@ export class StorageUtil {
 
   /**
    * 获取所有存储项
-   * 
+   *
    * 获取偏好设置中的所有存储项，返回一个StorageItem对象。
-   * 
+   *
    * @returns {Promise<StorageItem>} 所有存储项
-   * 
+   *
    * @example
    * ```typescript
    * const allItems = await StorageUtil.getAll();
@@ -517,11 +520,12 @@ export class StorageUtil {
    */
   public static async getAll(): Promise<StorageItem> {
     try {
-      const preferences = StorageUtil.getPreferences();
+      const preferences: Preferences | null = StorageUtil.getPreferences();
       if (preferences) {
         const result: StorageItem = {};
         // Explicitly type the return value | 显式类型化返回值
-        const allItems: Record<string, string | number | boolean> = await preferences.getAll() as Record<string, string | number | boolean>;
+        const allItemsValue: Preferences.Value = await preferences.getAll();
+        const allItems: Record<string, Preferences.Value> = allItemsValue as Record<string, Preferences.Value>;
         if (typeof allItems === 'object' && allItems !== null) {
           const keyArray = Object.keys(allItems);
           for (let i = 0; i < keyArray.length; i++) {
@@ -632,11 +636,11 @@ export class StorageUtil {
       const jsonStr = await StorageUtil.getString(key);
       if (jsonStr) {
         // 安全的类型转换 | Safe type conversion
-        const parsed = JSON.parse(jsonStr);
+        const parsedValue: Record<string, object | string | number | boolean | null | undefined> = JSON.parse(jsonStr);
         // 验证类型安全 | Validate type safety
-        if (typeof parsed === 'object' && parsed !== null) {
+        if (typeof parsedValue === 'object' && parsedValue !== null) {
           // 使用类型守卫确保类型安全 | Use type guard to ensure type safety
-          const safeParsed: Record<string, object | string | number | boolean | null | undefined> = parsed as Record<string, object | string | number | boolean | null | undefined>;
+          const safeParsed: Record<string, object | string | number | boolean | null | undefined> = parsedValue;
           const result: StorageObject = {};
 
           // 检查并转换 userInfo

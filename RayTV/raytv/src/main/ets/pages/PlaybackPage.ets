@@ -295,7 +295,26 @@ struct PlaybackPage {
   // 初始化播放 | Initialize playback
   private async initPlayback(): Promise<void> {
     try {
-      // 获取路由参数
+      // 尝试从router获取参数（NAS播放）
+      const routerParams = router.getParams();
+      if (routerParams && routerParams.url && routerParams.title) {
+        // NAS视频播放
+        Logger.info(this.TAG, `NAS video playback: ${routerParams.title}, URL: ${routerParams.url}`);
+        
+        // 直接使用AVPlayerService播放
+        // 这里需要实现AVPlayerService的初始化
+        // 暂时模拟播放状态
+        this.playbackState.isLoading = false;
+        this.playbackState.isError = false;
+        this.playbackState.isPlaying = true;
+        this.playbackState.duration = 3600; // 模拟1小时视频
+        this.playbackState.currentTime = 0;
+        this.playbackState.progress = 0;
+        
+        return;
+      }
+      
+      // 常规视频播放（从AppNavigator获取参数）
       const params = AppNavigator.getInstance().getCurrentRouteParams();
       
       if (!params || !params.id || !params.siteKey) {
@@ -588,6 +607,16 @@ struct PlaybackPage {
    */
   private async handlePlayPause(): Promise<void> {
     try {
+      // 检查是否是NAS视频播放
+      const routerParams = router.getParams();
+      if (routerParams && routerParams.url) {
+        // NAS视频播放控制
+        this.playbackState.isPlaying = !this.playbackState.isPlaying;
+        Logger.info(this.TAG, `NAS video ${this.playbackState.isPlaying ? 'playing' : 'paused'}`);
+        return;
+      }
+      
+      // 常规视频播放控制
       // 验证playbackService是否可用
       if (!this.playbackService) {
         Logger.error(this.TAG, 'Playback service not available');
@@ -646,6 +675,18 @@ struct PlaybackPage {
    */
   private async handleFastForward(seconds: number = 30): Promise<void> {
     try {
+      // 检查是否是NAS视频播放
+      const routerParams = router.getParams();
+      if (routerParams && routerParams.url) {
+        // NAS视频快进
+        const targetTime = Math.min(this.playbackState.duration, this.playbackState.currentTime + seconds);
+        this.playbackState.currentTime = targetTime;
+        this.playbackState.progress = (targetTime / this.playbackState.duration) * 100;
+        Logger.info(this.TAG, `NAS video fast forward ${seconds} seconds to ${targetTime}`);
+        return;
+      }
+      
+      // 常规视频快进
       const targetTime = this.playbackState.currentTime + seconds;
       // 调用实际的PlaybackService快进 | Call actual PlaybackService to fast forward
       const result = await this.playbackService.seek(targetTime);
@@ -666,6 +707,18 @@ struct PlaybackPage {
    */
   private async handleRewind(seconds: number = 10): Promise<void> {
     try {
+      // 检查是否是NAS视频播放
+      const routerParams = router.getParams();
+      if (routerParams && routerParams.url) {
+        // NAS视频快退
+        const targetTime = Math.max(0, this.playbackState.currentTime - seconds);
+        this.playbackState.currentTime = targetTime;
+        this.playbackState.progress = (targetTime / this.playbackState.duration) * 100;
+        Logger.info(this.TAG, `NAS video rewind ${seconds} seconds to ${targetTime}`);
+        return;
+      }
+      
+      // 常规视频快退
       const targetTime = Math.max(0, this.playbackState.currentTime - seconds);
       // 调用实际的PlaybackService快退 | Call actual PlaybackService to rewind
       const result = await this.playbackService.seek(targetTime);

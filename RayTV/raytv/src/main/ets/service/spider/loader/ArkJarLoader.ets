@@ -12,6 +12,57 @@ import sandbox from '@ohos.sandbox';
 import BusinessError from '@ohos.base';
 
 /**
+ * 沙箱文件系统接口 Sandbox file system interface
+ */
+interface SandboxFileSystem {
+  mkdir: (path: string, options?: { recursive?: boolean }) => Promise<void>;
+  [key: string]: any;
+}
+
+/**
+ * JAR方法参数类型 JAR method parameter type
+ */
+export type JarMethodParam = string | number | boolean | null | JarMethodParam[] | JarMethodResult;
+
+/**
+ * JAR方法结果类型 JAR method result type
+ */
+export interface JarMethodResult {
+  success: boolean;
+  code?: number;
+  message?: string;
+  data?: JarMethodData;
+  timestamp?: number;
+}
+
+/**
+ * JAR方法数据类型 JAR method data type
+ */
+export type JarMethodData =
+  | string
+  | number
+  | boolean
+  | null
+  | JarMethodParam[]
+  | Record<string, JarMethodData>;
+
+/**
+ * 爬虫实例接口 Spider instance interface
+ */
+export interface SiteSpider {
+  getSiteInfo: () => Promise<JarMethodResult>;
+  getRecommendList: () => Promise<JarMethodResult>;
+  getHotList: () => Promise<JarMethodResult>;
+  getLatestList: () => Promise<JarMethodResult>;
+  getCategories: () => Promise<JarMethodResult>;
+  getCategoryList: (category: string, page: number) => Promise<JarMethodResult>;
+  search: (keyword: string, page?: number) => Promise<JarMethodResult>;
+  getDetail: (id: string) => Promise<JarMethodResult>;
+  getPlayUrl: (id: string, episodeId?: string) => Promise<JarMethodResult>;
+  getSearchSuggestions: (keyword: string) => Promise<JarMethodResult>;
+}
+
+/**
  * JAR 加载器配置 JAR loader configuration
  */
 interface JarLoaderConfig {
@@ -25,7 +76,7 @@ interface JarLoaderConfig {
  * 实现基于 HarmonyOS ArkNative 能力的 JAR 文件加载器 Implements JAR file loader based on HarmonyOS ArkNative capabilities
  */
 export class ArkJarLoader extends BaseLoader {
-  private readonly TAG: string = 'ArkJarLoader';
+  public readonly TAG: string = 'ArkJarLoader';
   private jarFilePath: string = '';
   private taskPoolManager: TaskPoolManager;
   private httpService: HttpService;
@@ -33,14 +84,14 @@ export class ArkJarLoader extends BaseLoader {
   private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
   private sandboxId: string = '';
-  private sandboxFs: any = null;
+  private sandboxFs: SandboxFileSystem | null = null;
   private jarLoaded: boolean = false;
   private methodExecutedCount: number = 0;
   private lastMemoryCheckTime: number = 0;
   private errorCount: number = 0;
   private maxErrorCount: number = 5;
   private status: string = 'initialized';
-  private jarCache: Map<string, any> = new Map();
+  private jarCache: Map<string, JarMethodResult> = new Map();
 
   /**
    * 构造函数 Constructor
@@ -100,9 +151,9 @@ export class ArkJarLoader extends BaseLoader {
    * 方法调用 Method invocation
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<any> 方法返回值 Method return value
+   * @returns Promise<JarMethodResult> 方法返回值 Method return value
    */
-  public async callMethod(methodName: string, args: Array<any>): Promise<any> {
+  public async callMethod(methodName: string, args: Array<JarMethodParam>): Promise<JarMethodResult> {
     try {
       if (!this.jarLoaded) {
         throw new Error('JAR file is not loaded');
@@ -309,7 +360,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 参数 Parameters
    * @private
    */
-  private async executeJarMethod(methodName: string, params: Array<any>): Promise<any> {
+  private async executeJarMethod(methodName: string, params: Array<JarMethodParam>): Promise<JarMethodResult> {
     try {
       Logger.info(this.TAG, `Executing JAR method: ${methodName}`);
       
@@ -395,25 +446,43 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async verifyJarFile(): Promise<void> {
     // 检查 JAR 文件大小 Check JAR file size
-    const fileStats = fileio.statSync(this.jarFilePath);
+    let fileStats;
+    try {
+      fileStats = fileio.statSync(this.jarFilePath);
+    } catch (error) {
+      throw new Error(`Failed to stat JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+    
     const maxSize = (this.loaderConfig.maxMemory || 256) * 1024 * 1024; // 转换为字节 Convert to bytes
     
-    if (fileStats.size > maxSize) {
+    if (fileStats.fileSize > maxSize) {
       throw new Error(`JAR file exceeds maximum allowed size (${maxSize} bytes)`);
     }
     
     // 简单的文件头验证，确保是有效的 JAR/ZIP 文件
-    const file = fileio.openSync(this.jarFilePath, 0);
-    const header = new Uint8Array(4);
-    fileio.readSync(file.fd, header.buffer, 0, 4, 0);
-    fileio.closeSync(file.fd);
-    
-    // JAR 文件的魔数是 PK\003\004
-    const isValidJar = header[0] === 0x50 && header[1] === 0x4B && 
-                      header[2] === 0x03 && header[3] === 0x04;
-    
-    if (!isValidJar) {
-      throw new Error('Invalid JAR file format');
+    let file;
+    try {
+      file = fileio.openSync(this.jarFilePath, 0);
+      const header = new Uint8Array(4);
+      fileio.readSync(file.fd, header.buffer, 0, 4, 0);
+      
+      // JAR 文件的魔数是 PK\003\004
+      const isValidJar = header[0] === 0x50 && header[1] === 0x4B && 
+                        header[2] === 0x03 && header[3] === 0x04;
+      
+      if (!isValidJar) {
+        throw new Error('Invalid JAR file format');
+      }
+    } catch (error) {
+      throw new Error(`Failed to verify JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      if (file) {
+        try {
+          fileio.closeSync(file.fd);
+        } catch (error) {
+          // 忽略关闭文件时的错误
+        }
+      }
     }
   }
 
@@ -441,7 +510,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params 方法参数 Method parameters
    * @private
    */
-  private validateParams(params: Array<any>): void {
+  private validateParams(params: Array<JarMethodParam>): void {
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 1024 * 1024) { // 1MB 限制
       throw new Error('JAR method parameters too large');
@@ -524,7 +593,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param params JavaScript 参数 JavaScript parameters
    * @private
    */
-  private convertToJavaParams(params: Array<any>): any {
+  private convertToJavaParams(params: Array<JarMethodParam>): JarMethodParam[] {
     // 转换 JavaScript 数据结构为 Java 兼容格式
     // 在实际实现中需要根据 ArkNative API 的要求进行转换
     return params;
@@ -535,7 +604,7 @@ export class ArkJarLoader extends BaseLoader {
    * @param result Java 结果 Java result
    * @private
    */
-  private convertFromJavaResult(result: any): any {
+  private convertFromJavaResult(result: JarMethodResult): JarMethodResult {
     // 转换 Java 结果为 JavaScript 格式
     // 在实际实现中需要根据 ArkNative API 的要求进行转换
     return result;
@@ -545,7 +614,7 @@ export class ArkJarLoader extends BaseLoader {
    * 创建爬虫实例实现 Create spider instance implementation
    * @returns SiteSpider 爬虫实例 Spider instance
    */
-  protected createSpiderImpl(): any {
+  protected createSpiderImpl(): SiteSpider {
     return {
       getSiteInfo: async () => this.callMethod('getSiteInfo', []),
       getRecommendList: async () => this.callMethod('getRecommendList', []),

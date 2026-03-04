@@ -326,11 +326,12 @@ struct CategoryPage {
   @Builder
   private renderMediaItem(media: MediaItem): void {
     Row() {
-      Image(media.coverUrl || "https://via.placeholder.com/80x120?text=No+Image")
+      Image(media.coverUrl || '')
         .width(80)
         .height(120)
         .objectFit(ImageFit.Cover)
         .borderRadius(4)
+        .backgroundColor('#F5F5F5')
       Column() {
         Text(media.title)
           .fontSize(16)
