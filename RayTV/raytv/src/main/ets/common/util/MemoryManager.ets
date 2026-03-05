@@ -1,5 +1,6 @@
 // MemoryManager - 内存管理工具类
 import Logger from './Logger';
+import ObjectUtils from './ark/ObjectUtils';
 
 const TAG = 'MemoryManager';
 
@@ -370,7 +371,7 @@ export default class MemoryManager {
       }
 
       // 对象 - 使用Object.keys替代for...in
-      const keys = Object.keys(obj);
+      const keys = ObjectUtils.getKeys(obj);
       let size: number = 0;
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];

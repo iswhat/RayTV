@@ -1,5 +1,6 @@
 import Logger from '../../common/util/Logger';
 import fs from '@ohos.file.fs';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 /**
  * 缓存项接口 | Cache item interface
@@ -573,7 +574,7 @@ export class CacheManager {
    */
   private getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
     // 鐩存帴浣跨敤Object.keys鑾峰彇閿紝閬垮厤for-in寰幆鍜屽師鍨嬮摼鎿嶄綔
-    return Object.keys(obj);
+    return ObjectUtils.getKeys(obj);
   }
 
   /**

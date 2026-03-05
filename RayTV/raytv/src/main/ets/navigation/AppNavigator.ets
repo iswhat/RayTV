@@ -3,6 +3,7 @@
 
 import router from '@ohos.router';
 import StorageUtil, { StorageType } from '../common/util/StorageUtil';
+import ObjectUtils from '../common/util/ark/ObjectUtils';
 // Logger import removed as AnalyticsService was deleted
 
 // 页面路由常量 | Page route constants
@@ -179,8 +180,8 @@ export class NavigationParamsImpl implements NavigationParams {
   
   clone(): NavigationParams {
     const clone = new NavigationParamsImpl();
-    // 使用Object.keys替代for-in循环
-    const keys = Object.keys(this._data);
+    // 使用ObjectUtils.getKeys替代Object.keys
+    const keys = ObjectUtils.getKeys(this._data);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       clone.setParam(key, this._data[key]);
@@ -192,8 +193,8 @@ export class NavigationParamsImpl implements NavigationParams {
   toObject(): Record<string, string | number | boolean | null> {
     // 手动构建对象，避免使用Object.fromEntries
     const result: Record<string, string | number | boolean | null> = {};
-    // 使用Object.keys替代for-in循环
-    const keys = Object.keys(this._data);
+    // 使用ObjectUtils.getKeys替代Object.keys
+    const keys = ObjectUtils.getKeys(this._data);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const value = this._data[key];

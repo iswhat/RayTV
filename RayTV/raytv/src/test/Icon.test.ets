@@ -5,6 +5,7 @@
 
 import { Icon } from '../components/Icon';
 import { BaseComponent } from '../components/BaseComponent';
+import ObjectUtils from '../main/ets/common/util/ark/ObjectUtils';
 
 describe('Icon Component Tests', () => {
   let icon: Icon;
@@ -129,12 +130,14 @@ describe('Icon Component Tests', () => {
         'check': '✅'
       };
       
-      Object.entries(iconMappings).forEach(([name, expectedChar]) => {
+      const entries = ObjectUtils.getEntries<string>(iconMappings);
+      for (let i = 0; i < entries.length; i++) {
+        const [name, expectedChar] = entries[i];
         const testIcon = new Icon({ name: name });
         const rendered = testIcon.render();
         expect(rendered).toBeDefined();
         // 验证图标字符映射正确
-      });
+      }
     });
     
     it('应该正确处理未定义的图标', () => {

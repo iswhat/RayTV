@@ -4,6 +4,7 @@
 import { describe, it, beforeAll } from '@ohos/hypium'
 import { PerformanceMonitor, MonitorPerformance } from '../../src/main/ets/utils/PerformanceMonitor'
 import { Assert } from '../utils/TestUtils'
+import ObjectUtils from '../../src/main/ets/common/util/ark/ObjectUtils';
 
 export default function performanceMonitorTest() {
   describe('PerformanceMonitor', function () {
@@ -79,7 +80,7 @@ export default function performanceMonitorTest() {
       
       // 检查是否有性能数据被记录
       const report = monitor.getPerformanceReport()
-      Assert.assertTrue(Object.keys(report.metrics).length > 0, '应该记录性能指标')
+      Assert.assertTrue(ObjectUtils.getKeys(report.metrics).length > 0, '应该记录性能指标')
     })
     
     /**
@@ -91,13 +92,13 @@ export default function performanceMonitorTest() {
       monitor.endMeasurement('oldTest')
       
       const reportBefore = monitor.getPerformanceReport()
-      const metricCountBefore = Object.keys(reportBefore.metrics).length
+      const metricCountBefore = ObjectUtils.getKeys(reportBefore.metrics).length
       
       // 清理旧数据（立即清理所有数据用于测试）
       monitor.cleanupOldData(0)
       
       const reportAfter = monitor.getPerformanceReport()
-      const metricCountAfter = Object.keys(reportAfter.metrics).length
+      const metricCountAfter = ObjectUtils.getKeys(reportAfter.metrics).length
       
       // 由于清理机制可能保留一些数据，我们只要求清理后数据不增加
       Assert.assertTrue(metricCountAfter <= metricCountBefore, '清理后指标数量不应该增加')

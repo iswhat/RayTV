@@ -4,6 +4,7 @@
 import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import { Site, SiteType, LoaderType } from '../../data/bean/Site';
 import { AppConfig, HarmonyConfig, LiveCollection, LiveConfigItem, LiveGroup, LiveChannel } from '../../data/bean/Config';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 
 const TAG = 'ConfigParser';
@@ -138,8 +139,8 @@ export class ConfigParser {
     if (obj === null || typeof obj !== 'object') {
       return [];
     }
-    // 使用Object.keys替代for...in循环
-    return Object.keys(obj);
+    // 使用ObjectUtils.getKeys替代Object.keys
+    return ObjectUtils.getKeys(obj);
   }
 
   /**

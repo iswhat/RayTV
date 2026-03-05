@@ -7,6 +7,7 @@
 import { Optional, SafeAny } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
 import StringUtils from './StringUtils';
+import ObjectUtils from './ObjectUtils';
 
 /**
  * JSON工具函数集合 JSON utility functions collection
@@ -367,7 +368,7 @@ export const JsonUtils = {
             const cleanedValue = JsonUtils.clean(value as Record<string, SafeAny>, removeEmpty);
             
             // 如果需要移除空对象，并且清理后的对象为空，则跳过 If need to remove empty objects and cleaned value is empty, skip
-            if (!removeEmpty || Object.keys(cleanedValue).length > 0) {
+            if (!removeEmpty || ObjectUtils.getKeys(cleanedValue).length > 0) {
               result[key] = cleanedValue;
             }
           } else if (!removeEmpty || (Array.isArray(value) && value.length > 0) || (!Array.isArray(value))) {

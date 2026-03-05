@@ -272,7 +272,11 @@ export class ErrorService {
    * @param errorInfo 错误信息
    */
   private logError(errorInfo: ErrorInfo): void {
-    const { type, code, message, location, details } = errorInfo;
+    const type = errorInfo.type;
+    const code = errorInfo.code;
+    const message = errorInfo.message;
+    const location = errorInfo.location;
+    const details = errorInfo.details;
     const logMessage = `[${type}] [${code}] ${message}${location ? ` (${location})` : ''}`;
     
     switch (type) {

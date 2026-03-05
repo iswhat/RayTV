@@ -6,6 +6,7 @@ import UserService, { UserPreferences } from '../../service/user/UserService';
 import DatabaseManager from '../../data/db/DatabaseManager';
 import { BusinessError } from '@ohos.base';
 import type { ApplicationInfo } from '@ohos.bundle.bundleManager';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 // 自定义主题接口 | Custom theme interface
 export interface CustomTheme {
@@ -298,8 +299,8 @@ export default class SettingService {
    * 获取对象的所有自有属性键 | Get all own property keys of object
    */
   private getOwnPropertyKeys(obj: object): string[] {
-    // ArkTS兼容实现：使用Object.keys | ArkTS compatible: use Object.keys
-    return Object.keys(obj);
+    // ArkTS兼容实现：使用ObjectUtils.getKeys | ArkTS compatible: use ObjectUtils.getKeys
+    return ObjectUtils.getKeys(obj);
   }
   // 服务实例将在需要时直接调用 | Service instances will be called directly when needed
   private appSettings: AppSettings = DEFAULT_APP_SETTINGS;

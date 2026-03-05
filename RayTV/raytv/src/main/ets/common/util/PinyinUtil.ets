@@ -1,6 +1,7 @@
 // PinyinUtil.ets - 拼音工具类 Pinyin utility class
 // 支持中文到拼音的转换，支持全拼和首字母提取 Supports Chinese to pinyin conversion, supports full pinyin and first letter extraction
 import Logger from './Logger';
+import ObjectUtils from './ark/ObjectUtils';
 
 const TAG = 'PinyinUtil';
 
@@ -107,7 +108,7 @@ export class PinyinUtil {
     const keys: string[] = [];
     try {
       // 使用Object.keys获取对象的键，这在HarmonyOS环境中是支持的 Uses Object.keys to get object keys, this is supported in HarmonyOS environment
-      const objKeys = Object.keys(map);
+      const objKeys = ObjectUtils.getKeys(map);
       for (let i = 0; i < objKeys.length; i++) {
         keys.push(objKeys[i]);
       }
@@ -240,7 +241,7 @@ export class PinyinUtil {
       let updatedCount = 0;
       
       // 使用Object.keys获取对象键 Uses Object.keys to get object keys
-      const keys = Object.keys(map);
+      const keys = ObjectUtils.getKeys(map);
       
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];

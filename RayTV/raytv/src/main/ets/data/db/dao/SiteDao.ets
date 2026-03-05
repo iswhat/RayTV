@@ -7,6 +7,7 @@ import { Site, SiteAuth, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, Sit
 import LoggerUtil from '../../../common/util/Logger';
 import JsonUtil from '../../../common/util/JsonUtil';
 import StorageUtil from '../../../common/util/StorageUtil';
+import ObjectUtils from '../../../common/util/ark/ObjectUtils';
 
 
 
@@ -351,7 +352,7 @@ export class SiteDao {
                 }
               } else if (parsedHeaders && typeof parsedHeaders === 'object') {
                 // 处理对象格式 | Handle object format
-                const keys = Object.keys(parsedHeaders);
+                const keys = ObjectUtils.getKeys(parsedHeaders);
                 for (let i = 0; i < keys.length; i++) {
                   const headerKey = keys[i];
                   const headerValue = String(parsedHeaders[headerKey]);
@@ -470,7 +471,7 @@ export class SiteDao {
           // 处理config对象，移除null值 | Process config object, remove null values
           let cleanedConfig: Record<string, string | number | boolean> = {};
           if (config) {
-            const entries = Object.entries(config);
+            const entries = ObjectUtils.getEntries(config);
             for (let i = 0; i < entries.length; i++) {
               const entry = entries[i];
               const key = entry[0];

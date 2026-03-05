@@ -1,5 +1,6 @@
 // 通用工具类 // Common Utility Class
 // 提供各种辅助函数 // Provides various helper functions
+import ObjectUtils from './ark/ObjectUtils';
 
 /**
  * 通用工具类 // Common Utility Class
@@ -34,13 +35,7 @@ export class CommonUtil {
    * 替代Object.keys，适配ArkTS语法 // Alternative to Object.keys, adapted to ArkTS syntax
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (typeof obj === 'object' && obj !== null && this.hasOwnProperty(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    return ObjectUtils.getKeys(obj);
   }
 
   /**
@@ -98,7 +93,7 @@ export class CommonUtil {
     
     const clonedObj: Record<string, unknown> = {};
     // 直接使用Object.keys获取键 // Directly use Object.keys to get keys
-    const keys = Object.keys(obj);
+    const keys = ObjectUtils.getKeys(obj);
     for (const key of keys) {
       const propertyValue = (obj as Record<string, unknown>)[key];
       clonedObj[key] = this.deepClone(propertyValue);
@@ -353,9 +348,9 @@ export class CommonUtil {
     for (let i = 0; i < keys1.length; i++) {
       const key = keys1[i];
       // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call // Safe check if property exists, avoid using Object.prototype.hasOwnProperty.call
-      if (typeof obj1 === 'object' && obj1 !== null && Object.keys(obj1).includes(key)) {
+      if (typeof obj1 === 'object' && obj1 !== null && ObjectUtils.getKeys(obj1).includes(key)) {
         // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call // Safe check if property exists, avoid using Object.prototype.hasOwnProperty.call
-        if (typeof obj2 === 'object' && obj2 !== null && Object.keys(obj2).includes(key)) {
+        if (typeof obj2 === 'object' && obj2 !== null && ObjectUtils.getKeys(obj2).includes(key)) {
           if (obj1[key] !== obj2[key]) {
             if (typeof obj1[key] === 'object' && typeof obj2[key] === 'object') {
               const nestedDiff = this.getObjectDiff(obj1[key], obj2[key]);
@@ -378,7 +373,7 @@ export class CommonUtil {
       const key = keys2[i];
       // 安全检查属性是否存在，避免使用Object.prototype.hasOwnProperty.call // Safe check if property exists, avoid using Object.prototype.hasOwnProperty.call
       if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null && 
-          Object.keys(obj2).includes(key) && !Object.keys(obj1).includes(key)) {
+          ObjectUtils.getKeys(obj2).includes(key) && !ObjectUtils.getKeys(obj1).includes(key)) {
         diff[key] = obj2[key];
       }
     }
@@ -552,7 +547,8 @@ export class CommonUtil {
       return baseUrl;
     }
     
-    const queryString = Object.entries(params)
+    const entries = ObjectUtils.getEntries(params);
+    const queryString = entries
       .filter(([_, value]) => value !== undefined && value !== null)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
       .join('&');

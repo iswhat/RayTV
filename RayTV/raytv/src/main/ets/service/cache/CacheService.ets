@@ -7,6 +7,7 @@ import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
 import ConfigService from '../config/ConfigService';
 
 import Logger from '../../common/util/Logger';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 // 常量定义 Constants definition
 const TAG = 'CacheService';
@@ -409,7 +410,7 @@ export default class CacheService {
    * 替代Object.keys，适配ArkTS语法 | Alternative to Object.keys, adapted for ArkTS syntax
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    return Object.keys(obj);
+    return ObjectUtils.getKeys(obj);
   }
 
   /**

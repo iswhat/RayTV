@@ -1,6 +1,7 @@
 /**
  * 测试覆盖率分析和执行脚本 | Test Coverage Analysis and Execution Script
  */
+import ObjectUtils from '../main/ets/common/util/ark/ObjectUtils';
 
 // ==================== 测试覆盖率数据 | Test Coverage Data ====================
 
@@ -195,9 +196,11 @@ class TestCoverageExecutor {
     this.coverageReport.byCategory.services.tested += 2;   // 新增配置和内容服务测试
     
     // 重新计算百分比
-    Object.values(this.coverageReport.byCategory).forEach(category => {
+    const categories = ObjectUtils.getValues<typeof this.coverageReport.byCategory[0]>(this.coverageReport.byCategory);
+    for (let i = 0; i < categories.length; i++) {
+      const category = categories[i];
       category.percentage = (category.tested / category.total) * 100;
-    });
+    }
   }
   
   /**
@@ -215,10 +218,12 @@ class TestCoverageExecutor {
     console.log(`  提升幅度: ${(this.coverageReport.coveragePercentage - 15).toFixed(1)}%`);
     
     console.log(`\n📋 各分类覆盖率:`);
-    Object.entries(this.coverageReport.byCategory).forEach(([category, data]) => {
+    const entries = ObjectUtils.getEntries<typeof this.coverageReport.byCategory[0]>(this.coverageReport.byCategory);
+    for (let i = 0; i < entries.length; i++) {
+      const [category, data] = entries[i];
       const categoryName = this.getCategoryDisplayName(category);
       console.log(`  ${categoryName}: ${data.tested}/${data.total} (${data.percentage.toFixed(1)}%)`);
-    });
+    }
     
     console.log(`\n🎯 目标达成情况:`);
     const targetAchieved = this.coverageReport.coveragePercentage >= 85;

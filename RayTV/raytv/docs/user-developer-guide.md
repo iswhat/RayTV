@@ -109,7 +109,6 @@ RayTV 是一款基于 HarmonyOS 平台的高性能、安全的多媒体播放应
 - HarmonyOS SDK 3.0 及以上
 - DevEco Studio 3.0 及以上
 - Node.js 14.0 及以上
-- TypeScript 4.0 及以上
 
 #### 2.1.2 环境配置
 
@@ -189,7 +188,7 @@ raytv/
 
 ### 2.4 代码规范
 
-#### 2.4.1 TypeScript/ArkTS 规范
+#### 2.4.1 ArkTS 规范
 
 - 使用 2 空格缩进
 - 使用单引号字符串

@@ -1,5 +1,6 @@
 // DefaultNetworkRepository - 网络服务默认实现类 | Default network service implementation class
 import StorageUtil from '../../common/util/StorageUtil';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import http from '@ohos.net.http';
 import NetworkRepository, {
   NetworkResult,
@@ -400,8 +401,8 @@ export default class DefaultNetworkRepository implements NetworkRepository {
    * 获取对象键 | Get object keys
    */
   private getObjectKeys(obj: object): string[] {
-    // 使用Object.keys替代for...in循环
-    return Object.keys(obj);
+    // 使用ObjectUtils.getKeys替代Object.keys
+    return ObjectUtils.getKeys(obj);
   }
 
   /**

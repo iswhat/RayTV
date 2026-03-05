@@ -5,6 +5,7 @@
 
 import { Component, State, Prop, Builder, AboutToAppear } from '@ohos/arkui'
 import Logger from '../util/Logger'
+import ObjectUtils from '../util/ark/ObjectUtils'
 
 // ==================== 类型定义 ====================
 
@@ -89,9 +90,10 @@ export class ResponsiveLayoutSystem {
    * 检测当前断点
    */
   private detectBreakpoint(): void {
-    const breakpoints = Object.entries(BREAKPOINT_CONFIGS) as [Breakpoint, BreakpointConfig][]
+    const breakpoints = ObjectUtils.getEntries(BREAKPOINT_CONFIGS) as [Breakpoint, BreakpointConfig][]
     
-    for (const [breakpoint, config] of breakpoints) {
+    for (let i = 0; i < breakpoints.length; i++) {
+      const [breakpoint, config] = breakpoints[i];
       if (this.screenWidth >= config.minWidth) {
         if (!config.maxWidth || this.screenWidth <= config.maxWidth) {
           this.currentBreakpoint = breakpoint

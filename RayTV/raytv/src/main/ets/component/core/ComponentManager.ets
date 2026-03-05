@@ -44,7 +44,9 @@ export class ComponentManager {
   public registerComponent<T extends ComponentProps>(
     definition: ComponentDefinition<T>
   ): void {
-    const { name, component, category = 'general' } = definition
+    const name = definition.name;
+    const component = definition.component;
+    const category = definition.category || 'general';
     
     // 检查组件是否已注册
     if (this.components.has(name)) {
@@ -174,7 +176,10 @@ export class ComponentManager {
       .filter(info => info.name === componentName)
       .map(info => info.id)
     
-    instancesToDelete.forEach(id => this.destroyComponentInstance(id))
+    for (let i = 0; i < instancesToDelete.length; i++) {
+      const id = instancesToDelete[i];
+      this.destroyComponentInstance(id);
+    }
   }
   
   /**

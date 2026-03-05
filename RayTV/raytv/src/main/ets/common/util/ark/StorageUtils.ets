@@ -6,6 +6,7 @@
  */
 import { Optional, SafeAny } from './types/ArkTSBaseTypes';
 import TypeUtils from './TypeUtils';
+import ObjectUtils from './ObjectUtils';
 import StringUtils from './StringUtils';
 
 /**
@@ -249,7 +250,7 @@ export const StorageUtils = {
     }
     
     try {
-      const keys = Object.keys(items);
+      const keys = ObjectUtils.getKeys(items);
       let success = true;
       
       for (let i = 0; i < keys.length; i++) {

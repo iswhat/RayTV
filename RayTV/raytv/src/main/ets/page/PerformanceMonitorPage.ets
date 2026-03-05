@@ -6,6 +6,7 @@ import { Component, State } from '@ohos/arkui'
 import { PerformanceMonitor } from '../utils/PerformanceMonitor'
 import { MemoryOptimizer } from '../utils/MemoryOptimizer'
 import { LazyLoader } from '../utils/LazyLoader'
+import ObjectUtils from '../common/util/ark/ObjectUtils'
 
 @Entry
 @Component
@@ -86,7 +87,9 @@ struct PerformanceMonitorPage {
         .margin({ bottom: '12px' })
       
       if (this.performanceData.metrics) {
-        ForEach(Object.entries(this.performanceData.metrics), ([name, data]: [string, any]) => {
+        const entries = ObjectUtils.getEntries(this.performanceData.metrics);
+        ForEach(entries, (entry: [string, any]) => {
+          const [name, data] = entry;
           Column() {
             Text(`${name}:`)
               .fontSize('14px')

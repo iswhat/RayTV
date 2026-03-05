@@ -29,6 +29,7 @@ import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
 import common from '@ohos.app.ability.common';
 import URLValidator from '../common/util/URLValidator';
 import Logger from '../common/util/Logger';
+import ObjectUtils from '../common/util/ark/ObjectUtils';
 import fs from '@ohos.file.fs';
 import path from '@ohos.file.path';
 
@@ -526,7 +527,7 @@ export class HttpService {
       }
     } else if (typeof data === 'object') {
       // 递归验证对象 Recursively validate object
-      const objectKeys = Object.keys(data);
+      const objectKeys = ObjectUtils.getKeys(data);
       for (let i = 0; i < objectKeys.length; i++) {
         const key = objectKeys[i];
         this.validateRequestData(data[key]);
@@ -554,11 +555,11 @@ export class HttpService {
       'If-None-Match', 'X-Requested-With'
     ];
     
-    const headerEntries: string[][] = Object.entries(headers);
+    const headerEntries: [string, unknown][] = ObjectUtils.getEntries(headers);
     for (let i = 0; i < headerEntries.length; i++) {
       const entry = headerEntries[i];
       const key = entry[0];
-      const value = entry[1];
+      const value = entry[1] as string;
       // 检查头部名称是否合法
       if (!/^[a-zA-Z0-9!#$%&'*+-.^_`|~]+$/.test(key)) {
         Logger.warn(HttpService.TAG, `Invalid header name: ${key}`);
@@ -757,10 +758,10 @@ export class HttpService {
         }
         const headerObj = requestConfig.header as Record<string, string>;
         // 使用传统for循环遍历键值对变量声明 Use traditional for loop to iterate key-value pairs variable declaration
-        const entries = Object.entries(sanitizedHeaders);
+        const entries = ObjectUtils.getEntries(sanitizedHeaders);
         for (let i = 0; i < entries.length; i++) {
           const key = entries[i][0];
-          const value = entries[i][1];
+          const value = entries[i][1] as string;
           headerObj[key] = value;
         }
       }
@@ -1242,10 +1243,10 @@ export class HttpService {
         }
         const headerObj = requestConfig.header as Record<string, string>;
         // 使用传统for循环遍历键值对变量声明 Use traditional for loop to iterate key-value pairs variable declaration
-        const entries = Object.entries(sanitizedHeaders);
+        const entries = ObjectUtils.getEntries(sanitizedHeaders);
         for (let i = 0; i < entries.length; i++) {
           const key = entries[i][0];
-          const value = entries[i][1];
+          const value = entries[i][1] as string;
           headerObj[key] = value;
         }
       }
@@ -1337,7 +1338,7 @@ export class HttpService {
     headers['User-Agent'] = this.httpConfig.userAgent || 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36';
     headers['Content-Type'] = 'application/json';
 
-    const headerKeys = Object.keys(sanitizedHeaders);
+    const headerKeys = ObjectUtils.getKeys(sanitizedHeaders);
     for (let i = 0; i < headerKeys.length; i++) {
       const key = headerKeys[i];
       headers[key] = sanitizedHeaders[key];
@@ -1352,13 +1353,13 @@ export class HttpService {
   private mergeHeaders(baseHeaders: Record<string, string>, additionalHeaders: Record<string, string>): Record<string, string> {
     const result: Record<string, string> = {};
 
-    const baseKeys = Object.keys(baseHeaders);
+    const baseKeys = ObjectUtils.getKeys(baseHeaders);
     for (let i = 0; i < baseKeys.length; i++) {
       const key = baseKeys[i];
       result[key] = baseHeaders[key];
     }
 
-    const addKeys = Object.keys(additionalHeaders);
+    const addKeys = ObjectUtils.getKeys(additionalHeaders);
     for (let i = 0; i < addKeys.length; i++) {
       const key = addKeys[i];
       result[key] = additionalHeaders[key];
@@ -1392,7 +1393,7 @@ export class HttpService {
     
     // 遍历headers，确保所有值都是字符串类型
     // Iterate through headers, ensure all values are string type
-    const headerKeys = Object.keys(headers);
+    const headerKeys = ObjectUtils.getKeys(headers);
     for (let i = 0; i < headerKeys.length; i++) {
       const key = headerKeys[i];
       const value = headers[key];

@@ -3,6 +3,8 @@
  * Provides unified error handling, error parsing and error message generation functionality | 提供统一的错误处理、错误解析和错误信息生成功能
  */
 
+import ObjectUtils from './ark/ObjectUtils';
+
 // Error type enum | 错误类型枚举
 export enum ErrorType {
   NETWORK_ERROR = 'network_error',
@@ -100,8 +102,8 @@ export class ErrorHandler {
    */
   private getSafeProperty(obj: object, key: string): string | number | boolean | object | null | undefined {
     try {
-      // 使用 Object.keys 检查属性是否存在
-      const keys = Object.keys(obj);
+      // 使用 ObjectUtils.getKeys 检查属性是否存在
+      const keys = ObjectUtils.getKeys(obj);
       if (keys.includes(key)) {
         return (obj as Record<string, string | number | boolean | object | null | undefined>)[key];
       }
@@ -257,8 +259,9 @@ export class ErrorHandler {
       let hasDetails = false;
 
       // Extract useful error information | 提取有用的错误信息
-      const keys = Object.keys(error);
-      for (const key of keys) {
+      const keys = ObjectUtils.getKeys(error);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (key !== 'message' && key !== 'code' && key !== 'stack') {
           // 使用安全的属性访问方式 | Use safe property access
           const value = this.getSafeProperty(error, key);

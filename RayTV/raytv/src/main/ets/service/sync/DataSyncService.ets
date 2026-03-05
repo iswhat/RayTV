@@ -7,6 +7,7 @@ import ModernDistributedDataService from './ModernDistributedDataService';
 import { SyncDataType } from './ModernDistributedDataService';
 import { Serializable } from '../../types/commonTypes';
 import common from '@ohos.app.ability.common';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 // 常量定义 | Constant definition
 const TAG = 'DataSyncService';
@@ -219,7 +220,7 @@ export default class DataSyncService {
    */
   private getObjectValues<T extends object>(obj: T): string[] {
     const values: string[] = [];
-    const keys = Object.keys(obj);
+    const keys = ObjectUtils.getKeys(obj);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       values.push(obj[key as keyof T] as string);

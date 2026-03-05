@@ -28,6 +28,7 @@
 import RelationalStore from '@ohos.data.relationalStore';
 import { DatabaseManager } from './DatabaseManager';
 import Logger from '../../common/util/Logger';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import SQLValidator from '../../common/util/SQLValidator';
 import CacheService from '../../service/cache/CacheService';
 import { CachePriority } from '../../service/cache/CacheService';
@@ -1089,7 +1090,7 @@ export class SQLiteHelper {
 
         await this.dbManager.executeTransaction(async (db) => {
           for (const updateData of updates) {
-            const setClause = Object.keys(updateData.values)
+            const setClause = ObjectUtils.getKeys(updateData.values)
               .map(key => `${key} = ?`)
               .join(', ');
 
@@ -1107,7 +1108,10 @@ export class SQLiteHelper {
             const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClauses}`;
 
             const bindArgs: ValueType[] = [];
-            Object.values(updateData.values).forEach(val => bindArgs.push(val));
+            const values = ObjectUtils.getValues(updateData.values);
+            for (let i = 0; i < values.length; i++) {
+              bindArgs.push(values[i] as ValueType);
+            }
             updateData.conditions.forEach(cond => {
               if ((cond.operator === 'IN' || cond.operator === 'NOT IN') && Array.isArray(cond.value)) {
                 for (let i = 0; i < cond.value.length; i++) {

@@ -7,6 +7,20 @@ import CacheService from '../service/cache/CacheService';
 import { PinyinUtil } from '../common/util/PinyinUtil';
 import display from '@ohos.display';
 import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos.components';
+import EventBusUtil from '../common/util/EventBusUtil';
+import ThemeProvider, { Theme } from '../design/ThemeProvider';
+import Logger from '../common/util/Logger';
+
+// AbortController接口定义 - AbortController interface
+interface AbortController {
+  abort(): void;
+  signal: AbortSignal;
+}
+
+// AbortSignal接口定义 - AbortSignal interface
+interface AbortSignal {
+  aborted: boolean;
+}
 
 // 鎼滅储杩囨护鍣ㄦ帴鍙?| Search filters interface
 export interface SearchFilters {
@@ -135,6 +149,9 @@ struct SearchPage {
   aboutToAppear() {
     console.info('SearchPage about to appear');
     
+    // 添加主题监听器
+    ThemeProvider.addThemeChangeListener(this.themeChangeListener);
+    
     // 鍒濆鍖栧睆骞曚俊鎭?| Initialize screen information
     this.initScreenInfo();
     
@@ -143,6 +160,28 @@ struct SearchPage {
     this.loadSearchHistory();
   }
   
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'SearchPage about to disappear');
+    
+    // 移除事件监听器
+    this.eventBus.off('search:result');
+    this.eventBus.off('search:error');
+    
+    // 清除防抖定时器
+    if (this.searchDebounceTimer !== 0) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = 0;
+    }
+    
+    // 中止当前搜索请求
+    if (this.abortController != null) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+    
+    // 移除主题监听器
+    ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+  }
   // 鍒濆鍖栧睆骞曚俊鎭?| Initialize screen information
   private initScreenInfo(): void {
     try {

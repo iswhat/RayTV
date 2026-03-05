@@ -3,6 +3,8 @@
  * 提供类型安全检查和转换的辅助方法 | Provides helper methods for type safety checking and conversion
  */
 
+import ObjectUtils from './ark/ObjectUtils';
+
 /**
  * 异步执行选项接口 | Async execute options interface
  */
@@ -123,7 +125,7 @@ export class TypeSafetyHelper {
     try {
       // 检查属性是否存在
       if (typeof obj === 'object' && obj !== null) {
-        const keys: string[] = Object.keys(obj);
+        const keys: string[] = ObjectUtils.getKeys(obj);
         if (keys.includes(key)) {
           return (obj as GenericObject)[key];
         }
@@ -171,7 +173,7 @@ export class TypeSafetyHelper {
       }
       // 检查属性是否存在 | Check if property exists
       const objRecord = current as GenericObject;
-      const objKeys = Object.keys(objRecord);
+      const objKeys = ObjectUtils.getKeys(objRecord);
       if (!objKeys.includes(key)) {
         return defaultValue;
       }
@@ -210,7 +212,7 @@ export class TypeSafetyHelper {
         return false;
       }
       const objRecord = current as GenericObject;
-      const objKeys = Object.keys(objRecord);
+      const objKeys = ObjectUtils.getKeys(objRecord);
       if (!objKeys.includes(key) || TypeSafetyHelper.getSafeProperty(objRecord, key) === undefined || TypeSafetyHelper.getSafeProperty(objRecord, key) === null) {
         // 创建空对象并使用类型断言 | Create empty object and use type assertion
         const newObj: GenericObject = {};
@@ -293,7 +295,7 @@ export class TypeSafetyHelper {
       return defaultValue;
     }
     // ArkTS兼容：手动检查枚举值 | ArkTS compatible: manually check enum value
-    const keys: string[] = Object.keys(enumObj);
+    const keys: string[] = ObjectUtils.getKeys(enumObj);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (enumObj[key] === value) {
@@ -484,7 +486,7 @@ export class TypeSafetyHelper {
     }
     // ArkTS兼容：手动创建合并对象，不使用展开运算符 | ArkTS compatible: manually create merged object, not using spread operator
     const merged: GenericObject = {};
-    const targetKeys: string[] = Object.keys(target);
+    const targetKeys: string[] = ObjectUtils.getKeys(target);
     for (let i = 0; i < targetKeys.length; i++) {
       const key = targetKeys[i];
       // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
@@ -493,7 +495,7 @@ export class TypeSafetyHelper {
     }
     for (const source of sources) {
       if (source && typeof source === 'object') {
-        const sourceKeys: string[] = Object.keys(source);
+        const sourceKeys: string[] = ObjectUtils.getKeys(source);
         for (let i = 0; i < sourceKeys.length; i++) {
           const key = sourceKeys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues
@@ -540,7 +542,7 @@ export class TypeSafetyHelper {
     }
     if (typeof obj === 'object') {
         const clonedObj: GenericObject = {};
-        const keys: string[] = Object.keys(obj as SafeObject);
+        const keys: string[] = ObjectUtils.getKeys(obj as SafeObject);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           // ArkTS 兼容：使用类型断言避免索引访问问题 | ArkTS compatible: use type assertion to avoid indexed access issues

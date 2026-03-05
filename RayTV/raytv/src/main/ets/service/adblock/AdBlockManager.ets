@@ -228,7 +228,10 @@ export class AdBlockManager {
    */
   private async loadWhitelist(): Promise<void> {
     if (this.config?.whitelist && this.config.whitelist.length > 0) {
-      this.config.whitelist.forEach(item => this.whitelist.add(item));
+      for (let i = 0; i < this.config.whitelist.length; i++) {
+        const item = this.config.whitelist[i];
+        this.whitelist.add(item);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-﻿// 鎺ㄨ崘浠撳簱 - 绠＄悊鍐呭鎺ㄨ崘绠楁硶鍜屾暟鎹?import Logger from '../../common/util/Logger';
+// 鎺ㄨ崘浠撳簱 - 绠＄悊鍐呭鎺ㄨ崘绠楁硶鍜屾暟鎹?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
@@ -7,6 +7,7 @@ import UserRepository from './UserRepository';
 import SearchHistoryRepository from './SearchHistoryRepository';
 import { LocalStorageType, CacheType } from '../model/commonTypes';
 import { Serializable } from '../../types/commonTypes';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 // 鎺ㄨ崘绫诲瀷鏋氫妇
 export enum RecommendationType {
@@ -829,9 +830,12 @@ export class RecommendationRepository {
         return [];
       }
       
-      // 杩囨护鍑烘湭瀹屾垚鐨勮鐪嬭褰?      const continueWatchingItems: RecommendationItem[] = [];
+      // 杩囨护鍑烘湭瀹屾垚鐨勮鐪嬭褰?
+      const continueWatchingItems: RecommendationItem[] = [];
       
-      for (const [videoId, history] of Object.entries(watchHistory)) {
+      const entries = ObjectUtils.getEntries<{ progress: number; duration: number; timestamp: number }>(watchHistory);
+      for (let i = 0; i < entries.length; i++) {
+        const [videoId, history] = entries[i];
         if (history.progress < history.duration * 0.9) { // 杩涘害灏忎簬90%鐨勮涓烘湭瀹屾垚
           continueWatchingItems.push({
             id: videoId,
@@ -947,7 +951,9 @@ export class RecommendationRepository {
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
         let cleanedCount = 0;
         
-        for (const [videoId, history] of Object.entries(watchHistory)) {
+        const entries = ObjectUtils.getEntries<{ progress: number; duration: number; timestamp: number }>(watchHistory);
+        for (let i = 0; i < entries.length; i++) {
+          const [videoId, history] = entries[i];
           if (history.timestamp < thirtyDaysAgo) {
             delete watchHistory[videoId];
             cleanedCount++;

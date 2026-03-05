@@ -32,7 +32,10 @@ export class BreakpointManager {
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener(this.currentConfig));
+    for (let i = 0; i < this.listeners.length; i++) {
+      const listener = this.listeners[i];
+      listener(this.currentConfig);
+    }
   }
 
   getCurrentConfig(): any {

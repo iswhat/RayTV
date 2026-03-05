@@ -5,6 +5,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import { ConfigKey, ConfigValue, ConfigCategory } from '../model/ConfigModel';
 import DatabaseRepository from './DatabaseRepository';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 /**
  * 配置仓库 | Config repository
@@ -352,11 +353,13 @@ public async setConfig(key: string, value: string | number | boolean | Object, t
  */
 public async setConfigs(configs: Record<string, string | number | boolean | Object>): Promise<void> {
     try {
-      for (const [key, value] of Object.entries(configs)) {
+      const entries = ObjectUtils.getEntries<string | number | boolean | Object>(configs);
+      for (let i = 0; i < entries.length; i++) {
+        const [key, value] = entries[i];
         const type = this.getValueType(value);
         await this.setConfig(key, value, type);
       }
-      Logger.debug(`Batch set ${Object.keys(configs).length} configs`);
+      Logger.debug(`Batch set ${ObjectUtils.getKeys(configs).length} configs`);
     } catch (error) {
       Logger.error('Failed to set configs in batch', error);
       throw error;
@@ -441,7 +444,9 @@ public async exportConfigs(): Promise<Record<string, Object>> {
  */
 public async importConfigs(configs: Record<string, Object>): Promise<void> {
   try {
-    for (const [key, config] of Object.entries(configs)) {
+    const entries = ObjectUtils.getEntries<Object>(configs);
+    for (let i = 0; i < entries.length; i++) {
+      const [key, config] = entries[i];
       if (typeof config === 'object' && config !== null) {
         await this.setConfig(key, (config as any).value, (config as any).type, (config as any).category);
       } else {
@@ -451,7 +456,7 @@ public async importConfigs(configs: Record<string, Object>): Promise<void> {
       }
     }
     
-    Logger.info(`Imported ${Object.keys(configs).length} configs`);
+    Logger.info(`Imported ${ObjectUtils.getKeys(configs).length} configs`);
   } catch (error) {
     Logger.error('Failed to import configs', error);
     throw error;

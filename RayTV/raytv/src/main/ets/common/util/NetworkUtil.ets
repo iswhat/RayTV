@@ -2,6 +2,7 @@
 import Logger from './Logger';
 import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';
+import ObjectUtils from './ark/ObjectUtils';
 
 const TAG = 'NetworkUtil';
 
@@ -84,13 +85,15 @@ export class NetworkUtil {
     const sensitiveHeaders = ['Authorization', 'token', 'password', 'apiKey', 'secret'];
     const cleanedHeaders: Record<string, string> = {};
     
-    for (const [key, value] of Object.entries(headers)) {
+    const entries = ObjectUtils.getEntries(headers);
+    for (let i = 0; i < entries.length; i++) {
+      const [key, value] = entries[i];
       if (sensitiveHeaders.some(sensitiveKey => 
         key.toLowerCase().includes(sensitiveKey.toLowerCase())
       )) {
         cleanedHeaders[key] = '***';
       } else {
-        cleanedHeaders[key] = value;
+        cleanedHeaders[key] = value as string;
       }
     }
     

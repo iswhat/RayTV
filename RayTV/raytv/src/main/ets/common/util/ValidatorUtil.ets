@@ -4,6 +4,7 @@
  */
 
 import Logger from './Logger';
+import ObjectUtils from './ark/ObjectUtils';
 
 /**
  * 验证工具类 Validation utility class
@@ -328,7 +329,7 @@ export class ValidatorUtil {
       return obj.length === 0;
     }
 
-    return Object.keys(obj).length === 0;
+    return ObjectUtils.getKeys(obj).length === 0;
   }
 
   /**

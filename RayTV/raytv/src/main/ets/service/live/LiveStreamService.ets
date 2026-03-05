@@ -1,5 +1,6 @@
-﻿// LiveStreamService - 直播流服务类 | Live stream service class
+// LiveStreamService - 直播流服务类 | Live stream service class
 import Logger from '../../common/util/Logger';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import StorageUtil from '../../common/util/StorageUtil';
 import DateUtil from '../../common/util/DateUtil';
 import RepositoryFactory from '../../data/repository/RepositoryFactory';
@@ -340,7 +341,10 @@ export default class LiveStreamService {
       const favoritesJson = await StorageUtil.getString(LIVE_FAVORITES_KEY);
       if (favoritesJson) {
         const favorites = JSON.parse(favoritesJson) as string[];
-        favorites.forEach(channelId => this.favoriteChannels.add(channelId));
+        for (let i = 0; i < favorites.length; i++) {
+          const channelId = favorites[i];
+          this.favoriteChannels.add(channelId);
+        }
       }
       
       Logger.info(TAG, `Loaded ${this.favoriteChannels.size} favorite channels`);
@@ -371,9 +375,10 @@ export default class LiveStreamService {
       // 从数据库加载频道组 | Load channel groups from database
       const result = await this.databaseRepo.getLiveChannelGroups();
       if (result.isSuccess() && result.data) {
-        result.data.forEach(group => {
+        for (let i = 0; i < result.data.length; i++) {
+          const group = result.data[i];
           this.channelGroups.set(group.id, group);
-        });
+        }
       }
       
       Logger.info(TAG, `Loaded ${this.channelGroups.size} channel groups`);
@@ -398,9 +403,11 @@ export default class LiveStreamService {
       const channelCacheJson = await StorageUtil.getString(LIVE_CHANNEL_CACHE_KEY);
       if (channelCacheJson) {
         const cacheData = JSON.parse(channelCacheJson);
-        Object.entries(cacheData).forEach(([key, value]) => {
+        const entries = ObjectUtils.getEntries(cacheData);
+        for (let i = 0; i < entries.length; i++) {
+          const [key, value] = entries[i];
           this.cachedChannels.set(key, value);
-        });
+        }
       }
     } catch (error) {
       Logger.error(TAG, 'Failed to load cached data', error instanceof Error ? error : new Error(String(error)));

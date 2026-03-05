@@ -11,6 +11,7 @@ import MediaService from './media/MediaService';
 import CacheService from './cache/CacheService';
 import { FactoryBase } from '../../../common/base/FactoryBase';
 import { DependencyInjector, DI_TOKENS } from '../../../common/di/DependencyInjector';
+import ObjectUtils from '../../../common/util/ark/ObjectUtils';
 
 /**
  * 服务接口定义
@@ -142,11 +143,13 @@ export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInst
    * Initialize service status
    */
   private initializeServiceStatus(): void {
-    Object.values(ServiceType).forEach(type => {
+    const serviceTypes = ObjectUtils.getValues(ServiceType);
+    for (let i = 0; i < serviceTypes.length; i++) {
+      const type = serviceTypes[i];
       if (typeof type === 'number') {
         this.serviceStatusMap.set(type, ServiceStatus.UNINITIALIZED);
       }
-    });
+    }
   }
 
   /**
@@ -222,13 +225,15 @@ export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInst
     };
     
     // 访问所有服务类型
-    Object.values(ServiceType).forEach(type => {
+    const serviceTypes = ObjectUtils.getValues(ServiceType);
+    for (let i = 0; i < serviceTypes.length; i++) {
+      const type = serviceTypes[i];
       if (typeof type === 'number') {
         if (!visited.has(type)) {
           visit(type);
         }
       }
-    });
+    }
     
     return result;
   }
@@ -461,15 +466,17 @@ export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInst
       Logger.info(this.TAG, 'Initializing services...');
 
       // 1. 检测循环依赖
-      Logger.info(this.TAG, 'Checking for circular dependencies...');
-      let hasCircularDependency = false;
-      Object.values(ServiceType).forEach(type => {
-        if (typeof type === 'number') {
-          if (this.checkCircularDependency(type, new Set())) {
-            hasCircularDependency = true;
-          }
+    Logger.info(this.TAG, 'Checking for circular dependencies...');
+    let hasCircularDependency = false;
+    const serviceTypes = ObjectUtils.getValues(ServiceType);
+    for (let i = 0; i < serviceTypes.length; i++) {
+      const type = serviceTypes[i];
+      if (typeof type === 'number') {
+        if (this.checkCircularDependency(type, new Set())) {
+          hasCircularDependency = true;
         }
-      });
+      }
+    }
       
       if (hasCircularDependency) {
         Logger.error(this.TAG, 'Circular dependencies detected, cannot initialize services');

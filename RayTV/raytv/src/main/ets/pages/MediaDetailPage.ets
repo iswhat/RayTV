@@ -10,6 +10,26 @@ import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, Vertica
 import DesignSystem from '../design/DesignSystem';
 import AnimationSystem from '../design/AnimationSystem';
 import ThemeProvider, { Theme } from '../design/ThemeProvider';
+import Logger from '../common/util/Logger';
+
+// Vod接口定义 - 用于向后兼容
+interface Vod {
+  id: string;
+  name: string;
+  type: string;
+  area: string;
+  lang: string;
+  year: string;
+  score: string;
+  status: string;
+  desc: string;
+  cover: string;
+  tag: string;
+  url: string;
+  sourceKey: string;
+  createdAt: number;
+  updatedAt: number;
+}
 
 // 播放源接口 - Play source interface
 export interface PlaySource {
@@ -54,14 +74,67 @@ struct MediaDetailPage {
   @State isError: boolean = false;
   @State errorMessage: string = '';
   @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
+  
+  // 临时属性，用于向后兼容 - Temporary properties for backward compatibility
+  private media: Vod = {
+    id: '',
+    name: '',
+    type: '',
+    area: '',
+    lang: '',
+    year: '',
+    score: '',
+    status: '',
+    desc: '',
+    cover: '',
+    tag: '',
+    url: '',
+    sourceKey: '',
+    createdAt: 0,
+    updatedAt: 0
+  };
+  private episodes: Episode[] = [];
+  private filteredSources: PlaySource[] = [];
+  private relatedMedia: MediaItem[] = [];
+  private isFavorite: boolean = false;
+  
+  // 资源管理相关 - Resource management related
+  private mediaPlayer: Object | null = null;
+  private progressUpdateTimer: number = 0;
+  private themeChangeListener: (theme: Theme) => void = (theme: Theme) => {
+    this.currentTheme = theme;
+  };
+  
+  // 释放资源 - Release resources
+  private releaseResources(): void {
+    this.media = {
+      id: '',
+      name: '',
+      type: '',
+      area: '',
+      lang: '',
+      year: '',
+      score: '',
+      status: '',
+      desc: '',
+      cover: '',
+      tag: '',
+      url: '',
+      sourceKey: '',
+      createdAt: 0,
+      updatedAt: 0
+    };
+    this.episodes = [];
+    this.filteredSources = [];
+    this.relatedMedia = [];
+    this.mediaDetailData = null;
+  }
 
   aboutToAppear(): void {
     this.mediaId = this.getMediaIdFromParams() || '';
     
     // 添加主题变更监听器
-    ThemeProvider.addThemeChangeListener((theme) => {
-      this.currentTheme = theme;
-    });
+    ThemeProvider.addThemeChangeListener(this.themeChangeListener);
     
     // 监听播放进度更新
     this.eventBus.on('playback:progressUpdated', (data: Record<string, unknown>) => {
@@ -75,6 +148,38 @@ struct MediaDetailPage {
     this.loadEpisodes();
     this.loadSources();
     this.loadRelatedMedia();
+  }
+  
+  aboutToDisappear(): void {
+    Logger.info(this.TAG, 'MediaDetailPage about to disappear');
+    
+    // 移除事件监听器
+    this.eventBus.off('playback:progressUpdated');
+    this.eventBus.off('playback:error');
+    this.eventBus.off('playback:complete');
+    
+    // 清除定时器
+    if (this.progressUpdateTimer !== 0) {
+      clearInterval(this.progressUpdateTimer);
+      this.progressUpdateTimer = 0;
+    }
+    
+    // 释放媒体播放器
+    if (this.mediaPlayer != null) {
+      try {
+        // 停止和释放播放器资源
+        this.mediaPlayer = null;
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        Logger.error(this.TAG, 'Failed to release media player', err);
+      }
+    }
+    
+    // 移除主题监听器
+    ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+    
+    // 释放资源
+    this.releaseResources();
   }
 
   /**
@@ -226,6 +331,19 @@ struct MediaDetailPage {
     // 实际实现应该从路由参数获取媒体ID - Actual implementation should get media ID from route params
     // 由于router模块不可用，返回默认值 - Return default value since router module is not available
     return '1'; // 默认值用于演示 - Default value for demonstration
+  }
+  
+  /**
+   * 记录播放进度 - Record playback progress
+   */
+  private recordPlaybackProgress(videoId: string, progress: number): void {
+    try {
+      Logger.info(this.TAG, `Recording progress for ${videoId}: ${progress}%`);
+      // 实际实现应该将播放进度保存到本地存储 - Actual implementation should save progress to local storage
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, 'Failed to record playback progress', err);
+    }
   }
 
   /**

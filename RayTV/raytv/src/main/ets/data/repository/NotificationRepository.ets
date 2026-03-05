@@ -1,10 +1,11 @@
-﻿// NotificationRepository - 閫氱煡浠撳簱绫?// 璐熻矗绠＄悊搴旂敤鍐呴€氱煡銆佺郴缁熼€氱煡鍜岀敤鎴峰亸濂借缃?
+// NotificationRepository - 閫氱煡浠撳簱绫?// 璐熻矗绠＄悊搴旂敤鍐呴€氱煡銆佺郴缁熼€氱煡鍜岀敤鎴峰亸濂借缃?
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
 import CacheService from '../../service/cache/CacheService';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType } from '../model/CacheModel';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 /**
  * 閫氱煡绫诲瀷鏋氫妇
@@ -301,7 +302,7 @@ export class NotificationRepository {
     enableSound: true,
     enableVibration: true,
     enableLight: true,
-    enabledTypes: Object.values(NotificationType),
+    enabledTypes: ObjectUtils.getValues<NotificationType>(NotificationType),
     mutedTypes: [],
     enableDoNotDisturb: false,
     doNotDisturbStart: '22:00',

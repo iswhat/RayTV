@@ -4,6 +4,7 @@
  * 提供ArkTS环境中安全的类型检测和转换功能 Provides safe type detection and conversion functionality in ArkTS environment
  */
 import { SafeAny, SafeObject, isNonNull, Optional } from './types/ArkTSBaseTypes';
+import ObjectUtils from './ObjectUtils';
 
 /**
  * 类型工具函数集合 Type utility functions collection
@@ -97,7 +98,7 @@ export const TypeUtils = {
     
     if (typeof value === 'object') {
       // 使用Object.keys获取属性数量，避免使用hasOwnProperty Use Object.keys to get property count, avoid using hasOwnProperty
-      return Object.keys(value).length === 0;
+      return ObjectUtils.getKeys(value).length === 0;
     }
     
     return false;
@@ -221,7 +222,9 @@ export const TypeUtils = {
       }
       
       // 验证所有必需的属性都存在且符合类型 Validate all required properties exist and match type
-      for (const [key, validator] of Object.entries(schema)) {
+      const entries = ObjectUtils.getEntries(schema);
+      for (let i = 0; i < entries.length; i++) {
+        const [key, validator] = entries[i];
         // 使用类型安全的属性查询方式，避免索引签名访问 Use type-safe property query method, avoid index signature access
         const value = TypeUtils.getPropertyValue(obj, key);
         if (!validator(value)) {

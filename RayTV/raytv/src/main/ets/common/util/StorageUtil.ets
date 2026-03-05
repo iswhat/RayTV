@@ -32,6 +32,7 @@ import { Preferences } from '@ohos.data.preferences';
 import common from '@ohos.app.ability.common';
 import cryptoFramework from '@ohos.security.cryptoFramework';
 import buffer from '@ohos.buffer';
+import ObjectUtils from './ark/ObjectUtils';
 
 // 加密工具类 | Encryption utility class
 class EncryptionUtil {
@@ -478,8 +479,8 @@ export class StorageUtil {
         const allItems: Preferences.Value = await preferences.getAll();
         // 确保allItems是对象类型
         if (typeof allItems === 'object' && allItems !== null) {
-          // 使用Object.keys获取所有键
-          const keyArray = Object.keys(allItems);
+          // 使用ObjectUtils.getKeys获取所有键
+          const keyArray = ObjectUtils.getKeys(allItems);
           for (let i = 0; i < keyArray.length; i++) {
             const key = keyArray[i];
             await preferences.delete(key);
@@ -500,7 +501,7 @@ export class StorageUtil {
    */
   private static getObjectKeys(obj: Record<string, string | number | boolean>): string[] {
     // 使用Object.keys替代for...in循环
-    return Object.keys(obj);
+    return ObjectUtils.getKeys(obj);
   }
 
   /**
@@ -527,7 +528,7 @@ export class StorageUtil {
         const allItemsValue: Preferences.Value = await preferences.getAll();
         const allItems: Record<string, Preferences.Value> = allItemsValue as Record<string, Preferences.Value>;
         if (typeof allItems === 'object' && allItems !== null) {
-          const keyArray = Object.keys(allItems);
+          const keyArray = ObjectUtils.getKeys(allItems);
           for (let i = 0; i < keyArray.length; i++) {
             const key = keyArray[i];
             const value = allItems[key];

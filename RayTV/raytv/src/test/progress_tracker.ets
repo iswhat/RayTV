@@ -2,6 +2,7 @@
  * 测试执行进度跟踪器 | Test Execution Progress Tracker
  * 实时跟踪测试执行进度和覆盖率提升情况
  */
+import ObjectUtils from '../main/ets/common/util/ark/ObjectUtils';
 
 // ==================== 进度数据结构 | Progress Data Structure ====================
 
@@ -128,7 +129,12 @@ class TestProgressTracker {
       'Modal.test.ets': 508
     };
     
-    return Object.values(fileLineCounts).reduce((sum, lines) => sum + lines, 0);
+    const values = ObjectUtils.getValues<number>(fileLineCounts);
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) {
+      sum += values[i];
+    }
+    return sum;
   }
   
   /**

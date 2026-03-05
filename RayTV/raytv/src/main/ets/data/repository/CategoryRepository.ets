@@ -6,6 +6,7 @@ import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
 import CacheService from '../../service/cache/CacheService';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import { LocalStorageType } from '../model/LocalModel';
 import { CacheType, CachePolicy } from '../model/CacheModel';
 
@@ -488,13 +489,16 @@ export class CategoryRepository {
         this.followedCategories = new Set(followed);
       }
       
-      // 鍔犺浇鑷畾涔夋帓搴?     const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
+      // 鍔犺浇鑷畾涔夋帓搴?
+     const orderData = await this.storageUtil.get(LocalStorageType.CATEGORY_CUSTOM_ORDER);
       if (orderData) {
         const order = JSON.parse(orderData) as Record<string, number>;
         this.customOrder.clear();
-        Object.entries(order).forEach(([id, index]) => {
+        const entries = ObjectUtils.getEntries<number>(order);
+        for (let i = 0; i < entries.length; i++) {
+          const [id, index] = entries[i];
           this.customOrder.set(id, index);
-        });
+        }
       }
       
       // 鍔犺浇缁熻淇℃伅

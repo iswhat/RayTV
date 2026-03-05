@@ -5,6 +5,7 @@ import ConfigParser from './ConfigParser';
 import Logger from '../../common/util/Logger';
 import { handleError, ConfigError } from '../../common/util/AppError';
 import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 // 安全存储键前缀 | Secure storage key prefix
 const SECURE_STORAGE_PREFIX = 'secure_';
@@ -1612,7 +1613,7 @@ export default class ConfigService {
     }
 
     let maxDepth = 0;
-    const keys = Object.keys(obj);
+    const keys = ObjectUtils.getKeys(obj);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const objRecord = obj as Record<string, ConfigValue>;

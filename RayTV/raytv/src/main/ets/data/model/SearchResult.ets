@@ -1,6 +1,7 @@
 // SearchResult - 搜索结果实体类 // Search result entity class
 import Logger from '../../common/util/Logger';
 import { VideoType } from './Movie';
+import ObjectUtils from '../../common/util/ark/ObjectUtils';
 
 const TAG = 'SearchResult';
 
@@ -443,7 +444,7 @@ export default class SearchResult {
       
       // 处理extraData // Process extraData
       if (data.extraInfo.extraData && typeof data.extraInfo.extraData === 'object' && !Array.isArray(data.extraInfo.extraData)) {
-        const extraDataKeys = Object.keys(data.extraInfo.extraData);
+        const extraDataKeys = ObjectUtils.getKeys(data.extraInfo.extraData);
         for (let i = 0; i < extraDataKeys.length; i++) {
           const key = extraDataKeys[i];
           const value = data.extraInfo.extraData![key];
@@ -458,7 +459,7 @@ export default class SearchResult {
               };
               
               // 手动复制nestedData中的每个属性 // Manually copy each property in nestedData
-              const nestedKeys = Object.keys(potentialNested.nestedData);
+              const nestedKeys = ObjectUtils.getKeys(potentialNested.nestedData);
               for (let j = 0; j < nestedKeys.length; j++) {
                 const nestedKey = nestedKeys[j];
                 const nestedValue = potentialNested.nestedData![nestedKey];
@@ -528,7 +529,7 @@ export default class SearchResult {
       // 确保extraInfo.extraData存在 // Ensure extraInfo.extraData exists
       if (this.extraInfo.extraData) {
         // 手动复制extraData中的每个属性 // Manually copy each property in extraData
-        const keys = Object.keys(this.extraInfo.extraData);
+        const keys = ObjectUtils.getKeys(this.extraInfo.extraData);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           const value = this.extraInfo.extraData![key];
@@ -543,7 +544,7 @@ export default class SearchResult {
               };
               
               // 手动复制nestedData中的每个属性 // Manually copy each property in nestedData
-              const nestedKeys = Object.keys(potentialNested.nestedData);
+              const nestedKeys = ObjectUtils.getKeys(potentialNested.nestedData);
               for (let j = 0; j < nestedKeys.length; j++) {
                 const nestedKey = nestedKeys[j];
                 const nestedValue = potentialNested.nestedData![nestedKey];

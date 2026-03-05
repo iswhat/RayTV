@@ -1,9 +1,10 @@
-﻿/**
+/**
  * 事件总线工具类 // Event Bus Utility Class
  * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能 // Provides unified event publishing and subscription mechanism, supporting namespaces, debouncing, batch operations, etc.
  */
 
 import Logger from './Logger';
+import ObjectUtils from './ark/ObjectUtils';
 
 /**
  * 事件处理器类型 // Event Handler Type
@@ -152,7 +153,7 @@ export class EventBusUtil {
     if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
       // 创建新对象，移除当前事件 // Create new object, remove current event
       const newEventMap: Record<string, Subscription[]> = {};
-      const keys = Object.keys(this.eventMap);
+      const keys = ObjectUtils.getKeys(this.eventMap);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key !== eventName) {
@@ -214,7 +215,7 @@ export class EventBusUtil {
         if (this.eventMap[eventName] && this.eventMap[eventName].length === 0) {
           // 创建新对象，移除当前事件 // Create new object, remove current event
           const newEventMap: Record<string, Subscription[]> = {};
-          const keys = Object.keys(this.eventMap);
+          const keys = ObjectUtils.getKeys(this.eventMap);
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
             if (key !== eventName) {
@@ -279,7 +280,7 @@ export class EventBusUtil {
     const timerId = setTimeout(() => {
       // 清除定时器引用 // Clear timer reference
       const newDebounceTimers: Record<string, number> = {};
-      const keys = Object.keys(this.debounceTimers);
+      const keys = ObjectUtils.getKeys(this.debounceTimers);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key !== debounceKey) {
@@ -309,7 +310,7 @@ export class EventBusUtil {
       
       // 创建新对象，移除当前防抖键 // Create new object, remove current debounce key
       const newDebounceTimers: Record<string, number> = {};
-      const keys = Object.keys(this.debounceTimers);
+      const keys = ObjectUtils.getKeys(this.debounceTimers);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key !== debounceKey) {
@@ -328,7 +329,7 @@ export class EventBusUtil {
   public clearAllDebounceTimers(): void {
     try {
       Logger.debug('EventBus', 'Clearing all debounce timers');
-      const debounceKeys = Object.keys(this.debounceTimers);
+      const debounceKeys = ObjectUtils.getKeys(this.debounceTimers);
       for (let i = 0; i < debounceKeys.length; i++) {
         const debounceKey = debounceKeys[i];
         const timerId = this.debounceTimers[debounceKey];
@@ -369,7 +370,7 @@ export class EventBusUtil {
    * @returns 事件名称数组 // Event name array
    */
   public getEventNames(): string[] {
-    return Object.keys(this.eventMap);
+    return ObjectUtils.getKeys(this.eventMap);
   }
 
   /**

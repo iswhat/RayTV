@@ -45,7 +45,7 @@ export const UtilityFunctions = {
     }
     
     const result: Partial<T> = {};
-    const objKeys = Object.keys(obj);
+    const objKeys = ObjectUtils.getKeys(obj);
     
     for (let i = 0; i < objKeys.length; i++) {
       const key = objKeys[i];
@@ -370,7 +370,7 @@ export const UtilityFunctions = {
       return false;
     }
     
-    const actualKeys = Object.keys(obj);
+    const actualKeys = ObjectUtils.getKeys(obj);
     
     if (actualKeys.length !== expectedKeys.length) {
       return false;

@@ -1101,7 +1101,10 @@ export default class PlaybackService {
       await this.load(nextItem, 0);
       
       // 通知队列监听器 Notify queue listeners
-      this.queueListeners.forEach(listener => listener(this.playbackQueue, this.currentQueueIndex));
+      for (let i = 0; i < this.queueListeners.length; i++) {
+        const listener = this.queueListeners[i];
+        listener(this.playbackQueue, this.currentQueueIndex);
+      }
     }
   }
   

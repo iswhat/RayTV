@@ -45,7 +45,10 @@ class ResponsiveSystem {
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener(this.currentBreakpoint));
+    for (let i = 0; i < this.listeners.length; i++) {
+      const listener = this.listeners[i];
+      listener(this.currentBreakpoint);
+    }
   }
 
   getCurrentBreakpoint(): string {

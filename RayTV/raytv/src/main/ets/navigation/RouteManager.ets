@@ -1,3 +1,5 @@
+import ObjectUtils from '../common/util/ark/ObjectUtils';
+
 export interface Route {
   path: string;
   component: string;
@@ -64,9 +66,11 @@ export class RouteManager {
   generatePath(routePath: string, params?: Record<string, string>): string {
     let path = routePath;
     if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        path = path.replace(`:${key}`, value);
-      });
+      const entries = ObjectUtils.getEntries(params);
+      for (let i = 0; i < entries.length; i++) {
+        const [key, value] = entries[i];
+        path = path.replace(`:${key}`, value as string);
+      }
     }
     return path;
   }

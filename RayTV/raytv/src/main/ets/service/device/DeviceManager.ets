@@ -266,7 +266,10 @@ export default class DeviceManager {
   private async loadAuthorizedDevices(): Promise<void> {
     try {
       const savedDevices = await this.configService.getConfig<string[]>('authorizedDevices', []);
-      savedDevices.forEach(deviceId => this.authorizedDevices.add(deviceId));
+      for (let i = 0; i < savedDevices.length; i++) {
+        const deviceId = savedDevices[i];
+        this.authorizedDevices.add(deviceId);
+      }
     } catch (error) {
       Logger.error(TAG, `Failed to load authorized devices: ${error}`);
     }

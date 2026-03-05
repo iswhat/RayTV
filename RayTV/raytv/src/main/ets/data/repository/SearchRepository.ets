@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Search Repository - 搜索仓库 (重构版)
  * 
  * 已重构为使用ContentAccessService,不再依赖硬编码的API端点
@@ -13,6 +13,7 @@ import ContentAccessService from '@ohos:raytv/src/main/ets/service/content/Conte
 import { VodSiteWithSource, LiveChannelWithSource } from '@ohos:raytv/src/main/ets/service/pool/SourcePoolManager';
 import { CacheType } from '@ohos:raytv/src/main/ets/service/CacheService';
 import { LocalStorageType } from '@ohos:raytv/src/main/ets/utils/StorageUtil';
+import ObjectUtils from '@ohos:raytv/src/main/ets/utils/ark/ObjectUtils';
 
 /**
  * 搜索类型枚举
@@ -711,12 +712,14 @@ export class SearchRepository {
       let mostSearchedType: SearchType | null = null;
       let maxCount = 0;
       
-      Object.entries(typeCount).forEach(([type, count]) => {
+      const entries = ObjectUtils.getEntries<number>(typeCount);
+      for (let i = 0; i < entries.length; i++) {
+        const [type, count] = entries[i];
         if (count > maxCount) {
           maxCount = count;
           mostSearchedType = type as SearchType;
         }
-      });
+      }
       
       const resultsSum = history.reduce((sum, item) => sum + (item.resultCount || 0), 0);
       const averageResults = history.length > 0 ? resultsSum / history.length : 0;

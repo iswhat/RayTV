@@ -3,6 +3,7 @@
  * Provides safe JSON serialization and deserialization functionality | 提供安全的JSON序列化和反序列化功能
  */
 import Logger from './Logger';
+import ObjectUtils from './ark/ObjectUtils';
 
 class JsonUtil {
   /**
@@ -71,7 +72,7 @@ class JsonUtil {
       }
       // 创建一个安全对象，排除undefined值
       const safeObj: Record<string, string | number | boolean | null> = {};
-      const keys = Object.keys(obj);
+      const keys = ObjectUtils.getKeys(obj);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const value = obj[key];
@@ -86,7 +87,7 @@ class JsonUtil {
       // 创建一个新对象，排除undefined值
       const safeObj: Record<string, string | number | boolean | null> = {};
       if (typeof obj === 'object' && obj !== null) {
-        const keys = Object.keys(obj);
+        const keys = ObjectUtils.getKeys(obj);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           const value = obj[key];
@@ -133,8 +134,8 @@ class JsonUtil {
    * @returns Array of keys | 键数组
    */
   private static getObjectKeys(obj: Record<string, string | number | boolean | null>): string[] {
-    // 使用Object.keys替代for...in循环
-    return Object.keys(obj);
+    // 使用ObjectUtils.getKeys替代Object.keys
+    return ObjectUtils.getKeys(obj);
   }
 
   /**

@@ -27,8 +27,7 @@
 ## 2. 技术选型
 
 ### 2.1 开发语言
-- **主要语言**：ArkTS (HarmonyOS的主要开发语言)
-- **辅助语言**：TypeScript
+- **唯一语言**：ArkTS (HarmonyOS的主要开发语言)
 
 ### 2.2 核心技术框架
 - **UI框架**：ArkUI (声明式UI框架)
@@ -83,7 +82,7 @@ raytv/
 │   ├── parser/               # 解析器管理服务
 │   ├── config/               # 配置服务
 │   │   ├── NetworkSourceManager.ets   # 网络源管理
-│   │   └── ConfigSourceService.ts      # 配置源服务
+│   │   └── ConfigSourceService.ets      # 配置源服务
 │   ├── content/              # 内容聚合服务
 │   │   └── ContentAccessService.ets    # 统一内容访问
 │   ├── recommendation/       # 推荐服务
@@ -108,13 +107,13 @@ raytv/
 │   ├── ImageLazyLoader.ets           # 图片懒加载
 │   └── VirtualList.ets               # 虚拟列表
 ├── design/                   # 设计系统
-│   ├── DesignSystem.ts               # 设计系统核心
-│   ├── ThemeProvider.ts              # 主题提供者
-│   ├── ModernDesignSystem.ts         # 现代设计系统
-│   └── HighContrastTheme.ts          # 高对比度主题
+│   ├── DesignSystem.ets               # 设计系统核心
+│   ├── ThemeProvider.ets              # 主题提供者
+│   ├── ModernDesignSystem.ets         # 现代设计系统
+│   └── HighContrastTheme.ets          # 高对比度主题
 ├── navigation/               # 导航系统
 │   ├── AppNavigator.ets              # 应用导航
-│   └── NavigationGuard.ts            # 导航守卫
+│   └── NavigationGuard.ets            # 导航守卫
 ├── task/                     # 任务调度
 │   ├── scheduler/            # WorkScheduler管理
 │   └── pool/                 # TaskPool优化

@@ -7,7 +7,7 @@
 ## 导入规范
 
 ### 1. 文件扩展名
-- **禁止**在导入语句中包含文件扩展名（`.ets`、`.ts`）
+- **禁止**在导入语句中包含文件扩展名（`.ets`）
 - **正确示例**: `import Logger from '../../common/util/Logger'`
 - **错误示例**: `import Logger from '../../common/util/Logger.ets'`
 
@@ -42,7 +42,7 @@
 - 每个文件应该只有一个默认导出
 - 适用于主要的类、函数或对象
 - **示例**:
-```typescript
+```arkts
 // NetworkRepository.ets
 export default interface NetworkRepository {
   // 接口定义
@@ -53,7 +53,7 @@ export default interface NetworkRepository {
 - 适用于导出多个相关的接口、类型或常量
 - 保持导出的命名清晰且具有描述性
 - **示例**:
-```typescript
+```arkts
 // Vod.ets
 export interface Vod {
   // 接口定义
@@ -68,7 +68,7 @@ export interface VodSearchResult {
 - 允许同时使用默认导出和命名导出
 - 确保导出的结构清晰，避免混乱
 - **示例**:
-```typescript
+```arkts
 // Logger.ets
 export enum LogLevel {
   DEBUG,
@@ -113,7 +113,7 @@ export default class Logger {
 
 ### 2. 导入分组
 使用空行将不同类型的导入分组：
-```typescript
+```arkts
 // 第三方库
 import { Component } from '@ohos/arkui';
 
@@ -129,15 +129,15 @@ import { Vod } from '../bean/Vod';
 **推荐**: 明确导入需要的模块
 
 ### 4. 使用类型导入
-对于TypeScript类型，使用类型导入：
-```typescript
+对于ArkTS类型，使用类型导入：
+```arkts
 import type { Vod } from '../bean/Vod';
 ```
 
 ## 代码示例
 
 ### 正确的导入示例
-```typescript
+```arkts
 // 默认导入（适用于默认导出的类）
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
@@ -151,7 +151,7 @@ import DatabaseRepository, { RepositoryType } from '../repository/DatabaseReposi
 ```
 
 ### 正确的导出示例
-```typescript
+```arkts
 // 默认导出（主要类）
 export default class MediaService {
   // 类实现
@@ -180,20 +180,8 @@ export function formatDuration(seconds: number): string {
 - `import/order`: 控制导入顺序
 - `import/no-cycle`: 检测循环依赖
 
-### 2. TypeScript配置
-在`tsconfig.json`中配置路径映射：
-```json
-{
-  "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@common/*": ["common/*"],
-      "@data/*": ["data/*"],
-      "@service/*": ["service/*"]
-    }
-  }
-}
-```
+### 2. ArkTS配置
+在项目配置中设置合理的路径映射，确保模块导入的一致性和可维护性。
 
 ## 总结
 

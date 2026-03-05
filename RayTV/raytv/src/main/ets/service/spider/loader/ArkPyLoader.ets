@@ -2,6 +2,7 @@
 // 实现基于 HarmonyOS 的 Python 代码加载和执行器 Implements Python code loader and executor based on HarmonyOS
 
 import Logger from '../../../common/util/Logger';
+import ObjectUtils from '../../../common/util/ark/ObjectUtils';
 import { BaseLoader, LoaderOptions, Site, SiteSpider } from './BaseLoader';
 import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
 import HttpService from '../HttpService';
@@ -240,7 +241,7 @@ export class ArkPyLoader extends BaseLoader {
         Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
       },
       len: (obj: string | number | boolean | object | null | undefined) => {
-        return Array.isArray(obj) ? obj.length : Object.keys(obj || {}).length;
+        return Array.isArray(obj) ? obj.length : ObjectUtils.getKeys(obj || {}).length;
       },
       str: (obj: string | number | boolean | object | null | undefined) => String(obj),
       int: (obj: string | number | boolean | object | null | undefined) => parseInt(obj as string, 10),
@@ -739,13 +740,14 @@ export class ArkPyLoader extends BaseLoader {
         }
       }
     } else if (typeof obj === 'object' && obj !== null) {
-      const keys = Object.keys(obj);
+      const keys = ObjectUtils.getKeys(obj);
       if (keys.length > 2000) {
         throw new Error('Object has too many properties');
       }
 
       // 递归检查对象属性 Recursively check object properties
-      for (const key of keys) {
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         this.checkCollectionSize((obj as Record<string, string | number | boolean | object | null | undefined>)[key]);
       }
     }
