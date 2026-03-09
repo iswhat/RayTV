@@ -217,8 +217,8 @@ struct SearchPage {
         return;
       }
       
-      // 浣跨敤榛樿鐑棬鍏抽敭璇?| Use default hot keywords
-      this.hotKeywords = ['鐑棬鐢靛奖', '鏈€鏂板墽闆?, '缁忓吀鍔ㄧ敾', '绉戝够澶х墖', '鐖辨儏鍠滃墽'];
+      // 使用默认热门关键词 | Use default hot keywords
+      this.hotKeywords = ['热门电影', '最新剧集', '经典动画', '科幻大片', '爱情喜剧'];
       
       // 缂撳瓨缁撴灉 | Cache result
       await CacheService.getInstance().set<string[]>(cacheKey, this.hotKeywords);

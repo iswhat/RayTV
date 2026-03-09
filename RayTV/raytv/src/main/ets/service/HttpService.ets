@@ -170,7 +170,6 @@ export interface HttpHeaders {
   'Referrer-Policy'?: string;
   'Permissions-Policy'?: string;
   'Content-Security-Policy'?: string;
-  [key: string]: string;
 }
 
 /**
@@ -495,7 +494,7 @@ export class HttpService {
    * @param data 请求数据
    * @throws {Error} 如果数据无效
    */
-  private validateRequestData(data: string | number | boolean | Record<string, any> | null | undefined): void {
+  private validateRequestData(data: string | number | boolean | Record<string, string | number | boolean | null | undefined> | null | undefined): void {
     if (data === null || data === undefined) {
       return;
     }
@@ -559,7 +558,7 @@ export class HttpService {
       'If-None-Match', 'X-Requested-With'
     ];
     
-    const headerEntries: [string, unknown][] = ObjectUtils.getEntries(headers);
+    const headerEntries: [string, unknown][] = ObjectUtils.getEntries<unknown>(headers);
     for (let i = 0; i < headerEntries.length; i++) {
       const entry = headerEntries[i];
       const key = entry[0];
@@ -771,7 +770,7 @@ export class HttpService {
         }
         const headerObj = requestConfig.header as Record<string, string>;
         // 使用传统for循环遍历键值对变量声明 Use traditional for loop to iterate key-value pairs variable declaration
-        const entries = ObjectUtils.getEntries(sanitizedHeaders);
+        const entries = ObjectUtils.getEntries<string>(sanitizedHeaders);
         for (let i = 0; i < entries.length; i++) {
           const key = entries[i][0];
           const value = entries[i][1] as string;
@@ -1284,7 +1283,7 @@ export class HttpService {
         }
         const headerObj = requestConfig.header as Record<string, string>;
         // 使用传统for循环遍历键值对变量声明 Use traditional for loop to iterate key-value pairs variable declaration
-        const entries = ObjectUtils.getEntries(sanitizedHeaders);
+        const entries = ObjectUtils.getEntries<string>(sanitizedHeaders);
         for (let i = 0; i < entries.length; i++) {
           const key = entries[i][0];
           const value = entries[i][1] as string;
@@ -1924,7 +1923,11 @@ export class HttpService {
    */
   public cleanExpiredRequestCache(): void {
     const now = Date.now();
-    for (const [key, value] of this.mergedRequestQueue.entries()) {
+    const entries = Array.from(this.mergedRequestQueue.entries());
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const key = entry[0];
+      const value = entry[1];
       if (now - value.timestamp > 5000) { // 清理5秒前的请求缓存
         this.mergedRequestQueue.delete(key);
       }

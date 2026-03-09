@@ -265,15 +265,15 @@ export class EmptyLoader extends BaseLoader {
     };
 
     const spider: SiteSpider = {
-      getSiteInfo: async () => this.site,
-      getRecommendList: async () => [],
-      getHotList: async () => [],
-      getLatestList: async () => [],
-      getCategories: async () => [],
-      getCategoryList: async () => [],
-      search: async () => [],
-      getDetail: async () => detailResult,
-      getPlayUrl: async () => ''
+      getSiteInfo: async (): Promise<SiteInfo> => this.site,
+      getRecommendList: async (): Promise<VideoItem[]> => [],
+      getHotList: async (): Promise<VideoItem[]> => [],
+      getLatestList: async (): Promise<VideoItem[]> => [],
+      getCategories: async (): Promise<string[]> => [],
+      getCategoryList: async (category: string, page: number): Promise<VideoItem[]> => [],
+      search: async (keyword: string, page?: number): Promise<VideoItem[]> => [],
+      getDetail: async (id: string): Promise<VideoDetail> => detailResult,
+      getPlayUrl: async (id: string, episodeId?: string): Promise<string> => ''
     };
     return spider;
   }

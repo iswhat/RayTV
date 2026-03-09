@@ -49,11 +49,29 @@ export class ArkPyLoader extends BaseLoader {
     this.pyModuleName = `site_${site.key || 'default'}`;
   }
 
+/**
+ * Python解释器接口
+ */
+interface PythonInterpreter {
+  createContext?: (script: string, context: Record<string, string | number | boolean | object | null | undefined>) => 
+    Promise<Record<string, string | number | boolean | object | null | undefined | 
+      ((...args: (string | number | boolean | object | null | undefined)[]) => 
+        string | number | boolean | object | null | undefined
+      )
+    >>;
+  executeFunction?: (options: {
+    context: Record<string, string | number | boolean | object | null | undefined>;
+    functionName: string;
+    params: string | number | boolean | object | null | undefined;
+    timeout: number;
+  }) => Promise<string | number | boolean | object | null | undefined>;
+}
+
   /**
    * 获取 Python 解释器 Get Python interpreter
    * @private
    */
-  private getPythonInterpreter(): { createContext?: (script: string, context: Record<string, string | number | boolean | object | null | undefined>) => Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined)>>, executeFunction?: (options: { context: Record<string, string | number | boolean | object | null | undefined>, functionName: string, params: string | number | boolean | object | null | undefined, timeout: number }) => Promise<string | number | boolean | object | null | undefined> } | null {
+  private getPythonInterpreter(): PythonInterpreter | null {
     // 在 ArkTS 中，我们可以使用一个模块级别的变量或通过依赖注入获取
     // 这里返回 null 作为默认值，实际实现需要根据具体情况调整
     return null;
@@ -237,7 +255,7 @@ export class ArkPyLoader extends BaseLoader {
     // 创建 Python 模块环境 Create Python module environment
     this.pyContext = {
       // 基本的 Python 内置函数映射 Basic Python built-in function mapping
-      print: (...args: (string | number | boolean | object | null | undefined)[]) => {
+      print: (args: (string | number | boolean | object | null | undefined)[]) => {
         Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
       },
       len: (obj: string | number | boolean | object | null | undefined) => {
@@ -247,8 +265,30 @@ export class ArkPyLoader extends BaseLoader {
       int: (obj: string | number | boolean | object | null | undefined) => parseInt(obj as string, 10),
       float: (obj: string | number | boolean | object | null | undefined) => parseFloat(obj as string),
       bool: (obj: string | number | boolean | object | null | undefined) => Boolean(obj),
-      list: (obj: string | number | boolean | object | null | undefined) => Array.isArray(obj) ? [...obj] : [obj],
-      dict: (obj: string | number | boolean | object | null | undefined) => (typeof obj === 'object' && obj !== null) ? { ...(obj as object) } : {},
+      list: (obj: string | number | boolean | object | null | undefined) => {
+        if (Array.isArray(obj)) {
+          const result = [];
+          for (let i = 0; i < obj.length; i++) {
+            result.push(obj[i]);
+          }
+          return result;
+        } else {
+          return [obj];
+        }
+      },
+      dict: (obj: string | number | boolean | object | null | undefined) => {
+        if (typeof obj === 'object' && obj !== null) {
+          const result = {};
+          const keys = ObjectUtils.getKeys(obj);
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            result[key] = (obj as Record<string, any>)[key];
+          }
+          return result;
+        } else {
+          return {};
+        }
+      },
       range: (start: number, stop?: number, step: number = 1) => {
         const result = [];
         if (stop === undefined) {
@@ -461,10 +501,11 @@ export class ArkPyLoader extends BaseLoader {
    */
   private executeMethod(methodName: string, params: Array<string | number | boolean | object | null | undefined>): string | number | boolean | object | null | undefined {
     // 检查方法是否存在 Check if method exists
-    if (typeof this.pyContext[methodName] !== 'function') {
+    const safeContext = this.pyContext as Record<string, unknown>;
+    if (typeof safeContext[methodName] !== 'function') {
       // 尝试在 Python 模块中查找 Try to find in Python module
       const pyMethodName = `parse_${methodName}`;
-      if (typeof this.pyContext[pyMethodName] !== 'function') {
+      if (typeof safeContext[pyMethodName] !== 'function') {
         throw new Error(`Method ${methodName} or ${pyMethodName} not found in Python script`);
       }
       methodName = pyMethodName;
@@ -481,7 +522,9 @@ export class ArkPyLoader extends BaseLoader {
       const safeParams = this.deepClone(params);
 
       // 执行方法 Execute method
-      const result = this.pyContext[methodName](safeParams);
+      const safeContext = this.pyContext as Record<string, unknown>;
+      const method = safeContext[methodName] as (...args: any[]) => any;
+      const result = method(safeParams);
 
       // 序列化结果以检查循环引用 Serialize result to check for circular references
       const serializedResult = JSON.stringify(result);
@@ -516,13 +559,8 @@ export class ArkPyLoader extends BaseLoader {
    * 替换 Object.keys，适配 ArkTS 语法 Replace Object.keys, adapt to ArkTS syntax
    */
   private getObjectKeys<T extends object>(obj: T): string[] {
-    const keys: string[] = [];
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
+    // 使用ObjectUtils.getKeys替代for..in循环
+    return ObjectUtils.getKeys(obj);
   }
   
   /**
@@ -613,8 +651,8 @@ export class ArkPyLoader extends BaseLoader {
     // 这里假设使用 Python 解释器服务
     // 使用局部变量替代 globalThis
     const pythonInterpreter = this.getPythonInterpreter();
-    if (!pythonInterpreter) {
-      throw new Error('Python interpreter not available');
+    if (!pythonInterpreter || !pythonInterpreter.createContext) {
+      throw new Error('Python interpreter or createContext method not available');
     }
     
     return await pythonInterpreter.createContext(script, context);
@@ -627,8 +665,8 @@ export class ArkPyLoader extends BaseLoader {
   private async executePythonFunction(functionName: string, params: string | number | boolean | object | null | undefined | Array<string | number | boolean | object | null | undefined>): Promise<string | number | boolean | object | null | undefined> {
     // 实际实现应该使用 Python 解释器执行函数
     const pythonInterpreter = this.getPythonInterpreter();
-    if (!pythonInterpreter) {
-      throw new Error('Python interpreter not available');
+    if (!pythonInterpreter || !pythonInterpreter.executeFunction) {
+      throw new Error('Python interpreter or executeFunction method not available');
     }
     
     return await pythonInterpreter.executeFunction({
@@ -709,12 +747,14 @@ export class ArkPyLoader extends BaseLoader {
     }
 
     let maxDepth = currentDepth;
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const depth = this.checkObjectDepth((obj as Record<string, string | number | boolean | object | null | undefined>)[key], currentDepth + 1);
-        if (depth > maxDepth) {
-          maxDepth = depth;
-        }
+    // 使用ObjectUtils.getKeys替代for..in循环
+    const keys = ObjectUtils.getKeys(obj);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const value = (obj as Record<string, string | number | boolean | object | null | undefined>)[key];
+      const depth = this.checkObjectDepth(value, currentDepth + 1);
+      if (depth > maxDepth) {
+        maxDepth = depth;
       }
     }
 

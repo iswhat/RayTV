@@ -7,78 +7,103 @@ import { SafeAny, SafeObject, isNonNull, Optional } from './types/ArkTSBaseTypes
 import ObjectUtils from './ObjectUtils';
 
 /**
- * 类型工具函数集合 Type utility functions collection
+ * TypeUtils接口 TypeUtils interface
  */
-export const TypeUtils = {
+export interface TypeUtilsInterface {
+  isString(value: SafeAny): boolean;
+  isNumber(value: SafeAny): boolean;
+  isBoolean(value: SafeAny): boolean;
+  isUndefined(value: SafeAny): boolean;
+  isNull(value: SafeAny): boolean;
+  isNullOrUndefined(value: SafeAny): boolean;
+  isObject(value: SafeAny): boolean;
+  isArray(value: SafeAny): boolean;
+  isFunction(value: SafeAny): boolean;
+  isDate(value: SafeAny): boolean;
+  isEmpty(value: SafeAny): boolean;
+  toString(value: SafeAny, defaultValue?: string): string;
+  toNumber(value: SafeAny, defaultValue?: number): number;
+  toBoolean(value: SafeAny): boolean;
+  toArray<T>(value: Optional<T | T[]>, defaultValue?: T[]): T[];
+  toObject(value: SafeAny): SafeObject;
+  getPropertyValue(obj: SafeAny, key: string): SafeAny;
+  createTypeGuard<T extends SafeObject>(schema: Record<string, (value: SafeAny) => boolean>): (obj: SafeAny) => boolean;
+}
+
+/**
+ * TypeUtils 类实现 - 使用类而不是对象字面量
+ * TypeUtils class implementation - using class instead of object literal
+ */
+export class TypeUtilsClass implements TypeUtilsInterface {
   /**
    * 检查值是否为字符串类型 Check if value is string type
    */
   isString(value: SafeAny): boolean {
     return typeof value === 'string';
-  },
+  }
 
   /**
    * 检查值是否为数字类型 Check if value is number type
    */
   isNumber(value: SafeAny): boolean {
     return typeof value === 'number' && !isNaN(value) && isFinite(value);
-  },
+  }
 
   /**
    * 检查值是否为布尔类型 Check if value is boolean type
    */
   isBoolean(value: SafeAny): boolean {
     return typeof value === 'boolean';
-  },
+  }
 
   /**
    * 检查值是否为undefined Check if value is undefined
    */
   isUndefined(value: SafeAny): boolean {
     return value === undefined;
-  },
+  }
 
   /**
    * 检查值是否为null Check if value is null
    */
   isNull(value: SafeAny): boolean {
     return value === null;
-  },
+  }
 
   /**
    * 检查值是否为null或undefined Check if value is null or undefined
    */
   isNullOrUndefined(value: SafeAny): boolean {
     return value === null || value === undefined;
-  },
+  }
 
   /**
    * 检查值是否为对象类型 Check if value is object type
    */
   isObject(value: SafeAny): boolean {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
-  },
+  }
 
   /**
    * 检查值是否为数组类型 Check if value is array type
    */
   isArray(value: SafeAny): boolean {
     return Array.isArray(value);
-  },
+  }
 
   /**
    * 检查值是否为函数类型 Check if value is function type
    */
   isFunction(value: SafeAny): boolean {
     return typeof value === 'function';
-  },
+  }
 
   /**
    * 检查值是否为Date类型 Check if value is Date type
    */
   isDate(value: SafeAny): boolean {
     return value instanceof Date && !isNaN(value.getTime());
-  },
+  }
 
   /**
    * 检查值是否为空(包括null、undefined、空字符串、空数组、空对象) Check if value is empty (null, undefined, empty string, empty array, empty object)
@@ -102,7 +127,7 @@ export const TypeUtils = {
     }
     
     return false;
-  },
+  }
 
   /**
    * 安全地将值转换为字符串 Safely convert value to string
@@ -113,7 +138,7 @@ export const TypeUtils = {
     }
     
     return String(value);
-  },
+  }
 
   /**
    * 安全地将值转换为数字 Safely convert value to number
@@ -135,7 +160,7 @@ export const TypeUtils = {
     }
     
     return defaultValue;
-  },
+  }
 
   /**
    * 安全地将值转换为布尔值 Safely convert value to boolean
@@ -162,7 +187,7 @@ export const TypeUtils = {
     }
     
     return true;
-  },
+  }
 
   /**
    * 安全地将值转换为数组 Safely convert value to array
@@ -177,7 +202,7 @@ export const TypeUtils = {
     }
     
     return [value as T];
-  },
+  }
 
   /**
    * 安全地将值转换为对象 Safely convert value to object
@@ -188,27 +213,29 @@ export const TypeUtils = {
     }
     
     return value as SafeObject;
-  },
+  }
 
   /**
    * 安全地获取对象属性值 Safely get object property value
    * @param obj - 要获取属性的对象 Object to get property from
    * @param key - 属性键名 Property key name
-   * @returns 属性值，如果属性不存在则返回undefined Property value, undefined if property doesn't exist
+   * @returns 属性值，如果属性不存在则返回 undefined Property value, undefined if property doesn't exist
    */
   getPropertyValue(obj: SafeAny, key: string): SafeAny {
-    if (!TypeUtils.isObject(obj)) {
+    if (!this.isObject(obj)) {
       return undefined;
     }
-    
+      
     // 使用类型安全的属性查询方式 Use type-safe property query method
     const safeObj = obj as Record<string, SafeAny>;
-    if (Object.prototype.hasOwnProperty.call(safeObj, key)) {
+    // 避免使用 Object.prototype.hasOwnProperty.call，直接检查属性
+    const keys = ObjectUtils.getKeys(safeObj);
+    if (keys.includes(key)) {
       return safeObj[key];
     }
-    
+      
     return undefined;
-  },
+  }
 
   /**
    * 创建类型保护函数 Create type guard function
@@ -216,17 +243,20 @@ export const TypeUtils = {
   createTypeGuard<T extends SafeObject>(
     schema: Record<string, (value: SafeAny) => boolean>
   ): (obj: SafeAny) => boolean {
+    const self = this;
     return (obj: SafeAny): boolean => {
-      if (!TypeUtils.isObject(obj)) {
+      if (!self.isObject(obj)) {
         return false;
       }
       
       // 验证所有必需的属性都存在且符合类型 Validate all required properties exist and match type
       const entries = ObjectUtils.getEntries(schema);
       for (let i = 0; i < entries.length; i++) {
-        const [key, validator] = entries[i];
+        const entry = entries[i];
+        const key = entry[0];
+        const validator = entry[1];
         // 使用类型安全的属性查询方式，避免索引签名访问 Use type-safe property query method, avoid index signature access
-        const value = TypeUtils.getPropertyValue(obj, key);
+        const value = self.getPropertyValue(obj, key);
         if (!validator(value)) {
           return false;
         }
@@ -235,7 +265,10 @@ export const TypeUtils = {
       return true;
     };
   }
-};
+}
+
+// 创建单例实例 Create singleton instance
+export const TypeUtils: TypeUtilsInterface = new TypeUtilsClass();
 
 export default TypeUtils;
 

@@ -104,9 +104,9 @@ export class ArkJsLoader extends BaseLoader {
    * 调用脚本方法 Call script method
    * @param methodName 方法名称 Method name
    * @param args 方法参数 Method arguments
-   * @returns Promise<any> 方法返回值 Method return value
+   * @returns Promise<object> 方法返回值 Method return value
    */
-  public async callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<any> {
+  public async callMethod(methodName: string, args: Array<string | number | boolean | object | null | undefined>): Promise<object> {
     try {
       Logger.debug(this.TAG, `Calling method ${methodName} for site ${this.site.key} with args: ${JSON.stringify(args)}`);
       
@@ -120,10 +120,10 @@ export class ArkJsLoader extends BaseLoader {
       
       // 如果是 Promise，等待其完成 If it's a Promise, wait for it to complete
       if (result instanceof Promise) {
-        return await result;
+        return await result as object;
       }
       
-      return result;
+      return result as object;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to call method ${methodName}:`, err);
@@ -137,30 +137,27 @@ export class ArkJsLoader extends BaseLoader {
    */
   protected createSpiderImpl(): SiteSpider {
     const spider: SiteSpider = {
-      getSiteInfo: async () => this.callMethod('getSiteInfo', []),
+      getSiteInfo: async (): Promise<SiteInfo> => this.callMethod('getSiteInfo', []) as Promise<SiteInfo>,
       
-      getRecommendList: async () => this.callMethod('getRecommendList', []),
+      getRecommendList: async (): Promise<VideoItem[]> => this.callMethod('getRecommendList', []) as Promise<VideoItem[]>,
       
-      getHotList: async () => this.callMethod('getHotList', []),
+      getHotList: async (): Promise<VideoItem[]> => this.callMethod('getHotList', []) as Promise<VideoItem[]>,
       
-      getLatestList: async () => this.callMethod('getLatestList', []),
+      getLatestList: async (): Promise<VideoItem[]> => this.callMethod('getLatestList', []) as Promise<VideoItem[]>,
       
-      getCategories: async () => this.callMethod('getCategories', []),
+      getCategories: async (): Promise<string[]> => this.callMethod('getCategories', []) as Promise<string[]>,
       
-      getCategoryList: async (category: string, page: number) => this.callMethod('getCategoryList', [category, page]),
+      getCategoryList: async (category: string, page: number): Promise<VideoItem[]> => 
+        this.callMethod('getCategoryList', [category, page]) as Promise<VideoItem[]>,
       
-      search: async (keyword: string, page?: number) => this.callMethod('search', [keyword, page]),
+      search: async (keyword: string, page?: number): Promise<VideoItem[]> => 
+        this.callMethod('search', [keyword, page]) as Promise<VideoItem[]>,
       
-      getDetail: async (id: string) => this.callMethod('getDetail', [id]),
+      getDetail: async (id: string): Promise<VideoDetail> => 
+        this.callMethod('getDetail', [id]) as Promise<VideoDetail>,
       
-      getPlayUrl: async (id: string, episodeId?: string) => this.callMethod('getPlayUrl', [id, episodeId]),
-      
-      getSearchSuggestions: async (keyword: string) => {
-        if (typeof this.scriptExports.getSearchSuggestions === 'function') {
-          return this.callMethod('getSearchSuggestions', [keyword]);
-        }
-        return [];
-      }
+      getPlayUrl: async (id: string, episodeId?: string): Promise<string> => 
+        this.callMethod('getPlayUrl', [id, episodeId]) as Promise<string>
     };
     return spider;
   }

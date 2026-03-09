@@ -7,6 +7,7 @@ import StorageUtil from '../../common/util/StorageUtil';
 import HttpService from '../HttpService';
 import CacheService from '../cache/CacheService';
 import ApiResponse from '../../data/dto/ApiResponse';
+import { DIContainer } from '../../common/di/Container';
 import {
   IConfigSourceService,
   ConfigSource,
@@ -22,12 +23,25 @@ import {
 // 常量定义 | Constants definition
 const TAG = 'ConfigSourceService';
 const CONFIG_SOURCE_STORAGE_KEY = 'config_sources';
-const DEFAULT_CONFIG_SOURCES = [
+/**
+ * 配置源接口
+ */
+interface ConfigSource {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  version: string;
+  priority: number;
+  isActive: boolean;
+}
+
+const DEFAULT_CONFIG_SOURCES: ConfigSource[] = [
   {
     id: 'default_a',
     name: '默认配置源A',
     url: 'https://list.eoeoo.com/base2/a.json',
-    type: 'json' as const,
+    type: 'json',
     version: '1.0.0',
     priority: 1,
     isActive: true
@@ -36,7 +50,7 @@ const DEFAULT_CONFIG_SOURCES = [
     id: 'default_b',
     name: '默认配置源B',
     url: 'https://q.uoouo.com/dianshi.json',
-    type: 'json' as const,
+    type: 'json',
     version: '1.0.0',
     priority: 2,
     isActive: true
@@ -93,9 +107,10 @@ export class ConfigSourceService implements IConfigSourceService {
    * 私有构造函数 | Private constructor
    */
   private constructor() {
-    this.httpService = HttpService.getInstance();
-    this.cacheService = CacheService.getInstance();
     this.logger = new Logger(TAG);
+    const container = DIContainer.getInstance();
+    this.httpService = container.resolve('HttpService');
+    this.cacheService = container.resolve('CacheService');
   }
 
   /**
@@ -945,8 +960,10 @@ export class ConfigSourceService implements IConfigSourceService {
 
   private extractSourceName(url: string, config: ParsedConfig): string {
     // 尝试从配置中提取名称 | Try to extract name from config
-    if (config.sites && config.sites.length > 0) {
-      return `${config.sites[0].name}等${config.sites.length}个源`;
+    const sites = config.sites || [];
+    if (sites.length > 0) {
+      const firstSite = sites[0];
+      return `${firstSite.name || '未知站点'}等${sites.length}个源`;
     }
     // 从URL提取 | Extract from URL
     try {
@@ -959,7 +976,7 @@ export class ConfigSourceService implements IConfigSourceService {
 
   private extractVersion(config: ParsedConfig): string {
     // 简单的版本提取逻辑 | Simple version extraction logic
-    return '1.0.' + (config.sites?.length || 0);
+    return '1.0.' + ((config.sites?.length) || 0);
   }
 
   private calculatePriority(url: string): number {

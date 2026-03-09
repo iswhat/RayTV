@@ -19,8 +19,8 @@ export interface ServiceDescriptor<T> {
 // 依赖注入容器类 | Dependency injection container class
 export class DIContainer {
   private static instance: DIContainer | null = null;
-  private services: Map<string, ServiceDescriptor<unknown>> = new Map();
-  private resolvedInstances: Map<string, unknown> = new Map();
+  private services: Map<string, ServiceDescriptor<object>> = new Map();
+  private resolvedInstances: Map<string, object> = new Map();
   private logger: Logger;
 
   /**
@@ -47,7 +47,7 @@ export class DIContainer {
    * @param singleton 是否单例 | Whether singleton
    * @param dependencies 依赖的服务标识符 | Dependent service tokens
    */
-  public register<T>(
+  public register<T extends object>(
     token: string,
     factory: ServiceFactory<T>,
     singleton: boolean = true,
@@ -65,7 +65,7 @@ export class DIContainer {
       instance: undefined
     };
 
-    this.services.set(token, descriptor);
+    this.services.set(token, descriptor as ServiceDescriptor<object>);
     this.logger.info(`Registered service: ${token} (singleton: ${singleton})`);
   }
 
@@ -75,8 +75,8 @@ export class DIContainer {
    * @param resolving 正在解析的服务链，用于检测循环依赖 | Resolving service chain for circular dependency detection
    * @returns 服务实例 | Service instance
    */
-  public resolve<T>(token: string, resolving: Set<string> = new Set()): T {
-    const descriptor = this.services.get(token);
+  public resolve<T extends object>(token: string, resolving: Set<string> = new Set()): T {
+    const descriptor = this.services.get(token) as ServiceDescriptor<T> | undefined;
     if (!descriptor) {
       throw new Error(`Service ${token} not registered`);
     }
@@ -127,7 +127,7 @@ export class DIContainer {
    * @param tokens 服务标识符数组 | Service token array
    * @returns 服务实例数组 | Service instance array
    */
-  public resolveAll<T>(tokens: string[]): T[] {
+  public resolveAll<T extends object>(tokens: string[]): T[] {
     return tokens.map(token => this.resolve<T>(token));
   }
 
@@ -162,7 +162,7 @@ export class DIContainer {
       }
     } else {
       // 清除所有单例实例 | Clear all singleton instances
-      this.services.forEach((descriptor, token) => {
+      this.services.forEach((descriptor: ServiceDescriptor<object>, token: string) => {
         if (descriptor.singleton) {
           descriptor.instance = undefined;
         }
@@ -187,10 +187,10 @@ export class DIContainer {
    * @param resolving 正在解析的服务链，用于检测循环依赖 | Resolving service chain for circular dependency detection
    * @returns 依赖实例数组 | Dependency instance array
    */
-  private resolveDependencies(dependencies: string[], resolving: Set<string>): unknown[] {
-    return dependencies.map(depToken => {
+  private resolveDependencies(dependencies: string[], resolving: Set<string>): object[] {
+    return dependencies.map((depToken: string): object => {
       try {
-        return this.resolve(depToken, resolving);
+        return this.resolve<object>(depToken, resolving);
       } catch (error) {
         this.logger.error(`Failed to resolve dependency: ${depToken}`, error);
         throw new Error(`Missing dependency: ${depToken}`);
@@ -207,7 +207,7 @@ export class DIContainer {
  * @param singleton 是否单例 | Whether singleton
  */
 export function Service(token: string, singleton: boolean = true) {
-  return function (constructor: Function) {
+  return (constructor: Function): void => {
     const container = DIContainer.getInstance();
     container.register(token, () => new (constructor as any)(), singleton);
   };
@@ -218,15 +218,9 @@ export function Service(token: string, singleton: boolean = true) {
  * @param token 服务标识符 | Service token
  */
 export function Inject(token: string) {
-  return function (target: any, propertyKey: string) {
-    Object.defineProperty(target, propertyKey, {
-      get: function () {
-        const container = DIContainer.getInstance();
-        return container.resolve(token);
-      },
-      enumerable: true,
-      configurable: true
-    });
+  return (target: object, propertyKey: string): void => {
+    // 简化实现，避免使用Object.defineProperty
+    // 在使用时通过容器手动解析
   };
 }
 
@@ -236,9 +230,9 @@ export function Inject(token: string) {
  * @param singleton 是否单例 | Whether singleton
  */
 export function Factory(token: string, singleton: boolean = true) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return (target: object, propertyKey: string, descriptor: PropertyDescriptor): void => {
     const container = DIContainer.getInstance();
-    const factory = descriptor.value;
+    const factory = descriptor.value as ServiceFactory<object>;
     container.register(token, factory, singleton);
   };
 }

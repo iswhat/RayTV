@@ -519,9 +519,9 @@ export default class ConfigService {
     try {
       // 检查属性是否存在
       if (typeof obj === 'object' && obj !== null) {
-        // ArkTS 兼容：手动检查属性是否存在
-        const objRecord = obj as Record<string, ConfigValue>;
-        if (key in objRecord) {
+        // ArkTS 兼容：使用hasOwnProperty检查属性是否存在
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const objRecord = obj as Record<string, ConfigValue>;
           const value = objRecord[key];
           // 确保返回值符合ConfigValue类型
           if (value === undefined) {
