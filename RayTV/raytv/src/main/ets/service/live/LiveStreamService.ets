@@ -8,6 +8,7 @@ import DatabaseRepository from '../../data/repository/DatabaseRepository';
 import NetworkRepository from '../../data/repository/NetworkRepository';
 import { ConfigParser } from '../config/ConfigParser';
 import { ConfigLoader } from '../config/ConfigLoader';
+import { LiveChannelWithSource, LiveCategory as UnifiedLiveCategory, LiveProgramInfo, toLiveChannelWithSource } from './LiveChannelTypes';
 
 // 导入类型和DTO | Import types and DTO
 import ApiResponse, { ResponseCode } from '../../data/dto/ApiResponse';
@@ -40,16 +41,17 @@ export enum LiveQuality {
   UHD = 'uhd'          // 超高清 | Ultra high definition
 }
 
-// 直播分类接口 | Live category interface
-export interface LiveCategory {
-  id: string;           // 分类ID | Category ID
-  name: string;         // 分类名称 | Category name
-  icon?: string;        // 分类图标 | Category icon
-  order: number;        // 排序 | Order
-  channelCount: number; // 频道数量 | Channel count
-}
+// 重新导出统一类型以保持向后兼容
+// Re-export unified types for backward compatibility
+export type LiveCategory = UnifiedLiveCategory;
+export type LiveProgram = LiveProgramInfo;
 
-// 直播频道接口 | Live channel interface
+/**
+ * 旧版LiveChannel接口（已弃用，请使用LiveChannelWithSource）
+ * Legacy LiveChannel interface (Deprecated, use LiveChannelWithSource instead)
+ * 
+ * @deprecated 请使用LiveChannelWithSource替代 | Please use LiveChannelWithSource instead
+ */
 export interface LiveChannel {
   id: string;          // 频道ID | Channel ID
   name: string;        // 频道名称 | Channel name
@@ -68,19 +70,6 @@ export interface LiveChannel {
   country?: string;    // 国家/地区 | Country/region
   language?: string;   // 语言 | Language
   isLocked?: boolean;  // 是否锁定 | Whether locked
-}
-
-// 直播节目接口 | Live program interface
-export interface LiveProgram {
-  id: string;          // 节目ID | Program ID
-  title: string;       // 节目标题 | Program title
-  startTime: number;   // 开始时间（时间戳）| Start time (timestamp)
-  endTime: number;     // 结束时间（时间戳）| End time (timestamp)
-  description?: string; // 节目描述 | Program description
-  cover?: string;      // 节目封面 | Program cover
-  genre?: string[];    // 节目类型 | Program genre
-  actors?: string[];   // 演员 | Actors
-  director?: string;   // 导演 | Director
 }
 
 // 直播事件接口 | Live event interface

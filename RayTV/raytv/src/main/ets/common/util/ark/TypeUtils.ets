@@ -97,7 +97,7 @@ export const TypeUtils = {
     }
     
     if (typeof value === 'object') {
-      // 使用Object.keys获取属性数量，避免使用hasOwnProperty Use Object.keys to get property count, avoid using hasOwnProperty
+      // 使用ObjectUtils.getKeys获取属性数量，避免使用hasOwnProperty Use ObjectUtils.getKeys to get property count, avoid using hasOwnProperty
       return ObjectUtils.getKeys(value).length === 0;
     }
     

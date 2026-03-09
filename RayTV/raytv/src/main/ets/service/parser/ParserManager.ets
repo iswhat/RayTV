@@ -196,7 +196,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error(`Failed to load parser from ${filePath}`, error);
-      return ApiResponse.failure(`Load failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Load failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -238,7 +238,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error(`Failed to unload parser ${parserId}`, error);
-      return ApiResponse.failure(`Unload failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Unload failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -305,7 +305,7 @@ export class ParserManager implements IParserManager {
     } catch (error) {
       this.logger.error(`Parse execution failed for ${url}`, error);
       this.updateParseStatistics(false, 0);
-      return ApiResponse.failure(`Parse failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Parse failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -369,7 +369,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Smart parse execution failed', error);
-      return ApiResponse.failure(`Smart parse failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Smart parse failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -446,7 +446,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Parallel parse execution failed', error);
-      return ApiResponse.failure(`Parallel parse failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Parallel parse failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -508,7 +508,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Batch parse execution failed', error);
-      return ApiResponse.failure(`Batch parse failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Batch parse failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -546,7 +546,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Failed to get parsers', error);
-      return ApiResponse.failure(`Get parsers failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Get parsers failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -572,7 +572,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error(`Failed to get config for parser ${parserId}`, error);
-      return ApiResponse.failure(`Get config failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Get config failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -622,7 +622,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error(`Failed to update config for parser ${parserId}`, error);
-      return ApiResponse.failure(`Update config failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Update config failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -667,7 +667,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error(`Failed to validate parser file ${filePath}`, error);
-      return ApiResponse.failure(`Validation failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Validation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -699,7 +699,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Failed to get statistics', error);
-      return ApiResponse.failure(`Get statistics failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Get statistics failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -733,7 +733,7 @@ export class ParserManager implements IParserManager {
 
     } catch (error) {
       this.logger.error('Failed to clear cache', error);
-      return ApiResponse.failure(`Clear cache failed: ${(error as Error).message}`);
+      return ApiResponse.failure(`Clear cache failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

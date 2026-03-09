@@ -8,6 +8,7 @@ import ConfigService from '../config/ConfigService';
 
 import Logger from '../../common/util/Logger';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
+import ErrorHandler, { handleError } from '../../common/util/ErrorHandler';
 
 // 常量定义 Constants definition
 const TAG = 'CacheService';
@@ -467,7 +468,6 @@ export default class CacheService {
       console.info(TAG + `: Cache service initialized successfully`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to initialize cache service`, err);
       this.recordError(err, 'initialize');
     }
   }
@@ -500,7 +500,7 @@ export default class CacheService {
       console.debug(TAG + `: Cache directory set to: ${this.cacheDir}`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to set cache directory`, err);
+      this.recordError(err, 'setCacheDirectory');
       throw err;
     }
   }
@@ -523,7 +523,7 @@ export default class CacheService {
       console.debug(TAG + `: Loaded cache index with ${this.cacheIndex.size} entries`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to load cache index`, err.message);
+      this.recordError(err, 'loadCacheIndex');
     }
   }
 
@@ -555,7 +555,6 @@ export default class CacheService {
       console.debug(TAG + `: Saved cache index with ${this.getObjectKeys(indexData).length} entries`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to save cache index`, err.message);
       this.recordError(err, 'saveCacheIndex');
     }
   }
@@ -642,7 +641,6 @@ export default class CacheService {
       console.debug(TAG + `: Updated cache statistics`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to update statistics`, err.message);
       this.recordError(err, 'updateStatistics');
     }
   }
@@ -666,7 +664,7 @@ export default class CacheService {
       return new Blob([str]).size;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to calculate object size`, err.message);
+      this.recordError(err, 'calculateObjectSize');
       return 0;
     }
   }
@@ -677,12 +675,15 @@ export default class CacheService {
   private recordError(error: Error, operation: string, key?: string): void {
     this.statistics.errorCount++;
     
+    // 使用ErrorHandler处理错误 | Handle error using ErrorHandler
+    handleError(error, `CACHE_${operation.toUpperCase()}`);
+    
     // 通知错误监听器 | Notify error listeners
     for (const listener of this.errorListeners) {
         try {
           listener(error, operation, key);
         } catch (listenerError) {
-          console.error(TAG + `: Error in error listener`, listenerError instanceof Error ? listenerError.message : String(listenerError));
+          handleError(listenerError, 'CACHE_LISTENER_ERROR');
         }
       }
   }
@@ -744,7 +745,6 @@ export default class CacheService {
       return this.createCacheConfig(this.cacheConfig);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to update cache config`, err);
       this.recordError(err, 'setCacheConfig');
       return this.createCacheConfig(this.cacheConfig);
     }
@@ -787,7 +787,6 @@ export default class CacheService {
       };
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to get cache statistics`, err);
       this.recordError(err, 'getStatistics');
       return this.statistics;
     }
@@ -888,7 +887,6 @@ export default class CacheService {
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to get cache items`, err);
       this.recordError(err, 'getCacheItems');
       return [];
     }
@@ -921,7 +919,6 @@ export default class CacheService {
       return this.createCacheConfig(this.cacheConfig);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to reset cache config`, err);
       this.recordError(err, 'resetCacheConfig');
       return this.createCacheConfig(this.cacheConfig);
     }
@@ -941,7 +938,6 @@ export default class CacheService {
       console.debug(TAG + `: Started auto cleanup, interval: ${this.cacheConfig.cleanupInterval}ms`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to start auto cleanup`, err);
       this.recordError(err, 'startAutoCleanup');
     }
   }
@@ -957,7 +953,6 @@ export default class CacheService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to stop auto cleanup`, err);
       this.recordError(err, 'stopAutoCleanup');
     }
   }
@@ -977,7 +972,6 @@ export default class CacheService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to perform initial cleanup`, err);
       this.recordError(err, 'performInitialCleanup');
     }
   }
@@ -1035,7 +1029,6 @@ export default class CacheService {
       console.info(TAG + `: Auto cleanup completed: ${deletedCount} items deleted, ${this.formatSize(freedSpace)} freed, took ${duration}ms`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to perform auto cleanup`, err);
       this.recordError(err, 'performAutoCleanup');
     }
   }
@@ -1079,7 +1072,6 @@ export default class CacheService {
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to cleanup expired items`, err);
       this.recordError(err, 'cleanupExpiredItems');
       const result: CacheCleanupResult = {
         deletedCount: 0,
@@ -1195,7 +1187,6 @@ export default class CacheService {
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to cleanup cache by size`, err);
       this.recordError(err, 'cleanupCacheBySize');
       const result: CacheCleanupResult = {
         deletedCount: 0,
@@ -1297,7 +1288,6 @@ export default class CacheService {
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to cleanup cache by count`, err.message);
       this.recordError(err, 'cleanupCacheByCount');
       const result: CacheCleanupResult = {
         deletedCount: 0,
@@ -1337,7 +1327,6 @@ export default class CacheService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to evict memory cache by time`, err.message);
       this.recordError(err, 'evictMemoryCacheByTime');
     }
   }
@@ -1425,7 +1414,6 @@ export default class CacheService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to evict memory cache by size`, err.message);
       this.recordError(err, 'evictMemoryCacheBySize');
     }
   }
@@ -1455,9 +1443,54 @@ export default class CacheService {
       console.debug(TAG + `: Removed cache item from disk: ${key}`);
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to remove cache item from disk: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'removeItemFromDisk', key);
     }
+  }
+
+  /**
+   * 生成智能缓存键 | Generate smart cache key
+   * @param key 原始键 Original key
+   * @param tags 标签 Tags
+   * @param dataType 数据类型 Data type
+   * @returns 生成的缓存键 Generated cache key
+   */
+  private generateSmartCacheKey(key: string, tags: string[] = [], dataType: string = 'unknown'): string {
+    // 基础键包含前缀、版本和数据类型
+    let baseKey = `${this.cacheConfig.cacheKeyPrefix}${this.cacheConfig.cacheVersion}_${dataType}_${key}`;
+    
+    // 如果有标签，添加标签哈希
+    if (tags.length > 0) {
+      // 对标签进行排序并生成简单哈希
+      const sortedTags = tags.sort().join('_');
+      const tagHash = this.generateSimpleHash(sortedTags);
+      baseKey += `_tags_${tagHash}`;
+    }
+    
+    // 限制键长度，避免过长的缓存键
+    const maxKeyLength = 100;
+    if (baseKey.length > maxKeyLength) {
+      // 对过长的键生成哈希
+      const keyHash = this.generateSimpleHash(baseKey);
+      const prefix = baseKey.substring(0, maxKeyLength - keyHash.length - 1);
+      baseKey = `${prefix}_${keyHash}`;
+    }
+    
+    return baseKey;
+  }
+
+  /**
+   * 生成简单哈希 | Generate simple hash
+   * @param input 输入字符串 Input string
+   * @returns 哈希值 Hash value
+   */
+  private generateSimpleHash(input: string): string {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 转换为32位整数
+    }
+    return Math.abs(hash).toString(16);
   }
 
   /**
@@ -1477,7 +1510,7 @@ export default class CacheService {
     options?: CacheOptions
   ): Promise<CacheOperationResult> {
     const startTime = Date.now();
-    const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
+    const fullKey = this.generateSmartCacheKey(key, options?.tags || [], typeof data);
     
     try {
       // 验证缓存类型 | Validate cache type
@@ -1595,7 +1628,6 @@ export default class CacheService {
       };
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to set cache item: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'set', key);
       return {
         success: false,
@@ -1609,7 +1641,7 @@ export default class CacheService {
    */
   public async get<T>(key: string): Promise<T | null> {
     const startTime = Date.now();
-    const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
+    const fullKey = this.generateSmartCacheKey(key, [], 'unknown');
     
     try {
       let data: T | null = null;
@@ -1625,7 +1657,8 @@ export default class CacheService {
               try {
                 data = JSON.parse(cachedItem.data.value) as T;
               } catch (e) {
-                console.error(TAG + `: Failed to parse array data from cache: ${key}`);
+                const err = e instanceof Error ? e : new Error(String(e));
+                this.recordError(err, 'parseArrayData', key);
                 data = null;
               }
             } else {
@@ -1689,7 +1722,6 @@ export default class CacheService {
       return data;
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to get cache item: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'get', key);
       return null;
     }
@@ -1699,7 +1731,7 @@ export default class CacheService {
    * 检查缓存项是否存在 | Check if cache item exists
    */
   public async exists(key: string): Promise<boolean> {
-    const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
+    const fullKey = this.generateSmartCacheKey(key, [], 'unknown');
     
     try {
       // 检查内存缓存 | Check memory cache
@@ -1722,7 +1754,6 @@ export default class CacheService {
       return false;
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to check cache existence: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'exists', key);
       return false;
     }
@@ -1732,7 +1763,7 @@ export default class CacheService {
    * 获取缓存项元数据 | Get cache metadata
    */
   public async getMetadata(key: string): Promise<CacheMetadata | null> {
-    const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
+    const fullKey = this.generateSmartCacheKey(key, [], 'unknown');
     
     try {
       const metadata = this.cacheIndex.get(fullKey);
@@ -1773,7 +1804,6 @@ export default class CacheService {
       return metadataCopy;
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to get cache metadata: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'getMetadata', key);
       return null;
     }
@@ -1783,7 +1813,7 @@ export default class CacheService {
    * 删除缓存项 | Remove cache item
    */
   public async remove(key: string): Promise<CacheOperationResult> {
-    const fullKey = `${this.cacheConfig.cacheKeyPrefix}${key}`;
+    const fullKey = this.generateSmartCacheKey(key, [], 'unknown');
     
     try {
       // 从内存缓存删除 | Remove from memory cache
@@ -1807,7 +1837,6 @@ export default class CacheService {
       };
     } catch (error) {
       const errorMsg: string = error instanceof Error ? error.message : String(error);
-      console.error(TAG + `: Failed to remove cache item: ${key}`, errorMsg);
       this.recordError(error instanceof Error ? error : new Error(errorMsg), 'remove', key);
       return {
         success: false,

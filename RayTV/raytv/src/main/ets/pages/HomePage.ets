@@ -5,6 +5,7 @@ import ContentAccessService from '../service/content/ContentAccessService';
 import { MediaItem } from '../data/bean/MediaItem';
 import NASDiscoveryService from '../service/nas/NASDiscoveryService';
 import router from '@ohos.router';
+import display from '@ohos.display';
 
 import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit, Progress, ProgressType, ItemAlign, ScrollDirection, EdgeEffect, Stack, Position, HorizontalAlign, Alignment, GestureDirection, GestureType, GestureEvent, PanGesture, GestureInfo, Grid, GridItem, View, WindowStage } from '@ohos.arkui';
 import VirtualList from '../components/VirtualList';
@@ -47,6 +48,9 @@ struct HomePage {
   @State showQuickActions: boolean = false;
   @State currentBreakpoint: Breakpoint = 'md';
   
+  // 监听器 | Listeners
+  private themeChangeListener: ((theme: Theme) => void) | null = null;
+  
   // 服务实例 | Service instances
   private contentService: ContentAccessService = ContentAccessService.getInstance();
   private layoutSystem: ResponsiveLayoutSystem = ResponsiveLayoutSystem.getInstance();
@@ -54,15 +58,18 @@ struct HomePage {
   // 初始化页面 | Initialize page
   async aboutToAppear(): Promise<void> {
     Logger.info(this.TAG, 'HomePage mounted');
-    // 添加主题变更监听器
-    ThemeProvider.addThemeChangeListener((theme) => {
+    
+    // 添加主题变更监听器 | Add theme change listener
+    this.themeChangeListener = (theme) => {
       this.currentTheme = theme;
-    });
-    // 添加断点变化监听器
+    };
+    ThemeProvider.addThemeChangeListener(this.themeChangeListener);
+    
+    // 添加断点变化监听器 | Add breakpoint listener
     this.layoutSystem.addBreakpointListener(this.handleBreakpointChange);
-    // 获取当前断点
+    // 获取当前断点 | Get current breakpoint
     this.currentBreakpoint = this.layoutSystem.getCurrentBreakpoint();
-    // 获取屏幕宽度
+    // 获取屏幕宽度 | Get screen width
     this.updateScreenWidth();
     await this.loadHomePageData();
   }
@@ -70,7 +77,14 @@ struct HomePage {
   // 清理资源 | Clean up resources
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'HomePage unmounted');
-    // 移除断点变化监听器
+    
+    // 移除主题监听器 | Remove theme listener
+    if (this.themeChangeListener) {
+      ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+      this.themeChangeListener = null;
+    }
+    
+    // 移除断点变化监听器 | Remove breakpoint listener
     this.layoutSystem.removeBreakpointListener(this.handleBreakpointChange);
   }
   
@@ -83,12 +97,16 @@ struct HomePage {
   // 更新屏幕宽度 | Update screen width
   private updateScreenWidth(): void {
     try {
-      // 在HarmonyOS中，需要从AbilityContext获取windowStage
-      // 这里暂时使用默认值，实际项目中需要从能力上下文获取
-      const defaultWidth = 1080; // 默认宽度
-      this.layoutSystem.updateScreenWidth(defaultWidth);
-    } catch (error) {
+      // 在HarmonyOS中，尝试从display模块获取屏幕宽度
+      const displayInfo = display.getDefaultDisplaySync();
+      const screenWidth: number = displayInfo.width;
+      this.layoutSystem.updateScreenWidth(screenWidth);
+      Logger.info(this.TAG, `Screen width updated to: ${screenWidth}`);
+    } catch (error: unknown) {
       Logger.error(this.TAG, `Failed to get screen width: ${error instanceof Error ? error.message : String(error)}`);
+      // 失败时使用默认值 | Use default value on failure
+      const defaultWidth: number = 1080; // 默认宽度
+      this.layoutSystem.updateScreenWidth(defaultWidth);
     }
   }
   
@@ -102,53 +120,176 @@ struct HomePage {
 
       Logger.info(this.TAG, 'Loading home page data');
 
-      // 从ContentAccessService获取数据
-      const sites = this.contentService.getAllVodSites();
+      await this.fetchMediaData();
       
-      if (sites.length > 0) {
-        // 基于站点数据生成媒体列表
-        // 实际应用中应该从每个站点获取具体的媒体内容
-        this.recommendedMedia = sites.slice(0, 6).map((site, index) => ({
-          id: `rec_${index}_${site.sourceId}`,
-          title: `${site.name} - 推荐内容`,
-          coverUrl: '',
-          siteKey: site.siteKey,
-          score: (8.0 + index * 0.3).toFixed(1),
-          sourceId: site.sourceId,
-          sourceName: site.sourceName
-        }));
+      // 检查是否有数据
+      const hasData: boolean = this.recommendedMedia.length > 0 || 
+                     this.popularMedia.length > 0 || 
+                     this.newMedia.length > 0;
 
-        this.popularMedia = sites.slice(6, 12).map((site, index) => ({
-          id: `pop_${index}_${site.sourceId}`,
-          title: `${site.name} - 热门内容`,
-          coverUrl: '',
-          siteKey: site.siteKey,
-          score: (8.5 + index * 0.4).toFixed(1),
-          sourceId: site.sourceId,
-          sourceName: site.sourceName
-        }));
-
-        this.newMedia = sites.slice(12, 18).map((site, index) => ({
-          id: `new_${index}_${site.sourceId}`,
-          title: `${site.name} - 最新内容`,
-          coverUrl: '',
-          siteKey: site.siteKey,
-          score: (8.2 + index * 0.2).toFixed(1),
-          sourceId: site.sourceId,
-          sourceName: site.sourceName
-        }));
-      } else {
-        // 无数据时显示提示
-        this.errorMessage = '暂无内容，请在设置中添加网络源';
+      if (!hasData) {
+        await this.loadFallbackData();
       }
 
       Logger.info(this.TAG, `Home page data loaded: recommended=${this.recommendedMedia.length}, popular=${this.popularMedia.length}, new=${this.newMedia.length}`);
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to load home page data: ${err.message}`);
       this.errorMessage = '加载数据失败，请稍后重试';
     } finally {
       this.isLoading = false;
+    }
+  }
+  
+  /**
+   * 获取媒体数据 | Fetch media data
+   */
+  private async fetchMediaData(): Promise<void> {
+    // 导入MovieService
+    const MovieService = await import('../service/media/MovieService');
+    const movieService = MovieService.default.getInstance();
+
+    // 并行获取不同类型的内容
+    const [trendingResponse, popularResponse, newResponse] = await Promise.all([
+      movieService.getTrending('all', 6),
+      movieService.getPopular('all', 6),
+      movieService.getNewReleases('all', 6)
+    ]);
+
+    // 处理热门内容
+    this.processTrendingData(trendingResponse);
+    // 处理热播内容
+    this.processPopularData(popularResponse);
+    // 处理最新内容
+    this.processNewReleasesData(newResponse);
+  }
+  
+  /**
+   * 处理热门内容 | Process trending content
+   */
+  private processTrendingData(response: any): void {
+    if (response.isSuccess() && response.data) {
+      this.recommendedMedia = response.data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        coverUrl: item.posters?.[0]?.url || '',
+        score: item.rating?.score?.toString() || '0',
+        sourceId: 'api',
+        sourceName: 'API'
+      }));
+    }
+  }
+  
+  /**
+   * 处理热播内容 | Process popular content
+   */
+  private processPopularData(response: any): void {
+    if (response.isSuccess() && response.data) {
+      this.popularMedia = response.data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        coverUrl: item.posters?.[0]?.url || '',
+        score: item.rating?.score?.toString() || '0',
+        sourceId: 'api',
+        sourceName: 'API'
+      }));
+    }
+  }
+  
+  /**
+   * 处理最新内容 | Process new releases content
+   */
+  private processNewReleasesData(response: any): void {
+    if (response.isSuccess() && response.data) {
+      this.newMedia = response.data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        coverUrl: item.posters?.[0]?.url || '',
+        score: item.rating?.score?.toString() || '0',
+        sourceId: 'api',
+        sourceName: 'API'
+      }));
+    }
+  }
+  
+  /**
+   * 加载备用数据 | Load fallback data
+   */
+  private async loadFallbackData(): Promise<void> {
+    // 尝试从站点获取备用数据
+    const sites = this.contentService.getAllVodSites();
+    if (sites.length > 0) {
+      const allMediaItems: MediaItem[] = await this.processSiteMedia(sites);
+      
+      if (allMediaItems.length > 0) {
+        this.distributeFallbackMedia(allMediaItems);
+      } else {
+        this.errorMessage = '暂无内容，请在设置中添加网络源';
+      }
+    } else {
+      this.errorMessage = '暂无内容，请在设置中添加网络源';
+    }
+  }
+  
+  /**
+   * 处理站点媒体数据 | Process site media data
+   */
+  private async processSiteMedia(sites: any[]): Promise<MediaItem[]> {
+    const allMediaItems: MediaItem[] = [];
+    for (const site of sites) {
+      try {
+        const mediaItems: MediaItem[] = this.getMediaItemsFromSite(site);
+        allMediaItems.push(...mediaItems);
+      } catch (error: unknown) {
+        Logger.warn(this.TAG, `Failed to load media from site ${site.name}`);
+      }
+    }
+    return allMediaItems;
+  }
+  
+  /**
+   * 分发备用媒体数据 | Distribute fallback media data
+   */
+  private distributeFallbackMedia(mediaItems: MediaItem[]): void {
+    // 按评分排序
+    mediaItems.sort((a: MediaItem, b: MediaItem) => {
+      const scoreA: number = parseFloat(a.score || '0');
+      const scoreB: number = parseFloat(b.score || '0');
+      return scoreB - scoreA;
+    });
+    
+    // 分配到不同的媒体列表
+    this.recommendedMedia = mediaItems.slice(0, 6);
+    this.popularMedia = mediaItems.slice(6, 12);
+    this.newMedia = mediaItems.slice(12, 18);
+  }
+  
+  /**
+   * 从站点获取媒体项（兼容方法）
+   */
+  private getMediaItemsFromSite(site: any): MediaItem[] {
+    try {
+      // 基于站点数据生成模拟媒体项
+      // 在实际实现中，应该调用真实的API获取媒体内容
+      const mediaCount: number = Math.max(1, Math.floor(Math.random() * 5));
+      const mediaItems: MediaItem[] = [];
+      
+      for (let i = 0; i < mediaCount; i++) {
+        mediaItems.push({
+          id: `${site.siteKey}_${site.sourceId}_${i}`,
+          title: `${site.name} - 内容${i + 1}`,
+          coverUrl: '',
+          siteKey: site.siteKey,
+          score: (7.5 + Math.random() * 2).toFixed(1),
+          sourceId: site.sourceId,
+          sourceName: site.sourceName
+        });
+      }
+      
+      return mediaItems;
+    } catch (error: unknown) {
+      Logger.warn(this.TAG, `Failed to get media items from site: ${site.name}`);
+      return [];
     }
   }
   
@@ -160,8 +301,8 @@ struct HomePage {
       Logger.info(this.TAG, 'Search button clicked');
       // 跳转到搜索页面 | Navigate to search page
       AppNavigator.getInstance().navigateToSearch('');
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to search page: ${err.message}`);
     }
   }
@@ -185,8 +326,8 @@ struct HomePage {
         siteKey: media.siteKey || '',
         type: 'movie'
       });
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to detail page: ${err.message}`);
     }
   }
@@ -199,8 +340,8 @@ struct HomePage {
       Logger.info(this.TAG, 'Live entry clicked');
       // 跳转到直播页面 | Navigate to live page
       AppNavigator.getInstance().navigateToLive();
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to live page: ${err.message}`);
     }
   }
@@ -213,8 +354,8 @@ struct HomePage {
       Logger.info(this.TAG, 'Settings entry clicked');
       // 跳转到设置页面 | Navigate to settings page
       AppNavigator.getInstance().navigateToSettings();
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to settings page: ${err.message}`);
     }
   }
@@ -227,8 +368,8 @@ struct HomePage {
       Logger.info(this.TAG, `Category clicked: ${category}`);
       // 跳转到分类页面 | Navigate to category page
       AppNavigator.getInstance().navigateToCategory(category);
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to category page: ${err.message}`);
     }
   }
@@ -243,8 +384,8 @@ struct HomePage {
       router.push({
         url: '/pages/NASManagementPage'
       });
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to navigate to NAS management page: ${err.message}`);
     }
   }
@@ -254,16 +395,19 @@ struct HomePage {
    */
   private convertToVirtualItems(mediaList: MediaItem[]): VirtualListItem[] {
     const virtualItems: VirtualListItem[] = [];
+    const itemWidth: number = this.getMediaItemWidth();
+    const itemHeight: number = this.getMediaItemHeight();
+    
     for (let i = 0; i < mediaList.length; i++) {
-      const media = mediaList[i];
+      const media: MediaItem = mediaList[i];
       const virtualItem: VirtualListItem = {
         id: `${media.id}_${media.sourceId || 'default'}`,
         index: i,
         data: media,
         top: 0,
-        left: i * 220, // 估算的项目宽度
-        height: 340,
-        width: 200,
+        left: i * (itemWidth + 20), // 项目宽度加上间距
+        height: itemHeight,
+        width: itemWidth,
         visible: false
       };
       virtualItems.push(virtualItem);
@@ -616,11 +760,11 @@ struct HomePage {
         bufferSize: 3,
         scrollDirection: ScrollDirection.Horizontal,
         renderItem: (item: VirtualListItem, index: number) => {
-          const media = item.data as MediaItem;
+          const media: MediaItem = item.data as MediaItem;
           return this.renderMediaItem(media, colors, spacing, borderRadius, shadows);
         },
         onItemClick: (item: VirtualListItem) => {
-          const media = item.data as MediaItem;
+          const media: MediaItem = item.data as MediaItem;
           this.handleMediaItemClick(media);
         }
       })
@@ -699,11 +843,11 @@ struct HomePage {
     borderRadius: any,
     shadows: any
   ): void {
-    const itemWidth = this.getMediaItemWidth();
-    const itemHeight = this.getMediaItemHeight();
-    const coverWidth = itemWidth - 20; // 减去padding
-    const coverHeight = coverWidth * 1.5; // 保持 2:3 的宽高比
-    const fontSize = this.getMediaItemFontSize();
+    const itemWidth: number = this.getMediaItemWidth();
+    const itemHeight: number = this.getMediaItemHeight();
+    const coverWidth: number = itemWidth - 20; // 减去padding
+    const coverHeight: number = coverWidth * 1.5; // 保持 2:3 的宽高比
+    const fontSize: number = this.getMediaItemFontSize();
     
     Column() {
       Stack() {

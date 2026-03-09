@@ -98,29 +98,38 @@ export interface StyleConfig {
   ratio?: number;
 }
 
-// 配置源服务接口 | Config source service interface
-export interface IConfigSourceService {
+// 配置加载器接口 | Config loader interface
+export interface IConfigLoader {
   /**
    * 加载远程配置源 | Load remote config source
    * @param url 配置源URL | Config source URL
    * @returns 配置源数据 | Config source data
    */
   loadConfigSource(url: string): Promise<ApiResponse<ConfigSource>>;
-  
+}
+
+// 配置解析器接口 | Config parser interface
+export interface IConfigParser {
   /**
    * 解析配置内容 | Parse config content
    * @param content 配置内容 | Config content
    * @returns 解析后的配置 | Parsed configuration
    */
   parseConfigContent(content: string): Promise<ApiResponse<ParsedConfig>>;
-  
+}
+
+// 配置验证器接口 | Config validator interface
+export interface IConfigValidator {
   /**
    * 验证配置格式 | Validate config format
    * @param config 配置数据 | Config data
    * @returns 是否有效 | Whether valid
    */
   validateConfigFormat(config: any): boolean;
-  
+}
+
+// 配置源管理器接口 | Config source manager interface
+export interface IConfigSourceManager {
   /**
    * 获取所有激活的配置源 | Get all active config sources
    * @returns 配置源列表 | Config source list
@@ -149,18 +158,37 @@ export interface IConfigSourceService {
    * @returns 更新结果 | Update result
    */
   updateSourceStatus(id: string, isActive: boolean): Promise<ApiResponse<boolean>>;
-  
-  /**
-   * 获取解析后的媒体站点 | Get parsed media sites
-   * @param sourceId 配置源ID | Config source ID
-   * @returns 媒体站点列表 | Media site list
-   */
-  getMediaSites(sourceId: string): Promise<ApiResponse<MediaSite[]>>;
-  
+}
+
+// 配置健康检查接口 | Config health checker interface
+export interface IConfigHealthChecker {
   /**
    * 检查配置源健康状态 | Check config source health
    * @param id 配置源ID | Config source ID
    * @returns 健康状态 | Health status
    */
   checkSourceHealth(id: string): Promise<ApiResponse<'healthy' | 'warning' | 'error'>>;
+}
+
+// 媒体站点管理器接口 | Media site manager interface
+export interface IMediaSiteManager {
+  /**
+   * 获取解析后的媒体站点 | Get parsed media sites
+   * @param sourceId 配置源ID | Config source ID
+   * @returns 媒体站点列表 | Media site list
+   */
+  getMediaSites(sourceId: string): Promise<ApiResponse<MediaSite[]>>;
+}
+
+// 配置源服务接口 | Config source service interface
+// 组合多个小接口，保持向后兼容性 | Combine multiple small interfaces for backward compatibility
+export interface IConfigSourceService extends 
+  IConfigLoader, 
+  IConfigParser, 
+  IConfigValidator, 
+  IConfigSourceManager, 
+  IConfigHealthChecker, 
+  IMediaSiteManager
+{
+  // 保持为空，通过继承获得所有方法 | Keep empty, inherit all methods from parent interfaces
 }

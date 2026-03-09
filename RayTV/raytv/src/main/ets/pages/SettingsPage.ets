@@ -1197,33 +1197,64 @@ struct SettingsPage {
    * 处理添加源
    */
   private async handleAddSource(): Promise<void> {
-    if (!this.tempSourceName || !this.tempSourceUrl) {
-      Logger.warn('SettingsPage', 'Source name or URL is empty');
+    // 验证源名称 | Validate source name
+    if (!this.tempSourceName || this.tempSourceName.trim().length === 0) {
+      Logger.warn('SettingsPage', 'Source name is empty');
+      this.showValidationMessage('请输入源名称');
+      return;
+    }
+    
+    // 验证名称长度（2-50字符）| Validate name length (2-50 characters)
+    if (this.tempSourceName.length < 2 || this.tempSourceName.length > 50) {
+      Logger.warn('SettingsPage', 'Source name length invalid');
+      this.showValidationMessage('源名称长度应在2-50个字符之间');
+      return;
+    }
+    
+    if (!this.tempSourceUrl || this.tempSourceUrl.trim().length === 0) {
+      Logger.warn('SettingsPage', 'Source URL is empty');
+      this.showValidationMessage('请输入源URL');
+      return;
+    }
+
+    // 验证URL格式和协议 | Validate URL format and protocol
+    try {
+      const url = new URL(this.tempSourceUrl.trim());
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        Logger.error('SettingsPage', 'Invalid URL protocol');
+        this.showValidationMessage('只支持http和https协议的URL');
+        return;
+      }
+    } catch (error) {
+      Logger.error('SettingsPage', 'Invalid URL format');
+      this.showValidationMessage('URL格式不正确');
       return;
     }
 
     this.isAddingSource = true;
 
     try {
-      // 验证URL格式
-      try {
-        new URL(this.tempSourceUrl);
-      } catch (error) {
-        Logger.error('SettingsPage', 'Invalid URL format');
+      // 测试源的可访问性 | Test source accessibility
+      this.showValidationMessage('正在测试源...');
+      const isAccessible = await this.testSourceAccessibility(this.tempSourceUrl.trim());
+      
+      if (!isAccessible) {
+        Logger.warn('SettingsPage', 'Source not accessible');
+        this.showValidationMessage('源无法访问，请检查URL是否正确');
         this.isAddingSource = false;
         return;
       }
 
-      // 解析标签
+      // 解析标签 | Parse tags
       const tags = this.tempSourceTags
         ? this.tempSourceTags.split(',').map(tag => tag.trim()).filter(tag => tag)
         : [];
 
-      // 创建新源
+      // 创建新源 | Create new source
       const newSource: NetworkSourceConfig = {
         id: `source_${Date.now()}`,
-        name: this.tempSourceName,
-        url: this.tempSourceUrl,
+        name: this.tempSourceName.trim(),
+        url: this.tempSourceUrl.trim(),
         type: 'json',
         version: '1.0.0',
         isActive: true,
@@ -1243,12 +1274,49 @@ struct SettingsPage {
       await this.loadContentStats();
 
       Logger.info('SettingsPage', `Source added: ${newSource.name}`);
+      this.showValidationMessage('源添加成功');
       this.closePopup();
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       Logger.error('SettingsPage', 'Failed to add source', err);
+      this.showValidationMessage('添加源失败：' + err.message);
     } finally {
       this.isAddingSource = false;
     }
+  }
+  
+  /**
+   * 测试源的可访问性 | Test source accessibility
+   */
+  private async testSourceAccessibility(url: string): Promise<boolean> {
+    try {
+      // 导入HttpService
+      const HttpService = await import('../service/HttpService');
+      const httpService = HttpService.default.getInstance();
+      
+      // 发送HEAD请求测试URL是否可达
+      const response = await httpService.get(url, {
+        timeout: 10000, // 10秒超时
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'RayTV/1.0'
+        }
+      });
+      
+      // 检查响应状态码
+      return response && response.statusCode >= 200 && response.statusCode < 300;
+    } catch (error) {
+      Logger.warn('SettingsPage', `Source accessibility test failed: ${error instanceof Error ? error.message : String(error)}`);
+      return false;
+    }
+  }
+  
+  /**
+   * 显示验证消息 | Show validation message
+   */
+  private showValidationMessage(message: string): void {
+    // 这里可以实现消息提示显示逻辑
+    // Here you can implement message prompt display logic
+    Logger.info('SettingsPage', `Validation message: ${message}`);
   }
 }

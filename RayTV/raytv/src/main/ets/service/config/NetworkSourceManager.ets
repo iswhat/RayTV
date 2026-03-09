@@ -9,6 +9,7 @@ import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import HttpService from '../HttpService';
 import SourcePoolManager, { NetworkSourceConfig, ContentUsage } from '../pool/SourcePoolManager';
+import NetworkSourceHealthChecker from './NetworkSourceHealthChecker';
 
 const STORAGE_KEY = 'network_sources_config';
 const TAG = 'NetworkSourceManager';
@@ -68,6 +69,9 @@ export class NetworkSourceManager {
   
   private sources: NetworkSourceConfig[] = [];
   private initialized: boolean = false;
+  private lock: Promise<void> = Promise.resolve();
+  private lockCount: number = 0;
+  private healthChecker: NetworkSourceHealthChecker = NetworkSourceHealthChecker.getInstance();
   
   /**
    * 获取单例实例
@@ -89,6 +93,41 @@ export class NetworkSourceManager {
   }
   
   /**
+   * 获取锁
+   */
+  private async acquireLock(): Promise<() => void> {
+    const previousLock: Promise<void> = this.lock;
+    this.lockCount++;
+    
+    let released: boolean = false;
+    
+    // 等待前一个操作完成
+    await previousLock;
+    
+    return () => {
+      if (!released) {
+        released = true;
+        this.lockCount--;
+        if (this.lockCount === 0) {
+          this.lock = Promise.resolve();
+        }
+      }
+    };
+  }
+  
+  /**
+   * 执行带锁的操作
+   */
+  private async withLock<T>(operation: () => Promise<T>): Promise<T> {
+    const release: () => void = await this.acquireLock();
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  }
+  
+  /**
    * 初始化管理器
    */
   public async initialize(): Promise<void> {
@@ -102,8 +141,8 @@ export class NetworkSourceManager {
       
       this.initialized = true;
       this.logger.info('NetworkSourceManager initialized');
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       this.logger.error('Failed to initialize NetworkSourceManager', err);
       throw err;
     }
@@ -113,36 +152,40 @@ export class NetworkSourceManager {
    * 加载源配置
    */
   private async loadSources(): Promise<void> {
-    try {
-      const stored = await StorageUtil.getItem(STORAGE_KEY);
-      if (stored) {
-        this.sources = JSON.parse(stored) as NetworkSourceConfig[];
-      } else {
+    await this.withLock(async () => {
+      try {
+        const stored: string | null = await StorageUtil.getItem(STORAGE_KEY);
+        if (stored) {
+          this.sources = JSON.parse(stored) as NetworkSourceConfig[];
+        } else {
+          // 使用默认源
+          this.sources = DEFAULT_SOURCES.map((s: NetworkSourceConfig) => ({ ...s }));
+          await this.saveSources();
+        }
+        
+        this.logger.info(`Loaded ${this.sources.length} network sources`);
+      } catch (error: unknown) {
+        const err: Error = error instanceof Error ? error : new Error(String(error));
+        this.logger.error('Failed to load sources', err);
         // 使用默认源
-        this.sources = DEFAULT_SOURCES.map(s => ({ ...s }));
-        await this.saveSources();
+        this.sources = DEFAULT_SOURCES.map((s: NetworkSourceConfig) => ({ ...s }));
       }
-      
-      this.logger.info(`Loaded ${this.sources.length} network sources`);
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to load sources', err);
-      // 使用默认源
-      this.sources = DEFAULT_SOURCES.map(s => ({ ...s }));
-    }
+    });
   }
   
   /**
    * 保存源配置
    */
   private async saveSources(): Promise<void> {
-    try {
-      await StorageUtil.setItem(STORAGE_KEY, JSON.stringify(this.sources));
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to save sources', err);
-      throw err;
-    }
+    await this.withLock(async () => {
+      try {
+        await StorageUtil.setItem(STORAGE_KEY, JSON.stringify(this.sources));
+      } catch (error: unknown) {
+        const err: Error = error instanceof Error ? error : new Error(String(error));
+        this.logger.error('Failed to save sources', err);
+        throw err;
+      }
+    });
   }
   
   // ========================================
@@ -153,173 +196,189 @@ export class NetworkSourceManager {
    * 添加网络源
    */
   public async addSource(source: NetworkSourceConfig): Promise<void> {
-    // 检查ID是否重复
-    if (this.sources.some(s => s.id === source.id)) {
-      throw new Error(`Source with ID ${source.id} already exists`);
-    }
-    
-    // 检查URL是否重复
-    if (this.sources.some(s => s.url === source.url)) {
-      throw new Error(`Source with URL ${source.url} already exists`);
-    }
-    
-    try {
-      // 测试连接
-      const healthStatus = await this.checkSourceHealthInternal(source.url);
-      source.healthStatus = healthStatus;
-      source.lastUpdated = Date.now();
+    await this.withLock(async () => {
+      // 检查ID是否重复
+      if (this.sources.some((s: NetworkSourceConfig) => s.id === source.id)) {
+        throw new Error(`Source with ID ${source.id} already exists`);
+      }
       
-      // 添加到列表
-      this.sources.push(source);
+      // 检查URL是否重复
+      if (this.sources.some((s: NetworkSourceConfig) => s.url === source.url)) {
+        throw new Error(`Source with URL ${source.url} already exists`);
+      }
       
-      // 保存并重建池
-      await this.saveSources();
-      await this.rebuildPoolsIfNeeded(source.isActive);
-      
-      this.logger.info(`Added source: ${source.name}`);
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error(`Failed to add source ${source.name}`, err);
-      throw err;
-    }
+      try {
+        // 测试连接
+        const healthStatus: 'healthy' | 'degraded' | 'unreachable' = await this.healthChecker.checkSingleSource(source.url);
+        source.healthStatus = healthStatus;
+        source.lastUpdated = Date.now();
+        
+        // 添加到列表
+        this.sources.push(source);
+        
+        // 保存并重建池
+        await this.saveSources();
+        await this.rebuildPoolsIfNeeded(source.isActive);
+        
+        this.logger.info(`Added source: ${source.name}`);
+      } catch (error: unknown) {
+        const err: Error = error instanceof Error ? error : new Error(String(error));
+        this.logger.error(`Failed to add source ${source.name}`, err);
+        throw err;
+      }
+    });
   }
   
   /**
    * 删除网络源
    */
   public async removeSource(sourceId: string): Promise<void> {
-    const index = this.sources.findIndex(s => s.id === sourceId);
-    if (index === -1) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    const source = this.sources[index];
-    this.sources.splice(index, 1);
-    
-    // 保存并重建池
-    await this.saveSources();
-    await this.poolManager.rebuildAllPools(this.sources);
-    
-    this.logger.info(`Removed source: ${source.name}`);
+    await this.withLock(async () => {
+      const index: number = this.sources.findIndex((s: NetworkSourceConfig) => s.id === sourceId);
+      if (index === -1) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      const source: NetworkSourceConfig = this.sources[index];
+      this.sources.splice(index, 1);
+      
+      // 保存并重建池
+      await this.saveSources();
+      await this.poolManager.rebuildAllPools(this.sources);
+      
+      this.logger.info(`Removed source: ${source.name}`);
+    });
   }
   
   /**
    * 更新网络源
    */
   public async updateSource(source: NetworkSourceConfig): Promise<void> {
-    const index = this.sources.findIndex(s => s.id === source.id);
-    if (index === -1) {
-      throw new Error(`Source with ID ${source.id} not found`);
-    }
-    
-    // 如果URL改变了,重新检查健康状态
-    const oldSource = this.sources[index];
-    if (oldSource.url !== source.url) {
-      const healthStatus = await this.checkSourceHealthInternal(source.url);
-      source.healthStatus = healthStatus;
-      source.lastUpdated = Date.now();
-    }
-    
-    // 更新源
-    this.sources[index] = source;
-    
-    // 保存并重建池
-    await this.saveSources();
-    await this.rebuildPoolsIfNeeded(source.isActive || oldSource.isActive);
-    
-    this.logger.info(`Updated source: ${source.name}`);
+    await this.withLock(async () => {
+      const index: number = this.sources.findIndex((s: NetworkSourceConfig) => s.id === source.id);
+      if (index === -1) {
+        throw new Error(`Source with ID ${source.id} not found`);
+      }
+      
+      // 如果URL改变了,重新检查健康状态
+      const oldSource: NetworkSourceConfig = this.sources[index];
+      if (oldSource.url !== source.url) {
+        const healthStatus: 'healthy' | 'degraded' | 'unreachable' = await this.healthChecker.checkSingleSource(source.url);
+        source.healthStatus = healthStatus;
+        source.lastUpdated = Date.now();
+      }
+      
+      // 更新源
+      this.sources[index] = source;
+      
+      // 保存并重建池
+      await this.saveSources();
+      await this.rebuildPoolsIfNeeded(source.isActive || oldSource.isActive);
+      
+      this.logger.info(`Updated source: ${source.name}`);
+    });
   }
   
   /**
    * 切换源启用状态
    */
   public async toggleSource(sourceId: string, isActive: boolean): Promise<void> {
-    const source = this.sources.find(s => s.id === sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    if (source.isActive === isActive) {
-      return; // 状态未改变
-    }
-    
-    source.isActive = isActive;
-    
-    // 保存并重建池
-    await this.saveSources();
-    await this.poolManager.rebuildAllPools(this.sources);
-    
-    this.logger.info(`Toggled source ${source.name} to ${isActive ? 'active' : 'inactive'}`);
+    await this.withLock(async () => {
+      const source: NetworkSourceConfig | undefined = this.sources.find((s: NetworkSourceConfig) => s.id === sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      if (source.isActive === isActive) {
+        return; // 状态未改变
+      }
+      
+      source.isActive = isActive;
+      
+      // 保存并重建池
+      await this.saveSources();
+      await this.poolManager.rebuildAllPools(this.sources);
+      
+      this.logger.info(`Toggled source ${source.name} to ${isActive ? 'active' : 'inactive'}`);
+    });
   }
   
   /**
    * 更新内容使用配置
    */
   public async updateContentUsage(sourceId: string, usage: ContentUsage): Promise<void> {
-    const source = this.sources.find(s => s.id === sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    source.contentUsage = { ...usage };
-    
-    // 保存并重建池
-    await this.saveSources();
-    await this.poolManager.rebuildAllPools(this.sources);
-    
-    this.logger.info(`Updated content usage for source: ${source.name}`);
+    await this.withLock(async () => {
+      const source: NetworkSourceConfig | undefined = this.sources.find((s: NetworkSourceConfig) => s.id === sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      source.contentUsage = { ...usage };
+      
+      // 保存并重建池
+      await this.saveSources();
+      await this.poolManager.rebuildAllPools(this.sources);
+      
+      this.logger.info(`Updated content usage for source: ${source.name}`);
+    });
   }
   
   /**
    * 更新优先级
    */
   public async updatePriority(sourceId: string, priority: number): Promise<void> {
-    const source = this.sources.find(s => s.id === sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    source.priority = Math.max(1, Math.min(10, priority)); // 限制在1-10范围内
-    
-    // 保存并重建池
-    await this.saveSources();
-    await this.poolManager.rebuildAllPools(this.sources);
-    
-    this.logger.info(`Updated priority for source ${source.name} to ${priority}`);
+    await this.withLock(async () => {
+      const source: NetworkSourceConfig | undefined = this.sources.find((s: NetworkSourceConfig) => s.id === sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      source.priority = Math.max(1, Math.min(10, priority)); // 限制在1-10范围内
+      
+      // 保存并重建池
+      await this.saveSources();
+      await this.poolManager.rebuildAllPools(this.sources);
+      
+      this.logger.info(`Updated priority for source ${source.name} to ${priority}`);
+    });
   }
   
   /**
    * 添加标签
    */
   public async addTag(sourceId: string, tag: string): Promise<void> {
-    const source = this.sources.find(s => s.id === sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    if (!source.tags) {
-      source.tags = [];
-    }
-    
-    if (!source.tags.includes(tag)) {
-      source.tags.push(tag);
-      await this.saveSources();
-    }
+    await this.withLock(async () => {
+      const source: NetworkSourceConfig | undefined = this.sources.find((s: NetworkSourceConfig) => s.id === sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      if (!source.tags) {
+        source.tags = [];
+      }
+      
+      if (!source.tags.includes(tag)) {
+        source.tags.push(tag);
+        await this.saveSources();
+      }
+    });
   }
   
   /**
    * 移除标签
    */
   public async removeTag(sourceId: string, tag: string): Promise<void> {
-    const source = this.sources.find(s => s.id === sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    if (source.tags) {
-      source.tags = source.tags.filter(t => t !== tag);
-      await this.saveSources();
-    }
+    await this.withLock(async () => {
+      const source: NetworkSourceConfig | undefined = this.sources.find((s: NetworkSourceConfig) => s.id === sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      if (source.tags) {
+        source.tags = source.tags.filter((t: string) => t !== tag);
+        await this.saveSources();
+      }
+    });
   }
   
   // ========================================
@@ -337,21 +396,21 @@ export class NetworkSourceManager {
    * 获取启用的源
    */
   public getActiveSources(): NetworkSourceConfig[] {
-    return this.sources.filter(s => s.isActive);
+    return this.sources.filter((s: NetworkSourceConfig) => s.isActive);
   }
   
   /**
    * 按ID获取源
    */
   public getSourceById(sourceId: string): NetworkSourceConfig | null {
-    return this.sources.find(s => s.id === sourceId) || null;
+    return this.sources.find((s: NetworkSourceConfig) => s.id === sourceId) || null;
   }
   
   /**
    * 按标签获取源
    */
   public getSourcesByTag(tag: string): NetworkSourceConfig[] {
-    return this.sources.filter(s => s.tags && s.tags.includes(tag));
+    return this.sources.filter((s: NetworkSourceConfig) => s.tags && s.tags.includes(tag));
   }
   
   // ========================================
@@ -362,60 +421,34 @@ export class NetworkSourceManager {
    * 检查单个源的健康状态
    */
   public async checkSourceHealth(sourceId: string): Promise<'healthy' | 'degraded' | 'unreachable'> {
-    const source = this.getSourceById(sourceId);
-    if (!source) {
-      throw new Error(`Source with ID ${sourceId} not found`);
-    }
-    
-    const healthStatus = await this.checkSourceHealthInternal(source.url);
-    source.healthStatus = healthStatus;
-    source.lastUpdated = Date.now();
-    await this.saveSources();
-    
-    return healthStatus;
+    return this.withLock(async () => {
+      const source: NetworkSourceConfig | null = this.getSourceById(sourceId);
+      if (!source) {
+        throw new Error(`Source with ID ${sourceId} not found`);
+      }
+      
+      const healthStatus: 'healthy' | 'degraded' | 'unreachable' = await this.healthChecker.checkSingleSource(source.url);
+      source.healthStatus = healthStatus;
+      source.lastUpdated = Date.now();
+      await this.saveSources();
+      
+      return healthStatus;
+    });
   }
   
   /**
    * 检查所有源的健康状态
+   * 使用并发控制，避免大量同时请求
    */
   public async checkAllSourcesHealth(): Promise<Map<string, 'healthy' | 'degraded' | 'unreachable'>> {
-    const results = new Map<string, 'healthy' | 'degraded' | 'unreachable'>();
-    
-    for (const source of this.sources) {
-      try {
-        const healthStatus = await this.checkSourceHealthInternal(source.url);
-        source.healthStatus = healthStatus;
-        source.lastUpdated = Date.now();
-        results.set(source.id, healthStatus);
-      } catch (error) {
-        source.healthStatus = 'unreachable';
-        source.lastUpdated = Date.now();
-        results.set(source.id, 'unreachable');
-      }
-    }
-    
-    await this.saveSources();
-    return results;
-  }
-  
-  /**
-   * 内部健康检查方法
-   */
-  private async checkSourceHealthInternal(url: string): Promise<'healthy' | 'degraded' | 'unreachable'> {
-    try {
-      const startTime = Date.now();
-      const response = await this.httpService.get(url, { timeout: 10000 });
-      const duration = Date.now() - startTime;
+    return this.withLock(async () => {
+      // 使用健康检查器检查所有源
+      const results: Map<string, 'healthy' | 'degraded' | 'unreachable'> = await this.healthChecker.checkAllSourcesHealth(this.sources);
       
-      if (response && response.statusCode >= 200 && response.statusCode < 300) {
-        // 响应时间超过5秒视为降级
-        return duration > 5000 ? 'degraded' : 'healthy';
-      }
-      
-      return 'degraded';
-    } catch (error) {
-      return 'unreachable';
-    }
+      // 保存检查结果
+      await this.saveSources();
+      return results;
+    });
   }
   
   // ========================================
@@ -450,10 +483,10 @@ export class NetworkSourceManager {
   } {
     const stats = {
       total: this.sources.length,
-      active: this.sources.filter(s => s.isActive).length,
-      healthy: this.sources.filter(s => s.healthStatus === 'healthy').length,
-      degraded: this.sources.filter(s => s.healthStatus === 'degraded').length,
-      unreachable: this.sources.filter(s => s.healthStatus === 'unreachable').length
+      active: this.sources.filter((s: NetworkSourceConfig) => s.isActive).length,
+      healthy: this.sources.filter((s: NetworkSourceConfig) => s.healthStatus === 'healthy').length,
+      degraded: this.sources.filter((s: NetworkSourceConfig) => s.healthStatus === 'degraded').length,
+      unreachable: this.sources.filter((s: NetworkSourceConfig) => s.healthStatus === 'unreachable').length
     };
     
     return stats;

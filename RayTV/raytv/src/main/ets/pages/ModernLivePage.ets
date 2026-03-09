@@ -5,6 +5,7 @@ import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import ContentAccessService from '../service/content/ContentAccessService';
 import display from '@ohos.display';
+import { LiveChannelWithSource, LiveCategory } from '../service/live/LiveChannelTypes';
 
 import {
   FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment, TextAlign, BarState, ScrollDirection, EdgeEffect, GestureDirection, GestureEvent, PanGesture, GestureInfo, Column, Row, Text, Button, ForEach, Stack, Image, ImageFit
@@ -18,22 +19,9 @@ import ModernDesignSystem, { Theme } from '../design/ModernDesignSystem';
 /**
  * 直播界面
  * 实现直播内容的播放、频道切换和播放设置
+ * 使用LiveCategory作为ChannelCategory的类型别名以保持兼容
  */
-interface ChannelCategory {
-  id: string;
-  name: string;
-}
-
-interface LiveChannelWithSource {
-  id: string;
-  name: string;
-  url: string;
-  group: string;
-  sourceId: string;
-  sourceName: string;
-  logo?: string;
-  epgUrl?: string;
-}
+type ChannelCategory = LiveCategory;
 
 @Entry
 @Component

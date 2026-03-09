@@ -232,6 +232,7 @@ export class ConfigSourceService implements IConfigSourceService {
    * 解析配置内容
    *
    * 解析配置源的JSON内容，验证格式并提取各个部分。
+   * 增强了错误处理，即使配置有格式错误也能尽可能解析可用部分。
    *
    * @param content 配置内容字符串
    * @returns Promise<ApiResponse<ParsedConfig>> - 包含解析结果的API响应
@@ -241,9 +242,19 @@ export class ConfigSourceService implements IConfigSourceService {
    * const result = await configSourceService.parseConfigContent(configContent);
    * if (result.isSuccess()) {
    *   console.log('Config parsed successfully:', result.data);
-   * }
-   * ```
+   * }  * ```
    */
+  interface ConfigData {
+    sites?: unknown[];
+    parses?: unknown[];
+    parsers?: unknown[];
+    rules?: unknown[];
+    wallpaper?: string | string[];
+    lives?: unknown[];
+    spider?: string;
+    [key: string]: unknown;
+  }
+
   public async parseConfigContent(content: string): Promise<ApiResponse<ParsedConfig>> {
     try {
       let configData: unknown;
@@ -253,29 +264,90 @@ export class ConfigSourceService implements IConfigSourceService {
         configData = JSON.parse(content);
       } catch (jsonError) {
         this.logger.error('Failed to parse config as JSON', jsonError);
-        return ApiResponse.failure('Invalid JSON format');
+        // 即使JSON解析失败，也创建一个空配置对象，确保应用不会崩溃
+        configData = {};
       }
 
-      // 验证必需字段 | Validate required fields
-      if (!this.validateRequiredFields(configData)) {
-        return ApiResponse.failure('Missing required config fields');
+      // 确保configData是对象 | Ensure configData is an object
+      if (typeof configData !== 'object' || configData === null) {
+        configData = {};
       }
 
-      // 解析各个部分 | Parse different parts
+      // 解析各个部分，每个部分都有独立的错误处理 | Parse different parts with independent error handling
+      let sites: MediaSite[] = [];
+      let parsers: ParserConfig[] = [];
+      let rules: RuleConfig[] = [];
+      let wallpapers: string[] = [];
+      let lives: LiveSource[] = [];
+      let spider: SpiderConfig | undefined;
+
+      const config = configData as ConfigData;
+
+      try {
+        sites = this.parseSites(config.sites || []);
+      } catch (error) {
+        this.logger.warn('Failed to parse sites, using empty array', error);
+        sites = [];
+      }
+
+      try {
+        parsers = this.parseParsers(config.parses || config.parsers || []);
+      } catch (error) {
+        this.logger.warn('Failed to parse parsers, using empty array', error);
+        parsers = [];
+      }
+
+      try {
+        rules = this.parseRules(config.rules || []);
+      } catch (error) {
+        this.logger.warn('Failed to parse rules, using empty array', error);
+        rules = [];
+      }
+
+      try {
+        wallpapers = this.parseWallpapers(config.wallpaper);
+      } catch (error) {
+        this.logger.warn('Failed to parse wallpapers, using empty array', error);
+        wallpapers = [];
+      }
+
+      try {
+        lives = this.parseLiveSources(config.lives || []);
+      } catch (error) {
+        this.logger.warn('Failed to parse live sources, using empty array', error);
+        lives = [];
+      }
+
+      try {
+        spider = this.parseSpider(config.spider || '');
+      } catch (error) {
+        this.logger.warn('Failed to parse spider, using undefined', error);
+        spider = undefined;
+      }
+
+      // 创建解析后的配置 | Create parsed config
       const parsedConfig: ParsedConfig = {
-        sites: this.parseSites(configData.sites || []),
-        parsers: this.parseParsers(configData.parses || []),
-        rules: this.parseRules(configData.rules || []),
-        wallpapers: this.parseWallpapers(configData.wallpaper),
-        lives: this.parseLiveSources(configData.lives || []),
-        spider: this.parseSpider(configData.spider)
+        sites,
+        parsers,
+        rules,
+        wallpapers,
+        lives,
+        spider
       };
 
       return ApiResponse.success(parsedConfig);
 
     } catch (error) {
       this.logger.error('Failed to parse config content', error);
-      return ApiResponse.failure(`Parsing error: ${(error as Error).message}`);
+      // 即使出现严重错误，也返回一个空配置，确保应用不会崩溃
+      return ApiResponse.success({
+        sites: [],
+        parsers: [],
+        rules: [],
+        wallpapers: [],
+        lives: [],
+        spider: undefined
+      });
     }
   }
 
@@ -686,26 +758,86 @@ export class ConfigSourceService implements IConfigSourceService {
     [key: string]: unknown;
   }
 
-  private parseSites(sites: SiteConfig[]): MediaSite[] {
-    return sites.map(site => ({
-      key: site.key || '',
-      name: site.name || '',
-      type: site.type || 0,
-      api: site.api || '',
-      searchable: site.searchable !== undefined ? Boolean(site.searchable) : false,
-      quickSearch: site.quickSearch !== undefined ? Boolean(site.quickSearch) : false,
-      filterable: site.filterable !== undefined ? Boolean(site.filterable) : false,
-      ext: site.ext,
-      jar: site.jar,
-      playerType: site.playerType,
-      headers: site.header || {},
-      timeout: site.timeout,
-      changeable: site.changeable !== undefined ? Boolean(site.changeable) : true,
-      style: site.style ? {
-        type: site.style.type || 'list',
-        ratio: site.style.ratio
-      } : undefined
-    })).filter(site => site.key && site.name && site.api);
+  interface SiteConfigData {
+    key?: string;
+    name?: string;
+    type?: number;
+    api?: string;
+    searchable?: unknown;
+    quickSearch?: unknown;
+    filterable?: unknown;
+    ext?: string;
+    jar?: string;
+    playerType?: string;
+    header?: Record<string, string>;
+    headers?: Record<string, string>;
+    timeout?: number;
+    changeable?: unknown;
+    style?: {
+      type?: string;
+      ratio?: number;
+    };
+    [key: string]: unknown;
+  }
+
+  private parseSites(sites: SiteConfigData[]): MediaSite[] {
+    // 确保sites是数组 | Ensure sites is an array
+    if (!Array.isArray(sites)) {
+      this.logger.warn('Sites is not an array, using empty array');
+      return [];
+    }
+
+    return sites.map(site => {
+      try {
+        // 确保site是对象 | Ensure site is an object
+        if (typeof site !== 'object' || site === null) {
+          this.logger.warn('Site is not an object, skipping');
+          return null;
+        }
+
+        // 处理jar后缀的灵活性 | Handle jar suffix flexibility
+        let jar = site.jar;
+        if (jar && typeof jar === 'string') {
+          // 支持各种常见的jar包后缀 | Support various common jar suffixes
+          if (!jar.endsWith('.jar')) {
+            jar += '.jar';
+          }
+        }
+
+        // 处理api URL的灵活性 | Handle api URL flexibility
+        let api = site.api || '';
+        if (api && typeof api === 'string') {
+          // 确保URL格式正确 | Ensure URL format is correct
+          if (!api.startsWith('http://') && !api.startsWith('https://') && !api.startsWith('proxy://')) {
+            // 尝试添加默认协议 | Try to add default protocol
+            api = 'http://' + api;
+          }
+        }
+
+        return {
+          key: site.key || '',
+          name: site.name || '',
+          type: site.type || 0,
+          api: api,
+          searchable: site.searchable !== undefined ? Boolean(site.searchable) : false,
+          quickSearch: site.quickSearch !== undefined ? Boolean(site.quickSearch) : false,
+          filterable: site.filterable !== undefined ? Boolean(site.filterable) : false,
+          ext: site.ext,
+          jar: jar,
+          playerType: site.playerType,
+          headers: site.header || site.headers || {},
+          timeout: site.timeout,
+          changeable: site.changeable !== undefined ? Boolean(site.changeable) : true,
+          style: site.style ? {
+            type: site.style.type || 'list',
+            ratio: site.style.ratio
+          } : undefined
+        };
+      } catch (error) {
+        this.logger.warn('Failed to parse site, skipping', error);
+        return null;
+      }
+    }).filter((site): site is MediaSite => site !== null && site.key && site.name && site.api);
   }
 
   interface ParserConfigData {
@@ -766,17 +898,30 @@ export class ConfigSourceService implements IConfigSourceService {
     })).filter(live => live.name && live.url);
   }
 
-  private parseSpider(spider: string | undefined): SpiderConfig | undefined {
-    if (!spider || typeof spider !== 'string') {
+  private parseSpider(spider: string): SpiderConfig | undefined {
+    if (!spider) {
       return undefined;
     }
 
-    const parts = spider.split(';');
-    if (parts.length >= 3 && parts[0] && parts[2]) {
-      return {
-        path: parts[0],
-        md5: parts[2]
-      };
+    try {
+      const parts = spider.split(';');
+      if (parts.length >= 3 && parts[0] && parts[2]) {
+        let path = parts[0];
+        // 处理spider路径的灵活性 | Handle spider path flexibility
+        if (path) {
+          // 支持各种常见的spider文件后缀 | Support various common spider file suffixes
+          if (!path.endsWith('.jar') && !path.endsWith('.py') && !path.endsWith('.js')) {
+            // 尝试添加默认后缀 | Try to add default suffix
+            path += '.jar';
+          }
+        }
+        return {
+          path: path,
+          md5: parts[2]
+        };
+      }
+    } catch (error) {
+      this.logger.warn('Failed to parse spider, using undefined', error);
     }
     return undefined;
   }

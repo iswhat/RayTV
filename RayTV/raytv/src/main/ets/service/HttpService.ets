@@ -30,6 +30,8 @@ import common from '@ohos.app.ability.common';
 import URLValidator from '../common/util/URLValidator';
 import Logger from '../common/util/Logger';
 import ObjectUtils from '../common/util/ark/ObjectUtils';
+import { NetworkError, createNetworkError } from '../common/util/AppError';
+import ErrorHandler from '../common/util/ErrorHandler';
 import fs from '@ohos.file.fs';
 import path from '@ohos.file.path';
 
@@ -363,7 +365,9 @@ export class HttpService {
    */
   private getContext(): common.Context {
     if (!this.context) {
-      throw new Error('HttpService context not set. Please call setContext() first.');
+      const error = new Error('HttpService context not set. Please call setContext() first.');
+      ErrorHandler.getInstance().handleError(error, 'CONTEXT_NOT_SET');
+      throw error;
     }
     return this.context;
   }
@@ -710,6 +714,15 @@ export class HttpService {
       Logger.debug(HttpService.TAG, `Cache miss for ${url}, sending network request`);
     }
 
+    // 并发控制：等待直到有可用的并发槽
+    while (this.currentConcurrentRequests >= this.MAX_CONCURRENT_REQUESTS) {
+      await this.sleep(50); // 等待50ms后重试
+    }
+
+    // 增加当前并发请求数
+    this.currentConcurrentRequests++;
+    Logger.debug(HttpService.TAG, `Starting request, current concurrent: ${this.currentConcurrentRequests}`);
+
     // 从连接池获取HTTP请求对象
     const httpRequest = this.getHttpRequestFromPool(url);
 
@@ -793,9 +806,13 @@ export class HttpService {
 
           if (retryCount > maxRetryCount) {
             if (lastError) {
-              throw lastError;
+              const networkError = createNetworkError(lastError.message, undefined, url);
+              ErrorHandler.getInstance().handleError(networkError, 'REQUEST_FAILED');
+              throw networkError;
             } else {
-              throw new Error('Request failed');
+              const networkError = createNetworkError('Request failed', undefined, url);
+              ErrorHandler.getInstance().handleError(networkError, 'REQUEST_FAILED');
+              throw networkError;
             }
           }
 
@@ -811,7 +828,9 @@ export class HttpService {
           lastErrorMsg = lastError.message || 'unknown error';
         }
         const errorMsg = `HTTP request failed after ${retryCount} retries: url=${url}, retryCount=${retryCount}, maxRetryCount=${maxRetryCount}, lastError=${lastErrorMsg}`;
-        throw new Error(errorMsg);
+        const networkError = createNetworkError(errorMsg, undefined, url);
+        ErrorHandler.getInstance().handleError(networkError, 'REQUEST_FAILED');
+        throw networkError;
       }
 
       // 处理响应 Process response
@@ -825,8 +844,9 @@ export class HttpService {
 
       // 检查状态码 Check status code
       if (result.status < 200 || result.status >= 300) {
-        const error = new Error(`HTTP Error: ${result.status} - ${url}`);
-        throw error;
+        const networkError = createNetworkError(`HTTP Error: ${result.status} - ${url}`, result.status, url);
+        ErrorHandler.getInstance().handleError(networkError, 'HTTP_STATUS_ERROR');
+        throw networkError;
       }
 
       // 缓存响应 Cache response
@@ -842,9 +862,21 @@ export class HttpService {
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      Logger.error(HttpService.TAG, `HTTP request failed: ${url}`);
+      if (!(err instanceof NetworkError)) {
+        const networkError = createNetworkError(err.message, undefined, url);
+        ErrorHandler.getInstance().handleError(networkError, 'REQUEST_ERROR');
+        throw networkError;
+      }
+      ErrorHandler.getInstance().handleError(err, 'REQUEST_ERROR');
       throw err;
     } finally {
+      // 减少当前并发请求数
+      this.currentConcurrentRequests--;
+      if (this.currentConcurrentRequests < 0) {
+        this.currentConcurrentRequests = 0;
+      }
+      Logger.debug(HttpService.TAG, `Request completed, current concurrent: ${this.currentConcurrentRequests}`);
+      
       // 将HTTP请求对象返回连接池
       this.returnHttpRequestToPool(url, httpRequest);
     }
@@ -1196,6 +1228,15 @@ export class HttpService {
       throw new Error('Invalid file path: potential path traversal detected');
     }
 
+    // 并发控制：等待直到有可用的并发槽
+    while (this.currentConcurrentRequests >= this.MAX_CONCURRENT_REQUESTS) {
+      await this.sleep(50); // 等待50ms后重试
+    }
+
+    // 增加当前并发请求数
+    this.currentConcurrentRequests++;
+    Logger.debug(HttpService.TAG, `Starting download, current concurrent: ${this.currentConcurrentRequests}`);
+
     // 从连接池获取HTTP请求对象
     const httpRequest = this.getHttpRequestFromPool(url);
 
@@ -1309,9 +1350,21 @@ export class HttpService {
       return downloadResult;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      Logger.error(HttpService.TAG, `File download failed: ${url}`);
+      if (!(err instanceof NetworkError)) {
+        const networkError = createNetworkError(err.message, undefined, url);
+        ErrorHandler.getInstance().handleError(networkError, 'DOWNLOAD_ERROR');
+        throw networkError;
+      }
+      ErrorHandler.getInstance().handleError(err, 'DOWNLOAD_ERROR');
       throw err;
     } finally {
+      // 减少当前并发请求数
+      this.currentConcurrentRequests--;
+      if (this.currentConcurrentRequests < 0) {
+        this.currentConcurrentRequests = 0;
+      }
+      Logger.debug(HttpService.TAG, `Download completed, current concurrent: ${this.currentConcurrentRequests}`);
+      
       // 将HTTP请求对象返回连接池
       this.returnHttpRequestToPool(url, httpRequest);
     }
@@ -1643,17 +1696,47 @@ export class HttpService {
 
 
 
+  /**
+   * 批量执行请求
+   * 
+   * 批量执行多个HTTP请求，支持顺序执行、并行执行和按优先级执行三种策略。
+   * 提供动态批处理大小、智能重试策略和错误处理机制。
+   * 
+   * @param requests 要执行的请求数组
+   * @param options 批处理选项
+   * @returns 所有请求的响应数组
+   * @example
+   * ```typescript
+   * const requests = [
+   *   { url: 'https://api.example.com/data1', priority: 1 },
+   *   { url: 'https://api.example.com/data2', priority: 2 },
+   *   { url: 'https://api.example.com/data3', priority: 1 }
+   * ];
+   * 
+   * const results = await httpService.batchRequests<{ data: any }>(requests, {
+   *   batchSize: 5,
+   *   timeout: 30000,
+   *   strategy: 'prioritized',
+   *   onProgress: (completed, total) => {
+   *     console.log(`Progress: ${completed}/${total}`);
+   *   }
+   * });
+   * ```
+   */
   public async batchRequests<T>(
     requests: Array<BatchRequest>,
     options?: BatchOptions
   ): Promise<Array<HttpResponse<T>>> {
     const results: Array<HttpResponse<T>> = [];
-    const batchSize = options?.batchSize || 4;
+    // 动态批处理大小：根据请求数量和系统资源自动调整
+    const baseBatchSize = options?.batchSize || 4;
+    const totalRequests = requests.length;
+    // 请求数量较少时使用较小的批处理大小
+    const batchSize = Math.min(baseBatchSize, Math.max(2, Math.ceil(totalRequests / 10)));
     const timeout = options?.timeout || 30000;
     const strategy = options?.strategy || 'parallel';
     const onProgress = options?.onProgress;
     const retryCount = options?.retryCount || 3;
-    const totalRequests = requests.length;
     let completedRequests = 0;
 
     // 根据策略处理请求
@@ -1663,6 +1746,14 @@ export class HttpService {
       // 按优先级排序（优先级数字越小，优先级越高）
       processedRequests.sort((a, b) => (a.priority || 0) - (b.priority || 0));
     }
+
+    // 去重处理：合并相同URL的请求
+    const uniqueRequests = this.deduplicateRequests(processedRequests);
+    const requestMap = new Map<string, number>(); // URL到索引的映射
+    uniqueRequests.forEach((req, index) => {
+      const key = req.url + (req.options?.method || 'GET');
+      requestMap.set(key, index);
+    });
 
     // 执行请求的函数
     const self = this;
@@ -1695,8 +1786,9 @@ export class HttpService {
               throw lastError;
             }
             
-            // 重试前等待
-            await self.sleep(1000 * retries);
+            // 智能重试策略：根据错误类型调整重试间隔
+            const retryDelay = self.calculateRetryDelay(retries, lastError);
+            await self.sleep(retryDelay);
           }
         } catch (error) {
           // 更新进度
@@ -1712,21 +1804,74 @@ export class HttpService {
 
     if (strategy === 'sequential') {
       // 顺序执行请求
-      for (const req of processedRequests) {
+      for (const req of uniqueRequests) {
         const result = await executeRequest(req);
         results.push(result);
       }
     } else {
       // 并行分批执行请求
-      for (let i = 0; i < processedRequests.length; i += batchSize) {
-        const batch = processedRequests.slice(i, i + batchSize);
+      for (let i = 0; i < uniqueRequests.length; i += batchSize) {
+        const batch = uniqueRequests.slice(i, i + batchSize);
         const batchPromises = batch.map(executeRequest);
         const batchResults = await Promise.all(batchPromises);
         results.push(...batchResults);
       }
     }
 
-    return results;
+    // 处理重复请求的结果映射
+    return requests.map(req => {
+      const key = req.url + (req.options?.method || 'GET');
+      const index = requestMap.get(key);
+      return index !== undefined ? results[index] : results[0];
+    });
+  }
+
+  /**
+   * 去重请求
+   * 
+   * 合并相同URL和方法的请求，避免重复执行。
+   * 
+   * @param requests 请求数组
+   * @returns 去重后的请求数组
+   */
+  private deduplicateRequests(requests: Array<BatchRequest>): Array<BatchRequest> {
+    const uniqueRequests = new Map<string, BatchRequest>();
+    
+    requests.forEach(req => {
+      const key = req.url + (req.options?.method || 'GET');
+      if (!uniqueRequests.has(key)) {
+        uniqueRequests.set(key, req);
+      }
+    });
+    
+    return Array.from(uniqueRequests.values());
+  }
+
+  /**
+   * 计算重试延迟
+   * 
+   * 根据重试次数和错误类型计算智能重试延迟。
+   * 
+   * @param retryCount 重试次数
+   * @param error 错误对象
+   * @returns 重试延迟（毫秒）
+   */
+  private calculateRetryDelay(retryCount: number, error: Error): number {
+    // 基础延迟
+    let baseDelay = 1000 * Math.pow(2, retryCount - 1); // 指数退避
+    
+    // 根据错误类型调整延迟
+    if (error.message.includes('timeout')) {
+      // 超时错误，增加延迟
+      baseDelay *= 1.5;
+    } else if (error.message.includes('network')) {
+      // 网络错误，增加更多延迟
+      baseDelay *= 2;
+    }
+    
+    // 添加随机抖动，避免雪崩效应
+    const jitter = Math.random() * 500;
+    return Math.min(baseDelay + jitter, 10000); // 最大延迟10秒
   }
 
   /**

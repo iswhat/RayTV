@@ -33,39 +33,90 @@ import common from '@ohos.app.ability.common';
 import cryptoFramework from '@ohos.security.cryptoFramework';
 import buffer from '@ohos.buffer';
 import ObjectUtils from './ark/ObjectUtils';
+import ErrorHandler, { handleError } from './ErrorHandler';
 
 // 加密工具类 | Encryption utility class
 class EncryptionUtil {
-  // 简单的加密实现，实际应用中应使用更安全的加密算法
-  // Simple encryption implementation, should use more secure encryption algorithm in production
-  private static readonly KEY: string = 'RayTVEncryptionKey';
+  // 使用更安全的加密算法
+  // Use more secure encryption algorithm
+  private static readonly KEY: string = 'RayTVEncryptionKey12345'; // 16字节密钥
+  private static readonly IV: string = 'RayTVIV1234567890'; // 16字节IV
 
   // 加密字符串 | Encrypt string
   public static encrypt(text: string): string {
     try {
-      // 简单的Base64编码作为示例，实际应用中应使用AES等加密算法
-      // Simple Base64 encoding as example, should use AES or other encryption algorithm in production
+      // 使用AES-CBC模式加密
+      // Use AES-CBC mode for encryption
+      const encoder: TextEncoder = new TextEncoder();
+      const data: Uint8Array = encoder.encode(text);
+      
+      // 生成密钥和IV
+      const keyData: Uint8Array = encoder.encode(this.KEY);
+      const ivData: Uint8Array = encoder.encode(this.IV);
+      
+      // 创建加密上下文
+      const crypto = cryptoFramework;
+      const cipher = crypto.createCipher('AES-CBC-128');
+      cipher.init(crypto.KeyUsages.ENCRYPT, keyData, ivData);
+      
+      // 加密数据
+      const encrypted = cipher.update(data);
+      const final = cipher.final();
+      const encryptedData = new Uint8Array(encrypted.length + final.length);
+      encryptedData.set(encrypted, 0);
+      encryptedData.set(final, encrypted.length);
+      
+      // 转换为Base64
+      const bufferData: buffer.Buffer = buffer.from(encryptedData);
+      return bufferData.toString('base64');
+    } catch (error) {
+      handleError(error, 'STORAGE_ENCRYPTION_FAILED');
+      // 降级到Base64编码
       const encoder: TextEncoder = new TextEncoder();
       const data: Uint8Array = encoder.encode(text);
       const bufferData: buffer.Buffer = buffer.from(data);
       return bufferData.toString('base64');
-    } catch (error) {
-      console.error('StorageUtil: Encryption failed', error);
-      return text;
     }
   }
 
   // 解密字符串 | Decrypt string
   public static decrypt(encryptedText: string): string {
     try {
-      // 简单的Base64解码作为示例，实际应用中应使用AES等加密算法
-      // Simple Base64 decoding as example, should use AES or other encryption algorithm in production
-      const data: buffer.Buffer = buffer.from(encryptedText, 'base64');
+      // 使用AES-CBC模式解密
+      // Use AES-CBC mode for decryption
+      const encryptedData: buffer.Buffer = buffer.from(encryptedText, 'base64');
+      
+      // 生成密钥和IV
+      const encoder: TextEncoder = new TextEncoder();
+      const keyData: Uint8Array = encoder.encode(this.KEY);
+      const ivData: Uint8Array = encoder.encode(this.IV);
+      
+      // 创建解密上下文
+      const crypto = cryptoFramework;
+      const decipher = crypto.createDecipher('AES-CBC-128');
+      decipher.init(crypto.KeyUsages.DECRYPT, keyData, ivData);
+      
+      // 解密数据
+      const decrypted = decipher.update(new Uint8Array(encryptedData));
+      const final = decipher.final();
+      const decryptedData = new Uint8Array(decrypted.length + final.length);
+      decryptedData.set(decrypted, 0);
+      decryptedData.set(final, decrypted.length);
+      
+      // 转换为字符串
       const decoder: TextDecoder = new TextDecoder();
-      return decoder.decode(data);
+      return decoder.decode(decryptedData);
     } catch (error) {
-      console.error('StorageUtil: Decryption failed', error);
-      return encryptedText;
+      handleError(error, 'STORAGE_DECRYPTION_FAILED');
+      // 降级到Base64解码
+      try {
+        const data: buffer.Buffer = buffer.from(encryptedText, 'base64');
+        const decoder: TextDecoder = new TextDecoder();
+        return decoder.decode(data);
+      } catch (decodeError) {
+        handleError(decodeError, 'STORAGE_BASE64_DECODING_FAILED');
+        return encryptedText;
+      }
     }
   }
 }
@@ -161,7 +212,7 @@ export class StorageUtil {
   public static async initialize(context: common.Context): Promise<boolean> {
     try {
       if (!context) {
-        console.error(StorageUtil.TAG + ': Failed to get context for preferences');
+        handleError(new Error('Failed to get context for preferences'), 'STORAGE_CONTEXT_ERROR');
         return false;
       }
 
@@ -170,7 +221,7 @@ export class StorageUtil {
       return true;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to initialize StorageUtil', err.message);
+      handleError(err, 'STORAGE_INITIALIZATION_FAILED');
       return false;
     }
   }
@@ -211,7 +262,7 @@ export class StorageUtil {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to put string for key: ' + key, err.message);
+      handleError(err, 'STORAGE_PUT_STRING_FAILED');
     }
   }
 
@@ -500,7 +551,7 @@ export class StorageUtil {
    * @returns Array of keys | 键数组
    */
   private static getObjectKeys(obj: Record<string, string | number | boolean>): string[] {
-    // 使用Object.keys替代for...in循环
+    // 使用ObjectUtils.getKeys替代for...in循环
     return ObjectUtils.getKeys(obj);
   }
 

@@ -367,6 +367,158 @@ export class ValidatorUtil {
     }
     return /^[a-zA-Z0-9]+$/.test(str);
   }
+
+  /**
+   * 验证字符串是否包含SQL注入攻击字符 Validates if string contains SQL injection attack characters
+   * @param str 字符串 String
+   * @returns 是否包含SQL注入攻击字符 Whether it contains SQL injection attack characters
+   */
+  public static containsSqlInjection(str: string): boolean {
+    if (!str) {
+      return false;
+    }
+    const sqlInjectionPatterns = [
+      /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC)\b/i,
+      /\b(OR|AND)\s+1=1\b/i,
+      /'OR'1'='1/,
+      /"OR"1"="1/,
+      /\bUNION\b.*\bSELECT\b/i,
+      /\bDROP\b.*\bTABLE\b/i,
+      /\bDROP\b.*\bDATABASE\b/i,
+      /\bEXEC\b.*\bxp_\w+\b/i
+    ];
+    return sqlInjectionPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * 验证字符串是否包含XSS攻击字符 Validates if string contains XSS attack characters
+   * @param str 字符串 String
+   * @returns 是否包含XSS攻击字符 Whether it contains XSS attack characters
+   */
+  public static containsXssAttack(str: string): boolean {
+    if (!str) {
+      return false;
+    }
+    const xssPatterns = [
+      /<script[^>]*>.*?<\/script>/gi,
+      /<iframe[^>]*>.*?<\/iframe>/gi,
+      /javascript:/gi,
+      /on\w+\s*=/gi,
+      /<img[^>]*src\s*=\s*["']?javascript:/gi,
+      /<link[^>]*href\s*=\s*["']?javascript:/gi,
+      /<object[^>]*data\s*=\s*["']?javascript:/gi
+    ];
+    return xssPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * 验证字符串是否包含路径遍历攻击字符 Validates if string contains path traversal attack characters
+   * @param str 字符串 String
+   * @returns 是否包含路径遍历攻击字符 Whether it contains path traversal attack characters
+   */
+  public static containsPathTraversal(str: string): boolean {
+    if (!str) {
+      return false;
+    }
+    const pathTraversalPatterns = [
+      /\.\./,
+      /\.\\/,
+      /\/\.\./,
+      /\\\.\.\\/,
+      /^\.\./,
+      /^\.\\/,
+      /\/\.\.$/,
+      /\\\.\.$/
+    ];
+    return pathTraversalPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * 验证字符串是否包含命令注入攻击字符 Validates if string contains command injection attack characters
+   * @param str 字符串 String
+   * @returns 是否包含命令注入攻击字符 Whether it contains command injection attack characters
+   */
+  public static containsCommandInjection(str: string): boolean {
+    if (!str) {
+      return false;
+    }
+    const commandInjectionPatterns = [
+      /\|/,
+      /&/,
+      /;/,
+      /\$\(/,
+      /`/,
+      /\/bin\/sh/,
+      /\/bin\/bash/,
+      /cmd\.exe/,
+      /powershell/,
+      /exec\(/,
+      /system\(/,
+      /eval\(/
+    ];
+    return commandInjectionPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * 清理字符串中的危险字符 Sanitizes dangerous characters in string
+   * @param str 字符串 String
+   * @returns 清理后的字符串 Sanitized string
+   */
+  public static sanitizeString(str: string): string {
+    if (!str) {
+      return str;
+    }
+    // 清理SQL注入字符
+    let sanitized = str
+      .replace(/\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC)\b/gi, '')
+      .replace(/\b(OR|AND)\s+1=1\b/gi, '')
+      .replace(/'OR'1'='1/g, '')
+      .replace(/"OR"1"="1/g, '');
+    
+    // 清理XSS字符
+    sanitized = sanitized
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '');
+    
+    // 清理路径遍历字符
+    sanitized = sanitized
+      .replace(/\.\./g, '')
+      .replace(/\.\\/g, '');
+    
+    // 清理命令注入字符
+    sanitized = sanitized
+      .replace(/\|/g, '')
+      .replace(/&/g, '')
+      .replace(/;/g, '')
+      .replace(/\$\(/g, '')
+      .replace(/`/g, '')
+      .replace(/\/bin\/sh/g, '')
+      .replace(/\/bin\/bash/g, '')
+      .replace(/cmd\.exe/g, '')
+      .replace(/powershell/g, '');
+    
+    return sanitized;
+  }
+
+  /**
+   * 验证输入是否安全 Validates if input is safe
+   * @param input 输入值 Input value
+   * @returns 是否安全 Is safe
+   */
+  public static isSafeInput(input: string): boolean {
+    if (!input) {
+      return true;
+    }
+    return !(
+      this.containsSqlInjection(input) ||
+      this.containsXssAttack(input) ||
+      this.containsPathTraversal(input) ||
+      this.containsCommandInjection(input)
+    );
+  }
 }
+
 
 export default ValidatorUtil;

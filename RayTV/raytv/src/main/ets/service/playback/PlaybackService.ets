@@ -30,6 +30,7 @@
 import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import HistoryManager from './HistoryManager';
+import PlaybackErrorHandler from './PlaybackErrorHandler';
 import AVPlay from '@ohos.multimedia.media';
 import AudioManager from '@ohos.multimedia.audio';
 import AudioRendererInfo from '@ohos.multimedia.audio';
@@ -180,6 +181,14 @@ export interface SubtitleItem {
   encoding?: string;        // 编码格式 | Encoding
 }
 
+// 视频质量枚举 | Video quality enum
+export enum VideoQuality {
+  LOW = 'low',       // 低质量
+  MEDIUM = 'medium', // 中质量
+  HIGH = 'high',     // 高质量
+  AUTO = 'auto'      // 自动
+}
+
 // 播放配置接口 | Playback config interface
 export interface PlaybackConfig {
   autoPlay: boolean;        // 自动播放 | Auto play
@@ -197,6 +206,25 @@ export interface PlaybackConfig {
   subtitleStyle: SubtitleStyle; // 字幕样式 | Subtitle style
   volume: number;           // 音量 | Volume
   mute: boolean;            // 是否静音 | Mute
+  enableAutoSkipIntro: boolean; // 启用自动跳过片头 | Enable auto skip intro
+  enableAutoSkipOutro: boolean; // 启用自动跳过片尾 | Enable auto skip outro
+  introDuration: number;    // 片头时长（秒）| Intro duration (seconds)
+  outroDuration: number;    // 片尾时长（秒）| Outro duration (seconds)
+  enableAdaptiveQuality: boolean; // 启用自适应画质 | Enable adaptive quality
+  defaultVideoQuality: VideoQuality; // 默认视频质量 | Default video quality
+  qualitySwitchThresholds: {
+    excellent: VideoQuality; // 优秀网络质量对应的视频质量
+    good: VideoQuality;      // 良好网络质量对应的视频质量
+    fair: VideoQuality;      // 一般网络质量对应的视频质量
+    poor: VideoQuality;      // 较差网络质量对应的视频质量
+  };
+  enablePictureInPicture: boolean; // 启用画中画模式 | Enable picture-in-picture mode
+  pipPosition: {
+    x: number; // 画中画位置X坐标 | PIP position X coordinate
+    y: number; // 画中画位置Y坐标 | PIP position Y coordinate
+    width: number; // 画中画宽度 | PIP width
+    height: number; // 画中画高度 | PIP height
+  };
 }
 
 // 默认播放配置 | Default playback config
@@ -215,7 +243,26 @@ export const DEFAULT_PLAYBACK_CONFIG: PlaybackConfig = {
   maxRetryCount: MAX_RETRY_COUNT,
   subtitleStyle: DEFAULT_SUBTITLE_STYLE,
   volume: 1.0,
-  mute: false
+  mute: false,
+  enableAutoSkipIntro: false,
+  enableAutoSkipOutro: false,
+  introDuration: 0, // 片头时长（秒）| Intro duration (seconds)
+  outroDuration: 0, // 片尾时长（秒）| Outro duration (seconds)
+  enableAdaptiveQuality: true,
+  defaultVideoQuality: VideoQuality.AUTO,
+  qualitySwitchThresholds: {
+    excellent: VideoQuality.HIGH,
+    good: VideoQuality.HIGH,
+    fair: VideoQuality.MEDIUM,
+    poor: VideoQuality.LOW
+  },
+  enablePictureInPicture: true,
+  pipPosition: {
+    x: 20, // 默认位置：左上角20px
+    y: 20,
+    width: 320, // 默认宽度320px
+    height: 180 // 默认高度180px
+  }
 };
 
 // 播放错误接口 | Playback error interface
@@ -276,6 +323,12 @@ export default class PlaybackService {
   private networkCheckTimerId: number | null = null;
   private currentNetworkQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
   private adaptiveBufferSize: number = PLAYBACK_BUFFER_SIZE;
+  private errorHandler: PlaybackErrorHandler = new PlaybackErrorHandler();
+  private hasSkippedIntro: boolean = false; // 是否已跳过片头
+  private hasSkippedOutro: boolean = false; // 是否已跳片尾
+  private currentVideoQuality: VideoQuality = VideoQuality.HIGH; // 当前视频质量
+  private isPictureInPicture: boolean = false; // 是否处于画中画模式
+  private currentPipPosition: { x: number; y: number; width: number; height: number } = { ...DEFAULT_PLAYBACK_CONFIG.pipPosition };
   
   // 监听器列表 Listener list
   private stateListeners: PlaybackStateListener[] = [];
@@ -283,6 +336,10 @@ export default class PlaybackService {
   private progressListeners: PlaybackProgressListener[] = [];
   private bufferingListeners: BufferingStateListener[] = [];
   private queueListeners: PlaybackQueueListener[] = [];
+  
+  // 画中画状态监听器类型 | Picture-in-picture state listener type
+  type PipStateListener = (isPip: boolean, position?: { x: number; y: number; width: number; height: number }) => void;
+  private pipStateListeners: PipStateListener[] = [];
 
   /**
    * 获取单例实例
@@ -489,12 +546,26 @@ export default class PlaybackService {
       // 检查配置是否支持硬件解码 Check if config supports hardware decoding
       if (this.config.enableHardwareDecoding) {
         try {
-          // 先尝试硬件解码 Try hardware decoding first
-          await this.avPlayInstance.setParameter('videoDecodingMode', 'hardware');
-          Logger.info(TAG, 'Hardware decoding enabled');
+          // 获取设备能力 Get device capabilities
+          const capabilities = await this.deviceInfoRepository.getDeviceCapabilities();
+          
+          // 根据设备能力选择最佳解码模式 Select optimal decoding mode based on device capabilities
+          if (capabilities && capabilities.gpu && capabilities.gpu.supportsHardwareDecoding) {
+            // 尝试硬件解码 Try hardware decoding
+            await this.avPlayInstance.setParameter('videoDecodingMode', 'hardware');
+            Logger.info(TAG, 'Hardware decoding enabled based on device capability');
+            
+            // 启用硬件加速相关参数 Enable hardware acceleration related parameters
+            await this.enableHardwareAccelerationFeatures();
+          } else {
+            // 设备不支持硬件解码，使用软件解码 Device doesn't support hardware decoding, use software decoding
+            Logger.warn(TAG, 'Device does not support hardware decoding, using software decoding');
+            await this.avPlayInstance.setParameter('videoDecodingMode', 'software');
+            this.config.enableHardwareDecoding = false;
+          }
         } catch (error) {
           // 硬件解码失败，回退到软件解码 Hardware decoding failed, fallback to software decoding
-          Logger.warn(TAG, 'Hardware decoding not supported, falling back to software decoding');
+          Logger.warn(TAG, 'Hardware decoding not supported, falling back to software decoding', error);
           await this.avPlayInstance.setParameter('videoDecodingMode', 'software');
           // 更新配置，避免下次再尝试失败的解码模式 Update config to avoid trying failed decoding mode next time
           this.config.enableHardwareDecoding = false;
@@ -512,6 +583,33 @@ export default class PlaybackService {
       } catch (fallbackError) {
         Logger.error(TAG, `Failed to fallback to software decoding: ${fallbackError}`);
       }
+    }
+  }
+
+  /**
+   * 启用硬件加速特性 | Enables hardware acceleration features
+   */
+  private async enableHardwareAccelerationFeatures(): Promise<void> {
+    if (!this.avPlayInstance) return;
+    
+    try {
+      // 启用硬件解码相关参数 Enable hardware decoding related parameters
+      await this.avPlayInstance.setParameter('hardwareDecodingEnabled', 'true');
+      await this.avPlayInstance.setParameter('hardwareDecodingMode', 'auto');
+      
+      // 启用GPU渲染 Enable GPU rendering
+      await this.avPlayInstance.setParameter('useGpuRendering', 'true');
+      
+      // 启用硬件缩放 Enable hardware scaling
+      await this.avPlayInstance.setParameter('useHardwareScaling', 'true');
+      
+      // 启用硬件色彩处理 Enable hardware color processing
+      await this.avPlayInstance.setParameter('useHardwareColorProcessing', 'true');
+      
+      Logger.info(TAG, 'Hardware acceleration features enabled');
+    } catch (error) {
+      Logger.warn(TAG, 'Failed to enable hardware acceleration features', error);
+      // 硬件加速特性启用失败，继续使用基本硬件解码
     }
   }
 
@@ -589,205 +687,56 @@ export default class PlaybackService {
    * 处理播放错误 Handles playback error
    */
   private async handlePlaybackError(error: BusinessError): Promise<void> {
-    Logger.error(TAG, `Playback error occurred: ${JSON.stringify(error)}`);
+    // 更新错误处理器的依赖项
+    this.errorHandler.setDependencies(
+      this.avPlayInstance,
+      this.currentPlaybackItem,
+      this.lastPosition,
+      this.config.autoPlay,
+      this.config.enableHardwareDecoding,
+      this.errorListeners,
+      (state) => this.updatePlaybackState(state),
+      () => this.createAVPlayInstance(),
+      () => this.savePlaybackPosition()
+    );
     
-    // 识别错误类型 Identify error type
-    const errorType = this.determineErrorType(error);
+    // 使用错误处理器处理错误
+    await this.errorHandler.handlePlaybackError(error);
     
-    const playbackError: PlaybackError = {
-      code: error.code || -1, 
-      message: error.message || 'Unknown error',
-      type: errorType,
-      details: error
-    };
-    
-    // 通知错误监听器 Notify error listeners
-    this.notifyErrorListeners(playbackError);
-    
-    // 更新播放状态 Update playback state
-    this.updatePlaybackState(PlaybackState.ERROR);
-    
-    // 尝试自动恢复 Attempt auto recovery
-    if (await this.attemptErrorRecovery(errorType)) {
-      Logger.info(TAG, 'Successfully recovered from playback error');
-    } else {
-      Logger.warn(TAG, 'Failed to recover from playback error, giving up');
-      // 保存播放位置以便后续恢复 Save playback position for later recovery
-      await this.savePlaybackPosition();
-    }
+    // 同步重试计数
+    this.retryCount = this.errorHandler.getRetryCount();
   }
-  
+
   /**
-   * 确定错误类型 Determines error type
+   * 重新创建播放实例并设置数据源 Recreates playback instance and sets data source
    */
-  private determineErrorType(error: BusinessError): PlaybackErrorType {
-    const errorCode = error.code || 0;
-    const errorMessage = (error.message || '').toLowerCase();
+  private async recreatePlaybackInstance(url: string): Promise<boolean> {
+    // 重新创建播放实例 Recreate playback instance
+    await this.createAVPlayInstance();
+    if (!this.avPlayInstance) return false;
     
-    // 基于错误码和错误信息确定错误类型 Determine error type based on error code and message
-    if (errorMessage.includes('network') || errorMessage.includes('connect') || errorMessage.includes('timeout')) {
-      return PlaybackErrorType.NETWORK;
-    } else if (errorMessage.includes('decode') || errorMessage.includes('codec') || errorMessage.includes('format')) {
-      return PlaybackErrorType.DECODE;
-    } else if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
-      return PlaybackErrorType.PERMISSION;
-    } else if (errorMessage.includes('resource') || errorMessage.includes('not found')) {
-      return PlaybackErrorType.RESOURCE;
-    } else if (errorMessage.includes('timeout')) {
-      return PlaybackErrorType.TIMEOUT;
-    } else if (errorMessage.includes('drm')) {
-      return PlaybackErrorType.DRM;
-    } else {
-      return PlaybackErrorType.UNKNOWN;
-    }
+    // 重新设置数据源 Reset data source
+    await this.avPlayInstance.setSource(url);
+    await this.avPlayInstance.prepare();
+    
+    return true;
   }
-  
+
   /**
-   * 尝试错误恢复 Attempts error recovery
+   * 恢复播放状态和位置 Resumes playback state and position
    */
-  private async attemptErrorRecovery(errorType: PlaybackErrorType): Promise<boolean> {
-    // 检查重试次数是否超过 Check if retry count exceeded
-    if (this.retryCount >= MAX_RETRY_COUNT) {
-      Logger.warn(TAG, `Max retry count (${MAX_RETRY_COUNT}) reached`);
-      return false;
+  private async resumePlaybackState(): Promise<void> {
+    if (!this.avPlayInstance) return;
+    
+    // 恢复到上次播放位置 Resume to last playback position
+    if (this.lastPosition > 0) {
+      await this.avPlayInstance.seekTo(this.lastPosition);
     }
     
-    // 增加重试次数 Increase retry count
-    this.retryCount++;
-    Logger.info(TAG, `Attempting to recover from error, retry ${this.retryCount}/${MAX_RETRY_COUNT}`);
-    
-    try {
-      // 等待一段时间再重试 Wait for some time before retry
-      await new Promise(resolve => setTimeout(resolve, MIN_RETRY_INTERVAL * this.retryCount));
-      
-      switch (errorType) {
-        case PlaybackErrorType.NETWORK:
-          // 网络错误：重新加载资源 Network error: reload resource
-          return await this.recoverFromNetworkError();
-          
-        case PlaybackErrorType.DECODE:
-          // 解码错误：切换解码模式后重新加载 Decode error: switch decoding mode and reload
-          return await this.recoverFromDecodeError();
-          
-        case PlaybackErrorType.TIMEOUT:
-          // 超时错误：重新连接 Timeout error: reconnect
-          return await this.recoverFromTimeoutError();
-          
-        default:
-          // 其他错误：尝试重新加载 Other errors: try to reload
-          return await this.recoverFromGenericError();
-      }
-    } catch (error) {
-      Logger.error(TAG, `Recovery attempt failed: ${error}`);
-      return false;
-    }
-  }
-  
-  /**
-   * 从网络错误恢复 Recovers from network error
-   */
-  private async recoverFromNetworkError(): Promise<boolean> {
-    if (!this.currentPlaybackItem) return false;
-    
-    try {
-      Logger.info(TAG, 'Recovering from network error');
-      // 重新创建播放实例 Recreate playback instance
-      await this.createAVPlayInstance();
-      if (!this.avPlayInstance) return false;
-      
-      // 重新设置数据源 Reset data source
-      await this.avPlayInstance.setSource(this.currentPlaybackItem.url);
-      await this.avPlayInstance.prepare();
-      
-      // 恢复到上次播放位置 Resume to last playback position
-      if (this.lastPosition > 0) {
-        await this.avPlayInstance.seekTo(this.lastPosition);
-      }
-      
-      // 恢复播放 Resume playback
-      if (this.config.autoPlay) {
-        await this.avPlayInstance.play();
-        this.updatePlaybackState(PlaybackState.PLAYING);
-      }
-      
-      return true;
-    } catch (error) {
-      Logger.error(TAG, `Failed to recover from network error: ${error}`);
-      return false;
-    }
-  }
-  
-  /**
-   * 从解码错误恢复 Recovers from decode error
-   */
-  private async recoverFromDecodeError(): Promise<boolean> {
-    if (!this.currentPlaybackItem) return false;
-    
-    try {
-      Logger.info(TAG, 'Recovering from decode error');
-      
-      // 如果当前使用硬件解码，尝试切换到软件解码 If current using hardware decoding, try switching to software decoding
-      if (this.config.enableHardwareDecoding) {
-        Logger.info(TAG, 'Switching from hardware to software decoding');
-        this.config.enableHardwareDecoding = false;
-        
-        // 重新创建播放实例 Recreate playback instance
-        await this.createAVPlayInstance();
-        if (!this.avPlayInstance) return false;
-        
-        // 重新设置数据源 Reset data source
-        await this.avPlayInstance.setSource(this.currentPlaybackItem.url);
-        await this.avPlayInstance.prepare();
-        
-        // 恢复到上次播放位置 Resume to last playback position
-        if (this.lastPosition > 0) {
-          await this.avPlayInstance.seekTo(this.lastPosition);
-        }
-        
-        // 恢复播放 Resume playback
-        if (this.config.autoPlay) {
-          await this.avPlayInstance.play();
-          this.updatePlaybackState(PlaybackState.PLAYING);
-        }
-        
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      Logger.error(TAG, `Failed to recover from decode error: ${error}`);
-      return false;
-    }
-  }
-  
-  /**
-   * 从超时错误恢复 Recovers from timeout error
-   */
-  private async recoverFromTimeoutError(): Promise<boolean> {
-    // 超时错误处理，类似于网络错误 Timeout error handling, similar to network error
-    return await this.recoverFromNetworkError();
-  }
-  
-  /**
-   * 从一般错误恢复 Recovers from generic error
-   */
-  private async recoverFromGenericError(): Promise<boolean> {
-    if (!this.currentPlaybackItem) return false;
-    
-    try {
-      Logger.info(TAG, 'Attempting generic error recovery');
-      // 释放并重新创建播放实例 Release and recreate playback instance
-      await this.releaseAVPlayInstance();
-      await this.createAVPlayInstance();
-      
-      if (!this.avPlayInstance) return false;
-      
-      // 重新加载当前播放项 Reload current playback item
-      await this.load(this.currentPlaybackItem, this.lastPosition);
-      return true;
-    } catch (error) {
-      Logger.error(TAG, `Generic error recovery failed: ${error}`);
-      return false;
+    // 恢复播放 Resume playback
+    if (this.config.autoPlay) {
+      await this.avPlayInstance.play();
+      this.updatePlaybackState(PlaybackState.PLAYING);
     }
   }
   
@@ -862,7 +811,7 @@ export default class PlaybackService {
     Logger.info(TAG, `Buffering changed: status=${bufferingStatus}, start=${startBufferBytes}, buffering=${bufferingBytes}, total=${totalBytes}`);
     
     // 计算缓冲百分比 Calculate buffering percentage
-    const percent = totalBytes > 0 ? Math.round((bufferingBytes / totalBytes) * 100) : 0;
+    const percent: number = totalBytes > 0 ? Math.round((bufferingBytes / totalBytes) * 100) : 0;
     
     // 构建缓冲信息 Build buffering info
     const bufferingInfo: BufferingInfo = {
@@ -874,7 +823,7 @@ export default class PlaybackService {
     };
     
     // 通知缓冲监听器 Notify buffering listeners
-    this.bufferingListeners.forEach(listener => listener(bufferingInfo));
+    this.bufferingListeners.forEach((listener: BufferingStateListener) => listener(bufferingInfo));
     
     // 更新播放状态 Update playback state
     if (bufferingStatus === 1) {
@@ -895,14 +844,14 @@ export default class PlaybackService {
     this.updatePlaybackState(PlaybackState.COMPLETED);
     
     // 保存播放历史 Save playback history
-    this.savePlaybackPosition().catch(error => {
+    this.savePlaybackPosition().catch((error: unknown) => {
       Logger.error(TAG, `Failed to save playback history on complete: ${error}`);
     });
     
     // 检查是否有下一个播放项 Check if there's a next item in queue
     if (this.currentQueueIndex < this.playbackQueue.length - 1) {
       // 自动播放下一个 Auto play next
-      this.playNext().catch(error => {
+      this.playNext().catch((error: unknown) => {
         Logger.error(TAG, `Failed to play next item: ${error}`);
       });
     }
@@ -914,11 +863,11 @@ export default class PlaybackService {
   private updatePlaybackState(state: PlaybackState): void {
     // 实现播放状态更新逻辑 Implement playback state update logic
     if (this.currentState !== state) {
-      const oldState = this.currentState;
+      const oldState: PlaybackState = this.currentState;
       this.currentState = state;
       
       // 通知状态监听器 Notify state listeners
-      this.stateListeners.forEach(listener => listener(state));
+      this.stateListeners.forEach((listener: PlaybackStateListener) => listener(state));
       
       Logger.info(TAG, `Playback state changed from ${oldState} to ${state}`);
     }
@@ -929,7 +878,7 @@ export default class PlaybackService {
    */
   private notifyErrorListeners(error: PlaybackError): void {
     // 实现错误通知逻辑 Implement error notification logic
-    this.errorListeners.forEach(listener => listener(error));
+    this.errorListeners.forEach((listener: PlaybackErrorListener) => listener(error));
   }
 
   /**
@@ -945,14 +894,14 @@ export default class PlaybackService {
           this.avPlayInstance.off('error');
           this.avPlayInstance.off('bufferingChange');
           this.avPlayInstance.off('playbackComplete');
-        } catch (error) {
+        } catch (error: unknown) {
           Logger.warn(TAG, `Failed to remove event listeners: ${error}`);
         }
         
         await this.avPlayInstance.release();
         this.avPlayInstance = null;
         Logger.info(TAG, 'AVPlay instance released successfully');
-      } catch (error) {
+      } catch (error: unknown) {
         Logger.error(TAG, `Failed to release AVPlay instance: ${error}`);
         this.avPlayInstance = null;
       }
@@ -972,24 +921,43 @@ export default class PlaybackService {
     this.positionUpdateTimerId = setInterval(async () => {
       if (this.avPlayInstance && this.currentState === PlaybackState.PLAYING) {
         try {
-          const currentTime = await this.avPlayInstance.getCurrentTime();
-          const duration = await this.avPlayInstance.getDuration();
-          const percent = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+          const currentTime: number = await this.avPlayInstance.getCurrentTime();
+          const duration: number = await this.avPlayInstance.getDuration();
+          const percent: number = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+          
+          // 自动跳过片头 | Auto skip intro
+          if (this.config.introDuration > 0 && !this.hasSkippedIntro) {
+            if (currentTime >= this.config.introDuration * 1000) {
+              await this.avPlayInstance.seekTo(this.config.introDuration * 1000);
+              this.hasSkippedIntro = true;
+              Logger.info(TAG, `Auto skipped intro at ${this.config.introDuration} seconds`);
+            }
+          }
+          
+          // 自动跳过片尾 | Auto skip outro
+          if (this.config.outroDuration > 0 && !this.hasSkippedOutro && duration > 0) {
+            const outroStart = (duration / 1000) - this.config.outroDuration;
+            if (currentTime >= outroStart * 1000) {
+              await this.avPlayInstance.seekTo(duration);
+              this.hasSkippedOutro = true;
+              Logger.info(TAG, `Auto skipped outro at ${outroStart} seconds`);
+            }
+          }
           
           // 更新最后位置 Update last position
           this.lastPosition = currentTime;
           this.lastPositionUpdateTime = Date.now();
           
           // 通知进度监听器 Notify progress listeners
-          this.progressListeners.forEach(listener => listener(currentTime, duration, percent));
+          this.progressListeners.forEach((listener: PlaybackProgressListener) => listener(currentTime, duration, percent));
           
           // 每30秒保存一次播放位置 Save position every 30 seconds
           if (Date.now() - this.lastPositionUpdateTime > 30000) {
-            this.savePlaybackPosition().catch(error => {
+            this.savePlaybackPosition().catch((error: unknown) => {
               Logger.error(TAG, `Failed to save playback position: ${error}`);
             });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           Logger.error(TAG, `Failed to get playback position: ${error}`);
         }
       }
@@ -1007,7 +975,7 @@ export default class PlaybackService {
     }
     
     // 保存当前位置 Save current position
-    this.savePlaybackPosition().catch(error => {
+    this.savePlaybackPosition().catch((error: unknown) => {
       Logger.error(TAG, `Failed to save playback position on stop: ${error}`);
     });
   }
@@ -1019,6 +987,10 @@ export default class PlaybackService {
     // 实现加载播放项逻辑 Implement load playback item logic
     try {
       Logger.info(TAG, `Loading playback item: ${item.title}, position: ${position}`);
+      
+      // 重置跳过标志 Reset skip flags
+      this.hasSkippedIntro = false;
+      this.hasSkippedOutro = false;
       
       // 更新当前播放项 Update current playback item
       this.currentPlaybackItem = item;
@@ -1047,7 +1019,7 @@ export default class PlaybackService {
         await this.avPlayInstance.play();
         this.updatePlaybackState(PlaybackState.PLAYING);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error(TAG, `Failed to load playback item: ${error}`);
       this.updatePlaybackState(PlaybackState.ERROR);
       throw error;
@@ -1086,7 +1058,7 @@ export default class PlaybackService {
       }
       
       Logger.info(TAG, `Audio route set to: ${route}`);
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error(TAG, `Failed to set audio route: ${error}`);
     }
   }
@@ -1097,12 +1069,12 @@ export default class PlaybackService {
   private async playNext(): Promise<void> {
     if (this.currentQueueIndex < this.playbackQueue.length - 1) {
       this.currentQueueIndex++;
-      const nextItem = this.playbackQueue[this.currentQueueIndex];
+      const nextItem: PlaybackItem = this.playbackQueue[this.currentQueueIndex];
       await this.load(nextItem, 0);
       
       // 通知队列监听器 Notify queue listeners
       for (let i = 0; i < this.queueListeners.length; i++) {
-        const listener = this.queueListeners[i];
+        const listener: PlaybackQueueListener = this.queueListeners[i];
         listener(this.playbackQueue, this.currentQueueIndex);
       }
     }
@@ -1131,26 +1103,139 @@ export default class PlaybackService {
    */
   private async checkNetworkQuality(): Promise<void> {
     try {
-      // 这里可以实现实际的网络质量检测逻辑
-      // 例如，通过ping服务器、下载测试文件等方式
-      // For now, we'll simulate network quality changes
+      // 实际的网络质量检测实现 | Actual network quality detection implementation
+      // 可以通过以下方式实现 | Can be implemented through the following methods:
+      // 1. 测量网络延迟 | 1. Measure network latency
+      // 2. 测试下载速度 | 2. Test download speed
+      // 3. 监控丢包率 | 3. Monitor packet loss rate
+      // 4. 检测带宽 | 4. Detect bandwidth
       
-      // 模拟网络质量检测 | Simulate network quality detection
-      const qualityLevels: Array<'excellent' | 'good' | 'fair' | 'poor'> = ['excellent', 'good', 'fair', 'poor'];
-      const randomIndex = Math.floor(Math.random() * 4);
-      this.currentNetworkQuality = qualityLevels[randomIndex];
+      // 测量网络延迟 | Measure network latency
+      const latency: number = await this.measureNetworkLatency();
       
-      Logger.info(TAG, `Network quality: ${this.currentNetworkQuality}`);
-    } catch (error) {
+      // 根据延迟判断网络质量 | Determine network quality based on latency
+      if (latency < 50) {
+        this.currentNetworkQuality = 'excellent';
+      } else if (latency < 100) {
+        this.currentNetworkQuality = 'good';
+      } else if (latency < 200) {
+        this.currentNetworkQuality = 'fair';
+      } else {
+        this.currentNetworkQuality = 'poor';
+      }
+      
+      Logger.info(TAG, `Network quality: ${this.currentNetworkQuality}, Latency: ${latency}ms`);
+      
+    } catch (error: unknown) {
       Logger.error(TAG, `Failed to check network quality: ${error}`);
-      this.currentNetworkQuality = 'poor';
+      // 网络检测失败时使用保守设置 | Use conservative settings when network detection fails
+      this.currentNetworkQuality = 'fair';
     }
   }
   
   /**
-   * 根据网络质量调整缓冲大小 | Adjusts buffer size based on network quality
+   * 测量网络延迟 | Measure network latency
    */
-  private adjustBufferSizeBasedOnNetwork(): void {
+  private async measureNetworkLatency(): Promise<number> {
+    try {
+      // 导入HttpService
+      const HttpService = await import('../HttpService');
+      const httpService = HttpService.default.getInstance();
+      
+      // 选择几个可靠的服务器进行测试
+      const testEndpoints: string[] = [
+        'https://www.google.com/generate_204', // Google的204响应
+        'https://www.cloudflare.com/cdn-cgi/trace', // Cloudflare的trace端点
+        'https://www.baidu.com/favicon.ico' // 百度的favicon
+      ];
+      
+      // 随机选择一个端点进行测试
+      const endpoint: string = testEndpoints[Math.floor(Math.random() * testEndpoints.length)];
+      
+      // 测量开始时间
+      const startTime: number = Date.now();
+      
+      // 发送HEAD请求（比GET更轻量）
+      await httpService.get(endpoint, {
+        timeout: 5000, // 5秒超时
+        headers: {
+          'User-Agent': 'RayTV/1.0'
+        }
+      });
+      
+      // 计算往返时间
+      const endTime: number = Date.now();
+      const latency: number = endTime - startTime;
+      
+      Logger.info(TAG, `Network latency to ${endpoint}: ${latency}ms`);
+      return Math.round(latency);
+    } catch (error: unknown) {
+      Logger.warn(TAG, `Failed to measure network latency: ${error instanceof Error ? error.message : String(error)}`);
+      return 100; // 返回默认延迟值 | Return default latency value
+    }
+  }
+  
+
+  
+  /**
+   * 根据网络质量获取视频质量 | Gets video quality based on network quality
+   */
+  private getVideoQualityForNetwork(networkQuality: 'excellent' | 'good' | 'fair' | 'poor'): VideoQuality {
+    if (!this.config.enableAdaptiveQuality) {
+      return this.config.defaultVideoQuality;
+    }
+    
+    switch (networkQuality) {
+      case 'excellent':
+        return this.config.qualitySwitchThresholds.excellent;
+      case 'good':
+        return this.config.qualitySwitchThresholds.good;
+      case 'fair':
+        return this.config.qualitySwitchThresholds.fair;
+      case 'poor':
+        return this.config.qualitySwitchThresholds.poor;
+      default:
+        return this.config.defaultVideoQuality;
+    }
+  }
+
+  /**
+   * 应用视频质量设置 | Applies video quality setting
+   */
+  private async applyVideoQuality(quality: VideoQuality): Promise<void> {
+    if (!this.avPlayInstance) return;
+    
+    try {
+      // 根据视频质量设置不同的参数
+      switch (quality) {
+        case VideoQuality.HIGH:
+          // 高质量：较高的码率和分辨率
+          await this.avPlayInstance.setParameter('videoBitrate', 'high');
+          await this.avPlayInstance.setParameter('videoResolution', 'high');
+          break;
+        case VideoQuality.MEDIUM:
+          // 中质量：中等的码率和分辨率
+          await this.avPlayInstance.setParameter('videoBitrate', 'medium');
+          await this.avPlayInstance.setParameter('videoResolution', 'medium');
+          break;
+        case VideoQuality.LOW:
+          // 低质量：较低的码率和分辨率
+          await this.avPlayInstance.setParameter('videoBitrate', 'low');
+          await this.avPlayInstance.setParameter('videoResolution', 'low');
+          break;
+      }
+      
+      this.currentVideoQuality = quality;
+      Logger.info(TAG, `Applied video quality: ${quality}`);
+    } catch (error: unknown) {
+      Logger.error(TAG, `Failed to apply video quality: ${error}`);
+    }
+  }
+
+  /**
+   * 根据网络质量调整缓冲大小和视频质量 | Adjusts buffer size and video quality based on network quality
+   */
+  private async adjustBufferSizeBasedOnNetwork(): Promise<void> {
     let newBufferSize: number;
     
     switch (this.currentNetworkQuality) {
@@ -1176,10 +1261,16 @@ export default class PlaybackService {
       
       // 如果AVPlay实例已创建，更新缓冲大小 | Update buffer size if AVPlay instance exists
       if (this.avPlayInstance) {
-        this.avPlayInstance.setParameter('cacheSize', newBufferSize.toString()).catch(error => {
+        this.avPlayInstance.setParameter('cacheSize', newBufferSize.toString()).catch((error: unknown) => {
           Logger.error(TAG, `Failed to update buffer size: ${error}`);
         });
       }
+    }
+    
+    // 调整视频质量 | Adjust video quality
+    const newQuality = this.getVideoQualityForNetwork(this.currentNetworkQuality);
+    if (newQuality !== this.currentVideoQuality) {
+      await this.applyVideoQuality(newQuality);
     }
   }
   
@@ -1193,7 +1284,7 @@ export default class PlaybackService {
       // 设置预缓冲时间 | Set pre-buffer duration
       await this.avPlayInstance.setParameter('preBufferDuration', PRE_BUFFER_DURATION.toString());
       Logger.info(TAG, `Pre-buffering enabled with duration: ${PRE_BUFFER_DURATION}s`);
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error(TAG, `Failed to enable pre-buffering: ${error}`);
     }
   }
@@ -1231,6 +1322,7 @@ export default class PlaybackService {
       this.progressListeners = [];
       this.bufferingListeners = [];
       this.queueListeners = [];
+      this.pipStateListeners = [];
       
       // 清理播放队列 Clear playback queue
       this.playbackQueue = [];
@@ -1242,21 +1334,342 @@ export default class PlaybackService {
       // 重置状态 Reset state
       this.currentState = PlaybackState.IDLE;
       this.retryCount = 0;
+      this.errorHandler.resetRetryCount();
       this.lastRetryTime = 0;
       this.lastPosition = 0;
       this.lastPositionUpdateTime = 0;
       this.currentNetworkQuality = 'good';
       this.adaptiveBufferSize = PLAYBACK_BUFFER_SIZE;
+      this.isPictureInPicture = false;
+      this.currentPipPosition = { ...DEFAULT_PLAYBACK_CONFIG.pipPosition };
       
       // 重置初始化状态 Reset initialized state
       this.isInitialized = false;
       
       Logger.info(TAG, 'Playback service resources cleaned up successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error(TAG, `Failed to cleanup playback service: ${error}`);
     }
   }
   
+  /**
+   * 进入画中画模式
+   * 
+   * 进入画中画模式，将视频缩小为小窗口播放，允许用户在浏览其他内容的同时继续观看视频。
+   * 
+   * @param position - 可选的画中画位置和大小
+   * @returns Promise<boolean> - 是否成功进入画中画模式
+   * 
+   * @example
+   * ```typescript
+   * const success = await playbackService.enterPictureInPicture();
+   * if (success) {
+   *   console.log('Entered picture-in-picture mode');
+   * }
+   * ```
+   */
+  public async enterPictureInPicture(position?: { x: number; y: number; width: number; height: number }): Promise<boolean> {
+    try {
+      if (!this.avPlayInstance || !this.config.enablePictureInPicture) {
+        Logger.warn(TAG, 'Picture-in-picture not enabled or AVPlay instance not available');
+        return false;
+      }
+      
+      // 设置画中画位置和大小
+      if (position) {
+        this.currentPipPosition = position;
+      } else {
+        this.currentPipPosition = { ...this.config.pipPosition };
+      }
+      
+      // 启用画中画模式
+      await this.avPlayInstance.setParameter('pictureInPictureEnabled', 'true');
+      await this.avPlayInstance.setParameter('pictureInPicturePosition', JSON.stringify(this.currentPipPosition));
+      
+      this.isPictureInPicture = true;
+      Logger.info(TAG, 'Entered picture-in-picture mode', this.currentPipPosition);
+      
+      // 通知监听器
+      this.notifyPipStateListeners(true, this.currentPipPosition);
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to enter picture-in-picture mode: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * 退出画中画模式
+   * 
+   * 退出画中画模式，将视频恢复为全屏播放。
+   * 
+   * @returns Promise<boolean> - 是否成功退出画中画模式
+   * 
+   * @example
+   * ```typescript
+   * const success = await playbackService.exitPictureInPicture();
+   * if (success) {
+   *   console.log('Exited picture-in-picture mode');
+   * }
+   * ```
+   */
+  public async exitPictureInPicture(): Promise<boolean> {
+    try {
+      if (!this.avPlayInstance || !this.isPictureInPicture) {
+        Logger.warn(TAG, 'Not in picture-in-picture mode or AVPlay instance not available');
+        return false;
+      }
+      
+      // 禁用画中画模式
+      await this.avPlayInstance.setParameter('pictureInPictureEnabled', 'false');
+      
+      this.isPictureInPicture = false;
+      Logger.info(TAG, 'Exited picture-in-picture mode');
+      
+      // 通知监听器
+      this.notifyPipStateListeners(false);
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to exit picture-in-picture mode: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * 移动画中画窗口
+   * 
+   * 移动画中画窗口到指定位置。
+   * 
+   * @param x - 新的X坐标
+   * @param y - 新的Y坐标
+   * @returns Promise<boolean> - 是否成功移动
+   * 
+   * @example
+   * ```typescript
+   * const success = await playbackService.movePictureInPicture(100, 100);
+   * if (success) {
+   *   console.log('Moved picture-in-picture window');
+   * }
+   * ```
+   */
+  public async movePictureInPicture(x: number, y: number): Promise<boolean> {
+    try {
+      if (!this.avPlayInstance || !this.isPictureInPicture) {
+        Logger.warn(TAG, 'Not in picture-in-picture mode or AVPlay instance not available');
+        return false;
+      }
+      
+      // 更新位置
+      this.currentPipPosition.x = x;
+      this.currentPipPosition.y = y;
+      
+      // 应用新位置
+      await this.avPlayInstance.setParameter('pictureInPicturePosition', JSON.stringify(this.currentPipPosition));
+      
+      Logger.info(TAG, 'Moved picture-in-picture window to', { x, y });
+      
+      // 通知监听器
+      this.notifyPipStateListeners(true, this.currentPipPosition);
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to move picture-in-picture window: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * 设置片头时长
+   * 
+   * 设置片头时长，并自动开启跳过片头功能。
+   * 
+   * @param seconds - 片头时长（秒）
+   * @returns Promise<void>
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.setIntroDuration(90); // 设置片头时长为90秒
+   * console.log('Intro duration set to 90 seconds');
+   * ```
+   */
+  public async setIntroDuration(seconds: number): Promise<void> {
+    try {
+      this.config.introDuration = seconds;
+      // 如果设置了片头时长，自动开启跳过片头功能
+      if (seconds > 0) {
+        this.config.enableAutoSkipIntro = true;
+      } else {
+        this.config.enableAutoSkipIntro = false;
+      }
+      await this.configService.setConfig('playbackConfig', this.config);
+      Logger.info(TAG, `Set intro duration to ${seconds} seconds`);
+    } catch (error) {
+      Logger.error(TAG, `Failed to set intro duration: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 设置片尾时长
+   * 
+   * 设置片尾时长，并自动开启跳过片尾功能。
+   * 
+   * @param seconds - 片尾时长（秒）
+   * @returns Promise<void>
+   * 
+   * @example
+   * ```typescript
+   * await playbackService.setOutroDuration(120); // 设置片尾时长为120秒
+   * console.log('Outro duration set to 120 seconds');
+   * ```
+   */
+  public async setOutroDuration(seconds: number): Promise<void> {
+    try {
+      this.config.outroDuration = seconds;
+      // 如果设置了片尾时长，自动开启跳过片尾功能
+      if (seconds > 0) {
+        this.config.enableAutoSkipOutro = true;
+      } else {
+        this.config.enableAutoSkipOutro = false;
+      }
+      await this.configService.setConfig('playbackConfig', this.config);
+      Logger.info(TAG, `Set outro duration to ${seconds} seconds`);
+    } catch (error) {
+      Logger.error(TAG, `Failed to set outro duration: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 调整画中画窗口大小
+   * 
+   * 调整画中画窗口的大小。
+   * 
+   * @param width - 新的宽度
+   * @param height - 新的高度
+   * @returns Promise<boolean> - 是否成功调整大小
+   * 
+   * @example
+   * ```typescript
+   * const success = await playbackService.resizePictureInPicture(400, 225);
+   * if (success) {
+   *   console.log('Resized picture-in-picture window');
+   * }
+   * ```
+   */
+  public async resizePictureInPicture(width: number, height: number): Promise<boolean> {
+    try {
+      if (!this.avPlayInstance || !this.isPictureInPicture) {
+        Logger.warn(TAG, 'Not in picture-in-picture mode or AVPlay instance not available');
+        return false;
+      }
+      
+      // 更新大小
+      this.currentPipPosition.width = width;
+      this.currentPipPosition.height = height;
+      
+      // 应用新大小
+      await this.avPlayInstance.setParameter('pictureInPicturePosition', JSON.stringify(this.currentPipPosition));
+      
+      Logger.info(TAG, 'Resized picture-in-picture window to', { width, height });
+      
+      // 通知监听器
+      this.notifyPipStateListeners(true, this.currentPipPosition);
+      
+      return true;
+    } catch (error) {
+      Logger.error(TAG, `Failed to resize picture-in-picture window: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * 获取画中画状态
+   * 
+   * 获取当前是否处于画中画模式。
+   * 
+   * @returns boolean - 是否处于画中画模式
+   * 
+   * @example
+   * ```typescript
+   * const isPip = playbackService.isInPictureInPicture();
+   * console.log('Is in picture-in-picture mode:', isPip);
+   * ```
+   */
+  public isInPictureInPicture(): boolean {
+    return this.isPictureInPicture;
+  }
+
+  /**
+   * 获取画中画位置
+   * 
+   * 获取当前画中画窗口的位置和大小。
+   * 
+   * @returns { x: number; y: number; width: number; height: number } - 画中画位置和大小
+   * 
+   * @example
+   * ```typescript
+   * const position = playbackService.getPictureInPicturePosition();
+   * console.log('Picture-in-picture position:', position);
+   * ```
+   */
+  public getPictureInPicturePosition(): { x: number; y: number; width: number; height: number } {
+    return { ...this.currentPipPosition };
+  }
+
+  /**
+   * 注册画中画状态监听器
+   * 
+   * 注册一个监听器，当画中画状态发生变化时被调用。
+   * 
+   * @param listener - 画中画状态监听器
+   * 
+   * @example
+   * ```typescript
+   * playbackService.addPipStateListener((isPip, position) => {
+   *   console.log('PIP state changed:', isPip, position);
+   * });
+   * ```
+   */
+  public addPipStateListener(listener: PipStateListener): void {
+    this.pipStateListeners.push(listener);
+  }
+
+  /**
+   * 移除画中画状态监听器
+   * 
+   * 移除之前注册的画中画状态监听器。
+   * 
+   * @param listener - 要移除的监听器
+   * 
+   * @example
+   * ```typescript
+   * const listener = (isPip, position) => {
+   *   console.log('PIP state changed:', isPip, position);
+   * };
+   * playbackService.addPipStateListener(listener);
+   * // 之后移除
+   * playbackService.removePipStateListener(listener);
+   * ```
+   */
+  public removePipStateListener(listener: PipStateListener): void {
+    const index = this.pipStateListeners.indexOf(listener);
+    if (index > -1) {
+      this.pipStateListeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * 通知画中画状态监听器
+   * 
+   * 通知所有注册的画中画状态监听器状态变化。
+   */
+  private notifyPipStateListeners(isPip: boolean, position?: { x: number; y: number; width: number; height: number }): void {
+    this.pipStateListeners.forEach(listener => listener(isPip, position));
+  }
+
   /**
    * 销毁播放服务
    * 

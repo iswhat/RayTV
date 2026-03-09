@@ -868,8 +868,142 @@ export default class SearchService {
       console.error("Failed to get search suggestions: " + (error instanceof Error ? error.message : String(error)));
     }
 
-    // 如果API调用失败，返回空数组 If API call fails, return empty array
-    return [];
+    // 如果API调用失败，从本地历史记录和热门搜索中生成建议
+    // If API call fails, generate suggestions from local history and hot searches
+    const suggestions: SearchSuggestionItem[] = [];
+    
+    // 从历史记录中获取建议
+    if (this.searchHistory.length > 0) {
+      const historySuggestions = this.searchHistory
+        .filter(item => item.keyword.toLowerCase().includes(keyword.toLowerCase()))
+        .map(item => ({
+          keyword: item.keyword,
+          type: item.searchType,
+          searchCount: item.clickCount,
+          isHistory: true
+        }))
+        .slice(0, limit / 2);
+      suggestions.push(...historySuggestions);
+    }
+    
+    // 从热门搜索中获取建议
+    if (this.hotSearches.length > 0) {
+      const hotSuggestions = this.hotSearches
+        .filter(item => item.keyword.toLowerCase().includes(keyword.toLowerCase()))
+        .map(item => ({
+          keyword: item.keyword,
+          type: SearchType.ALL,
+          searchCount: item.searchCount,
+          isHot: true
+        }))
+        .slice(0, limit - suggestions.length);
+      suggestions.push(...hotSuggestions);
+    }
+    
+    return suggestions;
+  }
+
+  /**
+   * 全局搜索（跨源搜索） Global search (cross-source search)
+   * @param keyword 搜索关键词 Search keyword
+   * @param options 搜索选项 Search options
+   */
+  public async globalSearch(keyword: string, options: SearchOptions = {}): Promise<SearchResponse> {
+    // 验证搜索关键词
+    this.validateSearchKeyword(keyword);
+    
+    if (keyword.length < this.config.minSearchLength) {
+      throw new Error(`搜索关键词至少需要${this.config.minSearchLength}个字符`);
+    }
+    
+    const startTime = Date.now();
+    
+    try {
+      console.info("执行全局搜索: query=" + keyword + ", options=" + JSON.stringify(options));
+      
+      // 检查缓存
+      const cacheKey = this.getCacheKey(keyword, options.type || SearchType.ALL, options.filters || {}, [], options.limitPerSite || 20);
+      if (this.searchCache.has(cacheKey)) {
+        const cachedResult = this.searchCache.get(cacheKey)!;
+        const historyParams: AddSearchHistoryParams = {
+          query: keyword,
+          resultCount: cachedResult.total,
+          searchType: options.type || SearchType.ALL,
+          filters: options.filters
+        };
+        await this.addToSearchHistory(historyParams);
+        this.notifySearchCompleted(cachedResult);
+        return cachedResult;
+      }
+      
+      // 获取所有活跃站点
+      const allSites = await SiteManager.getInstance().getActiveSites();
+      const searchableSites: SiteKeyName[] = [];
+      for (let i = 0; i < allSites.length; i++) {
+        const site = allSites[i];
+        searchableSites.push({ key: site.key, name: site.name });
+      }
+      
+      // 执行跨源搜索
+      const searchResults = await this.searchInSites(keyword, searchableSites, options.limitPerSite || 20, options.timeout || 10000);
+      
+      // 合并结果
+      const mergedResult = this.mergeSearchResults(searchResults, options.page || 1, options.pageSize || 20, options.filters || {});
+      
+      // 高亮搜索结果
+      const highlightedResult = this.addHighlightToResults(mergedResult);
+      
+      // 创建响应对象
+      const response: SearchResponse = {
+        query: keyword,
+        total: highlightedResult.total,
+        items: highlightedResult.items,
+        page: options.page || 1,
+        pageSize: options.pageSize || 20,
+        filters: options.filters || {},
+        searchType: options.type || SearchType.ALL,
+        searchTime: Date.now() - startTime,
+        successSites: highlightedResult.successSites,
+        totalSites: highlightedResult.totalSites
+      };
+      
+      // 缓存结果
+      this.cacheResult(cacheKey, response);
+      
+      // 记录搜索历史
+      const historyParams: AddSearchHistoryParams = {
+        query: keyword,
+        resultCount: response.total,
+        searchType: options.type || SearchType.ALL,
+        filters: options.filters
+      };
+      await this.addToSearchHistory(historyParams);
+      
+      // 通知搜索完成
+      this.notifySearchCompleted(response);
+      
+      return response;
+    } catch (error) {
+      console.error("全局搜索失败: " + (error instanceof Error ? error.message : String(error)));
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  /**
+   * 实时搜索 Real-time search
+   * @param keyword 搜索关键词 Search keyword
+   * @param options 搜索选项 Search options
+   */
+  public async realtimeSearch(keyword: string, options: SearchOptions = {}): Promise<SearchResponse> {
+    // 实时搜索使用更短的超时和更少的结果
+    const realtimeOptions: SearchOptions = {
+      ...options,
+      timeout: 3000,
+      limitPerSite: 5,
+      pageSize: 10
+    };
+    
+    return this.globalSearch(keyword, realtimeOptions);
   }
 
   /**

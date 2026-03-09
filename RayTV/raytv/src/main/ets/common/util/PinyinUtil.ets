@@ -107,7 +107,7 @@ export class PinyinUtil {
   private getMapKeys(map: Record<string, string>): string[] {
     const keys: string[] = [];
     try {
-      // 使用Object.keys获取对象的键，这在HarmonyOS环境中是支持的 Uses Object.keys to get object keys, this is supported in HarmonyOS environment
+      // 使用ObjectUtils.getKeys获取对象的键，适配ArkTS语法 Uses ObjectUtils.getKeys to get object keys, adapted to ArkTS syntax
       const objKeys = ObjectUtils.getKeys(map);
       for (let i = 0; i < objKeys.length; i++) {
         keys.push(objKeys[i]);
@@ -240,7 +240,7 @@ export class PinyinUtil {
       let addedCount = 0;
       let updatedCount = 0;
       
-      // 使用Object.keys获取对象键 Uses Object.keys to get object keys
+      // 使用ObjectUtils.getKeys获取对象键 Uses ObjectUtils.getKeys to get object keys
       const keys = ObjectUtils.getKeys(map);
       
       for (let i = 0; i < keys.length; i++) {

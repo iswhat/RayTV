@@ -2,8 +2,9 @@ import { AppNavigator, DetailParams } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import ContentAccessService from '../service/content/ContentAccessService';
 import display from '@ohos.display';
-import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, ImageFit, BarState, HorizontalAlign, Alignment, Curve, List, ListItem, Axis, Stack } from '@ohos/arkui';
+import { Column, Row, Text, Button, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, HorizontalAlign, Alignment, Curve, List, ListItem, Axis, Stack } from '@ohos/arkui';
 import ContentSourceBadge from '../components/ContentSourceBadge';
+import ImageLazyLoader from '../components/ImageLazyLoader';
 
 /**
  * 应用主页面 | Application main page
@@ -324,12 +325,15 @@ struct MainPage {
   private renderMediaItem(media: FeaturedMediaItem): void {
     Column() {
       Stack() {
-        Image(media.cover || '')
-          .width('100%')
-          .height(this.isLandscape ? 320 : 240)
-          .objectFit(ImageFit.Cover)
-          .borderRadius(12)
-          .backgroundColor('#2C2C2C')
+        ImageLazyLoader({
+          imageUrl: media.cover || '',
+          width: '100%',
+          height: this.isLandscape ? 320 : 240,
+          fit: 'cover',
+          borderRadius: 12,
+          placeholderColor: '#2C2C2C',
+          priority: 'high'
+        })
         
         // 来源标识 | Source badge
         if (media.sourceName) {
@@ -374,6 +378,13 @@ struct MainPage {
     .focusable(true)
     .focusBorderWidth(2)
     .focusBorderColor('#007AFF')
+    // 添加点击反馈动画
+    .gesture(
+      TapGesture()
+        .onAction(() => {
+          console.info('Media item tapped: ' + media.title);
+        })
+    )
   }
   
   // 渲染内容区域 | Render content section
@@ -439,17 +450,22 @@ struct MainPage {
         Row() {
           ForEach(this.mainMenuItems, (item: TabItem) => {
             Column() {
-              Text(item.name)
-                .fontSize(18)
-                .fontWeight(this.selectedTab === item.key ? 700 : 400)
-                .fontColor(this.selectedTab === item.key ? '#007AFF' : '#FFFFFF')
-                .padding({ left: 30, right: 30, top: 16, bottom: 16 })
-                .borderBottom(this.selectedTab === item.key ? { width: 3, color: '#007AFF' } : { width: 0, color: 'transparent' })
-            }
-            .onClick(() => this.handleMainMenuClick(item.key))
-            .focusable(true)
-            .focusBorderWidth(2)
-            .focusBorderColor('#007AFF')
+            Text(item.name)
+              .fontSize(18)
+              .fontWeight(this.selectedTab === item.key ? 700 : 400)
+              .fontColor(this.selectedTab === item.key ? '#007AFF' : '#FFFFFF')
+              .padding({ left: 30, right: 30, top: 16, bottom: 16 })
+              .borderBottom(this.selectedTab === item.key ? { width: 3, color: '#007AFF' } : { width: 0, color: 'transparent' })
+          }
+          .onClick(() => this.handleMainMenuClick(item.key))
+          .focusable(true)
+          .focusBorderWidth(2)
+          .focusBorderColor('#007AFF')
+          .backgroundColor(this.selectedTab === item.key ? 'rgba(255, 255, 255, 0.1)' : 'transparent')
+          .animation({
+            duration: 200,
+            curve: Curve.EaseOut
+          })
           }, (item: TabItem) => item.key)
         }
         .width('100%')

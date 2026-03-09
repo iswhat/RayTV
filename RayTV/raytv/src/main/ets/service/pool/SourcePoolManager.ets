@@ -87,21 +87,13 @@ export interface VodSiteWithSource {
 
 /**
  * 带来源标识的直播频道
+ * Live channel with source identifier
+ * 
+ * 从LiveChannelTypes导入统一定义
+ * Import unified definition from LiveChannelTypes
  */
-export interface LiveChannelWithSource {
-  id: string;
-  name: string;
-  url: string;
-  group: string;
-  
-  // 来源标识
-  sourceId: string;
-  sourceName: string;
-  
-  // 频道元数据
-  logo?: string;
-  epgUrl?: string;
-}
+export { LiveChannelWithSource, LiveCategory, ExtendedLiveChannelWithSource, LiveProgramInfo } from '../live/LiveChannelTypes';
+export { toLiveChannelWithSource, toExtendedLiveChannel, isValidLiveChannel, createLiveChannelWithSource } from '../live/LiveChannelTypes';
 
 /**
  * 带来源标识的壁纸

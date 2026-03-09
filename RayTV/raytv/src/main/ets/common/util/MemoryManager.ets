@@ -370,7 +370,7 @@ export default class MemoryManager {
         return size;
       }
 
-      // 对象 - 使用Object.keys替代for...in
+      // 对象 - 使用ObjectUtils.getKeys替代for...in
       const keys = ObjectUtils.getKeys(obj);
       let size: number = 0;
       for (let i = 0; i < keys.length; i++) {

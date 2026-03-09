@@ -115,13 +115,13 @@ export class CacheManager {
     };
     Logger.info(this.TAG, `Updated cache config`, { config: this.config });
     
-    // 閲嶆柊鍚姩娓呯悊瀹氭椂鍣?
+    // 重新启动清理定时器
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
     }
     this.startCleanupTimer();
     
-    // 濡傛灉缂撳瓨澶у皬瓒呴檺锛岀珛鍗虫竻鐞?
+    // 如果缓存大小超限，立即清理
     this.cleanupExcessCache();
   }
 
@@ -136,34 +136,34 @@ export class CacheManager {
     }
 
     try {
-      // 棣栧厛浠庡唴瀛樼紦瀛樹腑鑾峰彇
+      // 首先从内存缓存中获取
       const cacheItem = this.memoryCache.get(key);
       
       if (cacheItem) {
-        // 妫€鏌ユ槸鍚﹁繃鏈?
+        // 检查是否过期
         if (!this.isExpired(cacheItem)) {
           Logger.debug(this.TAG, `Cache hit for key: ${key} (memory)`, { key });
           return cacheItem.data;
         } else {
-          // 杩囨湡鍒欑Щ闄?
+          // 过期则移除
           this.remove(key);
         }
       }
       
-      // 浠庢枃浠剁郴缁熻幏鍙?
+      // 从文件系统获取
       const filePath = this.getCacheFilePath(key);
       try {
         const fileContent = await this.fsManager.readText(filePath);
         const fileCacheItem: CacheItem = JSON.parse(fileContent);
         
-        // 妫€鏌ユ槸鍚﹁繃鏈?
+        // 检查是否过期
         if (!this.isExpired(fileCacheItem)) {
-          // 鍔犺浇鍒板唴瀛樼紦瀛?
+          // 加载到内存缓存
           this.memoryCache.set(key, fileCacheItem);
           Logger.debug(this.TAG, `Cache hit for key: ${key} (disk)`);
           return fileCacheItem.data;
         } else {
-          // 杩囨湡鍒欏垹闄ゆ枃浠?
+          // 过期则删除文件
           this.fsManager.unlinkSync(filePath);
         }
       }
@@ -193,8 +193,8 @@ export class CacheManager {
       const dataString = JSON.stringify(data);
       const size = dataString.length;
       
-      // 妫€鏌ユ暟鎹ぇ灏忔槸鍚﹁秴杩囬檺鍒?
-      if (size > this.config.maxSize! * 0.1) { // 涓嶇紦瀛樿秴杩囨渶澶х紦瀛?0%鐨勬暟鎹?
+      // 检查数据大小是否超过限制
+      if (size > this.config.maxSize! * 0.1) { // 不缓存超过最大缓存10%的数据
         Logger.warn(this.TAG, `Data too large for caching: ${size} bytes`);
         return false;
       }
@@ -206,17 +206,17 @@ export class CacheManager {
         size
       };
       
-      // 鏇存柊鎬诲ぇ灏?
+      // 更新总大小
       this.updateTotalSize(key, size);
       
-      // 淇濆瓨鍒板唴瀛樼紦瀛?
+      // 存储到内存缓存
       this.memoryCache.set(key, cacheItem);
       
-      // 淇濆瓨鍒版枃浠剁郴缁?
+      // 存储到文件系统
       const filePath = this.getCacheFilePath(key);
       await this.fsManager.writeText(filePath, JSON.stringify(cacheItem));
       
-      // 妫€鏌ュ苟娓呯悊瓒呭嚭澶у皬闄愬埗鐨勭紦瀛?
+      // 检查并清理超出大小限制的缓存
       this.cleanupExcessCache();
       
       Logger.debug(this.TAG, `Cached data for key: ${key}`, { key, size, expiry: expiryTime });
@@ -399,7 +399,7 @@ export class CacheManager {
       const keysToRemove: string[] = [];
       const currentTime = Date.now();
       
-      // 娓呯悊鍐呭瓨缂撳瓨 - 浣跨敤鏅€氬彉閲忓０鏄庢浛浠ｈВ鏋?
+      // 清理内存缓存 - 使用标准方法解决问题
       const entries = this.memoryCache.entries();
       let entry = entries.next();
       while (!entry.done) {
@@ -414,7 +414,7 @@ export class CacheManager {
       
       for (const key of keysToRemove) {
         this.memoryCache.delete(key);
-        // 鍚屾椂鍒犻櫎鏂囦欢绯荤粺涓殑缂撳瓨
+        // 同时删除文件系统中的缓存
         const filePath = this.getCacheFilePath(key);
         if (this.fsManager.existsSync(filePath)) {
           this.fsManager.unlinkSync(filePath);
@@ -476,8 +476,8 @@ export class CacheManager {
   }
 
   /**
-   * 妫€鏌ョ紦瀛橀」鏄惁杩囨湡
-   * @param item 缂撳瓨椤?
+   * 检查缓存项是否过期
+   * @param item 缓存项
    * @returns boolean
    * @private
    */
@@ -486,9 +486,9 @@ export class CacheManager {
   }
 
   /**
-   * 鏇存柊鎬荤紦瀛樺ぇ灏?
-   * @param key 缂撳瓨閿?
-   * @param newSize 鏂扮殑澶у皬
+   * 更新总缓存大小
+   * @param key 缓存键
+   * @param newSize 新的大小
    * @private
    */
   private updateTotalSize(key: string, newSize: number): void {
@@ -500,7 +500,7 @@ export class CacheManager {
   }
 
   /**
-   * 鑾峰彇缂撳瓨鐩綍
+   * 获取缓存目录
    * @returns string
    * @private
    */
@@ -510,8 +510,8 @@ export class CacheManager {
   }
 
   /**
-   * 鑾峰彇缂撳瓨鏂囦欢璺緞
-   * @param key 缂撳瓨閿?
+   * 获取缓存文件路径
+   * @param key 缓存键
    * @returns string
    * @private
    */

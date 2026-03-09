@@ -1,4 +1,4 @@
-import { AppNavigator } from '../navigation/AppNavigator';
+import { AppNavigator, BreadcrumbItem } from '../navigation/AppNavigator';
 // Logger import removed as AnalyticsService was deleted
 import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
@@ -31,6 +31,8 @@ struct CategoryPage {
   @State currentPage: number = 1;
   @State hasMoreResults: boolean = true;
   @State isRefreshing: boolean = false;
+  @State hotCategories: string[] = ['热门电影', '热门电视剧', '热门动画', '热门综艺'];
+  @State breadcrumbs: BreadcrumbItem[] = [];
   
   // 分页配置 | Pagination configuration
   private pageSize: number = 20;
@@ -51,6 +53,9 @@ struct CategoryPage {
       yearArray.push((currentYear - i).toString());
     }
     this.years = yearArray;
+    
+    // 获取面包屑导航
+    this.breadcrumbs = AppNavigator.getInstance().getBreadcrumbs();
     
     // 初始化数据 | Initialize data
     await this.loadMediaList(true);
@@ -178,6 +183,35 @@ struct CategoryPage {
       await this.handleFilterChange();
     }
   }
+
+  /**
+   * 处理热门分类选择 | Handle hot category selection
+   */
+  private async handleHotCategorySelect(hotCategory: string): Promise<void> {
+    console.info('Hot category clicked: ' + hotCategory);
+    
+    // 根据热门分类设置对应的分类和排序
+    switch (hotCategory) {
+      case '热门电影':
+        this.selectedCategory = '电影';
+        this.selectedSort = '最热';
+        break;
+      case '热门电视剧':
+        this.selectedCategory = '电视剧';
+        this.selectedSort = '最热';
+        break;
+      case '热门动画':
+        this.selectedCategory = '动画';
+        this.selectedSort = '最热';
+        break;
+      case '热门综艺':
+        this.selectedCategory = '综艺';
+        this.selectedSort = '最热';
+        break;
+    }
+    
+    await this.handleFilterChange();
+  }
   
   /**
    * 处理媒体项点击 | Handle media item click
@@ -232,23 +266,53 @@ struct CategoryPage {
     // 使用AppNavigator处理返回 | Use AppNavigator to handle back
     AppNavigator.getInstance().navigateToBack();
   }
+
+  /**
+   * 处理面包屑导航点击 | Handle breadcrumb navigation click
+   */
+  private async handleBreadcrumbClick(index: number): Promise<void> {
+    await AppNavigator.getInstance().navigateToBreadcrumb(index);
+  }
   
   /**
    * 渲染头部 | Render header
    */
   @Builder
   private renderHeader(): void {
-    Row() {
-      Button("返回")
-        .onClick(() => this.handleBack())
-      Text("分类浏览")
-        .fontSize(20)
-        .fontWeight(700)
-      // 使用空的Row作为占位符，类似HTML blank元素 | Use empty Row as placeholder, similar to HTML blank element
-      Row() {}
+    Column() {
+      Row() {
+        Button("返回")
+          .onClick(() => this.handleBack())
+        Text("分类浏览")
+          .fontSize(20)
+          .fontWeight(700)
+        // 使用空的Row作为占位符，类似HTML blank元素 | Use empty Row as placeholder, similar to HTML blank element
+        Row() {}
+      }
+      .justifyContent(FlexAlign.SpaceBetween)
+      .padding(20)
+      
+      // 面包屑导航 | Breadcrumb navigation
+      if (this.breadcrumbs.length > 0) {
+        Row() {
+          ForEach(this.breadcrumbs, (crumb: BreadcrumbItem, index: number) => {
+            Row() {
+              Text(crumb.title)
+                .fontSize(14)
+                .fontColor(index === this.breadcrumbs.length - 1 ? '#333333' : '#666666')
+                .fontWeight(index === this.breadcrumbs.length - 1 ? 700 : 400)
+                .onClick(() => this.handleBreadcrumbClick(index))
+              if (index < this.breadcrumbs.length - 1) {
+                Text(" > ")
+                  .fontSize(14)
+                  .fontColor('#999999')
+              }
+            }
+          }, (crumb: BreadcrumbItem) => crumb.route + crumb.title)
+        }
+        .padding({ left: 20, right: 20, bottom: 10 })
+      }
     }
-    .justifyContent(FlexAlign.SpaceBetween)
-    .padding(20)
   }
   
   /**
@@ -264,6 +328,30 @@ struct CategoryPage {
       }, (category: string) => category)
     }
     .padding(5)
+  }
+
+  /**
+   * 渲染热门分类快捷入口 | Render hot category quick access
+   */
+  @Builder
+  private renderHotCategories() {
+    Column() {
+      Text("热门分类")
+        .fontSize(18)
+        .fontWeight(700)
+        .margin({ top: 10, bottom: 10, left: 20 })
+      
+      Row() {
+        ForEach(this.hotCategories, (hotCategory: string) => {
+          Button(hotCategory)
+            .onClick(() => this.handleHotCategorySelect(hotCategory))
+            .margin(5)
+            .backgroundColor('#FF6B35')
+            .fontColor('#FFFFFF')
+        }, (hotCategory: string) => hotCategory)
+      }
+      .padding(5)
+    }
   }
   
   /**
@@ -368,6 +456,9 @@ struct CategoryPage {
     Column() {
       // 页面头部 | Page header
       this.renderHeader()
+      
+      // 热门分类快捷入口 | Hot category quick access
+      this.renderHotCategories()
       
       // 分类选择 | Category selection
       this.renderCategorySelector()

@@ -2,6 +2,7 @@ import { AppNavigator } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
 import ContentAccessService from '../service/content/ContentAccessService';
 import LivePlaybackService, { LivePlaybackStatus } from '../service/live/LivePlaybackService';
+import { LiveChannelWithSource, LiveCategory } from '../service/live/LiveChannelTypes';
 import EventBusUtil from '../common/util/EventBusUtil';
 import display from '@ohos.display';
 import { FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment, TextAlign, BarState, ScrollDirection, EdgeEffect, GestureDirection, GestureEvent, PanGesture, GestureInfo } from '@ohos.arkui';
@@ -16,21 +17,6 @@ import ThemeProvider, { Theme } from '../design/ThemeProvider';
  * 直播界面 | Live page
  * 实现直播内容的播放、频道切换和播放设置 | Implement live content playback, channel switching and playback settings
  */
-interface ChannelCategory {
-  id: string;
-  name: string;
-}
-
-interface LiveChannelWithSource {
-  id: string;
-  name: string;
-  url: string;
-  group: string;
-  sourceId: string;
-  sourceName: string;
-  logo?: string;
-  epgUrl?: string;
-}
 
 @Entry
 @Component
@@ -43,6 +29,8 @@ struct LivePage {
   @State isLoading: boolean = true;
   @State isError: boolean = false;
   @State errorMessage: string = '';
+  @State errorActionText: string = '';
+  @State errorActionHandler: (() => void) | undefined = undefined;
   @State currentChannel: LiveChannelWithSource | null = null;
   @State channelCategories: ChannelCategory[] = [];
   @State channels: LiveChannelWithSource[] = [];
@@ -74,9 +62,10 @@ struct LivePage {
   aboutToAppear() {
     Logger.info(this.TAG, 'LivePage about to appear');
     // 添加主题变更监听器
-    ThemeProvider.addThemeChangeListener((theme) => {
+    this.themeChangeListener = (theme) => {
       this.currentTheme = theme;
-    });
+    };
+    ThemeProvider.addThemeChangeListener(this.themeChangeListener);
     this.initScreenInfo();
     this.initServices();
     this.loadLiveContent();
@@ -126,6 +115,7 @@ struct LivePage {
   aboutToDisappear() {
     if (this.controlAutoHideTimer) {
       clearTimeout(this.controlAutoHideTimer);
+      this.controlAutoHideTimer = 0;
     }
     
     // 停止播放
@@ -136,6 +126,12 @@ struct LivePage {
     this.eventBus.off('live:error');
     this.eventBus.off('live:reconnecting');
     this.eventBus.off('live:reconnected');
+    
+    // 移除主题监听器
+    if (this.themeChangeListener) {
+      ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+      this.themeChangeListener = null;
+    }
   }
   
   // 处理播放状态变化
@@ -165,8 +161,91 @@ struct LivePage {
   // 处理播放错误
   private handlePlaybackError(error: { code: number; message: string }): void {
     this.isError = true;
-    this.errorMessage = `播放错误: ${error.message} (错误码: ${error.code})`;
-    Logger.error(this.TAG, `Playback error: ${error.message}`);
+    
+    // 根据错误类型提供不同的处理建议
+    let errorMessage = '';
+    let actionText = '';
+    let actionHandler: (() => void) | undefined;
+    
+    switch (error.code) {
+      case 404:
+      case 403:
+      case 401:
+        errorMessage = `源地址失效或权限不足: ${error.message}`;
+        actionText = '切换线路';
+        actionHandler = () => this.switchToNextParseLine();
+        break;
+        
+      case -1: // 网络错误
+      case -2: // 连接超时
+        errorMessage = `网络连接失败: ${error.message}`;
+        actionText = '重试连接';
+        actionHandler = () => this.retryCurrentChannel();
+        break;
+        
+      case -3: // 解码错误
+        errorMessage = `视频解码失败: ${error.message}`;
+        actionText = '切换源';
+        actionHandler = () => this.switchSource();
+        break;
+        
+      default:
+        errorMessage = `播放错误: ${error.message} (错误码: ${error.code})`;
+        actionText = '重试';
+        actionHandler = () => this.retryCurrentChannel();
+    }
+    
+    this.errorMessage = errorMessage;
+    this.errorActionText = actionText;
+    this.errorActionHandler = actionHandler;
+    
+    Logger.error(this.TAG, `Playback error: ${error.code} - ${error.message}`);
+    
+    // 错误上报 | Report error
+    this.reportError(error);
+  }
+  
+  // 错误上报 | Report error
+  private reportError(error: { code: number; message: string }): void {
+    try {
+      const errorData = {
+        code: error.code,
+        message: error.message,
+        channel: this.currentChannel?.name,
+        source: this.currentChannel?.sourceName,
+        timestamp: Date.now()
+      };
+      
+      // 这里可以实现错误上报逻辑
+      Logger.warn(this.TAG, `Error reported: ${JSON.stringify(errorData)}`);
+    } catch (reportError) {
+      Logger.warn(this.TAG, 'Failed to report error');
+    }
+  }
+
+  // 重试当前频道 | Retry current channel
+  private async retryCurrentChannel(): Promise<void> {
+    if (this.currentChannel) {
+      this.isError = false;
+      this.errorMessage = '';
+      this.errorActionText = '';
+      this.errorActionHandler = undefined;
+      await this.playChannel(this.currentChannel);
+    }
+  }
+
+  // 切换到下一条解析线路 | Switch to next parse line
+  private async switchToNextParseLine(): Promise<void> {
+    // 这里可以实现切换解析线路的逻辑
+    // 暂时先重试当前频道
+    await this.retryCurrentChannel();
+  }
+
+  // 切换源 | Switch source
+  private async switchSource(): Promise<void> {
+    // 这里可以实现切换源的逻辑
+    // 暂时先重试当前频道
+    await this.retryCurrentChannel();
   }
   
   // 初始化屏幕信息 | Initialize screen information
@@ -429,8 +508,13 @@ struct LivePage {
   private handleProgressChange(value: number) {
     this.currentProgress = Math.max(0, Math.min(this.totalDuration, value));
     Logger.info(this.TAG, `Progress changed to: ${this.currentProgress}`);
-    // 这里可以调用播放器API调节进度
-    this.liveStreamService.seekTo(value);
+    
+    // 直播流不支持seek操作，只记录日志
+    // Live streaming does not support seek operations, only log
+    Logger.warn(this.TAG, 'Live stream does not support seeking, progress change ignored');
+    
+    // 如果需要点播功能的seek操作，应该在点播页面实现
+    // If seek operation is needed for on-demand content, it should be implemented in the on-demand page
   }
   
   // 处理返回 | Handle back
@@ -885,23 +969,43 @@ struct LivePage {
         .textAlign(TextAlign.Center)
         .width('80%')
       
-      Button('重试')
-        .backgroundColor(colors.primary)
-        .fontColor(colors.surface)
-        .borderRadius(borderRadius.md)
-        .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
-        .onClick(() => this.loadLiveContent())
-        .focusable(true)
-        .focusBorderWidth(2)
-        .focusBorderColor(colors.primary)
-        .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+      // 显示错误操作按钮（如果有）
+      if (this.errorActionText && this.errorActionHandler) {
+        Button(this.errorActionText)
+          .backgroundColor(colors.primary)
+          .fontColor(colors.surface)
+          .borderRadius(borderRadius.md)
+          .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+          .onClick(() => {
+            if (this.errorActionHandler) {
+              this.errorActionHandler();
+            }
+          })
+          .focusable(true)
+          .focusBorderWidth(2)
+          .focusBorderColor(colors.primary)
+          .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+          .margin({ bottom: spacing.sm })
+      } else {
+        // 默认重试按钮
+        Button('重试')
+          .backgroundColor(colors.primary)
+          .fontColor(colors.surface)
+          .borderRadius(borderRadius.md)
+          .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
+          .onClick(() => this.loadLiveContent())
+          .focusable(true)
+          .focusBorderWidth(2)
+          .focusBorderColor(colors.primary)
+          .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 4 })
+          .margin({ bottom: spacing.sm })
+      }
       
       Button('返回')
         .backgroundColor(colors.surface)
         .fontColor(colors.text)
         .borderRadius(borderRadius.md)
         .padding({ left: spacing.lg, right: spacing.lg, top: spacing.md, bottom: spacing.md })
-        .margin({ top: spacing.sm })
         .onClick(() => this.handleBack())
         .focusable(true)
         .focusBorderWidth(2)

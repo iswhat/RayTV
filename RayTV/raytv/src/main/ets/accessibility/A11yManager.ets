@@ -172,7 +172,7 @@ export class A11yManager {
   /**
    * 获取可访问性属性 | Get accessibility attributes for element
    */
-  getAccessibilityAttributes(elementId: string): Record<string, any> {
+  getAccessibilityAttributes(elementId: string): Record<string, Object> {
     // 这里应该根据元素ID返回相应的可访问性属性
     // 暂时返回默认属性
     return {

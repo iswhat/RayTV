@@ -72,9 +72,10 @@ export class DIContainer {
   /**
    * 解析服务 | Resolve service
    * @param token 服务标识符 | Service token
+   * @param resolving 正在解析的服务链，用于检测循环依赖 | Resolving service chain for circular dependency detection
    * @returns 服务实例 | Service instance
    */
-  public resolve<T>(token: string): T {
+  public resolve<T>(token: string, resolving: Set<string> = new Set()): T {
     const descriptor = this.services.get(token);
     if (!descriptor) {
       throw new Error(`Service ${token} not registered`);
@@ -85,9 +86,18 @@ export class DIContainer {
       return descriptor.instance;
     }
 
+    // 检测循环依赖 | Detect circular dependency
+    if (resolving.has(token)) {
+      const chain = Array.from(resolving).join(' -> ') + ' -> ' + token;
+      throw new Error(`Circular dependency detected: ${chain}`);
+    }
+
     try {
+      // 添加到正在解析的服务链 | Add to resolving chain
+      resolving.add(token);
+      
       // 解析依赖 | Resolve dependencies
-      const dependencies = this.resolveDependencies(descriptor.dependencies);
+      const dependencies = this.resolveDependencies(descriptor.dependencies, resolving);
       
       // 创建实例 | Create instance
       const instance = descriptor.factory(...dependencies);
@@ -98,10 +108,15 @@ export class DIContainer {
         this.resolvedInstances.set(token, instance);
       }
 
+      // 从正在解析的服务链中移除 | Remove from resolving chain
+      resolving.delete(token);
+      
       this.logger.info(`Resolved service: ${token}`);
       return instance;
 
     } catch (error) {
+      // 确保从解析链中移除 | Ensure removed from resolving chain
+      resolving.delete(token);
       this.logger.error(`Failed to resolve service ${token}`, error);
       throw new Error(`Failed to resolve service ${token}: ${(error as Error).message}`);
     }
@@ -169,12 +184,13 @@ export class DIContainer {
   /**
    * 解析依赖 | Resolve dependencies
    * @param dependencies 依赖的服务标识符 | Dependent service tokens
+   * @param resolving 正在解析的服务链，用于检测循环依赖 | Resolving service chain for circular dependency detection
    * @returns 依赖实例数组 | Dependency instance array
    */
-  private resolveDependencies(dependencies: string[]): unknown[] {
+  private resolveDependencies(dependencies: string[], resolving: Set<string>): unknown[] {
     return dependencies.map(depToken => {
       try {
-        return this.resolve(depToken);
+        return this.resolve(depToken, resolving);
       } catch (error) {
         this.logger.error(`Failed to resolve dependency: ${depToken}`, error);
         throw new Error(`Missing dependency: ${depToken}`);

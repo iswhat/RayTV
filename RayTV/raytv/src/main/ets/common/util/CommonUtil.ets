@@ -92,7 +92,7 @@ export class CommonUtil {
     }
     
     const clonedObj: Record<string, unknown> = {};
-    // 直接使用Object.keys获取键 // Directly use Object.keys to get keys
+    // 使用ObjectUtils.getKeys获取键 // Use ObjectUtils.getKeys to get keys
     const keys = ObjectUtils.getKeys(obj);
     for (const key of keys) {
       const propertyValue = (obj as Record<string, unknown>)[key];

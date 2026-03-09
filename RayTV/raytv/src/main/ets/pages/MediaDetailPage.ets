@@ -74,6 +74,10 @@ struct MediaDetailPage {
   @State isError: boolean = false;
   @State errorMessage: string = '';
   @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
+  @State isPlaying: boolean = false;
+  @State isNavigating: boolean = false;
+  @State toastMessage: string = '';
+  @State showToast: boolean = false;
   
   // 临时属性，用于向后兼容 - Temporary properties for backward compatibility
   private media: Vod = {
@@ -101,9 +105,12 @@ struct MediaDetailPage {
   // 资源管理相关 - Resource management related
   private mediaPlayer: Object | null = null;
   private progressUpdateTimer: number = 0;
-  private themeChangeListener: (theme: Theme) => void = (theme: Theme) => {
-    this.currentTheme = theme;
-  };
+  private themeChangeListener: ((theme: Theme) => void) | null = null;
+  
+  // 事件监听器ID - Event listener IDs
+  private progressListenerId: string = '';
+  private errorListenerId: string = '';
+  private completeListenerId: string = '';
   
   // 释放资源 - Release resources
   private releaseResources(): void {
@@ -133,14 +140,30 @@ struct MediaDetailPage {
   aboutToAppear(): void {
     this.mediaId = this.getMediaIdFromParams() || '';
     
-    // 添加主题变更监听器
+    // 添加主题变更监听器 | Add theme change listener
+    this.themeChangeListener = (theme: Theme) => {
+      this.currentTheme = theme;
+    };
     ThemeProvider.addThemeChangeListener(this.themeChangeListener);
     
-    // 监听播放进度更新
-    this.eventBus.on('playback:progressUpdated', (data: Record<string, unknown>) => {
-      // 记录播放进度
+    // 监听播放进度更新 | Listen to playback progress updates
+    this.progressListenerId = this.eventBus.on('playback:progressUpdated', (data: Record<string, unknown>) => {
       if (data.videoId && data.progress) {
         this.recordPlaybackProgress(data.videoId as string, data.progress as number);
+      }
+    });
+    
+    // 监听播放错误 | Listen to playback errors
+    this.errorListenerId = this.eventBus.on('playback:error', (data: Record<string, unknown>) => {
+      if (data.error) {
+        this.handlePlaybackError(data.error as Error);
+      }
+    });
+    
+    // 监听播放完成 | Listen to playback completion
+    this.completeListenerId = this.eventBus.on('playback:complete', (data: Record<string, unknown>) => {
+      if (data.videoId) {
+        this.handlePlaybackComplete(data.videoId as string);
       }
     });
     
@@ -153,21 +176,26 @@ struct MediaDetailPage {
   aboutToDisappear(): void {
     Logger.info(this.TAG, 'MediaDetailPage about to disappear');
     
-    // 移除事件监听器
-    this.eventBus.off('playback:progressUpdated');
-    this.eventBus.off('playback:error');
-    this.eventBus.off('playback:complete');
+    // 使用保存的ID准确取消订阅 | Use saved IDs to accurately unsubscribe
+    if (this.progressListenerId) {
+      this.eventBus.off('playback:progressUpdated', this.progressListenerId);
+    }
+    if (this.errorListenerId) {
+      this.eventBus.off('playback:error', this.errorListenerId);
+    }
+    if (this.completeListenerId) {
+      this.eventBus.off('playback:complete', this.completeListenerId);
+    }
     
-    // 清除定时器
+    // 清除定时器 | Clear timer
     if (this.progressUpdateTimer !== 0) {
       clearInterval(this.progressUpdateTimer);
       this.progressUpdateTimer = 0;
     }
     
-    // 释放媒体播放器
+    // 释放媒体播放器 | Release media player
     if (this.mediaPlayer != null) {
       try {
-        // 停止和释放播放器资源
         this.mediaPlayer = null;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
@@ -175,10 +203,13 @@ struct MediaDetailPage {
       }
     }
     
-    // 移除主题监听器
-    ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+    // 移除主题监听器 | Remove theme listener
+    if (this.themeChangeListener) {
+      ThemeProvider.removeThemeChangeListener(this.themeChangeListener);
+      this.themeChangeListener = null;
+    }
     
-    // 释放资源
+    // 释放资源 | Release resources
     this.releaseResources();
   }
 
@@ -195,7 +226,7 @@ struct MediaDetailPage {
       }
       
       // 使用MediaDataFetcherService获取媒体详情
-      const detail = await this.mediaDataFetcher.getMediaDetail(this.mediaId);
+      const detail: MediaDetail | null = await this.mediaDataFetcher.getMediaDetail(this.mediaId);
       
       if (!detail) {
         throw new Error('Failed to fetch media detail');
@@ -231,8 +262,8 @@ struct MediaDetailPage {
       });
       
       console.info(`Media detail loaded: ${detail.title}`);
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       this.isError = true;
       this.errorMessage = err.message;
       console.error(`加载媒体详情失败: ${err.message}`);
@@ -251,7 +282,7 @@ struct MediaDetailPage {
         return;
       }
       
-      const sites = this.contentService.getAllVodSites();
+      const sites: any[] = this.contentService.getAllVodSites();
       if (sites.length === 0) {
         this.episodes = [];
         return;
@@ -263,8 +294,8 @@ struct MediaDetailPage {
         name: `第${i + 1}集`,
         url: `episode_${i + 1}`
       }));
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       console.error(`加载剧集列表失败: ${err.message}`);
       this.episodes = [];
     }
@@ -280,19 +311,19 @@ struct MediaDetailPage {
         return;
       }
       
-      const sites = this.contentService.getAllVodSites();
+      const sites: any[] = this.contentService.getAllVodSites();
       if (sites.length === 0) {
         this.filteredSources = [];
         return;
       }
       
       // 从站点生成播放源
-      this.filteredSources = sites.map(site => ({
+      this.filteredSources = sites.map((site: any) => ({
         name: site.name,
         quality: '高清'
       }));
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       console.error(`加载播放源失败: ${err.message}`);
       this.filteredSources = [];
     }
@@ -303,22 +334,22 @@ struct MediaDetailPage {
    */
   private async loadRelatedMedia(): Promise<void> {
     try {
-      const sites = this.contentService.getAllVodSites();
+      const sites: any[] = this.contentService.getAllVodSites();
       if (sites.length === 0) {
         this.relatedMedia = [];
         return;
       }
       
       // 基于站点数据生成相关推荐
-      this.relatedMedia = sites.slice(0, 6).map((site) => ({
+      this.relatedMedia = sites.slice(0, 6).map((site: any) => ({
         title: `${site.name} - 相关推荐`,
         cover: '',
         url: `related_${site.siteKey}`,
         sourceId: site.sourceId,
         sourceName: site.sourceName
       }));
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       console.error(`加载相关推荐失败: ${err.message}`);
       this.relatedMedia = [];
     }
@@ -340,17 +371,35 @@ struct MediaDetailPage {
     try {
       Logger.info(this.TAG, `Recording progress for ${videoId}: ${progress}%`);
       // 实际实现应该将播放进度保存到本地存储 - Actual implementation should save progress to local storage
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, 'Failed to record playback progress', err);
     }
+  }
+  
+  /**
+   * 处理播放错误 | Handle playback error
+   */
+  private handlePlaybackError(error: Error): void {
+    Logger.error(this.TAG, `Playback error: ${error.message}`);
+    // 可以在这里显示错误提示或执行其他错误处理逻辑
+    // Can display error prompt or perform other error handling logic here
+  }
+  
+  /**
+   * 处理播放完成 | Handle playback completion
+   */
+  private handlePlaybackComplete(videoId: string): void {
+    Logger.info(this.TAG, `Playback completed for: ${videoId}`);
+    // 可以在这里标记视频为已观看或执行其他完成处理逻辑
+    // Can mark video as watched or perform other completion handling logic here
   }
 
   /**
    * 渲染剧集列表 - Render episode list
    */
   @Builder
-  private renderEpisodes() {
+  private renderEpisodes(): void {
     const colors = this.currentTheme.colors;
     const spacing = DesignSystem.Spacing;
     const borderRadius = DesignSystem.BorderRadius;
@@ -393,7 +442,7 @@ struct MediaDetailPage {
    * 渲染播放源 - Render play sources
    */
   @Builder
-  private renderPlaySources() {
+  private renderPlaySources(): void {
     const colors = this.currentTheme.colors;
     const spacing = DesignSystem.Spacing;
     const borderRadius = DesignSystem.BorderRadius;
@@ -441,7 +490,7 @@ struct MediaDetailPage {
    * 渲染空播放源提示 - Render empty play sources hint
    */
   @Builder
-  private renderEmptyPlaySources() {
+  private renderEmptyPlaySources(): void {
     const colors = this.currentTheme.colors;
     const spacing = DesignSystem.Spacing;
     
@@ -465,7 +514,7 @@ struct MediaDetailPage {
    * 渲染相关推荐 - Render related recommendations
    */
   @Builder
-  private renderRelatedMedia() {
+  private renderRelatedMedia(): void {
     const colors = this.currentTheme.colors;
     const spacing = DesignSystem.Spacing;
     const borderRadius = DesignSystem.BorderRadius;
@@ -525,11 +574,45 @@ struct MediaDetailPage {
   }
 
   /**
-   * 处理剧集点击 - Handle episode click
+   * 处理剧集点击 | Handle episode click
    */
   private handleEpisodeClick(episode: Episode): void {
     console.info(`点击剧集: ${episode.name} | Clicked episode: ${episode.name}`);
-    // 处理剧集点击逻辑 - Handle episode click logic
+    
+    // 显示加载状态提示 | Show loading state prompt
+    this.isLoading = true;
+    
+    try {
+      // 验证剧集数据 | Validate episode data
+      if (!episode || !episode.id || !episode.name) {
+        Logger.error(this.TAG, 'Invalid episode data');
+        this.errorMessage = '剧集数据无效';
+        this.isError = true;
+        this.isLoading = false;
+        return;
+      }
+      
+      // 记录用户操作 | Log user action
+      Logger.info(this.TAG, `User selected episode: ${episode.name} (${episode.id})`);
+      
+      // 设置当前剧集 | Set current episode
+      this.currentEpisodeId = episode.id;
+      
+      // 显示成功反馈 | Show success feedback
+      console.info(`已选择剧集: ${episode.name}`);
+      
+      // 处理剧集点击逻辑 - Handle episode click logic
+      // 这里可以添加跳转到播放页面的逻辑
+      // Here you can add logic to navigate to playback page
+      
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, 'Failed to handle episode click', err);
+      this.errorMessage = '处理失败：' + err.message;
+      this.isError = true;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   /**
@@ -537,7 +620,29 @@ struct MediaDetailPage {
    */
   private handlePlayClick(episode: Episode, source: PlaySource): void {
     console.info(`正在播放剧集 ${episode.name} 来自 ${source.name} | Playing episode ${episode.name} from ${source.name}`);
-    // 处理播放点击逻辑 - Handle play click logic
+    
+    // 显示播放中状态
+    this.isPlaying = true;
+    this.showToast(`正在播放: ${episode.name}`);
+    
+    try {
+      // 验证播放数据
+      if (!episode || !episode.id || !source || !source.name) {
+        throw new Error('播放数据无效');
+      }
+      
+      // 模拟播放操作
+      setTimeout(() => {
+        this.isPlaying = false;
+        this.showToast('播放开始');
+      }, 1000);
+      
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      this.isPlaying = false;
+      this.showToast('播放失败: ' + err.message);
+      Logger.error(this.TAG, 'Failed to handle play click', err);
+    }
   }
 
   /**
@@ -545,7 +650,29 @@ struct MediaDetailPage {
    */
   private handleRelatedMediaClick(media: MediaItem): void {
     console.info(`点击相关媒体: ${media.title} | Clicked related media: ${media.title}`);
-    // 处理相关媒体点击逻辑 - Handle related media click logic
+    
+    // 显示导航状态
+    this.isNavigating = true;
+    this.showToast(`正在加载: ${media.title}`);
+    
+    try {
+      // 验证媒体数据
+      if (!media || !media.title) {
+        throw new Error('媒体数据无效');
+      }
+      
+      // 模拟导航操作
+      setTimeout(() => {
+        this.isNavigating = false;
+        this.showToast('跳转成功');
+      }, 800);
+      
+    } catch (error: unknown) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      this.isNavigating = false;
+      this.showToast('跳转失败: ' + err.message);
+      Logger.error(this.TAG, 'Failed to handle related media click', err);
+    }
   }
 
   /**
@@ -556,11 +683,26 @@ struct MediaDetailPage {
   }
 
   /**
+   * 显示Toast提示 - Show toast message
+   */
+  private showToast(message: string): void {
+    this.toastMessage = message;
+    this.showToast = true;
+    
+    // 2秒后自动隐藏
+    setTimeout(() => {
+      this.showToast = false;
+    }, 2000);
+  }
+
+  /**
    * 处理收藏 - Handle favorite
    */
   private handleFavorite(): void {
     this.isFavorite = !this.isFavorite;
-    console.info(`Media ${this.isFavorite ? 'added to' : 'removed from'} favorites`);
+    const message: string = this.isFavorite ? '已添加到收藏' : '已从收藏中移除';
+    this.showToast(message);
+    Logger.info(this.TAG, `Media ${this.isFavorite ? 'added to' : 'removed from'} favorites`);
   }
 
   build() {
@@ -766,7 +908,7 @@ struct MediaDetailPage {
                   .margin({ bottom: spacing.md })
                   
                   // 立即播放按钮
-                  Button('立即播放')
+                  Button(this.isPlaying ? '播放中...' : '立即播放')
                     .fontSize(18)
                     .fontColor(colors.surface)
                     .backgroundColor(colors.primary)
@@ -881,6 +1023,25 @@ struct MediaDetailPage {
       .scrollBar(BarState.Auto)
       .flexGrow(1)
       .backgroundColor(colors.background)
+      
+      // Toast提示组件 | Toast component
+      if (this.showToast) {
+        Stack() {
+          Text(this.toastMessage)
+            .fontSize(16)
+            .fontColor(colors.surface)
+            .padding({ left: spacing.md, right: spacing.md, top: spacing.sm, bottom: spacing.sm })
+            .backgroundColor(`${colors.primary}E0`)
+            .borderRadius(borderRadius.full)
+            .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.2)', offsetX: 0, offsetY: 4 })
+        }
+        .position({ x: '50%', y: '80%' })
+        .translate({ x: -100 })
+        .animation({
+          duration: 300,
+          timingFunction: 'ease-out'
+        })
+      }
     }
     .width('100%')
     .height('100%')

@@ -348,14 +348,21 @@ export class AppNavigator {
       historyItem.title = title || this.getRouteDefaultTitle(route);
       this.addToHistory(historyItem);
 
-      // 使用router.pushUrl API - 新版本需要添加模式参数
+      // 使用router.pushUrl API - 新版本需要添加模式参数和动画选项
       const routerParams = params instanceof NavigationParamsImpl ?
         params.toObject() :
         (params || {} as Record<string, string | number | boolean | null>);
       await router.pushUrl({
         url: url,
         params: routerParams
-      }, router.RouterMode.Standard);
+      }, router.RouterMode.Standard, {
+        transition: {
+          type: router.TransitionType.Slide,
+          duration: 300,
+          curve: router.CurveType.EaseOut,
+          delay: 0
+        }
+      });
     } catch (error) {
       console.error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
       throw new Error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
@@ -367,8 +374,15 @@ export class AppNavigator {
    */
   async navigateToBack(): Promise<void> {
     try {
-      // 使用最新的router.back API
-      await router.back();
+      // 使用最新的router.back API，添加动画选项
+      await router.back({
+        transition: {
+          type: router.TransitionType.Slide,
+          duration: 300,
+          curve: router.CurveType.EaseOut,
+          delay: 0
+        }
+      });
       this.removeLastFromHistory();
     } catch (error) {
       console.error('Navigation back failed: ' + (error instanceof Error ? error.message : String(error)));
@@ -403,14 +417,21 @@ export class AppNavigator {
   async replace(route: string, params?: NavigationParams, title?: string): Promise<void> {
     try {
       const url = this.getPageUrl(route);
-      // 使用router.replaceUrl API - 添加模式参数
+      // 使用router.replaceUrl API - 添加模式参数和动画选项
       const routerParams = params instanceof NavigationParamsImpl ?
         params.toObject() :
         (params || {} as Record<string, string | number | boolean | null>);
       await router.replaceUrl({
         url: url,
         params: routerParams
-      }, router.RouterMode.Standard);
+      }, router.RouterMode.Standard, {
+        transition: {
+          type: router.TransitionType.Fade,
+          duration: 300,
+          curve: router.CurveType.EaseOut,
+          delay: 0
+        }
+      });
       
       // 创建符合接口定义的历史记录
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();
