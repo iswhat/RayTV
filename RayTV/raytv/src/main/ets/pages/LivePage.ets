@@ -271,7 +271,7 @@ struct LivePage {
     try {
       this.isLoading = true;
       this.isError = false;
-      Logger.info(this.TAG, 'Loading live content...');
+      Logger.info(this.TAG, Strings.livePage.loading);
       
       // 从ContentAccessService获取直播数据
       const allChannels = this.contentService.getAllLiveChannels();
@@ -302,8 +302,8 @@ struct LivePage {
       } else {
         // 无直播数据 | No live data
         this.isError = true;
-        this.errorMessage = '未配置直播源，请在设置中添加网络源';
-        Logger.warn(this.TAG, 'No live data configured');
+        this.errorMessage = Strings.livePage.noData;
+        Logger.warn(this.TAG, Strings.livePage.noData);
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
