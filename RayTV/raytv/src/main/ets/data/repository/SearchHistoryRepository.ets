@@ -1,7 +1,7 @@
 // SearchHistoryRepository - 搜索历史仓库 | Search history repository
 // 负责管理用户的搜索历史数据，包括保存、获取、删除搜索记录等 | Manages user search history data, including saving, retrieving, deleting search records, etc.
 
-import StorageUtil, { StorageType } from '../../common/util/StorageUtil';
+import StorageUtil, { StorageObject, SearchHistoryConfig as StorageSearchHistoryConfig } from '../../common/util/StorageUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
 
 /**
@@ -114,7 +114,7 @@ export interface FavoriteToggleEventData {
 export interface SearchHistoryImportData {
   history?: SearchHistoryItem[];
   favorites?: SearchHistoryItem[];
-  config?: { maxHistoryItems?: number; maxFavoriteItems?: number; autoClearDays?: number; enableAutoComplete?: boolean; enableRecentSearches?: boolean; enableFavorites?: boolean };
+  config?: SearchHistoryConfig;
 }
 
 /**
@@ -254,7 +254,7 @@ export class SearchHistoryRepository {
       
       // 检查是否启用搜索历史 | Check if search history is enabled
       if (!config.enableRecentSearches) {
-        return {
+        const noHistoryItem: SearchHistoryItem = {
           id: this.generateId(),
           query: trimmedQuery,
           type,
@@ -262,6 +262,7 @@ export class SearchHistoryRepository {
           resultCount,
           category
         };
+        return noHistoryItem;
       }
       
       // 加载现有历史记录 | Load existing history records
@@ -299,12 +300,11 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
-      await StorageUtil.setObject(
+      await StorageUtil.putString(
         this.storageKeys.searchHistory,
-        history,
-        StorageType.PREFERENCES
+        JSON.stringify(history)
       );
-      
+
       // 发布搜索历史添加事件 | Publish search history added event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_ADDED);
       
@@ -312,8 +312,9 @@ export class SearchHistoryRepository {
       
       return newItem;
     } catch (error) {
-      console.error('SearchHistoryRepository: 保存搜索历史失败 | Failed to save search history', error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 保存搜索历史失败 | Failed to save search history', err);
+      throw err;
     }
   }
 
@@ -382,21 +383,21 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
-      await StorageUtil.setObject(
+      await StorageUtil.putString(
         this.storageKeys.searchHistory,
-        history,
-        StorageType.PREFERENCES
+        JSON.stringify(history)
       );
-      
+
       // 发布搜索历史删除事件 | Publish search history deleted event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_HISTORY_DELETED);
       
-      console.debug(`SearchHistoryRepository: 已删除搜索历史项: ${id} | Search history item deleted: ${id}`);
+      console.debug(`SearchHistoryRepository: 已删除搜索历史项：${id} | Search history item deleted: ${id}`);
       
       return true;
     } catch (error) {
-      console.error(`SearchHistoryRepository: 删除搜索历史项 ${id} 失败 | Failed to delete search history item ${id}`, error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error(`SearchHistoryRepository: 删除搜索历史项 ${id} 失败 | Failed to delete search history item ${id}`, err);
+      throw err;
     }
   }
 
@@ -416,12 +417,11 @@ export class SearchHistoryRepository {
       
       // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = history;
-      await StorageUtil.setObject(
-        this.storageKeys.searchHistory, 
-        history,
-        StorageType.PREFERENCES
+      await StorageUtil.putString(
+        this.storageKeys.searchHistory,
+        JSON.stringify(history)
       );
-      
+
       // 清除最近搜索缓存 | Clear recent searches cache
       await this.clearRecentSearches();
       
@@ -442,7 +442,7 @@ export class SearchHistoryRepository {
    */
   private async clearRecentSearches(): Promise<void> {
     try {
-      await StorageUtil.remove(this.storageKeys.recentSearches, StorageType.PREFERENCES);
+      await StorageUtil.remove(this.storageKeys.recentSearches);
     } catch (error) {
       console.warn('SearchHistoryRepository: 清除最近搜索失败 | Failed to clear recent searches', error instanceof Error ? error : new Error(String(error)));
     }
@@ -497,18 +497,16 @@ export class SearchHistoryRepository {
       this.cachedHistory = history;
       this.cachedFavorites = favorites;
       
-      await StorageUtil.setObject(
+      await StorageUtil.putString(
         this.storageKeys.searchHistory,
-        history,
-        StorageType.PREFERENCES
+        JSON.stringify(history)
       );
-      
-      await StorageUtil.setObject(
+
+      await StorageUtil.putString(
         this.storageKeys.favoriteSearches,
-        favorites,
-        StorageType.PREFERENCES
+        JSON.stringify(favorites)
       );
-      
+
       // 发布收藏状态变更事件 | Publish favorite status changed event
       this.eventBus.emit(SearchHistoryEventType.SEARCH_FAVORITE_TOGGLED);
       
@@ -516,8 +514,9 @@ export class SearchHistoryRepository {
       
       return item;
     } catch (error) {
-      console.error(`SearchHistoryRepository: 切换搜索历史项 ${id} 的收藏状态失败 | Failed to toggle favorite for search history item ${id}`, error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error(`SearchHistoryRepository: 切换搜索历史项 ${id} 的收藏状态失败 | Failed to toggle favorite for search history item ${id}`, err);
+      throw err;
     }
   }
 
@@ -564,15 +563,15 @@ export class SearchHistoryRepository {
       // 保存更新后的历史记录 | Save updated history records
       this.cachedHistory = updatedHistory;
       this.cachedFavorites = [];
-      
-      await StorageUtil.setObject(
+
+      await StorageUtil.putString(
         this.storageKeys.searchHistory,
-        updatedHistory
+        JSON.stringify(updatedHistory)
       );
-      
-      await StorageUtil.setObject(
+
+      await StorageUtil.putString(
         this.storageKeys.favoriteSearches,
-        []
+        JSON.stringify([])
       );
       
       console.info('SearchHistoryRepository: 所有收藏搜索已清除 | All favorite searches cleared');
@@ -652,9 +651,12 @@ export class SearchHistoryRepository {
       
       // 保存配置 | Save configuration
       this.cachedConfig = updatedConfig;
+      const storageObj: StorageObject = {
+        searchHistoryConfig: updatedConfig as unknown as StorageSearchHistoryConfig
+      };
       await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
-        updatedConfig
+        storageObj
       );
       
       // 根据新配置清理数据 | Clean up data based on new configuration
@@ -667,8 +669,9 @@ export class SearchHistoryRepository {
       
       return updatedConfig;
     } catch (error) {
-      console.error('SearchHistoryRepository: 设置搜索历史配置失败 | Failed to set search history config', error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 设置搜索历史配置失败 | Failed to set search history config', err);
+      throw err;
     }
   }
 
@@ -683,7 +686,7 @@ export class SearchHistoryRepository {
       }
       
       // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
-      return {
+      const configCopy: SearchHistoryConfig = {
         maxHistoryItems: this.cachedConfig!.maxHistoryItems,
         maxFavoriteItems: this.cachedConfig!.maxFavoriteItems,
         autoClearDays: this.cachedConfig!.autoClearDays,
@@ -691,10 +694,11 @@ export class SearchHistoryRepository {
         enableRecentSearches: this.cachedConfig!.enableRecentSearches,
         enableFavorites: this.cachedConfig!.enableFavorites
       };
+      return configCopy;
     } catch (error) {
       console.error('SearchHistoryRepository: 获取搜索历史配置失败 | Failed to get search history config', error instanceof Error ? error : new Error(String(error)));
       // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
-      return {
+      const defaultConfigCopy: SearchHistoryConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
         maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
         autoClearDays: this.defaultConfig.autoClearDays,
@@ -702,6 +706,7 @@ export class SearchHistoryRepository {
         enableRecentSearches: this.defaultConfig.enableRecentSearches,
         enableFavorites: this.defaultConfig.enableFavorites
       };
+      return defaultConfigCopy;
     }
   }
 
@@ -719,14 +724,17 @@ export class SearchHistoryRepository {
         enableRecentSearches: this.defaultConfig.enableRecentSearches,
         enableFavorites: this.defaultConfig.enableFavorites
       };
+      const storageObj: StorageObject = {
+        searchHistoryConfig: this.defaultConfig as unknown as StorageSearchHistoryConfig
+      };
       await StorageUtil.setObject(
         this.storageKeys.searchHistoryConfig,
-        this.defaultConfig
+        storageObj
       );
       
       console.info('SearchHistoryRepository: 搜索历史配置已重置为默认值 | Search history configuration reset to default');
-    
-      return {
+
+      const resetConfigResult: SearchHistoryConfig = {
         maxHistoryItems: this.defaultConfig.maxHistoryItems,
         maxFavoriteItems: this.defaultConfig.maxFavoriteItems,
         autoClearDays: this.defaultConfig.autoClearDays,
@@ -734,9 +742,11 @@ export class SearchHistoryRepository {
         enableRecentSearches: this.defaultConfig.enableRecentSearches,
         enableFavorites: this.defaultConfig.enableFavorites
       };
+      return resetConfigResult;
     } catch (error) {
-      console.error('SearchHistoryRepository: 重置搜索历史配置失败 | Failed to reset search history config', error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 重置搜索历史配置失败 | Failed to reset search history config', err);
+      throw err;
     }
   }
 
@@ -745,11 +755,9 @@ export class SearchHistoryRepository {
    */
   private async loadHistory(): Promise<void> {
     try {
-      const historyResult: SearchHistoryItem[] | null = await StorageUtil.getObject<SearchHistoryItem[]>(
-        this.storageKeys.searchHistory
-      );
-      
-      this.cachedHistory = historyResult || [];
+      const historyStr: string = await StorageUtil.getString(this.storageKeys.searchHistory, '[]');
+      const historyData: SearchHistoryItem[] | null = Array.isArray(JSON.parse(historyStr)) ? JSON.parse(historyStr) as SearchHistoryItem[] : null;
+      this.cachedHistory = historyData || [];
       console.debug(`SearchHistoryRepository: 已加载 ${this.cachedHistory.length} 个搜索历史项 | Loaded ${this.cachedHistory.length} search history items`);
     } catch (error) {
       console.error('SearchHistoryRepository: 加载搜索历史失败 | Failed to load search history', error instanceof Error ? error : new Error(String(error)));
@@ -762,12 +770,9 @@ export class SearchHistoryRepository {
    */
   private async loadFavorites(): Promise<void> {
     try {
-      const favoritesResult: SearchHistoryItem[] | null = await StorageUtil.getObject<SearchHistoryItem[]>(
-        this.storageKeys.favoriteSearches, 
-        StorageType.PREFERENCES
-      );
-      
-      this.cachedFavorites = favoritesResult || [];
+      const favoritesStr: string = await StorageUtil.getString(this.storageKeys.favoriteSearches, '[]');
+      const favoritesData: SearchHistoryItem[] | null = Array.isArray(JSON.parse(favoritesStr)) ? JSON.parse(favoritesStr) as SearchHistoryItem[] : null;
+      this.cachedFavorites = favoritesData || [];
       console.debug(`SearchHistoryRepository: 已加载 ${this.cachedFavorites.length} 个收藏搜索项 | Loaded ${this.cachedFavorites.length} favorite searches`);
     } catch (error) {
       console.error('SearchHistoryRepository: 加载收藏搜索失败 | Failed to load favorite searches', error instanceof Error ? error : new Error(String(error)));
@@ -780,20 +785,20 @@ export class SearchHistoryRepository {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const configResult: SearchHistoryConfig | null = await StorageUtil.getObject<SearchHistoryConfig>(
-        this.storageKeys.searchHistoryConfig, 
-        StorageType.PREFERENCES
+      const configResult: StorageObject | null = await StorageUtil.getObject<StorageObject>(
+        this.storageKeys.searchHistoryConfig
       );
+      const configData: StorageSearchHistoryConfig | null = configResult ? (configResult.searchHistoryConfig as unknown as StorageSearchHistoryConfig) || null : null;
       
       // 使用手动属性复制替代Object.assign | Use manual property copy instead of Object.assign
-      if (configResult) {
+      if (configData) {
         this.cachedConfig = {
-          maxHistoryItems: configResult.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
-          maxFavoriteItems: configResult.maxFavoriteItems ?? this.defaultConfig.maxFavoriteItems,
-          autoClearDays: configResult.autoClearDays ?? this.defaultConfig.autoClearDays,
-          enableAutoComplete: configResult.enableAutoComplete ?? this.defaultConfig.enableAutoComplete,
-          enableRecentSearches: configResult.enableRecentSearches ?? this.defaultConfig.enableRecentSearches,
-          enableFavorites: configResult.enableFavorites ?? this.defaultConfig.enableFavorites
+          maxHistoryItems: configData.maxHistoryItems ?? this.defaultConfig.maxHistoryItems,
+          maxFavoriteItems: configData.maxFavoriteItems ?? this.defaultConfig.maxFavoriteItems,
+          autoClearDays: configData.autoClearDays ?? this.defaultConfig.autoClearDays,
+          enableAutoComplete: configData.enableAutoComplete ?? this.defaultConfig.enableAutoComplete,
+          enableRecentSearches: configData.enableRecentSearches ?? this.defaultConfig.enableRecentSearches,
+          enableFavorites: configData.enableFavorites ?? this.defaultConfig.enableFavorites
         };
       } else {
         // 使用手动属性复制替代Object.assign和扩展运算符 | Use manual property copy instead of Object.assign and spread operator
@@ -830,27 +835,28 @@ export class SearchHistoryRepository {
    */
   private async saveData(): Promise<void> {
     try {
+      const configObj: StorageObject = {
+        searchHistoryConfig: (this.cachedConfig || this.defaultConfig) as unknown as StorageSearchHistoryConfig
+      };
       await Promise.all([
-        StorageUtil.setObject(
-          this.storageKeys.searchHistory, 
-          this.cachedHistory || [],
-          StorageType.PREFERENCES
+        StorageUtil.putString(
+          this.storageKeys.searchHistory,
+          JSON.stringify(this.cachedHistory)
         ),
-        StorageUtil.setObject(
+        StorageUtil.putString(
           this.storageKeys.favoriteSearches,
-          this.cachedFavorites || [],
-          StorageType.PREFERENCES
+          JSON.stringify(this.cachedFavorites)
         ),
         StorageUtil.setObject(
           this.storageKeys.searchHistoryConfig,
-          this.cachedConfig || this.defaultConfig,
-          StorageType.PREFERENCES
+          configObj
         )
       ]);
       
       console.debug('SearchHistoryRepository: 搜索历史数据已保存 | Search history data saved');
     } catch (error) {
-      console.error('SearchHistoryRepository: 保存搜索历史数据失败 | Failed to save search history data', error instanceof Error ? error : new Error(String(error)));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 保存搜索历史数据失败 | Failed to save search history data', err);
     }
   }
 
@@ -877,12 +883,11 @@ export class SearchHistoryRepository {
       // 如果有变化，保存更新后的历史记录 | If there are changes, save updated history records
       if (filteredHistory.length !== history.length) {
         this.cachedHistory = filteredHistory;
-        await StorageUtil.setObject(
+        await StorageUtil.putString(
           this.storageKeys.searchHistory,
-          filteredHistory,
-          StorageType.PREFERENCES
+          JSON.stringify(filteredHistory)
         );
-        
+
         console.info(`SearchHistoryRepository: 已清理 ${history.length - filteredHistory.length} 个过期搜索历史项 | Cleaned up ${history.length - filteredHistory.length} expired search history items`);
       }
     } catch (error) {
@@ -904,21 +909,20 @@ export class SearchHistoryRepository {
         if (history.length > newConfig.maxHistoryItems) {
           const filteredHistory = history.slice(0, newConfig.maxHistoryItems);
           this.cachedHistory = filteredHistory;
-          await StorageUtil.setObject(
+          await StorageUtil.putString(
             this.storageKeys.searchHistory,
-            filteredHistory,
-            StorageType.PREFERENCES
+            JSON.stringify(filteredHistory)
           );
         }
       }
-      
+
       // 检查收藏数量限制是否改变 | Check if favorite items count limit changed
       if (oldConfig.maxFavoriteItems !== newConfig.maxFavoriteItems) {
         const favorites = await this.getFavorites();
         if (favorites.length > newConfig.maxFavoriteItems) {
           const filteredFavorites = favorites.slice(0, newConfig.maxFavoriteItems);
           this.cachedFavorites = filteredFavorites;
-          
+
           // 更新历史记录中的收藏状态 | Update favorite status in history records
           const history = await this.getHistory();
           const updatedHistory = history.map(item => {
@@ -934,17 +938,15 @@ export class SearchHistoryRepository {
             };
             return updatedItem;
           });
-          
+
           this.cachedHistory = updatedHistory;
-          await StorageUtil.setObject(
+          await StorageUtil.putString(
             this.storageKeys.favoriteSearches,
-            filteredFavorites,
-            StorageType.PREFERENCES
+            JSON.stringify(filteredFavorites)
           );
-          await StorageUtil.setObject(
+          await StorageUtil.putString(
             this.storageKeys.searchHistory,
-            updatedHistory,
-            StorageType.PREFERENCES
+            JSON.stringify(updatedHistory)
           );
         }
       }
@@ -999,8 +1001,9 @@ export class SearchHistoryRepository {
       
       return data;
     } catch (error) {
-      console.error('SearchHistoryRepository: 导出搜索历史数据失败 | Failed to export search history data', error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 导出搜索历史数据失败 | Failed to export search history data', err);
+      throw err;
     }
   }
 
@@ -1038,10 +1041,12 @@ export class SearchHistoryRepository {
         this.validateConfig(mergedConfig);
         this.cachedConfig = mergedConfig;
         
+        const configObj: StorageObject = {
+          searchHistoryConfig: mergedConfig as unknown as StorageSearchHistoryConfig
+        };
         await StorageUtil.setObject(
           this.storageKeys.searchHistoryConfig,
-          mergedConfig,
-          StorageType.PREFERENCES
+          configObj
         );
       }
       
@@ -1090,13 +1095,12 @@ export class SearchHistoryRepository {
         }
         
         this.cachedHistory = finalHistory;
-        await StorageUtil.setObject(
+        await StorageUtil.putString(
           this.storageKeys.searchHistory,
-          finalHistory,
-          StorageType.PREFERENCES
+          JSON.stringify(finalHistory)
         );
       }
-      
+
       // 处理收藏导入 | Process favorites import
       if (data.favorites && Array.isArray(data.favorites)) {
         const processedFavorites = data.favorites
@@ -1145,13 +1149,12 @@ export class SearchHistoryRepository {
         }
         
         this.cachedFavorites = finalFavorites;
-        await StorageUtil.setObject(
+        await StorageUtil.putString(
           this.storageKeys.favoriteSearches,
-          finalFavorites,
-          StorageType.PREFERENCES
+          JSON.stringify(finalFavorites)
         );
       }
-      
+
       // 更新历史记录中的收藏状态 | Update favorite status in history records
       if (data.favorites) {
         const history = await this.getHistory();
@@ -1171,17 +1174,17 @@ export class SearchHistoryRepository {
         });
         
         this.cachedHistory = updatedHistory;
-        await StorageUtil.setObject(
+        await StorageUtil.putString(
           this.storageKeys.searchHistory,
-          updatedHistory,
-          StorageType.PREFERENCES
+          JSON.stringify(updatedHistory)
         );
       }
-      
+
       console.info('SearchHistoryRepository: 搜索历史数据导入成功 | Search history data imported successfully');
     } catch (error) {
-      console.error('SearchHistoryRepository: 导入搜索历史数据失败 | Failed to import search history data', error instanceof Error ? error : new Error(String(error)));
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.error('SearchHistoryRepository: 导入搜索历史数据失败 | Failed to import search history data', err);
+      throw err;
     }
   }
 
@@ -1207,7 +1210,7 @@ export class SearchHistoryRepository {
       item.type : 
       SearchType.ALL;
     
-    return {
+    const normalizedItem: SearchHistoryItem = {
       id: item.id || this.generateId(),
       query: item.query || '',
       type: normalizedType,
@@ -1216,6 +1219,7 @@ export class SearchHistoryRepository {
       category: item.category || '',
       isFavorite: item.isFavorite || false
     };
+    return normalizedItem;
   }
 }
 

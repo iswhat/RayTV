@@ -1,15 +1,22 @@
 import { VirtualListItem, VirtualListConfig, VirtualListState, VirtualListEvents } from '../types/VirtualListTypes';
-import { ScrollDirection, EdgeEffect, BarState, ScrollEvent } from '@ohos.arkui';
+
+/**
+ * 滚动偏移量接口
+ */
+interface ScrollOffset {
+  xOffset: number;
+  yOffset: number;
+}
 
 /**
  * 虚拟列表组件
  * 高性能长列表渲染解决方案
  */
 @Component
-struct VirtualList {
+export struct VirtualList {
   @State private visibleItems: VirtualListItem[] = [];
-  @State private scrollTop: number = 0;
-  @State private scrollLeft: number = 0;
+  @State @Watch('onVerticalScrollChange') private scrollTop: number = 0;
+  @State @Watch('onHorizontalScrollChange') private scrollLeft: number = 0;
   @State private containerHeight: number = 0;
   @State private containerWidth: number = 0;
   
@@ -22,7 +29,7 @@ struct VirtualList {
   private totalWidth: number = 0;
 
   // 组件属性
-  @Prop items: VirtualListItem[] = [];
+  @Prop @Watch('onItemsChange') items: VirtualListItem[] = [];
   @Prop estimatedItemHeight: number = 60;
   @Prop estimatedItemWidth: number = 200;
   @Prop bufferSize: number = 5;
@@ -43,13 +50,11 @@ struct VirtualList {
     this.updateVisibleItems();
   }
 
-  @Watch('items')
   onItemsChange(): void {
     this.calculateTotalSize();
     this.updateVisibleItems();
   }
 
-  @Watch('scrollTop')
   onVerticalScrollChange(): void {
     if (this.scrollDirection === ScrollDirection.Vertical) {
       this.updateVisibleItems();
@@ -57,7 +62,6 @@ struct VirtualList {
     }
   }
 
-  @Watch('scrollLeft')
   onHorizontalScrollChange(): void {
     if (this.scrollDirection === ScrollDirection.Horizontal) {
       this.updateVisibleItems();
@@ -107,7 +111,7 @@ struct VirtualList {
     startIndex = Math.max(0, startIndex - this.bufferCount);
     endIndex = Math.min(this.items.length - 1, endIndex + this.bufferCount);
 
-    const newVisibleItems = [];
+    const newVisibleItems: VirtualListItem[] = [];
     const visibleItemIds = new Set(this.visibleItems.map(item => item.id));
     const newVisibleItemIds = new Set<string>();
 
@@ -273,8 +277,8 @@ struct VirtualList {
           Blank()
             .height(`${this.getEndOffset()}px`)
         }
-        .onAreaChange((oldArea: AreaInfo, newArea: AreaInfo) => {
-          this.containerHeight = newArea.height;
+        .onAreaChange((oldArea: Area, newArea: Area) => {
+          this.containerHeight = newArea.height as number;
           this.updateVisibleItems();
         })
       } else {
@@ -289,7 +293,7 @@ struct VirtualList {
               this.renderItem(item, item.index)
             }
             .key(this.getItemKey(item))
-            .position({ x: item.left - this.getStartOffsetHorizontal(), y: 0 })
+            .position({ x: (item.left || 0) - this.getStartOffsetHorizontal(), y: 0 })
             .width(`${item.width || this.itemWidth}px`)
             .onClick(() => this.handleItemClick(item))
           }, (item: VirtualListItem) => this.getItemKey(item))
@@ -298,14 +302,15 @@ struct VirtualList {
           Blank()
             .width(`${this.getEndOffsetHorizontal()}px`)
         }
-        .onAreaChange((oldArea: AreaInfo, newArea: AreaInfo) => {
-          this.containerWidth = newArea.width;
+        .onAreaChange((oldArea: Area, newArea: Area) => {
+          this.containerWidth = newArea.width as number;
           this.updateVisibleItems();
         })
       }
     }
-    .onScroll((event: ScrollEvent) => {
-      this.handleScroll({ offset: event.offset });
+    .onScroll((xOffset: number, yOffset: number) => {
+      const offset: ScrollOffset = { xOffset: xOffset, yOffset: yOffset };
+      this.handleScroll(offset);
     })
     .scrollable(this.scrollDirection)
     .scrollBar(BarState.Auto)

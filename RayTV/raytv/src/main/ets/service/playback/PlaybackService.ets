@@ -31,6 +31,7 @@ import Logger from '../../common/util/Logger';
 import ConfigService from '../config/ConfigService';
 import HistoryManager from './HistoryManager';
 import PlaybackErrorHandler from './PlaybackErrorHandler';
+import HttpService from '../HttpService';
 import AVPlay from '@ohos.multimedia.media';
 import AudioManager from '@ohos.multimedia.audio';
 import AudioRendererInfo from '@ohos.multimedia.audio';
@@ -297,6 +298,9 @@ type BufferingStateListener = (info: BufferingInfo) => void;
 // 播放队列变化监听器类型 | Playback queue change listener type
 type PlaybackQueueListener = (queue: PlaybackItem[], currentIndex: number) => void;
 
+// 画中画状态监听器类型 | Picture-in-picture state listener type
+type PipStateListener = (isPip: boolean, position?: { x: number; y: number; width: number; height: number }) => void;
+
 export default class PlaybackService {
   private static instance: PlaybackService;
   private configService: ConfigService;
@@ -337,8 +341,6 @@ export default class PlaybackService {
   private bufferingListeners: BufferingStateListener[] = [];
   private queueListeners: PlaybackQueueListener[] = [];
   
-  // 画中画状态监听器类型 | Picture-in-picture state listener type
-  type PipStateListener = (isPip: boolean, position?: { x: number; y: number; width: number; height: number }) => void;
   private pipStateListeners: PipStateListener[] = [];
 
   /**
@@ -844,14 +846,14 @@ export default class PlaybackService {
     this.updatePlaybackState(PlaybackState.COMPLETED);
     
     // 保存播放历史 Save playback history
-    this.savePlaybackPosition().catch((error: unknown) => {
+    this.savePlaybackPosition().catch((error: string) => {
       Logger.error(TAG, `Failed to save playback history on complete: ${error}`);
     });
     
     // 检查是否有下一个播放项 Check if there's a next item in queue
     if (this.currentQueueIndex < this.playbackQueue.length - 1) {
       // 自动播放下一个 Auto play next
-      this.playNext().catch((error: unknown) => {
+      this.playNext().catch((error: string) => {
         Logger.error(TAG, `Failed to play next item: ${error}`);
       });
     }
@@ -894,14 +896,14 @@ export default class PlaybackService {
           this.avPlayInstance.off('error');
           this.avPlayInstance.off('bufferingChange');
           this.avPlayInstance.off('playbackComplete');
-        } catch (error: unknown) {
+        } catch (error) {
           Logger.warn(TAG, `Failed to remove event listeners: ${error}`);
         }
         
         await this.avPlayInstance.release();
         this.avPlayInstance = null;
         Logger.info(TAG, 'AVPlay instance released successfully');
-      } catch (error: unknown) {
+      } catch (error) {
         Logger.error(TAG, `Failed to release AVPlay instance: ${error}`);
         this.avPlayInstance = null;
       }
@@ -953,15 +955,15 @@ export default class PlaybackService {
           
           // 每30秒保存一次播放位置 Save position every 30 seconds
           if (Date.now() - this.lastPositionUpdateTime > 30000) {
-            this.savePlaybackPosition().catch((error: unknown) => {
+            this.savePlaybackPosition().catch((error: string) => {
               Logger.error(TAG, `Failed to save playback position: ${error}`);
             });
           }
-        } catch (error: unknown) {
+        } catch (error) {
           Logger.error(TAG, `Failed to get playback position: ${error}`);
         }
       }
-    }, 1000) as unknown as number;
+    }, 1000);
   }
 
   /**
@@ -975,7 +977,7 @@ export default class PlaybackService {
     }
     
     // 保存当前位置 Save current position
-    this.savePlaybackPosition().catch((error: unknown) => {
+    this.savePlaybackPosition().catch((error: string) => {
       Logger.error(TAG, `Failed to save playback position on stop: ${error}`);
     });
   }
@@ -1019,7 +1021,7 @@ export default class PlaybackService {
         await this.avPlayInstance.play();
         this.updatePlaybackState(PlaybackState.PLAYING);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to load playback item: ${error}`);
       this.updatePlaybackState(PlaybackState.ERROR);
       throw error;
@@ -1058,7 +1060,7 @@ export default class PlaybackService {
       }
       
       Logger.info(TAG, `Audio route set to: ${route}`);
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to set audio route: ${error}`);
     }
   }
@@ -1089,11 +1091,11 @@ export default class PlaybackService {
       clearInterval(this.networkCheckTimerId);
     }
     
-    // 每5秒检查一次网络质量 | Check network quality every 5 seconds
+    // 每 5 秒检查一次网络质量 | Check network quality every 5 seconds
     this.networkCheckTimerId = setInterval(async () => {
       await this.checkNetworkQuality();
       this.adjustBufferSizeBasedOnNetwork();
-    }, NETWORK_CHECK_INTERVAL) as unknown as number;
+    }, NETWORK_CHECK_INTERVAL);
     
     Logger.info(TAG, 'Network quality monitoring started');
   }
@@ -1126,7 +1128,7 @@ export default class PlaybackService {
       
       Logger.info(TAG, `Network quality: ${this.currentNetworkQuality}, Latency: ${latency}ms`);
       
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to check network quality: ${error}`);
       // 网络检测失败时使用保守设置 | Use conservative settings when network detection fails
       this.currentNetworkQuality = 'fair';
@@ -1138,9 +1140,7 @@ export default class PlaybackService {
    */
   private async measureNetworkLatency(): Promise<number> {
     try {
-      // 导入HttpService
-      const HttpService = await import('../HttpService');
-      const httpService = HttpService.default.getInstance();
+      const httpService = HttpService.getInstance();
       
       // 选择几个可靠的服务器进行测试
       const testEndpoints: string[] = [
@@ -1169,7 +1169,7 @@ export default class PlaybackService {
       
       Logger.info(TAG, `Network latency to ${endpoint}: ${latency}ms`);
       return Math.round(latency);
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.warn(TAG, `Failed to measure network latency: ${error instanceof Error ? error.message : String(error)}`);
       return 100; // 返回默认延迟值 | Return default latency value
     }
@@ -1227,7 +1227,7 @@ export default class PlaybackService {
       
       this.currentVideoQuality = quality;
       Logger.info(TAG, `Applied video quality: ${quality}`);
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to apply video quality: ${error}`);
     }
   }
@@ -1261,7 +1261,7 @@ export default class PlaybackService {
       
       // 如果AVPlay实例已创建，更新缓冲大小 | Update buffer size if AVPlay instance exists
       if (this.avPlayInstance) {
-        this.avPlayInstance.setParameter('cacheSize', newBufferSize.toString()).catch((error: unknown) => {
+        this.avPlayInstance.setParameter('cacheSize', newBufferSize.toString()).catch((error: string) => {
           Logger.error(TAG, `Failed to update buffer size: ${error}`);
         });
       }
@@ -1284,7 +1284,7 @@ export default class PlaybackService {
       // 设置预缓冲时间 | Set pre-buffer duration
       await this.avPlayInstance.setParameter('preBufferDuration', PRE_BUFFER_DURATION.toString());
       Logger.info(TAG, `Pre-buffering enabled with duration: ${PRE_BUFFER_DURATION}s`);
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to enable pre-buffering: ${error}`);
     }
   }
@@ -1347,7 +1347,7 @@ export default class PlaybackService {
       this.isInitialized = false;
       
       Logger.info(TAG, 'Playback service resources cleaned up successfully');
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(TAG, `Failed to cleanup playback service: ${error}`);
     }
   }

@@ -2,7 +2,6 @@
  * TV友好的可聚焦容器组件
  * 提供遥控器友好的焦点管理和视觉反馈
  */
-import { Component, State, Prop, Builder } from '@ohos/arkui'
 import { RemoteControlManager } from './RemoteControlManager'
 
 @Component

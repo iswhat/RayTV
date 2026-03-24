@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 事件总线工具类 // Event Bus Utility Class
  * 提供统一的事件发布订阅机制，支持命名空间、防抖、批量操作等功能 // Provides unified event publishing and subscription mechanism, supporting namespaces, debouncing, batch operations, etc.
  */

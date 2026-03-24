@@ -1,4 +1,4 @@
-// MovieService - 电影/视频服务类 Movie/Video service class
+﻿// MovieService - 电影/视频服务类 Movie/Video service class
 import Logger from '../../common/util/Logger';
 import JsonUtil from '../../common/util/JsonUtil';
 import StorageUtil from '../../common/util/StorageUtil';

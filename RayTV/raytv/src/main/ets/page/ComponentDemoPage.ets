@@ -2,7 +2,6 @@
  * 组件演示页面
  * 展示各种UI组件的使用方法和效果
  */
-import { Column, Row, Text, Scroll, Stack } from '@ohos/arkui'
 import { SimpleButton } from '../component/ui/SimpleButton'
 import { SimpleCard } from '../component/ui/SimpleCard'
 

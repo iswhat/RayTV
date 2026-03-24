@@ -94,19 +94,19 @@ export interface LiveProgramInfo {
  * @returns LiveChannelWithSource对象 | LiveChannelWithSource object
  */
 export function toLiveChannelWithSource(
-  legacy: any,
+  legacy: Record<string, string | undefined>,
   sourceId: string,
   sourceName: string
 ): LiveChannelWithSource {
   return {
-    id: legacy.id || legacy.channelId || '',
-    name: legacy.name || legacy.channelName || '',
-    url: legacy.url || legacy.playUrl || '',
-    group: legacy.groupId || legacy.categoryId || legacy.categoryName || '默认',
+    id: legacy['id'] || legacy['channelId'] || '',
+    name: legacy['name'] || legacy['channelName'] || '',
+    url: legacy['url'] || legacy['playUrl'] || '',
+    group: legacy['groupId'] || legacy['categoryId'] || legacy['categoryName'] || '默认',
     sourceId: sourceId,
     sourceName: sourceName,
-    logo: legacy.logo || legacy.logoUrl,
-    epgUrl: legacy.epg || legacy.epgUrl
+    logo: legacy['logo'] || legacy['logoUrl'],
+    epgUrl: legacy['epg'] || legacy['epgUrl']
   };
 }
 
@@ -118,14 +118,28 @@ export function toLiveChannelWithSource(
  * @param extended 扩展字段 | Extended fields
  * @returns ExtendedLiveChannelWithSource对象 | ExtendedLiveChannelWithSource object
  */
-export function toExtendedLiveChannel(
+export function extendLiveChannel(
   channel: LiveChannelWithSource,
   extended?: Partial<ExtendedLiveChannelWithSource>
 ): ExtendedLiveChannelWithSource {
-  return {
-    ...channel,
-    ...extended
-  } as ExtendedLiveChannelWithSource;
+  const result: ExtendedLiveChannelWithSource = {
+    id: channel.id,
+    name: channel.name,
+    url: channel.url,
+    group: channel.group,
+    sourceId: channel.sourceId,
+    sourceName: channel.sourceName,
+    logo: channel.logo,
+    epgUrl: channel.epgUrl,
+    description: extended?.description,
+    country: extended?.country,
+    language: extended?.language,
+    isFavorite: extended?.isFavorite,
+    viewCount: extended?.viewCount,
+    currentProgram: extended?.currentProgram,
+    nextProgram: extended?.nextProgram
+  };
+  return result;
 }
 
 /**
@@ -135,9 +149,11 @@ export function toExtendedLiveChannel(
  * @param channel 待验证的频道对象 | Channel object to validate
  * @returns 是否有效 | Whether valid
  */
-export function isValidLiveChannel(channel: any): channel is LiveChannelWithSource {
-  return (
-    channel &&
+export function isValidLiveChannel(channel: LiveChannelWithSource | null | undefined): boolean {
+  if (!channel) {
+    return false;
+  }
+  const isValid: boolean = (
     typeof channel.id === 'string' && channel.id.length > 0 &&
     typeof channel.name === 'string' && channel.name.length > 0 &&
     typeof channel.url === 'string' && channel.url.length > 0 &&
@@ -145,6 +161,7 @@ export function isValidLiveChannel(channel: any): channel is LiveChannelWithSour
     typeof channel.sourceId === 'string' &&
     typeof channel.sourceName === 'string'
   );
+  return isValid;
 }
 
 /**

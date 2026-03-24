@@ -371,11 +371,11 @@ export class CollectionDao {
   }
 
   /**
-   * 解析JSON字符串 | Parse JSON string
-   * @param jsonString JSON字符串 | JSON string
+   * 解析 JSON 字符串 | Parse JSON string
+   * @param jsonString JSON 字符串 | JSON string
    * @returns 解析后的对象 | Parsed object
    */
-  private parseJsonString(jsonString?: string): Record<string, unknown> {
+  private parseJsonString(jsonString?: string): Record<string, Object> {
     if (!jsonString) return {};
     try {
       return JSON.parse(jsonString);
@@ -386,11 +386,11 @@ export class CollectionDao {
   }
 
   /**
-   * 将对象转换为JSON字符串 | Convert object to JSON string
+   * 将对象转换为 JSON 字符串 | Convert object to JSON string
    * @param obj 要转换的对象 | Object to convert
-   * @returns JSON字符串 | JSON string
+   * @returns JSON 字符串 | JSON string
    */
-  private stringifyJson(obj: Record<string, unknown>): string {
+  private stringifyJson(obj: Record<string, Object>): string {
     try {
       return JSON.stringify(obj);
     } catch (error) {

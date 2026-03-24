@@ -3,6 +3,68 @@
  * 防止开放重定向和SSRF攻击
  */
 
+/**
+ * 简单的URL解析结果接口 | Simple URL parse result interface
+ */
+interface ParsedURL {
+  protocol: string;   // e.g. 'https:'
+  hostname: string;   // e.g. 'example.com'
+  port: string;       // e.g. '8080' or ''
+  pathname: string;   // e.g. '/path/to/resource'
+  href: string;       // original url
+}
+
+/**
+ * 解析URL字符串为各组成部分 | Parse URL string into components
+ */
+function parseURL(url: string): ParsedURL | null {
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+  // Extract protocol
+  const protocolEnd = url.indexOf('://');
+  if (protocolEnd < 0) {
+    return null;
+  }
+  const protocol = url.substring(0, protocolEnd + 1); // e.g. 'https:'
+  const rest = url.substring(protocolEnd + 3); // everything after '://'
+
+  // Extract host (hostname + optional port) and path
+  const slashIdx = rest.indexOf('/');
+  const queryIdx = rest.indexOf('?');
+  let hostEnd: number;
+  if (slashIdx < 0 && queryIdx < 0) {
+    hostEnd = rest.length;
+  } else if (slashIdx < 0) {
+    hostEnd = queryIdx;
+  } else if (queryIdx < 0) {
+    hostEnd = slashIdx;
+  } else {
+    hostEnd = slashIdx < queryIdx ? slashIdx : queryIdx;
+  }
+
+  const hostPart = rest.substring(0, hostEnd);
+  const pathname = slashIdx >= 0 ? rest.substring(slashIdx) : '/';
+
+  // Split host into hostname and port
+  let hostname: string;
+  let port: string;
+  const colonIdx = hostPart.lastIndexOf(':');
+  if (colonIdx >= 0) {
+    hostname = hostPart.substring(0, colonIdx);
+    port = hostPart.substring(colonIdx + 1);
+  } else {
+    hostname = hostPart;
+    port = '';
+  }
+
+  if (!hostname) {
+    return null;
+  }
+
+  return { protocol, hostname, port, pathname, href: url };
+}
+
 export class URLValidator {
   // 允许的协议
   private static readonly ALLOWED_PROTOCOLS: Set<string> = new Set([
@@ -40,7 +102,10 @@ export class URLValidator {
     }
 
     try {
-      const parsed: URL = new URL(url);
+      const parsed: ParsedURL | null = parseURL(url);
+      if (!parsed) {
+        throw new Error(`Invalid URL: ${url}`);
+      }
 
       // 验证协议
       if (!URLValidator.ALLOWED_PROTOCOLS.has(parsed.protocol)) {
@@ -175,8 +240,8 @@ export class URLValidator {
    */
   public static isAbsoluteURL(url: string): boolean {
     try {
-      const parsed: URL = new URL(url);
-      return parsed.protocol && parsed.hostname;
+      const parsed: ParsedURL | null = parseURL(url);
+      return parsed !== null && parsed.protocol.length > 0 && parsed.hostname.length > 0;
     } catch {
       return false;
     }
@@ -189,8 +254,11 @@ export class URLValidator {
    */
   public static normalizeURL(url: string): string {
     try {
-      const parsed: URL = new URL(url);
-      return parsed.href;
+      const parsed: ParsedURL | null = parseURL(url);
+      if (parsed) {
+        return parsed.href;
+      }
+      return url;
     } catch {
       return url;
     }
@@ -203,8 +271,8 @@ export class URLValidator {
    */
   public static getDomain(url: string): string {
     try {
-      const parsed: URL = new URL(url);
-      return parsed.hostname;
+      const parsed: ParsedURL | null = parseURL(url);
+      return parsed ? parsed.hostname : '';
     } catch {
       return '';
     }

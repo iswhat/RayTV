@@ -1,4 +1,4 @@
-import { NASDevice, NASFileItem } from './types/NASDeviceTypes';
+﻿import { NASDevice, NASFileItem } from './types/NASDeviceTypes';
 
 // NAS文件类型枚举
 export enum NASFileType {
@@ -145,7 +145,7 @@ export abstract class BaseNASProtocolAdapter implements NASProtocolAdapter {
     protocol: string;
     address: string;
     port: number;
-    [key: string]: any;
+    [key: string]: string;
   }> {
     // 默认实现：返回设备基本信息
     return {

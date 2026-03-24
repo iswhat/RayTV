@@ -5,13 +5,15 @@ import LivePlaybackService, { LivePlaybackStatus } from '../service/live/LivePla
 import { LiveChannelWithSource, LiveCategory } from '../service/live/LiveChannelTypes';
 import EventBusUtil from '../common/util/EventBusUtil';
 import display from '@ohos.display';
-import { FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment, TextAlign, BarState, ScrollDirection, EdgeEffect, GestureDirection, GestureEvent, PanGesture, GestureInfo } from '@ohos.arkui';
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 import ContentSourceBadge from '../components/ContentSourceBadge';
 import DesignSystem from '../design/DesignSystem';
 import AnimationSystem from '../design/AnimationSystem';
 import ThemeProvider, { Theme } from '../design/ThemeProvider';
+import { Video, ImageFit } from '@ohos.multimedia.media';
+import Strings from '../common/resources/Strings';
+
 
 /**
  * 直播界面 | Live page
@@ -37,15 +39,12 @@ struct LivePage {
   @State selectedCategory: string = 'all';
   @State showLeftControl: boolean = false;
   @State showRightControl: boolean = false;
-  @State showProgressBar: boolean = false;
   @State screenWidth: number = 0;
   @State screenHeight: number = 0;
   @State isLandscape: boolean = true;
   @State volume: number = 50;
   @State brightness: number = 80;
   @State playbackSpeed: number = 1.0;
-  @State currentProgress: number = 0;
-  @State totalDuration: number = 3600;
   @State controlAutoHideTimer: number = 0;
   @State currentTheme: Theme = ThemeProvider.getCurrentTheme();
   @State showQuickChannelSwitcher: boolean = false;
@@ -57,6 +56,8 @@ struct LivePage {
   // 服务实例 | Service instances
   private livePlaybackService: LivePlaybackService = LivePlaybackService.getInstance();
   private eventBus: EventBusUtil = EventBusUtil.getInstance();
+  // 主题变更监听器，需要保存引用以便移除 | Theme change listener reference for proper cleanup
+  private themeChangeListener: ((theme: Theme) => void) | null = null;
   
   // 生命周期 | Lifecycle
   aboutToAppear() {
@@ -79,14 +80,14 @@ struct LivePage {
       Logger.info(this.TAG, 'LivePlaybackService initialized successfully');
       
       // 监听播放状态变化
-      this.eventBus.on('live:statusChanged', (data: Record<string, unknown>) => {
+      this.eventBus.on('live:statusChanged', (data: Record<string, Object>) => {
         if (data.status) {
           this.handlePlaybackStatusChange(data.status as LivePlaybackStatus);
         }
       });
       
       // 监听错误事件
-      this.eventBus.on('live:error', (data: Record<string, unknown>) => {
+      this.eventBus.on('live:error', (data: Record<string, Object>) => {
         if (data.error) {
           const error = data.error as { code: number; message: string };
           this.handlePlaybackError(error);
@@ -94,7 +95,7 @@ struct LivePage {
       });
       
       // 监听重连事件
-      this.eventBus.on('live:reconnecting', (data: Record<string, unknown>) => {
+      this.eventBus.on('live:reconnecting', (data: Record<string, Object>) => {
         const attempt = data.attempt as number;
         Logger.info(this.TAG, `Reconnecting... Attempt ${attempt}`);
         this.isReconnecting = true;
@@ -377,7 +378,6 @@ struct LivePage {
     if (x < this.screenWidth * 0.3) {
       this.showLeftControl = !this.showLeftControl;
       this.showRightControl = false;
-      this.showProgressBar = false;
       this.showQuickChannelSwitcher = false;
       this.resetControlAutoHide();
     }
@@ -385,7 +385,6 @@ struct LivePage {
     else if (x > this.screenWidth * 0.7) {
       this.showRightControl = !this.showRightControl;
       this.showLeftControl = false;
-      this.showProgressBar = false;
       this.showQuickChannelSwitcher = false;
       this.resetControlAutoHide();
     }
@@ -394,25 +393,25 @@ struct LivePage {
       this.showQuickChannelSwitcher = !this.showQuickChannelSwitcher;
       this.showLeftControl = false;
       this.showRightControl = false;
-      this.showProgressBar = false;
       this.resetControlAutoHide();
     }
     // 中间点击 | Middle click
     else {
       this.showLeftControl = false;
       this.showRightControl = false;
-      this.showProgressBar = false;
       this.showQuickChannelSwitcher = false;
     }
   }
   
   // 处理屏幕长按 | Handle screen long press
   private handleScreenLongPress() {
-    Logger.info(this.TAG, 'Screen long pressed');
-    this.showProgressBar = !this.showProgressBar;
+    Logger.info(this.TAG, 'Screen long pressed - live stream does not support seeking, progress bar hidden');
+    // 直播流不支持 seek 操作，长按不应显示进度条
+    // 改为显示/隐藏快速频道切换器
+    this.showQuickChannelSwitcher = !this.showQuickChannelSwitcher;
     this.showLeftControl = false;
     this.showRightControl = false;
-    this.showQuickChannelSwitcher = false;
+    this.showProgressBar = false; // 始终不显示进度条
     this.resetControlAutoHide();
   }
   
@@ -422,11 +421,10 @@ struct LivePage {
       clearTimeout(this.controlAutoHideTimer);
     }
     
-    if (this.showLeftControl || this.showRightControl || this.showProgressBar || this.showQuickChannelSwitcher) {
+    if (this.showLeftControl || this.showRightControl || this.showQuickChannelSwitcher) {
       this.controlAutoHideTimer = setTimeout(() => {
         this.showLeftControl = false;
         this.showRightControl = false;
-        this.showProgressBar = false;
         this.showQuickChannelSwitcher = false;
       }, 5000);
     }
@@ -504,18 +502,7 @@ struct LivePage {
     }
   }
   
-  // 处理进度调节 | Handle progress adjustment
-  private handleProgressChange(value: number) {
-    this.currentProgress = Math.max(0, Math.min(this.totalDuration, value));
-    Logger.info(this.TAG, `Progress changed to: ${this.currentProgress}`);
-    
-    // 直播流不支持seek操作，只记录日志
-    // Live streaming does not support seek operations, only log
-    Logger.warn(this.TAG, 'Live stream does not support seeking, progress change ignored');
-    
-    // 如果需要点播功能的seek操作，应该在点播页面实现
-    // If seek operation is needed for on-demand content, it should be implemented in the on-demand page
-  }
+
   
   // 处理返回 | Handle back
   private handleBack() {
@@ -594,16 +581,13 @@ struct LivePage {
               timingFunction: 'ease-out'
             })
           
-          // 将Channel转换为VirtualListItem
-          const virtualItems = this.getFilteredChannels().map((channel, index) => ({
-            id: `${channel.id}_${channel.sourceId}`,
-            index,
-            data: channel
-          }));
-          
-          // 使用VirtualList优化性能
+          // 将Channel转换为VirtualListItem并使用VirtualList优化性能
           VirtualList({
-            items: virtualItems,
+            items: this.getFilteredChannels().map((channel, index) => ({
+              id: `${channel.id}_${channel.sourceId}`,
+              index,
+              data: channel as Object
+            })),
             estimatedItemHeight: 80,
             bufferSize: 3,
             renderItem: (item: VirtualListItem, index: number) => {
@@ -828,50 +812,7 @@ struct LivePage {
     .alignItems(HorizontalAlign.End)
   }
   
-  // 渲染进度条 | Render progress bar
-  @Builder
-  renderProgressBar() {
-    const colors = this.currentTheme.colors;
-    const spacing = DesignSystem.Spacing;
-    
-    if (!this.showProgressBar) return;
-    
-    Column() {
-      Row() {
-        Text(this.formatTime(this.currentProgress))
-          .fontSize(16)
-          .fontColor(colors.text)
-          .margin({ right: spacing.lg })
-        
-        Slider({
-          value: this.currentProgress,
-          min: 0,
-          max: this.totalDuration,
-          step: 1,
-          style: SliderStyle.OutSet
-        })
-        .width('80%')
-        .blockColor(colors.primary)
-        .trackColor(colors.divider)
-        .selectedColor(colors.primary)
-        .onChange((value: number) => this.handleProgressChange(value))
-        
-        Text(this.formatTime(this.totalDuration))
-          .fontSize(16)
-          .fontColor(colors.text)
-          .margin({ left: spacing.lg })
-      }
-    }
-    .width('100%')
-    .padding(spacing.lg)
-    .position({ y: this.screenHeight * 0.8 })
-    .backgroundColor(`${colors.surface}CC`)
-    .borderRadius(24)
-    .animation({
-      duration: 300,
-      timingFunction: 'ease-out'
-    })
-  }
+
   
   // 渲染快速频道切换器 | Render quick channel switcher
   @Builder
@@ -1055,40 +996,48 @@ struct LivePage {
         } else if (this.isError) {
           this.renderError();
         } else if (this.currentChannel) {
-          Column() {
-            // 这里应该使用Video组件播放直播内容
-            // 由于是模拟，使用占位符
-            Text(`正在播放: ${this.currentChannel.name}`)
-              .fontSize(24)
-              .fontColor(colors.text)
-              .margin(spacing.lg)
-              .animation({
-                duration: 500,
-                timingFunction: 'ease-out'
-              })
-            
-            ContentSourceBadge({
-              sourceName: this.currentChannel.sourceName,
-              sourceId: this.currentChannel.sourceId
+          Stack() {
+            // 使用Video组件播放直播内容
+            Video({
+              src: this.currentChannel.url,
+              currentProgressRate: this.playbackSpeed
             })
-            .margin({ bottom: spacing.lg })
-            .animation({
-              duration: 500,
-              delay: 100,
-              timingFunction: 'ease-out'
-            })
+            .width('100%')
+            .height('100%')
+            .objectFit(ImageFit.Cover)
+            .controls(false)
+            .autoPlay(true)
+            .loop(true)
             
-            Text('直播内容播放区域')
-              .fontSize(18)
-              .fontColor(colors.textSecondary)
-              .animation({
-                duration: 500,
-                delay: 200,
-                timingFunction: 'ease-out'
-              })
+            // 频道信息叠加层
+            Column() {
+              Row() {
+                Text(`正在播放: ${this.currentChannel.name}`)
+                  .fontSize(16)
+                  .fontColor('#FFFFFF')
+                  .backgroundColor('rgba(0, 0, 0, 0.5)')
+                  .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+                  .borderRadius(12)
+                  .margin({ left: spacing.lg, top: spacing.lg })
+              }
+              .justifyContent(FlexAlign.Start)
+              .width('100%')
+            }
+            .position({ top: 0, left: 0 })
+            
+            // 播放状态指示器
+            if (this.isReconnecting) {
+              Column() {
+                Text(`正在重连... (${this.reconnectAttempt})`)
+                  .fontSize(14)
+                  .fontColor('#FFFFFF')
+                  .backgroundColor('rgba(0, 0, 0, 0.7)')
+                  .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+                  .borderRadius(20)
+              }
+              .position({ bottom: spacing.lg, right: spacing.lg })
+            }
           }
-          .justifyContent(FlexAlign.Center)
-          .alignItems(HorizontalAlign.Center)
           .width('100%')
           .height('100%')
         }
@@ -1098,9 +1047,6 @@ struct LivePage {
         
         // 右侧控制区 | Right control area
         this.renderRightControl()
-        
-        // 进度条 | Progress bar
-        this.renderProgressBar()
         
         // 快速频道切换器 | Quick channel switcher
         this.renderQuickChannelSwitcher()

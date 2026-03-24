@@ -1,4 +1,4 @@
-// SubtitleService - 字幕服务类 Subtitle service class
+﻿// SubtitleService - 字幕服务类 Subtitle service class
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
@@ -1010,13 +1010,13 @@ export default class SubtitleService {
     const response = await request.execute();
     const data = await response.json();
     
-    // 解析API响应，转换为SubtitleTrack格式
+    // 解析 API 响应，转换为 SubtitleTrack 格式
     // Parse API response, convert to SubtitleTrack format
-    return data.data?.map((item: any) => ({
+    return data.data?.map((item: { id: string; attributes: { language_name: string; language: string; download_url: string; is_default: boolean } }) => ({
       id: item.id,
       name: item.attributes.language_name,
       language: item.attributes.language,
-      type: SubtitleType.SRT, // 假设API返回SRT格式，实际可能需要根据响应调整
+      type: SubtitleType.SRT, // 假设 API 返回 SRT 格式，实际可能需要根据响应调整
       url: item.attributes.download_url,
       isExternal: true,
       isDefault: item.attributes.is_default || false
@@ -1051,13 +1051,13 @@ export default class SubtitleService {
     const response = await request.execute();
     const data = await response.json();
     
-    // 解析API响应，转换为SubtitleTrack格式
+    // 解析 API 响应，转换为 SubtitleTrack 格式
     // Parse API response, convert to SubtitleTrack format
-    return data.results?.map((item: any) => ({
+    return data.results?.map((item: { id: string; name: string; language: string; download_url: string }) => ({
       id: item.id,
       name: item.name,
       language: item.language,
-      type: SubtitleType.ASS, // SubHD主要提供ASS格式字幕
+      type: SubtitleType.ASS, // SubHD 主要提供 ASS 格式字幕
       url: item.download_url,
       isExternal: true,
       isDefault: false

@@ -2,7 +2,6 @@
  * Image Component | 图片组件
  * Provides unified image loading, placeholder and error handling functionality | 提供统一的图片加载、占位符和错误处理功能
  */
-import { Component, Prop, State, EventHub, Event, Stack, Image, Text, Alignment } from '@ohos/arkui';
 import Logger from '../common/util/Logger';
 
 export interface ImageComponentOptions {

@@ -125,7 +125,7 @@ export interface IConfigValidator {
    * @param config 配置数据 | Config data
    * @returns 是否有效 | Whether valid
    */
-  validateConfigFormat(config: Record<string, unknown>): boolean;
+  validateConfigFormat(config: Record<string, string>): boolean;
 }
 
 // 配置源管理器接口 | Config source manager interface

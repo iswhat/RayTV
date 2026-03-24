@@ -308,10 +308,10 @@ export class HistoryService {
       
       if (result !== null) {
         while (result.goToNextRow()) {
-          const item: Record<string, any> = {};
+          const item: Record<string, Object> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
-            const value = result.getLong(i) ?? result.getString(i);
+            const value: Object = result.getLong(i) ?? result.getString(i);
             item[columnName] = value;
           }
           historyItems.push(this.parseHistoryRow(item));
@@ -340,10 +340,10 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, any> = {};
+          const item: Record<string, Object> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
-            const value = result.getLong(i) ?? result.getString(i);
+            const value: Object = result.getLong(i) ?? result.getString(i);
             item[columnName] = value;
           }
           result.close();
@@ -375,10 +375,10 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, any> = {};
+          const item: Record<string, Object> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
-            const value = result.getLong(i) ?? result.getString(i);
+            const value: Object = result.getLong(i) ?? result.getString(i);
             item[columnName] = value;
           }
           result.close();
@@ -414,10 +414,10 @@ export class HistoryService {
 
       if (result !== null) {
         if (result.goToFirstRow()) {
-          const item: Record<string, any> = {};
+          const item: Record<string, Object> = {};
           for (let i = 0; i < result.columnCount; i++) {
             const columnName = result.getColumnName(i);
-            const value = result.getLong(i) ?? result.getString(i);
+            const value: Object = result.getLong(i) ?? result.getString(i);
             item[columnName] = value;
           }
           result.close();
@@ -606,14 +606,16 @@ export class HistoryService {
   }
 
   /**
-   * 解析数据库行到历史记录项 Parse database row to history item
+   * 解析数据库行为 HistoryItem
+   * Parse a database row to HistoryItem
+   *
    * @param row 数据库行 Database row
    * @returns HistoryItem
    * @private
    */
-  private parseHistoryRow(row: Record<string, unknown>): HistoryItem {
+  private parseHistoryRow(row: Record<string, Object>): HistoryItem {
     try {
-      const typedRow = row as Record<keyof HistoryItem, unknown>;
+      const typedRow = row as Record<keyof HistoryItem, Object>;
       return {
         id: TypeSafetyUtil.asString(typedRow.id, ''),
         mediaId: TypeSafetyUtil.asString(typedRow.mediaId, ''),
@@ -659,7 +661,7 @@ export class HistoryService {
    * @returns HistoryItem[]
    * @private
    */
-  private parseHistoryRows(rows: Record<string, unknown>[]): HistoryItem[] {
+  private parseHistoryRows(rows: Record<string, Object>[]): HistoryItem[] {
     return rows.map(row => this.parseHistoryRow(row));
   }
 

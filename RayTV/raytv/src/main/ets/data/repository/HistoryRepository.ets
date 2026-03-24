@@ -1,4 +1,4 @@
-// HistoryRepository.ets - 鍘嗗彶璁板綍鏁版嵁浠撳簱
+﻿// HistoryRepository.ets - 鍘嗗彶璁板綍鏁版嵁浠撳簱
 // 璐熻矗鍘嗗彶璁板綍鐩稿叧鏁版嵁鐨勫瓨鍌ㄣ€佽鍙栧拰绠＄悊
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';

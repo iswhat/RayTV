@@ -1,4 +1,4 @@
-// PlayVodUseCase.ets - 播放点播用例 // Play VOD use case
+﻿// PlayVodUseCase.ets - 播放点播用例 // Play VOD use case
 import Logger from '../../common/util/Logger';
 import { Vod, VideoSource } from '../../data/bean/Vod';
 import { History } from '../../data/bean/History';

@@ -10,7 +10,6 @@ import TimerManager from '../common/util/TimerManager';
 import CacheService, { CachePriority } from '../service/cache/CacheService';
 import { getPlaybackViewModel, PlaybackViewModel } from '../viewmodel/PlaybackViewModel';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, HorizontalAlign, FlexWrap, KeyEvent, FocusStyle, TouchEvent, GestureEvent, Curve, Scroller, Column, Row, Text, Button, Image, Stack } from '@ohos/arkui';
 
 // 导入子组件 | Import sub-components
 import { PlaybackControls } from './playback/PlaybackControls';

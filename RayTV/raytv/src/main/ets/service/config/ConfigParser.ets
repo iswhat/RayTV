@@ -1,7 +1,7 @@
-// ConfigParser - 配置解析器 | Config parser
+﻿// ConfigParser - 配置解析器 | Config parser
 // 实现Fongmi配置文件解析和适配功能 | Implement Fongmi config file parsing and adaptation functionality
 
-import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
+import TypeSafetyHelper, { SafeObject } from '../../common/util/TypeSafetyHelper';
 import { Site, SiteType, LoaderType } from '../../data/bean/Site';
 import { AppConfig, HarmonyConfig, LiveCollection, LiveConfigItem, LiveGroup, LiveChannel } from '../../data/bean/Config';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
@@ -150,7 +150,7 @@ export class ConfigParser {
   public validateSite(site: SiteConfig | Site): boolean {
     try {
       // 使用TypeSafetyUtil确保安全访问 | Use TypeSafetyUtil to ensure safe access
-      const siteObj = TypeSafetyHelper.safeObject(site);
+      const siteObj = TypeSafetyHelper.safeObject(site as unknown as SafeObject, {} as SafeObject) as unknown as SiteConfig;
       
       // 基本字段验证 | Basic field validation
       const key = TypeSafetyHelper.safeGet(siteObj, 'key', '');
@@ -210,7 +210,7 @@ export class ConfigParser {
       return true;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to validate site: ${err.message}`);
+      console.error(err.message);
       return false;
     }
   }
@@ -289,7 +289,7 @@ export class ConfigParser {
             sites.push(site);
           } catch (error) {
             const err = error instanceof Error ? error : new Error(String(error));
-            console.error(TAG + `: Failed to parse site item: ${err.message}`);
+            console.error(err.message);
           }
         }
       }
@@ -298,7 +298,7 @@ export class ConfigParser {
       return sites;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to parse sites configuration: ${err.message}`);
+      console.error(err.message);
       throw err;
     }
   }
@@ -388,7 +388,7 @@ export class ConfigParser {
       return sites;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to convert Fongmi format: ${err.message}`);
+      console.error(err.message);
       return [];
     }
   }
@@ -399,7 +399,7 @@ export class ConfigParser {
    */
   public detectSiteType(siteData: Record<string, string | number | boolean | Record<string, string | number | boolean>>): SiteType {
     // 根据站点配置特征自动判断类型 | Auto detect type based on site config features
-    const siteObj = TypeSafetyHelper.safeObject(siteData);
+    const siteObj = TypeSafetyHelper.safeObject(siteData as unknown as SafeObject, {} as SafeObject) as unknown as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
     const type = TypeSafetyHelper.safeString(TypeSafetyHelper.safeGet(siteObj, 'type', ''));
     if (type) {
       return this.convertSiteType(type);
@@ -435,7 +435,7 @@ export class ConfigParser {
       return JSON.parse(cleanContent) as Record<string, string | number | boolean | Record<string, string | number | boolean | string[]>>;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to parse JSON content: ${err.message}`);
+      console.error(err.message);
       throw new Error('Invalid JSON format');
     }
   }
@@ -652,7 +652,7 @@ export class ConfigParser {
                 typeof searchData.searchKey === 'string' ? searchData.searchKey : 'wd',
       pageKey: typeof searchData.pageKey === 'string' ? searchData.pageKey : 'page',
       resultPath: typeof searchData.resultPath === 'string' ? searchData.resultPath : '',
-      list: Array.isArray(searchData.list) ? searchData.list : []
+      list: Array.isArray(searchData.list) ? (searchData.list as SearchRuleItem[]) : []
     };
     
     return result;
@@ -799,7 +799,7 @@ export class ConfigParser {
       return url.startsWith('http://') || url.startsWith('https://');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Error validating URL: ${err.message}`);
+      console.error(err.message);
       return false;
     }
   }
@@ -827,15 +827,16 @@ export class ConfigParser {
         enableBackgroundSync: typeof harmonySectionObj.enableBackgroundSync === 'boolean' ? harmonySectionObj.enableBackgroundSync : false,
         enableMultiWindow: typeof harmonySectionObj.enableMultiWindow === 'boolean' ? harmonySectionObj.enableMultiWindow : false,
         enableHiAI: typeof harmonySectionObj.enableHiAI === 'boolean' ? harmonySectionObj.enableHiAI : false,
+        enableSuperDevice: typeof harmonySectionObj.enableSuperDevice === 'boolean' ? harmonySectionObj.enableSuperDevice : false,
         deviceSharingEnabled: typeof harmonySectionObj.deviceSharingEnabled === 'boolean' ? harmonySectionObj.deviceSharingEnabled : false,
-        notificationChannels: Array.isArray(harmonySectionObj.notificationChannels) ? harmonySectionObj.notificationChannels : [],
-        quickActions: Array.isArray(harmonySectionObj.quickActions) ? harmonySectionObj.quickActions : []
+        notificationChannels: Array.isArray(harmonySectionObj.notificationChannels) ? (harmonySectionObj.notificationChannels as string[]) : [],
+        quickActions: Array.isArray(harmonySectionObj.quickActions) ? (harmonySectionObj.quickActions as string[]) : []
       };
       
       return harmonyConfig;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to parse application configuration: ${err.message}`);
+      console.error(err.message);
       // 返回默认配置 | Return default config
       return this.getDefaultConfig();
     }
@@ -902,14 +903,15 @@ export class ConfigParser {
       }
       
       console.info(TAG + `: Successfully parsed ${lives.length} live configurations`);
-      return {
+      const liveCollection: LiveCollection = {
         lives,
         version: typeof config.version === 'string' ? config.version : undefined,
         updatedAt: typeof config.updatedAt === 'number' ? config.updatedAt : Date.now()
       };
+      return liveCollection;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to parse live configuration: ${err.message}`);
+      console.error(err.message);
       return { lives: [] };
     }
   }
@@ -928,6 +930,7 @@ export class ConfigParser {
       enableBackgroundSync: false,
       enableMultiWindow: false,
       enableHiAI: false,
+      enableSuperDevice: false,
       deviceSharingEnabled: false,
       notificationChannels: [],
       quickActions: []

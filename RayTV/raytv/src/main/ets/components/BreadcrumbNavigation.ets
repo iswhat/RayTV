@@ -2,7 +2,6 @@
 // 显示当前页面的导航路径，支持点击导航到历史页面
 
 import { AppNavigator, BreadcrumbItem } from '../navigation/AppNavigator';
-import { Row, Column, Text, Button, FlexAlign } from '@ohos/arkui';
 
 // 面包屑导航组件参数 | Breadcrumb navigation component parameters
 interface BreadcrumbNavigationParams {
@@ -90,7 +89,7 @@ export struct BreadcrumbNavigation {
         if (!isLast) {
           this.renderSeparator();
         }
-      })
+      }, (item: BreadcrumbItem, index: number) => `${item.id || index}`)
     }
     .width('100%')
     .padding({ left: 20, right: 20, top: 10, bottom: 10 })

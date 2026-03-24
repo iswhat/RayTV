@@ -375,9 +375,10 @@ export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInst
       }
       
       // 调用服务自身的健康检查方法（如果有的话）
-      if (typeof (service as any).healthCheck === 'function') {
+      const serviceWithHealthCheck = service as { healthCheck?: () => Promise<boolean> };
+      if (typeof serviceWithHealthCheck.healthCheck === 'function') {
         try {
-          const result = await (service as any).healthCheck();
+          const result = await serviceWithHealthCheck.healthCheck();
           if (result) {
             Logger.debug(this.TAG, `Health check passed for ${ServiceType[serviceType]} (self-check)`);
             return true;
@@ -731,9 +732,10 @@ export default class ServiceFactory extends FactoryBase<ServiceType, ServiceInst
       }
       
       // 调用服务的销毁方法（如果有的话）
-      if (typeof (service as any).destroy === 'function') {
+      const serviceWithDestroy = service as { destroy?: () => Promise<void> };
+      if (typeof serviceWithDestroy.destroy === 'function') {
         try {
-          await (service as any).destroy();
+          await serviceWithDestroy.destroy();
           Logger.info(this.TAG, `Service ${ServiceType[type]} destroyed successfully`);
         } catch (destroyError) {
           Logger.warn(this.TAG, `Failed to destroy service ${ServiceType[type]}: ${destroyError instanceof Error ? destroyError.message : String(destroyError)}`);

@@ -1,4 +1,4 @@
-// NASDirectoryBrowser.ets - NAS目录浏览页面
+﻿// NASDirectoryBrowser.ets - NAS目录浏览页面
 // 负责浏览NAS设备的目录结构和文件列表
 
 import router from '@ohos.router';

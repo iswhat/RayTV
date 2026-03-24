@@ -4,21 +4,21 @@ import { SettingsDTO } from '../../types/dto/SettingsDTO';
 import { ConfigSourceDTO } from '../../types/dto/ConfigSourceDTO';
 
 export class DataMapper {
-  mapToMediaContentDTO(media: any): MediaContentDTO {
+  mapToMediaContentDTO(media: Record<string, Object>): MediaContentDTO {
     return {
-      id: media.id,
-      title: media.title,
-      description: media.description,
-      url: media.url,
-      thumbnail: media.thumbnail,
-      duration: media.duration,
-      source: media.source,
-      category: media.category,
-      createdAt: media.createdAt instanceof Date ? media.createdAt.toISOString() : media.createdAt
+      id: media.id as string,
+      title: media.title as string,
+      description: media.description as string,
+      url: media.url as string,
+      thumbnail: media.thumbnail as string,
+      duration: media.duration as number,
+      source: media.source as string,
+      category: media.category as string,
+      createdAt: media.createdAt instanceof Date ? media.createdAt.toISOString() : media.createdAt as string
     };
   }
 
-  mapFromMediaContentDTO(dto: MediaContentDTO): any {
+  mapFromMediaContentDTO(dto: MediaContentDTO): Record<string, Object> {
     return {
       id: dto.id,
       title: dto.title,
@@ -32,17 +32,17 @@ export class DataMapper {
     };
   }
 
-  mapToUserDTO(user: any): UserDTO {
+  mapToUserDTO(user: Record<string, Object>): UserDTO {
     return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      isLoggedIn: user.isLoggedIn,
-      lastLogin: user.lastLogin instanceof Date ? user.lastLogin.toISOString() : user.lastLogin
+      id: user.id as string,
+      username: user.username as string,
+      email: user.email as string,
+      isLoggedIn: user.isLoggedIn as boolean,
+      lastLogin: user.lastLogin instanceof Date ? user.lastLogin.toISOString() : user.lastLogin as string
     };
   }
 
-  mapFromUserDTO(dto: UserDTO): any {
+  mapFromUserDTO(dto: UserDTO): Record<string, Object> {
     return {
       id: dto.id,
       username: dto.username,
@@ -52,17 +52,17 @@ export class DataMapper {
     };
   }
 
-  mapToSettingsDTO(settings: any): SettingsDTO {
+  mapToSettingsDTO(settings: Record<string, Object>): SettingsDTO {
     return {
-      theme: settings.theme,
-      language: settings.language,
-      autoPlay: settings.autoPlay,
-      notifications: settings.notifications,
-      quality: settings.quality
+      theme: settings.theme as string,
+      language: settings.language as string,
+      autoPlay: settings.autoPlay as boolean,
+      notifications: settings.notifications as boolean,
+      quality: settings.quality as string
     };
   }
 
-  mapFromSettingsDTO(dto: SettingsDTO): any {
+  mapFromSettingsDTO(dto: SettingsDTO): Record<string, Object> {
     return {
       theme: dto.theme,
       language: dto.language,
@@ -72,17 +72,17 @@ export class DataMapper {
     };
   }
 
-  mapToConfigSourceDTO(source: any): ConfigSourceDTO {
+  mapToConfigSourceDTO(source: Record<string, Object>): ConfigSourceDTO {
     return {
-      id: source.id,
-      name: source.name,
-      url: source.url,
-      enabled: source.enabled,
-      lastUpdated: source.lastUpdated instanceof Date ? source.lastUpdated.toISOString() : source.lastUpdated
+      id: source.id as string,
+      name: source.name as string,
+      url: source.url as string,
+      enabled: source.enabled as boolean,
+      lastUpdated: source.lastUpdated instanceof Date ? source.lastUpdated.toISOString() : source.lastUpdated as string
     };
   }
 
-  mapFromConfigSourceDTO(dto: ConfigSourceDTO): any {
+  mapFromConfigSourceDTO(dto: ConfigSourceDTO): Record<string, Object> {
     return {
       id: dto.id,
       name: dto.name,

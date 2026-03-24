@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ErrorHandler - Error handling utility class | 错误处理工具类
  * Provides unified error handling, error parsing and error message generation functionality | 提供统一的错误处理、错误解析和错误信息生成功能
  */

@@ -1,10 +1,10 @@
 import { AppNavigator, DetailParams } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
-import ContentAccessService from '../service/content/ContentAccessService';
+import ContentAccessServiceInstance, { ContentAccessService } from '../service/content/ContentAccessService';
 import display from '@ohos.display';
-import { Column, Row, Text, Button, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, HorizontalAlign, Alignment, Curve, List, ListItem, Axis, Stack } from '@ohos/arkui';
 import ContentSourceBadge from '../components/ContentSourceBadge';
-import ImageLazyLoader from '../components/ImageLazyLoader';
+import { ImageLazyLoader } from '../components/ImageLazyLoader';
+import Strings from '../common/resources/Strings';
 
 /**
  * 应用主页面 | Application main page
@@ -38,51 +38,82 @@ struct MainPage {
   private readonly TAG: string = 'MainPage';
   private scroller: Scroller = new Scroller();
   private contentScroller: Scroller = new Scroller();
-  
+  // 定时器ID，用于在组件销毁时清理 | Timer ID for cleanup on component destroy
+  private dateUpdateTimer: number = -1;
+
   // 状态管理 | State management
   @State featuredMedia: FeaturedMediaItem[] = [];
   @State popularMedia: FeaturedMediaItem[] = [];
   @State newMedia: FeaturedMediaItem[] = [];
   @State isLoading: boolean = true;
   @State isError: boolean = false;
-  @State errorMessage: string = '推荐内容加载失败';
+  @State errorMessage: string = Strings.mainPage.loadFailed;
   @State selectedTab: string = 'vod';
-  @State selectedCategory: string = '全部';
+  @State selectedCategory: string = Strings.mainPage.categories.all;
   @State isLandscape: boolean = false;
   @State screenWidth: number = 0;
   @State screenHeight: number = 0;
   @State currentDate: string = '';
   
+  // 日期更新优化 | Date update optimization
+  private lastMinute: number | null = null;
+
   // 导航标签数据 | Navigation tab data
   private mainMenuItems: TabItem[] = [
-    { key: 'vod', name: '点播' },
-    { key: 'live', name: '直播' },
-    { key: 'search', name: '搜索' },
-    { key: 'history', name: '历史' },
-    { key: 'settings', name: '设置' }
+    { key: 'vod', name: Strings.mainPage.tabs.vod },
+    { key: 'live', name: Strings.mainPage.tabs.live },
+    { key: 'search', name: Strings.mainPage.tabs.search },
+    { key: 'history', name: Strings.mainPage.tabs.history },
+    { key: 'settings', name: Strings.mainPage.tabs.settings }
   ];
-  
-  // 服务实例 | Service instances
-  private contentService: ContentAccessService = ContentAccessService.getInstance();
 
-  
+  // 服务实例 | Service instances
+  private contentService: ContentAccessService = ContentAccessServiceInstance;
+
+
   // 生命周期 | Lifecycle
   aboutToAppear() {
     Logger.info(this.TAG, 'MainPage about to appear');
-    
+
     // 初始化屏幕信息 | Initialize screen information
     this.initScreenInfo();
-    
+
     // 初始化日期 | Initialize date
     this.updateCurrentDate();
-    
-    // 每60秒更新一次日期 | Update date every 60 seconds
-    setInterval(() => {
-      this.updateCurrentDate();
-    }, 60000);
-    
+
+    // 使用requestAnimationFrame实现更高效的日期更新
+    // 只在分钟变化时更新，减少不必要的渲染
+    this.updateDateEfficiently();
+
     // 加载推荐内容 | Load recommended content
     this.loadFeaturedMedia();
+  }
+
+  // 组件销毁时清理 | Clean up on component destroy
+  aboutToDisappear() {
+    if (this.dateUpdateTimer !== -1) {
+      cancelAnimationFrame(this.dateUpdateTimer);
+      this.dateUpdateTimer = -1;
+    }
+  }
+
+  // 高效的日期更新方法 | Efficient date update method
+  private updateDateEfficiently(): void {
+    const updateDate = () => {
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+      
+      // 只在分钟变化时更新，减少渲染次数
+      if (!this.lastMinute || this.lastMinute !== currentMinute) {
+        this.updateCurrentDate();
+        this.lastMinute = currentMinute;
+      }
+      
+      // 继续下一帧更新
+      this.dateUpdateTimer = requestAnimationFrame(updateDate);
+    };
+    
+    updateDate();
   }
   
   // 更新当前日期 | Update current date
@@ -119,124 +150,53 @@ struct MainPage {
     try {
       this.isLoading = true;
       this.isError = false;
-      
-      // 模拟数据 - 实际应该从ContentAccessService获取
-      // 这里使用模拟数据以便展示
-      this.featuredMedia = [
-        {
-          id: '1',
-          title: '星际穿越',
-          cover: 'https://example.com/cover1.jpg',
-          type: 'movie',
-          siteKey: 'site1',
-          rating: '9.3',
-          sourceId: 'source1',
-          sourceName: '源A'
-        },
-        {
-          id: '2',
-          title: '盗梦空间',
-          cover: 'https://example.com/cover2.jpg',
-          type: 'movie',
-          siteKey: 'site2',
-          rating: '9.0',
-          sourceId: 'source2',
-          sourceName: '源B'
-        },
-        {
-          id: '3',
-          title: '流浪地球2',
-          cover: 'https://example.com/cover3.jpg',
-          type: 'movie',
-          siteKey: 'site3',
-          rating: '8.5',
-          sourceId: 'source1',
-          sourceName: '源A'
-        },
-        {
-          id: '4',
-          title: '阿凡达',
-          cover: 'https://example.com/cover4.jpg',
-          type: 'movie',
-          siteKey: 'site4',
-          rating: '8.8',
-          sourceId: 'source3',
-          sourceName: '源C'
-        },
-        {
-          id: '5',
-          title: '复仇者联盟4',
-          cover: 'https://example.com/cover5.jpg',
-          type: 'movie',
-          siteKey: 'site1',
-          rating: '8.7',
-          sourceId: 'source1',
-          sourceName: '源A'
-        }
-      ];
 
-      this.popularMedia = [
-        {
-          id: '6',
-          title: '泰坦尼克号',
-          cover: 'https://example.com/cover6.jpg',
-          type: 'movie',
-          siteKey: 'site2',
-          rating: '9.2',
-          sourceId: 'source2',
-          sourceName: '源B'
-        },
-        {
-          id: '7',
-          title: '肖申克的救赎',
-          cover: 'https://example.com/cover7.jpg',
-          type: 'movie',
-          siteKey: 'site3',
-          rating: '9.7',
-          sourceId: 'source1',
-          sourceName: '源A'
-        },
-        {
-          id: '8',
-          title: '霸王别姬',
-          cover: 'https://example.com/cover8.jpg',
-          type: 'movie',
-          siteKey: 'site1',
-          rating: '9.6',
-          sourceId: 'source3',
-          sourceName: '源C'
-        }
-      ];
+      // 确保ContentAccessService已初始化 | Ensure ContentAccessService is initialized
+      if (!this.contentService.isInitialized()) {
+        await this.contentService.initialize();
+      }
 
-      this.newMedia = [
-        {
-          id: '9',
-          title: '沙丘2',
-          cover: 'https://example.com/cover9.jpg',
-          type: 'movie',
-          siteKey: 'site1',
-          rating: '8.6',
-          sourceId: 'source3',
-          sourceName: '源C'
-        },
-        {
-          id: '10',
-          title: '哥斯拉-1.0',
-          cover: 'https://example.com/cover10.jpg',
-          type: 'movie',
-          siteKey: 'site2',
-          rating: '8.3',
-          sourceId: 'source2',
-          sourceName: '源B'
-        }
-      ];
-      
+      // 从ContentAccessService获取真实的点播站点数据 | Get real VOD site data from ContentAccessService
+      const allVodSites = this.contentService.getAllVodSites();
+
+      if (allVodSites.length > 0) {
+        // 将VodSiteWithSource转换为FeaturedMediaItem
+        const toMediaItem = (site: ReturnType<typeof this.contentService.getAllVodSites>[number], idx: number): FeaturedMediaItem => ({
+          id: `${site.siteKey}_${idx}`,
+          title: site.name,
+          cover: site.logo || '',
+          type: 'vod',
+          siteKey: site.siteKey,
+          sourceId: site.sourceId,
+          sourceName: site.sourceName
+        });
+
+        // 推荐内容：取前5个站点 | Featured: first 5 sites
+        this.featuredMedia = allVodSites.slice(0, 5).map(toMediaItem);
+
+        // 热门内容：取5-10个站点 | Popular: sites 5-10
+        this.popularMedia = allVodSites.slice(5, 10).map(toMediaItem);
+
+        // 最新内容：取最后一批站点（最多5个）| New: last batch of sites (up to 5)
+        const newStart = Math.max(10, allVodSites.length - 5);
+        this.newMedia = allVodSites.slice(newStart).map(toMediaItem);
+
+        Logger.info(this.TAG, `Loaded ${allVodSites.length} VOD sites from ContentAccessService`);
+      } else {
+        // 无数据时提示用户配置源 | No data: prompt user to configure sources
+        this.featuredMedia = [];
+        this.popularMedia = [];
+        this.newMedia = [];
+        Logger.warn(this.TAG, 'No VOD sites available. Please configure network sources in Settings.');
+      }
+
       this.isLoading = false;
-      
+
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load featured media: ${error}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `Failed to load featured media: ${errorMsg}`);
       this.isError = true;
-      this.errorMessage = '推荐内容加载失败';
+      this.errorMessage = `推荐内容加载失败: ${errorMsg}`;
       this.isLoading = false;
     }
   }
@@ -254,8 +214,11 @@ struct MainPage {
 
       switch (key) {
         case 'vod':
-          this.selectedTab = 'vod';
-          this.loadFeaturedMedia();
+          // 只在切换到 vod tab 时才加载（已在 vod tab 则不重复加载）| Only load when switching to vod tab
+          if (this.selectedTab !== 'vod') {
+            this.selectedTab = 'vod';
+            this.loadFeaturedMedia();
+          }
           break;
         case 'live':
           AppNavigator.getInstance().navigateToLive();
@@ -289,10 +252,19 @@ struct MainPage {
         return;
       }
 
+      // 只在分类真正变化时才重新加载，避免重复请求 | Only reload when category actually changes
+      if (this.selectedCategory === categoryId) {
+        return;
+      }
+
       this.selectedCategory = categoryId;
 
-      // 这里可以根据分类加载对应内容
-      this.loadFeaturedMedia();
+      // 根据分类筛选已加载的内容，无需重新请求全部数据 | Filter loaded content by category, no need to re-fetch all
+      // 如果是"全部"分类则直接刷新 | If "全部" category, do a full refresh
+      if (categoryId === '全部') {
+        this.loadFeaturedMedia();
+      }
+      // 其他分类在 build 中通过 selectedCategory 状态自动过滤展示
     } catch (error) {
       Logger.error(this.TAG, `Failed to handle category click: ${error}`);
     }
@@ -376,8 +348,6 @@ struct MainPage {
     .width(this.isLandscape ? 260 : 200)
     .height(this.isLandscape ? 440 : 370)
     .focusable(true)
-    .focusBorderWidth(2)
-    .focusBorderColor('#007AFF')
     // 添加点击反馈动画
     .gesture(
       TapGesture()
@@ -455,12 +425,10 @@ struct MainPage {
               .fontWeight(this.selectedTab === item.key ? 700 : 400)
               .fontColor(this.selectedTab === item.key ? '#007AFF' : '#FFFFFF')
               .padding({ left: 30, right: 30, top: 16, bottom: 16 })
-              .borderBottom(this.selectedTab === item.key ? { width: 3, color: '#007AFF' } : { width: 0, color: 'transparent' })
+              .border(this.selectedTab === item.key ? { width: { bottom: 3 }, color: '#007AFF' } : { width: { bottom: 0 }, color: 'transparent' })
           }
           .onClick(() => this.handleMainMenuClick(item.key))
           .focusable(true)
-          .focusBorderWidth(2)
-          .focusBorderColor('#007AFF')
           .backgroundColor(this.selectedTab === item.key ? 'rgba(255, 255, 255, 0.1)' : 'transparent')
           .animation({
             duration: 200,
@@ -480,11 +448,11 @@ struct MainPage {
         Scroll(this.contentScroller) {
           Column() {
             if (this.isLoading) {
-              Column() {
-                Text('正在加载推荐内容...')
-                  .fontSize(18)
-                  .fontColor('#8E8E93')
-                  .margin({ top: 30, bottom: 20 })
+          Column() {
+            Text(Strings.mainPage.loadingContent)
+              .fontSize(18)
+              .fontColor('#8E8E93')
+              .margin({ top: 30, bottom: 20 })
                 
                 // 骨架屏 | Skeleton screen
                 Row() {
@@ -530,7 +498,7 @@ struct MainPage {
               .height(this.isLandscape ? 500 : 400)
             } else if (this.isError) {
               Column() {
-                Text('推荐内容加载失败')
+                Text(Strings.mainPage.loadFailed)
                   .fontSize(18)
                   .fontColor('#FF5252')
                   .margin({ top: 20 })
@@ -538,7 +506,7 @@ struct MainPage {
                   .fontSize(16)
                   .fontColor('#FF9800')
                   .margin({ top: 12 })
-                Button('重试')
+                Button(Strings.common.retry)
                   .onClick(() => this.loadFeaturedMedia())
                   .backgroundColor('#007AFF')
                   .fontColor('white')
@@ -547,31 +515,29 @@ struct MainPage {
                   .margin({ top: 20 })
                   .fontSize(16)
                   .focusable(true)
-                  .focusBorderWidth(2)
-                  .focusBorderColor('#007AFF')
               }
               .justifyContent(FlexAlign.Center)
               .height(this.isLandscape ? 500 : 400)
             } else {
               // 推荐内容 | Recommended content
               if (this.featuredMedia.length > 0) {
-                this.renderContentSection('为你推荐', this.featuredMedia);
+                this.renderContentSection(Strings.mainPage.categories.featured, this.featuredMedia);
               }
               
               // 热门内容 | Popular content
               if (this.popularMedia.length > 0) {
-                this.renderContentSection('热门内容', this.popularMedia);
+                this.renderContentSection(Strings.mainPage.categories.popular, this.popularMedia);
               }
               
               // 最新内容 | New content
               if (this.newMedia.length > 0) {
-                this.renderContentSection('最新上线', this.newMedia);
+                this.renderContentSection(Strings.mainPage.categories.new, this.newMedia);
               }
             }
           }
           .width('100%')
         }
-        .scrollable(Axis.Vertical)
+        .scrollable(ScrollDirection.Vertical)
         .scrollBar(BarState.Auto)
         .flexGrow(1)
         .backgroundColor('#121212')

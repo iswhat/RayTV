@@ -1,4 +1,4 @@
-// 解析服务 | Parser service
+﻿// 解析服务 | Parser service
 // 提供视频源解析和处理功能 | Provides video source parsing and processing functionality
 
 import Logger from '../../common/util/Logger';

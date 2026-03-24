@@ -1,4 +1,4 @@
-// StringUtils.ets - ArkTS兼容的字符串工具函数 ArkTS compatible string utility functions
+﻿// StringUtils.ets - ArkTS兼容的字符串工具函数 ArkTS compatible string utility functions
 
 /**
  * 字符串工具函数 String utility functions
@@ -15,7 +15,7 @@ export const StringUtils = {
   /**
    * 检查值是否为字符串 Checks if value is a string
    */
-  isString(value: unknown): boolean {
+  isString(value: string): boolean {
     return TypeUtils.isString(value);
   },
 

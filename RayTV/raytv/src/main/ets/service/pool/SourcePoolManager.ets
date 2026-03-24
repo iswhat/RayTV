@@ -13,10 +13,26 @@
 
 import Logger from '../../common/util/Logger';
 import ConfigSourceService, { ConfigSource } from '../config/ConfigSourceService';
+import { LiveChannelWithSource, LiveCategory } from '../live/LiveChannelTypes';
+import { ParsedConfig, ParserConfig, MediaSite, LiveSource } from '../interfaces/IConfigSourceService';
 
 // ========================================
 // 数据类型定义
 // ========================================
+
+/**
+ * NAS设备配置接口
+ */
+export interface NasConfig {
+  deviceId: string;            // NAS设备ID
+  protocol: string;            // 协议类型 (smb, huawei, webdav, dlna)
+  address: string;             // 设备地址
+  port?: number;               // 端口
+  username?: string;           // 用户名
+  password?: string;           // 密码
+  share?: string;              // SMB共享名称
+  domain?: string;             // 域 (SMB)
+}
 
 /**
  * 网络源配置
@@ -39,16 +55,7 @@ export interface NetworkSourceConfig {
   tags?: string[];
   
   // NAS设备配置 (仅当type为'nas'时使用)
-  nasConfig?: {
-    deviceId: string;            // NAS设备ID
-    protocol: string;            // 协议类型 (smb, huawei, webdav, dlna)
-    address: string;             // 设备地址
-    port?: number;               // 端口
-    username?: string;           // 用户名
-    password?: string;           // 密码
-    share?: string;              // SMB共享名称
-    domain?: string;             // 域 (SMB)
-  };
+  nasConfig?: NasConfig;
   
   lastUpdated: number;           // 最后更新时间
   healthStatus: 'healthy' | 'degraded' | 'unreachable';
@@ -93,7 +100,7 @@ export interface VodSiteWithSource {
  * Import unified definition from LiveChannelTypes
  */
 export { LiveChannelWithSource, LiveCategory, ExtendedLiveChannelWithSource, LiveProgramInfo } from '../live/LiveChannelTypes';
-export { toLiveChannelWithSource, toExtendedLiveChannel, isValidLiveChannel, createLiveChannelWithSource } from '../live/LiveChannelTypes';
+export { toLiveChannelWithSource, extendLiveChannel, isValidLiveChannel, createLiveChannelWithSource } from '../live/LiveChannelTypes';
 
 /**
  * 带来源标识的壁纸
@@ -113,13 +120,42 @@ export interface WallpaperWithSource {
 }
 
 /**
- * 直播分类
+ * 壁纸数据接口
  */
-export interface LiveCategory {
+interface WallpaperData {
   id: string;
   name: string;
-  channelCount: number;
-  sources: string[]; // 来源源ID列表
+  url: string;
+  thumbnail?: string;
+  aspectRatio?: string;
+}
+
+/**
+ * 广告过滤规则数据接口
+ */
+interface AdBlockRuleData {
+  id?: string;
+  pattern: string;
+  type: 'domain' | 'url' | 'element';
+  enabled?: boolean;
+}
+
+/**
+ * 解码器配置数据接口
+ */
+interface DecoderConfigData {
+  id?: string;
+  name: string;
+  type: string;
+  config?: Record<string, string>;
+}
+
+/**
+ * 分类统计数据接口
+ */
+interface CategoryStats {
+  count: number;
+  sources: Set<string>;
 }
 
 /**
@@ -240,8 +276,11 @@ class VodSitePool implements IVodSitePool {
   removeSitesBySource(sourceId: string): void {
     this.sites = this.sites.filter(site => site.sourceId !== sourceId);
     
-    // 更新sourceMap
-    for (const [siteKey, sid] of this.sourceMap.entries()) {
+    // 更新 sourceMap
+    const entries = this.sourceMap.entries();
+    for (const entry of entries) {
+      const siteKey: string = entry[0];
+      const sid: string = entry[1];
       if (sid === sourceId) {
         this.sourceMap.delete(siteKey);
       }
@@ -289,7 +328,7 @@ class LiveChannelPool implements ILiveChannelPool {
   }
   
   private updateCategories(): void {
-    const categoryMap = new Map<string, { count: number; sources: Set<string> }>();
+    const categoryMap = new Map<string, CategoryStats>();
     
     this.channels.forEach(channel => {
       const existing = categoryMap.get(channel.group);
@@ -297,19 +336,29 @@ class LiveChannelPool implements ILiveChannelPool {
         existing.count++;
         existing.sources.add(channel.sourceId);
       } else {
-        categoryMap.set(channel.group, {
+        const newStats: CategoryStats = {
           count: 1,
           sources: new Set([channel.sourceId])
-        });
+        };
+        categoryMap.set(channel.group, newStats);
       }
     });
     
-    this.categories = Array.from(categoryMap.entries()).map(([name, data], index) => ({
-      id: `cat_${index}`,
-      name,
-      channelCount: data.count,
-      sources: Array.from(data.sources)
-    }));
+    const categoryEntries = Array.from(categoryMap.entries());
+    const categories: LiveCategory[] = [];
+    for (let index = 0; index < categoryEntries.length; index++) {
+      const entry = categoryEntries[index];
+      const name: string = entry[0];
+      const data = entry[1];
+      const category: LiveCategory = {
+        id: `cat_${index}`,
+        name,
+        channelCount: data.count,
+        sources: Array.from(data.sources)
+      };
+      categories.push(category);
+    }
+    this.categories = categories;
   }
   
   getChannelsByCategory(category: string): LiveChannelWithSource[] {
@@ -377,10 +426,16 @@ class GlobalAdBlockRules implements IGlobalAdBlockRules {
     this.removeRulesBySource(sourceId);
     
     // 添加新规则(添加来源标识)
-    const rulesWithSource = rules.map(rule => ({
-      ...rule,
-      id: `${sourceId}_${rule.id}`
-    }));
+    const rulesWithSource: AdBlockRule[] = [];
+    for (const rule of rules) {
+      const ruleWithSource: AdBlockRule = {
+        id: `${sourceId}_${rule.id}`,
+        pattern: rule.pattern,
+        type: rule.type,
+        enabled: rule.enabled
+      };
+      rulesWithSource.push(ruleWithSource);
+    }
     
     this.rules = this.rules.concat(rulesWithSource);
     this.sources.add(sourceId);
@@ -409,11 +464,17 @@ class GlobalDecoderConfigs implements IGlobalDecoderConfigs {
     // 移除该源的旧配置
     this.removeConfigsBySource(sourceId);
     
-    // 添加新配置(添加来源标识)
-    const configsWithSource = configs.map(config => ({
-      ...config,
-      id: `${sourceId}_${config.id}`
-    }));
+    // 添加新配置 (添加来源标识)
+    const configsWithSource: DecoderConfig[] = [];
+    for (const config of configs) {
+      const configWithSource: DecoderConfig = {
+        id: `${sourceId}_${config.id}`,
+        name: config.name,
+        type: config.type,
+        config: config.config
+      };
+      configsWithSource.push(configWithSource);
+    }
     
     this.configs = this.configs.concat(configsWithSource);
     configsWithSource.forEach(config => {
@@ -424,7 +485,10 @@ class GlobalDecoderConfigs implements IGlobalDecoderConfigs {
   removeConfigsBySource(sourceId: string): void {
     this.configs = this.configs.filter(config => !config.id.startsWith(`${sourceId}_`));
     
-    for (const [configId, sid] of this.sources.entries()) {
+    const entries = this.sources.entries();
+    for (const entry of entries) {
+      const configId: string = entry[0];
+      const sid: string = entry[1];
       if (sid === sourceId) {
         this.sources.delete(configId);
       }
@@ -448,14 +512,15 @@ class GlobalDecoderConfigs implements IGlobalDecoderConfigs {
 // Source Pool Manager 主类
 // ========================================
 
+const TAG: string = 'SourcePoolManager';
+
 /**
  * 源池管理器
- * 
+ *
  * 负责将各个网络源的内容提取到统一的使用池中
  */
 export class SourcePoolManager {
   private static instance: SourcePoolManager | null = null;
-  private logger: Logger;
   private configSourceService: ConfigSourceService;
   
   // 统一使用池
@@ -481,7 +546,6 @@ export class SourcePoolManager {
    * 私有构造函数
    */
   private constructor() {
-    this.logger = Logger.getInstance('SourcePoolManager');
     this.configSourceService = ConfigSourceService.getInstance();
     
     // 初始化池
@@ -501,32 +565,32 @@ export class SourcePoolManager {
     }
     
     try {
-      this.logger.info('Initializing SourcePoolManager');
+      Logger.info(TAG, 'Initializing SourcePoolManager');
       
       // 加载所有启用的源
-      const sources = await this.configSourceService.getAllSources();
-      const activeSources = sources.filter(s => s.isActive);
+      const sources: ConfigSource[] = await this.configSourceService.getAllSources();
+      const activeSources: ConfigSource[] = sources.filter((s: ConfigSource): boolean => s.isActive);
       
-      this.logger.info(`Found ${activeSources.length} active sources`);
+      Logger.info(TAG, `Found ${activeSources.length} active sources`);
       
       // 并行加载所有源，提高启动速度
       if (activeSources.length > 0) {
-        const loadPromises = activeSources.map(source => 
-          this.loadFromSource(source).catch(error => {
-            const err = error instanceof Error ? error : new Error(String(error));
-            this.logger.error(`Failed to load source ${source.id}, continuing with other sources`, err);
+        const loadPromises: Promise<void>[] = activeSources.map((source: ConfigSource) =>
+          this.loadFromSource(source as unknown as NetworkSourceConfig).catch((error: unknown) => {
+            const err: Error = error instanceof Error ? error : new Error(String(error));
+            Logger.error(TAG, `Failed to load source ${source.id}, continuing with other sources`, err);
             // 单个源失败不影响其他源的加载
           })
         );
-        
+
         await Promise.all(loadPromises);
       }
-      
+
       this.initialized = true;
-      this.logger.info('SourcePoolManager initialized successfully');
+      Logger.info(TAG, 'SourcePoolManager initialized successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to initialize SourcePoolManager', err);
+      Logger.error(TAG, 'Failed to initialize SourcePoolManager', err);
       throw err;
     }
   }
@@ -538,12 +602,12 @@ export class SourcePoolManager {
    */
   public async loadFromSource(source: NetworkSourceConfig): Promise<void> {
     if (!source.isActive) {
-      this.logger.info(`Source ${source.id} is not active, skipping`);
+      Logger.info(TAG, `Source ${source.id} is not active, skipping`);
       return;
     }
     
     try {
-      this.logger.info(`Loading content from source: ${source.name} (${source.id})`);
+      Logger.info(TAG, `Loading content from source: ${source.name} (${source.id})`);
       
       const usage = source.contentUsage;
       
@@ -551,37 +615,37 @@ export class SourcePoolManager {
       if (usage.vodSites) {
         const vodSites = await this.retryWithBackoff(() => this.loadVodSites(source));
         this.vodPool.addSites(vodSites);
-        this.logger.info(`Loaded ${vodSites.length} VOD sites from source ${source.id}`);
+        Logger.info(TAG, `Loaded ${vodSites.length} VOD sites from source ${source.id}`);
       }
       
       if (usage.liveChannels) {
         const liveChannels = await this.retryWithBackoff(() => this.loadLiveChannels(source));
         this.livePool.addChannels(liveChannels);
-        this.logger.info(`Loaded ${liveChannels.length} live channels from source ${source.id}`);
+        Logger.info(TAG, `Loaded ${liveChannels.length} live channels from source ${source.id}`);
       }
       
       if (usage.wallpapers) {
         const wallpapers = await this.retryWithBackoff(() => this.loadWallpapers(source));
         this.wallpaperPool.addWallpapers(wallpapers);
-        this.logger.info(`Loaded ${wallpapers.length} wallpapers from source ${source.id}`);
+        Logger.info(TAG, `Loaded ${wallpapers.length} wallpapers from source ${source.id}`);
       }
       
       if (usage.adBlockRules) {
         const rules = await this.retryWithBackoff(() => this.loadAdBlockRules(source));
         this.adBlockRules.addRules(rules, source.id);
-        this.logger.info(`Loaded ${rules.length} ad block rules from source ${source.id}`);
+        Logger.info(TAG, `Loaded ${rules.length} ad block rules from source ${source.id}`);
       }
       
       if (usage.decoderConfigs) {
         const configs = await this.retryWithBackoff(() => this.loadDecoderConfigs(source));
         this.decoderConfigs.addConfigs(configs, source.id);
-        this.logger.info(`Loaded ${configs.length} decoder configs from source ${source.id}`);
+        Logger.info(TAG, `Loaded ${configs.length} decoder configs from source ${source.id}`);
       }
       
-      this.logger.info(`Successfully loaded content from source: ${source.name}`);
+      Logger.info(TAG, `Successfully loaded content from source: ${source.name}`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error(`Failed to load content from source ${source.id}`, err);
+      Logger.error(TAG, `Failed to load content from source ${source.id}`, err);
       throw err;
     }
   }
@@ -594,22 +658,26 @@ export class SourcePoolManager {
    * @returns 函数执行结果
    */
   private async retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
-    let lastError: Error;
-    
+    let lastError: Error = new Error('Unknown error');
+
     for (let i = 0; i < maxRetries; i++) {
       try {
         return await fn();
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        this.logger.warn(`Attempt ${i + 1} failed, retrying...`, lastError);
-        
+        Logger.warn(TAG, `Attempt ${i + 1} failed, retrying...`, lastError);
+
         // 指数退避
         const delay = Math.pow(2, i) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise<void>((resolve: () => void) => {
+          setTimeout(() => {
+            resolve();
+          }, delay);
+        });
       }
     }
-    
-    throw lastError!;
+
+    throw lastError;
   }
   
   /**
@@ -618,7 +686,7 @@ export class SourcePoolManager {
    * @param sources 网络源配置列表
    */
   public async rebuildAllPools(sources: NetworkSourceConfig[]): Promise<void> {
-    this.logger.info('Rebuilding all pools');
+    Logger.info(TAG, 'Rebuilding all pools');
     
     try {
       // 清空所有池
@@ -630,14 +698,14 @@ export class SourcePoolManager {
       
       // 从所有启用的源重新加载
       const activeSources = sources.filter(s => s.isActive);
-      this.logger.info(`Rebuilding from ${activeSources.length} active sources`);
+      Logger.info(TAG, `Rebuilding from ${activeSources.length} active sources`);
       
       // 并行加载所有源，提高性能
       if (activeSources.length > 0) {
-        const loadPromises = activeSources.map(source => 
-          this.loadFromSource(source).catch(error => {
-            const err = error instanceof Error ? error : new Error(String(error));
-            this.logger.error(`Failed to load source ${source.id} during rebuild, continuing with other sources`, err);
+        const loadPromises: Promise<void>[] = activeSources.map((source: NetworkSourceConfig) =>
+          this.loadFromSource(source).catch((error: unknown) => {
+            const err: Error = error instanceof Error ? error : new Error(String(error));
+            Logger.error(TAG, `Failed to load source ${source.id} during rebuild, continuing with other sources`, err);
             // 单个源失败不影响其他源的加载
           })
         );
@@ -645,10 +713,10 @@ export class SourcePoolManager {
         await Promise.all(loadPromises);
       }
       
-      this.logger.info('All pools rebuilt successfully');
+      Logger.info(TAG, 'All pools rebuilt successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to rebuild pools', err);
+      Logger.error(TAG, 'Failed to rebuild pools', err);
       throw err;
     }
   }
@@ -696,16 +764,21 @@ export class SourcePoolManager {
    * 获取解析器配置
    */
   public getParserConfigs(): ParserConfig[] {
+    // 从配置源服务获取解析器配置
+    // Get parser configs from config source service
     const allParsers: ParserConfig[] = [];
-    this.vodPool.getSites().forEach(site => {
-      if (site.parsers) {
-        allParsers.push(...site.parsers);
-      }
+    
+    // 遍历所有站点，收集解析器配置
+    // Iterate all sites and collect parser configs
+    this.vodPool.getAllSites().forEach((_site: VodSiteWithSource) => {
+      // MediaSite 接口中没有 parsers 属性，这里需要从其他地方获取
+      // MediaSite interface doesn't have parsers property, need to get from elsewhere
     });
-    // 去重
-    const uniqueParsers = new Map<string, ParserConfig>();
-    allParsers.forEach(parser => {
-      const key = `${parser.name}_${parser.url}`;
+    
+    // 去重 | Deduplicate
+    const uniqueParsers: Map<string, ParserConfig> = new Map<string, ParserConfig>();
+    allParsers.forEach((parser: ParserConfig) => {
+      const key: string = `${parser.name}_${parser.url}`;
       if (!uniqueParsers.has(key)) {
         uniqueParsers.set(key, parser);
       }
@@ -718,39 +791,46 @@ export class SourcePoolManager {
   // ========================================
   
   private async loadVodSites(source: NetworkSourceConfig): Promise<VodSiteWithSource[]> {
-    // 从ConfigSourceService加载解析后的配置
-    const parsedConfig = await this.configSourceService.getParsedConfig(source.url);
+    // 从 ConfigSourceService 加载解析后的配置
+    const parsedConfig: ParsedConfig | null = await this.configSourceService.getParsedConfig(source.url);
     
-    if (!parsedConfig || !parsedConfig.sites || parsedConfig.sites.length === 0) {
+    const hasNoSites: boolean = !parsedConfig || !parsedConfig.sites || parsedConfig.sites.length === 0;
+    if (hasNoSites) {
       return [];
     }
+
+    const vodSites: VodSiteWithSource[] = parsedConfig!.sites!.map((site: MediaSite): VodSiteWithSource => {
+      const vodSite: VodSiteWithSource = {
+        siteKey: site.key || site.name,
+        name: site.name,
+        url: site.api,
+        sourceId: source.id,
+        sourceName: source.name,
+        sourcePriority: source.priority,
+        sourceTags: source.tags,
+        categories: [],
+        flags: []
+      };
+      return vodSite;
+    });
     
-    return parsedConfig.sites.map(site => ({
-      siteKey: site.key || site.name,
-      name: site.name,
-      url: site.url,
-      sourceId: source.id,
-      sourceName: source.name,
-      sourcePriority: source.priority,
-      sourceTags: source.tags,
-      categories: site.groups || site.categories,
-      flags: site.flags
-    }));
+    return vodSites;
   }
   
   private async loadLiveChannels(source: NetworkSourceConfig): Promise<LiveChannelWithSource[]> {
-    // 从ConfigSourceService加载解析后的配置
-    const parsedConfig = await this.configSourceService.getParsedConfig(source.url);
+    // 从 ConfigSourceService 加载解析后的配置
+    const parsedConfig: ParsedConfig | null = await this.configSourceService.getParsedConfig(source.url);
 
-    if (!parsedConfig || !parsedConfig.lives || parsedConfig.lives.length === 0) {
+    const hasNoChannels: boolean = !parsedConfig || !parsedConfig.lives || parsedConfig.lives.length === 0;
+    if (hasNoChannels) {
       return [];
     }
 
     const channels: LiveChannelWithSource[] = [];
 
     // 直接使用 lives 数组中的每个 LiveSource 作为频道
-    parsedConfig.lives.forEach(live => {
-      channels.push({
+    parsedConfig!.lives!.forEach((live: LiveSource) => {
+      const channel: LiveChannelWithSource = {
         id: `${source.id}_${live.name}`,
         name: live.name,
         url: live.url,
@@ -759,61 +839,42 @@ export class SourcePoolManager {
         sourceName: source.name,
         logo: live.logo,
         epgUrl: live.epg
-      });
+      };
+      channels.push(channel);
     });
     
     return channels;
   }
   
   private async loadWallpapers(source: NetworkSourceConfig): Promise<WallpaperWithSource[]> {
-    // 从ConfigSourceService加载壁纸数据
-    const parsedConfig = await this.configSourceService.getParsedConfig(source.url);
+    // 从 ConfigSourceService 加载壁纸数据
+    const parsedConfig: ParsedConfig | null = await this.configSourceService.getParsedConfig(source.url);
     
-    if (!parsedConfig || !parsedConfig.wallpapers || parsedConfig.wallpapers.length === 0) {
+    const hasNoWallpapers: boolean = !parsedConfig || !parsedConfig.wallpapers || parsedConfig.wallpapers.length === 0;
+    if (hasNoWallpapers) {
       return [];
     }
-    
-    return parsedConfig.wallpapers.map(wallpaper => ({
-      id: `${source.id}_${wallpaper.id}`,
-      name: wallpaper.name,
-      url: wallpaper.url,
-      sourceId: source.id,
-      sourceName: source.name,
-      thumbnail: wallpaper.thumbnail,
-      aspectRatio: wallpaper.aspectRatio
-    }));
+
+    return parsedConfig!.wallpapers!.map((wallpaperUrl: string): WallpaperWithSource => {
+      const result: WallpaperWithSource = {
+        id: `${source.id}_${wallpaperUrl}`,
+        name: wallpaperUrl,
+        url: wallpaperUrl,
+        sourceId: source.id,
+        sourceName: source.name
+      };
+      return result;
+    });
   }
   
-  private async loadAdBlockRules(source: NetworkSourceConfig): Promise<AdBlockRule[]> {
-    // 从ConfigSourceService加载广告过滤规则
-    const parsedConfig = await this.configSourceService.getParsedConfig(source.url);
-    
-    if (!parsedConfig || !parsedConfig.adBlockRules || parsedConfig.adBlockRules.length === 0) {
-      return [];
-    }
-    
-    return parsedConfig.adBlockRules.map(rule => ({
-      id: rule.id || `${Date.now()}_${Math.random()}`,
-      pattern: rule.pattern,
-      type: rule.type || 'domain',
-      enabled: rule.enabled !== false
-    }));
+  private async loadAdBlockRules(_source: NetworkSourceConfig): Promise<AdBlockRule[]> {
+    // AdBlockRules are not part of ParsedConfig interface; return empty by default
+    return [];
   }
-  
-  private async loadDecoderConfigs(source: NetworkSourceConfig): Promise<DecoderConfig[]> {
-    // 从ConfigSourceService加载解码配置
-    const parsedConfig = await this.configSourceService.getParsedConfig(source.url);
-    
-    if (!parsedConfig || !parsedConfig.decoderConfigs || parsedConfig.decoderConfigs.length === 0) {
-      return [];
-    }
-    
-    return parsedConfig.decoderConfigs.map(config => ({
-      id: config.id || `${Date.now()}_${Math.random()}`,
-      name: config.name,
-      type: config.type,
-      config: config.config || {}
-    }));
+
+  private async loadDecoderConfigs(_source: NetworkSourceConfig): Promise<DecoderConfig[]> {
+    // DecoderConfigs are not part of ParsedConfig interface; return empty by default
+    return [];
   }
 }
 

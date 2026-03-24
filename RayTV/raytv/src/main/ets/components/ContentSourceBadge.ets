@@ -9,6 +9,16 @@
 // Badge 样式配置
 // ========================================
 
+/**
+ * 内边距配置接口
+ */
+export interface PaddingConfig {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
 export interface SourceBadgeStyle {
   showSourceName: boolean;
   showTags: boolean;
@@ -16,9 +26,16 @@ export interface SourceBadgeStyle {
   badgeColor: string;
   textColor: string;
   fontSize: number;
-  padding: { left: number; right: number; top: number; bottom: number };
+  padding: PaddingConfig;
   borderRadius: number;
 }
+
+const DEFAULT_PADDING: PaddingConfig = {
+  left: 8,
+  right: 8,
+  top: 4,
+  bottom: 4
+};
 
 const DEFAULT_STYLE: SourceBadgeStyle = {
   showSourceName: true,
@@ -27,7 +44,7 @@ const DEFAULT_STYLE: SourceBadgeStyle = {
   badgeColor: '#E3F2FD',
   textColor: '#1976D2',
   fontSize: 12,
-  padding: { left: 8, right: 8, top: 4, bottom: 4 },
+  padding: DEFAULT_PADDING,
   borderRadius: 4
 };
 
@@ -85,19 +102,27 @@ export struct ContentSourceBadge {
 
 /**
  * 多源组合徽章组件
- * 
+ * /**
+ * 源信息接口
+ */
+export interface SourceInfo {
+  name: string;
+  tags?: string[];
+}
+
+/**
  * 当内容来自多个源时显示的组合徽章
  */
 @Component
 export struct MultiSourceBadge {
-  sources: Array<{ name: string; tags?: string[] }> = [];
+  sources: Array<SourceInfo> = [];
   style: SourceBadgeStyle = DEFAULT_STYLE;
   maxShow: number = 2;
   
   build() {
     Row() {
-      // 显示前N个源
-      ForEach(this.sources.slice(0, this.maxShow), (source, index) => {
+      // 显示前 N 个源
+      ForEach(this.sources.slice(0, this.maxShow), (source: SourceInfo, index: number) => {
         Row() {
           Text(source.name)
             .fontSize(this.style.fontSize)
@@ -121,9 +146,9 @@ export struct MultiSourceBadge {
         .backgroundColor(this.style.badgeColor)
         .borderRadius(this.style.borderRadius)
         .margin({ right: 6 })
-      }, (source, index) => `${source.name}_${index}`)
+      }, (source: SourceInfo, index: number) => `${source.name}_${index}`)
       
-      // 如果还有更多源,显示"+N"
+      // 如果还有更多源，显示"+N"
       if (this.sources.length > this.maxShow) {
         Row() {
           Text(`+${this.sources.length - this.maxShow}`)

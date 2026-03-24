@@ -64,7 +64,7 @@ export class SQLValidator {
     }
 
     const trimmedName = tableName.trim().toLowerCase();
-    if (!this.VALID_TABLE_NAMES.has(trimmedName)) {
+    if (!SQLValidator.VALID_TABLE_NAMES.has(trimmedName)) {
       throw new Error(`Table name not in whitelist: ${tableName}`);
     }
 
@@ -95,7 +95,7 @@ export class SQLValidator {
     }
 
     const trimmedName = columnName.trim().toLowerCase();
-    if (!this.VALID_COLUMN_NAMES.has(trimmedName)) {
+    if (!SQLValidator.VALID_COLUMN_NAMES.has(trimmedName)) {
       throw new Error(`Column name not in whitelist: ${columnName}`);
     }
 
@@ -126,7 +126,7 @@ export class SQLValidator {
     }
 
     for (const columnName of columnNames) {
-      this.validateColumnName(columnName);
+      SQLValidator.validateColumnName(columnName);
     }
   }
 

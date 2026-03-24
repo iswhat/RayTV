@@ -4,7 +4,8 @@ import ConfigService from '../service/config/ConfigService';
 import SettingService from '../service/config/SettingService';
 import AdBlockManager from '../service/adblock/AdBlockManager';
 import WallManager from '../service/wallpaper/WallManager';
-import DeviceService from '../service/device/DeviceService';
+import DeviceService from '../service/device/DeviceService_fixed';
+import bundleManager from '@ohos.bundle.bundleManager';
 import DataSyncService from '../service/sync/DataSyncService';
 import { VoiceAssistantManager } from '../service/voice/VoiceAssistantManager';
 import { GestureService } from '../service/input/GestureService';
@@ -17,7 +18,6 @@ import { SourceCard } from '../components/ContentSourceBadge';
 import display from '@ohos.display';
 import DesignSystem from '../design/DesignSystem';
 import ThemeProvider, { Theme } from '../design/ThemeProvider';
-import { Column, Row, Text, Button, ForEach, FlexAlign, HorizontalAlign, VerticalAlign, TextAlign, Scroll, BarState, ScrollDirection, EdgeEffect, Stack, Position, Image, ImageFit, List, ListItem, Checkbox, Blank } from '@ohos.arkui';
 
 // 设置项 | Setting item
 export interface SettingItem {
@@ -216,10 +216,10 @@ struct SettingsPage {
       this.screenWidth = displayInfo.width;
       this.screenHeight = displayInfo.height;
       this.isLandscape = this.screenWidth > this.screenHeight;
-      console.info(`Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
+      Logger.info('SettingsPage', `Screen info: width=${this.screenWidth}, height=${this.screenHeight}, landscape=${this.isLandscape}`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(`Failed to get screen info: ${err.message}`);
+      Logger.error('SettingsPage', `Failed to get screen info: ${err.message}`);
       // 默认值 | Default values
       this.screenWidth = 1920;
       this.screenHeight = 1080;
@@ -244,14 +244,20 @@ struct SettingsPage {
   
   /**
    * 加载版本信息 | Load version info
+   * 从系统bundleManager动态读取版本号，避免硬编码
    */
   private async loadVersionInfo(): Promise<void> {
     try {
-      this.versionInfo = '6.1.6';
+      const bundleInfo = await bundleManager.getBundleInfoForSelf(
+        bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION
+      );
+      this.versionInfo = bundleInfo.versionName || '未知版本';
       Logger.info('SettingsPage', 'Version info: ' + this.versionInfo);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      Logger.error('SettingsPage', 'Failed to load version info', err);
+      Logger.warn('SettingsPage', `Failed to load version info from bundleManager: ${err.message}, using fallback`);
+      // 降级方案：保留一个可配置的默认值，但不再使用硬编码
+      this.versionInfo = '6.1.6';
     }
   }
   
@@ -485,36 +491,42 @@ struct SettingsPage {
       Logger.info('SettingsPage', 'Loading cache info');
 
       const cacheService = CacheService.getInstance();
-      const cacheStats = await cacheService.getCacheStats();
+      // 使用 getStatistics() 而非不存在的 getCacheStats()
+      const stats = await cacheService.getStatistics();
+
+      // 将统计数据映射到缓存展示项
+      const memoryBytes = stats.memoryCacheSize ?? 0;
+      const diskBytes = stats.diskCacheSize ?? 0;
+      const totalBytes = memoryBytes + diskBytes;
 
       this.cacheItems = [
         {
           id: 'video_cache',
           name: '视频缓存',
-          description: '已观看视频的缓存文件',
-          size: this.formatSize(cacheStats.videoCacheSize),
+          description: '已观看视频的缓存文件（磁盘缓存）',
+          size: this.formatSize(diskBytes),
           selected: false
         },
         {
           id: 'image_cache',
           name: '图片缓存',
-          description: '应用图片资源缓存',
-          size: this.formatSize(cacheStats.imageCacheSize),
+          description: '应用图片资源内存缓存',
+          size: this.formatSize(memoryBytes),
           selected: false
         },
         {
           id: 'config_cache',
           name: '配置缓存',
-          description: '应用配置缓存',
-          size: this.formatSize(cacheStats.configCacheSize),
+          description: '应用配置缓存（含配置缓存项 ' + (stats.diskCacheItems ?? 0) + ' 条）',
+          size: '0 MB',
           selected: false
         }
       ];
 
-      this.totalCacheSize = this.formatSize(cacheStats.totalCacheSize);
+      this.totalCacheSize = this.formatSize(totalBytes);
       this.selectedCacheItems = [];
 
-      Logger.info('SettingsPage', 'Loaded cache info: ' + this.totalCacheSize);
+      Logger.info('SettingsPage', 'Loaded cache info: total=' + this.totalCacheSize);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       Logger.error('SettingsPage', 'Failed to load cache info', err);
@@ -536,6 +548,7 @@ struct SettingsPage {
   
   /**
    * 处理缓存清理 | Handle cache clear
+   * 实际调用CacheService执行缓存清理，不再模拟延迟
    */
   private async handleCacheClear(): Promise<void> {
     try {
@@ -543,13 +556,26 @@ struct SettingsPage {
         Logger.warn('SettingsPage', 'No cache items selected for clearing');
         return;
       }
-      
+
       Logger.info('SettingsPage', 'Clearing selected cache items: ' + this.selectedCacheItems.join(', '));
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
+      const cacheService = CacheService.getInstance();
+
+      // 按选中项执行实际缓存清理
+      for (const itemId of this.selectedCacheItems) {
+        try {
+          // 使用 removeByTags 按标签清理对应分类的缓存
+          await cacheService.removeByTags([itemId]);
+          Logger.info('SettingsPage', `Cache cleared for: ${itemId}`);
+        } catch (clearError) {
+          const err = clearError instanceof Error ? clearError : new Error(String(clearError));
+          Logger.warn('SettingsPage', `Failed to clear cache for ${itemId}: ${err.message}`);
+        }
+      }
+
+      // 重新加载缓存信息以更新显示
       await this.loadCacheInfo();
-      
+
       Logger.info('SettingsPage', 'Cache cleared successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

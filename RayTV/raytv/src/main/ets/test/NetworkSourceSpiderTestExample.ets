@@ -1,4 +1,4 @@
-// NetworkSourceSpiderTestExample.ets
+﻿// NetworkSourceSpiderTestExample.ets
 // 网络源Spider解析能力测试使用示例
 
 import NetworkSourceSpiderTest from './NetworkSourceSpiderTest';
@@ -117,7 +117,7 @@ export class NetworkSourceSpiderTestExample {
   /**
    * 分析测试结果
    */
-  private analyzeTestResult(result: any): void {
+  private analyzeTestResult(result: string): void {
     const summary = result.summary;
     
     this.logger.info('\n=== 测试结果分析 ===');
@@ -130,10 +130,10 @@ export class NetworkSourceSpiderTestExample {
     this.logger.info(`成功率: ${summary.successRate.toFixed(2)}%`);
     
     // 分析失败的测试
-    const failedTests = result.tests.filter((test: any) => !test.passed);
+    const failedTests = result.tests.filter((test: string) => !test.passed);
     if (failedTests.length > 0) {
       this.logger.info('\n=== 失败测试分析 ===');
-      failedTests.forEach((test: any) => {
+      failedTests.forEach((test: string) => {
         this.logger.info(`- ${test.testName} (${test.siteKey}.${test.method}): ${test.error}`);
       });
     }
@@ -142,7 +142,7 @@ export class NetworkSourceSpiderTestExample {
     this.logger.info('\n=== 站点性能分析 ===');
     const sitePerformance = new Map<string, { totalTests: number; passedTests: number; avgResponseTime: number }>();
     
-    result.tests.forEach((test: any) => {
+    result.tests.forEach((test: string) => {
       if (!sitePerformance.has(test.siteKey)) {
         sitePerformance.set(test.siteKey, { totalTests: 0, passedTests: 0, avgResponseTime: 0 });
       }
@@ -158,7 +158,7 @@ export class NetworkSourceSpiderTestExample {
     });
     
     sitePerformance.forEach((perf, siteKey) => {
-      const siteName = result.spiders.find((s: any) => s.key === siteKey)?.name || siteKey;
+      const siteName = result.spiders.find((s: string) => s.key === siteKey)?.name || siteKey;
       const successRate = (perf.passedTests / perf.totalTests) * 100;
       const avgTime = perf.passedTests > 0 ? (perf.avgResponseTime / perf.passedTests).toFixed(2) : 'N/A';
       

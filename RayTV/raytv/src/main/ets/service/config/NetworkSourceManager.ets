@@ -1,4 +1,4 @@
-/**
+﻿﻿/**
  * Network Source Manager - 网络源管理服务
  * 
  * 负责网络源的CRUD操作、健康检查、内容使用配置等
@@ -141,11 +141,7 @@ export class NetworkSourceManager {
       
       this.initialized = true;
       this.logger.info('NetworkSourceManager initialized');
-    } catch (error: unknown) {
-      const err: Error = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to initialize NetworkSourceManager', err);
-      throw err;
-    }
+    } catch (error) {
   }
   
   /**
@@ -164,11 +160,7 @@ export class NetworkSourceManager {
         }
         
         this.logger.info(`Loaded ${this.sources.length} network sources`);
-      } catch (error: unknown) {
-        const err: Error = error instanceof Error ? error : new Error(String(error));
-        this.logger.error('Failed to load sources', err);
-        // 使用默认源
-        this.sources = DEFAULT_SOURCES.map((s: NetworkSourceConfig) => ({ ...s }));
+      } catch (error) {));
       }
     });
   }
@@ -180,11 +172,7 @@ export class NetworkSourceManager {
     await this.withLock(async () => {
       try {
         await StorageUtil.setItem(STORAGE_KEY, JSON.stringify(this.sources));
-      } catch (error: unknown) {
-        const err: Error = error instanceof Error ? error : new Error(String(error));
-        this.logger.error('Failed to save sources', err);
-        throw err;
-      }
+      } catch (error) {
     });
   }
   
@@ -221,9 +209,7 @@ export class NetworkSourceManager {
         await this.rebuildPoolsIfNeeded(source.isActive);
         
         this.logger.info(`Added source: ${source.name}`);
-      } catch (error: unknown) {
-        const err: Error = error instanceof Error ? error : new Error(String(error));
-        this.logger.error(`Failed to add source ${source.name}`, err);
+      } catch (error) {`, err);
         throw err;
       }
     });

@@ -1,4 +1,4 @@
-// DateUtils.ets - ArkTS兼容的日期时间工具函数 ArkTS compatible date and time utility functions
+﻿// DateUtils.ets - ArkTS兼容的日期时间工具函数 ArkTS compatible date and time utility functions
 /**
  * 日期时间工具函数 Date and time utility functions
  * 提供ArkTS环境中安全的日期时间操作功能 Provides safe date and time operation functionality in ArkTS environment
@@ -14,7 +14,7 @@ export const DateUtils = {
   /**
    * 检查值是否为Date对象 Checks if value is a Date object
    */
-  isDate(value: unknown): boolean {
+  isDate(value: string): boolean {
     return value instanceof Date && !isNaN(value.getTime());
   },
 

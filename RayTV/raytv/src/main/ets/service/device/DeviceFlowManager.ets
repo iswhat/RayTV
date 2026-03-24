@@ -1,12 +1,14 @@
-// 设备流转管理器 | Device flow manager
+﻿// 设备流转管理器 | Device flow manager
 // 提供设备发现、状态管理和媒体流转功能 | Provides device discovery, status management, and media flow functionality
 
 
 import { DeviceFlowStatus } from '../../data/bean/DeviceInfo';
-import ConfigService from '../config/ConfigService';
+import ConfigService, { ConfigKey } from '../config/ConfigService';
 import TypeSafetyHelper from '../../common/util/TypeSafetyHelper';
-import deviceManager from '@ohos.distributedHardware.deviceManager';
-import BusinessError from '@ohos.base';
+import dmModule from '@ohos.distributedHardware.deviceManager';
+import { BusinessError } from '@ohos.base';
+import Logger from '../../common/util/Logger';
+
 
 /**
  * 设备管理器设备接口 | Device manager device interface
@@ -16,12 +18,18 @@ export interface DMDevice {
   deviceName: string;
   deviceType: number;
   status: number;
+  deviceTypeId?: number;
+  networkId?: string;
+  isLocal?: boolean;
+  authType?: number;
+  isTrusted?: boolean;
+  extraInfo?: object;
 }
 
 /**
  * 增强的设备管理器接口 | Enhanced device manager interface
  */
-export interface EnhancedDeviceManager extends deviceManager.DeviceManager {
+export interface EnhancedDeviceManager extends dmModule.DeviceManager {
   on: (event: string, callback: (data: DMDevice | DMDevice[]) => void) => void;
   publishDeviceDiscovery: (options: object) => void;
   startDeviceDiscovery: (options: object) => void;
@@ -225,10 +233,10 @@ class DeviceManager {
   /**
    * 获取设备管理器实例 | Get device manager instance
    */
-  private async getDeviceManagerInstance(): Promise<deviceManager.DeviceManager> {
+  private async getDeviceManagerInstance(): Promise<dmModule.DeviceManager> {
     return new Promise((resolve, reject) => {
       try {
-        deviceManager.createDeviceManager('RayTV', (error: BusinessError, dm: deviceManager.DeviceManager) => {
+        dmModule.createDeviceManager('RayTV', (error: BusinessError, dm: dmModule.DeviceManager) => {
           if (error) {
             console.error(DeviceManager.TAG, `创建设备管理器失败: `, error, ` | Failed to create device manager: `, error);
             reject(error);
@@ -238,7 +246,8 @@ class DeviceManager {
           resolve(dm);
         });
       } catch (error) {
-        Logger.error(DeviceManager.TAG, `创建设备管理器时出错: `, error, ` | Error creating device manager: `, error);
+        const createErrMsg = error instanceof Error ? error.message : String(error);
+        Logger.error(DeviceManager.TAG, `创建设备管理器时出错: ${createErrMsg} | Error creating device manager: ${createErrMsg}`);
         reject(error);
       }
     });
@@ -314,7 +323,8 @@ class DeviceManager {
         });
       }
     } catch (error) {
-      Logger.error(DeviceManager.TAG, `设置设备监听器失败: `, error, ` | Failed to setup device listeners: `, error);
+      const setupErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceManager.TAG, `设置设备监听器失败: ${setupErrMsg} | Failed to setup device listeners: ${setupErrMsg}`);
     }
   }
   
@@ -535,7 +545,8 @@ class DeviceManager {
       // 通知监听器（可能是空列表） | Notify listeners (may be empty list)
       this.notifyDeviceListChanged();
     } catch (error) {
-      Logger.error(DeviceManager.TAG, `扫描设备失败: `, error, ` | Failed to scan devices: `, error);
+      const scanErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceManager.TAG, `扫描设备失败: ${scanErrMsg} | Failed to scan devices: ${scanErrMsg}`);
       // 确保只抛出Error对象 | Ensure only Error objects are thrown
       const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`扫描设备失败: ${errorMsg} | Failed to scan devices: ${errorMsg}`);
@@ -623,14 +634,16 @@ export class DeviceFlowManager {
       Logger.info(DeviceFlowManager.TAG, '正在初始化设备流转管理器... | Initializing DeviceFlowManager...');
       
       // 加载配置 | Load configuration
-      this.isEnabled = await this.configService.getConfig('enableDeviceFlow', true);
+      // enableDeviceFlow is not a standard config key; default to enabled
+      this.isEnabled = true;
       
       // 初始化设备管理器 | Initialize device manager
       await this.deviceManager.initialize();
       
       Logger.info(DeviceFlowManager.TAG, '设备流转管理器初始化成功 | DeviceFlowManager initialized successfully');
     } catch (error) {
-      Logger.error(DeviceFlowManager.TAG, `设备流转管理器初始化失败: `, error, ` | Failed to initialize DeviceFlowManager: `, error);
+      const initErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceFlowManager.TAG, `设备流转管理器初始化失败: ${initErrMsg} | Failed to initialize DeviceFlowManager: ${initErrMsg}`);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
@@ -673,7 +686,8 @@ export class DeviceFlowManager {
       try {
         await this.performDistributedTransfer(params.targetDeviceId, params.data);
       } catch (distributedError) {
-        Logger.warn(DeviceFlowManager.TAG, `分布式传输失败，正在使用回退方式: `, distributedError, ` | Distributed transfer failed, using fallback: `, distributedError);
+        const distErrMsg = distributedError instanceof Error ? distributedError.message : String(distributedError);
+        Logger.warn(DeviceFlowManager.TAG, `分布式传输失败，正在使用回退方式: ${distErrMsg} | Distributed transfer failed, using fallback: ${distErrMsg}`);
         // 如果分布式传输失败，使用本地数据备份作为回退 | If distributed transfer fails, use local data backup as fallback
         await this.performLocalBackupFallback(params.flowType, params.targetDeviceId);
       }
@@ -685,7 +699,8 @@ export class DeviceFlowManager {
       console.info(DeviceFlowManager.TAG, `流转完成成功 | Flow completed successfully`);
       this.notifyFlowStatusChanged();
     } catch (error) {
-      Logger.error(DeviceFlowManager.TAG, `启动流转失败: `, error, ` | Failed to start flow: `, error);
+      const startFlowErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceFlowManager.TAG, `启动流转失败: ${startFlowErrMsg} | Failed to start flow: ${startFlowErrMsg}`);
       
       // 更新为失败状态 | Update to failed status
       if (this.currentFlowStatus) {
@@ -744,22 +759,23 @@ export class DeviceFlowManager {
             }
           }
         });
-      
+      }
+
       // 5. 执行数据传输 | Execute data transfer
       // 使用分布式数据服务进行传输
       // 这里使用模拟的传输ID，实际应用中应使用真实的传输机制
       const transferId = `transfer_${Date.now()}`;
-      
+
       // 6. 记录传输ID | Record transfer ID
       // Note: DeviceFlowStatus interface doesn't have transferId field
       // The transferId is tracked internally
-      
+
       // 7. 模拟传输过程（实际应用中应使用真实的传输API）
       await this.simulateTransferProcess(transferId, targetDeviceId);
-      
+
       Logger.info(DeviceFlowManager.TAG, `分布式传输完成 | Distributed transfer completed`);
     } catch (error) {
-      Logger.error(DeviceFlowManager.TAG, `分布式传输失败: `, error, ` | Distributed transfer failed: `, error);
+      Logger.error(DeviceFlowManager.TAG, `分布式传输失败: ${error instanceof Error ? error.message : String(error)} | Distributed transfer failed`);
       const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`分布式传输失败: ${errorMsg} | Distributed transfer failed: ${errorMsg}`);
     }
@@ -782,7 +798,8 @@ export class DeviceFlowManager {
       // 清理资源 | Clean up resources
       this.currentFlowStatus = null;
     } catch (error) {
-      Logger.error(DeviceFlowManager.TAG, `停止流转失败: `, error, ` | Failed to stop flow: `, error);
+      const stopFlowErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceFlowManager.TAG, `停止流转失败: ${stopFlowErrMsg} | Failed to stop flow: ${stopFlowErrMsg}`);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
@@ -815,11 +832,12 @@ export class DeviceFlowManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await this.configService.setConfig('enableDeviceFlow', enabled);
+      await this.configService.setConfig('enableDeviceFlow' as ConfigKey, enabled);
 
       Logger.info(DeviceFlowManager.TAG, `设备流转已${enabled ? '启用' : '禁用'} | Device flow ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
-      Logger.error(DeviceFlowManager.TAG, `设置设备流转启用状态失败: `, error, ` | Failed to set device flow enabled state: `, error);
+      const setEnabledErrMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(DeviceFlowManager.TAG, `设置设备流转启用状态失败: ${setEnabledErrMsg} | Failed to set device flow enabled state: ${setEnabledErrMsg}`);
       const err = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
@@ -873,10 +891,10 @@ export class DeviceFlowManager {
   /**
    * 获取设备管理器实例 | Get device manager instance
    */
-  private async getDeviceManager(): Promise<deviceManager.DeviceManager> {
+  private async getDeviceManager(): Promise<dmModule.DeviceManager> {
     return new Promise((resolve, reject) => {
       try {
-        deviceManager.createDeviceManager('RayTV', (error: BusinessError, dm: deviceManager.DeviceManager) => {
+        dmModule.createDeviceManager('RayTV', (error: BusinessError, dm: dmModule.DeviceManager) => {
           if (error) {
             console.error(DeviceFlowManager.TAG, `创建设备管理器失败: `, error, ` | Failed to create device manager: `, error);
             reject(error);

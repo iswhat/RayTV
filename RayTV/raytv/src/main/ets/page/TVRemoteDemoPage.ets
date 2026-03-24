@@ -2,7 +2,6 @@
  * TV遥控器交互演示页面
  * 展示TV友好的交互组件和遥控器支持
  */
-import { Component, State } from '@ohos/arkui'
 import { TVFriendlyPage } from './TVFriendlyPage'
 import { TVGrid, GridItem } from '../component/tv/TVGrid'
 import { TVNavigationMenu, MenuItem } from '../component/tv/TVNavigationMenu'

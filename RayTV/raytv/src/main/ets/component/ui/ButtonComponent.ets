@@ -3,12 +3,11 @@
  * 支持多种样式和交互状态的通用按钮组件
  */
 import { BaseComponent } from '../core/BaseComponent'
-import { Stack, Text, TapGesture, LongPressGesture } from '@ohos/arkui'
 
 export interface ButtonProps {
   id?: string
   className?: string
-  style?: Record<string, any>
+  style?: Record<string, Object>
   disabled?: boolean
   visible?: boolean
   text: string
@@ -41,24 +40,24 @@ export class ButtonComponent extends BaseComponent<ButtonProps> {
     this.props.iconPosition = this.props.iconPosition || 'left'
   }
   
-  private getButtonStyle(): Record<string, any> {
-    const baseStyle = {
+  private getButtonStyle(): Record<string, Object> {
+    const baseStyle: Record<string, Object> = {
       padding: this.getSizePadding(),
       backgroundColor: this.getBackgroundColor(),
       borderRadius: this.getBorderRadius(),
       opacity: this.props.disabled ? 0.6 : 1,
       transition: 'all 0.2s ease'
-    }
+    };
     
-    return { ...baseStyle, ...this.props.style }
+    return { ...baseStyle, ...this.props.style };
   }
   
-  private getTextStyle(): Record<string, any> {
+  private getTextStyle(): Record<string, Object> {
     return {
       fontSize: this.getTextFontSize(),
       color: this.getTextColor(),
       fontWeight: '500'
-    }
+    };
   }
   
   private getSizePadding(): string {

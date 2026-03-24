@@ -52,6 +52,14 @@ export interface VirtualListConfig {
 }
 
 /**
+ * 可见范围接口
+ */
+export interface VisibleRange {
+  start: number;
+  end: number;
+}
+
+/**
  * 虚拟列表状态接口
  */
 export interface VirtualListState {
@@ -62,10 +70,7 @@ export interface VirtualListState {
   scrollTop: number;
   
   /** 可见项目范围 */
-  visibleRange: {
-    start: number;
-    end: number;
-  };
+  visibleRange: VisibleRange;
   
   /** 总项目数 */
   totalItems: number;

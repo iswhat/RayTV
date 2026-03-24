@@ -262,7 +262,7 @@ export interface SiteImportExportConfig {
  * Site template interface | 站点模板接口
  */
 export interface SiteTemplate {
-  id: string;           // Template ID | 模板ID
+  id: string;           // Template ID | 模板 ID
   name: string;         // Template name | 模板名称
   loaderType: LoaderType; // Loader type | 加载器类型
   configTemplate: string | number | boolean | null;  // Configuration template | 配置模板
@@ -271,3 +271,8 @@ export interface SiteTemplate {
   author?: string;      // Author | 作者
   version?: string;     // Version number | 版本号
 }
+
+/**
+ * SiteInfo 是 Site 的简化版本，用于爬虫服务 | SiteInfo is a simplified version of Site for crawler service
+ */
+export type SiteInfo = Site;

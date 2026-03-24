@@ -1,4 +1,4 @@
-// LiveStreamService - 直播流服务类 | Live stream service class
+﻿// LiveStreamService - 直播流服务类 | Live stream service class
 import Logger from '../../common/util/Logger';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import StorageUtil from '../../common/util/StorageUtil';

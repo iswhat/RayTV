@@ -1,4 +1,4 @@
-// DeviceInfoRepository.ets - 设备信息数据仓库 | Device info data repository
+﻿// DeviceInfoRepository.ets - 设备信息数据仓库 | Device info data repository
 // 负责设备信息的收集、存储和管理 | Responsible for device info collection, storage and management
 
 import { SQLiteHelper, QueryCondition } from '../db/SQLiteHelper';

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MainViewModel.ets
  * 主页面ViewModel - 实现响应式数据绑定和状态管理
  */
@@ -386,7 +386,7 @@ export class MainViewModel {
   
   // ==================== 错误处理 ====================
   
-  private handleError(message: string, error: unknown): void {
+  private handleError(message: string, error: string): void {
     this.isError.value = true;
     this.errorMessage.value = message;
     const err = error instanceof Error ? error : new Error(String(error));

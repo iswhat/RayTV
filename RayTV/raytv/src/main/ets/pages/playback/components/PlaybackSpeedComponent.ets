@@ -1,4 +1,3 @@
-import { Component, Text, Row, Column, Button } from '@ohos/arkui';
 import Logger from '../../../common/util/Logger';
 
 interface PlaybackSpeedComponentProps {

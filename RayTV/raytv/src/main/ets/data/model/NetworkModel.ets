@@ -39,9 +39,9 @@ export interface RequestOptions {
   data?: Record<string, string | number | boolean | null>;
   
   /**
-   * URL查询参数 // URL query parameters
+   * URL 查询参数 // URL query parameters
    */
-  params?: Record<string, unknown>;
+  params?: Record<string, Object>;
   
   /**
    * 超时时间（秒） // Timeout in seconds

@@ -1,4 +1,4 @@
-import { FocusManager } from '../managers/FocusManager';
+﻿import { FocusManager } from '../managers/FocusManager';
 import { NavigationHistory } from '../managers/NavigationHistory';
 
 /**
@@ -47,7 +47,7 @@ struct SmartNavigator {
   /**
    * 导航到指定路由
    */
-  navigateTo(path: string, params?: any): void {
+  navigateTo(path: string, params?: string): void {
     const targetIndex = this.routes.findIndex(route => route.path === path);
     if (targetIndex === -1 || targetIndex === this.currentIndex) {
       return;
@@ -182,7 +182,7 @@ struct SmartNavigator {
             .onFocus(() => {
               this.focusManager.setFocusedElement(`nav-${route.path}`);
             })
-        })
+        }, (route: RouteConfig) => `nav-${route.path}`)
       }
       .padding(16)
       .backgroundColor('#ffffff')
@@ -202,7 +202,7 @@ struct SmartNavigator {
             duration: this.transitionDuration,
             curve: Curve.EaseInOut
           })
-        })
+        }, (route: RouteConfig) => `content-${route.path}`)
       }
       .layoutWeight(1)
 

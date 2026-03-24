@@ -1,4 +1,4 @@
-// SQLiteDatabaseRepository - SQLite数据库实现类 | SQLite database implementation class
+﻿// SQLiteDatabaseRepository - SQLite数据库实现类 | SQLite database implementation class
 
 import JsonUtil from '../../common/util/JsonUtil';
 import DatabaseRepository, {

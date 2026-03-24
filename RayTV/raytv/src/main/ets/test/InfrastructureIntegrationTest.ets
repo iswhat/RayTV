@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 基础设施集成测试 | Infrastructure Integration Test
  * 验证核心组件的功能和集成 | Verifies core component functionality and integration
  */
@@ -103,7 +103,7 @@ export class InfrastructureIntegrationTest {
     
     try {
       let eventReceived = false;
-      let eventData: any = null;
+      let eventData: string = null;
 
       // 订阅事件 | Subscribe to event
       const subscriptionId = EventBus.subscribe('test_event', (data) => {

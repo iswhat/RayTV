@@ -1,4 +1,4 @@
-// DefaultNetworkRepository - 网络服务默认实现类 | Default network service implementation class
+﻿// DefaultNetworkRepository - 网络服务默认实现类 | Default network service implementation class
 import StorageUtil from '../../common/util/StorageUtil';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import http from '@ohos.net.http';

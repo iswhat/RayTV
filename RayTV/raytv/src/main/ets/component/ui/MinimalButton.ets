@@ -2,7 +2,6 @@
  * 最小化按钮组件
  * 最基础的按钮实现
  */
-import { Component, State, Prop } from '@ohos/arkui'
 
 @Component
 export struct MinimalButton {

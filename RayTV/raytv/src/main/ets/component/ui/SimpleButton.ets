@@ -2,7 +2,6 @@
  * 简单按钮组件
  * 使用标准ArkTS语法的按钮组件
  */
-import { Component, State, Prop } from '@ohos/arkui'
 
 @Component
 export struct SimpleButton {

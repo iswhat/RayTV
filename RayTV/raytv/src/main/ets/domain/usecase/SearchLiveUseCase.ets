@@ -1,4 +1,4 @@
-// SearchLiveUseCase.ets - 搜索直播用例 // Search live use case
+﻿// SearchLiveUseCase.ets - 搜索直播用例 // Search live use case
 import Logger from '../../common/util/Logger';
 import { Live } from '../../data/bean/Live';
 import { LiveRepository } from '../../data/repository/LiveRepository';

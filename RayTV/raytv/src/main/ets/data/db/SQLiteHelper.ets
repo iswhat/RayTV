@@ -26,7 +26,7 @@
  */
 
 import RelationalStore from '@ohos.data.relationalStore';
-import { DatabaseManager } from './DatabaseManager';
+import DatabaseManager from './DatabaseManager';
 import Logger from '../../common/util/Logger';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
 import SQLValidator from '../../common/util/SQLValidator';
@@ -70,6 +70,14 @@ export interface DatabaseResult {
   message?: string;
   affectedRows?: number;
   lastInsertRowId?: number;
+}
+
+/**
+ * 批量更新数据项接口 // Batch update item interface
+ */
+export interface BatchUpdateItem {
+  values: Record<string, ValueType>;
+  conditions: Array<QueryCondition>;
 }
 
 export class SQLiteHelper {
@@ -283,7 +291,7 @@ export class SQLiteHelper {
         // 验证表名，防止SQL注入
         SQLValidator.validateTableName(tableName);
 
-        const database = this.dbManager.getDatabase();
+        const database = await this.dbManager.getDatabase();
 
         // 构建插入语句 // Build insert statement
         const columns = this.getObjectKeys(values);
@@ -323,13 +331,13 @@ export class SQLiteHelper {
           success: true,
           lastInsertRowId,
           affectedRows: 1
-        };
+        } as DatabaseResult;
       } catch (error) {
         Logger.error(TAG, `Failed to insert into ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
         return {
           success: false,
           message: error instanceof Error ? error.message : JSON.stringify(error)
-        };
+        } as DatabaseResult;
       }
     });
   }
@@ -358,7 +366,7 @@ export class SQLiteHelper {
   public async batchInsert(tableName: string, dataList: Array<Record<string, ValueType>>): Promise<DatabaseResult> {
     return this.executeWithLock(async () => {
       if (!dataList || dataList.length === 0) {
-        return { success: true, affectedRows: 0 };
+        return { success: true, affectedRows: 0 } as DatabaseResult;
       }
       
       try {
@@ -383,13 +391,13 @@ export class SQLiteHelper {
       return {
         success: true,
         affectedRows
-      };
+      } as DatabaseResult;
     } catch (error) {
       Logger.error(TAG, `Failed to batch insert into ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
-      };
+      } as DatabaseResult;
     }
     });
   }
@@ -427,7 +435,7 @@ export class SQLiteHelper {
         // 验证表名，防止SQL注入
         SQLValidator.validateTableName(tableName);
 
-        const database = this.dbManager.getDatabase();
+        const database = await this.dbManager.getDatabase();
 
         // 构建更新语句 // Build update statement
         const columns = this.getObjectKeys(values);
@@ -503,20 +511,20 @@ export class SQLiteHelper {
         return {
           success: true,
           affectedRows
-        };
+        } as DatabaseResult;
       } catch (error) {
         Logger.error(TAG, `Failed to update ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
         return {
           success: false,
           message: error instanceof Error ? error.message : JSON.stringify(error)
-        };
+        } as DatabaseResult;
       }
     });
   }
-  
+
   /**
    * 删除数据
-   * 
+   *
    * 根据指定条件删除表中的记录，返回删除结果，包含是否成功和影响的行数。
    * 
    * @param {string} tableName - 表名
@@ -542,7 +550,7 @@ export class SQLiteHelper {
         // 验证表名，防止SQL注入
         SQLValidator.validateTableName(tableName);
 
-        const database = this.dbManager.getDatabase();
+        const database = await this.dbManager.getDatabase();
 
         let sql = `DELETE FROM ${tableName}`;
         const bindArgs: ValueType[] = [];
@@ -608,20 +616,20 @@ export class SQLiteHelper {
         return {
           success: true,
           affectedRows
-        };
+        } as DatabaseResult;
       } catch (error) {
         Logger.error(TAG, `Failed to delete from ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
         return {
           success: false,
           message: error instanceof Error ? error.message : JSON.stringify(error)
-        };
+        } as DatabaseResult;
       }
     });
   }
-  
+
   /**
    * 查询数据
-   * 
+   *
    * 根据指定条件查询表中的记录，支持排序、分页等功能，返回查询结果列表。
    * 
    * @template T - 泛型类型，用于指定返回记录的类型
@@ -685,7 +693,7 @@ export class SQLiteHelper {
           SQLValidator.validateColumnNames(columns);
         }
 
-        const database = this.dbManager.getDatabase();
+        const database = await this.dbManager.getDatabase();
 
         // 构建查询语句 // Build query statement
         let sql = `SELECT ${columns.join(', ')} FROM ${tableName}`;
@@ -878,7 +886,7 @@ export class SQLiteHelper {
         // 验证表名，防止SQL注入
         SQLValidator.validateTableName(tableName);
 
-        const database = this.dbManager.getDatabase();
+        const database = await this.dbManager.getDatabase();
 
         let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
         const bindArgs: ValueType[] = [];
@@ -994,8 +1002,8 @@ export class SQLiteHelper {
   public async executeCustomQuery<T extends Record<string, string | number | boolean | null>>(sql: string, bindArgs?: ValueType[]): Promise<T[]> {
     return this.executeWithLock(async () => {
       try {
-        const database = this.dbManager.getDatabase();
-        
+        const database = await this.dbManager.getDatabase();
+
         Logger.debug(TAG, `Executing custom query: ${sql}, args: ${JSON.stringify(bindArgs)}`);
         
         const result: RelationalStore.ResultSet = await database.querySql(sql, bindArgs);
@@ -1078,11 +1086,11 @@ export class SQLiteHelper {
    */
   public async batchUpdate(
     tableName: string,
-    updates: Array<{ values: Record<string, ValueType>, conditions: Array<QueryCondition> }>
+    updates: Array<BatchUpdateItem>
   ): Promise<DatabaseResult> {
     return this.executeWithLock(async () => {
       if (!updates || updates.length === 0) {
-        return { success: true, affectedRows: 0 };
+        return { success: true, affectedRows: 0 } as DatabaseResult;
       }
 
       try {
@@ -1108,7 +1116,7 @@ export class SQLiteHelper {
             const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClauses}`;
 
             const bindArgs: ValueType[] = [];
-            const values = ObjectUtils.getValues(updateData.values);
+            const values = this.getObjectValues(updateData.values);
             for (let i = 0; i < values.length; i++) {
               bindArgs.push(values[i] as ValueType);
             }
@@ -1134,13 +1142,13 @@ export class SQLiteHelper {
         return {
           success: true,
           affectedRows
-        };
+        } as DatabaseResult;
       } catch (error) {
         Logger.error(TAG, `Failed to batch update ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
         return {
           success: false,
           message: error instanceof Error ? error.message : JSON.stringify(error)
-        };
+        } as DatabaseResult;
       }
     });
   }
@@ -1172,7 +1180,7 @@ export class SQLiteHelper {
   ): Promise<DatabaseResult> {
     return this.executeWithLock(async () => {
       if (!conditionsList || conditionsList.length === 0) {
-        return { success: true, affectedRows: 0 };
+        return { success: true, affectedRows: 0 } as DatabaseResult;
       }
 
       try {
@@ -1204,8 +1212,8 @@ export class SQLiteHelper {
               }
             });
 
-            const result = await db.executeSql(sql, bindArgs);
-            affectedRows += result.rowAffected;
+            await db.executeSql(sql, bindArgs);
+            affectedRows++;
           }
         });
 
@@ -1216,13 +1224,13 @@ export class SQLiteHelper {
       return {
         success: true,
         affectedRows
-      };
+      } as DatabaseResult;
     } catch (error) {
       Logger.error(TAG, `Failed to batch delete from ${tableName}: ${error instanceof Error ? error.message : String(error)}`);
       return {
         success: false,
         message: error instanceof Error ? error.message : JSON.stringify(error)
-      };
+      } as DatabaseResult;
     }
     });
   }
@@ -1259,10 +1267,10 @@ export class SQLiteHelper {
    */
   public async executeTransaction<T>(operation: () => Promise<T>): Promise<T> {
     try {
-      return await this.dbManager.executeTransaction(operation);
+      return await this.dbManager.executeTransaction((_db: RelationalStore.RdbStore) => operation());
     } catch (error) {
       Logger.error(TAG, `Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 }

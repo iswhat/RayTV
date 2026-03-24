@@ -1,4 +1,4 @@
-﻿// 鎾斁浠撳簱- 绠＄悊鎾斁鐩稿叧鐨勬暟鎹搷浣?import Logger from '../../common/util/Logger';
+// 鎾斁浠撳簱- 绠＄悊鎾斁鐩稿叧鐨勬暟鎹搷浣?import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
 import NetworkUtil from '../../common/util/NetworkUtil';
 import EventBusUtil from '../../common/util/EventBusUtil';
@@ -64,7 +64,7 @@ export interface SubtitleTrack {
 export interface PlaybackEvent {
   type: string;
   timestamp: number;
-  data?: Record<string, unknown>;
+  data?: Record<string, Object>;
 }
 
 // 鎾斁鍘嗗彶椤规帴鍙?export interface PlaybackHistoryItem {
@@ -218,8 +218,8 @@ export class PlaybackRepository {
   /**
    * 鑾峰彇瀵硅薄鐨勬墍鏈夊€?   * 鏇夸唬Object.values锛屽吋瀹笰rkTS璇硶
    */
-  private getObjectValues<T extends object>(obj: T): unknown[] {
-    const values: unknown[] = [];
+  private getObjectValues<T extends object>(obj: T): string[] {
+    const values: string[] = [];
     for (const key in obj) {
       if (this.hasOwnProperty(obj, key)) {
         values.push(obj[key]);

@@ -9,7 +9,7 @@ export type CacheValue =
   | number              // 数字 | Number
   | boolean             // 布尔值 | Boolean
   | ArrayBuffer         // 二进制数据 | Binary data
-  | Object              // 对象类型 (使用Object兼容Record<string, unknown>符合ArkTS规范) | Object type (using Object compatible with Record<string, unknown> to comply with ArkTS specifications)
+  | Object              // 对象类型 (使用 Object 符合 ArkTS 规范) | Object type (using Object to comply with ArkTS specifications)
   | string[]            // 字符串数组 | String array
   | number[]            // 数字数组 | Number array
   | boolean[];          // 布尔值数组 | Boolean array

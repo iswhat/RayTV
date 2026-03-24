@@ -1,21 +1,41 @@
+/**
+ * 依赖注入器 | Dependency Injector
+ * 提供简化的依赖注入接口 | Provides simplified dependency injection interface
+ */
+import { DIContainer, Service, Inject, Factory } from './Container';
 import Logger from '../util/Logger';
 
 /**
- * 依赖注入容器
- * Dependency injection container
+ * 注入器配置 | Injector configuration
+ */
+export interface InjectorConfig {
+  autoRegister?: boolean;
+  strictMode?: boolean;
+  enableLogging?: boolean;
+}
+
+/**
+ * 服务元数据 | Service metadata
+ */
+export interface ServiceMetadata {
+  token: string;
+  registered: boolean;
+  singleton: boolean;
+  resolvedCount: number;
+}
+
+/**
+ * 依赖注入器类 | Dependency Injector class
  */
 export class DependencyInjector {
-  private static instance: DependencyInjector;
-  private services: Map<string, any> = new Map();
-  private factories: Map<string, () => any> = new Map();
-  private dependencies: Map<string, string[]> = new Map();
-  private isInitialized: boolean = false;
-  
-  private constructor() {}
-  
+  private static instance: DependencyInjector | null = null;
+  private container: DIContainer;
+  private config: InjectorConfig;
+  private logger: Logger;
+  private resolvedCounts: Map<string, number> = new Map();
+
   /**
-   * 获取单例实例
-   * Get singleton instance
+   * 获取单例实例 | Get singleton instance
    */
   public static getInstance(): DependencyInjector {
     if (!DependencyInjector.instance) {
@@ -23,156 +43,151 @@ export class DependencyInjector {
     }
     return DependencyInjector.instance;
   }
-  
+
   /**
-   * 注册服务
-   * Register service
-   * @param name 服务名称
-   * @param factory 服务工厂函数
-   * @param deps 依赖的服务名称数组
+   * 私有构造函数 | Private constructor
    */
-  public register<T>(name: string, factory: () => T, deps: string[] = []): void {
-    this.factories.set(name, factory);
-    this.dependencies.set(name, deps);
-    Logger.debug('DependencyInjector', `Registered service: ${name} with dependencies: ${deps.join(', ')}`);
+  private constructor() {
+    this.container = DIContainer.getInstance();
+    this.config = {
+      autoRegister: true,
+      strictMode: false,
+      enableLogging: true
+    };
+    this.logger = new Logger('DependencyInjector');
   }
-  
+
   /**
-   * 注册单例服务
-   * Register singleton service
-   * @param name 服务名称
-   * @param instance 服务实例
+   * 配置注入器 | Configure injector
    */
-  public registerSingleton<T>(name: string, instance: T): void {
-    this.services.set(name, instance);
-    Logger.debug('DependencyInjector', `Registered singleton service: ${name}`);
-  }
-  
-  /**
-   * 解析服务
-   * Resolve service
-   * @param name 服务名称
-   */
-  public resolve<T>(name: string): T {
-    // 检查服务是否已存在
-    if (this.services.has(name)) {
-      return this.services.get(name) as T;
+  public configure(config: Partial<InjectorConfig>): void {
+    if (config.autoRegister !== undefined) {
+      this.config.autoRegister = config.autoRegister;
     }
-    
-    // 检查服务是否已注册
-    if (!this.factories.has(name)) {
-      throw new Error(`Service not registered: ${name}`);
+    if (config.strictMode !== undefined) {
+      this.config.strictMode = config.strictMode;
     }
-    
-    // 解析依赖
-    const deps = this.dependencies.get(name) || [];
-    const resolvedDeps = deps.map(dep => this.resolve(dep));
-    
-    // 创建服务实例
-    const factory = this.factories.get(name)!;
-    const instance = factory();
-    
-    // 保存服务实例
-    this.services.set(name, instance);
-    Logger.debug('DependencyInjector', `Resolved service: ${name}`);
-    
-    return instance as T;
+    if (config.enableLogging !== undefined) {
+      this.config.enableLogging = config.enableLogging;
+    }
+    this.logger.info('Injector configured');
   }
-  
+
   /**
-   * 检查服务是否已注册
-   * Check if service is registered
-   * @param name 服务名称
+   * 注册服务 | Register service
    */
-  public isRegistered(name: string): boolean {
-    return this.factories.has(name) || this.services.has(name);
+  public registerService<T extends object>(
+    token: string,
+    factory: () => T,
+    singleton: boolean = true
+  ): void {
+    this.container.register(token, factory, singleton);
+    this.logger.info('Service registered: ' + token);
   }
-  
+
   /**
-   * 检查服务是否已解析
-   * Check if service is resolved
-   * @param name 服务名称
+   * 获取服务 | Get service
    */
-  public isResolved(name: string): boolean {
-    return this.services.has(name);
-  }
-  
-  /**
-   * 获取所有注册的服务名称
-   * Get all registered service names
-   */
-  public getRegisteredServices(): string[] {
-    const serviceNames = Array.from(this.services.keys());
-    const factoryNames = Array.from(this.factories.keys()).filter(name => !serviceNames.includes(name));
-    return [...serviceNames, ...factoryNames];
-  }
-  
-  /**
-   * 清除所有服务
-   * Clear all services
-   */
-  public clear(): void {
-    this.services.clear();
-    this.factories.clear();
-    this.dependencies.clear();
-    this.isInitialized = false;
-    Logger.debug('DependencyInjector', 'Cleared all services');
-  }
-  
-  /**
-   * 初始化所有服务
-   * Initialize all services
-   */
-  public initialize(): boolean {
+  public getService<T extends object>(token: string): T {
     try {
-      if (this.isInitialized) {
-        Logger.debug('DependencyInjector', 'Already initialized');
-        return true;
-      }
+      const instance = this.container.resolve<T>(token);
       
-      Logger.info('DependencyInjector', 'Initializing services...');
+      // 更新解析计数
+      const count = this.resolvedCounts.get(token) ?? 0;
+      this.resolvedCounts.set(token, count + 1);
       
-      // 解析所有注册的服务
-      const factoryNames = Array.from(this.factories.keys());
-      for (const name of factoryNames) {
-        if (!this.services.has(name)) {
-          this.resolve(name);
-        }
-      }
-      
-      this.isInitialized = true;
-      Logger.info('DependencyInjector', `Initialized ${this.services.size} services`);
-      return true;
+      return instance;
     } catch (error) {
-      Logger.error('DependencyInjector', `Failed to initialize services: ${error instanceof Error ? error.message : String(error)}`);
-      return false;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error('Failed to get service: ' + token + ' - ' + errorMessage);
+      
+      if (this.config.strictMode) {
+        throw error;
+      }
+      
+      throw new Error('Service not found: ' + token);
     }
+  }
+
+  /**
+   * 尝试获取服务 | Try get service
+   */
+  public tryGetService<T extends object>(token: string): T | null {
+    try {
+      return this.getService<T>(token);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * 检查服务是否已注册 | Check if service is registered
+   */
+  public hasService(token: string): boolean {
+    return this.container.has(token);
+  }
+
+  /**
+   * 获取所有服务元数据 | Get all service metadata
+   */
+  public getAllServicesMetadata(): ServiceMetadata[] {
+    const tokens = this.container.getAllTokens();
+    const metadata: ServiceMetadata[] = [];
+    
+    for (const token of tokens) {
+      metadata.push({
+        token: token,
+        registered: true,
+        singleton: true,
+        resolvedCount: this.resolvedCounts.get(token) ?? 0
+      });
+    }
+    
+    return metadata;
+  }
+
+  /**
+   * 清除所有单例实例 | Clear all singleton instances
+   */
+  public clearAll(): void {
+    this.container.clearSingleton();
+    this.resolvedCounts.clear();
+    this.logger.info('All singleton instances cleared');
+  }
+
+  /**
+   * 验证所有依赖 | Validate all dependencies
+   */
+  public validate(): boolean {
+    const tokens = this.container.getAllTokens();
+    let allValid = true;
+    
+    for (const token of tokens) {
+      if (!this.container.has(token)) {
+        this.logger.error('Missing dependency: ' + token);
+        allValid = false;
+      }
+    }
+    
+    return allValid;
+  }
+
+  /**
+   * 获取容器实例 | Get container instance
+   */
+  public getContainer(): DIContainer {
+    return this.container;
+  }
+
+  /**
+   * 销毁注入器 | Destroy injector
+   */
+  public destroy(): void {
+    this.container.destroy();
+    this.resolvedCounts.clear();
+    this.logger.info('DependencyInjector destroyed');
   }
 }
 
-/**
- * 依赖注入装饰器
- * Dependency injection decorator
- */
-export function Injectable() {
-  return function(target: any) {
-    // 标记类为可注入
-    target.__injectable = true;
-    return target;
-  };
-}
-
-/**
- * 依赖注入令牌
- * Dependency injection tokens
- */
-export const DI_TOKENS = {
-  HTTP_SERVICE: 'httpService',
-  CACHE_SERVICE: 'cacheService',
-  CONFIG_SERVICE: 'configService',
-  HISTORY_SERVICE: 'historyService',
-  MEDIA_SERVICE: 'mediaService',
-  SITE_SERVICE: 'siteService',
-  PLAYBACK_SERVICE: 'playbackService',
-  REPOSITORY_FACTORY: 'repositoryFactory'
-};
+// 导出单例实例 | Export singleton instance
+export default DependencyInjector.getInstance();

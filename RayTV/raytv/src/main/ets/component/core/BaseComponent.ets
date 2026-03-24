@@ -2,7 +2,6 @@
  * 基础组件类 - 所有UI组件的基类
  * 提供统一的组件生命周期、状态管理和事件处理机制
  */
-import { Component, State, Prop, Emit, Watch } from '@ohos/arkui'
 
 export interface ComponentProps {
   // 组件通用属性

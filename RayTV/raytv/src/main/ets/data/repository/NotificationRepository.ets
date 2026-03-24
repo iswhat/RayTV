@@ -84,7 +84,7 @@ export interface NotificationContent {
   deepLink?: string;
   actionText?: string;
   actionUrl?: string;
-  actionData?: Record<string, unknown>;
+  actionData?: Record<string, Object>;
 }
 
 /**

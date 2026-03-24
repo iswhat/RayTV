@@ -1,4 +1,4 @@
-// FormatUtil - 格式化工具类 // Format Utility Class
+﻿// FormatUtil - 格式化工具类 // Format Utility Class
 // 提供数据格式化相关的工具函数，包括时间、数字、字符串等的格式化 // Provides data formatting utility functions, including time, number, string formatting, etc.
 import Logger from './Logger';
 
@@ -532,7 +532,7 @@ export class FormatUtil {
    * 格式化错误消息 // Format error message
    * @param error 错误对象或消息 // Error object or message
    */
-  public formatErrorMessage(error: any): string {
+  public formatErrorMessage(error: string): string {
     try {
       if (!error) {
         return 'Unknown error';

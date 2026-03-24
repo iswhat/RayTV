@@ -1,7 +1,7 @@
 // SiteDao.ets - 站点数据访问对象 | Site data access object
 // 实现站点数据的增删改查操作 | Implements CRUD operations for site data
 import relationalStore from '@ohos.data.relationalStore';
-import { DatabaseManager } from '../DatabaseManager';
+import DatabaseManager from '../DatabaseManager';
 import { SITE_TABLE } from '../TableSchema';
 import { Site, SiteAuth, SiteConfigItem, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle, SiteHeaders, SiteType, LoaderType } from '../../bean/Site';
 import LoggerUtil from '../../../common/util/Logger';
@@ -33,7 +33,7 @@ export class SiteDao {
   public async insert(site: Site): Promise<void> {
     try {
       const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
-      await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
+      await (await this.dbManager.getDatabase()).insert(SITE_TABLE.NAME, valuesBucket);
       LoggerUtil.info(this.TAG, `Inserted site: ${site.name} (${site.key})`);
     } catch (error) {
       LoggerUtil.error(this.TAG, `Failed to insert site: ${error instanceof Error ? error.message : String(error)}`);
@@ -54,7 +54,7 @@ export class SiteDao {
     try {
       for (const site of sites) {
         const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
-        await this.dbManager.getDatabase().insert(SITE_TABLE.NAME, valuesBucket);
+        await (await this.dbManager.getDatabase()).insert(SITE_TABLE.NAME, valuesBucket);
       }
       LoggerUtil.info(this.TAG, `Batch inserted ${sites.length} sites`);
     } catch (error) {
@@ -73,7 +73,7 @@ export class SiteDao {
       const valuesBucket: relationalStore.ValuesBucket = await this.createValuesBucket(site);
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, site.key);
-      await this.dbManager.getDatabase().update(valuesBucket, predicates);
+      await (await this.dbManager.getDatabase()).update(valuesBucket, predicates);
       LoggerUtil.info(this.TAG, `Updated site: ${site.name} (${site.key})`);
     } catch (error) {
       LoggerUtil.error(this.TAG, `Failed to update site: ${error instanceof Error ? error.message : String(error)}`);
@@ -90,7 +90,7 @@ export class SiteDao {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      await this.dbManager.getDatabase().delete(predicates);
+      await (await this.dbManager.getDatabase()).delete(predicates);
       LoggerUtil.info(this.TAG, `Deleted site: ${key}`);
     } catch (error) {
       LoggerUtil.error(this.TAG, `Failed to delete site: ${error instanceof Error ? error.message : String(error)}`);
@@ -106,11 +106,13 @@ export class SiteDao {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.orderByAsc(SITE_TABLE.COLUMNS.ORDER);
-      const resultSet = await this.dbManager.getDatabase().query(predicates);
-      return this.parseResultSet(resultSet);
+      const resultSet: relationalStore.ResultSet = await (await this.dbManager.getDatabase()).query(predicates);
+      const sites: Site[] = await this.parseResultSet(resultSet);
+      return sites;
     } catch (error) {
-      LoggerUtil.error(this.TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      LoggerUtil.error(this.TAG, `Failed to get all sites: ${err.message}`);
+      throw err;
     }
   }
   
@@ -123,12 +125,17 @@ export class SiteDao {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      const resultSet = await this.dbManager.getDatabase().query(predicates);
-      const sites = this.parseResultSet(resultSet);
-      return sites.length > 0 ? sites[0] : undefined;
+      const resultSet: relationalStore.ResultSet = await (await this.dbManager.getDatabase()).query(predicates);
+      const sites: Site[] = await this.parseResultSet(resultSet);
+      if (sites.length > 0) {
+        const firstSite: Site = sites[0] as Site;
+        return firstSite;
+      }
+      return undefined;
     } catch (error) {
-      LoggerUtil.error(this.TAG, `Failed to get site by key: ${key}, error: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      LoggerUtil.error(this.TAG, `Failed to get site by key: ${key}, error: ${err.message}`);
+      throw err;
     }
   }
   
@@ -141,11 +148,13 @@ export class SiteDao {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.TYPE, type).orderByAsc(SITE_TABLE.COLUMNS.ORDER);
-      const resultSet = await this.dbManager.getDatabase().query(predicates);
-      return this.parseResultSet(resultSet);
+      const resultSet: relationalStore.ResultSet = await (await this.dbManager.getDatabase()).query(predicates);
+      const sites: Site[] = await this.parseResultSet(resultSet);
+      return sites;
     } catch (error) {
-      LoggerUtil.error(this.TAG, `Failed to get sites by type: ${type}, error: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      LoggerUtil.error(this.TAG, `Failed to get sites by type: ${type}, error: ${err.message}`);
+      throw err;
     }
   }
   
@@ -161,7 +170,7 @@ export class SiteDao {
       valuesBucket[SITE_TABLE.COLUMNS.ENABLED] = enabled ? 1 : 0;
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
       predicates.equalTo(SITE_TABLE.COLUMNS.KEY, key);
-      await this.dbManager.getDatabase().update(valuesBucket, predicates);
+      await (await this.dbManager.getDatabase()).update(valuesBucket, predicates);
       LoggerUtil.info(this.TAG, `${enabled ? 'Enabled' : 'Disabled'} site: ${key}`);
     } catch (error) {
       LoggerUtil.error(this.TAG, `Failed to ${enabled ? 'enable' : 'disable'} site: ${key}, error: ${error instanceof Error ? error.message : String(error)}`);
@@ -185,7 +194,7 @@ export class SiteDao {
         valuesBucket[SITE_TABLE.COLUMNS.ORDER] = i;
         const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
         predicates.equalTo(SITE_TABLE.COLUMNS.KEY, sites[i].key);
-        await this.dbManager.getDatabase().update(valuesBucket, predicates);
+        await (await this.dbManager.getDatabase()).update(valuesBucket, predicates);
       }
       LoggerUtil.info(this.TAG, `Updated order for ${sites.length} sites`);
     } catch (error) {
@@ -201,7 +210,7 @@ export class SiteDao {
   public async deleteAll(): Promise<void> {
     try {
       const predicates = new relationalStore.RdbPredicates(SITE_TABLE.NAME);
-      await this.dbManager.getDatabase().delete(predicates);
+      await (await this.dbManager.getDatabase()).delete(predicates);
       LoggerUtil.info(this.TAG, `Deleted all sites`);
     } catch (error) {
       LoggerUtil.error(this.TAG, `Failed to delete all sites: ${error instanceof Error ? error.message : String(error)}`);
@@ -471,11 +480,11 @@ export class SiteDao {
           // 处理config对象，移除null值 | Process config object, remove null values
           let cleanedConfig: Record<string, string | number | boolean> = {};
           if (config) {
-            const entries = ObjectUtils.getEntries(config);
-            for (let i = 0; i < entries.length; i++) {
-              const entry = entries[i];
-              const key = entry[0];
-              const value = entry[1];
+            const configRecord = config as Record<string, string | number | boolean | null>;
+            const configKeys: string[] = ObjectUtils.getKeys(configRecord as Record<string, string | number | boolean | null | undefined>);
+            for (let i: number = 0; i < configKeys.length; i++) {
+              const key: string = configKeys[i];
+              const value: string | number | boolean | null = configRecord[key];
               if (value !== null) {
                 cleanedConfig[key] = value as string | number | boolean;
               }

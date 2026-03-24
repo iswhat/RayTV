@@ -1,4 +1,4 @@
-// NetworkSourceSpiderTest.ets
+﻿// NetworkSourceSpiderTest.ets
 // 验证网络源中spider解析能力的测试类
 
 import NetworkSourceManager from '../service/config/NetworkSourceManager';
@@ -129,7 +129,7 @@ export class NetworkSourceSpiderTest {
   /**
    * 测试单个站点的Spider能力
    */
-  private async testSiteSpider(site: any, result: TestResult): Promise<void> {
+  private async testSiteSpider(site: string, result: TestResult): Promise<void> {
     this.logger.info(`开始测试站点: ${site.name} (${site.key})`);
     
     // 测试站点信息获取
@@ -157,7 +157,7 @@ export class NetworkSourceSpiderTest {
   private async testMethod(
     siteKey: string, 
     methodName: string, 
-    args: any[], 
+    args: string[], 
     testName: string, 
     result: TestResult
   ): Promise<void> {
@@ -369,8 +369,8 @@ export class NetworkSourceSpiderTest {
  * 测试结果接口
  */
 export interface TestResult {
-  networkSources: any[];
-  spiders: any[];
+  networkSources: string[];
+  spiders: string[];
   tests: TestCase[];
   summary: TestSummary;
 }
@@ -382,7 +382,7 @@ export interface TestCase {
   siteKey: string;
   method: string;
   testName: string;
-  args: any[];
+  args: string[];
   passed: boolean;
   error: string;
   responseTime: number;

@@ -6,7 +6,6 @@ import { MediaService } from '../service/media/MediaService';
 import CacheService from '../service/cache/CacheService';
 import { PinyinUtil } from '../common/util/PinyinUtil';
 import display from '@ohos.display';
-import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit } from '@ohos.components';
 import EventBusUtil from '../common/util/EventBusUtil';
 import ThemeProvider, { Theme } from '../design/ThemeProvider';
 import Logger from '../common/util/Logger';
@@ -100,6 +99,10 @@ struct SearchPage {
   @State selectedKeyIndex: number = -1;
   
   // 鏈嶅姟瀹炰緥灏嗗湪鏂规硶涓洿鎺ヨ皟鐢?| Service instances will be called directly in methods
+  private searchDebounceTimer: number = -1;
+  private abortController: AbortController | null = null;
+  private themeChangeListener: () => void = () => {};
+  private eventBus = EventBusUtil;
   
   // 铏氭嫙閿洏鎸夐敭 | Virtual keyboard keys
   private keyboardKeys: KeyboardKey[] = [
@@ -227,7 +230,7 @@ struct SearchPage {
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('Failed to load hot keywords: ' + err.message);
-      this.hotKeywords = ['鐑棬鐢靛奖', '鏈€鏂板墽闆?, '缁忓吀鍔ㄧ敾', '绉戝够澶х墖', '鐖辨儏鍠滃墽'];
+      this.hotKeywords = ['热门电影', '最新剧集', '经典动漫', '科幻大片', '爱情喜剧'];
     }
   }
   
@@ -322,7 +325,7 @@ struct SearchPage {
       const searchOptions: SearchOptions = {
         query: keyword,
         pageSize: 10,
-        type: SearchType.ALL,
+        type: 'all' as SearchType,
         page: 1,
         filters: {
           types: [],

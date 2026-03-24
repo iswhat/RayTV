@@ -1,4 +1,4 @@
-// DeviceManager.ets - 设备管理服务 | Device management service
+﻿// DeviceManager.ets - 设备管理服务 | Device management service
 // 基于HarmonyOS DeviceManager API实现设备管理功能 | Based on HarmonyOS DeviceManager API to implement device management functions
 
 import Logger from '../../common/util/Logger';

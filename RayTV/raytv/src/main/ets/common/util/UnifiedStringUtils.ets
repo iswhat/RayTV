@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UnifiedStringUtils - 统一的字符串工具类
  * 整合所有字符串处理相关的工具函数，避免代码重复
  */
@@ -20,7 +20,7 @@ export class UnifiedStringUtils {
   /**
    * 检查值是否为字符串
    */
-  public static isString(value: unknown): boolean {
+  public static isString(value: string): boolean {
     return TypeUtils.isString(value);
   }
 

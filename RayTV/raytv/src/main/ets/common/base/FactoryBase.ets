@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FactoryBase - Factory base class | 工厂基类
  * Abstract common logic for ServiceFactory and RepositoryFactory to reduce code duplication | 抽象ServiceFactory和RepositoryFactory的共同逻辑，减少代码重复
  */

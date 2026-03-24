@@ -28,24 +28,34 @@ export interface ColorPalette {
 }
 
 /**
+ * 字体大小规格
+ */
+export interface FontSizeScale {
+  xs: number;           // 极小号字体
+  sm: number;           // 小号字体
+  md: number;           // 中号字体
+  lg: number;           // 大号字体
+  xl: number;           // 特大号字体
+  xxl: number;          // 超大号字体
+}
+
+/**
+ * 字体粗细规格
+ */
+export interface FontWeightScale {
+  regular: number;      // 常规字重
+  medium: number;       // 中等字重
+  semibold: number;     // 半粗体
+  bold: number;         // 粗体
+}
+
+/**
  * 字体规格
  */
 export interface FontSpec {
   fontFamily: string;     // 字体家族
-  fontSize: {
-    xs: number;           // 极小号字体
-    sm: number;           // 小号字体
-    md: number;           // 中号字体
-    lg: number;           // 大号字体
-    xl: number;           // 特大号字体
-    xxl: number;          // 超大号字体
-  };
-  fontWeight: {
-    regular: number;      // 常规字重
-    medium: number;       // 中等字重
-    semibold: number;     // 半粗体
-    bold: number;         // 粗体
-  };
+  fontSize: FontSizeScale;
+  fontWeight: FontWeightScale;
 }
 
 /**
@@ -103,6 +113,34 @@ export interface BreakpointConfig {
   md: number;             // 中等屏幕
   lg: number;             // 大屏幕
   xl: number;             // 超大屏幕
+}
+
+/**
+ * 响应式排版样式
+ */
+export interface ResponsiveTypographyStyle {
+  fontSize: number;
+  fontWeight: number;
+}
+
+/**
+ * 响应式排版比例
+ */
+export interface ResponsiveTypographyScale {
+  xs: ResponsiveTypographyStyle;
+  sm: ResponsiveTypographyStyle;
+  md: ResponsiveTypographyStyle;
+  lg: ResponsiveTypographyStyle;
+  xl: ResponsiveTypographyStyle;
+}
+
+/**
+ * 响应式排版配置
+ */
+export interface ResponsiveTypographyConfig {
+  title: ResponsiveTypographyScale;
+  subtitle: ResponsiveTypographyScale;
+  body: ResponsiveTypographyScale;
 }
 
 /**
@@ -188,7 +226,7 @@ export class DesignSystem {
   };
 
   // 响应式排版
-  public static readonly ResponsiveTypography = {
+  public static readonly ResponsiveTypography: ResponsiveTypographyConfig = {
     title: {
       xs: { fontSize: 20, fontWeight: 700 },
       sm: { fontSize: 24, fontWeight: 700 },
@@ -246,10 +284,10 @@ export class DesignSystem {
    * 根据屏幕宽度获取当前断点
    */
   public static getCurrentBreakpoint(screenWidth: number): keyof BreakpointConfig {
-    if (screenWidth >= this.Breakpoints.xl) return 'xl';
-    if (screenWidth >= this.Breakpoints.lg) return 'lg';
-    if (screenWidth >= this.Breakpoints.md) return 'md';
-    if (screenWidth >= this.Breakpoints.sm) return 'sm';
+    if (screenWidth >= DesignSystem.Breakpoints.xl) return 'xl';
+    if (screenWidth >= DesignSystem.Breakpoints.lg) return 'lg';
+    if (screenWidth >= DesignSystem.Breakpoints.md) return 'md';
+    if (screenWidth >= DesignSystem.Breakpoints.sm) return 'sm';
     return 'xs';
   }
 
@@ -260,7 +298,7 @@ export class DesignSystem {
     screenWidth: number,
     styles: Record<keyof BreakpointConfig, T>
   ): T {
-    const breakpoint = this.getCurrentBreakpoint(screenWidth);
+    const breakpoint = DesignSystem.getCurrentBreakpoint(screenWidth);
     return styles[breakpoint];
   }
 }

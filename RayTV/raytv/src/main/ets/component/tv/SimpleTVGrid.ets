@@ -1,7 +1,6 @@
 /**
  * 简化版TV网格组件
  */
-import { Component, State, Prop } from '@ohos/arkui'
 
 export interface GridItem {
   id: string;
@@ -39,7 +38,7 @@ export struct SimpleTVGrid {
             .color('#333333')
         }
         .onClick(() => this.onItemClick(item))
-      })
+      }, (item: GridItem, index: number) => `${index}`)
     }
   }
 }

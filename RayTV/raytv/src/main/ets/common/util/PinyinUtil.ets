@@ -1,4 +1,4 @@
-// PinyinUtil.ets - 拼音工具类 Pinyin utility class
+﻿// PinyinUtil.ets - 拼音工具类 Pinyin utility class
 // 支持中文到拼音的转换，支持全拼和首字母提取 Supports Chinese to pinyin conversion, supports full pinyin and first letter extraction
 import Logger from './Logger';
 import ObjectUtils from './ark/ObjectUtils';

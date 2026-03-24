@@ -2,7 +2,6 @@
  * 超简单演示页面
  * 使用最基本的组件
  */
-import { Column, Text, Scroll } from '@ohos/arkui'
 import { UltraSimpleButton } from '../component/ui/UltraSimpleButton'
 import { UltraSimpleCard } from '../component/ui/UltraSimpleCard'
 

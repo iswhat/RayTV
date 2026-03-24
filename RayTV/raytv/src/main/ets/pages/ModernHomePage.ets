@@ -7,10 +7,6 @@ import ContentAccessService from '../service/content/ContentAccessService';
 import { MediaItem } from '../data/bean/MediaItem';
 import display from '@ohos.display';
 
-import {
-  Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit, Progress, ProgressType, ItemAlign, ScrollDirection, EdgeEffect, Stack, Position, HorizontalAlign, Alignment, GestureDirection, GestureEvent, PanGesture, GestureInfo
-} from '@ohos.arkui';
-
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 import { SkeletonScreen } from '../components/SkeletonScreen';
@@ -114,7 +110,7 @@ struct ModernHomePage {
   /**
    * 生成媒体项
    */
-  private generateMediaItems(sites: any[], type: string): MediaItem[] {
+  private generateMediaItems(sites: string[], type: string): MediaItem[] {
     return sites.map((site, index) => ({
       id: `${type}_${index}_${site.sourceId}`,
       title: site.name,
@@ -468,10 +464,10 @@ struct ModernHomePage {
   private renderMediaSection(
     title: string, 
     mediaList: MediaItem[],
-    colors: any,
-    spacing: any,
-    borderRadius: any,
-    typography: any
+    colors: string,
+    spacing: string,
+    borderRadius: string,
+    typography: string
   ) {
     Column() {
       Row() {
@@ -518,10 +514,10 @@ struct ModernHomePage {
   @Builder
   private renderMediaItem(
     media: MediaItem, 
-    colors: any,
-    spacing: any,
-    borderRadius: any,
-    typography: any
+    colors: string,
+    spacing: string,
+    borderRadius: string,
+    typography: string
   ): void {
     Column() {
       Stack() {

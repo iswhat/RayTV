@@ -1,4 +1,4 @@
-export interface GestureEvent {
+﻿export interface GestureEvent {
   type: 'swipe' | 'tap' | 'longPress' | 'keyPress';
   direction?: 'up' | 'down' | 'left' | 'right';
   distance?: number;
@@ -40,7 +40,7 @@ export class TVGestureHandler {
     // 这里暂时保留结构，实际实现需要根据HarmonyOS的事件系统进行调整
   }
 
-  private handleTouchStart(event: any): void {
+  private handleTouchStart(event: TouchEvent): void {
     if (event.touches && event.touches.length === 1) {
       const touch = event.touches[0];
       this.touchStartX = touch.clientX || 0;
@@ -55,7 +55,7 @@ export class TVGestureHandler {
     }
   }
 
-  private handleTouchMove(event: any): void {
+  private handleTouchMove(event: TouchEvent): void {
     if (!this.isTouching) return;
 
     const touch = event.touches[0];
@@ -73,7 +73,7 @@ export class TVGestureHandler {
     }
   }
 
-  private handleTouchEnd(event: any): void {
+  private handleTouchEnd(event: TouchEvent): void {
     if (!this.isTouching) return;
 
     // Cancel long press timer
@@ -107,7 +107,7 @@ export class TVGestureHandler {
     this.isTouching = false;
   }
 
-  private handleKeyDown(event: any): void {
+  private handleKeyDown(event: KeyEvent): void {
     this.emitGestureEvent({ type: 'keyPress', key: event.key });
   }
 

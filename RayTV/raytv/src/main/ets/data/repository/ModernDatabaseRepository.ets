@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ModernDatabaseRepository - 现代化数据库实现类 Modern database implementation class
  * 使用最新的HarmonyOS relationalStore API替代旧版的dataRdb API Uses latest HarmonyOS relationalStore API instead of old dataRdb API
  */

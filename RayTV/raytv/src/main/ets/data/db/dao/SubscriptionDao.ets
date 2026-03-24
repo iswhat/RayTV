@@ -1,4 +1,4 @@
-import Logger from '../../../common/util/Logger';
+﻿import Logger from '../../../common/util/Logger';
 import { DatabaseManager } from '../DatabaseManager';
 import { TableSchema } from '../TableSchema';
 import { ValuesBucket, RdbPredicates as RelationalPredicates, ResultSet } from '@ohos.data.relationalStore';

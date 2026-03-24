@@ -2,13 +2,13 @@
 // 提供基于TaskPool的任务调度和管理功能 // Provides task scheduling and management based on TaskPool
 import Logger from '../../common/util/Logger';
 import taskPool from '@ohos.taskpool';
-import MemoryManager from '../../common/util/MemoryManager';
+import MemoryManager, { MemoryStats } from '../../common/util/MemoryManager';
 import { Serializable } from '../../types/commonTypes';
 
 /**
  * 任务结果类型定义 // Task result type definition
  */
-export type TaskResult = Record<string, string | number | boolean | null | TaskResult>;
+export type TaskResult = Record<string, string | number | boolean | null | object>;
 
 const TAG = 'TaskPoolManager';
 
@@ -132,7 +132,7 @@ export class TaskPoolManager {
    * 按优先级排序任务队列 // Sort task queue by priority
    */
   sortTasks(): void {
-    this.taskQueue.sort((a: Task, b: Task) => b.priority - a.priority);
+    this.taskQueue.sort((a: Task<TaskResult>, b: Task<TaskResult>) => b.priority - a.priority);
   }
 
   /**
@@ -142,7 +142,7 @@ export class TaskPoolManager {
    */
   cancelTask(taskId: string): boolean {
     // 检查运行中的任务 // Check running tasks
-    const runningTask = this.runningTasks.get(taskId);
+    const runningTask: Task<TaskResult> | undefined = this.runningTasks.get(taskId);
     if (runningTask) {
       // 标记为取消状态 // Mark as cancelled
       this.runningTasks.delete(taskId);
@@ -155,9 +155,15 @@ export class TaskPoolManager {
     }
 
     // 检查队列中的任务 // Check queued tasks
-    const index = this.taskQueue.findIndex((task: Task) => task.id === taskId);
+    let index = -1;
+    for (let i = 0; i < this.taskQueue.length; i++) {
+      if (this.taskQueue[i].id === taskId) {
+        index = i;
+        break;
+      }
+    }
     if (index !== -1) {
-      const task: Task = this.taskQueue[index];
+      const task: Task<TaskResult> = this.taskQueue[index];
       // 执行取消回调 // Execute cancel callback
       if (task.onCancel) {
         task.onCancel();
@@ -177,12 +183,12 @@ export class TaskPoolManager {
    */
   cancelAllTasks(): void {
     // 取消运行中的任务 // Cancel running tasks
-    this.runningTasks.forEach((task: Task, id: string) => {
+    this.runningTasks.forEach((task: Task<TaskResult>, id: string) => {
       this.cancelTask(id);
     });
 
     // 清空任务队列 // Clear task queue
-    this.taskQueue.forEach((task: Task) => {
+    this.taskQueue.forEach((task: Task<TaskResult>) => {
       if (task.onCancel) {
         task.onCancel();
       }
@@ -280,19 +286,11 @@ export class TaskPoolManager {
     const startMemoryUsage = this.memoryManager.getCurrentMemoryUsage();
 
     try {
-      // 根据任务优先级和内存情况动态调整任务配置 // Dynamically adjust task configuration based on priority and memory
-      const memoryStats = this.memoryManager.getMemoryStats();
-      const taskOptions: taskPool.TaskOptions = {
-        priority: this.getTaskPoolPriority(task.priority),
-        // 内存紧张时，对低优先级任务应用更严格的资源限制 // Apply stricter resource limits for low priority tasks when memory is tight
-        maxWorkers: memoryStats.currentUsage > 0.8 && task.priority <= TaskPriority.NORMAL ? 1 : undefined
-      };
-
       // 执行任务 // Execute task
-      // 直接调用task.execute()，因为taskPool.execute需要@Concurrent装饰的函数
-      const result = await task.execute();
+      // 直接调用 task.execute()，因为 taskPool.execute 需要@Concurrent 装饰的函数
+      const executeResult: TaskResult = await task.execute();
       // 处理完成 // Handle completion
-      this.handleTaskComplete(task, result);
+      this.handleTaskComplete(task, executeResult);
 
       // 记录任务完成后的内存使用情况，监控内存泄漏 // Record memory usage after task completion, monitor memory leaks
       this.logTaskMemoryUsage(task.id, startMemoryUsage, startTime);
@@ -379,7 +377,14 @@ export class TaskPoolManager {
     }
 
     // 检查队列中的任务 // Check queued tasks
-    if (this.taskQueue.find(task => task.id === taskId)) {
+    let found = false;
+    for (let i = 0; i < this.taskQueue.length; i++) {
+      if (this.taskQueue[i].id === taskId) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
       return TaskStatus.PENDING;
     }
 
@@ -394,14 +399,20 @@ export class TaskPoolManager {
     const statusMap = new Map<string, TaskStatus>();
 
     // 运行中的任务 // Running tasks
-    this.runningTasks.forEach((_, id) => {
-      statusMap.set(id, TaskStatus.RUNNING);
+    const runningKeys: string[] = [];
+    this.runningTasks.forEach((value: Task<TaskResult>, id: string) => {
+      runningKeys.push(id);
     });
+    for (let i = 0; i < runningKeys.length; i++) {
+      const id = runningKeys[i];
+      statusMap.set(id, TaskStatus.RUNNING);
+    }
 
     // 队列中的任务 // Queued tasks
-    this.taskQueue.forEach(task => {
+    for (let i = 0; i < this.taskQueue.length; i++) {
+      const task: Task<TaskResult> = this.taskQueue[i];
       statusMap.set(task.id, TaskStatus.PENDING);
-    });
+    }
 
     return statusMap;
   }

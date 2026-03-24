@@ -1,4 +1,4 @@
-// CacheRepository - 缓存仓库类 | Cache repository class
+﻿// CacheRepository - 缓存仓库类 | Cache repository class
 // 负责管理应用程序的缓存数据，提供统一的缓存读写和管理接口 | Responsible for managing application cache data, providing unified cache read/write and management interface
 
 import Logger from '../../common/util/Logger';

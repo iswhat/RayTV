@@ -1,4 +1,4 @@
-// NetworkUtil - 网络请求和连接管理工具类 Network Request and Connection Management Utility Class
+﻿// NetworkUtil - 网络请求和连接管理工具类 Network Request and Connection Management Utility Class
 import Logger from './Logger';
 import http from '@ohos.net.http';
 import connection from '@ohos.net.connection';

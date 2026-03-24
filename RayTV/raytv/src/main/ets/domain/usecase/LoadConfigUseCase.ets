@@ -1,4 +1,4 @@
-// LoadConfigUseCase.ets - 加载配置用例 // Load configuration use case
+﻿// LoadConfigUseCase.ets - 加载配置用例 // Load configuration use case
 import Logger from '../../common/util/Logger';
 import { AppConfig, PlayerConfig, DisplayConfig, NetworkConfig, SecurityConfig, AdBlockConfig, HarmonyConfig } from '../../data/bean/Config';
 import { ConfigRepository } from '../../data/repository/ConfigRepository';

@@ -1,4 +1,3 @@
-import { Component, FlexAlign, FlexDirection, FlexWrap, ScrollDirection, Text, Row, Column, Image, Button, Scroll, BarState, VerticalAlign, Scroller, ImageFit } from '@ohos/arkui';
 import { MediaInfo as MediaInfoType, ParseLine } from '../types/PlaybackTypes';
 import Logger from '../../../common/util/Logger';
 
@@ -7,7 +6,7 @@ interface MediaInfoComponentProps {
   parseLines: ParseLine[];
   isLandscape: boolean;
   onLineSelect: (line: ParseLine) => void;
-  focusStyle: any;
+  focusStyle: string;
 }
 
 /**

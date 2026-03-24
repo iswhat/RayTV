@@ -3,7 +3,6 @@
  * 增强型输入框组件 - 专为TV应用优化的ArkTS输入框实现
  */
 
-import { Component, Prop, State, Builder, AboutToAppear } from '@ohos/arkui'
 import { FocusStyle } from '../../common/style/FocusStyle'
 
 // ==================== 类型定义 ====================
@@ -34,7 +33,7 @@ export interface EnhancedInputProps {
   width?: string | number
   height?: string | number
   maxLength?: number
-  customStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
   
   // 前后缀
   prefix?: string
@@ -159,7 +158,7 @@ export struct EnhancedInput {
   @Prop width: string | number = '100%'
   @Prop height: string | number = 'auto'
   @Prop maxLength: number = 1000
-  @Prop customStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
   @Prop prefix: string = ''
   @Prop suffix: string = ''
   @Prop prefixIcon: string = ''

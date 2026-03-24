@@ -4,7 +4,6 @@
  */
 
 import Logger from '../../common/util/Logger';
-import { FlexAlign, FlexDirection, TextAlign, ScrollDirection } from '@ohos/arkui';
 
 // 剧集信息接口 | Episode info interface
 export interface Episode {

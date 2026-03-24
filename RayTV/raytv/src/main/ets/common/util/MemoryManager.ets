@@ -10,6 +10,17 @@ interface LargeObjectInfo {
 }
 
 /**
+ * 内存使用统计接口
+ */
+export interface MemoryStats {
+  currentUsage: number;
+  averageUsage: number;
+  maxUsage: number;
+  minUsage: number;
+  largeObjectsCount: number;
+}
+
+/**
  * 内存管理工具类
  * 提供内存使用监控、内存限制检查等功能
  */
@@ -293,17 +304,6 @@ export default class MemoryManager {
   }
 
   /**
-   * 内存使用统计接口
-   */
-  export interface MemoryStats {
-    currentUsage: number;
-    averageUsage: number;
-    maxUsage: number;
-    minUsage: number;
-    largeObjectsCount: number;
-  }
-
-  /**
    * 获取内存使用统计信息
    * @returns 内存使用统计
    */
@@ -345,7 +345,7 @@ export default class MemoryManager {
    * @param obj 对象
    * @returns 估算大小(MB)
    */
-  public estimateObjectSize(obj: string | number | boolean | Record<string, any> | null | undefined): number {
+  public estimateObjectSize(obj: string | number | boolean | Array<string | number | boolean | object | null | undefined> | Record<string, string | number | boolean | null | undefined> | null | undefined): number {
     try {
       if (obj === null || obj === undefined) {
         return 0;
@@ -363,25 +363,31 @@ export default class MemoryManager {
 
       // 数组
       if (Array.isArray(obj)) {
+        const arr = obj as Array<string | number | boolean | object | null | undefined>;
         let size: number = 0;
-        for (const item of obj) {
-          size += this.estimateObjectSize(item);
+        const arrLen: number = arr.length;
+        for (let i = 0; i < arrLen; i++) {
+          const item = arr[i];
+          if (item !== null && item !== undefined) {
+            size += this.estimateObjectSize(item as string | number | boolean | Array<string | number | boolean | object | null | undefined> | Record<string, string | number | boolean | null | undefined> | null | undefined);
+          }
         }
         return size;
       }
 
-      // 对象 - 使用ObjectUtils.getKeys替代for...in
+      // 对象 - 使用 ObjectUtils.getKeys 替代 for...in
       const keys = ObjectUtils.getKeys(obj);
       let size: number = 0;
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        const objRecord = obj as Record<string, any>;
-        size += this.estimateObjectSize(objRecord[key]);
+        // 使用 ObjectUtils.getProperty 替代索引访问
+        const value = ObjectUtils.getProperty(obj, key);
+        size += this.estimateObjectSize(value);
       }
       return size;
     } catch (error) {
       Logger.error(TAG, `Failed to estimate object size: ${error}`);
-      return 0.1; // 默认100KB
+      return 0.1; // 默认 100KB
     }
   }
 }

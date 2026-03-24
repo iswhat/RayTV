@@ -1,4 +1,4 @@
-// DistributedDataService.ets - 分布式数据服务 | Distributed data service
+﻿// DistributedDataService.ets - 分布式数据服务 | Distributed data service
 // 基于HarmonyOS分布式能力实现多设备数据同步 | Based on HarmonyOS distributed capabilities to implement multi-device data synchronization
 
 
@@ -235,7 +235,7 @@ export default class DistributedDataService {
               
               try {
                 // 获取数据并通知监听器
-                let value: any = null;
+                let value: string = null;
                 if (this.kvStore) {
                   value = await this.kvStore.get(key);
                 }

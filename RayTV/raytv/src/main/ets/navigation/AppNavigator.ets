@@ -1,4 +1,4 @@
-// 应用导航服务 | Application navigation service
+﻿// 应用导航服务 | Application navigation service
 // 管理页面路由、导航栈和页面导航 | Manage page routing, navigation stack, and page navigation
 
 import router from '@ohos.router';
@@ -209,11 +209,9 @@ export class NavigationParamsImpl implements NavigationParams {
 export class AppNavigator {
   private static instance: AppNavigator | null = null;
 
-  private storageUtil: StorageUtil;
   private navigationHistory: Array<NavigationHistoryItem> = []; // 使用Array<Type>语法
 
   constructor() {
-    this.storageUtil = StorageUtil.getInstance();
     this.loadNavigationHistory();
   }
 
@@ -355,14 +353,7 @@ export class AppNavigator {
       await router.pushUrl({
         url: url,
         params: routerParams
-      }, router.RouterMode.Standard, {
-        transition: {
-          type: router.TransitionType.Slide,
-          duration: 300,
-          curve: router.CurveType.EaseOut,
-          delay: 0
-        }
-      });
+      }, router.RouterMode.Standard);
     } catch (error) {
       console.error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
       throw new Error('Navigation to ' + route + ' failed: ' + (error instanceof Error ? error.message : String(error)));
@@ -375,14 +366,7 @@ export class AppNavigator {
   async navigateToBack(): Promise<void> {
     try {
       // 使用最新的router.back API，添加动画选项
-      await router.back({
-        transition: {
-          type: router.TransitionType.Slide,
-          duration: 300,
-          curve: router.CurveType.EaseOut,
-          delay: 0
-        }
-      });
+      await router.back();
       this.removeLastFromHistory();
     } catch (error) {
       console.error('Navigation back failed: ' + (error instanceof Error ? error.message : String(error)));
@@ -424,14 +408,7 @@ export class AppNavigator {
       await router.replaceUrl({
         url: url,
         params: routerParams
-      }, router.RouterMode.Standard, {
-        transition: {
-          type: router.TransitionType.Fade,
-          duration: 300,
-          curve: router.CurveType.EaseOut,
-          delay: 0
-        }
-      });
+      }, router.RouterMode.Standard);
       
       // 创建符合接口定义的历史记录
       const historyItem: NavigationHistoryItem = new NavigationHistoryItemImpl();

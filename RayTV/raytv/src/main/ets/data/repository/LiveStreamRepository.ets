@@ -1,4 +1,4 @@
-﻿﻿// LiveStreamRepository - 鐩存挱鏁版嵁浠撳簱绫?// 璐熻矗绠＄悊鐩存挱娴佺浉鍏虫暟鎹紝鍖呮嫭鐩存挱鍒楄〃銆佺洿鎾鎯呫€佸叧娉ㄣ€佽鐪嬬粺璁＄瓑
+﻿// LiveStreamRepository - 鐩存挱鏁版嵁浠撳簱绫?// 璐熻矗绠＄悊鐩存挱娴佺浉鍏虫暟鎹紝鍖呮嫭鐩存挱鍒楄〃銆佺洿鎾鎯呫€佸叧娉ㄣ€佽鐪嬬粺璁＄瓑
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -83,7 +83,7 @@ export interface LiveChat {
   isModerator?: boolean;
   isBroadcaster?: boolean;
   messageType: 'text' | 'emoji' | 'system' | 'donation' | 'subscription';
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, Object>;
 }
 
 /**
@@ -163,7 +163,7 @@ export interface LiveStreamEvent {
   streamId: string;
   type: string;
   timestamp: number;
-  data?: Record<string, unknown>;
+  data?: Record<string, Object>;
   error?: Error;
 }
 

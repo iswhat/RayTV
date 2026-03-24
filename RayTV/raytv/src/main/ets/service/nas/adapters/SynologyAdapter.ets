@@ -1,4 +1,4 @@
-// SynologyAdapter.ets - 群晖协议适配器
+﻿// SynologyAdapter.ets - 群晖协议适配器
 import { NASDevice, NASFileItem } from '../types/NASDeviceTypes';
 import { BaseNASProtocolAdapter, NASFileType } from '../NASProtocolAdapter';
 import HttpService from '../../HttpService';

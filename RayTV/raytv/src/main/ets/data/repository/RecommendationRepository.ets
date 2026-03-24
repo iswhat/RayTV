@@ -274,7 +274,7 @@ export class RecommendationRepository {
     });
     
     // 鐩戝惉鎾斁杩涘害鏇存柊浜嬩欢
-    this.eventBus.on('playback:progressUpdated', async (data: Record<string, unknown>) => {
+    this.eventBus.on('playback:progressUpdated', async (data: Record<string, Object>) => {
       if (data.videoId && data.progress) {
         await this.updateWatchHistory(data.videoId as string, data.progress as number, data.duration as number);
       }

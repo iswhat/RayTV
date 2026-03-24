@@ -72,7 +72,7 @@ export class EventBus {
     }
 
     this.listeners.get(eventName)!.push(listener);
-    this.logger.info(`Subscribed to event: ${eventName} (id: ${listenerId})`);
+    this.logger.info('Subscribed to event: ' + eventName + ' (id: ' + listenerId + ')');
     
     return listenerId;
   }
@@ -98,7 +98,7 @@ export class EventBus {
       const index = listeners.findIndex(listener => listener.id === listenerId);
       if (index !== -1) {
         listeners.splice(index, 1);
-        this.logger.info(`Unsubscribed from event: ${eventName} (id: ${listenerId})`);
+        this.logger.info('Unsubscribed from event: ' + eventName + ' (id: ' + listenerId + ')');
         
         // 如果没有监听器了，删除事件 | If no listeners left, delete event
         if (listeners.length === 0) {
@@ -115,7 +115,7 @@ export class EventBus {
   public unsubscribeAll(eventName?: string): void {
     if (eventName) {
       this.listeners.delete(eventName);
-      this.logger.info(`Unsubscribed all listeners from event: ${eventName}`);
+      this.logger.info('Unsubscribed all listeners from event: ' + eventName);
     } else {
       this.listeners.clear();
       this.logger.info('Unsubscribed all listeners from all events');
@@ -131,7 +131,7 @@ export class EventBus {
   public publish<T = any>(eventName: string, data?: T, source?: string): void {
     const listeners = this.listeners.get(eventName);
     if (!listeners || listeners.length === 0) {
-      this.logger.debug(`No listeners for event: ${eventName}`);
+      this.logger.debug('No listeners for event: ' + eventName);
       return;
     }
 
@@ -154,10 +154,10 @@ export class EventBus {
         if (!listener.once) {
           remainingListeners.push(listener);
         } else {
-          this.logger.debug(`One-time listener executed and removed: ${listener.id}`);
+          this.logger.debug('One-time listener executed and removed: ' + listener.id);
         }
       } catch (error) {
-        this.logger.error(`Error in event listener ${listener.id} for event ${eventName}`, error);
+        this.logger.error('Error in event listener ' + listener.id + ' for event ' + eventName, error);
       }
     });
 
@@ -168,7 +168,7 @@ export class EventBus {
       this.listeners.set(eventName, remainingListeners);
     }
 
-    this.logger.info(`Published event: ${eventName} to ${listenersCopy.length} listeners`);
+    this.logger.info('Published event: ' + eventName + ' to ' + listenersCopy.length + ' listeners');
   }
 
   /**
@@ -218,7 +218,7 @@ export class EventBus {
     });
 
     if (cleanedCount > 0) {
-      this.logger.info(`Cleaned up ${cleanedCount} expired one-time listeners`);
+      this.logger.info('Cleaned up ' + cleanedCount + ' expired one-time listeners');
     }
   }
 
@@ -235,7 +235,8 @@ export class EventBus {
    * @returns 监听器ID | Listener ID
    */
   private generateListenerId(): string {
-    return `listener_${++this.eventIdCounter}_${Date.now()}`;
+    this.eventIdCounter++;
+    return 'listener_' + this.eventIdCounter + '_' + Date.now();
   }
 }
 

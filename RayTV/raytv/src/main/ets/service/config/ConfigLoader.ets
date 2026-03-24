@@ -1,4 +1,4 @@
-// ConfigLoader - 閰嶇疆鍔犺浇鍣?| Config loader
+﻿// ConfigLoader - 閰嶇疆鍔犺浇鍣?| Config loader
 
 import http from '@ohos.net.http';
 import fs from '@ohos.file.fs';

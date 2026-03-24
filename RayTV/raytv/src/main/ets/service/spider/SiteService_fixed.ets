@@ -1,10 +1,10 @@
-// 提供站点管理的核心功能，包括站点的增删改查、导入导出、测试连接等 | Provides core site management functionality, including site CRUD, import/export, connection testing, etc.
+﻿// 提供站点管理的核心功能，包括站点的增删改查、导入导出、测试连接等 | Provides core site management functionality, including site CRUD, import/export, connection testing, etc.
 import LoggerUtil from '../../common/util/Logger';
-import { LoaderType, Site, SiteType } from '../../data/bean/Site';
+import { LoaderType, Site, SiteAuth, SiteFilterConfig, SiteHeaders, SiteLifecycle, SitePerformanceConfig, SiteSearchConfig, SiteStats, SiteType } from '../../data/bean/Site';
 import { SiteDao } from '../../data/db/dao/SiteDao';
 import { Inject } from '../../common/di/Container';
 import CacheService from '../cache/CacheService';
-import HttpService from '../HttpService';
+import { HttpService } from '../HttpService';
 
 // 站点测试结果接口 | Site test result interface
 export interface SiteTestResult {
@@ -201,7 +201,7 @@ export class SiteService implements ISiteService {
   private static instance: SiteService | null = null;
   
   @Inject('SiteDao')
-  private siteDao: SiteDao;
+  private siteDao!: SiteDao;
   
   private cacheService: CacheService = CacheService.getInstance();
   private initialized: boolean = false;
@@ -232,9 +232,6 @@ export class SiteService implements ISiteService {
     }
     
     try {
-      // 初始化数据库 Initialize database
-      await this.siteDao.initialize();
-      
       // 初始化缓存 Initialize cache
       await this.cacheService.initialize();
       
@@ -259,10 +256,10 @@ export class SiteService implements ISiteService {
       }
       
       // 从数据库获取 Get from database
-      const sites = await this.siteDao.getAllSites();
-      
+      const sites = await this.siteDao.getAll();
+
       // 缓存结果 Cache the result
-      await this.cacheService.set('sites:all', sites, 300); // 缓存5分钟 Cache for 5 minutes
+      await this.cacheService.set('sites:all', sites, { expiry: 300 * 1000 }); // 缓存5分钟 Cache for 5 minutes
       
       return sites;
     } catch (error) {
@@ -278,7 +275,7 @@ export class SiteService implements ISiteService {
   public async getEnabledSites(): Promise<Site[]> {
     try {
       const allSites = await this.getAllSites();
-      return allSites.filter(site => site.enabled);
+      return allSites.filter<Site>(site => site.enabled);
     } catch (error) {
       LoggerUtil.error(TAG, `Failed to get enabled sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -293,7 +290,7 @@ export class SiteService implements ISiteService {
   public async getSitesByType(type: SiteType): Promise<Site[]> {
     try {
       const allSites = await this.getAllSites();
-      return allSites.filter(site => site.type === type);
+      return allSites.filter<Site>(site => site.type === type);
     } catch (error) {
       LoggerUtil.error(TAG, `Failed to get sites by type ${type}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -315,14 +312,14 @@ export class SiteService implements ISiteService {
       }
       
       // 从数据库获取 Get from database
-      const site = await this.siteDao.getSiteByKey(key);
-      
+      const site = await this.siteDao.getByKey(key);
+
       // 缓存结果 Cache the result
       if (site) {
-        await this.cacheService.set(cacheKey, site, 600); // 缓存10分钟 Cache for 10 minutes
+        await this.cacheService.set(cacheKey, site, { expiry: 600 * 1000 }); // 缓存10分钟 Cache for 10 minutes
       }
-      
-      return site;
+
+      return site || null;
     } catch (error) {
       LoggerUtil.error(TAG, `Failed to get site by key ${key}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -343,7 +340,12 @@ export class SiteService implements ISiteService {
       site.updatedAt = now;
       
       // 保存到数据库 Save to database
-      await this.siteDao.saveSite(site);
+      const existing = await this.siteDao.getByKey(site.key);
+      if (existing) {
+        await this.siteDao.update(site);
+      } else {
+        await this.siteDao.insert(site);
+      }
       
       // 清除相关缓存 Clear related cache
       await this.cacheService.remove('sites:all');
@@ -370,7 +372,7 @@ export class SiteService implements ISiteService {
         site.updatedAt = now;
       }
       
-      await this.siteDao.batchSaveSites(sites);
+      await this.siteDao.batchInsert(sites);
       
       // 清除所有站点缓存 Clear all sites cache
       await this.cacheService.remove('sites:all');
@@ -388,7 +390,7 @@ export class SiteService implements ISiteService {
    */
   public async deleteSite(key: string): Promise<void> {
     try {
-      await this.siteDao.deleteSite(key);
+      await this.siteDao.delete(key);
       
       // 清除相关缓存 Clear related cache
       await this.cacheService.remove('sites:all');
@@ -460,8 +462,8 @@ export class SiteService implements ISiteService {
         throw new Error(`Site ${key} not found`);
       }
       
-      site.lastUsed = Date.now();
-      site.updatedAt = site.lastUsed;
+      site.lastUsedAt = Date.now();
+      site.updatedAt = site.lastUsedAt;
       
       await this.saveSite(site);
       
@@ -540,7 +542,7 @@ export class SiteService implements ISiteService {
       // 3. 测试站点API响应 Test site API response
       try {
         // 根据站点类型进行不同的API测试 Test API based on site type
-        if (site.type === 'VIDEO' || site.type === 'MIXED') {
+        if (site.type === SiteType.VOD || site.type === SiteType.MIXED) {
           // 测试视频站点API Test video site API
           const httpService = HttpService.getInstance();
           
@@ -555,7 +557,7 @@ export class SiteService implements ISiteService {
           } else {
             throw new Error(`API error: ${homeResponse.status}`);
           }
-        } else if (site.type === 'LIVE') {
+        } else if (site.type === SiteType.LIVE) {
           // 测试直播站点API Test live site API
           const httpService = HttpService.getInstance();
           
@@ -706,7 +708,7 @@ export class SiteService implements ISiteService {
     };
     
     try {
-      const importData: ImportData = JSON.parse(data);
+      const importData: ImportData = JSON.parse(data) as ImportData;
       
       if (!importData.sites || !Array.isArray(importData.sites)) {
         throw new Error('Invalid import data format');
@@ -728,28 +730,32 @@ export class SiteService implements ISiteService {
           const site: Site = {
             key: importSite.key || '',
             name: importSite.name || '',
-            type: (importSite.type as SiteType) || SiteType.VIDEO,
+            type: (importSite.type as SiteType) || SiteType.VOD,
             api: importSite.api || importSite.url || '',
             enabled: importSite.enabled !== undefined ? importSite.enabled : true,
             order: importSite.sort || 0,
-            headers: importSite.headers ? JSON.parse(importSite.headers as string) : {},
-            siteAuth: importSite.siteAuth ? JSON.parse(importSite.siteAuth as string) : {},
+            headers: importSite.headers ? JSON.parse(importSite.headers as string) as SiteHeaders : undefined,
+            siteAuth: importSite.siteAuth ? JSON.parse(importSite.siteAuth as string) as SiteAuth : undefined,
             customCode: importSite.customCode || '',
-            stats: importSite.stats ? JSON.parse(importSite.stats as string) : {
+            stats: importSite.stats ? JSON.parse(importSite.stats as string) as SiteStats : {
               queryCount: 0,
               errorCount: 0,
               avgResponseTime: 0,
               lastQueryTime: 0,
               lastErrorTime: 0,
               lastErrorMessage: ''
-            },
-            lastUsed: importSite.updatedAt || Date.now(),
+            } as SiteStats,
+            lastUsedAt: importSite.updatedAt || Date.now(),
             createdAt: importSite.createdAt || Date.now(),
             updatedAt: importSite.updatedAt || Date.now(),
             lifecycle: {
               initialized: false,
+              loading: false,
               error: false
-            },
+            } as SiteLifecycle,
+            searchConfig: { enabled: true } as SiteSearchConfig,
+            filterConfig: { enabled: false } as SiteFilterConfig,
+            performanceConfig: {} as SitePerformanceConfig,
             loaderType: LoaderType.JS
           };
           
@@ -792,7 +798,7 @@ export class SiteService implements ISiteService {
       
       if (response.status >= 200 && response.status < 300) {
         // 解析响应数据 Parse response data
-        const data = JSON.parse(response.data);
+        const data: object = JSON.parse(response.data as string) as object;
         if (Array.isArray(data)) {
           return data as SiteContentItem[];
         }
@@ -805,7 +811,7 @@ export class SiteService implements ISiteService {
       return [];
     }
   }
-  
+
   /**
    * 获取站点热门内容 Get site popular content
    */
@@ -815,18 +821,18 @@ export class SiteService implements ISiteService {
       if (!site.api) {
         throw new Error('Site API not configured');
       }
-      
+
       const httpService = HttpService.getInstance();
-      
+
       // 发送HTTP请求获取热门内容 Send HTTP request to get popular content
       const response = await httpService.get(`${site.api}/popular`, {
         timeout: 10000,
         cache: true
       });
-      
+
       if (response.status >= 200 && response.status < 300) {
         // 解析响应数据 Parse response data
-        const data = JSON.parse(response.data);
+        const data: object = JSON.parse(response.data as string) as object;
         if (Array.isArray(data)) {
           return data as SiteContentItem[];
         }
@@ -839,7 +845,7 @@ export class SiteService implements ISiteService {
       return [];
     }
   }
-  
+
   /**
    * 获取站点最新内容 Get site new content
    */
@@ -849,18 +855,18 @@ export class SiteService implements ISiteService {
       if (!site.api) {
         throw new Error('Site API not configured');
       }
-      
+
       const httpService = HttpService.getInstance();
-      
+
       // 发送HTTP请求获取最新内容 Send HTTP request to get new content
       const response = await httpService.get(`${site.api}/new`, {
         timeout: 10000,
         cache: true
       });
-      
+
       if (response.status >= 200 && response.status < 300) {
         // 解析响应数据 Parse response data
-        const data = JSON.parse(response.data);
+        const data: object = JSON.parse(response.data as string) as object;
         if (Array.isArray(data)) {
           return data as SiteContentItem[];
         }

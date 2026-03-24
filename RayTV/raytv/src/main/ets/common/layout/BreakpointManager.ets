@@ -5,14 +5,14 @@ export interface BreakpointConfig {
     gridColumns: number;
     spacing: number;
     fontSize: number;
-    [key: string]: any;
+    [key: string]: string;
   };
 }
 
 export class BreakpointManager {
   private config: BreakpointConfig;
-  private currentConfig: any;
-  private listeners: Array<(config: any) => void> = [];
+  private currentConfig: Record<string, Object>;
+  private listeners: Array<(config: Record<string, Object>) => void> = [];
 
   constructor(config: BreakpointConfig) {
     this.config = config;
@@ -27,7 +27,7 @@ export class BreakpointManager {
     });
   }
 
-  private getConfigForBreakpoint(breakpoint: string): any {
+  private getConfigForBreakpoint(breakpoint: string): Record<string, Object> {
     return this.config[breakpoint] || this.config['md'] || {};
   }
 
@@ -38,15 +38,15 @@ export class BreakpointManager {
     }
   }
 
-  getCurrentConfig(): any {
+  getCurrentConfig(): Record<string, Object> {
     return this.currentConfig;
   }
 
-  getConfig(breakpoint: string): any {
+  getConfig(breakpoint: string): Record<string, Object> {
     return this.getConfigForBreakpoint(breakpoint);
   }
 
-  onConfigChange(listener: (config: any) => void): () => void {
+  onConfigChange(listener: (config: Record<string, Object>) => void): () => void {
     this.listeners.push(listener);
     return () => {
       const index = this.listeners.indexOf(listener);

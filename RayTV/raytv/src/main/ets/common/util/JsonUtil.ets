@@ -1,4 +1,4 @@
-/**
+﻿/**
  * JSON utility class | JSON工具类
  * Provides safe JSON serialization and deserialization functionality | 提供安全的JSON序列化和反序列化功能
  */

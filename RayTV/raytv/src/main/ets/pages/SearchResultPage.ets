@@ -3,7 +3,6 @@ import Logger from '../common/util/Logger';
 import { SearchService } from '../service/search/SearchService';
 import { MediaService } from '../service/media/MediaService';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign, FlexWrap } from '@ohos/arkui';
 
 // 搜索结果接口 | Search result interface
 interface SearchResult {

@@ -88,7 +88,16 @@ export interface SearchResultHighlight {
 // 搜索结果元数据接口 | Search result meta data interface
 export interface SearchResultMeta {
   viewCount?: number;      // 查看次数 | View count
-  extraData?: { [key: string]: string | number | boolean | null | undefined }; // 额外数据 | Extra data
+
+ extraData?: SearchResultExtraData; // 额外数据 | Extra data
+}
+
+/**
+ * 搜索结果额外数据接口
+ * 注意：ArkTS 不支持索引签名，使用具体属性
+ */
+export interface SearchResultExtraData {
+  value?: string | number | boolean | null;
 }
 
 // 搜索结果项接口 | Search result item interface
@@ -874,28 +883,34 @@ export default class SearchService {
     
     // 从历史记录中获取建议
     if (this.searchHistory.length > 0) {
-      const historySuggestions = this.searchHistory
+      const historySuggestions: SearchSuggestionItem[] = this.searchHistory
         .filter(item => item.keyword.toLowerCase().includes(keyword.toLowerCase()))
-        .map(item => ({
-          keyword: item.keyword,
-          type: item.searchType,
-          searchCount: item.clickCount,
-          isHistory: true
-        }))
+        .map((item: SearchHistoryItem): SearchSuggestionItem => {
+          const suggestion: SearchSuggestionItem = {
+            keyword: item.keyword,
+            type: item.searchType,
+            searchCount: item.clickCount,
+            isHistory: true
+          };
+          return suggestion;
+        })
         .slice(0, limit / 2);
       suggestions.push(...historySuggestions);
     }
     
     // 从热门搜索中获取建议
     if (this.hotSearches.length > 0) {
-      const hotSuggestions = this.hotSearches
+      const hotSuggestions: SearchSuggestionItem[] = this.hotSearches
         .filter(item => item.keyword.toLowerCase().includes(keyword.toLowerCase()))
-        .map(item => ({
-          keyword: item.keyword,
-          type: SearchType.ALL,
-          searchCount: item.searchCount,
-          isHot: true
-        }))
+        .map((item: HotSearchItem): SearchSuggestionItem => {
+          const suggestion: SearchSuggestionItem = {
+            keyword: item.keyword,
+            type: SearchType.ALL,
+            searchCount: item.searchCount,
+            isHot: true
+          };
+          return suggestion;
+        })
         .slice(0, limit - suggestions.length);
       suggestions.push(...hotSuggestions);
     }
@@ -997,10 +1012,14 @@ export default class SearchService {
   public async realtimeSearch(keyword: string, options: SearchOptions = {}): Promise<SearchResponse> {
     // 实时搜索使用更短的超时和更少的结果
     const realtimeOptions: SearchOptions = {
-      ...options,
-      timeout: 3000,
-      limitPerSite: 5,
-      pageSize: 10
+      query: keyword,
+      type: options.type,
+      page: options.page,
+      pageSize: options.pageSize ?? 10,
+      filters: options.filters,
+      siteKeys: options.siteKeys,
+      limitPerSite: options.limitPerSite ?? 5,
+      timeout: 3000
     };
     
     return this.globalSearch(keyword, realtimeOptions);

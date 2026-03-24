@@ -1,4 +1,4 @@
-// ServiceUsageExample.ets - 服务使用示例  Service usage example
+﻿// ServiceUsageExample.ets - 服务使用示例  Service usage example
 import Logger from '../common/util/Logger';
 import ServiceFactory from '../service/ServiceFactory';
 import { Site, SiteType, LoaderType } from '../data/bean/Site';

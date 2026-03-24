@@ -2,7 +2,6 @@
  * 纯净演示页面
  * 使用最基础的组件
  */
-import { Column, Text, Scroll } from '@ohos/arkui'
 import { PureButton } from '../component/ui/PureButton'
 import { PureCard } from '../component/ui/PureCard'
 

@@ -2,7 +2,6 @@
  * 最小化卡片组件
  * 最基础的卡片实现
  */
-import { Component, Prop } from '@ohos/arkui'
 
 @Component
 export struct MinimalCard {

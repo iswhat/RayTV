@@ -519,11 +519,12 @@ export default class ConfigService {
     try {
       // 检查属性是否存在
       if (typeof obj === 'object' && obj !== null) {
-        // ArkTS 兼容：使用hasOwnProperty检查属性是否存在
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          const objRecord = obj as Record<string, ConfigValue>;
+        // ArkTS 兼容：使用 Object.getOwnPropertyNames 检查属性是否存在
+        const objRecord = obj as Record<string, ConfigValue>;
+        const keys = Object.getOwnPropertyNames(obj);
+        if (keys.includes(key)) {
           const value = objRecord[key];
-          // 确保返回值符合ConfigValue类型
+          // 确保返回值符合 ConfigValue 类型
           if (value === undefined) {
             return null;
           }
@@ -1349,7 +1350,7 @@ export default class ConfigService {
       Logger.info(TAG, `Config updated successfully: ${key} | Config updated successfully: ${key}`);
       return ApiResponse.success(configItem, `设置配置[${key}]成功`);
     } catch (error) {
-      Logger.error(TAG, `设置配置项失败: ${key} | Failed to set config: ${key}`, error instanceof Error ? error.message : String(error));
+      Logger.error(TAG, `设置配置项失败: ${key} | Failed to set config: ${key}: ${error instanceof Error ? error.message : String(error)}`);
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, `设置配置失败`);
     }
   }
@@ -1381,7 +1382,7 @@ export default class ConfigService {
           await this.setConfig(key, value);
           updated++;
         } catch (error) {
-            Logger.warn(TAG, `更新配置项失败: ${key} | Failed to update config ${key}`, error instanceof Error ? error.message : String(error));
+            Logger.warn(TAG, `更新配置项失败: ${key} | Failed to update config ${key}: ${error instanceof Error ? error.message : String(error)}`);
             failed++;
           }
       }
@@ -1396,7 +1397,7 @@ export default class ConfigService {
         `批量更新配置完成，成功${updated}项，失败${failed}项`
       );
     } catch (error) {
-      Logger.error(TAG, '批量设置配置失败 | Failed to set multiple configs', error instanceof Error ? error.message : String(error));
+      Logger.error(TAG, `批量设置配置失败 | Failed to set multiple configs: ${error instanceof Error ? error.message : String(error)}`);
       return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '批量更新配置失败');
     }
   }
@@ -1721,7 +1722,7 @@ export default class ConfigService {
       const secureKey = `${SECURE_STORAGE_PREFIX}${key}`;
       return await StorageUtil.getString(secureKey);
     } catch (error) {
-      Logger.error(TAG, `Failed to get secure config: ${key}`, error);
+      Logger.error(TAG, `Failed to get secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
       return null;
     }
   }
@@ -1736,7 +1737,7 @@ export default class ConfigService {
       Logger.info(TAG, `Secure config saved: ${key}`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to save secure config: ${key}`, error);
+      Logger.error(TAG, `Failed to save secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
       return false;
     }
   }
@@ -1751,7 +1752,7 @@ export default class ConfigService {
       Logger.info(TAG, `Secure config removed: ${key}`);
       return true;
     } catch (error) {
-      Logger.error(TAG, `Failed to remove secure config: ${key}`, error);
+      Logger.error(TAG, `Failed to remove secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
       return false;
     }
   }
@@ -1774,7 +1775,7 @@ export default class ConfigService {
       Logger.info(TAG, 'All secure configs cleared');
       return true;
     } catch (error) {
-      Logger.error(TAG, 'Failed to clear all secure configs', error);
+      Logger.error(TAG, `Failed to clear all secure configs: ${error instanceof Error ? (error as Error).message : String(error)}`);
       return false;
     }
   }
@@ -1877,7 +1878,7 @@ export default class ConfigService {
         try {
           listener(value);
         } catch (error) {
-          Logger.error(TAG, `配置监听器错误: ${key} | Error in config listener for ${key}`, error instanceof Error ? error.message : String(error));
+          Logger.error(TAG, `配置监听器错误: ${key} | Error in config listener for ${key}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }
@@ -1888,7 +1889,7 @@ export default class ConfigService {
       try {
           listener(key, value);
         } catch (error) {
-          Logger.error(TAG, `全局配置监听器错误 | Error in global config listener`, error instanceof Error ? error.message : String(error));
+          Logger.error(TAG, `全局配置监听器错误 | Error in global config listener: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
   }
@@ -1902,7 +1903,7 @@ export default class ConfigService {
       try {
         listener();
       } catch (error) {
-        Logger.error(TAG, `配置重置监听器错误 | Error in config reset listener`, error instanceof Error ? error.message : String(error));
+        Logger.error(TAG, `配置重置监听器错误 | Error in config reset listener: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }

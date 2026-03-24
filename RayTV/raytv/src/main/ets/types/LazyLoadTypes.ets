@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 懒加载策略枚举
  */
 export enum LazyLoadStrategy {
@@ -69,7 +69,7 @@ export interface LazyLoadEvents {
   onLoadSuccess?: (src: string) => void;
   
   /** 加载失败 */
-  onLoadError?: (error: any) => void;
+  onLoadError?: (error: string) => void;
   
   /** 重试 */
   onRetry?: (attempt: number) => void;

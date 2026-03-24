@@ -4,8 +4,8 @@
  */
 export class LazyLoader {
   private static instance: LazyLoader
-  private loadedModules: Map<string, any> = new Map()
-  private loadingPromises: Map<string, Promise<any>> = new Map()
+  private loadedModules: Map<string, Object> = new Map()
+  private loadingPromises: Map<string, Promise<Object>> = new Map()
   
   private constructor() {}
   
@@ -94,7 +94,7 @@ export class LazyLoader {
   /**
    * 获取加载统计信息
    */
-  public getLoadStats(): any {
+  public getLoadStats(): string {
     return {
       loadedModules: this.loadedModules.size,
       loadingPromises: this.loadingPromises.size,
@@ -105,14 +105,14 @@ export class LazyLoader {
 
 // 懒加载装饰器
 export function LazyLoad(modulePath: string) {
-  return function(target: any, propertyKey: string) {
+  return function(target: string, propertyKey: string) {
     const loader = new LazyLoader()
     
     Object.defineProperty(target, propertyKey, {
       get: function() {
         // 这里应该返回一个代理对象，实际加载在使用时进行
         return {
-          load: (actualLoader: () => Promise<any>) => {
+          load: (actualLoader: () => Promise<Object>) => {
             return loader.loadModule(modulePath, actualLoader)
           }
         }
@@ -124,7 +124,7 @@ export function LazyLoad(modulePath: string) {
 }
 
 // 组件懒加载高阶组件
-export function withLazyLoading<T>(WrappedComponent: T, loader: () => Promise<any>): T {
+export function withLazyLoading<T>(WrappedComponent: T, loader: () => Promise<Object>): T {
   // 这里应该返回一个包装组件，实际实现取决于具体框架
   return WrappedComponent
 }

@@ -1,4 +1,4 @@
-// A11yManager.ets - 可访问性管理器
+﻿// A11yManager.ets - 可访问性管理器
 // 提供可访问性支持，包括屏幕阅读器支持、键盘导航等
 
 import Logger from '../common/util/Logger';

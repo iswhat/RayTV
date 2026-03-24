@@ -118,11 +118,11 @@ export interface SearchResultItem {
   directors?: string[];             // 导演列表 | Director list
   actors?: string[];                // 演员列表 | Actor list
   provider?: string;                // 内容提供商 | Content provider
-  providerId?: string;              // 提供商ID | Provider ID
+  providerId?: string;              // 提供商 ID | Provider ID
   searchScore?: number;             // 搜索匹配分数 | Search match score
   highlightTerms?: string[];        // 需要高亮的关键词 | Keywords to highlight
   source?: string;                  // 来源 | Source
-  metadata?: Record<string, unknown>;   // 额外参数 | Extra parameters
+  metadata?: Record<string, Object>;   // 额外参数 | Extra parameters
 }
 
 /**

@@ -1,4 +1,4 @@
-import Ability from '@ohos.app.ability.Ability';
+﻿import Ability from '@ohos.app.ability.Ability';
 import Logger from '../common/util/Logger';
 
 /**

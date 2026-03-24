@@ -1,3 +1,13 @@
+import MemoryManagerClass from '../common/util/MemoryManager';
+
+/**
+ * MemoryManager 接口
+ */
+interface MemoryManager {
+  checkMemoryAvailability: (requiredMemoryMB?: number) => boolean;
+  recordLargeObject: (key: string, sizeMB: number) => void;
+}
+
 /**
  * 图片缓存管理器
  * 提供LRU缓存策略和内存管理
@@ -7,7 +17,7 @@ export class ImageCacheManager {
   private cache: Map<string, CacheEntry>;
   private maxSize: number;
   private currentSize: number;
-  private memoryManager: any;
+  private memoryManager: MemoryManager | null = null;
   private cacheHits: number = 0;
   private cacheMisses: number = 0;
   private maxLargeImageSize: number = 5; // 最大大型图片大小(MB)
@@ -16,15 +26,13 @@ export class ImageCacheManager {
     this.cache = new Map();
     this.maxSize = maxSize;
     this.currentSize = 0;
-    // 延迟初始化MemoryManager，避免循环依赖
-    setTimeout(() => {
-      try {
-        const MemoryManagerModule = require('../common/util/MemoryManager');
-        this.memoryManager = MemoryManagerModule.default.getInstance();
-      } catch (error) {
-        console.warn('Failed to initialize MemoryManager:', error);
-      }
-    }, 0);
+    // 初始化 MemoryManager | Initialize MemoryManager
+    try {
+      this.memoryManager = MemoryManagerClass.getInstance() as MemoryManager;
+    } catch (error) {
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      console.warn('Failed to initialize MemoryManager:', err);
+    }
   }
 
   static getInstance(): ImageCacheManager {
@@ -105,7 +113,7 @@ export class ImageCacheManager {
   /**
    * 设置错误缓存
    */
-  setError(key: string, error: any, ttl: number = 60000): void { // 1分钟错误缓存
+  setError(key: string, error: string, ttl: number = 60000): void { // 1分钟错误缓存
     const entry: CacheEntry = {
       data: '',
       timestamp: Date.now(),
@@ -113,7 +121,7 @@ export class ImageCacheManager {
       ttl,
       size: 1,
       error: true,
-      errorMessage: error.message || 'Unknown error'
+      errorMessage: error || 'Unknown error'
     };
 
     this.cache.set(key, entry);
@@ -166,9 +174,12 @@ export class ImageCacheManager {
     const oneHourAgo = now - 60 * 60 * 1000;
     let clearedCount = 0;
 
-    for (const [key, entry] of this.cache.entries()) {
-      if (entry.lastAccessed < oneHourAgo) {
-        this.currentSize -= entry.size;
+    const entries = this.cache.entries();
+    for (const entry of entries) {
+      const key: string = entry[0];
+      const cacheEntry: CacheEntry = entry[1];
+      if (cacheEntry.lastAccessed < oneHourAgo) {
+        this.currentSize -= cacheEntry.size;
         this.cache.delete(key);
         clearedCount++;
       }
@@ -219,7 +230,11 @@ export class ImageCacheManager {
         })
       );
       // 批次之间延迟，避免内存峰值
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise<void>((resolve: Function) => {
+        setTimeout(() => {
+          resolve();
+        }, 100);
+      });
     }
   }
 
@@ -242,9 +257,12 @@ export class ImageCacheManager {
     let oldestKey: string | null = null;
     let oldestTime = Infinity;
 
-    for (const [key, entry] of this.cache.entries()) {
-      if (entry.lastAccessed < oldestTime) {
-        oldestTime = entry.lastAccessed;
+    const entries = this.cache.entries();
+    for (const entry of entries) {
+      const key: string = entry[0];
+      const cacheEntry: CacheEntry = entry[1];
+      if (cacheEntry.lastAccessed < oldestTime) {
+        oldestTime = cacheEntry.lastAccessed;
         oldestKey = key;
       }
     }

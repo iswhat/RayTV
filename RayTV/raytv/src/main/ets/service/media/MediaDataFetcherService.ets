@@ -109,7 +109,7 @@ export class MediaDataFetcherService {
     this.cacheService = CacheService.getInstance();
     this.eventBus = EventBusUtil.getInstance();
     
-    this.logger.info('MediaDataFetcherService initialized');
+    Logger.info('MediaDataFetcher', MediaDataFetcherService initialized);
   }
   
   /**
@@ -127,19 +127,20 @@ export class MediaDataFetcherService {
    */
   public async getMediaDetail(mediaId: string, sourceId?: string): Promise<MediaDetail | null> {
     try {
-      this.logger.info(`Fetching media detail for ID: ${mediaId}`);
+      Logger.info(`Fetching media detail for ID: ${mediaId}`);
       
       // 检查缓存
-      const cacheKey = `media_detail_${mediaId}_${sourceId || 'all'}`;
-      const cached = await this.cacheService.get<MediaDetail>(cacheKey, CacheType.MEDIA);
+      const cacheKey: string = `media_detail_${mediaId}_${sourceId || 'all'}`;
+      const cached: MediaDetail | null = await this.cacheService.get<MediaDetail>(cacheKey, CacheType.MEDIA);
       
-      if (cached) {
+      const isCached: boolean = !!cached;
+      if (isCached) {
         this.logger.debug(`Cache hit for media detail: ${mediaId}`);
         return cached;
       }
       
-      // 从ContentAccessService获取站点
-      const sites = sourceId 
+      // 从 ContentAccessService 获取站点
+      const sites: VodSite[] = sourceId 
         ? this.contentService.getVodSitesBySource([sourceId])
         : this.contentService.getAllVodSites();
       
@@ -162,7 +163,7 @@ export class MediaDataFetcherService {
       
       return detail;
     } catch (error) {
-      this.logger.error(`Failed to get media detail for ${mediaId}`, error as Error);
+      Logger.error(`Failed to get media detail for ${mediaId}`, error as Error);
       return null;
     }
   }
@@ -172,19 +173,20 @@ export class MediaDataFetcherService {
    */
   public async getEpisodes(mediaId: string, sourceId?: string): Promise<EpisodeInfo[]> {
     try {
-      this.logger.info(`Fetching episodes for media: ${mediaId}`);
+      Logger.info(`Fetching episodes for media: ${mediaId}`);
       
       // 检查缓存
-      const cacheKey = `episodes_${mediaId}_${sourceId || 'all'}`;
-      const cached = await this.cacheService.get<EpisodeInfo[]>(cacheKey, CacheType.MEDIA);
+      const cacheKey: string = `episodes_${mediaId}_${sourceId || 'all'}`;
+      const cached: EpisodeInfo[] | null = await this.cacheService.get<EpisodeInfo[]>(cacheKey, CacheType.MEDIA);
       
-      if (cached) {
+      const isCached: boolean = !!cached;
+      if (isCached) {
         this.logger.debug(`Cache hit for episodes: ${mediaId}`);
         return cached;
       }
       
       // 从站点获取剧集
-      const episodes = await this.fetchEpisodesFromSites(mediaId, sourceId);
+      const episodes: EpisodeInfo[] = await this.fetchEpisodesFromSites(mediaId, sourceId);
       
       if (episodes.length > 0) {
         // 缓存结果
@@ -198,7 +200,7 @@ export class MediaDataFetcherService {
       
       return episodes;
     } catch (error) {
-      this.logger.error(`Failed to get episodes for ${mediaId}`, error as Error);
+      Logger.error(`Failed to get episodes for ${mediaId}`, error as Error);
       return [];
     }
   }
@@ -208,19 +210,20 @@ export class MediaDataFetcherService {
    */
   public async getPlaySources(mediaId: string, episodeId: string, sourceId?: string): Promise<PlaySource[]> {
     try {
-      this.logger.info(`Fetching play sources for media: ${mediaId}, episode: ${episodeId}`);
+      Logger.info(`Fetching play sources for media: ${mediaId}, episode: ${episodeId}`);
       
       // 检查缓存
-      const cacheKey = `play_sources_${mediaId}_${episodeId}_${sourceId || 'all'}`;
-      const cached = await this.cacheService.get<PlaySource[]>(cacheKey, CacheType.MEDIA);
+      const cacheKey: string = `play_sources_${mediaId}_${episodeId}_${sourceId || 'all'}`;
+      const cached: PlaySource[] | null = await this.cacheService.get<PlaySource[]>(cacheKey, CacheType.MEDIA);
       
-      if (cached) {
+      const isCached: boolean = !!cached;
+      if (isCached) {
         this.logger.debug(`Cache hit for play sources: ${mediaId}`);
         return cached;
       }
       
       // 从站点获取播放源
-      const sources = await this.fetchPlaySourcesFromSites(mediaId, episodeId, sourceId);
+      const sources: PlaySource[] = await this.fetchPlaySourcesFromSites(mediaId, episodeId, sourceId);
       
       if (sources.length > 0) {
         // 缓存结果
@@ -234,7 +237,7 @@ export class MediaDataFetcherService {
       
       return sources;
     } catch (error) {
-      this.logger.error(`Failed to get play sources for ${mediaId}`, error as Error);
+      Logger.error(`Failed to get play sources for ${mediaId}`, error as Error);
       return [];
     }
   }
@@ -244,7 +247,7 @@ export class MediaDataFetcherService {
    */
   public async parsePlayUrl(playSource: PlaySource): Promise<ParseResult> {
     try {
-      this.logger.info(`Parsing play URL from source: ${playSource.name}`);
+      Logger.info(`Parsing play URL from source: ${playSource.name}`);
       
       // 如果不需要解析，直接返回
       if (!playSource.needParse) {
@@ -255,7 +258,7 @@ export class MediaDataFetcherService {
       }
       
       // 调用解析器
-      const parser = await this.getParser(playSource);
+      const parser: Object | null = await this.getParser(playSource);
       
       if (!parser) {
         return {
@@ -266,15 +269,16 @@ export class MediaDataFetcherService {
       }
       
       // 解析播放地址
-      const parsedSources = await parser.parse(playSource.url);
+      const parserWithParse: { parse: (url: string) => Promise<PlaySource[]> } = parser as { parse: (url: string) => Promise<PlaySource[]> };
+      const parsedSources: PlaySource[] = await parserWithParse.parse(playSource.url);
       
       return {
         success: parsedSources.length > 0,
         playSources: parsedSources,
         error: parsedSources.length === 0 ? 'Parse failed' : undefined
       };
-    } catch (error) {
-      this.logger.error(`Failed to parse play URL`, error as Error);
+    } catch (error: Error) {
+      Logger.error(`Failed to parse play URL: ` + error.message);
       return {
         success: false,
         playSources: [],
@@ -288,11 +292,11 @@ export class MediaDataFetcherService {
    */
   public async getRelatedMedia(mediaId: string, limit: number = 10): Promise<RelatedMedia[]> {
     try {
-      this.logger.info(`Fetching related media for: ${mediaId}`);
+      Logger.info(`Fetching related media for: ${mediaId}`);
       
       // 检查缓存
-      const cacheKey = `related_media_${mediaId}`;
-      const cached = await this.cacheService.get<RelatedMedia[]>(cacheKey, CacheType.MEDIA);
+      const cacheKey: string = `related_media_${mediaId}`;
+      const cached: RelatedMedia[] | null = await this.cacheService.get<RelatedMedia[]>(cacheKey, CacheType.MEDIA);
       
       if (cached) {
         this.logger.debug(`Cache hit for related media: ${mediaId}`);
@@ -300,14 +304,14 @@ export class MediaDataFetcherService {
       }
       
       // 获取媒体详情以确定分类和标签
-      const mediaDetail = await this.getMediaDetail(mediaId);
+      const mediaDetail: MediaDetail | null = await this.getMediaDetail(mediaId);
       
       if (!mediaDetail) {
         return [];
       }
       
       // 获取所有站点
-      const allSites = this.contentService.getAllVodSites();
+      const allSites: VodSiteWithSource[] = this.contentService.getAllVodSites();
       
       // 查找相关媒体
       const related: RelatedMedia[] = [];
@@ -340,7 +344,7 @@ export class MediaDataFetcherService {
       
       return related;
     } catch (error) {
-      this.logger.error(`Failed to get related media for ${mediaId}`, error as Error);
+      Logger.error(`Failed to get related media for ${mediaId}`, error as Error);
       return [];
     }
   }
@@ -354,14 +358,14 @@ export class MediaDataFetcherService {
     limit: number = 20
   ): Promise<MediaDetail[]> {
     try {
-      this.logger.info(`Searching media with keyword: ${keyword}`);
+      Logger.info(`Searching media with keyword: ${keyword}`);
       
       if (!keyword.trim()) {
         return [];
       }
       
       // 获取站点
-      const sites = sourceId
+      const sites: VodSiteWithSource[] = sourceId
         ? this.contentService.getVodSitesBySource([sourceId])
         : this.contentService.getAllVodSites();
       
@@ -383,7 +387,7 @@ export class MediaDataFetcherService {
       
       return allResults.slice(0, limit);
     } catch (error) {
-      this.logger.error(`Failed to search media: ${keyword}`, error as Error);
+      Logger.error(`Failed to search media: ${keyword}`, error as Error);
       return [];
     }
   }
@@ -409,7 +413,7 @@ export class MediaDataFetcherService {
           return detail;
         }
       } catch (error) {
-        this.logger.warn(`Failed to fetch from site ${site.name}, trying next...`);
+        Logger.warn(`Failed to fetch from site ${site.name}, trying next...`);
         continue;
       }
     }
@@ -454,7 +458,7 @@ export class MediaDataFetcherService {
       
       return detail;
     } catch (error) {
-      this.logger.error(`Failed to fetch detail from site ${site.name}`, error as Error);
+      Logger.error(`Failed to fetch detail from site ${site.name}`, error as Error);
       return null;
     }
   }
@@ -485,7 +489,7 @@ export class MediaDataFetcherService {
       
       return episodes;
     } catch (error) {
-      this.logger.error('Failed to fetch episodes', error as Error);
+      Logger.error('MediaDataFetcher', Failed to fetch episodes, error as Error);
       return [];
     }
   }
@@ -521,7 +525,7 @@ export class MediaDataFetcherService {
       
       return sources;
     } catch (error) {
-      this.logger.error('Failed to fetch play sources', error as Error);
+      Logger.error('MediaDataFetcher', Failed to fetch play sources, error as Error);
       return [];
     }
   }
@@ -556,7 +560,7 @@ export class MediaDataFetcherService {
         director: ''
       }];
     } catch (error) {
-      this.logger.error(`Failed to search from site ${site.name}`, error as Error);
+      Logger.error(`Failed to search from site ${site.name}`, error as Error);
       return [];
     }
   }
@@ -564,13 +568,13 @@ export class MediaDataFetcherService {
   /**
    * 获取解析器
    */
-  private async getParser(playSource: PlaySource): Promise<any | null> {
+  private async getParser(playSource: PlaySource): Promise<Object | null> {
     try {
-      // 简化实现：返回null，表示不需要解析
-      // 实际应用中应该根据URL匹配对应的解析器
+      // 简化实现：返回 null，表示不需要解析
+      // 实际应用中应该根据 URL 匹配对应的解析器
       return null;
-    } catch (error) {
-      this.logger.error('Failed to get parser', error as Error);
+    } catch (error: Error) {
+      Logger.error('MediaDataFetcher', 'Failed to get parser: ' + error.message);
       return null;
     }
   }
@@ -590,10 +594,10 @@ export class MediaDataFetcherService {
   public async clearCache(): Promise<void> {
     try {
       // 清除媒体相关缓存
-      this.logger.info('Clearing media data cache');
+      Logger.info('MediaDataFetcher', Clearing media data cache);
       // TODO: 实现清除缓存逻辑
     } catch (error) {
-      this.logger.error('Failed to clear cache', error as Error);
+      Logger.error('MediaDataFetcher', Failed to clear cache, error as Error);
     }
   }
   
@@ -602,16 +606,16 @@ export class MediaDataFetcherService {
    */
   public async preloadMedia(mediaIds: string[]): Promise<void> {
     try {
-      this.logger.info(`Preloading ${mediaIds.length} media items`);
+      Logger.info(`Preloading ${mediaIds.length} media items`);
       
       for (const mediaId of mediaIds) {
         // 异步预加载，不等待
-        this.getMediaDetail(mediaId).catch(err => {
-          this.logger.warn(`Failed to preload media ${mediaId}`, err);
+        this.getMediaDetail(mediaId).catch((err: Error) => {
+          Logger.warn(`Failed to preload media ${mediaId}: ` + err.message);
         });
       }
-    } catch (error) {
-      this.logger.error('Failed to preload media', error as Error);
+    } catch (error: Error) {
+      Logger.error('MediaDataFetcher', 'Failed to preload media: ' + error.message);
     }
   }
 }

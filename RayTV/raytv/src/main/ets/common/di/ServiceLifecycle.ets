@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 服务生命周期管理 | Service Lifecycle Management
  * 定义服务的生命周期接口和管理类
  */

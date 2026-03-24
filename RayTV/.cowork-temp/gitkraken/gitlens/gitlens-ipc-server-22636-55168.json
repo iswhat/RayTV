@@ -1,0 +1,13 @@
+{
+  "token": "e9536a19-1ba8-4a26-b2f4-53f5f781e937",
+  "address": "http://127.0.0.1:55168",
+  "port": 55168,
+  "workspacePaths": [
+    "d:\\tv\\RayTV"
+  ],
+  "ideName": "trae-cn",
+  "ideDisplayName": "Trae CN",
+  "scheme": "trae-cn",
+  "pid": 22636,
+  "createdAt": "2026-03-23T05:59:00.212Z"
+}

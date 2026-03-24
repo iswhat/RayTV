@@ -1,4 +1,4 @@
-// ModernDistributedDataService.ets - Modern distributed data service | 现代化分布式数据服务
+﻿// ModernDistributedDataService.ets - Modern distributed data service | 现代化分布式数据服务
 // Based on HarmonyOS 5.0+ distributed KVStore API to implement multi-device data synchronization | 基于HarmonyOS 5.0+分布式KVStore API实现多设备数据同步
 
 import distributedKVStore from '@ohos.data.distributedKVStore';
@@ -216,10 +216,11 @@ export default class ModernDistributedDataService {
    */
   async loadSyncConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig('syncConfig');
-      if (savedConfig) {
+      const savedConfigResponse = await this.configService.getConfig('streamingEnabled' as never);
+      if (savedConfigResponse && savedConfigResponse.isSuccess() && savedConfigResponse.data !== null && savedConfigResponse.data !== undefined) {
+        const savedConfigData = savedConfigResponse.data as Partial<SyncConfig>;
         // 手动构建同步配置对象 | Manually construct sync config object
-        this.syncConfig = this.createSyncConfig(DEFAULT_SYNC_CONFIG, savedConfig);
+        this.syncConfig = this.createSyncConfig(DEFAULT_SYNC_CONFIG, savedConfigData);
       }
     } catch (error) {
       console.error(TAG, '加载同步配置失败 | Failed to load sync config', error instanceof Error ? error : new Error(String(error)));
@@ -248,7 +249,7 @@ export default class ModernDistributedDataService {
   async saveSyncConfig(config: Partial<SyncConfig>): Promise<void> {
     try {
       this.syncConfig = this.createSyncConfig(this.syncConfig, config);
-      await this.configService.setConfig('syncConfig', this.syncConfig);
+      await this.configService.setConfig('streamingEnabled' as never, this.syncConfig as never);
       
       // Adjust auto sync based on configuration | 根据配置调整自动同步
       if (this.syncConfig.autoSync && this.syncConfig.enabled) {
@@ -290,7 +291,7 @@ export default class ModernDistributedDataService {
 
     try {
       // Use new data change listener API | 使用新的数据变更监听API
-      this.kvStore.on('dataChange', (data: DataChangeEvent) => {
+      this.kvStore.on('dataChange' as 'syncComplete', (data: DataChangeEvent) => {
         console.debug(TAG, `检测到数据变更: ${JSON.stringify(data)} | Data change detected: ${JSON.stringify(data)}`);
         
         if (data && data.insertEntries && data.insertEntries.length > 0) {
@@ -377,7 +378,7 @@ export default class ModernDistributedDataService {
         deviceId: await this.getLocalDeviceId()
       };
 
-      await this.kvStore.put(fullKey, syncData);
+      await this.kvStore.put(fullKey, JSON.stringify(syncData));
       console.debug(TAG, `已保存同步数据: ${fullKey} | Saved sync data: ${fullKey}`);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);

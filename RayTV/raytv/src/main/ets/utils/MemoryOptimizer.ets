@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 内存优化工具
  * 提供内存管理、垃圾回收和资源清理功能
  */
@@ -80,7 +80,7 @@ export class MemoryOptimizer {
   /**
    * 获取内存使用统计
    */
-  public getMemoryStats(): any {
+  public getMemoryStats(): string {
     return {
       trackedObjects: this.trackedObjects.size,
       cleanupCallbacks: this.cleanupCallbacks.size,
@@ -151,7 +151,7 @@ export function MemoryManaged() {
 
 // 资源自动清理装饰器
 export function AutoCleanup(identifier: string) {
-  return function(target: any, propertyKey: string) {
+  return function(target: string, propertyKey: string) {
     const optimizer = MemoryOptimizer.getInstance()
     
     // 在对象销毁时自动清理

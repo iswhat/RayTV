@@ -1,4 +1,4 @@
-// 设备服务 | Device service
+﻿// 设备服务 | Device service
 // 提供设备信息管理、能力检测和状态监控功能 | Provides device information management, capability detection, and status monitoring functionality
 
 import DeviceInfoRepository from '../../data/repository/DeviceInfoRepository';

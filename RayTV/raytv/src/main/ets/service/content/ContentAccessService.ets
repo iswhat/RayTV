@@ -6,7 +6,8 @@
  */
 
 import Logger from '../../common/util/Logger';
-import SourcePoolManager, {
+import SourcePoolManagerInstance, {
+  SourcePoolManager,
   VodSiteWithSource,
   LiveChannelWithSource,
   WallpaperWithSource,
@@ -14,10 +15,36 @@ import SourcePoolManager, {
   DecoderConfig,
   LiveCategory
 } from '../pool/SourcePoolManager';
+import { ParserConfig } from '../interfaces/IConfigSourceService';
 
 // ========================================
 // 接口定义
 // ========================================
+
+/**
+ * 源统计信息接口
+ */
+export interface SourceStats {
+  sourceId: string;
+  sourceName: string;
+  count: number;
+}
+
+/**
+ * 整体统计信息接口
+ */
+export interface OverallStats {
+  vodSources: number;
+  vodSites: number;
+  vodCategories: number;
+  liveSources: number;
+  liveChannels: number;
+  liveCategories: number;
+  wallpaperSources: number;
+  wallpapers: number;
+  adBlockRules: number;
+  decoderConfigs: number;
+}
 
 /**
  * 内容筛选选项
@@ -55,10 +82,10 @@ export interface PagedResult<T> {
  */
 export class ContentAccessService {
   private static instance: ContentAccessService | null = null;
-  private logger: Logger;
+  private logTag: string = 'ContentAccessService';
   private poolManager: SourcePoolManager;
   private initialized: boolean = false;
-  
+
   /**
    * 获取单例实例
    */
@@ -68,13 +95,12 @@ export class ContentAccessService {
     }
     return ContentAccessService.instance;
   }
-  
+
   /**
    * 私有构造函数
    */
   private constructor() {
-    this.logger = Logger.getInstance('ContentAccessService');
-    this.poolManager = SourcePoolManager.getInstance();
+    this.poolManager = SourcePoolManagerInstance as SourcePoolManager;
   }
   
   /**
@@ -90,10 +116,10 @@ export class ContentAccessService {
       await this.poolManager.initialize();
       
       this.initialized = true;
-      this.logger.info('ContentAccessService initialized successfully');
+      Logger.info(this.logTag, 'ContentAccessService initialized successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to initialize ContentAccessService', err);
+      Logger.error(this.logTag, 'Failed to initialize ContentAccessService', err);
       throw err;
     }
   }
@@ -128,7 +154,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getVodPool();
     return pool.getAllSites();
   }
-  
+
   /**
    * 按源获取点播站点
    */
@@ -176,7 +202,7 @@ export class ContentAccessService {
    */
   public getVodSitesPaged(
     pagination: PaginationParams,
-    options?: ContentFilterOptions
+    options: ContentFilterOptions | undefined
   ): PagedResult<VodSiteWithSource> {
     let sites = this.getAllVodSites();
     
@@ -218,7 +244,7 @@ export class ContentAccessService {
   /**
    * 获取源统计信息
    */
-  public getVodSourceStats(): Array<{ sourceId: string; sourceName: string; count: number }> {
+  public getVodSourceStats(): Array<SourceStats> {
     const allSites = this.getAllVodSites();
     const statsMap = new Map<string, number>();
     
@@ -228,15 +254,19 @@ export class ContentAccessService {
     });
     
     // 获取源名称
-    const result: Array<{ sourceId: string; sourceName: string; count: number }> = [];
-    for (const [sourceId, count] of statsMap.entries()) {
+    const result: Array<SourceStats> = [];
+    const entries = statsMap.entries();
+    for (const entry of entries) {
+      const sourceId: string = entry[0];
+      const count: number = entry[1];
       const site = allSites.find(s => s.sourceId === sourceId);
       if (site) {
-        result.push({
+        const stat: SourceStats = {
           sourceId,
           sourceName: site.sourceName,
           count
-        });
+        };
+        result.push(stat);
       }
     }
     
@@ -255,7 +285,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getLivePool();
     return pool.getAllChannels();
   }
-  
+
   /**
    * 获取直播分类
    */
@@ -263,7 +293,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getLivePool();
     return pool.categories;
   }
-  
+
   /**
    * 按分类获取直播频道
    */
@@ -271,7 +301,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getLivePool();
     return pool.getChannelsByCategory(category);
   }
-  
+
   /**
    * 按源获取直播频道
    */
@@ -283,8 +313,8 @@ export class ContentAccessService {
   /**
    * 搜索直播频道
    */
-  public searchLiveChannels(keyword: string, options?: ContentFilterOptions): LiveChannelWithSource[] {
-    let channels = this.getAllLiveChannels();
+  public searchLiveChannels(keyword: string, options: ContentFilterOptions | undefined): LiveChannelWithSource[] {
+    let channels: LiveChannelWithSource[] = this.getAllLiveChannels();
     
     // 应用筛选条件
     if (options) {
@@ -309,9 +339,9 @@ export class ContentAccessService {
    */
   public getLiveChannelsPaged(
     pagination: PaginationParams,
-    options?: ContentFilterOptions
+    options: ContentFilterOptions | undefined
   ): PagedResult<LiveChannelWithSource> {
-    let channels = this.getAllLiveChannels();
+    let channels: LiveChannelWithSource[] = this.getAllLiveChannels();
     
     // 应用筛选条件
     if (options) {
@@ -335,7 +365,7 @@ export class ContentAccessService {
   /**
    * 获取直播源统计信息
    */
-  public getLiveSourceStats(): Array<{ sourceId: string; sourceName: string; count: number }> {
+  public getLiveSourceStats(): Array<SourceStats> {
     const allChannels = this.getAllLiveChannels();
     const statsMap = new Map<string, number>();
     
@@ -345,15 +375,19 @@ export class ContentAccessService {
     });
     
     // 获取源名称
-    const result: Array<{ sourceId: string; sourceName: string; count: number }> = [];
-    for (const [sourceId, count] of statsMap.entries()) {
+    const result: Array<SourceStats> = [];
+    const entries = statsMap.entries();
+    for (const entry of entries) {
+      const sourceId: string = entry[0];
+      const count: number = entry[1];
       const channel = allChannels.find(ch => ch.sourceId === sourceId);
       if (channel) {
-        result.push({
+        const stat: SourceStats = {
           sourceId,
           sourceName: channel.sourceName,
           count
-        });
+        };
+        result.push(stat);
       }
     }
     
@@ -372,7 +406,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getWallpaperPool();
     return pool.getRandomWallpaper();
   }
-  
+
   /**
    * 按源获取壁纸
    */
@@ -380,7 +414,7 @@ export class ContentAccessService {
     const pool = this.poolManager.getWallpaperPool();
     return pool.getWallpapersBySource(sourceId);
   }
-  
+
   /**
    * 获取所有壁纸
    */
@@ -409,7 +443,7 @@ export class ContentAccessService {
   /**
    * 获取壁纸源统计信息
    */
-  public getWallpaperSourceStats(): Array<{ sourceId: string; sourceName: string; count: number }> {
+  public getWallpaperSourceStats(): Array<SourceStats> {
     const allWallpapers = this.getAllWallpapers();
     const statsMap = new Map<string, number>();
     
@@ -419,15 +453,19 @@ export class ContentAccessService {
     });
     
     // 获取源名称
-    const result: Array<{ sourceId: string; sourceName: string; count: number }> = [];
-    for (const [sourceId, count] of statsMap.entries()) {
+    const result: Array<SourceStats> = [];
+    const entries = statsMap.entries();
+    for (const entry of entries) {
+      const sourceId: string = entry[0];
+      const count: number = entry[1];
       const wallpaper = allWallpapers.find(wp => wp.sourceId === sourceId);
       if (wallpaper) {
-        result.push({
+        const stat: SourceStats = {
           sourceId,
           sourceName: wallpaper.sourceName,
           count
-        });
+        };
+        result.push(stat);
       }
     }
     
@@ -443,12 +481,12 @@ export class ContentAccessService {
    * 获取所有广告过滤规则 (合并所有启用源)
    */
   public getAdBlockRules(): AdBlockRule[] {
-    const rules = this.poolManager.getAdBlockRules().getRules();
+    const rules: AdBlockRule[] = this.poolManager.getAdBlockRules().getRules();
     
     // 按类型分组并去重
-    const uniqueRules = new Map<string, AdBlockRule>();
-    rules.forEach(rule => {
-      const key = `${rule.type}_${rule.pattern}`;
+    const uniqueRules: Map<string, AdBlockRule> = new Map<string, AdBlockRule>();
+    rules.forEach((rule: AdBlockRule) => {
+      const key: string = `${rule.type}_${rule.pattern}`;
       if (!uniqueRules.has(key)) {
         uniqueRules.set(key, rule);
       }
@@ -547,19 +585,8 @@ export class ContentAccessService {
   /**
    * 获取整体统计信息
    */
-  public getOverallStats(): {
-    vodSources: number;
-    vodSites: number;
-    vodCategories: number;
-    liveSources: number;
-    liveChannels: number;
-    liveCategories: number;
-    wallpaperSources: number;
-    wallpapers: number;
-    adBlockRules: number;
-    decoderConfigs: number;
-  } {
-    return {
+  public getOverallStats(): OverallStats {
+    const stats: OverallStats = {
       vodSources: this.getVodSourceStats().length,
       vodSites: this.getAllVodSites().length,
       vodCategories: this.getVodSiteCategories().length,
@@ -571,6 +598,7 @@ export class ContentAccessService {
       adBlockRules: this.getAdBlockRules().length,
       decoderConfigs: this.getDecoderConfigs().length
     };
+    return stats;
   }
 }
 

@@ -1,4 +1,3 @@
-import { Component, FlexAlign, FlexDirection, FlexWrap, ScrollDirection, Text, Row, Column, Button, Scroll, BarState, VerticalAlign, Scroller } from '@ohos/arkui';
 import { Episode } from '../types/PlaybackTypes';
 import Logger from '../../../common/util/Logger';
 

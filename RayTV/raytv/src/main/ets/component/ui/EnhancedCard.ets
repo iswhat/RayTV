@@ -3,7 +3,6 @@
  * 增强型卡片组件 - 专为TV应用优化的ArkTS卡片实现
  */
 
-import { Component, Prop, State, Builder, AboutToAppear } from '@ohos/arkui'
 import { FocusStyle } from '../../common/style/FocusStyle'
 
 // ==================== 类型定义 ====================
@@ -41,10 +40,10 @@ export interface EnhancedCardProps {
   maxHeight?: string | number
   
   // 样式定制
-  customStyle?: Record<string, any>
-  headerStyle?: Record<string, any>
-  contentStyle?: Record<string, any>
-  footerStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
+  headerStyle?: Record<string, Object>
+  contentStyle?: Record<string, Object>
+  footerStyle?: Record<string, Object>
   
   // 媒体内容
   coverImage?: string
@@ -233,10 +232,10 @@ export struct EnhancedCard {
   @Prop height: string | number = 'auto'
   @Prop maxWidth: string | number = 'none'
   @Prop maxHeight: string | number = 'none'
-  @Prop customStyle: Record<string, any> = {}
-  @Prop headerStyle: Record<string, any> = {}
-  @Prop contentStyle: Record<string, any> = {}
-  @Prop footerStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
+  @Prop headerStyle: Record<string, Object> = {}
+  @Prop contentStyle: Record<string, Object> = {}
+  @Prop footerStyle: Record<string, Object> = {}
   @Prop coverImage: string = ''
   @Prop coverHeight: string | number = 160
   @Prop coverFit: ImageFit = ImageFit.Cover

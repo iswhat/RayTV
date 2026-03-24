@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Logger - Logger utility class | 日志工具类
  * Provides unified logging functionality | 提供统一的日志记录功能
  */

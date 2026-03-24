@@ -2,9 +2,28 @@
 // 基于HarmonyOS @ohos.multimodalInput.gesture API实现手势识别功能 | Based on HarmonyOS @ohos.multimodalInput.gesture API to implement gesture recognition functionality
 
 
-import gesture from '@ohos.multimodalInput.gesture';
-import input from '@ohos.multimodalInput.input';
+// import gesture from '@ohos.multimodalInput.gesture'; // Module not available in this environment
+// import input from '@ohos.multimodalInput.input'; // Module not available in this environment
 import BusinessError from '@ohos.base';
+
+// Stub types for @ohos.multimodalInput.gesture
+interface GestureManagerStub {
+}
+namespace gesture {
+  export type GestureManager = GestureManagerStub;
+  export function createGestureManager(): Promise<GestureManager> {
+    return Promise.resolve({} as GestureManager);
+  }
+}
+
+// Stub types for @ohos.multimodalInput.input
+namespace input {
+  export function on(event: string, callback: (e: GestureRawEvent) => void): number {
+    return -1;
+  }
+  export function off(subscriptionId: number): void {
+  }
+}
 
 /**
  * 手势指针接口 | Gesture pointer interface

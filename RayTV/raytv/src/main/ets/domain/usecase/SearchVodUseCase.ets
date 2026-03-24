@@ -1,4 +1,4 @@
-// SearchVodUseCase.ets - 搜索点播用例 // Search VOD use case
+﻿// SearchVodUseCase.ets - 搜索点播用例 // Search VOD use case
 import Logger from '../../common/util/Logger';
 import { Vod } from '../../data/bean/Vod';
 import { SearchResult } from '../../data/model/SearchResult';

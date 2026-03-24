@@ -1,4 +1,4 @@
-// JsonUtils.ets - ArkTS兼容的JSON工具函数 ArkTS compatible JSON utility functions
+﻿// JsonUtils.ets - ArkTS兼容的JSON工具函数 ArkTS compatible JSON utility functions
 
 /**
  * JSON工具函数 JSON utility functions
@@ -16,7 +16,7 @@ export const JsonUtils = {
   /**
    * 检查值是否可以被序列化 Checks if value can be serialized
    */
-  isSerializable(value: unknown): boolean {
+  isSerializable(value: string): boolean {
     try {
       JSON.stringify(value);
       return true;
@@ -29,7 +29,7 @@ export const JsonUtils = {
    * 安全的JSON序列化函数 Safe JSON stringify function
    * 替代JSON.stringify Replaces JSON.stringify
    */
-  stringify(value: unknown, replacer?: (key: string, value: unknown) => unknown | Array<number | string>, space?: string | number): string | null {
+  stringify(value: string, replacer?: (key: string, value: string) => unknown | Array<number | string>, space?: string | number): string | null {
     try {
       return JSON.stringify(value, replacer, space);
     } catch (e) {

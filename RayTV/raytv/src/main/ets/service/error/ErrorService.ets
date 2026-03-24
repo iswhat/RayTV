@@ -1,4 +1,4 @@
-// ErrorService.ets - 错误处理服务
+﻿// ErrorService.ets - 错误处理服务
 // 提供统一的错误处理机制，包括错误分类、错误码管理、错误日志记录等
 
 import Logger from '../../common/util/Logger';
@@ -80,7 +80,7 @@ export interface ErrorInfo {
   /** 错误消息 */
   message: string;
   /** 错误详情 */
-  details?: any;
+  details?: string;
   /** 错误发生的时间 */
   timestamp: number;
   /** 错误发生的位置 */
@@ -128,12 +128,12 @@ export class ErrorService {
    * @param error 错误对象
    * @param options 错误处理选项
    */
-  public captureError(error: any, options?: {
+  public captureError(error: string, options?: {
     type?: ErrorType;
     code?: ErrorCode;
     message?: string;
     location?: string;
-    details?: any;
+    details?: string;
   }): ErrorInfo {
     const errorInfo: ErrorInfo = {
       type: options?.type || this.determineErrorType(error),
@@ -158,7 +158,7 @@ export class ErrorService {
    * 确定错误类型
    * @param error 错误对象
    */
-  private determineErrorType(error: any): ErrorType {
+  private determineErrorType(error: string): ErrorType {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
       
@@ -198,7 +198,7 @@ export class ErrorService {
    * 确定错误码
    * @param error 错误对象
    */
-  private determineErrorCode(error: any): ErrorCode {
+  private determineErrorCode(error: string): ErrorCode {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
       
@@ -236,7 +236,7 @@ export class ErrorService {
    * 获取错误消息
    * @param error 错误对象
    */
-  private getErrorMessage(error: any): string {
+  private getErrorMessage(error: string): string {
     if (error instanceof Error) {
       return error.message;
     }
@@ -253,7 +253,7 @@ export class ErrorService {
    * 获取错误详情
    * @param error 错误对象
    */
-  private getErrorDetails(error: any): any {
+  private getErrorDetails(error: string): string {
     if (error instanceof Error) {
       return {
         name: error.name,
@@ -377,7 +377,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param url 请求URL
    */
-  public handleNetworkError(error: any, url: string): ErrorInfo {
+  public handleNetworkError(error: string, url: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.NETWORK,
       location: `Network request to ${url}`,
@@ -390,7 +390,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param provider 认证提供者
    */
-  public handleAuthError(error: any, provider: string): ErrorInfo {
+  public handleAuthError(error: string, provider: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.AUTHENTICATION,
       location: `Authentication with ${provider}`,
@@ -403,7 +403,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param filePath 文件路径
    */
-  public handleFileError(error: any, filePath: string): ErrorInfo {
+  public handleFileError(error: string, filePath: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.FILE,
       location: `File operation on ${filePath}`,
@@ -416,7 +416,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param dataType 数据类型
    */
-  public handleParsingError(error: any, dataType: string): ErrorInfo {
+  public handleParsingError(error: string, dataType: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.PARSING,
       location: `Parsing ${dataType} data`,
@@ -429,7 +429,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param operation 操作名称
    */
-  public handleBusinessError(error: any, operation: string): ErrorInfo {
+  public handleBusinessError(error: string, operation: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.BUSINESS,
       location: `Business operation: ${operation}`,
@@ -442,7 +442,7 @@ export class ErrorService {
    * @param error 错误对象
    * @param component 组件名称
    */
-  public handleSystemError(error: any, component: string): ErrorInfo {
+  public handleSystemError(error: string, component: string): ErrorInfo {
     return this.captureError(error, {
       type: ErrorType.SYSTEM,
       location: `System component: ${component}`,

@@ -1,8 +1,8 @@
-// DataSyncService.ets - 数据同步服务 | Data sync service
+﻿// DataSyncService.ets - 数据同步服务 | Data sync service
 // 负责协调本地数据库、网络数据和分布式数据之间的同步 | Responsible for coordinating synchronization between local database, network data, and distributed data
 
 
-import ConfigService from '../../service/config/ConfigService';
+import ConfigService, { ConfigKey } from '../../service/config/ConfigService';
 import ModernDistributedDataService from './ModernDistributedDataService';
 import { SyncDataType } from './ModernDistributedDataService';
 import { Serializable } from '../../types/commonTypes';
@@ -265,9 +265,9 @@ export default class DataSyncService {
       
       // 如果启用了启动时同步，执行同步
       if (this.config.syncOnStart && this.config.enabled) {
-        this.synchronizeAll().catch((error: Object) => {
+        this.synchronizeAll().catch((error: unknown) => {
           const err = error instanceof Error ? error : new Error(String(error));
-          console.error(TAG + `: Failed to sync on start: ${err.message}`);
+      console.error(err.message);
         });
       }
       
@@ -278,7 +278,7 @@ export default class DataSyncService {
       console.info(TAG + ': Data sync service initialized successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Failed to initialize data sync service: " + err.message);
+      console.error(err.message);
       throw new Error("Failed to initialize data sync service: " + err.message);
     }
   }
@@ -289,7 +289,8 @@ export default class DataSyncService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = await this.configService.getConfig<DataSyncConfig>('dataSyncConfig', DEFAULT_DATA_SYNC_CONFIG);
+      const savedConfigResponse = await this.configService.getConfig('dataSyncConfig' as unknown as ConfigKey);
+      const savedConfig = savedConfigResponse.data as DataSyncConfig | undefined;
       if (savedConfig) {
         // 手动合并配置 | Manually merge config
       this.config = {
@@ -309,7 +310,7 @@ export default class DataSyncService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to load data sync config: ${err.message}`);
+      console.error(err.message);
     }
   }
 
@@ -334,8 +335,8 @@ export default class DataSyncService {
         retryInterval: config.retryInterval ?? this.config.retryInterval,
         batchSize: config.batchSize ?? this.config.batchSize
       };
-      await this.configService.setConfig('dataSyncConfig', this.config);
-      
+      await this.configService.setConfig('dataSyncConfig' as unknown as ConfigKey, this.config);
+
       // 根据配置调整自动同步
       if (this.config.autoSync && this.config.enabled) {
         this.startAutoSync();
@@ -344,7 +345,7 @@ export default class DataSyncService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Failed to save data sync config: " + err.message);
+      console.error(err.message);
       throw new Error(err.message);
     }
   }
@@ -377,12 +378,13 @@ export default class DataSyncService {
    */
   private async loadSyncRecords(): Promise<void> {
     try {
-      const records = await this.configService.getConfig<SyncRecord[]>('syncRecords', []);
+      const recordsResponse = await this.configService.getConfig('syncRecords' as unknown as ConfigKey);
+      const records = (recordsResponse.data as SyncRecord[] | undefined) ?? [];
       this.syncRecords = records;
       console.info(TAG + `: Loaded ${this.syncRecords.length} sync records`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to load sync records: ${err.message}`);
+      console.error(err.message);
     }
   }
 
@@ -394,10 +396,10 @@ export default class DataSyncService {
     try {
       // 只保留最新100条记录
       const recentRecords = this.syncRecords.slice(-100);
-      await this.configService.setConfig('syncRecords', recentRecords);
+      await this.configService.setConfig('syncRecords' as unknown as ConfigKey, recentRecords);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to save sync records: ${err.message}`);
+      console.error(err.message);
     }
   }
 
@@ -415,13 +417,13 @@ export default class DataSyncService {
       SyncDataType.DEVICE_INFO
     ];
     
-    syncDataTypes.forEach((dataType: string) => {
+    syncDataTypes.forEach((dataType: SyncDataType) => {
       this.distributedDataService.addDataChangeListener(
-        dataType, (key: string, data: Object, deviceId: string) => {
+        dataType, (key: string, data: Serializable, deviceId: string) => {
           // 当接收到分布式数据变化时，更新本地数据
-          this.handleRemoteDataChange(dataType, key, data as SyncEntity, deviceId).catch((error: Object) => {
+          this.handleRemoteDataChange(dataType, key, data as unknown as SyncEntity, deviceId).catch((error: unknown) => {
             const err = error instanceof Error ? error : new Error(String(error));
-            console.error(TAG + ": Failed to handle remote data change: " + err.message);
+        console.error(err.message);
           });
         }
       );
@@ -463,7 +465,7 @@ export default class DataSyncService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Failed to sync remote data: " + err.message);
+      console.error(err.message);
     }
   }
 
@@ -638,7 +640,7 @@ export default class DataSyncService {
       this.notifyEvent(SyncEvent.CONFLICT_RESOLVED, resolvedData);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Failed to resolve conflict: " + err.message);
+      console.error(err.message);
     }
   }
 
@@ -714,7 +716,7 @@ export default class DataSyncService {
         await this.synchronizeAll();
       } catch (error) {
           const err = error instanceof Error ? error : new Error(String(error));
-          console.error(TAG + ": Auto sync failed: " + err.message);
+          console.error(err.message);
         } finally {
         // 通知自动同步停止事件，使用SyncEntity类型
         this.notifyEvent(SyncEvent.AUTO_SYNC_STOPPED, { id: "auto_sync", timestamp: Date.now() });
@@ -775,7 +777,7 @@ export default class DataSyncService {
       console.info(TAG + `: Full data synchronization completed in ${duration}ms`);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Full data synchronization failed: " + err.message);
+      console.error(err.message);
       
       // 记录失败的同步
       const duration = Date.now() - startTime;
@@ -849,7 +851,7 @@ export default class DataSyncService {
       
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Failed to sync data type " + dataType + ": " + err.message);
+      console.error(err.message);
       
       task.state = SyncState.FAILED;
       task.error = err.message;
@@ -904,7 +906,7 @@ export default class DataSyncService {
         }
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        console.error(TAG + ": Failed to upload change for " + change.entityId + ": " + err.message);
+        console.error(err.message);
         failedCount++;
       }
       
@@ -965,7 +967,7 @@ export default class DataSyncService {
       await this.synchronizeDataType(task.dataType);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Retry failed for task ${task.id}: ${err.message}`);
+      console.error(err.message);
     }
   }
 
@@ -1017,7 +1019,7 @@ export default class DataSyncService {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to sync important change: ${err.message}`);
+      console.error(err.message);
     }
   }
 
@@ -1110,7 +1112,7 @@ export default class DataSyncService {
         listener(taskCopy);
       } catch (error) {
           const err = error instanceof Error ? error : new Error(String(error));
-          console.error(TAG + ": Error in sync listener: " + err.message);
+          console.error(err.message);
         }
     }
     
@@ -1186,7 +1188,7 @@ export default class DataSyncService {
           listener(event, safeData);
         } catch (error) {
           const err = error instanceof Error ? error : new Error(String(error));
-          console.error(TAG + ": Error in sync event listener: " + err.message);
+          console.error(err.message);
         }
       }
     }
@@ -1203,9 +1205,9 @@ export default class DataSyncService {
     this.stopAutoSync();
     
     // 保存所有数据
-    this.saveSyncRecords().catch((error: Object) => {
+    this.saveSyncRecords().catch((error: unknown) => {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + ": Error saving sync records on close: " + err.message);
+      console.error(err.message);
     });
 
     this.isInitialized = false;

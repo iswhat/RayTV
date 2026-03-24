@@ -3,18 +3,17 @@
  * 通用的内容容器组件，支持阴影、边框和各种样式
  */
 import { BaseComponent } from '../core/BaseComponent'
-import { Stack, Column, Row } from '@ohos/arkui'
 
 export interface CardProps {
   id?: string
   className?: string
-  style?: Record<string, any>
+  style?: Record<string, Object>
   disabled?: boolean
   visible?: boolean
   title?: string
   subtitle?: string
-  header?: any
-  footer?: any
+  header?: string
+  footer?: string
   elevation?: number // 阴影等级 0-5
   variant?: 'filled' | 'outlined' | 'elevated'
   padding?: string
@@ -44,8 +43,8 @@ export class CardComponent extends BaseComponent<CardProps> {
     this.props.borderRadius = this.props.borderRadius || '12px'
   }
   
-  private getCardStyle(): Record<string, any> {
-    const baseStyle = {
+  private getCardStyle(): Record<string, Object> {
+    const baseStyle: Record<string, Object> = {
       padding: this.props.padding,
       margin: this.props.margin,
       borderRadius: this.props.borderRadius,
@@ -96,21 +95,21 @@ export class CardComponent extends BaseComponent<CardProps> {
     return elevations[Math.min(Math.max(this.props.elevation || 1, 0), 5)]
   }
   
-  private getTitleStyle(): Record<string, any> {
+  private getTitleStyle(): Record<string, Object> {
     return {
       fontSize: '18px',
       fontWeight: '600',
       color: '#333333',
       marginBottom: '4px'
-    }
+    };
   }
   
-  private getSubtitleStyle(): Record<string, any> {
+  private getSubtitleStyle(): Record<string, Object> {
     return {
       fontSize: '14px',
       color: '#666666',
       marginBottom: '12px'
-    }
+    };
   }
   
   private handleHover(enter: boolean): void {

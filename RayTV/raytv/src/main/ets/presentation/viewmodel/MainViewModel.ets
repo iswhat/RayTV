@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 主ViewModel | Main ViewModel
  * 负责应用的主要状态管理和数据转换
  */
@@ -60,9 +60,9 @@ export class MainViewModel extends BaseViewModel {
   };
 
   // 服务实例 | Service instances
-  private mediaService: any;
-  private configService: any;
-  private networkService: any;
+  private mediaService: string;
+  private configService: string;
+  private networkService: string;
 
   /**
    * 构造函数 | Constructor

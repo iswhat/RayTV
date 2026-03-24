@@ -1,4 +1,4 @@
-// AVPlayerService.ets - AV播放器服务 | AV player service
+﻿// AVPlayerService.ets - AV播放器服务 | AV player service
 // 实现基于HarmonyOS AVPlayer的媒体播放核心功能 | Implement core media playback functionality based on HarmonyOS AVPlayer
 import media from '@ohos.multimedia.media';
 import Logger from '../../common/util/Logger';

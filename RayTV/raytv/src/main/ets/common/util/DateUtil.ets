@@ -1,4 +1,4 @@
-// DateUtil - 日期和时间处理工具类 // Date and Time Handling Utility Class
+﻿// DateUtil - 日期和时间处理工具类 // Date and Time Handling Utility Class
 import Logger from './Logger';
 
 const TAG = 'DateUtil';

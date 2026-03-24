@@ -1,4 +1,4 @@
-// QNAPAdapter.ets - 威联通协议适配器
+﻿// QNAPAdapter.ets - 威联通协议适配器
 import { NASDevice, NASFileItem } from '../types/NASDeviceTypes';
 import { BaseNASProtocolAdapter, NASFileType } from '../NASProtocolAdapter';
 import HttpService from '../../HttpService';

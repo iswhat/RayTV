@@ -1,4 +1,4 @@
-// NASDiscoveryService.ets - NAS设备发现服务
+﻿// NASDiscoveryService.ets - NAS设备发现服务
 // 负责局域网NAS设备自动发现、信息采集和状态监控
 
 import Logger from '../../common/util/Logger';

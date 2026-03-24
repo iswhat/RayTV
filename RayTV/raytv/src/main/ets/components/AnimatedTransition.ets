@@ -142,7 +142,7 @@ struct AnimatedTransition {
             curve: this.easing,
             delay: this.delay
           })
-      })
+      }, (child: CustomComponent, index: number) => `animated-child-${index}`)
     }
     .visibility(this.isVisible ? Visibility.Visible : Visibility.Hidden)
   }

@@ -2,7 +2,6 @@
  * 基础演示页面
  * 展示最基础的组件使用
  */
-import { Column, Text, Scroll } from '@ohos/arkui'
 import { BasicButton } from '../component/ui/BasicButton'
 import { BasicCard } from '../component/ui/BasicCard'
 

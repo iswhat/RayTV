@@ -1,4 +1,4 @@
-import Logger from '../../common/util/Logger';
+﻿import Logger from '../../common/util/Logger';
 import fs from '@ohos.file.fs';
 import ObjectUtils from '../../common/util/ark/ObjectUtils';
 

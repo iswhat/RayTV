@@ -1,4 +1,4 @@
-import { ImageCacheManager } from '../utils/ImageCacheManager';
+﻿import { ImageCacheManager } from '../utils/ImageCacheManager';
 import { LazyLoadStrategy } from '../types/LazyLoadTypes';
 
 /**
@@ -6,14 +6,13 @@ import { LazyLoadStrategy } from '../types/LazyLoadTypes';
  * 支持多种加载策略和缓存机制
  */
 @Component
-struct ImageLazyLoader {
+export struct ImageLazyLoader {
   @State private isLoading: boolean = false;
   @State private isError: boolean = false;
   @State private isLoaded: boolean = false;
   @State private currentSrc: string = '';
   
   private cacheManager: ImageCacheManager = ImageCacheManager.getInstance();
-  private observer: IntersectionObserver | null = null;
   private retryCount: number = 0;
   private maxRetries: number = 3;
 
@@ -147,7 +146,7 @@ struct ImageLazyLoader {
       setTimeout(() => {
         if (Math.random() > 0.1) { // 90%成功率
           // 模拟返回图片数据
-          resolve(`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/${btoa(url)}`);
+          resolve(`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/${encodeURIComponent(url)}`);
         } else {
           reject(new Error('Network error'));
         }
@@ -169,10 +168,7 @@ struct ImageLazyLoader {
   }
 
   private cleanup(): void {
-    if (this.observer) {
-      this.observer.disconnect();
-      this.observer = null;
-    }
+    // cleanup: no observer to disconnect
   }
 
   build() {
@@ -204,17 +200,16 @@ struct ImageLazyLoader {
           })
       } else {
         // 默认占位符
-        Row()
-          .width(this.width)
-          .height(this.height)
-          .borderRadius(this.borderRadius)
-          .backgroundColor('#f0f0f0')
-          .justifyContent(FlexAlign.Center)
-          .alignItems(VerticalAlign.Center)
-          .children([
-            Text('🖼️')
-              .fontSize(24)
-          ])
+        Row() {
+          Text('[ ]')
+            .fontSize(24)
+        }
+        .width(this.width)
+        .height(this.height)
+        .borderRadius(this.borderRadius)
+        .backgroundColor('#f0f0f0')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
       }
     }
   }

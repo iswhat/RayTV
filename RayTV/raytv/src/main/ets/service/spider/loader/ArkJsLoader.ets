@@ -4,7 +4,11 @@
 import Logger from '../../../common/util/Logger';
 import { Site } from '../../../data/bean/Site';
 import { BaseLoader, LoaderOptions, ScriptContext } from './BaseLoader';
-import { SiteSpider } from '../CrawlerService';
+import { SiteSpider, VideoItem, VideoDetail } from '../CrawlerService';
+import { SiteInfo } from '../../../data/bean/Site';
+
+// Generic return value type for script method calls
+type PyValue = string | number | boolean | object | null | undefined;
 
 /**
  * JavaScript 加载器 JavaScript loader
@@ -116,14 +120,15 @@ export class ArkJsLoader extends BaseLoader {
       }
 
       // 调用方法 Call method
-      const result = method(...args);
+      const result: PyValue = method(...args);
       
       // 如果是 Promise，等待其完成 If it's a Promise, wait for it to complete
       if (result instanceof Promise) {
-        return await result as object;
+        const awaitedResult: PyValue = await result;
+        return awaitedResult;
       }
       
-      return result as object;
+      return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       Logger.error(this.TAG, `Failed to call method ${methodName}:`, err);
@@ -136,29 +141,51 @@ export class ArkJsLoader extends BaseLoader {
    * @returns SiteSpider 爬虫实例 Spider instance
    */
   protected createSpiderImpl(): SiteSpider {
-    const spider: SiteSpider = {
-      getSiteInfo: async (): Promise<SiteInfo> => this.callMethod('getSiteInfo', []) as Promise<SiteInfo>,
-      
-      getRecommendList: async (): Promise<VideoItem[]> => this.callMethod('getRecommendList', []) as Promise<VideoItem[]>,
-      
-      getHotList: async (): Promise<VideoItem[]> => this.callMethod('getHotList', []) as Promise<VideoItem[]>,
-      
-      getLatestList: async (): Promise<VideoItem[]> => this.callMethod('getLatestList', []) as Promise<VideoItem[]>,
-      
-      getCategories: async (): Promise<string[]> => this.callMethod('getCategories', []) as Promise<string[]>,
-      
-      getCategoryList: async (category: string, page: number): Promise<VideoItem[]> => 
-        this.callMethod('getCategoryList', [category, page]) as Promise<VideoItem[]>,
-      
-      search: async (keyword: string, page?: number): Promise<VideoItem[]> => 
-        this.callMethod('search', [keyword, page]) as Promise<VideoItem[]>,
-      
-      getDetail: async (id: string): Promise<VideoDetail> => 
-        this.callMethod('getDetail', [id]) as Promise<VideoDetail>,
-      
-      getPlayUrl: async (id: string, episodeId?: string): Promise<string> => 
-        this.callMethod('getPlayUrl', [id, episodeId]) as Promise<string>
-    };
+    class SpiderImplClass implements SiteSpider {
+      private loader: ArkJsLoader;
+
+      constructor(loader: ArkJsLoader) {
+        this.loader = loader;
+      }
+
+      async getSiteInfo(): Promise<SiteInfo> {
+        return this.loader.callMethod('getSiteInfo', []) as Promise<SiteInfo>;
+      }
+
+      async getRecommendList(): Promise<VideoItem[]> {
+        return this.loader.callMethod('getRecommendList', []) as Promise<VideoItem[]>;
+      }
+
+      async getHotList(): Promise<VideoItem[]> {
+        return this.loader.callMethod('getHotList', []) as Promise<VideoItem[]>;
+      }
+
+      async getLatestList(): Promise<VideoItem[]> {
+        return this.loader.callMethod('getLatestList', []) as Promise<VideoItem[]>;
+      }
+
+      async getCategories(): Promise<string[]> {
+        return this.loader.callMethod('getCategories', []) as Promise<string[]>;
+      }
+
+      async getCategoryList(category: string, page: number): Promise<VideoItem[]> {
+        return this.loader.callMethod('getCategoryList', [category, page]) as Promise<VideoItem[]>;
+      }
+
+      async search(keyword: string, page?: number): Promise<VideoItem[]> {
+        return this.loader.callMethod('search', [keyword, page]) as Promise<VideoItem[]>;
+      }
+
+      async getDetail(id: string): Promise<VideoDetail> {
+        return this.loader.callMethod('getDetail', [id]) as Promise<VideoDetail>;
+      }
+
+      async getPlayUrl(id: string, episodeId?: string): Promise<string> {
+        return this.loader.callMethod('getPlayUrl', [id, episodeId]) as Promise<string>;
+      }
+    }
+
+    const spider: SiteSpider = new SpiderImplClass(this);
     return spider;
   }
 

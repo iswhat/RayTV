@@ -1,4 +1,4 @@
-﻿// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
+// VodRepository.ets - 点播内容数据仓库 | VOD content data repository
 // 负责管理点播内容的缓存、查询和管理 | Manages VOD content caching, querying and management
 // 包含最近内容、热门内容、详细信息等 | Includes recent content, popular content, detailed information, etc.
 
@@ -13,9 +13,33 @@ import {
 } from '../bean/Vod';
 import { HistoryItem } from '../../types/commonTypes';
 
-import StorageUtil from '../../common/util/StorageUtil';
-
 const TAG = 'VodRepository';
+
+/**
+ * VOD 历史记录接口
+ */
+interface VODHistoryData {
+  content_id: string;
+  content_name: string;
+  type: string;
+  content_type: string;
+  source_key: string;
+  cover: string;
+  progress: number;
+  last_played_at: number;
+  first_played_at: number;
+  created_at: number;
+  updated_at: number;
+}
+
+/**
+ * VOD 进度更新数据接口
+ */
+interface VODProgressUpdateData {
+  progress: number;
+  last_played_at: number;
+  updated_at: number;
+}
 
 // 缓存过期时间（毫秒） | Cache expiry time (milliseconds)
 const CACHE_EXPIRY_TIME = 3600000; // 1小时 | 1 hour
@@ -37,13 +61,11 @@ export interface CacheStats {
 export class VodRepository {
   private static instance: VodRepository;
   private sqliteHelper: SQLiteHelper;
-  private storageUtil: StorageUtil;
   private recentVodsCache: Map<string, Vod[]> = new Map(); // 按站点ID缓存最近内容 | Cache recent content by site ID
   private popularVodsCache: Map<string, Vod[]> = new Map(); // 按站点ID缓存热门内容 | Cache popular content by site ID
-  
+
   private constructor() {
     this.sqliteHelper = SQLiteHelper.getInstance();
-    this.storageUtil = StorageUtil.getInstance();
   }
   
   /**
@@ -150,8 +172,8 @@ export class VodRepository {
     try {
       console.debug(TAG + ': Saving VOD history: ' + vodItem.name);
       
-      // ArkTS兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
-      const historyData = {
+      // ArkTS 兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
+      const historyData: VODHistoryData = {
         content_id: vodItem.id,
         content_name: vodItem.name,
         type: vodItem.type,
@@ -195,8 +217,8 @@ export class VodRepository {
         value: siteId
       }];
       
-      // ArkTS兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
-      const updateData = {
+      // ArkTS 兼容实现：直接使用属性名 | ArkTS compatible: use direct property names
+      const updateData: VODProgressUpdateData = {
         progress: progress,
         last_played_at: Date.now(),
         updated_at: Date.now()

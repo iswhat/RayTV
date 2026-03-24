@@ -6,7 +6,6 @@
 import { PlaybackService } from '../../service/playback/PlaybackService';
 import { TimerManager } from '../../common/util/TimerManager';
 import Logger from '../../common/util/Logger';
-import { KeyEvent, FocusStyle, FlexAlign, FlexDirection, TextAlign } from '@ohos/arkui';
 import { AudioTrack } from '../PlaybackPage';
 
 // 播放控制组件参数 | Playback controls component parameters
@@ -16,7 +15,7 @@ interface PlaybackControlsParams {
   duration: number;
   progress: number;
   showControls: boolean;
-  selectedSubtitle: any;
+  selectedSubtitle: string;
   showSkipOptions: boolean;
   showSubtitleOptions: boolean;
   showAudioTrackOptions: boolean;
@@ -42,7 +41,7 @@ export struct PlaybackControls {
   @Prop duration: number;
   @Prop progress: number;
   @Prop showControls: boolean;
-  @Prop selectedSubtitle: any;
+  @Prop selectedSubtitle: string;
   @Prop showSkipOptions: boolean;
   @Prop showSubtitleOptions: boolean;
   @Prop showAudioTrackOptions: boolean;

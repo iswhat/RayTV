@@ -1,8 +1,6 @@
 // 骨架屏组件 | Skeleton screen component
 // 用于在数据加载过程中显示占位内容，提升用户体验
 
-import { Row, Column, Text, Progress, FlexAlign, Animation } from '@ohos/arkui';
-
 // 骨架屏组件参数 | Skeleton screen component parameters
 interface SkeletonScreenParams {
   type?: 'list' | 'card' | 'detail' | 'custom'; // 骨架屏类型 | Skeleton screen type
@@ -62,7 +60,7 @@ export struct SkeletonScreen {
         }
         .width('100%')
         .padding({ left: 20, right: 20, top: 12, bottom: 12 })
-      })
+      }, (_, index: number) => `list-item-${index}`)
     }
   }
   
@@ -100,7 +98,7 @@ export struct SkeletonScreen {
         }
         .width(180)
         .padding(12)
-      })
+      }, (_, index: number) => `card-item-${index}`)
     }
     .width('100%')
     .padding({ left: 12, right: 12 })
@@ -138,7 +136,7 @@ export struct SkeletonScreen {
           .borderRadius(4)
           .margin({ bottom: 8, left: 20, right: 20 })
           .animation(this.animated ? this.getAnimation() : undefined)
-      })
+      }, (_, index: number) => `detail-line-${index}`)
       
       // 底部操作区占位 | Bottom action area placeholder
       Row() {
@@ -170,9 +168,9 @@ export struct SkeletonScreen {
   private renderCustomSkeleton() {
     Column() {
       if (this.customContent && this.customContent.length > 0) {
-        ForEach(this.customContent, (content: object) => {
+        ForEach(this.customContent, (content: object, index: number) => {
           content
-        })
+        }, (content: object, index: number) => `custom-item-${index}`)
       }
     }
   }

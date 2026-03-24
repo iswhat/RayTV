@@ -110,7 +110,7 @@ export interface SearchResultItem {
   thumbnailUrl?: string;
   sourceId?: string;
   sourceName?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, Object>;
 }
 
 /**

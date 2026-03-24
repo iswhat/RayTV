@@ -668,7 +668,7 @@ export interface PresetConfig {
   /**
    * 预设配置项 | Preset config items
    */
-  config: Record<string, unknown>;
+  config: Record<string, Object>;
   
   /**
    * 是否为默认预设 | Whether default preset

@@ -58,7 +58,7 @@ export class LocalStorageThemeStorage implements ThemeStorage {
   async saveTheme(config: ThemeConfig): Promise<void> {
     try {
       const configStr = JSON.stringify(config);
-      await StorageUtil.setItem(this.STORAGE_KEY, configStr);
+      await StorageUtil.putString(this.STORAGE_KEY, configStr);
     } catch (error) {
       console.error('Failed to save theme config:', error);
     }
@@ -66,7 +66,7 @@ export class LocalStorageThemeStorage implements ThemeStorage {
 
   async loadTheme(): Promise<ThemeConfig | null> {
     try {
-      const configStr = await StorageUtil.getItem(this.STORAGE_KEY);
+      const configStr: string | null = await StorageUtil.getString(this.STORAGE_KEY);
       if (configStr) {
         return JSON.parse(configStr) as ThemeConfig;
       }
@@ -79,7 +79,7 @@ export class LocalStorageThemeStorage implements ThemeStorage {
 
   async clearTheme(): Promise<void> {
     try {
-      await StorageUtil.deleteItem(this.STORAGE_KEY);
+      await StorageUtil.remove(this.STORAGE_KEY);
     } catch (error) {
       console.error('Failed to clear theme config:', error);
     }
@@ -224,7 +224,13 @@ export class ThemeProvider {
    * 获取当前主题配置
    */
   public getCurrentConfig(): ThemeConfig {
-    return { ...this.config };
+    // ArkTS 不支持展开运算符，手动复制
+    const configCopy: ThemeConfig = {
+      mode: this.config.mode,
+      useSystemAccentColor: this.config.useSystemAccentColor,
+      customAccentColor: this.config.customAccentColor
+    };
+    return configCopy;
   }
 
   /**

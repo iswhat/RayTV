@@ -1,4 +1,4 @@
-// SettingService.ets - 设置服务 | Setting Service
+﻿// SettingService.ets - 设置服务 | Setting Service
 // 提供应用配置管理、主题设置、语言切换等功能 | Provides app configuration management, theme settings, language switching, etc.
 import StorageUtil from '../../common/util/StorageUtil';
 import ConfigService from './ConfigService';

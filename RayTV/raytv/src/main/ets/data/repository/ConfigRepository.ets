@@ -448,9 +448,10 @@ public async importConfigs(configs: Record<string, Object>): Promise<void> {
     for (let i = 0; i < entries.length; i++) {
       const [key, config] = entries[i];
       if (typeof config === 'object' && config !== null) {
-        await this.setConfig(key, (config as any).value, (config as any).type, (config as any).category);
+        const typedConfig = config as { value?: string | number | boolean | Object; type?: string; category?: string };
+        await this.setConfig(key, typedConfig.value ?? '', typedConfig.type ?? 'string', typedConfig.category ?? 'general');
       } else {
-        // 兼容旧格式| Compatible with old format
+        // 兼容旧格式 | Compatible with old format
         const type = this.getValueType(config);
         await this.setConfig(key, config, type);
       }

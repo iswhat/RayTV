@@ -2,7 +2,6 @@
  * TV导航菜单组件
  * 为TV遥控器优化的垂直导航菜单
  */
-import { Component, State, Prop } from '@ohos/arkui'
 import { RemoteControlManager } from './RemoteControlManager'
 
 export interface MenuItem {

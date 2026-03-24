@@ -1,4 +1,4 @@
-// LiveRepository.ets - 直播内容数据仓库 | Live content data repository
+﻿// LiveRepository.ets - 直播内容数据仓库 | Live content data repository
 // 负责直播内容的缓存、管理和播放历史记录 | Responsible for live content caching, management and playback history recording
 
 import { SQLiteHelper, QueryCondition, SortOption } from '../db/SQLiteHelper';

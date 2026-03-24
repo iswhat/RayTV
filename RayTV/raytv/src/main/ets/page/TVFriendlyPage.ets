@@ -2,7 +2,6 @@
  * TV友好的页面模板
  * 提供标准的TV页面布局和遥控器交互支持
  */
-import { Component, State, Builder } from '@ohos/arkui'
 import { RemoteControlManager } from '../component/tv/RemoteControlManager'
 import { RemoteEventHandler } from '../component/tv/RemoteEventHandler'
 

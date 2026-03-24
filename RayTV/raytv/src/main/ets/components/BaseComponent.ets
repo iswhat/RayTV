@@ -3,7 +3,7 @@
  * 所有组件的基类，提供通用功能和生命周期管理
  * Base class for all components, providing common functionality and lifecycle management
  */
-import { Logger } from '../common/utils/Logger';
+import { Logger } from '../common/util/Logger';
 
 // ==================== 组件基础接口 | Component Base Interfaces ====================
 
@@ -17,7 +17,7 @@ export interface BaseComponentProps {
   
   // 样式相关
   className?: string;
-  style?: Record<string, any>;
+  style?: Record<string, Object>;
   
   // 状态控制
   disabled?: boolean;
@@ -51,7 +51,7 @@ export interface ComponentState {
 /**
  * 抽象组件基类 | Abstract Component Base Class
  */
-export abstract class BaseComponent<P extends BaseComponentProps = BaseComponentProps, S = any> {
+export abstract class BaseComponent<P extends BaseComponentProps = BaseComponentProps, S extends Record<string, Object> = Record<string, Object>> {
   
   protected props: P;
   protected state: ComponentState;
@@ -76,7 +76,7 @@ export abstract class BaseComponent<P extends BaseComponentProps = BaseComponent
   /**
    * 渲染组件 | Render component
    */
-  public abstract render(): any;
+  public abstract render(): string;
   
   /**
    * 更新组件属性 | Update component props

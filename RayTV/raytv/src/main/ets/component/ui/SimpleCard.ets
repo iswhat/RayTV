@@ -2,7 +2,6 @@
  * 简单卡片组件
  * 使用标准ArkTS语法的卡片组件
  */
-import { Component, Prop } from '@ohos/arkui'
 
 @Component
 export struct SimpleCard {

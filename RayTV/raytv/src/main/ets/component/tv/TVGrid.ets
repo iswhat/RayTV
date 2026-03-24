@@ -2,12 +2,11 @@
  * TV友好的网格布局组件
  * 专门为遥控器导航优化的网格布局
  */
-import { Component, State, Prop, Builder } from '@ohos/arkui'
 import { RemoteControlManager } from './RemoteControlManager'
 
 export interface GridItem {
   id: string
-  data: Record<string, unknown>
+  data: Record<string, Object>
 }
 
 @Component

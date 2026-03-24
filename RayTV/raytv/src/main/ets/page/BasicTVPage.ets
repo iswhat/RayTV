@@ -1,7 +1,6 @@
 /**
  * 基础TV页面
  */
-import { Component, State } from '@ohos/arkui'
 import { BasicTVGrid, GridItem } from '../component/tv/BasicTVGrid'
 
 @Entry

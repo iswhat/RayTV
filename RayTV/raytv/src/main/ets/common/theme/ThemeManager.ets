@@ -3,7 +3,6 @@
  * 主题管理系统 - 实现暗黑模式、自定义主题和动态主题切换
  */
 
-import { Component, State, Prop, Builder, AboutToAppear } from '@ohos/arkui'
 import Logger from '../util/Logger'
 import { StorageUtil, StorageType } from '../util/StorageUtil'
 
@@ -805,9 +804,9 @@ export struct ThemeProvider {
     Column() {
       // 渲染子组件
       if (this.children && this.children.length > 0) {
-        ForEach(this.children, (child: any) => {
+        ForEach(this.children, (child: CustomNode, index: number) => {
           child
-        })
+        }, (child: CustomNode, index: number) => `${index}`)
       }
     }
     .backgroundColor(this.currentTheme.colors.background)

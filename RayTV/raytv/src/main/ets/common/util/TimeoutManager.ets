@@ -110,9 +110,9 @@ export default class TimeoutManager {
    * 清除所有超时任务 Clear All Timeouts
    */
   public clearAllTimeouts(): void {
-    for (const [id, timerId] of this.timeouts) {
+    this.timeouts.forEach((timerId, id) => {
       clearTimeout(timerId);
-    }
+    });
     const count = this.timeouts.size;
     this.timeouts.clear();
     Logger.info(TAG, `Cleared all ${count} timeouts`);
@@ -149,7 +149,7 @@ export default class TimeoutManager {
           this.clearTimeout(id);
           resolve(result);
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           this.clearTimeout(id);
           reject(error);
         });
@@ -243,7 +243,11 @@ export default class TimeoutManager {
           Logger.warn(TAG, `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms: ${lastError.message}`);
 
           // 等待重试延迟 Wait for retry delay
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          await new Promise<void>((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, retryDelay);
+          });
         }
       }
 

@@ -102,13 +102,13 @@ export interface GestureRepository {
    * @param config 手势配置 | Gesture configuration
    * @returns 保存结果 | Save result
    */
-  saveGestureConfig(config: Record<string, any>): Promise<GestureResult<boolean>>;
+  saveGestureConfig(config: Record<string, Object>): Promise<GestureResult<boolean>>;
 
   /**
    * 获取手势配置 | Get gesture configuration
    * @returns 手势配置 | Gesture configuration
    */
-  getGestureConfig(): Promise<GestureResult<Record<string, any>>>;
+  getGestureConfig(): Promise<GestureResult<Record<string, Object>>>;
 
   /**
    * 处理手势事件 | Process gesture event

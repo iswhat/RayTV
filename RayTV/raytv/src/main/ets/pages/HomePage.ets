@@ -6,8 +6,8 @@ import { MediaItem } from '../data/bean/MediaItem';
 import NASDiscoveryService from '../service/nas/NASDiscoveryService';
 import router from '@ohos.router';
 import display from '@ohos.display';
+import MovieService from '../service/media/MovieService';
 
-import { Column, Row, Text, Button, Image, Scroll, ForEach, FlexAlign, TextAlign, VerticalAlign, BarState, ImageFit, Progress, ProgressType, ItemAlign, ScrollDirection, EdgeEffect, Stack, Position, HorizontalAlign, Alignment, GestureDirection, GestureType, GestureEvent, PanGesture, GestureInfo, Grid, GridItem, View, WindowStage } from '@ohos.arkui';
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 import { SkeletonScreen } from '../components/SkeletonScreen';
@@ -145,9 +145,7 @@ struct HomePage {
    * 获取媒体数据 | Fetch media data
    */
   private async fetchMediaData(): Promise<void> {
-    // 导入MovieService
-    const MovieService = await import('../service/media/MovieService');
-    const movieService = MovieService.default.getInstance();
+    const movieService = MovieService.getInstance();
 
     // 并行获取不同类型的内容
     const [trendingResponse, popularResponse, newResponse] = await Promise.all([

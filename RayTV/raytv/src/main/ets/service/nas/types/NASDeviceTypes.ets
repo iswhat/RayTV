@@ -38,7 +38,7 @@ export interface NASDevice {
   discoverySource?: string;   // 发现来源
   type?: string;              // 设备类型
   status?: string;            // 设备状态
-  config?: Record<string, any>; // 设备配置
+  config?: Record<string, Object>; // 设备配置
 }
 
 /**

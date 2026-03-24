@@ -62,13 +62,13 @@ export struct NetworkSourceDetailPopup {
     this.errorMessage = '';
 
     try {
-      // 从ContentAccessService获取实际统计信息
-      const vodSites = this.contentService.getAllVodSites();
-      const liveChannels = this.contentService.getAllLiveChannels();
-      const wallpapers = this.contentService.getAllWallpapers();
-      const adBlockRules = this.contentService.getAdBlockRules();
-      const decoderConfigs = this.contentService.getDecoderConfigs();
-      const parserConfigs = this.contentService.getParserConfigs();
+      // 从 ContentAccessService 获取实际统计信息
+      const vodSites: VodSiteWithSource[] = this.contentService.getAllVodSites();
+      const liveChannels: LiveSource[] = this.contentService.getAllLiveChannels();
+      const wallpapers: WallpaperWithSource[] = this.contentService.getAllWallpapers();
+      const adBlockRules: AdBlockRule[] = this.contentService.getAdBlockRules();
+      const decoderConfigs: Object[] = this.contentService.getDecoderConfigs();
+      const parserConfigs: Object[] = this.contentService.getParserConfigs();
 
       this.contentStats = {
         vodSites: vodSites.length,
@@ -139,9 +139,9 @@ export struct NetworkSourceDetailPopup {
     this.healthChecking = true;
     
     try {
-      const healthStatus = await this.networkSourceManager.checkSourceHealth(this.tempSource.id);
+      const healthStatus: 'healthy' | 'degraded' | 'unreachable' = await this.networkSourceManager.checkSourceHealth(this.tempSource.id);
       this.tempSource.healthStatus = healthStatus;
-    } catch (error) {
+    } catch (error: Error) {
       console.error('Failed to test connection:', error);
       this.tempSource.healthStatus = 'unreachable';
     } finally {

@@ -1,4 +1,4 @@
-// LoaderFactory.ets - 加载器工厂类 Loader factory class
+﻿// LoaderFactory.ets - 加载器工厂类 Loader factory class
 // 负责创建不同类型的加载器实例 Responsible for creating different types of loader instances
 import { Site } from '../../data/bean/Site';
 import { BaseLoader, EmptyLoader, LoaderOptions } from './loader/BaseLoader';
@@ -34,7 +34,7 @@ export class LoaderFactory {
    */
   public createLoader(site: Site, options: LoaderOptions = {}): BaseLoader {
     try {
-      Logger.info(this.TAG, `Creating loader for site: ${site.key}, type: ${site.loaderType || 'js'}`);
+      Logger.info(LoaderFactory.TAG, `Creating loader for site: ${site.key}, type: ${site.loaderType || 'js'}`);
 
       // 根据加载器类型创建不同的加载器实例 Create different loader instances based on loader type
       switch (site.loaderType?.toLowerCase()) {
@@ -48,11 +48,11 @@ export class LoaderFactory {
         case 'java':
           return new ArkJarLoader(site, options);
         default:
-          Logger.warn(this.TAG, `Unknown loader type: ${site.loaderType}, using default JS loader`);
+          Logger.warn(LoaderFactory.TAG, `Unknown loader type: ${site.loaderType}, using default JS loader`);
           return new ArkJsLoader(site, options);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create loader:`, error instanceof Error ? error : new Error(String(error)));
+      Logger.error(LoaderFactory.TAG, `Failed to create loader:`, error instanceof Error ? error : new Error(String(error)));
       // 如果创建失败，返回空加载器 If creation fails, return empty loader
       return new EmptyLoader(site, options);
     }

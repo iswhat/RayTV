@@ -1,4 +1,4 @@
-// SiteManager.ets - 站点管理器 | Site manager
+﻿// SiteManager.ets - 站点管理器 | Site manager
 // 实现站点信息的加载、更新、删除和查询 | Implements loading, updating, deleting and querying of site information
 import Logger from '../../common/util/Logger';
 import { LoaderType, Site } from '../../data/bean/Site';

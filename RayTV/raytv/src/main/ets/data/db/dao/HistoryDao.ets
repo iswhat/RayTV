@@ -1,4 +1,4 @@
-// HistoryDao.ets - 历史记录数据访问对象 | History data access object
+﻿// HistoryDao.ets - 历史记录数据访问对象 | History data access object
 import Logger from '../../../common/util/Logger';
 import { History } from '../../bean/History';
 import { DatabaseManager } from '../DatabaseManager';

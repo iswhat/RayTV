@@ -1,4 +1,4 @@
-import Logger from '../../../common/util/Logger';
+﻿import Logger from '../../../common/util/Logger';
 import { DatabaseManager } from '../DatabaseManager';
 import { SQLiteHelper } from '../SQLiteHelper';
 import { LINE_TABLE } from '../TableSchema';

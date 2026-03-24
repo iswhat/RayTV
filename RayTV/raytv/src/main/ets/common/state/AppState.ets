@@ -28,7 +28,7 @@ export interface UserPreferences {
 export interface RouteInfo {
   name: string;
   path: string;
-  params?: Record<string, any>;
+  params?: Record<string, Object>;
   timestamp: number;
 }
 
@@ -450,7 +450,7 @@ class GlobalState {
   /**
    * 获取状态快照 | Get state snapshot
    */
-  public getStateSnapshot(): any {
+  public getStateSnapshot(): Record<string, Object> {
     return {
       user: this._currentUser,
       isAuthenticated: this._isAuthenticated,
@@ -475,7 +475,7 @@ class GlobalState {
    * 加载状态快照 | Load state snapshot
    * @param snapshot 状态快照 | State snapshot
    */
-  public loadStateSnapshot(snapshot: any): void {
+  public loadStateSnapshot(snapshot: Record<string, Object>): void {
     if (snapshot.user) {
       this._currentUser = snapshot.user;
       this._isAuthenticated = snapshot.isAuthenticated;

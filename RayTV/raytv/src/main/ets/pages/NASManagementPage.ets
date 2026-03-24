@@ -155,7 +155,7 @@ struct NASManagementPage {
         this.newDevice.name,
         this.newDevice.ip,
         parseInt(this.newDevice.port),
-        this.newDevice.protocol as any,
+        this.newDevice.protocol,
         authConfig
       );
       

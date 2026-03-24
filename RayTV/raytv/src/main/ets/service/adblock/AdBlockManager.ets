@@ -1,4 +1,4 @@
-
+﻿
 import { AdBlockConfig } from '../../data/bean/Config';
 import ConfigService from '../config/ConfigService';
 

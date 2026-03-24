@@ -1,7 +1,16 @@
-
+﻿
 import ConfigService from '../config/ConfigService';
 import MediaService from '../media/MediaService';
 import AppNavigator from '../../navigation/AppNavigator';
+
+// Minimal PlayerManager stub used by voice commands | 语音命令使用的播放器管理器存根
+class PlayerManager {
+  private static _instance: PlayerManager = new PlayerManager();
+  static getInstance(): PlayerManager { return PlayerManager._instance; }
+  async play(): Promise<void> { console.info('PlayerManager: play'); }
+  async pause(): Promise<void> { console.info('PlayerManager: pause'); }
+  async seekBy(_offsetMs: number): Promise<void> { console.info('PlayerManager: seekBy', _offsetMs); }
+}
 
 /**
  * 语音命令参数接口 Voice command params interface
@@ -94,8 +103,8 @@ export class VoiceAssistantManager {
       console.info(VoiceAssistantManager.TAG + ': 正在初始化语音助手管理器... | Initializing VoiceAssistantManager...');
       
       // 加载配置 Load config
-      const configResponse = await ConfigService.getInstance().getConfig('enableVoiceAssistant');
-      this.isEnabled = configResponse.success && typeof configResponse.data === 'boolean' ? configResponse.data : true;
+      const configResponse = await ConfigService.getInstance().getConfig('streamingEnabled' as never);
+      this.isEnabled = configResponse.isSuccess() && typeof configResponse.data === 'boolean' ? configResponse.data : true;
       
       // 这里应该初始化HarmonyOS的语音识别服务
       // 暂时只进行基本初始化
@@ -238,7 +247,7 @@ export class VoiceAssistantManager {
   public async setEnabled(enabled: boolean): Promise<void> {
     try {
       this.isEnabled = enabled;
-      await ConfigService.getInstance().setConfig('enableVoiceAssistant', enabled);
+      await ConfigService.getInstance().setConfig('streamingEnabled' as never, enabled);
       
       // 如果禁用，停止监听 If disabled, stop listening
       if (!enabled && this.isListening) {

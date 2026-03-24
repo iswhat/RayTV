@@ -55,7 +55,7 @@ export interface CacheItem<T> {
 // ==================== 事件相关类型 ====================
 
 export interface EventListener {
-  (event: string, ...args: unknown[]): void;
+  (event: string, ...args: string[]): void;
 }
 
 // ==================== UI相关类型 ====================
@@ -70,7 +70,7 @@ export interface UIComponent {
 
 export interface DataItem {
   id: string;
-  data: Record<string, unknown>;
+  data: Record<string, Object>;
 }
 
 export interface DataCollection<T extends DataItem> {

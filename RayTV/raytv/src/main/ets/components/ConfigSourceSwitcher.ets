@@ -1,4 +1,4 @@
-import { LineManager, LineItem } from '../service/config/LineManager';
+﻿import { LineManager, LineItem } from '../service/config/LineManager';
 
 import display from '@ohos.display';
 // 移除 @ohos.arkui 导入，因为它在当前环境中不可用

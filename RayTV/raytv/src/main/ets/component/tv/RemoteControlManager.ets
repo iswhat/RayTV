@@ -2,7 +2,6 @@
  * TV遥控器交互管理器
  * 负责处理遥控器按键事件、焦点管理和导航逻辑
  */
-import { Component, State, Prop } from '@ohos/arkui'
 
 export interface RemoteControlConfig {
   enableFocusManagement: boolean
@@ -15,7 +14,7 @@ export interface RemoteControlConfig {
 
 export interface FocusableItem {
   id: string
-  element: any
+  element: string
   rect: Rect
   focusable: boolean
   visible: boolean

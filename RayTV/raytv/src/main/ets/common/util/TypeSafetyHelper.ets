@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TypeSafetyHelper - 类型安全辅助工具类 | Type safety helper class
  * 提供类型安全检查和转换的辅助方法 | Provides helper methods for type safety checking and conversion
  */
@@ -19,6 +19,13 @@ export interface SafeAsyncExecuteOptions<T> {
 export interface SafeObject {
   // 基础对象类型，用于替代any | Basic object type to replace any
   toStringTag?: string;
+}
+
+/**
+ * 扩展错误接口 | Extended error interface
+ */
+interface ErrorWithCause extends Error {
+  cause?: string | number | boolean | object | null | undefined;
 }
 
 /**
@@ -274,7 +281,7 @@ export class TypeSafetyHelper {
     const error = new Error(message);
     if (cause) {
       // 直接设置cause属性，不使用索引访问 | Directly set cause property, not using indexed access
-      error.cause = cause;
+      (error as ErrorWithCause).cause = cause;
     }
     return error;
   }

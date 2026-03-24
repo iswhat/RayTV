@@ -2,7 +2,6 @@
  * 超简单卡片组件
  * 移除了所有可能有问题的样式属性
  */
-import { Component, Prop } from '@ohos/arkui'
 
 @Component
 export struct UltraSimpleCard {

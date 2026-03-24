@@ -3,7 +3,6 @@
  * 响应式布局系统 - 实现断点管理、网格布局和自适应设计
  */
 
-import { Component, State, Prop, Builder, AboutToAppear } from '@ohos/arkui'
 import Logger from '../util/Logger'
 import ObjectUtils from '../util/ark/ObjectUtils'
 
@@ -26,7 +25,7 @@ export interface ResponsiveContainerProps {
   maxWidth?: number
   fluidBreakpoint?: Breakpoint
   className?: string
-  customStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
 }
 
 export interface ResponsiveGridProps {
@@ -34,7 +33,7 @@ export interface ResponsiveGridProps {
   gap?: number | Partial<Record<Breakpoint, number>>
   responsive?: boolean
   className?: string
-  customStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
 }
 
 export interface ResponsiveItemProps {
@@ -42,7 +41,7 @@ export interface ResponsiveItemProps {
   offset?: number | Partial<Record<Breakpoint, number>>
   order?: number | Partial<Record<Breakpoint, number>>
   className?: string
-  customStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
 }
 
 // ==================== 断点配置 ====================
@@ -219,7 +218,7 @@ export struct ResponsiveContainer {
   @Prop maxWidth: number = 0
   @Prop fluidBreakpoint: Breakpoint = 'lg'
   @Prop className: string = ''
-  @Prop customStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
   
   @State currentBreakpoint: Breakpoint = 'md'
   private layoutSystem: ResponsiveLayoutSystem = ResponsiveLayoutSystem.getInstance()
@@ -286,7 +285,7 @@ export struct ResponsiveGrid {
   @Prop gap: number | Partial<Record<Breakpoint, number>> = 16
   @Prop responsive: boolean = true
   @Prop className: string = ''
-  @Prop customStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
   
   @State currentBreakpoint: Breakpoint = 'md'
   private layoutSystem: ResponsiveLayoutSystem = ResponsiveLayoutSystem.getInstance()
@@ -356,7 +355,7 @@ export struct ResponsiveGridItem {
   @Prop offset: number | Partial<Record<Breakpoint, number>> = 0
   @Prop order: number | Partial<Record<Breakpoint, number>> = 0
   @Prop className: string = ''
-  @Prop customStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
   
   @State currentBreakpoint: Breakpoint = 'md'
   private layoutSystem: ResponsiveLayoutSystem = ResponsiveLayoutSystem.getInstance()

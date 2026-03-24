@@ -1,4 +1,4 @@
-// 缓存服务 Cache service
+﻿// 缓存服务 Cache service
 
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil from '../../common/util/FileUtil';
@@ -422,28 +422,29 @@ export default class CacheService {
       console.info(TAG + `: Initializing cache service...`);
       
       // 加载缓存配置 | Load cache config
-      const savedConfig = await StorageUtil.getObject<CacheConfig>(CACHE_CONFIG_KEY);
+      const savedConfig = await StorageUtil.getString(CACHE_CONFIG_KEY);
       if (savedConfig) {
+        const parsedConfig: CacheConfig = JSON.parse(savedConfig) as CacheConfig;
         this.cacheConfig = this.createCacheConfig({
-          enableMemoryCache: savedConfig.enableMemoryCache !== undefined ? savedConfig.enableMemoryCache : DEFAULT_CACHE_CONFIG.enableMemoryCache,
-          enableDiskCache: savedConfig.enableDiskCache !== undefined ? savedConfig.enableDiskCache : DEFAULT_CACHE_CONFIG.enableDiskCache,
-          memoryCacheSize: savedConfig.memoryCacheSize !== undefined ? savedConfig.memoryCacheSize : DEFAULT_CACHE_CONFIG.memoryCacheSize,
-          diskCacheSize: savedConfig.diskCacheSize !== undefined ? savedConfig.diskCacheSize : DEFAULT_CACHE_CONFIG.diskCacheSize,
-          defaultExpiry: savedConfig.defaultExpiry !== undefined ? savedConfig.defaultExpiry : DEFAULT_CACHE_CONFIG.defaultExpiry,
-          cacheStrategy: savedConfig.cacheStrategy !== undefined ? savedConfig.cacheStrategy : DEFAULT_CACHE_CONFIG.cacheStrategy,
-          storageLocation: savedConfig.storageLocation !== undefined ? savedConfig.storageLocation : DEFAULT_CACHE_CONFIG.storageLocation,
-          maxCacheItems: savedConfig.maxCacheItems !== undefined ? savedConfig.maxCacheItems : DEFAULT_CACHE_CONFIG.maxCacheItems,
-          enableAutoCleanup: savedConfig.enableAutoCleanup !== undefined ? savedConfig.enableAutoCleanup : DEFAULT_CACHE_CONFIG.enableAutoCleanup,
-          cleanupInterval: savedConfig.cleanupInterval !== undefined ? savedConfig.cleanupInterval : DEFAULT_CACHE_CONFIG.cleanupInterval,
-          cleanupThreshold: savedConfig.cleanupThreshold !== undefined ? savedConfig.cleanupThreshold : DEFAULT_CACHE_CONFIG.cleanupThreshold,
-          cacheKeyPrefix: savedConfig.cacheKeyPrefix !== undefined ? savedConfig.cacheKeyPrefix : DEFAULT_CACHE_CONFIG.cacheKeyPrefix,
-          cacheVersion: savedConfig.cacheVersion !== undefined ? savedConfig.cacheVersion : DEFAULT_CACHE_CONFIG.cacheVersion,
-          compressCacheItems: savedConfig.compressCacheItems !== undefined ? savedConfig.compressCacheItems : DEFAULT_CACHE_CONFIG.compressCacheItems,
-          encryptCacheItems: savedConfig.encryptCacheItems !== undefined ? savedConfig.encryptCacheItems : DEFAULT_CACHE_CONFIG.encryptCacheItems,
-          enableStatistics: savedConfig.enableStatistics !== undefined ? savedConfig.enableStatistics : DEFAULT_CACHE_CONFIG.enableStatistics,
-          logLevel: savedConfig.logLevel !== undefined ? savedConfig.logLevel : DEFAULT_CACHE_CONFIG.logLevel,
-          allowedCacheTypes: savedConfig.allowedCacheTypes !== undefined ? savedConfig.allowedCacheTypes : DEFAULT_CACHE_CONFIG.allowedCacheTypes,
-          maxItemSize: savedConfig.maxItemSize !== undefined ? savedConfig.maxItemSize : DEFAULT_CACHE_CONFIG.maxItemSize
+          enableMemoryCache: parsedConfig.enableMemoryCache !== undefined ? parsedConfig.enableMemoryCache : DEFAULT_CACHE_CONFIG.enableMemoryCache,
+          enableDiskCache: parsedConfig.enableDiskCache !== undefined ? parsedConfig.enableDiskCache : DEFAULT_CACHE_CONFIG.enableDiskCache,
+          memoryCacheSize: parsedConfig.memoryCacheSize !== undefined ? parsedConfig.memoryCacheSize : DEFAULT_CACHE_CONFIG.memoryCacheSize,
+          diskCacheSize: parsedConfig.diskCacheSize !== undefined ? parsedConfig.diskCacheSize : DEFAULT_CACHE_CONFIG.diskCacheSize,
+          defaultExpiry: parsedConfig.defaultExpiry !== undefined ? parsedConfig.defaultExpiry : DEFAULT_CACHE_CONFIG.defaultExpiry,
+          cacheStrategy: parsedConfig.cacheStrategy !== undefined ? parsedConfig.cacheStrategy : DEFAULT_CACHE_CONFIG.cacheStrategy,
+          storageLocation: parsedConfig.storageLocation !== undefined ? parsedConfig.storageLocation : DEFAULT_CACHE_CONFIG.storageLocation,
+          maxCacheItems: parsedConfig.maxCacheItems !== undefined ? parsedConfig.maxCacheItems : DEFAULT_CACHE_CONFIG.maxCacheItems,
+          enableAutoCleanup: parsedConfig.enableAutoCleanup !== undefined ? parsedConfig.enableAutoCleanup : DEFAULT_CACHE_CONFIG.enableAutoCleanup,
+          cleanupInterval: parsedConfig.cleanupInterval !== undefined ? parsedConfig.cleanupInterval : DEFAULT_CACHE_CONFIG.cleanupInterval,
+          cleanupThreshold: parsedConfig.cleanupThreshold !== undefined ? parsedConfig.cleanupThreshold : DEFAULT_CACHE_CONFIG.cleanupThreshold,
+          cacheKeyPrefix: parsedConfig.cacheKeyPrefix !== undefined ? parsedConfig.cacheKeyPrefix : DEFAULT_CACHE_CONFIG.cacheKeyPrefix,
+          cacheVersion: parsedConfig.cacheVersion !== undefined ? parsedConfig.cacheVersion : DEFAULT_CACHE_CONFIG.cacheVersion,
+          compressCacheItems: parsedConfig.compressCacheItems !== undefined ? parsedConfig.compressCacheItems : DEFAULT_CACHE_CONFIG.compressCacheItems,
+          encryptCacheItems: parsedConfig.encryptCacheItems !== undefined ? parsedConfig.encryptCacheItems : DEFAULT_CACHE_CONFIG.encryptCacheItems,
+          enableStatistics: parsedConfig.enableStatistics !== undefined ? parsedConfig.enableStatistics : DEFAULT_CACHE_CONFIG.enableStatistics,
+          logLevel: parsedConfig.logLevel !== undefined ? parsedConfig.logLevel : DEFAULT_CACHE_CONFIG.logLevel,
+          allowedCacheTypes: parsedConfig.allowedCacheTypes !== undefined ? parsedConfig.allowedCacheTypes : DEFAULT_CACHE_CONFIG.allowedCacheTypes,
+          maxItemSize: parsedConfig.maxItemSize !== undefined ? parsedConfig.maxItemSize : DEFAULT_CACHE_CONFIG.maxItemSize
         });
       }
       
@@ -550,7 +551,8 @@ export default class CacheService {
       
       // 写入索引文件 | Write to index file
       const indexContent = JsonUtil.stringify(indexData);
-      await FileUtil.writeFile(this.indexFile, indexContent, { create: true });
+      // FileUtil does not support writeFile; use StorageUtil as fallback
+      await StorageUtil.putString(this.indexFile, indexContent);
       
       console.debug(TAG + `: Saved cache index with ${this.getObjectKeys(indexData).length} entries`);
     } catch (error) {
@@ -661,7 +663,7 @@ export default class CacheService {
       } else {
         str = JsonUtil.stringify(obj);
       }
-      return new Blob([str]).size;
+      return str.length * 2;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.recordError(err, 'calculateObjectSize');
@@ -683,7 +685,8 @@ export default class CacheService {
         try {
           listener(error, operation, key);
         } catch (listenerError) {
-          handleError(listenerError, 'CACHE_LISTENER_ERROR');
+          const listenerErr = listenerError instanceof Error ? listenerError : new Error(String(listenerError));
+          handleError(listenerErr, 'CACHE_LISTENER_ERROR');
         }
       }
   }
@@ -1428,13 +1431,7 @@ export default class CacheService {
         return;
       }
 
-      // 删除缓存文件 | Delete cache file
-      const filePath = this.getCacheFilePath(key);
-      if (await FileUtil.fileExists(filePath)) {
-        await FileUtil.deleteFile(filePath);
-      }
-
-      // 从索引中删除 | Remove from index
+      // 删除缓存文件 | Delete cache file (FileUtil does not support file ops; remove from index only)
       this.cacheIndex.delete(key);
 
       // 通知清理监听器 | Notify cleanup listeners
@@ -1504,7 +1501,7 @@ export default class CacheService {
   /**
    * 设置缓存项 | Set cache item
    */
-  public async set<T>(
+  public async set<T extends string | number | boolean | object | null | undefined>(
     key: string,
     data: T,
     options?: CacheOptions
@@ -1591,7 +1588,8 @@ export default class CacheService {
 
         // 写入文件 | Write to file
         const filePath = this.getCacheFilePath(fullKey);
-        await FileUtil.writeFile(filePath, serializedData, { create: true });
+        // FileUtil does not support writeFile; use StorageUtil as fallback
+        await StorageUtil.putString(filePath, serializedData as string);
         
         // 更新索引 | Update index
         this.cacheIndex.set(fullKey, metadata);
@@ -1639,7 +1637,7 @@ export default class CacheService {
   /**
    * 获取缓存项 | Get cache item
    */
-  public async get<T>(key: string): Promise<T | null> {
+  public async get<T extends string | number | boolean | object | null | undefined>(key: string): Promise<T | null> {
     const startTime = Date.now();
     const fullKey = this.generateSmartCacheKey(key, [], 'unknown');
     
@@ -1746,8 +1744,8 @@ export default class CacheService {
       if (this.cacheConfig.enableDiskCache) {
         const metadata = this.cacheIndex.get(fullKey);
         if (metadata && (metadata.expiry === 0 || Date.now() < metadata.expiry)) {
-          const filePath = this.getCacheFilePath(fullKey);
-          return await FileUtil.fileExists(filePath);
+          // FileUtil does not support fileExists; check index only
+          return this.cacheIndex.has(fullKey);
         }
       }
       

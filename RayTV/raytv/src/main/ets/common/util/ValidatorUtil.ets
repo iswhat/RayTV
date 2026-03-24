@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ValidatorUtil - 验证工具类 Validation utility class
  * 提供数据验证相关的工具函数，包括邮箱、手机号、URL等验证 Provides data validation utility functions, including email, phone number, URL validation
  */
@@ -70,7 +70,7 @@ export class ValidatorUtil {
    * @param options 验证选项 Validation options
    * @returns 是否有效 Is valid
    */
-  public static isValidNumber(value: any, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
+  public static isValidNumber(value: string, options: { min?: number; max?: number; integer?: boolean } = {}): boolean {
     const num = Number(value);
     if (isNaN(num)) {
       return false;
@@ -316,7 +316,7 @@ export class ValidatorUtil {
    * @param obj 对象 Object
    * @returns 是否为空 Is empty
    */
-  public static isEmptyObject(obj: unknown): boolean {
+  public static isEmptyObject(obj: string): boolean {
     if (obj === null || obj === undefined) {
       return true;
     }

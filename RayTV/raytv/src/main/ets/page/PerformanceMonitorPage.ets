@@ -2,7 +2,6 @@
  * 性能监控页面
  * 展示应用性能指标和优化建议
  */
-import { Component, State } from '@ohos/arkui'
 import { PerformanceMonitor } from '../utils/PerformanceMonitor'
 import { MemoryOptimizer } from '../utils/MemoryOptimizer'
 import { LazyLoader } from '../utils/LazyLoader'
@@ -11,9 +10,9 @@ import ObjectUtils from '../common/util/ark/ObjectUtils'
 @Entry
 @Component
 struct PerformanceMonitorPage {
-  @State performanceData: any = {}
-  @State memoryStats: any = {}
-  @State loadStats: any = {}
+  @State performanceData: string = {}
+  @State memoryStats: string = {}
+  @State loadStats: string = {}
   
   private perfMonitor: PerformanceMonitor = PerformanceMonitor.getInstance()
   private memoryOptimizer: MemoryOptimizer = MemoryOptimizer.getInstance()
@@ -87,28 +86,28 @@ struct PerformanceMonitorPage {
         .margin({ bottom: '12px' })
       
       if (this.performanceData.metrics) {
-        const entries = ObjectUtils.getEntries(this.performanceData.metrics);
-        ForEach(entries, (entry: [string, any]) => {
-          const [name, data] = entry;
-          Column() {
-            Text(`${name}:`)
-              .fontSize('14px')
-              .fontWeight('500')
-            Text(`平均: ${data.average?.toFixed(2)}ms`)
-              .fontSize('12px')
-              .color('#666666')
-            Text(`最大: ${data.max}ms, 最小: ${data.min}ms`)
-              .fontSize('12px')
-              .color('#999999')
-          }
-          .width('100%')
-          .padding('8px')
-          .backgroundColor('#F5F5F5')
-          .borderRadius('6px')
-          .margin({ bottom: '8px' })
-        })
-      } else {
-        Text('暂无性能数据')
+          const entries = ObjectUtils.getEntries(this.performanceData.metrics);
+          ForEach(entries, (entry: [string, Record<string, Object>], index: number) => {
+            const [name, data] = entry;
+            Column() {
+              Text(`${name}:`)
+                .fontSize('14px')
+                .fontWeight('500')
+              Text(`平均：${data.average?.toFixed(2)}ms`)
+                .fontSize('12px')
+                .color('#666666')
+              Text(`最大：${data.max}ms, 最小：${data.min}ms`)
+                .fontSize('12px')
+                .color('#999999')
+            }
+            .width('100%')
+            .padding('8px')
+            .backgroundColor('#F5F5F5')
+            .borderRadius('6px')
+            .margin({ bottom: '8px' })
+          }, (entry: [string, Record<string, Object>], index: number) => `${index}`)
+        } else {
+          Text('暂无性能数据')
           .fontSize('14px')
           .color('#999999')
       }
@@ -167,12 +166,12 @@ struct PerformanceMonitorPage {
           .fontSize('14px')
           .fontWeight('500')
           .margin({ bottom: '4px' })
-        ForEach(this.loadStats.modules, (module: string) => {
+        ForEach(this.loadStats.modules, (module: string, index: number) => {
           Text(`• ${module}`)
             .fontSize('12px')
             .color('#666666')
             .margin({ bottom: '2px' })
-        })
+        }, (module: string, index: number) => `${index}`)
       }
     }
     .width('100%')

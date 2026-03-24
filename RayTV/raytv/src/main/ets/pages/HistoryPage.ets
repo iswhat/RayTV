@@ -3,7 +3,6 @@ import Logger from '../common/util/Logger';
 import { HistoryService } from '../service/media/HistoryService';
 import { MediaService } from '../service/media/MediaService';
 import display from '@ohos.display';
-import { ScrollDirection, BarState, FlexAlign, FlexDirection, ImageFit, TextAlign, VerticalAlign } from '@ohos/arkui';
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 

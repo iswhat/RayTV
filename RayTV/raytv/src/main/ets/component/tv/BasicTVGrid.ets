@@ -1,7 +1,6 @@
 /**
  * 基础TV网格组件
  */
-import { Component, Prop } from '@ohos/arkui'
 
 export interface GridItem {
   id: string;
@@ -27,7 +26,7 @@ export struct BasicTVGrid {
           Text(item.title || `Item ${index + 1}`)
         }
         .onClick(() => this.onItemClick(item))
-      })
+      }, (item: GridItem, index: number) => `${index}`)
     }
   }
 }

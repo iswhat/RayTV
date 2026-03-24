@@ -7,10 +7,6 @@ import ContentAccessService from '../service/content/ContentAccessService';
 import display from '@ohos.display';
 import { LiveChannelWithSource, LiveCategory } from '../service/live/LiveChannelTypes';
 
-import {
-  FlexAlign, FlexDirection, SliderStyle, HorizontalAlign, VerticalAlign, Alignment, TextAlign, BarState, ScrollDirection, EdgeEffect, GestureDirection, GestureEvent, PanGesture, GestureInfo, Column, Row, Text, Button, ForEach, Stack, Image, ImageFit
-} from '@ohos.arkui';
-
 import VirtualList from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 import ContentSourceBadge from '../components/ContentSourceBadge';
@@ -55,7 +51,7 @@ struct ModernLivePage {
   @State recentChannels: LiveChannelWithSource[] = [];
   
   // 服务实例
-  private liveStreamService: any = null;
+  private liveStreamService: string = null;
   
   // 生命周期
   aboutToAppear() {

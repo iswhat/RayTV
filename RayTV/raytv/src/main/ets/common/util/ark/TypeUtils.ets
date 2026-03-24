@@ -3,8 +3,11 @@
  * 类型工具函数 Type utility functions
  * 提供ArkTS环境中安全的类型检测和转换功能 Provides safe type detection and conversion functionality in ArkTS environment
  */
-import { SafeAny, SafeObject, isNonNull, Optional } from './types/ArkTSBaseTypes';
+import { SafeAny, Optional } from './types/ArkTSBaseTypes';
 import ObjectUtils from './ObjectUtils';
+
+// SafeObject type for ArkTS compatibility
+type SafeObject = Record<string, SafeAny>;
 
 /**
  * TypeUtils接口 TypeUtils interface
@@ -240,9 +243,7 @@ export class TypeUtilsClass implements TypeUtilsInterface {
   /**
    * 创建类型保护函数 Create type guard function
    */
-  createTypeGuard<T extends SafeObject>(
-    schema: Record<string, (value: SafeAny) => boolean>
-  ): (obj: SafeAny) => boolean {
+  createTypeGuard<T extends SafeObject>(schema: Record<string, (value: SafeAny) => boolean>): (obj: SafeAny) => boolean {
     const self = this;
     return (obj: SafeAny): boolean => {
       if (!self.isObject(obj)) {
@@ -250,11 +251,11 @@ export class TypeUtilsClass implements TypeUtilsInterface {
       }
       
       // 验证所有必需的属性都存在且符合类型 Validate all required properties exist and match type
-      const entries = ObjectUtils.getEntries(schema);
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        const key = entry[0];
-        const validator = entry[1];
+      const schemaKeys = ObjectUtils.getKeys(schema);
+      for (let i = 0; i < schemaKeys.length; i++) {
+        const key = schemaKeys[i];
+        const schemaRecord = schema as Record<string, (value: SafeAny) => boolean>;
+        const validator = schemaRecord[key];
         // 使用类型安全的属性查询方式，避免索引签名访问 Use type-safe property query method, avoid index signature access
         const value = self.getPropertyValue(obj, key);
         if (!validator(value)) {

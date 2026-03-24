@@ -1,4 +1,4 @@
-// PlayerService.ets - 播放器服务 Player service
+﻿// PlayerService.ets - 播放器服务 Player service
 // 基于HarmonyOS AVPlayer API实现媒体播放功能，提供统一的播放器接口 Based on HarmonyOS AVPlayer API to implement media playback functionality, provides unified player interface
 
 import Logger from '../../common/util/Logger';

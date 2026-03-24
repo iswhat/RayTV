@@ -28,72 +28,75 @@
  * const userInfo = await StorageUtil.getObject('userInfo');
  * ```
  */
-import Preferences from '@ohos.data.preferences';
+import dataPreferences from '@ohos.data.preferences';
 import common from '@ohos.app.ability.common';
 import cryptoFramework from '@ohos.security.cryptoFramework';
 import buffer from '@ohos.buffer';
 import ObjectUtils from './ark/ObjectUtils';
 import ErrorHandler, { handleError } from './ErrorHandler';
 
-// 兼容TextEncoder和TextDecoder
-const TextEncoder = globalThis.TextEncoder || (function() {
-  return function() {
-    this.encode = function(str: string): Uint8Array {
-      const buffer = new ArrayBuffer(str.length * 2);
-      const view = new Uint16Array(buffer);
-      for (let i = 0; i < str.length; i++) {
-        view[i] = str.charCodeAt(i);
-      }
-      return new Uint8Array(buffer);
-    };
-  };
-})();
+// 偏好设置实例接口 | Preferences instance interface
+interface PreferencesInstance {
+  get(key: string, defaultValue: string | number | boolean): Promise<string | number | boolean>;
+  getAll(): Promise<Object>;
+  put(key: string, value: string | number | boolean): Promise<void>;
+  delete(key: string): Promise<void>;
+  has(key: string): Promise<boolean>;
+  flush(): Promise<void>;
+}
 
-const TextDecoder = globalThis.TextDecoder || (function() {
-  return function() {
-    this.decode = function(uint8Array: Uint8Array): string {
-      const view = new Uint16Array(uint8Array.buffer);
-      let str = '';
-      for (let i = 0; i < view.length; i++) {
-        str += String.fromCharCode(view[i]);
-      }
-      return str;
-    };
-  };
-})();
+// 兼容 TextEncoder 和 TextDecoder
+class TextEncoderClass {
+  encode(str: string): Uint8Array {
+    const buffer = new ArrayBuffer(str.length * 2);
+    const view = new Uint16Array(buffer);
+    for (let i = 0; i < str.length; i++) {
+      view[i] = str.charCodeAt(i);
+    }
+    return new Uint8Array(buffer);
+  }
+}
+
+class TextDecoderClass {
+  decode(uint8Array: Uint8Array | buffer.Buffer): string {
+    const view = new Uint16Array(uint8Array.buffer);
+    let str = '';
+    for (let i = 0; i < view.length; i++) {
+      str += String.fromCharCode(view[i]);
+    }
+    return str;
+  }
+}
+
+// 使用简单函数创建编码器和解码器 | Use simple functions to create encoders and decoders
+function createTextEncoder(): TextEncoderClass {
+  return new TextEncoderClass();
+}
+
+function createTextDecoder(): TextDecoderClass {
+  return new TextDecoderClass();
+}
 
 // 加密工具类 | Encryption utility class
 class EncryptionUtil {
   // 使用更安全的加密算法
   // Use more secure encryption algorithm
-  private static readonly KEY: string = 'RayTVEncryptionKey12345'; // 16字节密钥
-  private static readonly IV: string = 'RayTVIV1234567890'; // 16字节IV
+  private static readonly KEY: string = 'RayTVEncryptionKey12345'; // 16 字节密钥
+  private static readonly IV: string = 'RayTVIV1234567890'; // 16 字节 IV
 
   // 加密字符串 | Encrypt string
   public static encrypt(text: string): string {
     try {
-      // 使用AES-CBC模式加密
-      // Use AES-CBC mode for encryption
-      const encoder: TextEncoder = new TextEncoder();
+      // 简化加密实现，使用 Base64 编码
+      // Simplified encryption implementation using Base64 encoding
+      const encoder: TextEncoderClass = createTextEncoder();
       const data: Uint8Array = encoder.encode(text);
-      
-      // 生成密钥和IV
-      const keyData: Uint8Array = encoder.encode(EncryptionUtil.KEY);
-      const ivData: Uint8Array = encoder.encode(EncryptionUtil.IV);
-      
-      // 转换为DataBlob格式
-      const dataBlob = {
-        data: data
-      };
-      
-      // 简化加密实现，使用Base64作为降级方案
-      // 由于HarmonyOS cryptoFramework API的复杂性，这里使用Base64编码作为替代
       const bufferData: buffer.Buffer = buffer.from(data);
       return bufferData.toString('base64');
     } catch (error) {
-      handleError(error, 'STORAGE_ENCRYPTION_FAILED');
-      // 降级到Base64编码
-      const encoder: TextEncoder = new TextEncoder();
+      handleError(error as Error, 'STORAGE_ENCRYPTION_FAILED');
+      // 降级到 Base64 编码 | Fallback to Base64 encoding
+      const encoder: TextEncoderClass = createTextEncoder();
       const data: Uint8Array = encoder.encode(text);
       const bufferData: buffer.Buffer = buffer.from(data);
       return bufferData.toString('base64');
@@ -103,19 +106,20 @@ class EncryptionUtil {
   // 解密字符串 | Decrypt string
   public static decrypt(encryptedText: string): string {
     try {
-      // 简化解密实现，使用Base64解码
+      // 简化解密实现，使用 Base64 解码
+      // Simplified decryption implementation using Base64 decoding
       const data: buffer.Buffer = buffer.from(encryptedText, 'base64');
-      const decoder: TextDecoder = new TextDecoder();
+      const decoder: TextDecoderClass = createTextDecoder();
       return decoder.decode(data);
     } catch (error) {
-      handleError(error, 'STORAGE_DECRYPTION_FAILED');
-      // 降级到Base64解码
+      handleError(error as Error, 'STORAGE_DECRYPTION_FAILED');
+      // 降级到 Base64 解码 | Fallback to Base64 decoding
       try {
         const data: buffer.Buffer = buffer.from(encryptedText, 'base64');
-        const decoder: TextDecoder = new TextDecoder();
+        const decoder: TextDecoderClass = createTextDecoder();
         return decoder.decode(data);
       } catch (decodeError) {
-        handleError(decodeError, 'STORAGE_BASE64_DECODING_FAILED');
+        handleError(decodeError as Error, 'STORAGE_BASE64_DECODING_FAILED');
         return encryptedText;
       }
     }
@@ -179,6 +183,34 @@ export interface StorageObject {
   appSettings?: AppSettings;
   mediaSettings?: MediaSettings;
   networkSettings?: NetworkSettings;
+  searchHistoryConfig?: SearchHistoryConfig;
+  searchHistory?: SearchHistoryItem[];
+  favoriteSearches?: SearchHistoryItem[];
+}
+
+/**
+ * 搜索历史配置接口
+ */
+export interface SearchHistoryConfig {
+  maxHistoryItems: number;
+  maxFavoriteItems: number;
+  autoClearDays?: number;
+  enableAutoComplete: boolean;
+  enableRecentSearches: boolean;
+  enableFavorites: boolean;
+}
+
+/**
+ * 搜索历史项接口
+ */
+export interface SearchHistoryItem {
+  id: string;
+  query: string;
+  timestamp: number;
+  count: number;
+  isFavorite: boolean;
+  tags?: string[];
+  source?: string;
 }
 
 /**
@@ -189,7 +221,7 @@ export interface StorageObject {
  */
 export class StorageUtil {
   private static readonly TAG: string = 'StorageUtil';
-  private static preferences: Preferences | null = null;
+  private static preferences: PreferencesInstance | null = null;
   private static readonly PREFERENCES_NAME: string = 'raytv_preferences';
 
   /**
@@ -217,7 +249,7 @@ export class StorageUtil {
         return false;
       }
 
-      StorageUtil.preferences = await Preferences.getPreferences(context, StorageUtil.PREFERENCES_NAME);
+      StorageUtil.preferences = await dataPreferences.getPreferences(context, StorageUtil.PREFERENCES_NAME) as unknown as PreferencesInstance;
       console.info(StorageUtil.TAG + ': StorageUtil initialized successfully');
       return true;
     } catch (error) {
@@ -231,7 +263,7 @@ export class StorageUtil {
    * Get preferences instance | 获取偏好设置实例
    * @returns Preferences instance | 偏好设置实例
    */
-  private static getPreferences(): Preferences | null {
+  private static getPreferences(): PreferencesInstance | null {
     if (!StorageUtil.preferences) {
       console.warn(StorageUtil.TAG + ': StorageUtil not initialized');
     }
@@ -254,7 +286,7 @@ export class StorageUtil {
    */
   public static async putString(key: string, value: string): Promise<void> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         // 加密存储值 | Encrypt storage value
         const encryptedValue: string = EncryptionUtil.encrypt(value);
@@ -285,10 +317,10 @@ export class StorageUtil {
    */
   public static async getString(key: string, defaultValue: string = '', storageType: StorageType = StorageType.PREFERENCES): Promise<string> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const encryptedValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const encryptedValue: string | number | boolean = await preferences.get(key, defaultValue);
         const encryptedResult: string = encryptedValue as string;
         // 解密存储值 | Decrypt storage value
         const result: string = EncryptionUtil.decrypt(encryptedResult);
@@ -297,7 +329,7 @@ export class StorageUtil {
       return defaultValue;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to get string for key: ' + key, err.message);
+      console.error(err.message);
       return defaultValue;
     }
   }
@@ -318,14 +350,14 @@ export class StorageUtil {
    */
   public static async putNumber(key: string, value: number): Promise<void> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.put(key, value);
         await preferences.flush();
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to put number for key: ' + key, err.message);
+      console.error(err.message);
     }
   }
 
@@ -346,17 +378,17 @@ export class StorageUtil {
    */
   public static async getNumber(key: string, defaultValue: number = 0): Promise<number> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const resultValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const resultValue: string | number | boolean = await preferences.get(key, defaultValue);
         const result: number = resultValue as number;
         return result;
       }
       return defaultValue;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to get number for key: ' + key, err.message);
+      console.error(err.message);
       return defaultValue;
     }
   }
@@ -377,14 +409,14 @@ export class StorageUtil {
    */
   public static async putBoolean(key: string, value: boolean): Promise<void> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.put(key, value);
         await preferences.flush();
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to put boolean for key: ' + key, err.message);
+      console.error(err.message);
     }
   }
 
@@ -405,17 +437,17 @@ export class StorageUtil {
    */
   public static async getBoolean(key: string, defaultValue: boolean = false): Promise<boolean> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         // Explicitly type the return value | 显式类型化返回值
-        const resultValue: Preferences.Value = await preferences.get(key, defaultValue);
+        const resultValue: string | number | boolean = await preferences.get(key, defaultValue);
         const result: boolean = resultValue as boolean;
         return result;
       }
       return defaultValue;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to get boolean for key: ' + key, err.message);
+      console.error(err.message);
       return defaultValue;
     }
   }
@@ -451,7 +483,7 @@ export class StorageUtil {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to set value for key: ' + key, err.message);
+      console.error(err.message);
     }
   }
 
@@ -470,14 +502,14 @@ export class StorageUtil {
    */
   public static async remove(key: string): Promise<void> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         await preferences.delete(key);
         await preferences.flush();
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to remove key: ' + key, err.message);
+      console.error(err.message);
     }
   }
 
@@ -501,14 +533,14 @@ export class StorageUtil {
    */
   public static async contains(key: string): Promise<boolean> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         return await preferences.has(key);
       }
       return false;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to check if key exists: ' + key, err.message);
+      console.error(err.message);
       return false;
     }
   }
@@ -526,13 +558,13 @@ export class StorageUtil {
    */
   public static async clear(): Promise<void> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
-        const allItems: Preferences.Value = await preferences.getAll();
+        const allItems: Object = await preferences.getAll();
         // 确保allItems是对象类型
         if (typeof allItems === 'object' && allItems !== null) {
           // 使用ObjectUtils.getKeys获取所有键
-          const keyArray = ObjectUtils.getKeys(allItems);
+          const keyArray = ObjectUtils.getKeys(allItems as Record<string, string | number | boolean>);
           for (let i = 0; i < keyArray.length; i++) {
             const key = keyArray[i];
             await preferences.delete(key);
@@ -542,7 +574,7 @@ export class StorageUtil {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to clear all preferences', err.message);
+      console.error(err.message);
     }
   }
 
@@ -573,12 +605,12 @@ export class StorageUtil {
    */
   public static async getAll(): Promise<StorageItem> {
     try {
-      const preferences: Preferences | null = StorageUtil.getPreferences();
+      const preferences: PreferencesInstance | null = StorageUtil.getPreferences();
       if (preferences) {
         const result: StorageItem = {};
         // Explicitly type the return value | 显式类型化返回值
-        const allItemsValue: Preferences.Value = await preferences.getAll();
-        const allItems: Record<string, Preferences.Value> = allItemsValue as Record<string, Preferences.Value>;
+        const allItemsValue: Object = await preferences.getAll();
+        const allItems: Record<string, string | number | boolean> = allItemsValue as Record<string, string | number | boolean>;
         if (typeof allItems === 'object' && allItems !== null) {
           const keyArray = ObjectUtils.getKeys(allItems);
           for (let i = 0; i < keyArray.length; i++) {
@@ -627,7 +659,7 @@ export class StorageUtil {
       return {};
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to get all preferences', err.message);
+      console.error(err.message);
       return {};
     }
   }
@@ -662,7 +694,7 @@ export class StorageUtil {
       await StorageUtil.putString(key, jsonStr);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to put object for key: ' + key, err.message);
+      console.error(err.message);
     }
   }
 
@@ -750,7 +782,7 @@ export class StorageUtil {
       return null;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(StorageUtil.TAG + ': Failed to get object for key: ' + key, err.message);
+      console.error(err.message);
       return null;
     }
   }

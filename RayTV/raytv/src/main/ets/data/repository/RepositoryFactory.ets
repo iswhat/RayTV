@@ -1,4 +1,4 @@
-/**
+﻿/**
  * RepositoryFactory - 仓库工厂类 | Repository factory class
  * 负责创建和管理各种Repository的实现 | Responsible for creating and managing various Repository implementations
  */

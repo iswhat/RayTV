@@ -3,7 +3,6 @@
  * 增强型按钮组件 - 专为TV应用优化的ArkTS按钮实现
  */
 
-import { Component, Prop, State, Builder, AboutToAppear } from '@ohos/arkui'
 import { FocusStyle } from '../../common/style/FocusStyle'
 
 // ==================== 类型定义 ====================
@@ -35,7 +34,7 @@ export interface EnhancedButtonProps {
   // 样式定制
   width?: string | number
   height?: string | number
-  customStyle?: Record<string, any>
+  customStyle?: Record<string, Object>
   
   // 事件回调
   onPress?: () => void
@@ -112,7 +111,7 @@ export struct EnhancedButton {
   @Prop soundEffect: string = 'default'
   @Prop width: string | number = 'auto'
   @Prop height: string | number = 'auto'
-  @Prop customStyle: Record<string, any> = {}
+  @Prop customStyle: Record<string, Object> = {}
   @Prop onPress: () => void = () => {}
   @Prop onLongPress: () => void = () => {}
   @Prop onFocus: () => void = () => {}

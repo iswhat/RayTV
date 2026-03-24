@@ -3,26 +3,112 @@
 
 import Logger from '../../../common/util/Logger';
 import ObjectUtils from '../../../common/util/ark/ObjectUtils';
-import { BaseLoader, LoaderOptions, Site, SiteSpider } from './BaseLoader';
+import { BaseLoader, LoaderOptions } from './BaseLoader';
+import { SiteSpider, VideoItem, VideoDetail } from '../CrawlerService';
+import { Site, SiteInfo } from '../../../data/bean/Site';
 import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
-import HttpService from '../HttpService';
+import HttpService from '../../HttpService';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
-
-/**
- * Python 执行上下文 Python execution context
- */
-interface PyContext {
-  contextData?: Record<string, string | number | boolean | Record<string, string | number | boolean | object | null | undefined>>;
-}
 
 /**
  * Ark Python 加载器 Ark Python loader
  * 实现基于 HarmonyOS 的 Python 代码加载和执行器 Implements Python code loader and executor based on HarmonyOS
  */
+/**
+ * PyContext动态字段类型
+ */
+type PyContextDynamic = Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined | void | Promise<string | number | boolean | object | null | undefined>)>;
+
+/**
+ * Python解释器执行函数选项接口
+ */
+interface PyExecuteFunctionOptions {
+  context: PyContextDynamic;
+  functionName: string;
+  params: string | number | boolean | object | null | undefined;
+  timeout: number;
+}
+
+/**
+ * Python解释器接口
+ */
+interface PythonInterpreter {
+  createContext?: (script: string, context: PyContextDynamic) =>
+    Promise<PyContextDynamic>;
+  executeFunction?: (options: PyExecuteFunctionOptions) => Promise<string | number | boolean | object | null | undefined>;
+}
+
+/**
+ * Python HTTP API接口
+ */
+interface PyHttpApi {
+  get: (url: string, options?: Record<string, string | number | boolean | object | null | undefined>) => Promise<object>;
+  post: (url: string, data?: string | number | boolean | object | null | undefined, options?: Record<string, string | number | boolean | object | null | undefined>) => Promise<object>;
+}
+
+/**
+ * Python Base64 API接口
+ */
+interface PyBase64Api {
+  encode: (str: string) => string;
+  decode: (str: string) => string;
+}
+
+/**
+ * Python Crypto API接口
+ */
+interface PyCryptoApi {
+  md5: (str: string) => string;
+  base64: PyBase64Api;
+}
+
+/**
+ * Python 字符串工具 API接口
+ */
+interface PyStringUtilApi {
+  contains: (text: string, substring: string) => boolean;
+  startsWith: (text: string, prefix: string) => boolean;
+  endsWith: (text: string, suffix: string) => boolean;
+  split: (text: string, separator: string) => string[];
+  replace: (text: string, search: string, replacement: string) => string;
+}
+
+/**
+ * Python Logger API接口
+ */
+interface PyLoggerApi {
+  info: (message: string) => void;
+  warning: (message: string) => void;
+  error: (message: string) => void;
+}
+
+/**
+ * Python JSON工具接口
+ */
+interface PyJsonApi {
+  loads: (text: string) => string | number | boolean | object | null | undefined;
+  dumps: (obj: string | number | boolean | object | null | undefined, indent?: number) => string;
+}
+
+/**
+ * Python Util API接口
+ */
+interface PyUtilApi {
+  json: PyJsonApi;
+  sleep: (seconds: number) => Promise<void>;
+}
+
+/**
+ * Python函数信息接口
+ */
+interface PyFunctionInfo {
+  name: string;
+}
+
 export class ArkPyLoader extends BaseLoader {
   public readonly TAG: string = 'ArkPyLoader';
-  private pyContext: PyContext = {};
+  private pyContext: PyContextDynamic = {};
   private scriptContent: string = '';
   private pythonCode: string = '';
   private taskPoolManager: TaskPoolManager;
@@ -48,24 +134,6 @@ export class ArkPyLoader extends BaseLoader {
     this.timeoutManager = TimeoutManager.getInstance();
     this.pyModuleName = `site_${site.key || 'default'}`;
   }
-
-/**
- * Python解释器接口
- */
-interface PythonInterpreter {
-  createContext?: (script: string, context: Record<string, string | number | boolean | object | null | undefined>) => 
-    Promise<Record<string, string | number | boolean | object | null | undefined | 
-      ((...args: (string | number | boolean | object | null | undefined)[]) => 
-        string | number | boolean | object | null | undefined
-      )
-    >>;
-  executeFunction?: (options: {
-    context: Record<string, string | number | boolean | object | null | undefined>;
-    functionName: string;
-    params: string | number | boolean | object | null | undefined;
-    timeout: number;
-  }) => Promise<string | number | boolean | object | null | undefined>;
-}
 
   /**
    * 获取 Python 解释器 Get Python interpreter
@@ -253,53 +321,69 @@ interface PythonInterpreter {
    */
   private createPyEnvironment(): void {
     // 创建 Python 模块环境 Create Python module environment
-    this.pyContext = {
-      // 基本的 Python 内置函数映射 Basic Python built-in function mapping
-      print: (args: (string | number | boolean | object | null | undefined)[]) => {
-        Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
-      },
-      len: (obj: string | number | boolean | object | null | undefined) => {
-        return Array.isArray(obj) ? obj.length : ObjectUtils.getKeys(obj || {}).length;
-      },
-      str: (obj: string | number | boolean | object | null | undefined) => String(obj),
-      int: (obj: string | number | boolean | object | null | undefined) => parseInt(obj as string, 10),
-      float: (obj: string | number | boolean | object | null | undefined) => parseFloat(obj as string),
-      bool: (obj: string | number | boolean | object | null | undefined) => Boolean(obj),
-      list: (obj: string | number | boolean | object | null | undefined) => {
-        if (Array.isArray(obj)) {
-          const result = [];
-          for (let i = 0; i < obj.length; i++) {
-            result.push(obj[i]);
+    // 逐个赋值避免 ArkTS 的未类型化对象字面量错误
+    this.pyContext = {};
+
+    this.pyContext['print'] = (args: (string | number | boolean | object | null | undefined)[]): void => {
+      Logger.info(`${this.TAG}[${this.site.name}]`, `${args.map(String).join(' ')} | ${args.map(String).join(' ')}`);
+    };
+
+    this.pyContext['len'] = (obj: string | number | boolean | object | null | undefined): number => {
+      return Array.isArray(obj) ? (obj as object[]).length : ObjectUtils.getKeys(obj || {}).length;
+    };
+
+    this.pyContext['str'] = (obj: string | number | boolean | object | null | undefined): string => String(obj);
+
+    this.pyContext['int'] = (obj: string | number | boolean | object | null | undefined): number =>
+      parseInt(obj as string, 10);
+
+    this.pyContext['float'] = (obj: string | number | boolean | object | null | undefined): number =>
+      parseFloat(obj as string);
+
+    this.pyContext['bool'] = (obj: string | number | boolean | object | null | undefined): boolean => Boolean(obj);
+
+    this.pyContext['list'] = (obj: string | number | boolean | object | null | undefined): object[] => {
+      if (Array.isArray(obj)) {
+        const result: object[] = [];
+        for (let i = 0; i < (obj as object[]).length; i++) {
+          const item = (obj as (string | number | boolean | object | null | undefined)[])[i];
+          if (item !== undefined) {
+            result.push(item as object);
           }
-          return result;
-        } else {
-          return [obj];
-        }
-      },
-      dict: (obj: string | number | boolean | object | null | undefined) => {
-        if (typeof obj === 'object' && obj !== null) {
-          const result = {};
-          const keys = ObjectUtils.getKeys(obj);
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            result[key] = (obj as Record<string, any>)[key];
-          }
-          return result;
-        } else {
-          return {};
-        }
-      },
-      range: (start: number, stop?: number, step: number = 1) => {
-        const result = [];
-        if (stop === undefined) {
-          stop = start;
-          start = 0;
-        }
-        for (let i = start; i < stop; i += step) {
-          result.push(i);
         }
         return result;
+      } else {
+        return [obj as object];
       }
+    };
+
+    this.pyContext['dict'] = (obj: string | number | boolean | object | null | undefined): Record<string, object> => {
+      if (typeof obj === 'object' && obj !== null) {
+        const result: Record<string, object> = {};
+        const keys = ObjectUtils.getKeys(obj);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = ObjectUtils.getProperty(obj, key);
+          result[key] = value as object;
+        }
+        return result;
+      } else {
+        return {};
+      }
+    };
+
+    this.pyContext['range'] = (start: number, stop?: number, step: number = 1): number[] => {
+      const result: number[] = [];
+      let s = stop;
+      let begin = start;
+      if (s === undefined) {
+        s = begin;
+        begin = 0;
+      }
+      for (let i = begin; i < s; i += step) {
+        result.push(i);
+      }
+      return result;
     };
 
     Logger.info(this.TAG, '已创建Python执行环境 | Created Python execution environment');
@@ -311,22 +395,43 @@ interface PythonInterpreter {
    */
   private injectApis(): void {
     // 注入 HTTP 请求 API Inject HTTP request API
-    this.pyContext.http = {
-      get: async (url: string, options?: { headers?: Record<string, string>, timeout?: number }) => {
+    const httpApi: PyHttpApi = {
+      get: async (url: string, options?: Record<string, string | number | boolean | object | null | undefined>): Promise<object> => {
         // 验证 URL 安全性 Validate URL security
         this.validateUrl(url);
         return this.httpService.get(url, options || {});
       },
-      post: async (url: string, data?: string | number | boolean | object | null | undefined, options?: { headers?: Record<string, string>, timeout?: number }) => {
+      post: async (url: string, data?: string | number | boolean | object | null | undefined, options?: Record<string, string | number | boolean | object | null | undefined>): Promise<object> => {
         // 验证 URL 安全性 Validate URL security
         this.validateUrl(url);
         return this.httpService.post(url, data, options || {});
       }
     };
+    this.pyContext.http = httpApi;
 
     // 注入加密 API Inject crypto API
-    this.pyContext.crypto = {
-      md5: (str: string) => {
+    const base64Api: PyBase64Api = {
+      encode: (str: string): string => {
+        try {
+          return btoa(unescape(encodeURIComponent(str)));
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          Logger.error(this.TAG, `Base64编码错误: ${err.message} | Base64 encode error: ${err.message}`);
+          return '';
+        }
+      },
+      decode: (str: string): string => {
+        try {
+          return decodeURIComponent(escape(atob(str)));
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          Logger.error(this.TAG, `Base64解码错误: ${err.message} | Base64 decode error: ${err.message}`);
+          return '';
+        }
+      }
+    };
+    const cryptoApi: PyCryptoApi = {
+      md5: (str: string): string => {
         try {
           // 在 HarmonyOS 中，使用兼容的 MD5 实现 In HarmonyOS, use compatible MD5 implementation
           let hash = 0;
@@ -341,32 +446,14 @@ interface PythonInterpreter {
           return `md5_${str}`;
         }
       },
-      base64: {
-        encode: (str: string) => {
-          try {
-            return btoa(unescape(encodeURIComponent(str)));
-          } catch (error) {
-            const err = error instanceof Error ? error : new Error(String(error));
-            Logger.error(this.TAG, `Base64编码错误: ${err.message} | Base64 encode error: ${err.message}`);
-            return '';
-          }
-        },
-        decode: (str: string) => {
-          try {
-            return decodeURIComponent(escape(atob(str)));
-          } catch (error) {
-            const err = error instanceof Error ? error : new Error(String(error));
-            Logger.error(this.TAG, `Base64解码错误: ${err.message} | Base64 decode error: ${err.message}`);
-            return '';
-          }
-        }
-      }
+      base64: base64Api
     };
+    this.pyContext.crypto = cryptoApi;
 
     // 注入字符串处理工具（替换正则表达式） Inject string processing tools (replace regular expressions)
-    this.pyContext.stringUtil = {
+    const stringUtilApi: PyStringUtilApi = {
       // 使用简单的字符串方法兼容正则表达式 Use simple string methods compatible with regular expressions
-      contains: (text: string, substring: string) => {
+      contains: (text: string, substring: string): boolean => {
         return text.indexOf(substring) !== -1;
       },
       startsWith: (text: string, prefix: string): boolean => {
@@ -382,46 +469,52 @@ interface PythonInterpreter {
         return text.replace(search, replacement);
       }
     };
+    this.pyContext.stringUtil = stringUtilApi;
 
     // 注入日志 API Inject logger API
-    this.pyContext.logger = {
-      info: (message: string) => {
+    const loggerApi: PyLoggerApi = {
+      info: (message: string): void => {
         Logger.info(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       },
-      warning: (message: string) => {
+      warning: (message: string): void => {
         Logger.warn(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       },
-      error: (message: string) => {
+      error: (message: string): void => {
         Logger.error(`${this.TAG}[${this.site.name}]`, `${message} | ${message}`);
       }
     };
+    this.pyContext.logger = loggerApi;
 
     // 注入工具函数 Inject utility functions
-    this.pyContext.util = {
-      json: {
-        loads: (text: string) => {
-          try {
-            return JSON.parse(text);
-          } catch (error) {
-            const err = error instanceof Error ? error : new Error(String(error));
-            Logger.error(this.TAG, `JSON解析错误: ${err.message} | JSON loads error: ${err.message}`);
-            return null;
-          }
-        },
-        dumps: (obj: string | number | boolean | object | null | undefined, indent?: number) => {
-          try {
-            return JSON.stringify(obj, null, indent);
-          } catch (error) {
-            const err = error instanceof Error ? error : new Error(String(error));
-            Logger.error(this.TAG, `JSON序列化错误: ${err.message} | JSON dumps error: ${err.message}`);
-            return '{}';
-          }
+    const jsonApi: PyJsonApi = {
+      loads: (text: string): string | number | boolean | object | null | undefined => {
+        try {
+          return JSON.parse(text) as string | number | boolean | object | null | undefined;
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          Logger.error(this.TAG, `JSON解析错误: ${err.message} | JSON loads error: ${err.message}`);
+          return null;
         }
       },
-      sleep: (seconds: number) => {
-        return new Promise(resolve => setTimeout(resolve, Math.min(seconds * 1000, 10000))); // 限制最大延迟 10 秒
+      dumps: (obj: string | number | boolean | object | null | undefined, indent?: number): string => {
+        try {
+          return JSON.stringify(obj, null, indent);
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          Logger.error(this.TAG, `JSON序列化错误: ${err.message} | JSON dumps error: ${err.message}`);
+          return '{}';
+        }
       }
     };
+    const utilApi: PyUtilApi = {
+      json: jsonApi,
+      sleep: (seconds: number): Promise<void> => {
+        return new Promise<void>((resolve: () => void) => {
+          setTimeout(resolve, Math.min(seconds * 1000, 10000)); // 限制最大延迟 10 秒
+        });
+      }
+    };
+    this.pyContext.util = utilApi;
 
     Logger.info(this.TAG, '已将增强API注入Python上下文 | Injected enhanced APIs into Python context');
   }
@@ -450,7 +543,7 @@ interface PythonInterpreter {
       if (error instanceof TypeError) {
         // 可能是相对路径，忽略 URL 解析错误 May be relative path, ignore URL parsing error
       } else {
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
     }
   }
@@ -469,7 +562,7 @@ interface PythonInterpreter {
       const processedScript = this.preprocessPythonCode(this.scriptContent);
       
       // 创建安全的执行上下文 Create safe execution context
-      const execContext: Record<string, string | number | boolean | object | null | undefined> = {};
+      const execContext: PyContextDynamic = {};
       
       // 初始化 Python 模块系统 Initialize Python module system
       execContext.__name__ = this.pyModuleName;
@@ -501,11 +594,10 @@ interface PythonInterpreter {
    */
   private executeMethod(methodName: string, params: Array<string | number | boolean | object | null | undefined>): string | number | boolean | object | null | undefined {
     // 检查方法是否存在 Check if method exists
-    const safeContext = this.pyContext as Record<string, unknown>;
-    if (typeof safeContext[methodName] !== 'function') {
+    if (typeof this.pyContext[methodName] !== 'function') {
       // 尝试在 Python 模块中查找 Try to find in Python module
       const pyMethodName = `parse_${methodName}`;
-      if (typeof safeContext[pyMethodName] !== 'function') {
+      if (typeof this.pyContext[pyMethodName] !== 'function') {
         throw new Error(`Method ${methodName} or ${pyMethodName} not found in Python script`);
       }
       methodName = pyMethodName;
@@ -522,18 +614,14 @@ interface PythonInterpreter {
       const safeParams = this.deepClone(params);
 
       // 执行方法 Execute method
-      const safeContext = this.pyContext as Record<string, unknown>;
-      const method = safeContext[methodName] as (...args: any[]) => any;
-      const result = method(safeParams);
-
-      // 序列化结果以检查循环引用 Serialize result to check for circular references
-      const serializedResult = JSON.stringify(result);
+      const method = this.pyContext[methodName] as ((...args: object[]) => object);
+      const result = method(safeParams as object[]);
 
       // 深度克隆结果返回 Deep clone result for return
       return this.deepClone(result);
     } catch (error) {
       Logger.error(this.TAG, `执行Python方法${methodName}出错: ${error instanceof Error ? error.message : String(error)} | Error executing Python method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
   
@@ -547,9 +635,10 @@ interface PythonInterpreter {
     }
 
     try {
-      return JSON.parse(JSON.stringify(obj));
+      return JSON.parse(JSON.stringify(obj)) as T;
     } catch (error) {
-      Logger.error(this.TAG, `深度克隆错误: ${error} | Deep clone error: ${error}`);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(this.TAG, `深度克隆错误: ${errMsg} | Deep clone error: ${errMsg}`);
       return obj;
     }
   }
@@ -646,7 +735,7 @@ interface PythonInterpreter {
    * 创建 Python 执行上下文 Create Python execution context
    * @private
    */
-  private async createPythonContext(script: string, context: Record<string, string | number | boolean | object | null | undefined>): Promise<Record<string, string | number | boolean | object | null | undefined | ((...args: (string | number | boolean | object | null | undefined)[]) => string | number | boolean | object | null | undefined)>> {
+  private async createPythonContext(script: string, context: PyContextDynamic): Promise<PyContextDynamic> {
     // 实际实现应该使用 Python 解释器或翻译器
     // 这里假设使用 Python 解释器服务
     // 使用局部变量替代 globalThis
@@ -674,7 +763,7 @@ interface PythonInterpreter {
       functionName: functionName,
       params: params,
       timeout: 30000 // 30秒超时
-    });
+    } as PyExecuteFunctionOptions);
   }
   
   private extractPythonFunctions(): void {
@@ -688,7 +777,7 @@ interface PythonInterpreter {
       Logger.info(this.TAG, `找到Python函数: ${functionName} | Found Python function: ${functionName}`);
       
       // 创建函数代理 Create function proxy
-      this.pyContext[functionName] = async (params: string | number | boolean | object | null | undefined | Array<string | number | boolean | object | null | undefined>) => {
+      this.pyContext[functionName] = async (params: string | number | boolean | object | null | undefined | Array<string | number | boolean | object | null | undefined>): Promise<string | number | boolean | object | null | undefined> => {
         // 执行真实的 Python 函数 Execute real Python function
         return await this.executePythonFunction(functionName, params);
       };
@@ -699,20 +788,19 @@ interface PythonInterpreter {
    * 模拟 Python 函数解析 Mock Python function parsing
    * @private
    */
-  private mockPythonFunctions(): Array<{ name: string }> {
+  private mockPythonFunctions(): Array<PyFunctionInfo> {
     // 模拟常见的爬虫方法
-    return [
-      { name: 'getSiteInfo' },
-      { name: 'getRecommendList' },
-      { name: 'getHotList' },
-      { name: 'getLatestList' },
-      { name: 'getCategories' },
-      { name: 'getCategoryList' },
-      { name: 'search' },
-      { name: 'getDetail' },
-      { name: 'getPlayUrl' },
-      { name: 'getSearchSuggestions' }
-    ];
+    const fn1: PyFunctionInfo = { name: 'getSiteInfo' };
+    const fn2: PyFunctionInfo = { name: 'getRecommendList' };
+    const fn3: PyFunctionInfo = { name: 'getHotList' };
+    const fn4: PyFunctionInfo = { name: 'getLatestList' };
+    const fn5: PyFunctionInfo = { name: 'getCategories' };
+    const fn6: PyFunctionInfo = { name: 'getCategoryList' };
+    const fn7: PyFunctionInfo = { name: 'search' };
+    const fn8: PyFunctionInfo = { name: 'getDetail' };
+    const fn9: PyFunctionInfo = { name: 'getPlayUrl' };
+    const fn10: PyFunctionInfo = { name: 'getSearchSuggestions' };
+    return [fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, fn9, fn10];
   }
 
   /**
@@ -798,19 +886,24 @@ interface PythonInterpreter {
    * @returns SiteSpider 爬虫实例 Spider instance
    */
   protected createSpiderImpl(): SiteSpider {
+    const self = this;
     const spider: SiteSpider = {
-      getSiteInfo: async () => this.callMethod('getSiteInfo', []),
-      getRecommendList: async () => this.callMethod('getRecommendList', []),
-      getHotList: async () => this.callMethod('getHotList', []),
-      getLatestList: async () => this.callMethod('getLatestList', []),
-      getCategories: async () => this.callMethod('getCategories', []),
-      getCategoryList: async (category: string, page: number) => this.callMethod('getCategoryList', [category, page]),
-      search: async (keyword: string, page?: number) => this.callMethod('search', [keyword, page]),
-      getDetail: async (id: string) => this.callMethod('getDetail', [id]),
-      getPlayUrl: async (id: string, episodeId?: string) => this.callMethod('getPlayUrl', [id, episodeId]),
-      getSearchSuggestions: async (keyword: string) => {
+      getSiteInfo: async (): Promise<SiteInfo> => self.callMethod('getSiteInfo', []) as Promise<SiteInfo>,
+      getRecommendList: async (): Promise<VideoItem[]> => self.callMethod('getRecommendList', []) as Promise<VideoItem[]>,
+      getHotList: async (): Promise<VideoItem[]> => self.callMethod('getHotList', []) as Promise<VideoItem[]>,
+      getLatestList: async (): Promise<VideoItem[]> => self.callMethod('getLatestList', []) as Promise<VideoItem[]>,
+      getCategories: async (): Promise<string[]> => self.callMethod('getCategories', []) as Promise<string[]>,
+      getCategoryList: async (category: string, page: number): Promise<VideoItem[]> =>
+        self.callMethod('getCategoryList', [category, page]) as Promise<VideoItem[]>,
+      search: async (keyword: string, page?: number): Promise<VideoItem[]> =>
+        self.callMethod('search', [keyword, page]) as Promise<VideoItem[]>,
+      getDetail: async (id: string): Promise<VideoDetail> =>
+        self.callMethod('getDetail', [id]) as Promise<VideoDetail>,
+      getPlayUrl: async (id: string, episodeId?: string): Promise<string> =>
+        self.callMethod('getPlayUrl', [id, episodeId]) as Promise<string>,
+      getSearchSuggestions: async (keyword: string): Promise<string[]> => {
         try {
-          return await this.callMethod('getSearchSuggestions', [keyword]);
+          return await self.callMethod('getSearchSuggestions', [keyword]) as string[];
         } catch (error) {
           return [];
         }

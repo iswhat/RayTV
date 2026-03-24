@@ -1,13 +1,14 @@
 // CrawlerService.ets - 爬虫服务 Crawler service
 // 管理多站点数据获取、解析和统一接口 Manage multi-site data acquisition, parsing and unified interfaces
 
-import { Site, SiteInfo } from '../../data/bean/Site';
-import { ConfigService } from '../config/ConfigService';
-import { HttpService } from '../HttpService';
-import { StorageUtil } from '../../common/util/StorageUtil';
+import { Site, SiteInfo, SiteType, LoaderType, SiteSearchConfig, SiteFilterConfig, SitePerformanceConfig, SiteStats, SiteLifecycle } from '../../data/bean/Site';
+import ConfigService from '../config/ConfigService';
+import { HttpService, HttpResponse } from '../HttpService';
+import StorageUtil from '../../common/util/StorageUtil';
 import { ConfigParser } from '../config/ConfigParser';
 import Logger from '../../common/util/Logger';
 import { Inject } from '../../common/di/Container';
+import { BaseLoader } from './loader/BaseLoader';
 
 /**
  * 视频链接定义 Video link definition
@@ -47,8 +48,110 @@ export interface VideoDetail {
   director?: string;
   actors?: string[];
   updateTime?: string;
-  playSources?: Array<{ name: string; url: string }>;
-  episodes?: Array<{ id: string; name: string }>;
+  playSources?: PlaySourceInfo[];
+  episodes?: EpisodeInfo[];
+}
+
+/**
+ * 播放源信息接口
+ */
+export interface PlaySourceInfo {
+  name: string;
+  url: string;
+}
+
+/**
+ * 剧集信息接口
+ */
+export interface EpisodeInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * 性能统计接口
+ */
+export interface PerformanceStat {
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  totalTime: number;
+  lastCallTime?: number;
+}
+
+/**
+ * 性能统计结果接口
+ */
+export interface PerformanceStatsResult {
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  totalTime: number;
+  averageTime: number;
+  successRate: number;
+  lastCallTime?: number;
+}
+
+/**
+ * 站点爬虫实现类
+ */
+class SiteSpiderImpl implements SiteSpider {
+  private config: SiteInfo;
+  
+  constructor(config: SiteInfo) {
+    this.config = config;
+  }
+  
+  async getSiteInfo(): Promise<SiteInfo> {
+    return this.config;
+  }
+  
+  async getRecommendList(): Promise<VideoItem[]> {
+    return [];
+  }
+  
+  async getHotList(): Promise<VideoItem[]> {
+    return [];
+  }
+  
+  async getLatestList(): Promise<VideoItem[]> {
+    return [];
+  }
+  
+  async getCategories(): Promise<string[]> {
+    return [];
+  }
+  
+  async getCategoryList(category: string, page: number): Promise<VideoItem[]> {
+    return [];
+  }
+  
+  async search(keyword: string, page?: number): Promise<VideoItem[]> {
+    return [];
+  }
+  
+  async getDetail(id: string): Promise<VideoDetail> {
+    const detail: VideoDetail = {
+      id,
+      title: '',
+      description: '',
+      category: '',
+      tags: [],
+      rating: 0,
+      year: '',
+      region: '',
+      director: '',
+      actors: [],
+      updateTime: '',
+      playSources: [],
+      episodes: []
+    };
+    return detail;
+  }
+  
+  async getPlayUrl(id: string, episodeId?: string): Promise<string> {
+    return '';
+  }
 }
 
 /**
@@ -106,29 +209,21 @@ export class CrawlerService {
   private readonly TAG: string = 'CrawlerService';
   
   @Inject('ConfigService')
-  private configService: ConfigService;
+  private configService: ConfigService = ConfigService.getInstance();
   
   @Inject('HttpService')
-  private httpService: HttpService;
-  
-  @Inject('StorageUtil')
-  private storageUtil: StorageUtil;
-  
-  private configParser: ConfigParser;
+  private httpService: HttpService = HttpService.getInstance();
+
+  private configParser: ConfigParser = ConfigParser.getInstance();
   private scriptLoaders: Map<string, ScriptLoader> = new Map();
-  private performanceStats: Map<string, {
-    totalCalls: number;
-    successfulCalls: number;
-    failedCalls: number;
-    totalTime: number;
-    lastCallTime?: number;
-  }> = new Map();
+  
+  private performanceStats: Map<string, PerformanceStat> = new Map();
   
   /**
    * 构造函数 Constructor
    */
   private constructor() {
-    this.configParser = new ConfigParser();
+    this.configParser = ConfigParser.getInstance();
   }
   
   /**
@@ -168,9 +263,10 @@ export class CrawlerService {
    */
   private async loadSiteConfigs(): Promise<void> {
     try {
-      const configs = await this.storageUtil.getSitesConfig();
+      const configsJson: string = await StorageUtil.getString('sites_config', '');
+      const configs: SiteInfo[] = configsJson ? JSON.parse(configsJson) as SiteInfo[] : [];
       if (configs && Array.isArray(configs)) {
-        for (const config of configs) {
+        for (const config of configs as SiteInfo[]) {
           if (this.validateSiteConfig(config)) {
             this.siteConfigs.set(config.key, config);
           } else {
@@ -205,13 +301,16 @@ export class CrawlerService {
         }
         
         // 保存默认站点配置 Save default site configurations
-        await this.storageUtil.saveSitesConfig(Array.from(this.siteConfigs.values()));
+        await StorageUtil.putString('sites_config', JSON.stringify(Array.from(this.siteConfigs.values())));
       } else {
         // 为已有的站点配置创建爬虫实例
         // Create crawler instances for existing site configurations
-        for (const [key, config] of this.siteConfigs.entries()) {
+        const entries = this.siteConfigs.entries();
+        for (const entry of entries) {
+          const key: string = entry[0];
+          const config: SiteInfo = entry[1];
           if (!this.siteSpiders.has(key)) {
-            const spider = await this.createSpider(key, config);
+            const spider: SiteSpider | null = await this.createSpider(key, config);
             if (spider) {
               this.siteSpiders.set(key, spider);
             }
@@ -229,7 +328,7 @@ export class CrawlerService {
   private validateSiteConfig(config: Site): boolean {
     try {
       // 验证必填字段 Validate required fields
-      if (!config.key || !config.name || !config.type || !config.url) {
+      if (!config.key || !config.name || !config.type || !config.api) {
         Logger.error(this.TAG, '站点配置缺少必填字段 | Site config missing required fields');
         return false;
       }
@@ -242,8 +341,8 @@ export class CrawlerService {
       }
       
       // 验证URL格式 Validate URL format
-      if (!config.url.startsWith('http://') && !config.url.startsWith('https://')) {
-        Logger.error(this.TAG, `无效的URL格式: ${config.url} | Invalid URL format: ${config.url}`);
+      if (!config.api.startsWith('http://') && !config.api.startsWith('https://')) {
+        Logger.error(this.TAG, `无效的URL格式: ${config.api} | Invalid URL format: ${config.api}`);
         return false;
       }
       
@@ -263,15 +362,16 @@ export class CrawlerService {
       // Create corresponding crawler instance based on site type and configuration
       Logger.info(this.TAG, `正在为站点创建爬虫: ${key} | Creating spider for site: ${key}`);
       
-      // 使用LoaderFactory创建加载器 Use LoaderFactory to create loader
+      // 使用 LoaderFactory 创建加载器 Use LoaderFactory to create loader
       const loaderFactory = await import('./LoaderFactory');
       const factory = loaderFactory.LoaderFactory.getInstance();
-      const loader = factory.createLoader(config);
+      const loader: BaseLoader = factory.createLoader(config);
       
       // 使用加载器创建爬虫实例 Use loader to create crawler instance
       return await loader.createSpider();
     } catch (error) {
-      Logger.error(this.TAG, `为站点${key}创建爬虫失败: | Failed to create spider for site ${key}:`, error instanceof Error ? error : new Error(String(error)));
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      Logger.error(this.TAG, `为站点${key}创建爬虫失败： | Failed to create spider for site ${key}:`, err);
       return null;
     }
   }
@@ -280,103 +380,64 @@ export class CrawlerService {
    * 创建基础爬虫实例 Create base crawler instance
    */
   private createBaseSpider(config: SiteInfo): SiteSpider {
-    // 实现基础的爬虫骨架，支持HTTP请求和简单的解析
+    // 实现基础的爬虫骨架，支持 HTTP 请求和简单的解析
     // Implement basic crawler skeleton, support HTTP requests and simple parsing
-    return {
-      getSiteInfo: async () => config,
-      
-      getRecommendList: async () => {
-        // 这里应该从站点API获取推荐列表
-        // Here should get recommended list from site API
-        // 暂时返回空数组，后续实现实际的API调用
-        // Temporarily return empty array, implement actual API call later
-        return [];
-      },
-      
-      getHotList: async () => {
-        // 这里应该从站点API获取热门列表
-        // Here should get hot list from site API
-        return [];
-      },
-      
-      getLatestList: async () => {
-        // 这里应该从站点API获取最新更新列表
-        // Here should get latest updates list from site API
-        return [];
-      },
-      
-      getCategories: async () => {
-        // 这里应该从站点API获取分类列表
-        // Here should get categories list from site API
-        return [];
-      },
-      
-      getCategoryList: async (category: string, page: number) => {
-        // 这里应该从站点API获取分类内容
-        // Here should get category content from site API
-        return [];
-      },
-      
-      search: async (keyword: string, page?: number) => {
-        // 这里应该从站点API搜索内容
-        // Here should search content from site API
-        return [];
-      },
-      
-      getDetail: async (id: string) => {
-        // 这里应该从站点API获取详情
-        // Here should get details from site API
-        return {
-          id,
-          title: '未知标题',
-          cover: '',
-          description: '暂无描述',
-          playSources: [],
-          episodes: []
-        };
-      },
-      
-      getPlayUrl: async (id: string, episodeId?: string) => {
-        // 这里应该从站点API获取播放链接
-        // Here should get play URL from site API
-        return '';
-      },
-      
-      getSearchSuggestions: async (keyword: string) => {
-        // 这里应该从站点API获取搜索建议
-        // Here should get search suggestions from site API
-        return [];
-      }
-    };
+    return new SiteSpiderImpl(config);
   }
   
   /**
    * 获取默认站点配置 Get default site configurations
    */
   private async getDefaultSites(): Promise<SiteInfo[]> {
-    // 从真实API获取默认站点配置 | Get default site configurations from real API
     try {
-      const httpService = HttpService.getInstance();
-      const response = await httpService.request<SiteInfo[]>('https://api.raytv.com/config/sites/default', {
+      const httpService: HttpService = HttpService.getInstance();
+      const response: HttpResponse<SiteInfo[]> = await httpService.request<SiteInfo[]>('https://api.raytv.com/config/sites/default', {
         method: 'GET',
         timeout: 10000
       });
       
       if (response.status >= 200 && response.status < 300 && Array.isArray(response.data)) {
-        return response.data.map((site: SiteInfo) => ({
-          key: site.key,
-          name: site.name,
-          type: site.type,
-          url: site.url,
-          enabled: site.enabled !== false,
-          updateTime: site.updateTime || new Date().toISOString(),
-          version: site.version || '1.0.0',
-          userAgent: site.userAgent || '',
-          requestHeaders: site.requestHeaders || {},
-          searchRule: site.searchRule || {},
-          detailRule: site.detailRule || {},
-          playRule: site.playRule || {}
-        }));
+        const result: SiteInfo[] = [];
+        const dataSites: SiteInfo[] = response.data as SiteInfo[];
+        for (const site of dataSites) {
+          const siteInfo: SiteInfo = {
+            key: site.key,
+            name: site.name,
+            type: site.type,
+            loaderType: site.loaderType,
+            api: site.api,
+            logo: site.logo,
+            description: site.description,
+            siteAuth: site.siteAuth,
+            headers: site.headers,
+            config: site.config,
+            configItems: site.configItems,
+            searchConfig: site.searchConfig,
+            filterConfig: site.filterConfig,
+            performanceConfig: site.performanceConfig,
+            version: site.version,
+            stats: site.stats,
+            lifecycle: site.lifecycle,
+            enabled: site.enabled !== false,
+            order: site.order || 0,
+            group: site.group,
+            tags: site.tags,
+            customCode: site.customCode,
+            sandboxEnabled: site.sandboxEnabled,
+            allowThirdParty: site.allowThirdParty,
+            createdAt: site.createdAt || Date.now(),
+            updatedAt: site.updatedAt || Date.now(),
+            lastUsedAt: site.lastUsedAt,
+            userAgent: site.userAgent || '',
+            referer: site.referer,
+            proxy: site.proxy,
+            encoding: site.encoding,
+            charset: site.charset,
+            certificate: site.certificate
+          };
+          result.push(siteInfo);
+        }
+        return result;
       }
       
       // 如果API调用失败，返回空数组 | Return empty array if API call fails
@@ -395,11 +456,14 @@ export class CrawlerService {
     await this.initialize();
     const sites: SiteInfo[] = [];
     
-    for (const [key, config] of this.siteConfigs.entries()) {
+    const entries = this.siteConfigs.entries();
+    for (const entry of entries) {
+      const key: string = entry[0];
+      const config: SiteInfo = entry[1];
       sites.push(config);
     }
     
-    return sites.sort((a, b) => {
+    return sites.sort((a: SiteInfo, b: SiteInfo): number => {
       // 按启用状态和名称排序 Sort by enabled status and name
       if (a.enabled !== b.enabled) {
         return a.enabled ? -1 : 1;
@@ -415,13 +479,16 @@ export class CrawlerService {
     await this.initialize();
     const sites: SiteInfo[] = [];
     
-    for (const [key, config] of this.siteConfigs.entries()) {
+    const entries = this.siteConfigs.entries();
+    for (const entry of entries) {
+      const key: string = entry[0];
+      const config: SiteInfo = entry[1];
       if (config.enabled) {
         sites.push(config);
       }
     }
     
-    return sites.sort((a, b) => a.name.localeCompare(b.name));
+    return sites.sort((a: SiteInfo, b: SiteInfo): number => a.name.localeCompare(b.name));
   }
   
   /**
@@ -430,14 +497,14 @@ export class CrawlerService {
   public async setSiteStatus(siteKey: string, enabled: boolean): Promise<void> {
     await this.initialize();
     
-    const config = this.siteConfigs.get(siteKey);
+    const config: SiteInfo | undefined = this.siteConfigs.get(siteKey);
     if (config) {
       config.enabled = enabled;
       this.siteConfigs.set(siteKey, config);
       
       // 保存更新后的配置 Save updated configuration
       const allSites = await this.getAllSites();
-      await this.storageUtil.saveSitesConfig(allSites);
+      await StorageUtil.putString('sites_config', JSON.stringify(allSites));
     }
   }
   
@@ -448,38 +515,41 @@ export class CrawlerService {
     await this.initialize();
     
     try {
-      // 使用ConfigParser解析站点配置 Use ConfigParser to parse site configuration
-      const siteConfig = this.configParser.parseSiteConfig(configStr);
-      
+      // 使用 ConfigParser 解析站点配置 Use ConfigParser to parse site configuration
+      const sites: Site[] = this.configParser.parseSites(configStr);
+      const siteConfig: Site | undefined = sites.length > 0 ? sites[0] : undefined;
+
       if (siteConfig && siteConfig.key) {
         // 验证站点配置 Validate site configuration
         if (!this.validateSiteConfig(siteConfig)) {
           throw new Error('Invalid site configuration');
         }
-        
+
         // 检查是否已存在同名站点 Check if site with same name already exists
         if (this.siteConfigs.has(siteConfig.key)) {
           // 更新现有站点 Update existing site
-          const existingConfig = this.siteConfigs.get(siteConfig.key);
-          siteConfig.enabled = existingConfig.enabled;
+          const existingConfig: Site | undefined = this.siteConfigs.get(siteConfig.key);
+          if (existingConfig) {
+            siteConfig.enabled = existingConfig.enabled;
+          }
         }
-        
+
         // 保存站点配置 Save site configuration
         this.siteConfigs.set(siteConfig.key, siteConfig);
-        
+
         // 创建爬虫实例 Create crawler instance
         const spider = await this.createSpider(siteConfig.key, siteConfig);
         if (spider) {
           this.siteSpiders.set(siteConfig.key, spider);
         }
-        
+
         // 保存到存储 Save to storage
         const allSites = await this.getAllSites();
-        await this.storageUtil.saveSitesConfig(allSites);
-        
+        await StorageUtil.putString('sites_config', JSON.stringify(allSites));
+
         return siteConfig;
       }
-      
+
       return null;
     } catch (error) {
       Logger.error(this.TAG, '导入站点配置失败: | Failed to import site config:', error instanceof Error ? error : new Error(String(error)));
@@ -500,7 +570,7 @@ export class CrawlerService {
       
       // 更新存储 Update storage
       const allSites = await this.getAllSites();
-      await this.storageUtil.saveSitesConfig(allSites);
+      await StorageUtil.putString('sites_config', JSON.stringify(allSites));
     }
   }
   
@@ -527,11 +597,12 @@ export class CrawlerService {
     let result: T = this.getDefaultEmptyData<T>(methodName);
     
     try {
-      result = await this.callSpiderMethod<T>(spider, methodName, args, options);
+      result = await this.callSpiderMethod<T>(spider, methodName as keyof SiteSpider, args, options);
       this.updatePerformanceStats(siteKey, true, Date.now() - startTime);
     } catch (error) {
       this.updatePerformanceStats(siteKey, false, Date.now() - startTime);
-      throw error;
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
     
     return result;
@@ -614,22 +685,60 @@ export class CrawlerService {
       case 'search':
       case 'getSearchSuggestions':
       case 'getCategories':
-        return ([] as T);
+        return [] as T;
       case 'getDetail':
-        return ({ 
+        const detail: VideoDetail = {
           id: '',
           title: '未知标题',
           cover: '',
           description: '暂无描述',
           playSources: [],
           episodes: []
-        } as T);
+        };
+        return detail as T;
       case 'getPlayUrl':
-        return ('') as T;
+        return '' as T;
       case 'getSiteInfo':
-        return ({}) as T;
+        const searchConfig: SiteSearchConfig = {
+          enabled: true
+        };
+        const filterConfig: SiteFilterConfig = {
+          enabled: false
+        };
+        const performanceConfig: SitePerformanceConfig = {
+          timeout: 10000,
+          retryCount: 3
+        };
+        const stats: SiteStats = {
+          queryCount: 0,
+          errorCount: 0,
+          avgResponseTime: 0
+        };
+        const lifecycle: SiteLifecycle = {
+          initialized: false,
+          loading: false,
+          error: false
+        };
+        const siteInfo: Site = {
+          key: '',
+          name: '',
+          type: SiteType.VOD,
+          loaderType: LoaderType.JS,
+          api: '',
+          searchConfig,
+          filterConfig,
+          performanceConfig,
+          stats,
+          lifecycle,
+          enabled: false,
+          order: 0,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        return siteInfo as T;
       default:
-        return ({}) as T;
+        const empty: Record<string, string> = {};
+        return empty as T;
     }
   }
   
@@ -661,54 +770,40 @@ export class CrawlerService {
   /**
    * 获取站点性能统计 Get site performance statistics
    */
-  public getPerformanceStats(siteKey: string): {
-    totalCalls: number;
-    successfulCalls: number;
-    failedCalls: number;
-    totalTime: number;
-    averageTime: number;
-    successRate: number;
-    lastCallTime?: number;
-  } | null {
+  public getPerformanceStats(siteKey: string): PerformanceStatsResult | null {
     const stats = this.performanceStats.get(siteKey);
     if (!stats) {
       return null;
     }
     
-    return {
-      ...stats,
+    const result: PerformanceStatsResult = {
+      totalCalls: stats.totalCalls,
+      successfulCalls: stats.successfulCalls,
+      failedCalls: stats.failedCalls,
+      totalTime: stats.totalTime,
+      lastCallTime: stats.lastCallTime,
       averageTime: stats.totalCalls > 0 ? stats.totalTime / stats.totalCalls : 0,
       successRate: stats.totalCalls > 0 ? stats.successfulCalls / stats.totalCalls : 0
     };
+    return result;
   }
   
   /**
    * 获取所有站点性能统计 Get all sites performance statistics
    */
-  public getAllPerformanceStats(): Map<string, {
-    totalCalls: number;
-    successfulCalls: number;
-    failedCalls: number;
-    totalTime: number;
-    averageTime: number;
-    successRate: number;
-    lastCallTime?: number;
-  }> {
-    const result = new Map<string, {
-      totalCalls: number;
-      successfulCalls: number;
-      failedCalls: number;
-      totalTime: number;
-      averageTime: number;
-      successRate: number;
-      lastCallTime?: number;
-    }>();
-    this.performanceStats.forEach((stats, siteKey) => {
-      result.set(siteKey, {
-        ...stats,
+  public getAllPerformanceStats(): Map<string, PerformanceStatsResult> {
+    const result = new Map<string, PerformanceStatsResult>();
+    this.performanceStats.forEach((stats: PerformanceStat, siteKey: string) => {
+      const resultStats: PerformanceStatsResult = {
+        totalCalls: stats.totalCalls,
+        successfulCalls: stats.successfulCalls,
+        failedCalls: stats.failedCalls,
+        totalTime: stats.totalTime,
         averageTime: stats.totalCalls > 0 ? stats.totalTime / stats.totalCalls : 0,
-        successRate: stats.totalCalls > 0 ? stats.successfulCalls / stats.totalCalls : 0
-      });
+        successRate: stats.totalCalls > 0 ? stats.successfulCalls / stats.totalCalls : 0,
+        lastCallTime: stats.lastCallTime
+      };
+      result.set(siteKey, resultStats);
     });
     return result;
   }
@@ -733,8 +828,11 @@ export interface CrawlerOptions {
 }
 
 export class CrawlerError extends Error {
-  constructor(message: string, public code?: string) {
+  public code?: string;
+  
+  constructor(message: string, code?: string) {
     super(message);
     this.name = 'CrawlerError';
+    this.code = code;
   }
 }

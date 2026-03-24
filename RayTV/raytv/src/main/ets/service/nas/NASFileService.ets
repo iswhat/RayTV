@@ -1,4 +1,4 @@
-// NASFileService.ets - NAS文件访问服务
+﻿// NASFileService.ets - NAS文件访问服务
 // 负责文件和目录浏览、文件操作和权限验证
 
 import Logger from '../../common/util/Logger';
@@ -565,7 +565,7 @@ export class NASFileService {
       });
       
       if (response.status === 200 && response.data && response.data.files) {
-        const files = response.data.files.map((file: any) => ({
+        const files: NASFileItem[] = response.data.files.map((file: { id?: string; name: string; type: string; size?: number; modifiedTime?: string; mimeType?: string; duration?: number; resolution?: string }) => ({
           id: file.id || `smb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
           path: `${path}/${file.name}`,
@@ -669,7 +669,7 @@ export class NASFileService {
       });
       
       if (response.status === 200 && response.data && response.data.files) {
-        const results = response.data.files.map((file: any) => ({
+        const results: NASFileItem[] = response.data.files.map((file: { id?: string; name: string; path: string; type: string; size?: number; modifiedTime?: string; mimeType?: string; duration?: number; resolution?: string }) => ({
           id: file.id || `smb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
           path: file.path,
@@ -781,7 +781,7 @@ export class NASFileService {
       });
       
       if (response && response.statusCode === 200 && response.result) {
-        return response.result.files.map((file: any) => ({
+        return response.result.files.map((file: string) => ({
           id: file.id,
           name: file.name,
           path: file.path,
@@ -981,7 +981,7 @@ export class NASFileService {
   /**
    * 解析WebDAV响应
    */
-  private parseWebDAVResponse(responseData: any, basePath: string): NASFileItem[] {
+  private parseWebDAVResponse(responseData: string, basePath: string): NASFileItem[] {
     // 这里应该实现XML解析逻辑
     // 暂时返回基于响应数据的解析结果
     const files: NASFileItem[] = [];
@@ -991,7 +991,7 @@ export class NASFileService {
         ? responseData.multistatus.response 
         : [responseData.multistatus.response];
       
-      responses.forEach((response: any) => {
+      responses.forEach((response: string) => {
         if (response.href) {
           const href = response.href;
           const path = href.replace(`http://${basePath}`, '');
@@ -1174,7 +1174,7 @@ export class NASFileService {
       });
       
       if (response.status === 200 && response.data && response.data.files) {
-        const results = response.data.files.map((file: any) => ({
+        const results = response.data.files.map((file: string) => ({
           id: file.id || `http_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
           path: file.path,
@@ -1208,7 +1208,7 @@ export class NASFileService {
   /**
    * 解析HTTP目录响应
    */
-  private parseHTTPDirectoryResponse(responseData: any, basePath: string): NASFileItem[] {
+  private parseHTTPDirectoryResponse(responseData: string, basePath: string): NASFileItem[] {
     const files: NASFileItem[] = [];
     
     // 假设响应是HTML目录列表
@@ -1373,7 +1373,7 @@ export class NASFileService {
       });
       
       if (response && response.statusCode === 200 && response.result) {
-        const results = response.result.files.map((file: any) => ({
+        const results = response.result.files.map((file: string) => ({
           id: file.id,
           name: file.name,
           path: file.path,
@@ -1492,7 +1492,7 @@ export class NASFileService {
       });
       
       if (response && response.statusCode === 200 && response.result) {
-        const results = response.result.files.map((file: any) => ({
+        const results = response.result.files.map((file: string) => ({
           id: file.id,
           name: file.name,
           path: file.path,
@@ -1746,7 +1746,7 @@ export class NASFileService {
       });
       
       if (response && response.statusCode === 200 && response.result) {
-        const results = response.result.files.map((file: any) => ({
+        const results = response.result.files.map((file: string) => ({
           id: file.id,
           name: file.name,
           path: file.path,

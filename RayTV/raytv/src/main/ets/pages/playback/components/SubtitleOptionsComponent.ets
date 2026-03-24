@@ -1,4 +1,3 @@
-import { Component, FlexAlign, Text, Row, Column, Button } from '@ohos/arkui';
 import { SubtitleTrack } from '../../../service/media/SubtitleService';
 import Logger from '../../../common/util/Logger';
 

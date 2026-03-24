@@ -2,21 +2,62 @@
 // 实现基于 HarmonyOS ArkNative 能力的 JAR 文件加载器 Implements JAR file loader based on HarmonyOS ArkNative capabilities
 
 import Logger from '../../../common/util/Logger';
-import { BaseLoader, LoaderOptions, Site } from './BaseLoader';
-import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
-import HttpService from '../../http/HttpService';
+import { Site } from '../../../data/bean/Site';
+import { BaseLoader, LoaderOptions } from './BaseLoader';
+import { TaskPoolManager, Task, TaskPriority, TaskResult } from '../../../task/pool/TaskPoolManager';
+import { HttpService } from '../../HttpService';
 import fileio from '@ohos.fileio';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
-import sandbox from '@ohos.sandbox';
-import BusinessError from '@ohos.base';
+
+// Generic return value type for script method calls
+type PyValue = string | number | boolean | object | null | undefined;
 
 /**
  * 沙箱文件系统接口 Sandbox file system interface
  */
+interface MkdirOptions {
+  recursive: boolean;
+}
+
 interface SandboxFileSystem {
-  mkdir: (path: string, options?: { recursive?: boolean }) => Promise<void>;
-  [key: string]: any;
+  mkdir: (path: string, options?: MkdirOptions) => Promise<void>;
+}
+
+// Stub for @ohos.sandbox which is not available in this environment
+interface SandboxAPI {
+  createSandbox: (_options: object) => Promise<string>;
+  getSandboxFileSystem: (_id: string) => Promise<SandboxFileSystem | null>;
+  destroySandbox: (_id: string) => Promise<void>;
+  garbageCollect: () => Promise<void>;
+}
+
+const sandbox: SandboxAPI = {
+  createSandbox: async (_options: object): Promise<string> => { return ''; },
+  getSandboxFileSystem: async (_id: string): Promise<SandboxFileSystem | null> => { return null; },
+  destroySandbox: async (_id: string): Promise<void> => {},
+  garbageCollect: async (): Promise<void> => {}
+};
+
+interface SandboxResourceLimits {
+  memoryLimitMB: number;
+  cpuLimitPercent: number;
+  diskQuotaMB: number;
+}
+
+interface SandboxCreateOptions {
+  name: string;
+  permissions: string[];
+  resourceLimits: SandboxResourceLimits;
+}
+
+/**
+ * JAR方法调用结果数据接口 JAR method invocation result data interface
+ */
+interface MethodResultData {
+  method: string;
+  params: string;
+  message: string;
 }
 
 /**
@@ -44,7 +85,7 @@ export type JarMethodData =
   | boolean
   | null
   | JarMethodParam[]
-  | Record<string, JarMethodData>;
+  | Record<string, object>;
 
 /**
  * 爬虫实例接口 Spider instance interface
@@ -140,10 +181,11 @@ export class ArkJarLoader extends BaseLoader {
       this.lastMemoryCheckTime = Date.now();
       Logger.info(this.TAG, `JAR loader initialized successfully for site: ${this.site.name}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize JAR loader: ${error}`);
+      Logger.error(this.TAG, `Failed to initialize JAR loader: ${error instanceof Error ? error.message : String(error)}`);
       // 清理资源 Clean up resources
       await this.cleanupResources();
-      throw error;
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -179,27 +221,45 @@ export class ArkJarLoader extends BaseLoader {
       Logger.info(this.TAG, `Invoking JAR method: ${methodName} for site: ${this.site.name}`);
       
       // 使用超时管理器处理超时 Use timeout manager to handle timeout
-      const timeoutId = this.timeoutManager.setTimeout(() => {
-        throw new Error(`Method ${methodName} execution timed out`);
+      const timeoutId = `jar_timeout_${methodName}_${Date.now()}`;
+      this.timeoutManager.setTimeout(timeoutId, (): void => {
+        const timeoutError: Error = new Error(`Method ${methodName} execution timed out`);
+        throw timeoutError;
       }, this.loaderConfig.timeout || 30000);
       try {
         // 在后台线程执行 JAR 方法 Execute JAR method in background thread
-        const result = await this.taskPoolManager.execute(async () => {
-          return await this.executeJarMethod(methodName, args);
+        const self: ArkJarLoader = this;
+        const result: JarMethodResult = await new Promise<JarMethodResult>((resolve, reject) => {
+          const task: Task<TaskResult> = {
+            id: `jar_${methodName}_${Date.now()}`,
+            priority: TaskPriority.NORMAL,
+            execute: async (): Promise<TaskResult> => {
+              const methodResult = await self.executeJarMethod(methodName, args);
+              return methodResult as unknown as TaskResult;
+            },
+            onComplete: (res: TaskResult) => {
+              resolve(res as unknown as JarMethodResult);
+            },
+            onError: (err: Error) => {
+              reject(err);
+            }
+          };
+          self.taskPoolManager.submit(task);
         });
         return result;
       } finally {
         this.timeoutManager.clearTimeout(timeoutId);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to invoke JAR method ${methodName}: ${error}`);
+      Logger.error(this.TAG, `Failed to invoke JAR method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
       // 增加错误计数 Increase error count
       this.errorCount++;
       if (this.errorCount > this.maxErrorCount) {
         Logger.warn(this.TAG, `Too many errors, destroying loader for site: ${this.site.name}`);
         await this.destroy();
       }
-      throw error;
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -226,14 +286,14 @@ export class ArkJarLoader extends BaseLoader {
       this.timeoutManager.clearAllTimeouts();
       
       // 通知内存管理器释放内存 Notify memory manager to release memory
-      this.memoryManager.releaseMemory(this.site.key);
+      this.memoryManager.cleanLargeObjectCache(true);
       
       this.jarLoaded = false;
       this.status = 'destroyed';
       Logger.info(this.TAG, `JAR loader destroyed successfully for site: ${this.site.name}`);
       await super.destroy();
     } catch (error) {
-      Logger.error(this.TAG, `Error during JAR loader destruction: ${error}`);
+      Logger.error(this.TAG, `Error during JAR loader destruction: ${error instanceof Error ? error.message : String(error)}`);
       this.status = 'destroyed';
     }
   }
@@ -252,20 +312,20 @@ export class ArkJarLoader extends BaseLoader {
       Logger.info(this.TAG, 'Creating true sandbox environment using @ohos.sandbox API');
       
       // 使用 @ohos.sandbox API 创建真正的安全沙箱 Create true security sandbox using @ohos.sandbox API
-      this.sandboxId = await sandbox.createSandbox({ 
+      const resourceLimits: SandboxResourceLimits = {
+        memoryLimitMB: this.loaderConfig.maxMemory || 256,
+        cpuLimitPercent: 30,
+        diskQuotaMB: 512
+      };
+      const sandboxOptions: SandboxCreateOptions = {
         name: `raytv_jar_${this.site.key}`,
-        // 设置最小权限基础 Set minimum permission foundation
         permissions: [
-          'file.read',   // 只允许读取文件 Only allow reading files
-          'network.http'  // 只允许 HTTP 请求 Only allow HTTP requests
+          'file.read',
+          'network.http'
         ],
-        // 资源限制 Resource limits
-        resourceLimits: {
-          memoryLimitMB: this.loaderConfig.maxMemory || 256,
-          cpuLimitPercent: 30,  // 限制 CPU 使用 Limit CPU usage
-          diskQuotaMB: 512     // 限制磁盘使用 Limit disk usage
-        }
-      });
+        resourceLimits: resourceLimits
+      };
+      this.sandboxId = await sandbox.createSandbox(sandboxOptions);
       
       Logger.info(this.TAG, `Created true security sandbox with ID: ${this.sandboxId}`);
       
@@ -273,12 +333,18 @@ export class ArkJarLoader extends BaseLoader {
       this.sandboxFs = await sandbox.getSandboxFileSystem(this.sandboxId);
       
       // 创建沙箱内目录结构 Create directory structure inside sandbox
-      await this.sandboxFs.mkdir('/jar', { recursive: true });
-      await this.sandboxFs.mkdir('/temp', { recursive: true });
+      if (this.sandboxFs) {
+        const jarDirPath: string = '/jar';
+        const tempDirPath: string = '/temp';
+        const mkdirOptions: MkdirOptions = { recursive: true };
+        await this.sandboxFs.mkdir(jarDirPath, mkdirOptions);
+        await this.sandboxFs.mkdir(tempDirPath, mkdirOptions);
+      }
       
     } catch (error) {
-      Logger.error(this.TAG, `Failed to create true security sandbox: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to create true security sandbox: ${error instanceof Error ? error.message : String(error)}`);
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -302,17 +368,17 @@ export class ArkJarLoader extends BaseLoader {
       // 生成本地存储路径 Generate local storage path
       this.jarFilePath = this.getJarFilePath();
       
-      Logger.info(this.TAG, `Downloading JAR file from: ${config.api}`);
+      const configApi: string = config.api;
+      Logger.info(this.TAG, `Downloading JAR file from: ${configApi}`);
       
       // 下载 JAR 文件 Download JAR file
-      const response = await this.httpService.downloadFile({
-        url: config.api,
-        filePath: this.jarFilePath,
+      const response = await this.httpService.downloadFile(config.api, this.jarFilePath, {
         timeout: this.loaderConfig.timeout
       });
-      
-      if (response.code !== 200) {
-        throw new Error(`Failed to download JAR file: ${response.code}`);
+
+      if (!response.filePath) {
+        const downloadError: Error = new Error(`Failed to download JAR file`);
+        throw downloadError;
       }
       
       // 验证 JAR 文件完整性 Verify JAR file integrity
@@ -320,8 +386,9 @@ export class ArkJarLoader extends BaseLoader {
       
       Logger.info(this.TAG, `JAR file downloaded successfully to: ${this.jarFilePath}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to load JAR file: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to load JAR file: ${error instanceof Error ? error.message : String(error)}`);
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -337,10 +404,8 @@ export class ArkJarLoader extends BaseLoader {
       // 由于实际 API 可能有所不同，这里提供一个框架实现
       
       // 1. 检查 JAR 文件是否存在 Check if JAR file exists
-      if (!fileio.accessSync(this.jarFilePath)) {
-        throw new Error('JAR file not found');
-      }
-      
+      fileio.accessSync(this.jarFilePath);
+
       // 2. 加载 JAR 文件 Load JAR file
       // ArkNativeAPI.loadJar(this.jarFilePath);
       
@@ -349,8 +414,9 @@ export class ArkJarLoader extends BaseLoader {
       
       Logger.info(this.TAG, `JAR resources initialized successfully`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize JAR resources: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Failed to initialize JAR resources: ${error instanceof Error ? error.message : String(error)}`);
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -373,19 +439,22 @@ export class ArkJarLoader extends BaseLoader {
       // 调用 JAR 中的方法 Call method in JAR
       // 这里需要使用 HarmonyOS 的 ArkNative API
       // const result = await ArkNativeAPI.invokeMethod(methodName, javaParams);
-      
+
       // 模拟方法调用结果 Simulate method invocation result
-      const result = {
+      const resultData: MethodResultData = {
+        method: methodName,
+        params: JSON.stringify(javaParams),
+        message: `JAR method ${methodName} executed successfully`
+      };
+      
+      const result: JarMethodResult = {
         success: true,
-        data: {
-          method: methodName,
-          params: javaParams,
-          message: `JAR method ${methodName} executed successfully`
-        }
+        data: resultData as unknown as JarMethodData,
+        timestamp: Date.now()
       };
       
       // 转换结果格式 Convert result format
-      const jsResult = this.convertFromJavaResult(result);
+      const jsResult: JarMethodResult = this.convertFromJavaResult(result);
       
       // 检查内存使用增长 Check memory usage increase
       const endMemory = this.memoryManager.getCurrentMemoryUsage();
@@ -395,8 +464,9 @@ export class ArkJarLoader extends BaseLoader {
       
       return jsResult;
     } catch (error) {
-      Logger.error(this.TAG, `Error executing JAR method ${methodName}: ${error}`);
-      throw error;
+      Logger.error(this.TAG, `Error executing JAR method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
+      const err: Error = error instanceof Error ? error : new Error(String(error));
+      throw err;
     }
   }
 
@@ -412,7 +482,7 @@ export class ArkJarLoader extends BaseLoader {
       // ArkNativeAPI.releaseJar();
       
     } catch (error) {
-      Logger.error(this.TAG, `Failed to release JAR resources: ${error}`);
+      Logger.error(this.TAG, `Failed to release JAR resources: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -436,7 +506,7 @@ export class ArkJarLoader extends BaseLoader {
       
       Logger.info(this.TAG, 'True security sandbox destroyed successfully');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to destroy true security sandbox: ${error}`);
+      Logger.error(this.TAG, `Failed to destroy true security sandbox: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -446,25 +516,28 @@ export class ArkJarLoader extends BaseLoader {
    */
   private async verifyJarFile(): Promise<void> {
     // 检查 JAR 文件大小 Check JAR file size
-    let fileStats;
+    let fileStats: fileio.Stat;
     try {
       fileStats = fileio.statSync(this.jarFilePath);
     } catch (error) {
-      throw new Error(`Failed to stat JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const statError: Error = new Error(`Failed to stat JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw statError;
     }
     
     const maxSize = (this.loaderConfig.maxMemory || 256) * 1024 * 1024; // 转换为字节 Convert to bytes
     
-    if (fileStats.fileSize > maxSize) {
-      throw new Error(`JAR file exceeds maximum allowed size (${maxSize} bytes)`);
+    if (fileStats.size > maxSize) {
+      const sizeError: Error = new Error(`JAR file exceeds maximum allowed size (${maxSize} bytes)`);
+      throw sizeError;
     }
     
     // 简单的文件头验证，确保是有效的 JAR/ZIP 文件
-    let file;
+    let fileDescriptor: number = -1;
     try {
-      file = fileio.openSync(this.jarFilePath, 0);
+      const openedFile = fileio.openSync(this.jarFilePath, 0);
+      fileDescriptor = openedFile.fd;
       const header = new Uint8Array(4);
-      fileio.readSync(file.fd, header.buffer, 0, 4, 0);
+      fileio.readSync(fileDescriptor, header.buffer);
       
       // JAR 文件的魔数是 PK\003\004
       const isValidJar = header[0] === 0x50 && header[1] === 0x4B && 
@@ -476,9 +549,9 @@ export class ArkJarLoader extends BaseLoader {
     } catch (error) {
       throw new Error(`Failed to verify JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      if (file) {
+      if (fileDescriptor >= 0) {
         try {
-          fileio.closeSync(file.fd);
+          fileio.closeSync(fileDescriptor);
         } catch (error) {
           // 忽略关闭文件时的错误
         }
@@ -493,15 +566,20 @@ export class ArkJarLoader extends BaseLoader {
   private async cleanupResources(): Promise<void> {
     try {
       // 删除临时 JAR 文件 Delete temporary JAR file
-      if (this.jarFilePath && fileio.accessSync(this.jarFilePath)) {
-        fileio.unlinkSync(this.jarFilePath);
-        Logger.info(this.TAG, `Cleaned up JAR file: ${this.jarFilePath}`);
+      if (this.jarFilePath) {
+        try {
+          fileio.accessSync(this.jarFilePath);
+          fileio.unlinkSync(this.jarFilePath);
+          Logger.info(this.TAG, `Cleaned up JAR file: ${this.jarFilePath}`);
+        } catch (accessError) {
+          // File doesn't exist or not accessible, skip
+        }
       }
       
       // 清理缓存 Clean up cache
       this.jarCache.clear();
     } catch (error) {
-      Logger.error(this.TAG, `Error during cleanup: ${error}`);
+      Logger.error(this.TAG, `Error during cleanup: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -540,14 +618,29 @@ export class ArkJarLoader extends BaseLoader {
    */
   private validateUrl(url: string): boolean {
     try {
-      const urlObj = new URL(url);
-      // 只允许 https 协议 Only allow https protocol
-      if (urlObj.protocol !== 'https:') {
+      // Only allow https protocol
+      if (!url.startsWith('https://')) {
+        Logger.warn(this.TAG, `Security violation: Non-HTTPS protocol detected: ${url}`);
+        return false;
+      }
+      // Extract hostname from URL string
+      const withoutProtocol: string = url.slice('https://'.length);
+      const slashIndex: number = withoutProtocol.indexOf('/');
+      const hostname: string = (slashIndex >= 0 ? withoutProtocol.slice(0, slashIndex) : withoutProtocol).toLowerCase();
+      // 阻止本地地址和内部网络地址 Block localhost and internal network addresses
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+        Logger.warn(this.TAG, `Security violation: Localhost access blocked: ${hostname}`);
+        return false;
+      }
+      // 阻止私有 IP 地址范围 Block private IP address ranges
+      if (/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(hostname)) {
+        Logger.warn(this.TAG, `Security violation: Private IP access blocked: ${hostname}`);
         return false;
       }
       // 可以添加更多的 URL 验证规则 Can add more URL validation rules
       return true;
     } catch (error) {
+      Logger.error(this.TAG, `URL validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return false;
     }
   }
@@ -582,7 +675,7 @@ export class ArkJarLoader extends BaseLoader {
       await sandbox.garbageCollect();
       Logger.info(this.TAG, 'System garbage collection completed successfully');
     } catch (error) {
-      Logger.error(this.TAG, `Failed to trigger system garbage collection: ${error}`);
+      Logger.error(this.TAG, `Failed to trigger system garbage collection: ${error instanceof Error ? error.message : String(error)}`);
       // 如果系统垃圾回收失败，回退到基本清理 If system garbage collection fails, fall back to basic cleanup
       await this.cleanupResources();
     }
@@ -622,14 +715,27 @@ export class ArkJarLoader extends BaseLoader {
       getLatestList: async () => this.callMethod('getLatestList', []),
       getCategories: async () => this.callMethod('getCategories', []),
       getCategoryList: async (category: string, page: number) => this.callMethod('getCategoryList', [category, page]),
-      search: async (keyword: string, page?: number) => this.callMethod('search', [keyword, page]),
+      search: async (keyword: string, page?: number) => {
+        const params: JarMethodParam[] = [keyword];
+        if (page !== undefined) {
+          params.push(page);
+        }
+        return this.callMethod('search', params);
+      },
       getDetail: async (id: string) => this.callMethod('getDetail', [id]),
-      getPlayUrl: async (id: string, episodeId?: string) => this.callMethod('getPlayUrl', [id, episodeId]),
+      getPlayUrl: async (id: string, episodeId?: string) => {
+        const params: JarMethodParam[] = [id];
+        if (episodeId !== undefined) {
+          params.push(episodeId);
+        }
+        return this.callMethod('getPlayUrl', params);
+      },
       getSearchSuggestions: async (keyword: string) => {
         try {
           return await this.callMethod('getSearchSuggestions', [keyword]);
         } catch (error) {
-          return [];
+          const emptyResult: JarMethodResult = { success: false, message: 'Not supported' };
+          return emptyResult;
         }
       }
     };

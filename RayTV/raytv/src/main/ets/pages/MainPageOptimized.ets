@@ -1,4 +1,4 @@
-import { Component, State, Property, EventEmitter } from '@ohos/harmonyos';
+﻿import { Component, State, Property, EventEmitter } from '@ohos/harmonyos';
 import { designSystem } from '../design/DesignSystem';
 import { responsiveSystem } from '../common/layout/ResponsiveSystem';
 import { appState } from '../common/state/AppState';

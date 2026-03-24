@@ -1,4 +1,4 @@
-// PlayLiveUseCase.ets - 播放直播用例 // Play live use case
+﻿// PlayLiveUseCase.ets - 播放直播用例 // Play live use case
 import Logger from '../../common/util/Logger';
 import { Live } from '../../data/bean/Live';
 import { History } from '../../data/bean/History';

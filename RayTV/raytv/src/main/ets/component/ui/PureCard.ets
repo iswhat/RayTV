@@ -2,7 +2,6 @@
  * 纯净卡片组件
  * 不使用任何样式属性，仅使用基本布局
  */
-import { Component, Prop } from '@ohos/arkui'
 
 @Component
 export struct PureCard {

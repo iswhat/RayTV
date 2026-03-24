@@ -2,9 +2,9 @@
 // 实现站点脚本的加载和执行 Implements loading and execution of site scripts
 import Logger from '../../../common/util/Logger';
 import { Site } from '../../../data/bean/Site';
-import { VodDetail } from '../../../data/bean/Vod';
 import { HttpService } from '../../HttpService';
-import { SiteSpider } from '../CrawlerService';
+import { SiteSpider, VideoItem, VideoDetail } from '../CrawlerService';
+import { SiteInfo } from '../../../data/bean/Site';
 
 /**
  * 加载器类型枚举 Loader type enum
@@ -255,7 +255,7 @@ export class EmptyLoader extends BaseLoader {
   }
 
   protected createSpiderImpl(): SiteSpider {
-    const detailResult: VodDetail = {
+    const detailResult: VideoDetail = {
       id: '',
       title: '未知标题',
       cover: '',
@@ -264,17 +264,37 @@ export class EmptyLoader extends BaseLoader {
       episodes: []
     };
 
-    const spider: SiteSpider = {
-      getSiteInfo: async (): Promise<SiteInfo> => this.site,
-      getRecommendList: async (): Promise<VideoItem[]> => [],
-      getHotList: async (): Promise<VideoItem[]> => [],
-      getLatestList: async (): Promise<VideoItem[]> => [],
-      getCategories: async (): Promise<string[]> => [],
-      getCategoryList: async (category: string, page: number): Promise<VideoItem[]> => [],
-      search: async (keyword: string, page?: number): Promise<VideoItem[]> => [],
-      getDetail: async (id: string): Promise<VideoDetail> => detailResult,
-      getPlayUrl: async (id: string, episodeId?: string): Promise<string> => ''
-    };
+    class EmptySpiderImpl implements SiteSpider {
+      async getSiteInfo(): Promise<SiteInfo> {
+        return {} as SiteInfo;
+      }
+      async getRecommendList(): Promise<VideoItem[]> {
+        return [];
+      }
+      async getHotList(): Promise<VideoItem[]> {
+        return [];
+      }
+      async getLatestList(): Promise<VideoItem[]> {
+        return [];
+      }
+      async getCategories(): Promise<string[]> {
+        return [];
+      }
+      async getCategoryList(category: string, page: number): Promise<VideoItem[]> {
+        return [];
+      }
+      async search(keyword: string, page?: number): Promise<VideoItem[]> {
+        return [];
+      }
+      async getDetail(id: string): Promise<VideoDetail> {
+        return detailResult;
+      }
+      async getPlayUrl(id: string, episodeId?: string): Promise<string> {
+        return '';
+      }
+    }
+
+    const spider: SiteSpider = new EmptySpiderImpl();
     return spider;
   }
 

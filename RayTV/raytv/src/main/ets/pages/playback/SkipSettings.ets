@@ -4,7 +4,6 @@
  */
 
 import Logger from '../../common/util/Logger';
-import { FlexAlign, TextAlign } from '@ohos/arkui';
 
 // 跳过设置组件参数 | Skip settings component parameters
 interface SkipSettingsParams {

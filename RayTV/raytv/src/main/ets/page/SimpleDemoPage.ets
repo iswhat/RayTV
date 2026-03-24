@@ -2,7 +2,6 @@
  * 简单演示页面
  * 展示基础UI组件
  */
-import { Column, Text, Scroll } from '@ohos/arkui'
 import { MinimalButton } from '../component/ui/MinimalButton'
 import { MinimalCard } from '../component/ui/MinimalCard'
 

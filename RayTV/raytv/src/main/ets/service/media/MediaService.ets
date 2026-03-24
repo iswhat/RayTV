@@ -1,9 +1,10 @@
-// 媒体服务 | Media service
+﻿// 媒体服务 | Media service
 // 实现媒体管理功能，包括播放记录、收藏管理等 | Implement media management functions, including playback records, collection management, etc.
 
 
 import ApiResponse from '../../data/dto/ApiResponse';
-import { SiteService } from '../spider/SiteService';
+import { SiteService } from '../spider/SiteService_fixed';
+import { CrawlerService } from '../spider/CrawlerService';
 import { Inject } from '../../common/di/Container';
 import CacheService from '../cache/CacheService';
 import { CachePriority } from '../cache/CacheService';
@@ -105,7 +106,7 @@ export class MediaService {
   private cacheService: CacheService = CacheService.getInstance();
   
   @Inject('SiteService')
-  private siteService: SiteService;
+  private siteService!: SiteService;
 
   /**
    * 获取单例实例 | Get singleton instance
@@ -148,7 +149,7 @@ export class MediaService {
       console.info(TAG + ': Media service initialized successfully');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to initialize media service: ${err.message}`);
+      console.error(error.message);
       throw err;
     }
   }
@@ -299,7 +300,7 @@ export class MediaService {
           }
           
           // 调用站点的内容方法
-          const siteContent = await this.siteService.callSiteMethod(
+          const siteContent = await CrawlerService.getInstance().callSiteMethod<SiteRecommendedItem[]>(
             site.key,
             siteMethod,
             [],
@@ -449,7 +450,7 @@ export class MediaService {
     
     // 计算各类型的权重
     this.userPreferences = [];
-    const types: string[] = this.getObjectKeys(typeCount);
+    const types: string[] = Array.from(typeCount.keys());
     for (let i = 0; i < types.length; i++) {
       const type = types[i];
       const count = typeCount.get(type);
@@ -540,7 +541,7 @@ export class MediaService {
       return ApiResponse.success(optimizedRecommendations, '获取个性化推荐内容成功');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error(TAG + `: Failed to get personalized recommendations: ${err.message}`);
+      console.error(error.message);
       return ApiResponse.error(500, '获取个性化推荐内容失败');
     }
   }
@@ -558,8 +559,8 @@ export class MediaService {
     // 清理数据 Clean up data
     this.playbackRecords.clear();
     this.collections.clear();
-    this.userBehaviors.clear();
-    this.userPreferences.clear();
+    this.userBehaviors = [];
+    this.userPreferences = [];
 
     this.isInitialized = false;
     console.info(TAG + ': Media service closed successfully');

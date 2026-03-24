@@ -2,7 +2,7 @@ import { AppNavigator, BreadcrumbItem } from '../navigation/AppNavigator';
 // Logger import removed as AnalyticsService was deleted
 import { MediaService } from '../service/media/MediaService';
 import { MediaItem } from '../data/bean/MediaItem';
-import VirtualList from '../components/VirtualList';
+import { VirtualList } from '../components/VirtualList';
 import { VirtualListItem } from '../types/VirtualListTypes';
 
 // 移除 @ohos.ui 导入，因为它在当前环境中不可用
@@ -231,14 +231,17 @@ struct CategoryPage {
    * 将MediaItem转换为VirtualListItem | Convert MediaItem to VirtualListItem
    */
   private convertToVirtualItems(mediaList: MediaItem[]): VirtualListItem[] {
-    return mediaList.map((media, index) => ({
-      id: media.id,
-      index: index,
-      data: media,
-      top: index * 140, // 估算的项目高度
-      height: 140,
-      visible: false
-    }));
+    return mediaList.map((media: MediaItem, index: number): VirtualListItem => {
+      const item: VirtualListItem = {
+        id: media.id,
+        index: index,
+        data: media,
+        top: index * 140, // 估算的项目高度
+        height: 140,
+        visible: false
+      };
+      return item;
+    });
   }
   
   /**
@@ -502,18 +505,14 @@ struct CategoryPage {
           .justifyContent(FlexAlign.Center)
           .padding(20)
         } else {
-            // 使用VirtualList优化性能 | Use VirtualList for better performance
-            const virtualItems = this.convertToVirtualItems(this.mediaList);
-            
-            VirtualList({
-              items: virtualItems,
-              estimatedItemHeight: 140,
-              bufferSize: 3,
-              renderItem: (item: VirtualListItem) => {
-                const media = item.data as MediaItem;
-                return this.renderMediaItem(media);
-              }
-            })
+            // 使用 List 优化性能 | Use List for better performance
+            List() {
+              ForEach(this.mediaList, (media: MediaItem, index: number) => {
+                ListItem() {
+                  this.renderMediaItem(media)
+                }
+              }, (media: MediaItem, index: number) => `${media.id}_${index}`)
+            }
             .margin(20)
             .height('70%')
         }

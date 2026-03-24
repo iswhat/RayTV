@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SiteRepository.ets - 站点数据仓库
  * 负责站点相关数据的存储、获取和管理
  */
@@ -12,7 +12,7 @@ import { DatabaseError, SiteError, handleError } from '../../common/util/AppErro
 
 // 数据库记录接口 | Database record interface
 export interface SiteRecord {
-  [key: string]: any;
+  [key: string]: string;
   [SITE_TABLE.COLUMNS.KEY]?: string | number;
   [SITE_TABLE.COLUMNS.NAME]: string;
   [SITE_TABLE.COLUMNS.TYPE]: SiteType;

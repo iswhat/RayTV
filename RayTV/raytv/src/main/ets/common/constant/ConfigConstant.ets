@@ -72,7 +72,16 @@ export interface HarmonyConfig {
   enableVoiceAssistant: boolean;
   enableDeviceFlow: boolean;
   enableGestureControl: boolean;
-  enablePushNotification: boolean;
+  enableWidget: boolean;
+  enableNotification: boolean;
+  enableAutoStart: boolean;
+  enableBackgroundSync: boolean;
+  enableMultiWindow: boolean;
+  enableHiAI: boolean;
+  deviceSharingEnabled: boolean;
+  notificationChannels: string[];
+  quickActions: string[];
+  enablePushNotification?: boolean;
   smartRemoteEnabled?: boolean;
 }
 

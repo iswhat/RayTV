@@ -1,4 +1,4 @@
-// ArkTSUtilityTypes.ets - ArkTS兼容的TypeScript Utility Types实现 ArkTS compatible TypeScript Utility Types implementation
+﻿// ArkTSUtilityTypes.ets - ArkTS兼容的TypeScript Utility Types实现 ArkTS compatible TypeScript Utility Types implementation
 
 /**
  * ArkTS兼容的TypeScript Utility Types实现 ArkTS compatible TypeScript Utility Types implementation
@@ -192,7 +192,7 @@ export type IndexAccess<T, K extends keyof T> = T[K];
 /**
  * 类型守卫函数工具类型 Type guard function utility type
  */
-export type TypeGuard<T> = (value: unknown) => value is T;
+export type TypeGuard<T> = (value: string) => value is T;
 
 /**
  * 类型转换函数工具类型 Type transformation function utility type

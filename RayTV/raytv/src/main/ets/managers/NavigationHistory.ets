@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 导航历史管理器
  * 管理页面导航历史记录
  */
@@ -161,11 +161,11 @@ interface NavigationRecord {
   timestamp: number;
   
   /** 页面参数 */
-  params?: any;
+  params?: string;
   
   /** 页面标题 */
   title?: string;
   
   /** 页面状态 */
-  state?: any;
+  state?: string;
 }
