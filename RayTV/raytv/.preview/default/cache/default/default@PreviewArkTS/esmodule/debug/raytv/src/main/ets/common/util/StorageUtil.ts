@@ -201,7 +201,8 @@ export class StorageUtil {
                 handleError(new Error('Failed to get context for preferences'), 'STORAGE_CONTEXT_ERROR');
                 return false;
             }
-            StorageUtil.preferences = await dataPreferences.getPreferences(context, StorageUtil.PREFERENCES_NAME) as unknown as PreferencesInstance;
+            const preferencesInstance = await dataPreferences.getPreferences(context, StorageUtil.PREFERENCES_NAME);
+            StorageUtil.preferences = preferencesInstance as PreferencesInstance;
             console.info(StorageUtil.TAG + ': StorageUtil initialized successfully');
             return true;
         }

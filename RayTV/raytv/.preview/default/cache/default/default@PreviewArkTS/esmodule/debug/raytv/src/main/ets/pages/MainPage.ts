@@ -351,7 +351,7 @@ class MainPage extends ViewPU {
             const allVodSites = this.contentService.getAllVodSites();
             if (allVodSites.length > 0) {
                 // 将VodSiteWithSource转换为FeaturedMediaItem
-                const toMediaItem = (site: ReturnType<typeof this.contentService.getAllVodSites>[number], idx: number): FeaturedMediaItem => ({
+                const toMediaItem = (site: import('../service/pool/SourcePoolManager').VodSiteWithSource, idx: number): FeaturedMediaItem => ({
                     id: `${site.siteKey}_${idx}`,
                     title: site.name,
                     cover: '',

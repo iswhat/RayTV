@@ -465,7 +465,7 @@ export class SourcePoolManager {
             Logger.info(TAG, `Found ${activeSources.length} active sources`);
             // 并行加载所有源，提高启动速度
             if (activeSources.length > 0) {
-                const loadPromises: Promise<void>[] = activeSources.map((source: ConfigSource) => this.loadFromSource(source as unknown as NetworkSourceConfig).catch((error: unknown) => {
+                const loadPromises: Promise<void>[] = activeSources.map((source: ConfigSource) => this.loadFromSource(source as NetworkSourceConfig).catch((error) => {
                     const err: Error = error instanceof Error ? error : new Error(String(error));
                     Logger.error(TAG, `Failed to load source ${source.id}, continuing with other sources`, err);
                     // 单个源失败不影响其他源的加载
@@ -574,7 +574,7 @@ export class SourcePoolManager {
             Logger.info(TAG, `Rebuilding from ${activeSources.length} active sources`);
             // 并行加载所有源，提高性能
             if (activeSources.length > 0) {
-                const loadPromises: Promise<void>[] = activeSources.map((source: NetworkSourceConfig) => this.loadFromSource(source).catch((error: unknown) => {
+                const loadPromises: Promise<void>[] = activeSources.map((source: NetworkSourceConfig) => this.loadFromSource(source).catch((error) => {
                     const err: Error = error instanceof Error ? error : new Error(String(error));
                     Logger.error(TAG, `Failed to load source ${source.id} during rebuild, continuing with other sources`, err);
                     // 单个源失败不影响其他源的加载

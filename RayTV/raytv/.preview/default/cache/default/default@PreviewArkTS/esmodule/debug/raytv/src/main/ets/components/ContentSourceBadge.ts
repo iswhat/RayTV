@@ -10,7 +10,7 @@ interface SourceCard_Params {
     priority?: number;
     tags?: string[];
     contentUsage?: Record<string, boolean>;
-    onClick?: (event?: any) => void;
+    onClick?: () => void;
     onToggle?: (isActive: boolean) => void;
 }
 interface MultiSourceBadge_Params {
@@ -420,7 +420,7 @@ export class SourceCard extends ViewPU {
     private priority: number;
     private tags: string[];
     private contentUsage: Record<string, boolean>;
-    private onClick?: (event?: any) => void;
+    private onClick?: () => void;
     private onToggle?: (isActive: boolean) => void;
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {

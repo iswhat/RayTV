@@ -18329,3 +18329,531 @@ Error Message: Type 'import("D:/tv/RayTV/raytv/src/main/ets/data/repository/Sear
 [2026-03-26T10:09:09.361] [DEBUG] debug-file - session manager: send message to worker process.
 [2026-03-26T10:09:09.370] [DEBUG] debug-file - watch worker: worker is ready to be terminated.
 [2026-03-26T10:09:09.371] [DEBUG] debug-file - Server currently has 0 watch-worker
+[2026-03-26T11:20:52.958] [DEBUG] debug-file - session manager: set active socket. socketId=jjPgVS--kwxRIeIPAAAF
+[2026-03-26T11:20:52.975] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-26T11:20:52.987] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2026-03-26T11:20:52.988] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2026-03-26T11:20:52.992] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2026-03-26T11:20:52.996] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2026-03-26T11:20:52.998] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-26T11:20:53.008] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' },
+  optimizationStrategy: 'memory',
+  hotCompile: undefined,
+  hotReloadBuild: undefined,
+  customizedParam: undefined
+}
+[2026-03-26T11:20:53.023] [DEBUG] debug-file - Cache service initialization finished in 15 ms 
+[2026-03-26T11:20:53.026] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\hvigorfile.ts
+[2026-03-26T11:20:53.054] [DEBUG] debug-file - hvigorfile, require result:  { default: { modules: [ [Object] ] } }
+[2026-03-26T11:20:53.055] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-26T11:20:53.056] [DEBUG] debug-file - Starting plugin build process
+[2026-03-26T11:20:53.057] [DEBUG] debug-file - App plugin prepare start...
+[2026-03-26T11:20:53.057] [DEBUG] debug-file - App plugin prepare end...
+[2026-03-26T11:20:53.057] [DEBUG] debug-file - App plugin creating...
+[2026-03-26T11:20:53.085] [DEBUG] debug-file - App plugin register hook start...
+[2026-03-26T11:20:53.086] [DEBUG] debug-file - App plugin register hook end...
+[2026-03-26T11:20:53.086] [DEBUG] debug-file - Plugin build process completed
+[2026-03-26T11:20:53.088] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2026-03-26T11:20:53.088] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2026-03-26T11:20:53.089] [DEBUG] debug-file - Product 'default' build option initialized
+[2026-03-26T11:20:53.089] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2026-03-26T11:20:53.091] [DEBUG] debug-file - Obtain build option for product 'default'in this build.
+[2026-03-26T11:20:53.096] [DEBUG] debug-file - No signingConfig found, initRemoteHspCache failed.
+[2026-03-26T11:20:53.107] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2026-03-26T11:20:53.480] [DEBUG] debug-file - Sdk init in 382 ms 
+[2026-03-26T11:20:53.494] [DEBUG] debug-file - Project task initialization takes 13 ms 
+[2026-03-26T11:20:53.494] [DEBUG] debug-file - hvigorfile, binding custom plugins undefined
+[2026-03-26T11:20:53.495] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\hvigorfile.ts
+[2026-03-26T11:20:53.495] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\hvigorfile.ts
+[2026-03-26T11:20:53.509] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-26T11:20:53.522] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-26T11:20:53.522] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-26T11:20:53.523] [DEBUG] debug-file - Starting plugin build process
+[2026-03-26T11:20:53.523] [DEBUG] debug-file - Hap plugin creating...
+[2026-03-26T11:20:53.570] [DEBUG] debug-file - failed to load cangjie to dynamically generate schemas: Error: Cannot find module '@ohos/cangjie-build-support/index'
+Require stack:
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\hooks\cangjie-register.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\strategy\stage-init-strategy.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\abstract-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\app-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\factory\plugin-factory.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\index.js
+- D:\tv\RayTV\hvigorfile.ts
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\configuration.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\process\daemon-process-boot-script.js
+[2026-03-26T11:20:53.581] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=release
+[2026-03-26T11:20:53.581] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-26T11:20:53.583] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-26T11:20:53.583] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-26T11:20:53.583] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-26T11:20:53.584] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-26T11:20:53.584] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-26T11:20:53.585] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-26T11:20:53.585] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-26T11:20:53.585] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-26T11:20:53.587] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-26T11:20:53.587] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-26T11:20:53.587] [DEBUG] debug-file - Obtain build option for module 'raytv' target 'default'in this build.
+[2026-03-26T11:20:53.593] [DEBUG] debug-file - Module raytv task initialization takes 4 ms 
+[2026-03-26T11:20:53.593] [DEBUG] debug-file - Hap plugin register hook start...
+[2026-03-26T11:20:53.593] [DEBUG] debug-file - Hap plugin register hook end...
+[2026-03-26T11:20:53.593] [DEBUG] debug-file - Plugin build process completed
+[2026-03-26T11:20:53.594] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-26T11:20:53.594] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-26T11:20:53.594] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-26T11:20:54.132] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 537 ms 
+[2026-03-26T11:20:54.132] [DEBUG] debug-file - project has submodules:raytv
+[2026-03-26T11:20:54.133] [DEBUG] debug-file - module:raytv no need to execute packageHap
+[2026-03-26T11:20:54.138] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2026-03-26T11:20:54.180] [DEBUG] debug-file - load to the disk finished
+[2026-03-26T11:20:54.183] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-26T11:20:54.191] [DEBUG] debug-file - Module RayTV Collected Dependency: 
+[2026-03-26T11:20:54.191] [DEBUG] debug-file - Module RayTV's total dependency: 0
+[2026-03-26T11:20:54.192] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-26T11:20:54.201] [DEBUG] debug-file - Module raytv Collected Dependency: 
+[2026-03-26T11:20:54.201] [DEBUG] debug-file - Module raytv's total dependency: 0
+[2026-03-26T11:20:54.214] [DEBUG] debug-file - Configuration phase cost:1 s 191 ms 
+[2026-03-26T11:20:54.218] [DEBUG] debug-file - Configuration task cost before running: 1 s 219 ms 
+[2026-03-26T11:20:54.235] [DEBUG] debug-file - Executing task :raytv:default@PreBuild
+[2026-03-26T11:20:54.238] [DEBUG] debug-file - Task 'raytv:default@PreBuild' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.274] [DEBUG] debug-file - Incremental task raytv:default@PreBuild pre-execution cost: 25 ms .
+[2026-03-26T11:20:54.274] [DEBUG] debug-file - raytv : default@PreBuild cost memory 0.383331298828125
+[2026-03-26T11:20:54.283] [INFO] debug-file - UP-TO-DATE :raytv:default@PreBuild...  
+[2026-03-26T11:20:54.286] [DEBUG] debug-file - Executing task :raytv:default@CreateModuleInfo
+[2026-03-26T11:20:54.286] [DEBUG] debug-file - Task 'raytv:default@CreateModuleInfo' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.287] [DEBUG] debug-file - raytv : default@CreateModuleInfo cost memory 0.04718780517578125
+[2026-03-26T11:20:54.287] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 288 ms 
+[2026-03-26T11:20:54.288] [INFO] debug-file - Finished :raytv:default@CreateModuleInfo... after 2 ms 
+[2026-03-26T11:20:54.290] [DEBUG] debug-file - Executing task :raytv:default@MergeProfile
+[2026-03-26T11:20:54.291] [DEBUG] debug-file - Task 'raytv:default@MergeProfile' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.299] [DEBUG] debug-file - Incremental task raytv:default@MergeProfile pre-execution cost: 8 ms .
+[2026-03-26T11:20:54.300] [DEBUG] debug-file - raytv : default@MergeProfile cost memory 0.1561126708984375
+[2026-03-26T11:20:54.302] [INFO] debug-file - UP-TO-DATE :raytv:default@MergeProfile...  
+[2026-03-26T11:20:54.306] [DEBUG] debug-file - Executing task :raytv:default@CreateBuildProfile
+[2026-03-26T11:20:54.308] [DEBUG] debug-file - Task 'raytv:default@CreateBuildProfile' cost while wrapping incremental declarations: 2 ms 
+[2026-03-26T11:20:54.314] [DEBUG] debug-file - Incremental task raytv:default@CreateBuildProfile pre-execution cost: 6 ms .
+[2026-03-26T11:20:54.314] [DEBUG] debug-file - raytv : default@CreateBuildProfile cost memory 0.0982666015625
+[2026-03-26T11:20:54.315] [INFO] debug-file - UP-TO-DATE :raytv:default@CreateBuildProfile...  
+[2026-03-26T11:20:54.319] [DEBUG] debug-file - Executing task :raytv:default@PreCheckSyscap
+[2026-03-26T11:20:54.322] [DEBUG] debug-file - raytv : default@PreCheckSyscap cost memory 0.0185394287109375
+[2026-03-26T11:20:54.322] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 323 ms 
+[2026-03-26T11:20:54.325] [INFO] debug-file - Finished :raytv:default@PreCheckSyscap... after 4 ms 
+[2026-03-26T11:20:54.335] [DEBUG] debug-file - Executing task :raytv:default@GeneratePkgContextInfo
+[2026-03-26T11:20:54.356] [DEBUG] debug-file - Task 'raytv:default@GeneratePkgContextInfo' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.357] [DEBUG] debug-file - raytv : default@GeneratePkgContextInfo cost memory 0.21668243408203125
+[2026-03-26T11:20:54.357] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 358 ms 
+[2026-03-26T11:20:54.357] [INFO] debug-file - Finished :raytv:default@GeneratePkgContextInfo... after 22 ms 
+[2026-03-26T11:20:54.361] [DEBUG] debug-file - Executing task :raytv:default@ProcessProfile
+[2026-03-26T11:20:54.365] [DEBUG] debug-file - Task 'raytv:default@ProcessProfile' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.369] [DEBUG] debug-file - Incremental task raytv:default@ProcessProfile pre-execution cost: 4 ms .
+[2026-03-26T11:20:54.369] [DEBUG] debug-file - raytv : default@ProcessProfile cost memory 0.17063140869140625
+[2026-03-26T11:20:54.370] [INFO] debug-file - UP-TO-DATE :raytv:default@ProcessProfile...  
+[2026-03-26T11:20:54.374] [DEBUG] debug-file - Executing task :raytv:default@ProcessRouterMap
+[2026-03-26T11:20:54.384] [DEBUG] debug-file - Incremental task raytv:default@ProcessRouterMap pre-execution cost: 9 ms .
+[2026-03-26T11:20:54.385] [DEBUG] debug-file - raytv : default@ProcessRouterMap cost memory 0.12683868408203125
+[2026-03-26T11:20:54.386] [INFO] debug-file - UP-TO-DATE :raytv:default@ProcessRouterMap...  
+[2026-03-26T11:20:54.390] [DEBUG] debug-file - Executing task :raytv:default@ProcessShareConfig
+[2026-03-26T11:20:54.399] [DEBUG] debug-file - Incremental task raytv:default@ProcessShareConfig pre-execution cost: 8 ms .
+[2026-03-26T11:20:54.400] [DEBUG] debug-file - raytv : default@ProcessShareConfig cost memory 0.1031494140625
+[2026-03-26T11:20:54.401] [INFO] debug-file - UP-TO-DATE :raytv:default@ProcessShareConfig...  
+[2026-03-26T11:20:54.405] [DEBUG] debug-file - Executing task :raytv:default@ProcessStartupConfig
+[2026-03-26T11:20:54.405] [DEBUG] debug-file - Task 'raytv:default@ProcessStartupConfig' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.406] [DEBUG] debug-file - raytv:default@ProcessStartupConfig is not up-to-date, since the output file 'D:\tv\RayTV\raytv\.preview\default\intermediates\startup\default\startup_config.json' does not exist.
+[2026-03-26T11:20:54.406] [DEBUG] debug-file - Incremental task raytv:default@ProcessStartupConfig pre-execution cost: 1 ms .
+[2026-03-26T11:20:54.407] [DEBUG] debug-file - raytv : default@ProcessStartupConfig cost memory 0.09343719482421875
+[2026-03-26T11:20:54.407] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 408 ms 
+[2026-03-26T11:20:54.409] [INFO] debug-file - Finished :raytv:default@ProcessStartupConfig... after 3 ms 
+[2026-03-26T11:20:54.413] [DEBUG] debug-file - restool module names: raytv; moduleName=raytv, taskName=default@PreviewProcessResource
+[2026-03-26T11:20:54.416] [DEBUG] debug-file - Executing task :raytv:default@PreviewProcessResource
+[2026-03-26T11:20:54.417] [DEBUG] debug-file - Task 'raytv:default@PreviewProcessResource' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.417] [DEBUG] debug-file - raytv : default@PreviewProcessResource cost memory 0.05146026611328125
+[2026-03-26T11:20:54.420] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 420 ms 
+[2026-03-26T11:20:54.425] [INFO] debug-file - Finished :raytv:default@PreviewProcessResource... after 4 ms 
+[2026-03-26T11:20:54.433] [DEBUG] debug-file - Executing task :raytv:default@GenerateLoaderJson
+[2026-03-26T11:20:54.444] [DEBUG] debug-file - Task 'raytv:default@GenerateLoaderJson' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.482] [DEBUG] debug-file - Incremental task raytv:default@GenerateLoaderJson pre-execution cost: 24 ms .
+[2026-03-26T11:20:54.482] [DEBUG] debug-file - raytv : default@GenerateLoaderJson cost memory -3.8822174072265625
+[2026-03-26T11:20:54.504] [INFO] debug-file - UP-TO-DATE :raytv:default@GenerateLoaderJson...  
+[2026-03-26T11:20:54.509] [DEBUG] debug-file - restool module names: raytv; moduleName=raytv, taskName=default@PreviewCompileResource
+[2026-03-26T11:20:54.510] [DEBUG] debug-file - Executing task :raytv:default@PreviewCompileResource
+[2026-03-26T11:20:54.555] [DEBUG] debug-file - Incremental task raytv:default@PreviewCompileResource pre-execution cost: 44 ms .
+[2026-03-26T11:20:54.555] [DEBUG] debug-file - raytv : default@PreviewCompileResource cost memory 0.5200729370117188
+[2026-03-26T11:20:54.556] [INFO] debug-file - UP-TO-DATE :raytv:default@PreviewCompileResource...  
+[2026-03-26T11:20:54.560] [DEBUG] debug-file - Executing task :raytv:default@PreviewHookCompileResource
+[2026-03-26T11:20:54.561] [DEBUG] debug-file - raytv : default@PreviewHookCompileResource cost memory 0.0174102783203125
+[2026-03-26T11:20:54.561] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 562 ms 
+[2026-03-26T11:20:54.562] [INFO] debug-file - Finished :raytv:default@PreviewHookCompileResource... after 1 ms 
+[2026-03-26T11:20:54.565] [DEBUG] debug-file - Executing task :raytv:default@CopyPreviewProfile
+[2026-03-26T11:20:54.573] [DEBUG] debug-file - Incremental task raytv:default@CopyPreviewProfile pre-execution cost: 7 ms .
+[2026-03-26T11:20:54.573] [DEBUG] debug-file - raytv : default@CopyPreviewProfile cost memory 0.0937957763671875
+[2026-03-26T11:20:54.574] [INFO] debug-file - UP-TO-DATE :raytv:default@CopyPreviewProfile...  
+[2026-03-26T11:20:54.578] [DEBUG] debug-file - Executing task :raytv:default@ReplacePreviewerPage
+[2026-03-26T11:20:54.578] [DEBUG] debug-file - raytv : default@ReplacePreviewerPage cost memory 0.21595001220703125
+[2026-03-26T11:20:54.578] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 579 ms 
+[2026-03-26T11:20:54.579] [INFO] debug-file - Finished :raytv:default@ReplacePreviewerPage... after 1 ms 
+[2026-03-26T11:20:54.583] [DEBUG] debug-file - Executing task :raytv:buildPreviewerResource
+[2026-03-26T11:20:54.584] [DEBUG] debug-file - raytv : buildPreviewerResource cost memory 0.01424407958984375
+[2026-03-26T11:20:54.584] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 585 ms 
+[2026-03-26T11:20:54.585] [INFO] debug-file - Finished :raytv:buildPreviewerResource... after 2 ms 
+[2026-03-26T11:20:54.591] [DEBUG] debug-file - Executing task :raytv:default@PreviewUpdateAssets
+[2026-03-26T11:20:54.603] [DEBUG] debug-file - Incremental task raytv:default@PreviewUpdateAssets pre-execution cost: 10 ms .
+[2026-03-26T11:20:54.604] [DEBUG] debug-file - raytv : default@PreviewUpdateAssets cost memory 0.10237884521484375
+[2026-03-26T11:20:54.609] [INFO] debug-file - UP-TO-DATE :raytv:default@PreviewUpdateAssets...  
+[2026-03-26T11:20:54.618] [DEBUG] debug-file - Executing task :raytv:default@PreviewArkTS
+[2026-03-26T11:20:54.620] [DEBUG] debug-file - obfuscationOptions: undefined
+[2026-03-26T11:20:54.626] [DEBUG] debug-file - Task 'raytv:default@PreviewArkTS' cost while wrapping incremental declarations: 1 ms 
+[2026-03-26T11:20:54.779] [DEBUG] debug-file - No watchWorker available for preview
+[2026-03-26T11:20:54.780] [DEBUG] debug-file - Can not reuse worker, create new worker for preview
+[2026-03-26T11:20:54.816] [DEBUG] debug-file - session manager: binding session. socketId=jjPgVS--kwxRIeIPAAAF, threadId=1@2.
+[2026-03-26T11:20:54.821] [DEBUG] debug-file - raytv : default@PreviewArkTS cost memory -24.882972717285156
+[2026-03-26T11:21:20.422] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchStart
+[2026-03-26T11:21:20.425] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchStart
+[2026-03-26T11:21:44.315] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.318] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.316] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.321] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.316] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.324] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.316] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.326] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.317] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.329] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.317] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.332] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.318] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.335] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.318] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.338] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.318] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.341] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.319] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.343] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.319] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.346] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.320] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.349] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.320] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.352] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.320] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.355] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.321] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.358] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.321] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.360] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.321] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.364] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.322] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.366] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.322] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.369] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.323] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.372] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.323] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.375] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.324] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.378] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.324] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.384] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.324] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.387] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.325] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.390] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.325] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.393] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.326] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.419] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.326] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.437] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.327] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.461] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.327] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.468] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.327] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.473] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.328] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.476] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.328] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.480] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.329] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.483] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.329] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.486] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.329] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.491] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.331] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.502] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.332] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.508] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.333] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.511] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.334] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.514] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.334] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.518] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.335] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.524] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.335] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.529] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.336] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.532] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.336] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.535] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.337] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.538] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.338] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.542] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.338] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.546] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.339] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.552] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.339] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.559] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.340] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.564] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.340] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.568] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.341] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.572] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.341] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.575] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.342] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.577] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.342] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.580] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.343] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.583] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.343] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.586] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.344] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.590] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.344] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.592] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.345] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.595] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.345] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.597] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.346] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.599] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.347] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.601] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.347] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.604] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.348] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.606] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.348] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.609] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.350] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.613] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.350] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.618] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.351] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.621] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.352] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.624] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.352] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.627] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.354] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.629] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.355] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.632] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.356] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.636] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.356] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.639] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.357] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.642] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.357] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.645] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.358] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.649] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.358] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.652] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.359] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.655] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.359] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.658] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.361] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.660] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.361] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.663] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.362] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.665] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.362] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.670] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.363] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.791] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.363] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.793] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.363] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.795] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.365] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.798] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.366] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.801] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.367] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.804] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.368] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.806] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.368] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.808] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.371] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.811] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.371] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.813] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.372] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.815] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.372] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.817] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.373] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.819] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.374] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.822] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.374] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.824] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.377] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.826] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.378] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.828] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.378] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.830] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.379] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.833] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.380] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.835] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.380] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.838] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.381] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.840] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.381] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.843] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.383] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.845] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.384] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.848] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.384] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.850] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.385] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.853] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.386] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.855] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.386] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.858] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.387] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.860] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.387] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.862] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.388] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.865] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.388] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.869] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.389] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.871] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.389] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.874] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.390] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.876] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.390] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.878] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.391] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.880] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.391] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.883] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.396] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.885] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:44.397] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:44.888] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:45.445] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:45.449] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:45.463] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:45.466] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:46.134] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:46.137] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:46.135] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:46.139] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:54.252] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:54.255] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:54.257] [ERROR] debug-file - ArkTsCompilerError [ArkTSCompilerError]: [31m10311009 ArkTS: ERROR
+Error Message: Failed to execute es2abc.
+
+* Try the following:
+  > Please refer to es2abc's error codes.
+[39m
+    at HvigorRollupLogger.printErrorAndExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\node_modules\@ohos\hvigor-arkts-base\dist\src\log\hvigor-rollup-logger.js:1:793)
+    at CommonLogger.printErrorAndExit (D:\Huawei\SDK\18\ets\build-tools\ets-loader\lib\fast_build\ark_compiler\logger.js:1:2209)
+    at ModulePreviewMode.<anonymous> (D:\Huawei\SDK\18\ets\build-tools\ets-loader\lib\fast_build\ark_compiler\module\module_mode.js:5:1331)
+    at ChildProcess.emit (node:events:529:35)
+    at maybeClose (node:internal/child_process:1098:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:303:5)
+[2026-03-26T11:21:54.253] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchLog
+[2026-03-26T11:21:54.257] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchLog
+[2026-03-26T11:21:54.259] [DEBUG] debug-file - default@PreviewArkTS watch work[2] failed.
+[2026-03-26T11:21:54.259] [ERROR] debug-file - Failed :raytv:default@PreviewArkTS... 
+[2026-03-26T11:21:54.260] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-26T11:21:54.386] [DEBUG] debug-file - ERROR: stacktrace = Error: default@PreviewArkTS watch work[2] failed.
+    at handleResponse (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\pool\worker-pool\watch-worker.js:1:1863)
+    at async Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\pool\worker-pool\watch-worker.js:1:3485)
+[2026-03-26T11:21:54.386] [ERROR] debug-file - Error: default@PreviewArkTS watch work[2] failed.
+    at handleResponse (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\pool\worker-pool\watch-worker.js:1:1863)
+    at async Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\pool\worker-pool\watch-worker.js:1:3485)
+[2026-03-26T11:21:54.407] [ERROR] debug-file - BUILD FAILED in 1 min 1 s 407 ms 
+[2026-03-26T11:21:54.407] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@PreBuild is up-to-date.
+[2026-03-26T11:21:54.408] [DEBUG] debug-file - Update task raytv:default@CreateModuleInfo output file:D:\tv\RayTV\raytv\.preview\default\generated\profile\default\ModuleInfo.ts cache.
+[2026-03-26T11:21:54.408] [DEBUG] debug-file - Incremental task raytv:default@CreateModuleInfo post-execution cost:1 ms .
+[2026-03-26T11:21:54.409] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@MergeProfile is up-to-date.
+[2026-03-26T11:21:54.409] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@CreateBuildProfile is up-to-date.
+[2026-03-26T11:21:54.409] [DEBUG] debug-file - Update task raytv:default@GeneratePkgContextInfo output file:D:\tv\RayTV\raytv\.preview\default\intermediates\loader\default\pkgContextInfo.json cache.
+[2026-03-26T11:21:54.409] [DEBUG] debug-file - Incremental task raytv:default@GeneratePkgContextInfo post-execution cost:1 ms .
+[2026-03-26T11:21:54.410] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@ProcessProfile is up-to-date.
+[2026-03-26T11:21:54.410] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@ProcessRouterMap is up-to-date.
+[2026-03-26T11:21:54.410] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@ProcessShareConfig is up-to-date.
+[2026-03-26T11:21:54.411] [DEBUG] debug-file - Update task raytv:default@ProcessStartupConfig output file:D:\tv\RayTV\raytv\.preview\default\intermediates\startup\default\startup_config.json cache.
+[2026-03-26T11:21:54.411] [DEBUG] debug-file - Incremental task raytv:default@ProcessStartupConfig post-execution cost:1 ms .
+[2026-03-26T11:21:54.411] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@GenerateLoaderJson is up-to-date.
+[2026-03-26T11:21:54.411] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@PreviewCompileResource is up-to-date.
+[2026-03-26T11:21:54.411] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@CopyPreviewProfile is up-to-date.
+[2026-03-26T11:21:54.412] [DEBUG] debug-file - There is no need to refresh cache, since the incremental task raytv:default@PreviewUpdateAssets is up-to-date.
+[2026-03-26T11:21:54.417] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\.preview\default\intermediates\loader\default cache by regenerate.
+[2026-03-26T11:21:54.419] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\.preview\default\intermediates\res\default\ResourceTable.txt cache by regenerate.
+[2026-03-26T11:21:54.420] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\.preview\default\intermediates\process_profile\default\module.json cache by regenerate.
+[2026-03-26T11:21:54.421] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\.preview\default\intermediates\res\default\resources\base\profile cache by regenerate.
+[2026-03-26T11:21:54.423] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\src\main\ets cache by regenerate.
+[2026-03-26T11:21:54.702] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS input file:D:\tv\RayTV\raytv\.preview\default\generated\profile\default\BuildProfile.ets cache by regenerate.
+[2026-03-26T11:21:54.703] [DEBUG] debug-file - Update task raytv:default@PreviewArkTS output file:D:\tv\RayTV\raytv\.preview\default\intermediates\loader_out\default\ets cache.
+[2026-03-26T11:21:54.703] [DEBUG] debug-file - Incremental task raytv:default@PreviewArkTS post-execution cost:292 ms .
+[2026-03-26T11:21:54.929] [DEBUG] debug-file - Current worker pool is stopped or closed.
+[2026-03-26T11:21:54.930] [DEBUG] debug-file - Clear worker 0.
+[2026-03-26T11:21:54.930] [DEBUG] debug-file - Worker 0 has been cleared.
+[2026-03-26T11:21:54.930] [DEBUG] debug-file - Current idle worker size: 1.
+[2026-03-26T11:21:54.930] [DEBUG] debug-file - Current busy worker size: 0.
+[2026-03-26T11:21:54.931] [DEBUG] debug-file - Clear worker 1.
+[2026-03-26T11:21:54.931] [DEBUG] debug-file - Worker 1 has been cleared.
+[2026-03-26T11:21:54.931] [DEBUG] debug-file - Current idle worker size: 0.
+[2026-03-26T11:21:54.931] [DEBUG] debug-file - Current busy worker size: 0.
+[2026-03-26T11:21:54.933] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-26T11:21:54.934] [DEBUG] debug-file - Current worker pool is terminated.
+[2026-03-26T11:21:54.938] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2026-03-26T11:21:54.947] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-26T11:21:54.948] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-26T11:21:54.940] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2026-03-26T11:21:58.962] [DEBUG] debug-file - watch worker: send response to session manager. Response type: WatchResult
+[2026-03-26T11:21:58.964] [DEBUG] debug-file - Ark compile finished.
+[2026-03-26T11:21:58.966] [DEBUG] debug-file - session manager: watch message received from worker 1. Type: WatchResult
+[2026-03-26T11:21:58.966] [DEBUG] debug-file - session manager: Invalid socket, socket is undefined or disconnected. Type: WatchResult
+[2026-03-26T11:21:58.966] [DEBUG] debug-file - default@PreviewArkTS watch work[2] failed.
+[2026-03-26T11:21:58.969] [DEBUG] debug-file - watch worker: worker is ready to be terminated.
+[2026-03-26T11:21:58.969] [DEBUG] debug-file - Server currently has 0 watch-worker
