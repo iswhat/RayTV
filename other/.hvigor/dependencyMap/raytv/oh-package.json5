@@ -1,0 +1,1 @@
+{"name":"raytv","version":"1.0.0","description":"RayTV - 一个强大的HarmonyOS视频播放器应用","main":"","author":"RayTV Team","license":"MIT","scripts":{"build":"hvigor assembleHap","dev":"hvigor assembleHap --hot-reload-build"},"dependencies":{},"devDependencies":{}}

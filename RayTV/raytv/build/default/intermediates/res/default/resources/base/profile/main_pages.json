@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/MainPage",
+    "pages/CategoryPage",
+    "pages/SearchPage",
+    "pages/ModernSettingsPage",
+    "pages/MediaDetailPage"
+  ]
+}

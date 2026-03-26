@@ -11,12 +11,12 @@ export struct ImageLazyLoader {
   @State private isError: boolean = false;
   @State private isLoaded: boolean = false;
   @State private currentSrc: string = '';
-  
+
   private cacheManager: ImageCacheManager = ImageCacheManager.getInstance();
   private retryCount: number = 0;
   private maxRetries: number = 3;
 
-  // 组件属性
+  // 组件属性 - 使用自定义名称避免与内置属性冲突
   @Prop src: string = '';
   @Prop placeholder: string = '';
   @Prop errorPlaceholder: string = '';
@@ -25,9 +25,9 @@ export struct ImageLazyLoader {
   @Prop rootMargin: string = '50px';
   @Prop enableCache: boolean = true;
   @Prop cacheKey: string = '';
-  @Prop width: number | string = '100%';
-  @Prop height: number | string = 'auto';
-  @Prop borderRadius: number | string = 0;
+  @Prop imgWidth: string | number = '100%';
+  @Prop imgHeight: string | number = 'auto';
+  @Prop imgRadius: string | number = 0;
   @Prop onLoad?: (src: string) => void;
   @Prop onError?: (error: Error) => void;
 
@@ -175,23 +175,23 @@ export struct ImageLazyLoader {
     Column() {
       if (this.isError && this.errorPlaceholder) {
         Image(this.errorPlaceholder)
-          .width(this.width)
-          .height(this.height)
-          .borderRadius(this.borderRadius)
+          .width(this.imgWidth)
+          .height(this.imgHeight)
+          .borderRadius(this.imgRadius)
           .onTouch(() => {
             this.retryCount = 0;
             this.loadImage();
           })
       } else if (this.isLoading && this.placeholder) {
         Image(this.placeholder)
-          .width(this.width)
-          .height(this.height)
-          .borderRadius(this.borderRadius)
+          .width(this.imgWidth)
+          .height(this.imgHeight)
+          .borderRadius(this.imgRadius)
       } else if (this.isLoaded && this.currentSrc) {
         Image(this.currentSrc)
-          .width(this.width)
-          .height(this.height)
-          .borderRadius(this.borderRadius)
+          .width(this.imgWidth)
+          .height(this.imgHeight)
+          .borderRadius(this.imgRadius)
           .onComplete(() => {
             console.log('Image loaded successfully');
           })
@@ -204,9 +204,9 @@ export struct ImageLazyLoader {
           Text('[ ]')
             .fontSize(24)
         }
-        .width(this.width)
-        .height(this.height)
-        .borderRadius(this.borderRadius)
+        .width(this.imgWidth)
+        .height(this.imgHeight)
+        .borderRadius(this.imgRadius)
         .backgroundColor('#f0f0f0')
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)

@@ -1,4 +1,4 @@
-﻿// ConfigParser - 配置解析器 | Config parser
+// ConfigParser - 配置解析器 | Config parser
 // 实现Fongmi配置文件解析和适配功能 | Implement Fongmi config file parsing and adaptation functionality
 
 import TypeSafetyHelper, { SafeObject } from '../../common/util/TypeSafetyHelper';
@@ -150,7 +150,7 @@ export class ConfigParser {
   public validateSite(site: SiteConfig | Site): boolean {
     try {
       // 使用TypeSafetyUtil确保安全访问 | Use TypeSafetyUtil to ensure safe access
-      const siteObj = TypeSafetyHelper.safeObject(site as unknown as SafeObject, {} as SafeObject) as unknown as SiteConfig;
+      const siteObj = TypeSafetyHelper.safeObject(site, {} as SiteConfig);
       
       // 基本字段验证 | Basic field validation
       const key = TypeSafetyHelper.safeGet(siteObj, 'key', '');
@@ -399,7 +399,7 @@ export class ConfigParser {
    */
   public detectSiteType(siteData: Record<string, string | number | boolean | Record<string, string | number | boolean>>): SiteType {
     // 根据站点配置特征自动判断类型 | Auto detect type based on site config features
-    const siteObj = TypeSafetyHelper.safeObject(siteData as unknown as SafeObject, {} as SafeObject) as unknown as Record<string, string | number | boolean | Record<string, string | number | boolean>>;
+    const siteObj = TypeSafetyHelper.safeObject(siteData, {} as Record<string, string | number | boolean | Record<string, string | number | boolean>>);
     const type = TypeSafetyHelper.safeString(TypeSafetyHelper.safeGet(siteObj, 'type', ''));
     if (type) {
       return this.convertSiteType(type);

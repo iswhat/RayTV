@@ -353,8 +353,7 @@ class LiveChannelPool implements ILiveChannelPool {
       const category: LiveCategory = {
         id: `cat_${index}`,
         name,
-        channelCount: data.count,
-        sources: Array.from(data.sources)
+        channelCount: data.count
       };
       categories.push(category);
     }

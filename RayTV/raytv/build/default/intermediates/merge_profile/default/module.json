@@ -1,0 +1,118 @@
+{
+	"app": {
+		"bundleName": "com.raytv.app",
+		"vendor": "example",
+		"versionCode": 1000000,
+		"versionName": "1.0.0",
+		"icon": "$media:app_icon",
+		"label": "$string:app_name",
+		"minAPIVersion": 18,
+		"targetAPIVersion": 18,
+		"apiReleaseType": "Release",
+		"description": "一个功能强大的视频播放应用",
+		"compileSdkVersion": "5.1.0.107",
+		"compileSdkType": "OpenHarmony",
+		"targetMinorAPIVersion": 0,
+		"targetPatchAPIVersion": 0,
+		"appEnvironments": [],
+		"bundleType": "app",
+		"buildMode": "debug",
+		"debug": true
+	},
+	"module": {
+		"name": "raytv",
+		"type": "entry",
+		"description": "$string:module_desc",
+		"mainElement": "MainAbility",
+		"deviceTypes": [
+			"default"
+		],
+		"deliveryWithInstall": true,
+		"installationFree": false,
+		"pages": "$profile:main_pages",
+		"abilities": [
+			{
+				"name": "MainAbility",
+				"srcEntry": "./ets/MainAbility.ets",
+				"description": "$string:RaytvAbility_desc",
+				"icon": "$media:app_icon",
+				"label": "$string:app_name",
+				"startWindowIcon": "$media:startIcon",
+				"startWindowBackground": "$color:start_window_background",
+				"exported": true,
+				"orientation": "unspecified",
+				"skills": [
+					{
+						"entities": [
+							"entity.system.home"
+						],
+						"actions": [
+							"ohos.want.action.home"
+						]
+					}
+				]
+			}
+		],
+		"extensionAbilities": [
+			{
+				"type": "backup",
+				"name": "raytvbackupability.RayTVBackupAbility",
+				"srcEntrance": "./ets/raytvbackupability/RayTVBackupAbility.ets",
+				"exported": true,
+				"metadata": [
+					{
+						"name": "ohos.extension.backup.config",
+						"resource": "$profile:backup_config"
+					}
+				]
+			}
+		],
+		"definePermissions": [
+			{
+				"name": "ohos.permission.DISTRIBUTED_DATASYNC",
+				"grantMode": "user_grant",
+				"availableLevel": "system_basic",
+				"label": "$string:permission_distributed_datasync_label",
+				"description": "$string:permission_distributed_datasync_desc"
+			},
+			{
+				"name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE",
+				"grantMode": "user_grant",
+				"availableLevel": "system_basic",
+				"label": "$string:permission_access_distributed_service_label",
+				"description": "$string:permission_access_distributed_service_desc"
+			}
+		],
+		"requestPermissions": [
+			{
+				"name": "ohos.permission.INTERNET",
+				"reason": "$string:permission_internet"
+			},
+			{
+				"name": "ohos.permission.GET_NETWORK_INFO",
+				"reason": "$string:permission_get_network_info"
+			},
+			{
+				"name": "ohos.permission.DISTRIBUTED_DATASYNC",
+				"reason": "$string:permission_distributed_datasync",
+				"usedScene": {
+					"abilities": [
+						"MainAbility"
+					],
+					"when": "inuse"
+				}
+			},
+			{
+				"name": "ohos.permission.ACCESS_DISTRIBUTED_SERVICE",
+				"reason": "$string:permission_access_distributed_service",
+				"usedScene": {
+					"abilities": [
+						"MainAbility"
+					],
+					"when": "inuse"
+				}
+			}
+		],
+		"packageName": "raytv"
+	}
+}

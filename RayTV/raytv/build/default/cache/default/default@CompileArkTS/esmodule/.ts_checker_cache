@@ -1,0 +1,4487 @@
+{
+  "runtimeOS": "OpenHarmony",
+  "sdkInfo": "true:18:5.1.0.107:Release",
+  "fileList": {
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Ability.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.rpc.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityLifecycleCallback.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\startAbilityParameter.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.dialogRequest.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\embedded_component.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FormMenu.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.pluginComponent.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Ability.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.EnvironmentCallback.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityLifecycleCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\folder_stack.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\navigation.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FoldSplitContainer.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.uiExtension.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets": {
+      "mtimeMs": 1773387150306.4614,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.hilog.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\dto\\ApiResponse.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\DatabaseManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\JsonUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TimeoutManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\raytvbackupability\\RayTVBackupAbility.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\content\\ContentAccessService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigSourceService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\EventBusUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\PinyinUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets": {
+      "mtimeMs": 1773387150257.9688,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets": {
+      "mtimeMs": 1774332790366.38,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\DeviceInfo.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.distributedHardware.deviceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2708
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets": {
+      "mtimeMs": 1774334543343.3318,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\commonTypes.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8,
+        2345,
+        2322
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\voice\\VoiceAssistantManager.ets": {
+      "mtimeMs": 1774323952319.5496,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\input\\GestureService.ets": {
+      "mtimeMs": 1774325853950.9683,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets": {
+      "mtimeMs": 1774338438678.9692,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        149
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\MainAbility.ets": {
+      "mtimeMs": 1774337687340.1748,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\voice\\VoiceAssistantManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\input\\GestureService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets"
+      ],
+      "parent": [],
+      "error": true,
+      "errorCodes": [
+        2769
+      ]
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Ability.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\raytvbackupability\\RayTVBackupAbility.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.OpenLinkOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.dialogRequest.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStartCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceProxy.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceExtensionConnectCallback.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EmbeddableUIAbilityContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.rpc.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Ability.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStageContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.EnvironmentCallback.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Skill.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStartCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\PhotoEditorExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.rpc.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.mediaquery.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentSnapshot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.dragController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.pointer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.appManager.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.preferences.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cryptoFramework.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.distributedKVStore.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.http.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.socket.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cert.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.file.fs.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.util.stream.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.events.emitter.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.fileio.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\input\\GestureService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\embedded_component.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\nav_destination.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\navigation.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\pattern_lock.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.print.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceNavigation.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FormMenu.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceWeb.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.pluginComponent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.prompt.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FoldSplitContainer.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.uiExtension.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FullScreenLaunchComponent.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.MultiNavigation.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.HalfScreenLaunchComponent.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ElementName.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.rpc.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\BundleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStageContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EventHub.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.contextConstant.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStageContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.print.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.contextConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.OpenLinkOptions.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.colorSpaceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.rpc.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.drawableDescriptor.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentSnapshot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\PhotoEditorExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.pointer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.screenshot.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.dialogRequest.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStartCallback.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FullScreenLaunchComponent.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.HalfScreenLaunchComponent.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceProxy.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceExtensionConnectCallback.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\BundleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ElementName.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\BundleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Skill.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\BundleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessInformation.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Skill.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\AbilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\units.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ElementName.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\BundleInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ApplicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Metadata.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\Skill.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\rawFileDescriptor.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.drawableDescriptor.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.preferences.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.distributedKVStore.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EventHub.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityLifecycleCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.EnvironmentCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ApplicationStateChangeCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessInformation.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.contextConstant.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.StateManagement.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\global\\rawFileDescriptor.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.drawableDescriptor.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.resourceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.colorSpaceManager.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityLifecycleCallback.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.UIAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.EnvironmentCallback.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AbilityConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ApplicationStateChangeCallback.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessInformation.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.appManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.bundleManager.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.appManager.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.font.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.mediaquery.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.inspector.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentUtils.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.animator.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.animator.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.measure.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentSnapshot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.dragController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.pointer.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\XComponentNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.InterstitialDialogAction.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RenderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\XComponentNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Content.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeContent.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\content_slot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\node_container.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ArcButton.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ProgressButtonV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBarV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButtonV2.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.font.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.mediaquery.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.inspector.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\action_sheet.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\alert_dialog.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\Index.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentUtils.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.animator.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.measure.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentSnapshot.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.dragController.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStageContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\FormExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EventHub.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStartCallback.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\VpnExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EmbeddableUIAbilityContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\PhotoEditorExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceProxy.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceExtensionConnectCallback.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.pointer.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\XComponentNode.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RenderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\XComponentNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\canvas.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.common2D.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RenderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\particle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\units.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RenderNode.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\XComponentNode.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Content.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeContent.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BuilderNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Content.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeContent.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Content.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.common2D.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\canvas.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.common2D.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.dragController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.StartOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.OpenLinkOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.ConfigurationConstant.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceProxy.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIServiceExtensionConnectCallback.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStageContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\HapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Configuration.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundleManager\\ExtensionAbilityInfo.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\FormExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\VpnExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\PhotoEditorExtensionContext.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\FormExtensionContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\data\\rdb\\resultSet.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityOperation.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.dataAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\VpnExtensionContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\EmbeddableUIAbilityContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\UIAbilityContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\PhotoEditorExtensionContext.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ExtensionContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\data\\rdb\\resultSet.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityOperation.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.dataAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityResult.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.dataAbility.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityOperation.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.rdb.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\data\\rdb\\resultSet.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityOperation.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.dataAbility.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\startAbilityParameter.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\abilityResult.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\appVersionInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityHelper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\connectOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\processInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\dataAbilityOperation.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\ability\\startAbilityParameter.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\app\\appVersionInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\processInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\elementName.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\hapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\appVersionInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\app\\processInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.ability.featureAbility.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\moduleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\customizeData.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\bundleInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\elementName.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\hapModuleInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\bundleInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\customizeData.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\hapModuleInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\bundleInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\bundleInfo.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\app\\context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\moduleInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\customizeData.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\bundleInfo.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\abilityInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\applicationInfo.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\bundle\\hapModuleInfo.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.bundle.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.appManager.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationStateObserver.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessInformation.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessInformation.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationStateObserver.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AppStateData.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStateData.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessData.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.appManager.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AppStateData.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationStateObserver.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\AbilityStateData.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationStateObserver.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ProcessData.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\ApplicationStateObserver.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.hilog.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets": {
+      "mtimeMs": 1773732103004.1538,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\TypeUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\TypeUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\JsonUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\EventBusUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\PinyinUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\TypeUtils.ets": {
+      "mtimeMs": 1774324847539.808,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\types\\ArkTSBaseTypes.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\types\\ArkTSBaseTypes.ets": {
+      "mtimeMs": 1773379190219.3079,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\TypeUtils.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\DeviceInfo.ets": {
+      "mtimeMs": 1768454810131.923,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets": {
+      "mtimeMs": 1774327747686.7585,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\AppError.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\dto\\ApiResponse.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\voice\\VoiceAssistantManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets": {
+      "mtimeMs": 1774328390218.9846,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345,
+        2352
+      ]
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.distributedHardware.deviceManager.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\device\\DeviceFlowManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets": {
+      "mtimeMs": 1774333168126.3289,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.preferences.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cryptoFramework.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.buffer.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\SearchHistoryRepository.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\ThemeProvider.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets": {
+      "mtimeMs": 1774333754616.6016,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Config.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8,
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\AppError.ets": {
+      "mtimeMs": 1770717251951.2803,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\dto\\ApiResponse.ets": {
+      "mtimeMs": 1767775313230.545,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.preferences.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cryptoFramework.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cert.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.buffer.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets": {
+      "mtimeMs": 1774238255834.6775,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Config.ets": {
+      "mtimeMs": 1768213774977.3823,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets": {
+      "mtimeMs": 1774324041494.647,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.distributedKVStore.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345,
+        2352
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\commonTypes.ets": {
+      "mtimeMs": 1767939951639.4392,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\DataSyncService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.distributedKVStore.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\sync\\ModernDistributedDataService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets": {
+      "mtimeMs": 1774328876562.873,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\dto\\ApiResponse.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\voice\\VoiceAssistantManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        134
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets": {
+      "mtimeMs": 1774325741175.0896,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\voice\\VoiceAssistantManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        28007
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets": {
+      "mtimeMs": 1774332103859.5386,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        134,
+        8,
+        34,
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets": {
+      "mtimeMs": 1774327546169.8296,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigParser.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\Container.ets": {
+      "mtimeMs": 1774322572910.1,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets": {
+      "mtimeMs": 1774327515184.4917,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\FileUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\JsonUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TypeSafetyHelper.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345,
+        2322
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets": {
+      "mtimeMs": 1774328835866.1519,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\DatabaseManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\TableSchema.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\JsonUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets": {
+      "mtimeMs": 1774330489991.135,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.http.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.common.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\URLValidator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\AppError.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ErrorHandler.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.file.fs.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteService_fixed.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\di\\ServiceRegistry.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigSourceService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2322,
+        2345
+      ]
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.sendableRelationalStore.d.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.sendableRelationalStore.d.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\DatabaseManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\DatabaseManager.ets": {
+      "mtimeMs": 1774330477994.6646,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\TableSchema.ets": {
+      "mtimeMs": 1767775184341.827,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\JsonUtil.ets": {
+      "mtimeMs": 1773387150297.3738,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.sendableRelationalStore.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.collections.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.lang.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.collections.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.lang.d.ets"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.sendableRelationalStore.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.lang.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.sendableRelationalStore.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\arkts\\@arkts.collections.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\FileUtil.ets": {
+      "mtimeMs": 1768540727446.9714,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.http.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\permissions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\security\\PermissionRequestResult.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\URLValidator.ets": {
+      "mtimeMs": 1774325834977.2395,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.file.fs.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.util.stream.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.http.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.socket.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.http.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.socket.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.socket.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cert.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.connection.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cert.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cryptoFramework.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.net.socket.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\permissions.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\security\\PermissionRequestResult.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.abilityAccessCtrl.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.util.stream.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.events.emitter.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.file.fs.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.events.emitter.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.util.stream.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets": {
+      "mtimeMs": 1774329008498.1887,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets": {
+      "mtimeMs": 1774322393480.986,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2322
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJsLoader.ets": {
+      "mtimeMs": 1774328981198.7002,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2322,
+        2352
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets": {
+      "mtimeMs": 1774339733156.811,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\CrawlerService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TimeoutManager.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8,
+        90,
+        38,
+        2613,
+        2415,
+        2345,
+        2339,
+        2352,
+        2304,
+        2552
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets": {
+      "mtimeMs": 1774332578769.4734,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\BaseLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.fileio.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TimeoutManager.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\LoaderFactory.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8,
+        28007,
+        2339,
+        2416
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets": {
+      "mtimeMs": 1774326803868.0498,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.taskpool.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\commonTypes.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets": {
+      "mtimeMs": 1774332856542.1833,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\utils\\ImageCacheManager.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2339
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\TimeoutManager.ets": {
+      "mtimeMs": 1773732103970.3677,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkPyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.taskpool.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\task\\pool\\TaskPoolManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.fileio.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\loader\\ArkJarLoader.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\raytvbackupability\\RayTVBackupAbility.ets": {
+      "mtimeMs": 1773387151386.72,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Ability.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\Index.ets": {
+      "mtimeMs": 1773393697681.9019,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts"
+      ],
+      "parent": [],
+      "error": true,
+      "errorCodes": [
+        28007
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\content\\ContentAccessService.ets": {
+      "mtimeMs": 1774324470942.5518,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.colorSpaceManager.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.hdrCapability.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FoldSplitContainer.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ContentSourceBadge.ets": {
+      "mtimeMs": 1774350510189.6104,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2305,
+        2416,
+        2554,
+        8
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ImageLazyLoader.ets": {
+      "mtimeMs": 1774349757964.6633,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\utils\\ImageCacheManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\LazyLoadTypes.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\resources\\Strings.ets": {
+      "mtimeMs": 1774349381065.0615,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        38,
+        1117
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets": {
+      "mtimeMs": 1774349851518.4392,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\content\\ContentAccessService.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ContentSourceBadge.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ImageLazyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\LazyLoadTypes.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\resources\\Strings.ets"
+      ],
+      "parent": [],
+      "error": true,
+      "errorCodes": [
+        28,
+        138,
+        60
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets": {
+      "mtimeMs": 1774350169300.9807,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigSourceService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\live\\LiveChannelTypes.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\live\\LiveChannelTypes.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\live\\LiveChannelTypes.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\content\\ContentAccessService.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets": {
+      "mtimeMs": 1773896933219.581,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\dto\\ApiResponse.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\content\\ContentAccessService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigSourceService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigSourceService.ets": {
+      "mtimeMs": 1774328263920.5818,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\interfaces\\IConfigSourceService.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\live\\LiveChannelTypes.ets": {
+      "mtimeMs": 1774324491158.6274,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\pool\\SourcePoolManager.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.hdrCapability.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\utils\\ImageCacheManager.ets": {
+      "mtimeMs": 1774324083839.8105,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\MemoryManager.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ImageLazyLoader.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\LazyLoadTypes.ets": {
+      "mtimeMs": 1773636016305.3784,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ImageLazyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\MainPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\MediaItem.ets": {
+      "mtimeMs": 1768213351584.536,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\VirtualList.ets": {
+      "mtimeMs": 1774328179532.194,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\VirtualListTypes.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        28007
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\VirtualListTypes.ets": {
+      "mtimeMs": 1774243330864.325,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\VirtualList.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\CategoryPage.ets": {
+      "mtimeMs": 1774325872660.5662,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\MediaItem.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\VirtualList.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\VirtualListTypes.ets"
+      ],
+      "parent": [],
+      "error": true,
+      "errorCodes": [
+        2322
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\SearchHistoryRepository.ets": {
+      "mtimeMs": 1774334206862.771,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\EventBusUtil.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets": {
+      "mtimeMs": 1774259031572.6724,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Vod.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Live.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\config\\ConfigService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\PinyinUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Config.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\PinyinUtil.ets": {
+      "mtimeMs": 1773387150355.048,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\EventBusUtil.ets": {
+      "mtimeMs": 1773387150268.0813,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\SearchHistoryRepository.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        2345
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\ThemeProvider.ets": {
+      "mtimeMs": 1774325787588.9165,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\DesignSystem.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\StorageUtil.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\pages\\SearchPage.ets": {
+      "mtimeMs": 1774324152268.892,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\navigation\\AppNavigator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\SearchHistoryRepository.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\media\\MediaService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\PinyinUtil.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\EventBusUtil.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\ThemeProvider.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets"
+      ],
+      "parent": [],
+      "error": true,
+      "errorCodes": [
+        2322
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\spider\\SiteManager.ets": {
+      "mtimeMs": 1773387152338.8762,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Site.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\dao\\SiteDao.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Vod.ets": {
+      "mtimeMs": 1768213775044.008,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Live.ets": {
+      "mtimeMs": 1768213288518.0852,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets": {
+      "mtimeMs": 1774325990683.8352,
+      "children": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\TableSchema.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\HttpService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\bean\\Vod.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\types\\commonTypes.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\search\\SearchService.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets": {
+      "mtimeMs": 1774332634741.8752,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.relationalStore.d.ts",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\DatabaseManager.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\Logger.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\ark\\ObjectUtils.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\SQLValidator.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\service\\cache\\CacheService.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\repository\\VodRepository.ets"
+      ],
+      "error": true,
+      "errorCodes": [
+        8
+      ]
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\common\\util\\SQLValidator.ets": {
+      "mtimeMs": 1774323296219.1072,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\data\\db\\SQLiteHelper.ets"
+      ],
+      "error": false
+    },
+    "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\DesignSystem.ets": {
+      "mtimeMs": 1774262023347.616,
+      "children": [],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\design\\ThemeProvider.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\action_sheet.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\alert_dialog.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\canvas.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.uniformTypeDescriptor.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.intentionCode.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SymbolGlyphModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.uiEffect.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.theme.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\with_theme.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Dialog.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\common.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.pointer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.uniformTypeDescriptor.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.data.unifiedDataChannel.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimodalInput.intentionCode.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SymbolGlyphModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.uiEffect.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.uiEffect.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ComponentContent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.theme.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\ScenePostProcessSettings.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneTypes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\Scene.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\component3d.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\component3d.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\ScenePostProcessSettings.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneTypes.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\Scene.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneTypes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\Scene.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneTypes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\ScenePostProcessSettings.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\Scene.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\Scene.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneResources.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneNodes.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\graphics3d\\SceneTypes.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.scene.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\content_slot.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\embedded_component.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\folder_stack.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.matrix4.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\image.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.drawableDescriptor.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.matrix4.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\nav_destination.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\navigation.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\node_container.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\particle.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\pattern_lock.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CommonModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\tabs.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\tabs.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CommonModifier.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.drawing.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.common2D.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\text_common.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\text_common.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.graphics.text.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.intl.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\time_picker.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\time_picker.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.intl.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\with_theme.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.theme.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\units.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\global\\resource.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\Graphics.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.security.cert.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.print.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.netErrorList.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\web.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\build-tools\\ets-loader\\declarations\\web.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts"
+      ],
+      "parent": [],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.print.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\Context.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.netErrorList.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.web.webview.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.animator.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceNavigation.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceSearch.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ArcButton.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Chip.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.NavPushPathHelper.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ChipGroup.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ComposeListItem.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ComposeTitleBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Counter.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Dialog.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.DialogV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.EditableTitleBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ExceptionPrompt.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Filter.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FormMenu.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.GridObjectSortComponent.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Popup.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ProgressButton.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ProgressButtonV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButton.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SelectionMenu.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SelectTitleBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SplitLayout.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeader.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SwipeRefresher.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.TabTitleBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBarV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.TreeView.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.InterstitialDialogAction.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentSnapshot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.componentUtils.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.dragController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.drawableDescriptor.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.inspector.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.observer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.StateManagement.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.shape.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.curves.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceWeb.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.font.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.matrix4.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.measure.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.mediaquery.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.pluginComponent.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.prompt.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.promptAction.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.router.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.screenshot.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@system.app.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@system.configuration.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@system.mediaquery.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@system.prompt.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@system.router.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcList.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcAlphabetIndexer.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcScrollBar.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.theme.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FoldSplitContainer.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.uiExtension.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FullScreenLaunchComponent.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceTabs.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.Prefetcher.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.DownloadFileButton.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.MultiNavigation.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ArcSlider.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcSwiper.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeaderV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButtonV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.HalfScreenLaunchComponent.d.ets"
+      ],
+      "parent": [
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ImageLazyLoader.ets",
+        "D:\\tv\\RayTV\\raytv\\src\\main\\ets\\components\\ContentSourceBadge.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceNavigation.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceSearch.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeader.d.ets"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ArcButton.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Chip.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ChipGroup.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.NavPushPathHelper.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ChipGroup.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Chip.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ComposeListItem.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ComposeTitleBar.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Counter.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Dialog.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.theme.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.DialogV2.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.EditableTitleBar.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ExceptionPrompt.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Filter.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FormMenu.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.form.formBindingData.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.GridObjectSortComponent.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Popup.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ProgressButton.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ProgressButtonV2.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButton.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SelectionMenu.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SelectTitleBar.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SplitLayout.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeader.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceSearch.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SwipeRefresher.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.TabTitleBar.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBar.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBarV2.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.TreeView.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.InterstitialDialogAction.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.UIContext.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.StateManagement.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.contextConstant.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.curves.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceWeb.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.PiPWindow.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\application\\BaseContext.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NodeController.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\FrameNode.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.pluginComponent.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.Want.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.prompt.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.screenshot.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.multimedia.image.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@system.app.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@system.configuration.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@system.mediaquery.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@system.prompt.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@system.router.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcList.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcAlphabetIndexer.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcScrollBar.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FoldSplitContainer.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.display.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.uiExtension.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.window.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FullScreenLaunchComponent.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.AtomicServiceTabs.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CommonModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\AlphabetIndexerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BlankModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ButtonModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CalendarPickerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CheckboxModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CheckboxGroupModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ColumnModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ColumnSplitModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CounterModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DataPanelModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DatePickerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DividerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GaugeModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridColModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridItemModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridRowModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\HyperlinkModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageAnimatorModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SymbolGlyphModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageSpanModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\LineModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListItemModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListItemGroupModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\LoadingProgressModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MarqueeModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MenuModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MenuItemModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavDestinationModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavigationModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavigatorModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavRouterModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PanelModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PathModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PatternLockModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PolygonModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PolylineModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ProgressModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\QRCodeModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RadioModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RatingModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RectModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RefreshModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RichEditorModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RowModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RowSplitModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ScrollModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SearchModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SelectModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ShapeModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SideBarContainerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SliderModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SpanModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\StackModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\StepperItemModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SwiperModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TabsModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextAreaModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextClockModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextInputModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextPickerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextTimerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TimePickerModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ToggleModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\VideoModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\WaterFlowModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\AttributeUpdater.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ContainerSpanModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SymbolSpanModifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ParticleModifier.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeader.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.Chip.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ChipGroup.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBar.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ToolBarV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeaderV2.d.ets",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButtonV2.d.ets"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.Prefetcher.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.DownloadFileButton.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.MultiNavigation.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.ArcSlider.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.ArcSwiper.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SubHeaderV2.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.SegmentButtonV2.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.node.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.atomicservice.HalfScreenLaunchComponent.d.ets": {
+      "mtimeMs": 978278400000,
+      "children": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.ability.AtomicServiceOptions.d.ts",
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.base.d.ts"
+      ],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\kits\\@kit.ArkUI.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\AlphabetIndexerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\BlankModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ButtonModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CalendarPickerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CheckboxModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CheckboxGroupModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ColumnModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ColumnSplitModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\CounterModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DataPanelModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DatePickerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\DividerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GaugeModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridColModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridItemModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\GridRowModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\HyperlinkModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageAnimatorModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ImageSpanModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\LineModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListItemModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ListItemGroupModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\LoadingProgressModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MarqueeModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MenuModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\MenuItemModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavDestinationModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavigationModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavigatorModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\NavRouterModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PanelModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PathModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PatternLockModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PolygonModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\PolylineModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ProgressModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\QRCodeModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RadioModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RatingModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RectModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RefreshModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RichEditorModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RowModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\RowSplitModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ScrollModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SearchModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SelectModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ShapeModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SideBarContainerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SliderModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SpanModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\StackModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\StepperItemModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SwiperModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TabsModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextAreaModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextClockModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextInputModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextPickerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TextTimerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\TimePickerModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ToggleModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\VideoModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\WaterFlowModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\AttributeUpdater.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ContainerSpanModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\SymbolSpanModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\arkui\\ParticleModifier.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.modifier.d.ts"
+      ],
+      "error": false
+    },
+    "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.app.form.formBindingData.d.ts": {
+      "mtimeMs": 978278400000,
+      "children": [],
+      "parent": [
+        "D:\\Huawei\\SDK\\18\\ets\\api\\@ohos.arkui.advanced.FormMenu.d.ets"
+      ],
+      "error": false
+    }
+  }
+}

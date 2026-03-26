@@ -1,6 +1,6 @@
 /**
  * Content Source Badge - 内容来源标识组件
- * 
+ *
  * 用于在各个页面显示内容项的来源信息
  * 支持显示源名称、源标签、优先级等
  */
@@ -183,7 +183,7 @@ export struct SourceCard {
   priority: number = 1;
   tags: string[] = [];
   contentUsage: Record<string, boolean> = {};
-  onClick?: () => void;
+  onClick?: (event?: any) => void;
   onToggle?: (isActive: boolean) => void;
   
   build() {

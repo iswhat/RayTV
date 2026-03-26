@@ -5,10 +5,7 @@
     "description": "$string:module_desc",
     "mainElement": "MainAbility",
     "deviceTypes": [
-      "phone",
-      "tablet",
-      "2in1",
-      "tv"
+      "default"
     ],
     "deliveryWithInstall": true,
     "installationFree": false,

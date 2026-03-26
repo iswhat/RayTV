@@ -1,4 +1,4 @@
-﻿// 提供站点管理的核心功能，包括站点的增删改查、导入导出、测试连接等 | Provides core site management functionality, including site CRUD, import/export, connection testing, etc.
+// 提供站点管理的核心功能，包括站点的增删改查、导入导出、测试连接等 | Provides core site management functionality, including site CRUD, import/export, connection testing, etc.
 import LoggerUtil from '../../common/util/Logger';
 import { LoaderType, Site, SiteAuth, SiteFilterConfig, SiteHeaders, SiteLifecycle, SitePerformanceConfig, SiteSearchConfig, SiteStats, SiteType } from '../../data/bean/Site';
 import { SiteDao } from '../../data/db/dao/SiteDao';
@@ -275,7 +275,7 @@ export class SiteService implements ISiteService {
   public async getEnabledSites(): Promise<Site[]> {
     try {
       const allSites = await this.getAllSites();
-      return allSites.filter<Site>(site => site.enabled);
+      return allSites.filter(site => site.enabled);
     } catch (error) {
       LoggerUtil.error(TAG, `Failed to get enabled sites: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -290,7 +290,7 @@ export class SiteService implements ISiteService {
   public async getSitesByType(type: SiteType): Promise<Site[]> {
     try {
       const allSites = await this.getAllSites();
-      return allSites.filter<Site>(site => site.type === type);
+      return allSites.filter(site => site.type === type);
     } catch (error) {
       LoggerUtil.error(TAG, `Failed to get sites by type ${type}: ${error instanceof Error ? error.message : String(error)}`);
       throw error instanceof Error ? error : new Error(String(error));
@@ -502,7 +502,7 @@ export class SiteService implements ISiteService {
         const httpService = HttpService.getInstance();
         
         // 发送实际的HTTP请求 Send actual HTTP request
-        const response = await httpService.get(site.api, {
+        const response = await httpService.get<Record<string, string | number | boolean | object>> (site.api, {
           timeout: 10000,
           cache: false
         });
@@ -547,10 +547,10 @@ export class SiteService implements ISiteService {
           const httpService = HttpService.getInstance();
           
           // 尝试获取首页数据 Try to get home page data
-          const homeResponse = await httpService.get(`${site.api}/home`, {
-            timeout: 10000,
-            cache: false
-          });
+        const homeResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/home`, {
+          timeout: 10000,
+          cache: false
+        });
           
           if (homeResponse.status >= 200 && homeResponse.status < 300) {
             // API响应正常 API response normal
@@ -562,10 +562,10 @@ export class SiteService implements ISiteService {
           const httpService = HttpService.getInstance();
           
           // 尝试获取频道列表 Try to get channel list
-          const channelResponse = await httpService.get(`${site.api}/channels`, {
-            timeout: 10000,
-            cache: false
-          });
+        const channelResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/channels`, {
+          timeout: 10000,
+          cache: false
+        });
           
           if (channelResponse.status >= 200 && channelResponse.status < 300) {
             // API响应正常 API response normal
@@ -791,7 +791,7 @@ export class SiteService implements ISiteService {
       const httpService = HttpService.getInstance();
       
       // 发送HTTP请求获取推荐内容 Send HTTP request to get recommendations
-      const response = await httpService.get(`${site.api}/recommendations`, {
+      const response = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/recommendations`, {
         timeout: 10000,
         cache: true
       });
@@ -825,7 +825,7 @@ export class SiteService implements ISiteService {
       const httpService = HttpService.getInstance();
 
       // 发送HTTP请求获取热门内容 Send HTTP request to get popular content
-      const response = await httpService.get(`${site.api}/popular`, {
+      const response = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/popular`, {
         timeout: 10000,
         cache: true
       });
@@ -859,7 +859,7 @@ export class SiteService implements ISiteService {
       const httpService = HttpService.getInstance();
 
       // 发送HTTP请求获取最新内容 Send HTTP request to get new content
-      const response = await httpService.get(`${site.api}/new`, {
+      const response = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/new`, {
         timeout: 10000,
         cache: true
       });

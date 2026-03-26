@@ -18,6 +18,7 @@ import { SourceCard } from '../components/ContentSourceBadge';
 import display from '@ohos.display';
 import DesignSystem from '../design/DesignSystem';
 import ThemeProvider, { Theme } from '../design/ThemeProvider';
+import Strings from '../common/resources/Strings';
 
 // 设置项 | Setting item
 export interface SettingItem {
@@ -61,7 +62,7 @@ struct SettingsPage {
   // 状态管理 | State management
   @State isLoading: boolean = true;
   @State isError: boolean = false;
-  @State errorMessage: string = '加载失败';
+  @State errorMessage: string = Strings.common.error;
   @State isLandscape: boolean = false;
   @State screenWidth: number = 0;
   @State screenHeight: number = 0;
@@ -747,7 +748,7 @@ struct SettingsPage {
         Column() {
           if (this.isLoading) {
             Column() {
-              Text('加载中...')
+              Text(Strings.common.loading)
                 .fontSize(20)
                 .fontColor(colors.textSecondary)
                 .margin(spacing.lg)
@@ -756,7 +757,7 @@ struct SettingsPage {
             .height(500)
           } else if (this.isError) {
             Column() {
-              Text('加载失败')
+              Text(Strings.common.failed)
                 .fontSize(20)
                 .fontColor(colors.error)
                 .margin({ top: spacing.md })
@@ -765,7 +766,7 @@ struct SettingsPage {
                 .fontColor(colors.warning)
                 .margin({ top: spacing.sm, left: spacing.lg, right: spacing.lg })
                 .textAlign(TextAlign.Center)
-              Button('重试')
+              Button(Strings.common.retry)
                 .onClick(() => this.loadAllData())
                 .backgroundColor(colors.primary)
                 .fontColor(colors.surface)
@@ -779,7 +780,7 @@ struct SettingsPage {
             // 网络源管理区域
             Column() {
               Row() {
-                Text('网络源管理')
+                Text(Strings.settingsPage.networkSources)
                   .fontSize(18)
                   .fontWeight(600)
                   .fontColor(colors.text)
@@ -816,7 +817,7 @@ struct SettingsPage {
               .padding({ left: spacing.md, right: spacing.md, bottom: spacing.md })
               
               // 添加新源按钮
-              Button('+ 添加网络源')
+              Button(Strings.settingsPage.addSource)
                 .width('100%')
                 .height(45)
                 .margin({ left: spacing.md, right: spacing.md, bottom: spacing.md })

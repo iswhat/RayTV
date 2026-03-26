@@ -1,0 +1,239 @@
+{
+  "version": "2.0",
+  "ppid": 30568,
+  "events": [
+    {
+      "head": {
+        "id": "00dcf57b-7b95-4f30-bec2-478c3c7b1e21",
+        "name": "watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231045054900
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "6c3454b9-2b87-49bd-bf42-95520d15aed1",
+        "name": "Since there is no instance or instance is terminated, create a new worker pool.",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231054207000
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "79224600-89f7-4300-b6cc-a320185a6459",
+        "name": "Worker pool is initialized with config:  {\n  minPoolNum: 2,\n  maxPoolNum: undefined,\n  maxCoreSize: undefined,\n  cacheCapacity: undefined,\n  cacheTtl: undefined\n}",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231054997200
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "25821f3b-905a-4fd1-96da-960ce4098e56",
+        "name": "Create  resident worker with id: 0.",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231056366400
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "addefcea-41cb-4cec-8cdd-8e167fae6ea6",
+        "name": "Create  resident worker with id: 1.",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231060820600
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "c0b7a246-6277-4310-8196-c852b1f65356",
+        "name": "Workers' log level updated to INFO",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231065807900
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "86696c0a-4bf5-4bd5-b594-4aba0cea181f",
+        "name": "hvigor build process will be closed with an error.",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231071255100
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "c67f5bec-e8d7-454f-bf9a-537c1fb3f335",
+        "name": "\u001b[31m00304035 Not Found\r\nError Message: Cannot find project build file build-profile.json5 under folder: D:\\tv\\RayTV.\r\n\r\n* Try the following:\r\n  > Make sure that the project has build-profile.json5 file.\r\n\u001b[39m\r\n\r\n\u001b[31m* Try:\r\n> Run with --stacktrace option to get the stack trace.\r\n> Run with --debug option to get more log output.\r\n",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231071699900
+      },
+      "additional": {
+        "logType": "error",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "39c4a3db-5dc4-4be3-b8e2-bbe1b8192301",
+        "name": "ERROR: stacktrace = AdaptorError: \u001b[31m00304035 Not Found\r\nError Message: Cannot find project build file build-profile.json5 under folder: D:\\tv\\RayTV.\r\n\r\n* Try the following:\r\n  > Make sure that the project has build-profile.json5 file.\r\n\u001b[39m\n    at HvigorLogger.printErrorExit (C:\\Program Files\\Huawei\\DevEco Studio\\tools\\hvigor\\hvigor\\src\\base\\log\\hvigor-log.js:1:5087)\n    at initEnvConfigProps (C:\\Program Files\\Huawei\\DevEco Studio\\tools\\hvigor\\hvigor\\src\\base\\boot\\hooks\\init-env-config-props.js:1:946)\n    at boot (C:\\Program Files\\Huawei\\DevEco Studio\\tools\\hvigor\\hvigor\\src\\base\\boot\\index.js:1:1618)\n    at Worker.<anonymous> (C:\\Program Files\\Huawei\\DevEco Studio\\tools\\hvigor\\hvigor\\src\\base\\daemon\\cluster\\worker-process-lifecycle.js:1:3747)\n    at Worker.emit (node:events:529:35)\n    at process.<anonymous> (node:internal/cluster/worker:35:12)\n    at process.emit (node:events:529:35)\n    at emit (node:internal/child_process:944:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231073232300
+      },
+      "additional": {
+        "logType": "debug",
+        "children": []
+      }
+    },
+    {
+      "head": {
+        "id": "28495154-498a-4ddb-ae35-557ad73997f7",
+        "name": "\"buildFinished\" hook function",
+        "description": "",
+        "type": "duration"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231093911700,
+        "endTime": 90231096220200
+      },
+      "additional": {
+        "children": [],
+        "state": "success",
+        "targetName": "",
+        "moduleName": "",
+        "category": "",
+        "taskRunReasons": [],
+        "parent": "f450563d-38c8-48bb-b2c6-359b380dfdd2",
+        "logId": "edc300bf-64fd-4669-954b-bcee890d4dd3"
+      },
+      "log": {
+        "_logger": {
+          "category": "DurationEvent",
+          "context": {},
+          "callStackSkipIndex": 0
+        },
+        "_filelogger": {
+          "category": "debug-file",
+          "context": {},
+          "callStackSkipIndex": 0
+        },
+        "anonymizeFileLogger": {
+          "fileLogger": {
+            "category": "debug-file",
+            "context": {},
+            "callStackSkipIndex": 0
+          }
+        }
+      }
+    },
+    {
+      "head": {
+        "id": "edc300bf-64fd-4669-954b-bcee890d4dd3",
+        "name": "\"buildFinished\" hook function",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231093911700,
+        "endTime": 90231096220200
+      },
+      "additional": {
+        "logType": "info",
+        "children": [],
+        "durationId": "28495154-498a-4ddb-ae35-557ad73997f7"
+      }
+    },
+    {
+      "head": {
+        "id": "cb1ad632-cdaa-4673-9a53-2fc81549a45b",
+        "name": "BUILD FAILED in 25 h 3 min 51 s 97 ms ",
+        "description": "",
+        "type": "log"
+      },
+      "body": {
+        "pid": 20228,
+        "tid": "Main Thread",
+        "startTime": 90231097591400
+      },
+      "additional": {
+        "logType": "error",
+        "children": []
+      }
+    }
+  ],
+  "workLog": []
+}

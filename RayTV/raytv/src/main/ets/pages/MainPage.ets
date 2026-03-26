@@ -4,6 +4,7 @@ import ContentAccessServiceInstance, { ContentAccessService } from '../service/c
 import display from '@ohos.display';
 import ContentSourceBadge from '../components/ContentSourceBadge';
 import { ImageLazyLoader } from '../components/ImageLazyLoader';
+import { LazyLoadStrategy } from '../types/LazyLoadTypes';
 import Strings from '../common/resources/Strings';
 
 /**
@@ -92,28 +93,25 @@ struct MainPage {
   // 组件销毁时清理 | Clean up on component destroy
   aboutToDisappear() {
     if (this.dateUpdateTimer !== -1) {
-      cancelAnimationFrame(this.dateUpdateTimer);
+      // 使用 setInterval 清理机制
+      clearInterval(this.dateUpdateTimer);
       this.dateUpdateTimer = -1;
     }
   }
 
   // 高效的日期更新方法 | Efficient date update method
   private updateDateEfficiently(): void {
-    const updateDate = () => {
+    // 使用 setInterval 每秒检查一次分钟变化
+    this.dateUpdateTimer = setInterval(() => {
       const now = new Date();
       const currentMinute = now.getMinutes();
-      
+
       // 只在分钟变化时更新，减少渲染次数
       if (!this.lastMinute || this.lastMinute !== currentMinute) {
         this.updateCurrentDate();
         this.lastMinute = currentMinute;
       }
-      
-      // 继续下一帧更新
-      this.dateUpdateTimer = requestAnimationFrame(updateDate);
-    };
-    
-    updateDate();
+    }, 1000) as number;
   }
   
   // 更新当前日期 | Update current date
@@ -161,10 +159,10 @@ struct MainPage {
 
       if (allVodSites.length > 0) {
         // 将VodSiteWithSource转换为FeaturedMediaItem
-        const toMediaItem = (site: ReturnType<typeof this.contentService.getAllVodSites>[number], idx: number): FeaturedMediaItem => ({
+        const toMediaItem = (site: import('../service/pool/SourcePoolManager').VodSiteWithSource, idx: number): FeaturedMediaItem => ({
           id: `${site.siteKey}_${idx}`,
           title: site.name,
-          cover: site.logo || '',
+          cover: '', // VodSiteWithSource 没有 logo 字段，使用空字符串
           type: 'vod',
           siteKey: site.siteKey,
           sourceId: site.sourceId,
@@ -298,20 +296,18 @@ struct MainPage {
     Column() {
       Stack() {
         ImageLazyLoader({
-          imageUrl: media.cover || '',
-          width: '100%',
-          height: this.isLandscape ? 320 : 240,
-          fit: 'cover',
-          borderRadius: 12,
-          placeholderColor: '#2C2C2C',
-          priority: 'high'
+          src: media.cover || '',
+          imgWidth: '100%',
+          imgHeight: this.isLandscape ? 320 : 240,
+          imgRadius: 12,
+          placeholder: '',
+          lazyStrategy: LazyLoadStrategy.VISIBLE
         })
         
         // 来源标识 | Source badge
         if (media.sourceName) {
           ContentSourceBadge({
-            sourceName: media.sourceName,
-            sourceId: media.sourceId || ''
+            sourceName: media.sourceName
           })
           .position({ top: 8, right: 8 })
         }

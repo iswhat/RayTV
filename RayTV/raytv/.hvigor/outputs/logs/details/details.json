@@ -1,0 +1,27 @@
+{
+  "HVIGOR": {
+    "IS_INCREMENTAL": true,
+    "IS_DAEMON": true,
+    "IS_PARALLEL": true,
+    "IS_HVIGORFILE_TYPE_CHECK": false,
+    "TASK_TIME": {},
+    "APIS": [],
+    "CONFIG_EXPERIMENT": {
+      "ENABLE_MODULE_SKIP": false,
+      "ENABLE_CPP_FUNCTION_LEVEL_INCREMENTAL": false
+    },
+    "CONFIG_PROPERTIES": {},
+    "TOTAL_TIME": 20436600,
+    "BUILD_ID": "202603241710372040",
+    "ERROR_MESSAGE": [
+      {
+        "CODE": "00303010",
+        "MESSAGE": "The property of module should be an array in root project %s. At file: %s",
+        "SOLUTIONS": [
+          "Check the project-level build-profile.json5 file and ensure that the module's option is an array."
+        ],
+        "TIMESTAMP": "1774343437209"
+      }
+    ]
+  }
+}

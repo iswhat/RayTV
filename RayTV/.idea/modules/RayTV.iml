@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="EMPTY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../..">
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/android/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/android/app/.cxx" />
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/android/app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/android/library/.cxx" />
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/android/library/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../.arkui-x/ios/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/../../oh_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/.cxx" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/.preview" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/.test" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/../../raytv/oh_modules" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="" scope="PROVIDED">
+      <library name="ArkTS-API 18" type="ArkUI">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../Huawei/SDK/18/ets/api" />
+          <root url="file://$MODULE_DIR$/../../../../Huawei/SDK/18/ets/component" />
+          <root url="file://$MODULE_DIR$/../../../../Huawei/SDK/18/ets/kits" />
+          <root url="file://$MODULE_DIR$/../../../../Huawei/SDK/18/ets/arkts" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>

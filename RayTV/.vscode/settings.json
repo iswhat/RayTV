@@ -1,0 +1,37 @@
+{
+    "files.associations": {
+        "*.ts": "ArkTS"
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "build-profile.json5"
+            ],
+            "url": "file:///c:/Users/renyu/Documents/kaihong/code/gerrit/KaihongOS_4.0/kh_third_party_application/kh_arkts_tools/templates/schemas/ohos-project-build-profile-schema.json"
+        },
+        {
+            "fileMatch": [
+                "AppScope/app.json5"
+            ],
+            "url": "file:///c:/Users/renyu/ALL_SDK/ohsdk/11/toolchains/modulecheck/app.json"
+        },
+        {
+            "fileMatch": [
+                "oh-package.json5"
+            ],
+            "url": "file:///c:/Users/renyu/Documents/kaihong/code/gerrit/KaihongOS_4.0/kh_third_party_application/kh_arkts_tools/templates/schemas/oh-package-json5-schema.json"
+        },
+        {
+            "fileMatch": [
+                "**/src/main/module.json5"
+            ],
+            "url": "file:///c:/Users/renyu/ALL_SDK/ohsdk/11/toolchains/modulecheck/module.json"
+        },
+        {
+            "fileMatch": [
+                "**/build-profile.json5"
+            ],
+            "url": "file:///c:/Users/renyu/Documents/kaihong/code/gerrit/KaihongOS_4.0/kh_third_party_application/kh_arkts_tools/templates/schemas/ohos-module-build-profile-schema.json"
+        }
+    ]
+}

@@ -169,32 +169,32 @@ struct LivePage {
     let actionHandler: (() => void) | undefined;
     
     switch (error.code) {
-      case 404:
-      case 403:
-      case 401:
-        errorMessage = `源地址失效或权限不足: ${error.message}`;
-        actionText = '切换线路';
-        actionHandler = () => this.switchToNextParseLine();
-        break;
-        
-      case -1: // 网络错误
-      case -2: // 连接超时
-        errorMessage = `网络连接失败: ${error.message}`;
-        actionText = '重试连接';
-        actionHandler = () => this.retryCurrentChannel();
-        break;
-        
-      case -3: // 解码错误
-        errorMessage = `视频解码失败: ${error.message}`;
-        actionText = '切换源';
-        actionHandler = () => this.switchSource();
-        break;
-        
-      default:
-        errorMessage = `播放错误: ${error.message} (错误码: ${error.code})`;
-        actionText = '重试';
-        actionHandler = () => this.retryCurrentChannel();
-    }
+          case 404:
+          case 403:
+          case 401:
+            errorMessage = `${Strings.livePage.errorMessages.source}: ${error.message}`;
+            actionText = Strings.livePage.errorActions.switchLine;
+            actionHandler = () => this.switchToNextParseLine();
+            break;
+            
+          case -1: // 网络错误
+          case -2: // 连接超时
+            errorMessage = `${Strings.livePage.errorMessages.network}: ${error.message}`;
+            actionText = Strings.livePage.errorActions.retryConnection;
+            actionHandler = () => this.retryCurrentChannel();
+            break;
+            
+          case -3: // 解码错误
+            errorMessage = `${Strings.livePage.errorMessages.decode}: ${error.message}`;
+            actionText = Strings.livePage.errorActions.switchSource;
+            actionHandler = () => this.switchSource();
+            break;
+            
+          default:
+            errorMessage = `${Strings.livePage.errorMessages.unknown}: ${error.message} (错误码: ${error.code})`;
+            actionText = Strings.livePage.errorActions.retry;
+            actionHandler = () => this.retryCurrentChannel();
+        }
     
     this.errorMessage = errorMessage;
     this.errorActionText = actionText;
@@ -306,13 +306,13 @@ struct LivePage {
         Logger.warn(this.TAG, Strings.livePage.noData);
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load live content: ${errorMsg}`);
-      this.isError = true;
-      this.errorMessage = `加载失败: ${errorMsg}`;
-    } finally {
-      this.isLoading = false;
-    }
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        Logger.error(this.TAG, `Failed to load live content: ${errorMsg}`);
+        this.isError = true;
+        this.errorMessage = `${Strings.livePage.loadingFailed}: ${errorMsg}`;
+      } finally {
+        this.isLoading = false;
+      }
   }
   
   // 添加到最近频道 | Add to recent channels
@@ -878,7 +878,7 @@ struct LivePage {
     const colors = this.currentTheme.colors;
     
     Column() {
-      Text('正在加载直播内容...')
+      Text(Strings.livePage.loading)
         .fontSize(18)
         .fontColor(colors.text)
         .margin(30)
@@ -898,7 +898,7 @@ struct LivePage {
     const borderRadius = DesignSystem.BorderRadius;
     
     Column() {
-      Text('加载失败')
+      Text(Strings.livePage.loadingFailed)
         .fontSize(20)
         .fontColor(colors.error)
         .margin({ bottom: spacing.sm })
@@ -929,7 +929,7 @@ struct LivePage {
           .margin({ bottom: spacing.sm })
       } else {
         // 默认重试按钮
-        Button('重试')
+        Button(Strings.common.retry)
           .backgroundColor(colors.primary)
           .fontColor(colors.surface)
           .borderRadius(borderRadius.md)
@@ -942,7 +942,7 @@ struct LivePage {
           .margin({ bottom: spacing.sm })
       }
       
-      Button('返回')
+      Button(Strings.common.back)
         .backgroundColor(colors.surface)
         .fontColor(colors.text)
         .borderRadius(borderRadius.md)

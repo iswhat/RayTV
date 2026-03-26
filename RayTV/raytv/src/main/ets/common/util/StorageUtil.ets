@@ -249,7 +249,8 @@ export class StorageUtil {
         return false;
       }
 
-      StorageUtil.preferences = await dataPreferences.getPreferences(context, StorageUtil.PREFERENCES_NAME) as unknown as PreferencesInstance;
+      const preferencesInstance = await dataPreferences.getPreferences(context, StorageUtil.PREFERENCES_NAME);
+      StorageUtil.preferences = preferencesInstance as PreferencesInstance;
       console.info(StorageUtil.TAG + ': StorageUtil initialized successfully');
       return true;
     } catch (error) {

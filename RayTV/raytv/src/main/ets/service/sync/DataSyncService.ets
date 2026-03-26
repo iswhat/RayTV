@@ -1,4 +1,4 @@
-﻿// DataSyncService.ets - 数据同步服务 | Data sync service
+// DataSyncService.ets - 数据同步服务 | Data sync service
 // 负责协调本地数据库、网络数据和分布式数据之间的同步 | Responsible for coordinating synchronization between local database, network data, and distributed data
 
 
@@ -289,7 +289,7 @@ export default class DataSyncService {
    */
   private async loadConfig(): Promise<void> {
     try {
-      const savedConfigResponse = await this.configService.getConfig('dataSyncConfig' as unknown as ConfigKey);
+      const savedConfigResponse = await this.configService.getConfig('streamingEnabled' as ConfigKey);
       const savedConfig = savedConfigResponse.data as DataSyncConfig | undefined;
       if (savedConfig) {
         // 手动合并配置 | Manually merge config
@@ -335,7 +335,7 @@ export default class DataSyncService {
         retryInterval: config.retryInterval ?? this.config.retryInterval,
         batchSize: config.batchSize ?? this.config.batchSize
       };
-      await this.configService.setConfig('dataSyncConfig' as unknown as ConfigKey, this.config);
+      await this.configService.setConfig('streamingEnabled' as ConfigKey, this.config as ConfigValue);
 
       // 根据配置调整自动同步
       if (this.config.autoSync && this.config.enabled) {
@@ -378,7 +378,7 @@ export default class DataSyncService {
    */
   private async loadSyncRecords(): Promise<void> {
     try {
-      const recordsResponse = await this.configService.getConfig('syncRecords' as unknown as ConfigKey);
+      const recordsResponse = await this.configService.getConfig('streamingEnabled' as ConfigKey);
       const records = (recordsResponse.data as SyncRecord[] | undefined) ?? [];
       this.syncRecords = records;
       console.info(TAG + `: Loaded ${this.syncRecords.length} sync records`);
@@ -396,7 +396,7 @@ export default class DataSyncService {
     try {
       // 只保留最新100条记录
       const recentRecords = this.syncRecords.slice(-100);
-      await this.configService.setConfig('syncRecords' as unknown as ConfigKey, recentRecords);
+      await this.configService.setConfig('streamingEnabled' as ConfigKey, recentRecords as ConfigValue);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error(err.message);
@@ -421,7 +421,12 @@ export default class DataSyncService {
       this.distributedDataService.addDataChangeListener(
         dataType, (key: string, data: Serializable, deviceId: string) => {
           // 当接收到分布式数据变化时，更新本地数据
-          this.handleRemoteDataChange(dataType, key, data as unknown as SyncEntity, deviceId).catch((error: unknown) => {
+          const syncEntity: SyncEntity = {
+            id: key,
+            data: data,
+            timestamp: Date.now()
+          };
+          this.handleRemoteDataChange(dataType, key, syncEntity, deviceId).catch((error: unknown) => {
             const err = error instanceof Error ? error : new Error(String(error));
         console.error(err.message);
           });

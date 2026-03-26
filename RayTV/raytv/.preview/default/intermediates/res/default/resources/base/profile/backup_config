@@ -1,0 +1,7 @@
+{
+  "backupExtension": {
+    "name": "RayTVBackupAbility",
+    "description": "RayTV应用备份还原能力",
+    "version": 1
+  }
+}

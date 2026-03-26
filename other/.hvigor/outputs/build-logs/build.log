@@ -1,0 +1,546 @@
+[2026-03-24T16:36:39.794] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T16:36:41.337] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T16:36:39.796] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T16:36:44.289] [DEBUG] debug-file - java daemon tryConnect failed Error: connect ECONNREFUSED 127.0.0.1:45050
+[2026-03-24T16:36:44.298] [DEBUG] debug-file - on error: Error: spawn java ENOENT
+[2026-03-24T16:36:44.366] [DEBUG] debug-file - session manager: set active socket. socketId=IXr5Ue5LTzmxo1eYAAAB
+[2026-03-24T16:36:45.797] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:36:45.804] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2026-03-24T16:36:45.805] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2026-03-24T16:36:45.807] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2026-03-24T16:36:45.811] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2026-03-24T16:36:45.816] [DEBUG] debug-file - Workers' log level updated to DEBUG
+[2026-03-24T16:36:45.838] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 10000, levelStr: 'DEBUG', colour: 'cyan' },
+  optimizationStrategy: 'memory',
+  hotCompile: undefined,
+  hotReloadBuild: undefined,
+  customizedParam: undefined
+}
+[2026-03-24T16:36:45.857] [DEBUG] debug-file - Cache service initialization finished in 19 ms 
+[2026-03-24T16:36:45.861] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:36:49.709] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:36:49.710] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:36:49.711] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:36:49.712] [DEBUG] debug-file - App plugin prepare start...
+[2026-03-24T16:36:49.712] [DEBUG] debug-file - App plugin prepare end...
+[2026-03-24T16:36:49.712] [DEBUG] debug-file - App plugin creating...
+[2026-03-24T16:36:50.145] [DEBUG] debug-file - App plugin register hook start...
+[2026-03-24T16:36:50.146] [DEBUG] debug-file - App plugin register hook end...
+[2026-03-24T16:36:50.146] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:36:50.149] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2026-03-24T16:36:50.150] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2026-03-24T16:36:50.151] [DEBUG] debug-file - Product 'default' build option initialized
+[2026-03-24T16:36:50.151] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2026-03-24T16:36:50.155] [DEBUG] debug-file - Obtain build option for product 'default'in this build.
+[2026-03-24T16:36:50.159] [DEBUG] debug-file - D:\tv\RayTV\build\cache\default\remote_hsp\remoteHspCache.json not exists.
+[2026-03-24T16:36:50.165] [DEBUG] debug-file - Local scan or download HarmonyOS sdk components toolchains,ets,js,native,previewer
+[2026-03-24T16:36:50.172] [DEBUG] debug-file - Local scan or download hmscore sdk components toolchains,ets,native
+[2026-03-24T16:36:50.176] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2026-03-24T16:36:50.244] [DEBUG] debug-file - Sdk init in 82 ms 
+[2026-03-24T16:36:50.257] [DEBUG] debug-file - Project task initialization takes 11 ms 
+[2026-03-24T16:36:50.257] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:36:50.259] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:36:50.260] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:36:50.261] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:36:50.273] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:36:50.273] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:36:50.273] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:36:50.274] [DEBUG] debug-file - Hap plugin creating...
+[2026-03-24T16:36:50.276] [DEBUG] debug-file - failed to load cangjie to dynamically generate schemas: Error: Cannot find module '@ohos/cangjie-build-support/index'
+Require stack:
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\hooks\cangjie-register.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\strategy\stage-init-strategy.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\abstract-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\app-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\factory\plugin-factory.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\index.js
+- D:\tv\RayTV\hvigorfile.ts
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\configuration.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\process\daemon-process-boot-script.js
+[2026-03-24T16:36:50.303] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:36:50.303] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:36:50.306] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:36:50.306] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:36:50.306] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=release
+[2026-03-24T16:36:50.306] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:36:50.308] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:36:50.308] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:36:50.308] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:36:50.309] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:36:50.309] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:36:50.310] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:36:50.310] [DEBUG] debug-file - Obtain build option for module 'raytv' target 'default'in this build.
+[2026-03-24T16:36:50.324] [DEBUG] debug-file - Module raytv task initialization takes 12 ms 
+[2026-03-24T16:36:50.324] [DEBUG] debug-file - Hap plugin register hook start...
+[2026-03-24T16:36:50.325] [DEBUG] debug-file - Hap plugin register hook end...
+[2026-03-24T16:36:50.325] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:36:50.325] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:36:50.325] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:36:50.326] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:36:50.529] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 203 ms 
+[2026-03-24T16:36:50.530] [DEBUG] debug-file - project has submodules:raytv
+[2026-03-24T16:36:50.534] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2026-03-24T16:36:50.589] [DEBUG] debug-file - load to the disk finished
+[2026-03-24T16:36:50.592] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:36:50.617] [DEBUG] debug-file - Module RayTV Collected Dependency: 
+[2026-03-24T16:36:50.617] [DEBUG] debug-file - Module RayTV's total dependency: 0
+[2026-03-24T16:36:50.619] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:36:50.630] [DEBUG] debug-file - Module raytv Collected Dependency: 
+[2026-03-24T16:36:50.630] [DEBUG] debug-file - Module raytv's total dependency: 0
+[2026-03-24T16:36:50.639] [DEBUG] debug-file - Configuration phase cost:4 s 782 ms 
+[2026-03-24T16:36:50.643] [DEBUG] debug-file - Configuration task cost before running: 4 s 825 ms 
+[2026-03-24T16:36:50.928] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:36:50.929] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:36:51.219] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:36:51.236] [ERROR] debug-file - BUILD FAILED in 5 s 417 ms 
+[2026-03-24T16:36:51.273] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:36:51.273] [DEBUG] debug-file - Cleanup worker 0.
+[2026-03-24T16:36:51.274] [DEBUG] debug-file - Worker 0 has been cleaned up.
+[2026-03-24T16:36:51.274] [DEBUG] debug-file - Current idle worker size: 1.
+[2026-03-24T16:36:51.275] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:36:51.275] [DEBUG] debug-file - Cleanup worker 1.
+[2026-03-24T16:36:51.276] [DEBUG] debug-file - Worker 1 has been cleaned up.
+[2026-03-24T16:36:51.276] [DEBUG] debug-file - Current idle worker size: 0.
+[2026-03-24T16:36:51.276] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:36:51.279] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T16:36:51.281] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2026-03-24T16:36:51.283] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2026-03-24T16:42:35.118] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T16:42:35.206] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T16:42:35.121] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T16:42:36.295] [DEBUG] debug-file - session manager: set active socket. socketId=6e0hMam_Q_6bbhc7AAAD
+[2026-03-24T16:42:36.308] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:42:36.316] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2026-03-24T16:42:36.318] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2026-03-24T16:42:36.319] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2026-03-24T16:42:36.324] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2026-03-24T16:42:36.329] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T16:42:36.350] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' },
+  optimizationStrategy: 'memory',
+  hotCompile: undefined,
+  hotReloadBuild: undefined,
+  customizedParam: undefined
+}
+[2026-03-24T16:42:36.362] [DEBUG] debug-file - Cache service initialization finished in 12 ms 
+[2026-03-24T16:42:36.367] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:42:40.838] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:42:40.839] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:42:40.840] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:42:40.840] [DEBUG] debug-file - App plugin prepare start...
+[2026-03-24T16:42:40.841] [DEBUG] debug-file - App plugin prepare end...
+[2026-03-24T16:42:40.841] [DEBUG] debug-file - App plugin creating...
+[2026-03-24T16:42:41.383] [DEBUG] debug-file - App plugin register hook start...
+[2026-03-24T16:42:41.384] [DEBUG] debug-file - App plugin register hook end...
+[2026-03-24T16:42:41.384] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:42:41.387] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2026-03-24T16:42:41.387] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2026-03-24T16:42:41.388] [DEBUG] debug-file - Product 'default' build option initialized
+[2026-03-24T16:42:41.389] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2026-03-24T16:42:41.393] [DEBUG] debug-file - Obtain build option for product 'default'in this build.
+[2026-03-24T16:42:41.396] [DEBUG] debug-file - D:\tv\RayTV\build\cache\default\remote_hsp\remoteHspCache.json not exists.
+[2026-03-24T16:42:41.403] [DEBUG] debug-file - Local scan or download HarmonyOS sdk components toolchains,ets,js,native,previewer
+[2026-03-24T16:42:41.449] [DEBUG] debug-file - Local scan or download hmscore sdk components toolchains,ets,native
+[2026-03-24T16:42:41.473] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2026-03-24T16:42:41.576] [DEBUG] debug-file - Sdk init in 176 ms 
+[2026-03-24T16:42:41.589] [DEBUG] debug-file - Project task initialization takes 10 ms 
+[2026-03-24T16:42:41.589] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:42:41.589] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:42:41.589] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:42:41.591] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:42:41.606] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:42:41.607] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:42:41.607] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:42:41.607] [DEBUG] debug-file - Hap plugin creating...
+[2026-03-24T16:42:41.610] [DEBUG] debug-file - failed to load cangjie to dynamically generate schemas: Error: Cannot find module '@ohos/cangjie-build-support/index'
+Require stack:
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\hooks\cangjie-register.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\strategy\stage-init-strategy.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\abstract-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\app-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\factory\plugin-factory.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\index.js
+- D:\tv\RayTV\hvigorfile.ts
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\configuration.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\process\daemon-process-boot-script.js
+[2026-03-24T16:42:41.638] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:42:41.638] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:42:41.640] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:42:41.640] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:42:41.641] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=release
+[2026-03-24T16:42:41.641] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:42:41.642] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:42:41.643] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:42:41.643] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:42:41.643] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:42:41.644] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:42:41.644] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:42:41.645] [DEBUG] debug-file - Obtain build option for module 'raytv' target 'default'in this build.
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - Module raytv task initialization takes 11 ms 
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - Hap plugin register hook start...
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - Hap plugin register hook end...
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:42:41.658] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:42:41.659] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:42:41.884] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 223 ms 
+[2026-03-24T16:42:41.884] [DEBUG] debug-file - project has submodules:raytv
+[2026-03-24T16:42:41.888] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2026-03-24T16:42:41.901] [DEBUG] debug-file - load to the disk finished
+[2026-03-24T16:42:41.904] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:42:41.930] [DEBUG] debug-file - Module RayTV Collected Dependency: 
+[2026-03-24T16:42:41.930] [DEBUG] debug-file - Module RayTV's total dependency: 0
+[2026-03-24T16:42:41.932] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:42:41.947] [DEBUG] debug-file - Module raytv Collected Dependency: 
+[2026-03-24T16:42:41.947] [DEBUG] debug-file - Module raytv's total dependency: 0
+[2026-03-24T16:42:41.957] [DEBUG] debug-file - Configuration phase cost:5 s 594 ms 
+[2026-03-24T16:42:41.961] [DEBUG] debug-file - Configuration task cost before running: 5 s 630 ms 
+[2026-03-24T16:42:41.961] [DEBUG] debug-file - Executing task :raytv:tasks
+[2026-03-24T16:42:41.962] [INFO] debug-file - --------------------------------------------------------------------------
+All tasks from hvigor node 'raytv'
+--------------------------------------------------------------------------
+Help tasks
+-------------
+tasks - Displays the tasks of the HvigorCoreNode.
+taskTree - Displays the task dag tree of the HvigorCoreNode.
+
+Sync tasks
+-------------
+init
+
+[2026-03-24T16:42:41.962] [DEBUG] debug-file - raytv : tasks cost memory 0.17855072021484375
+[2026-03-24T16:42:41.963] [DEBUG] debug-file - runTaskFromQueue task cost before running: 5 s 633 ms 
+[2026-03-24T16:42:41.964] [INFO] debug-file - Finished :raytv:tasks... after 2 ms 
+[2026-03-24T16:42:41.978] [INFO] debug-file - BUILD SUCCESSFUL in 5 s 648 ms 
+[2026-03-24T16:42:42.021] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:42:42.022] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:42:42.059] [DEBUG] debug-file - Cleanup worker 0.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Worker 0 has been cleaned up.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Current idle worker size: 1.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Cleanup worker 1.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Worker 1 has been cleaned up.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Current idle worker size: 0.
+[2026-03-24T16:42:42.060] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:42:42.063] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T16:42:42.489] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:42:42.489] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:42:42.490] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2026-03-24T16:42:42.491] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2026-03-24T16:43:50.871] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T16:43:50.965] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T16:43:50.874] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T16:43:51.897] [DEBUG] debug-file - session manager: set active socket. socketId=EYvTTXV7npPSa36KAAAF
+[2026-03-24T16:43:51.907] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:43:51.919] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T16:43:51.929] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' },
+  optimizationStrategy: 'memory',
+  hotCompile: undefined,
+  hotReloadBuild: undefined,
+  customizedParam: undefined
+}
+[2026-03-24T16:43:51.937] [DEBUG] debug-file - Cache service initialization finished in 9 ms 
+[2026-03-24T16:43:51.939] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:43:51.954] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:43:51.954] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:43:51.955] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:43:51.955] [DEBUG] debug-file - App plugin prepare start...
+[2026-03-24T16:43:51.955] [DEBUG] debug-file - App plugin prepare end...
+[2026-03-24T16:43:51.955] [DEBUG] debug-file - App plugin creating...
+[2026-03-24T16:43:51.967] [DEBUG] debug-file - App plugin register hook start...
+[2026-03-24T16:43:51.967] [DEBUG] debug-file - App plugin register hook end...
+[2026-03-24T16:43:51.967] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:43:51.968] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2026-03-24T16:43:51.968] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2026-03-24T16:43:51.968] [DEBUG] debug-file - Product 'default' build option initialized
+[2026-03-24T16:43:51.968] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2026-03-24T16:43:51.970] [DEBUG] debug-file - Obtain build option for product 'default'in this build.
+[2026-03-24T16:43:51.972] [DEBUG] debug-file - D:\tv\RayTV\build\cache\default\remote_hsp\remoteHspCache.json not exists.
+[2026-03-24T16:43:51.979] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2026-03-24T16:43:52.025] [DEBUG] debug-file - Sdk init in 51 ms 
+[2026-03-24T16:43:52.033] [DEBUG] debug-file - Project task initialization takes 7 ms 
+[2026-03-24T16:43:52.033] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:43:52.033] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:43:52.033] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:43:52.035] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:43:52.043] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:43:52.043] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:43:52.043] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:43:52.043] [DEBUG] debug-file - Hap plugin creating...
+[2026-03-24T16:43:52.045] [DEBUG] debug-file - failed to load cangjie to dynamically generate schemas: Error: Cannot find module '@ohos/cangjie-build-support/index'
+Require stack:
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\hooks\cangjie-register.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\strategy\stage-init-strategy.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\abstract-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\app-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\factory\plugin-factory.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\index.js
+- D:\tv\RayTV\hvigorfile.ts
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\configuration.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\process\daemon-process-boot-script.js
+[2026-03-24T16:43:52.050] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:43:52.050] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:43:52.051] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:43:52.051] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:43:52.051] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=release
+[2026-03-24T16:43:52.051] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:43:52.052] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:43:52.052] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:43:52.052] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:43:52.052] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:43:52.053] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:43:52.053] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:43:52.053] [DEBUG] debug-file - Obtain build option for module 'raytv' target 'default'in this build.
+[2026-03-24T16:43:52.056] [DEBUG] debug-file - Module raytv task initialization takes 2 ms 
+[2026-03-24T16:43:52.056] [DEBUG] debug-file - Hap plugin register hook start...
+[2026-03-24T16:43:52.056] [DEBUG] debug-file - Hap plugin register hook end...
+[2026-03-24T16:43:52.057] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:43:52.057] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:43:52.057] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:43:52.057] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:43:52.258] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 201 ms 
+[2026-03-24T16:43:52.259] [DEBUG] debug-file - project has submodules:raytv
+[2026-03-24T16:43:52.262] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2026-03-24T16:43:52.310] [DEBUG] debug-file - load to the disk finished
+[2026-03-24T16:43:52.312] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:43:52.331] [DEBUG] debug-file - Module RayTV Collected Dependency: 
+[2026-03-24T16:43:52.332] [DEBUG] debug-file - Module RayTV's total dependency: 0
+[2026-03-24T16:43:52.333] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:43:52.341] [DEBUG] debug-file - Module raytv Collected Dependency: 
+[2026-03-24T16:43:52.341] [DEBUG] debug-file - Module raytv's total dependency: 0
+[2026-03-24T16:43:52.346] [DEBUG] debug-file - Configuration phase cost:409 ms 
+[2026-03-24T16:43:52.359] [DEBUG] debug-file - Configuration task cost before running: 438 ms 
+[2026-03-24T16:43:52.360] [DEBUG] debug-file - Executing task :raytv:tasks
+[2026-03-24T16:43:52.365] [INFO] debug-file - --------------------------------------------------------------------------
+All tasks from hvigor node 'raytv'
+--------------------------------------------------------------------------
+Help tasks
+-------------
+tasks - Displays the tasks of the HvigorCoreNode.
+taskTree - Displays the task dag tree of the HvigorCoreNode.
+
+Sync tasks
+-------------
+init
+
+[2026-03-24T16:43:52.365] [DEBUG] debug-file - raytv : tasks cost memory 0.0434417724609375
+[2026-03-24T16:43:52.365] [DEBUG] debug-file - runTaskFromQueue task cost before running: 445 ms 
+[2026-03-24T16:43:52.366] [INFO] debug-file - Finished :raytv:tasks... after 5 ms 
+[2026-03-24T16:43:52.405] [INFO] debug-file - BUILD SUCCESSFUL in 485 ms 
+[2026-03-24T16:43:52.469] [DEBUG] debug-file - There's no busy workers and idle workers need cleanup.
+[2026-03-24T16:43:52.471] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T16:43:52.499] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:43:52.500] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:43:52.598] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:43:52.599] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:47:14.738] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T16:47:14.903] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T16:47:14.740] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T16:47:16.251] [DEBUG] debug-file - session manager: set active socket. socketId=T8JQ8yNxjfZtNHDOAAAH
+[2026-03-24T16:47:16.266] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:47:16.273] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T16:47:16.283] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' },
+  optimizationStrategy: 'memory',
+  hotCompile: undefined,
+  hotReloadBuild: undefined,
+  customizedParam: undefined
+}
+[2026-03-24T16:47:16.299] [DEBUG] debug-file - Cache service initialization finished in 16 ms 
+[2026-03-24T16:47:16.301] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:47:16.317] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:47:16.317] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:47:16.319] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:47:16.319] [DEBUG] debug-file - App plugin prepare start...
+[2026-03-24T16:47:16.319] [DEBUG] debug-file - App plugin prepare end...
+[2026-03-24T16:47:16.321] [DEBUG] debug-file - App plugin creating...
+[2026-03-24T16:47:16.335] [DEBUG] debug-file - App plugin register hook start...
+[2026-03-24T16:47:16.336] [DEBUG] debug-file - App plugin register hook end...
+[2026-03-24T16:47:16.336] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:47:16.337] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2026-03-24T16:47:16.337] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2026-03-24T16:47:16.337] [DEBUG] debug-file - Product 'default' build option initialized
+[2026-03-24T16:47:16.337] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2026-03-24T16:47:16.340] [DEBUG] debug-file - Obtain build option for product 'default'in this build.
+[2026-03-24T16:47:16.344] [DEBUG] debug-file - D:\tv\RayTV\build\cache\default\remote_hsp\remoteHspCache.json not exists.
+[2026-03-24T16:47:16.355] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2026-03-24T16:47:16.403] [DEBUG] debug-file - Sdk init in 58 ms 
+[2026-03-24T16:47:16.415] [DEBUG] debug-file - Project task initialization takes 11 ms 
+[2026-03-24T16:47:16.416] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:47:16.416] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:47:16.416] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\hvigorfile.ts
+[2026-03-24T16:47:16.418] [DEBUG] debug-file - hvigorfile, resolving D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:47:16.427] [DEBUG] debug-file - hvigorfile, require result:  { default: { plugins: [] } }
+[2026-03-24T16:47:16.428] [DEBUG] debug-file - hvigorfile, binding system plugins null
+[2026-03-24T16:47:16.428] [DEBUG] debug-file - Starting plugin build process
+[2026-03-24T16:47:16.428] [DEBUG] debug-file - Hap plugin creating...
+[2026-03-24T16:47:16.431] [DEBUG] debug-file - failed to load cangjie to dynamically generate schemas: Error: Cannot find module '@ohos/cangjie-build-support/index'
+Require stack:
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\hooks\cangjie-register.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\strategy\stage-init-strategy.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\abstract-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\builder\app-plugin-builder.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\src\plugin\factory\plugin-factory.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor-ohos-plugin\index.js
+- D:\tv\RayTV\hvigorfile.ts
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\configuration.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js
+- C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\process\daemon-process-boot-script.js
+[2026-03-24T16:47:16.435] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:47:16.436] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:47:16.437] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:47:16.437] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:47:16.437] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=release
+[2026-03-24T16:47:16.437] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:47:16.438] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:47:16.438] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:47:16.439] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=raytv, buildMode=debug
+[2026-03-24T16:47:16.439] [DEBUG] debug-file - Target 'default' config initialized
+[2026-03-24T16:47:16.440] [DEBUG] debug-file - Module 'raytv' target 'default' build option initialized
+[2026-03-24T16:47:16.441] [DEBUG] debug-file - End initialize module-target build option map, moduleName=raytv
+[2026-03-24T16:47:16.442] [DEBUG] debug-file - Obtain build option for module 'raytv' target 'default'in this build.
+[2026-03-24T16:47:16.448] [DEBUG] debug-file - Module raytv task initialization takes 4 ms 
+[2026-03-24T16:47:16.448] [DEBUG] debug-file - Hap plugin register hook start...
+[2026-03-24T16:47:16.449] [DEBUG] debug-file - Hap plugin register hook end...
+[2026-03-24T16:47:16.449] [DEBUG] debug-file - Plugin build process completed
+[2026-03-24T16:47:16.449] [DEBUG] debug-file - hvigorfile, binding custom plugins []
+[2026-03-24T16:47:16.449] [DEBUG] debug-file - hvigorfile, no custom plugins were found in D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:47:16.450] [DEBUG] debug-file - hvigorfile, resolve finished D:\tv\RayTV\raytv\hvigorfile.ts
+[2026-03-24T16:47:16.699] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 249 ms 
+[2026-03-24T16:47:16.700] [DEBUG] debug-file - project has submodules:raytv
+[2026-03-24T16:47:16.703] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2026-03-24T16:47:16.798] [DEBUG] debug-file - load to the disk finished
+[2026-03-24T16:47:16.801] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:47:16.816] [DEBUG] debug-file - Module RayTV Collected Dependency: 
+[2026-03-24T16:47:16.816] [DEBUG] debug-file - Module RayTV's total dependency: 0
+[2026-03-24T16:47:16.820] [DEBUG] debug-file - Start to initialize dependency information.
+[2026-03-24T16:47:16.826] [DEBUG] debug-file - Module raytv Collected Dependency: 
+[2026-03-24T16:47:16.827] [DEBUG] debug-file - Module raytv's total dependency: 0
+[2026-03-24T16:47:16.830] [DEBUG] debug-file - Configuration phase cost:531 ms 
+[2026-03-24T16:47:16.831] [DEBUG] debug-file - Configuration task cost before running: 558 ms 
+[2026-03-24T16:47:17.659] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:47:17.663] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:47:17.812] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:47:17.840] [ERROR] debug-file - BUILD FAILED in 1 s 566 ms 
+[2026-03-24T16:47:17.883] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:47:17.883] [DEBUG] debug-file - There's no busy workers and idle workers need cleanup.
+[2026-03-24T16:47:17.885] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T16:50:20.418] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T16:50:20.544] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T16:50:20.421] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T16:50:21.566] [DEBUG] debug-file - session manager: set active socket. socketId=6kEKl5_JqVL_N2VoAAAJ
+[2026-03-24T16:50:21.580] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:50:21.587] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2026-03-24T16:50:21.588] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2026-03-24T16:50:21.590] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2026-03-24T16:50:21.594] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2026-03-24T16:50:21.599] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T16:50:21.605] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-24T16:50:21.605] [ERROR] debug-file - [31m00304035 Not Found
+Error Message: Cannot find project build file build-profile.json5 under folder: D:\tv\RayTV.
+
+* Try the following:
+  > Make sure that the project has build-profile.json5 file.
+[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+[2026-03-24T16:50:21.606] [DEBUG] debug-file - ERROR: stacktrace = AdaptorError: [31m00304035 Not Found
+Error Message: Cannot find project build file build-profile.json5 under folder: D:\tv\RayTV.
+
+* Try the following:
+  > Make sure that the project has build-profile.json5 file.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at initEnvConfigProps (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\hooks\init-env-config-props.js:1:946)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1618)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+    at process.emit (node:events:529:35)
+    at emit (node:internal/child_process:944:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+[2026-03-24T16:50:21.607] [ERROR] debug-file - AdaptorError: [31m00304035 Not Found
+Error Message: Cannot find project build file build-profile.json5 under folder: D:\tv\RayTV.
+
+* Try the following:
+  > Make sure that the project has build-profile.json5 file.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at initEnvConfigProps (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\hooks\init-env-config-props.js:1:946)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1618)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+    at process.emit (node:events:529:35)
+    at emit (node:internal/child_process:944:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+[2026-03-24T16:50:21.631] [ERROR] debug-file - BUILD FAILED in 25 h 3 min 51 s 97 ms 
+[2026-03-24T16:50:21.676] [DEBUG] debug-file - Cleanup worker 0.
+[2026-03-24T16:50:21.677] [DEBUG] debug-file - Worker 0 has been cleaned up.
+[2026-03-24T16:50:21.678] [DEBUG] debug-file - Current idle worker size: 1.
+[2026-03-24T16:50:21.678] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:50:21.678] [DEBUG] debug-file - Cleanup worker 1.
+[2026-03-24T16:50:21.678] [DEBUG] debug-file - Worker 1 has been cleaned up.
+[2026-03-24T16:50:21.679] [DEBUG] debug-file - Current idle worker size: 0.
+[2026-03-24T16:50:21.679] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T16:50:21.680] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T16:50:21.683] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2026-03-24T16:50:21.684] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2026-03-24T16:50:21.688] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:50:21.688] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T16:50:21.688] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T16:50:21.689] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.

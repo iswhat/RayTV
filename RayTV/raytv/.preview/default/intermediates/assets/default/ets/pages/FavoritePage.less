@@ -1,0 +1,281 @@
+// FavoritePage 样式文件
+
+.favorite-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+}
+
+// 标签切换
+.tabs {
+  display: flex;
+  height: 50px;
+  background-color: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  
+  .tab-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    &.active {
+      .tab-text {
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 25%;
+        width: 50%;
+        height: 3px;
+        background-color: var(--primary-color);
+        border-radius: 1.5px;
+      }
+    }
+    
+    .tab-text {
+      font-size: 14px;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+// 头部操作
+.header-actions {
+  padding: 12px 16px;
+  flex-shrink: 0;
+  
+  .clear-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #ff6b6b;
+    border-radius: 4px;
+    
+    .clear-btn-text {
+      font-size: 13px;
+      color: white;
+    }
+  }
+}
+
+// 收藏列表
+.favorite-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px;
+}
+
+// 收藏分组
+.favorite-group {
+  margin-top: 16px;
+  
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// 分组头部
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  
+  .group-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+  
+  .group-count {
+    font-size: 13px;
+    color: var(--text-color-secondary);
+  }
+}
+
+// 收藏项列表
+.favorite-items {
+  .favorite-item {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .favorite-cover-wrapper {
+      width: 100px;
+      height: 140px;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: var(--background-color-dark);
+      position: relative;
+      flex-shrink: 0;
+      
+      .favorite-cover {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: rgba(0, 0, 0, 0.3);
+        
+        .progress-fill {
+          height: 100%;
+          background-color: var(--primary-color);
+        }
+      }
+    }
+    
+    .favorite-info {
+      flex: 1;
+      margin-left: 12px;
+      padding: 4px 0;
+      
+      .favorite-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-color);
+        line-height: 1.4;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .favorite-description {
+        font-size: 13px;
+        color: var(--text-color-secondary);
+        line-height: 1.4;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .favorite-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      
+      .favorite-site {
+        font-size: 12px;
+        color: var(--primary-color);
+        background-color: rgba(0, 120, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      
+      .favorite-time {
+        font-size: 12px;
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+  
+  // 滑动操作按钮样式
+  .swipe-share {
+    background-color: #4096ff;
+    color: white;
+  }
+  
+  .swipe-delete {
+    background-color: #ff6b6b;
+    color: white;
+  }
+}
+
+// 加载状态
+.loading-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  loading {
+    margin-bottom: 12px;
+  }
+}
+
+// 空状态
+.empty-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  .empty-description {
+    font-size: 14px;
+    color: var(--text-color-secondary);
+    margin-top: 16px;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .favorite-item {
+    flex-direction: column;
+    
+    .favorite-cover-wrapper {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 12px;
+    }
+    
+    .favorite-info {
+      margin-left: 0;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .favorite-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    
+    .favorite-item {
+      flex-direction: column;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--card-background);
+      
+      &:last-child {
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .favorite-cover-wrapper {
+        width: 100%;
+        height: 180px;
+        margin-bottom: 12px;
+      }
+      
+      .favorite-info {
+        margin-left: 0;
+      }
+    }
+  }
+}

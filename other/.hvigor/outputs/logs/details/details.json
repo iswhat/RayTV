@@ -1,0 +1,27 @@
+{
+  "HVIGOR": {
+    "IS_INCREMENTAL": true,
+    "IS_DAEMON": true,
+    "IS_PARALLEL": true,
+    "IS_HVIGORFILE_TYPE_CHECK": false,
+    "TASK_TIME": {},
+    "APIS": [],
+    "CONFIG_EXPERIMENT": {
+      "ENABLE_MODULE_SKIP": false,
+      "ENABLE_CPP_FUNCTION_LEVEL_INCREMENTAL": false
+    },
+    "CONFIG_PROPERTIES": {},
+    "BUILD_ID": "202603241650216000",
+    "ERROR_MESSAGE": [
+      {
+        "CODE": "00304035",
+        "MESSAGE": "Cannot find project build file %s under folder: %s.",
+        "SOLUTIONS": [
+          "Make sure that the project has build-profile.json5 file."
+        ],
+        "TIMESTAMP": "1774342221601"
+      }
+    ],
+    "TOTAL_TIME": 90231096790000
+  }
+}

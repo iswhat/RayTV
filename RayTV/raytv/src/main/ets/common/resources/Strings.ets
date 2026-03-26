@@ -3,7 +3,177 @@
  * 集中管理所有错误消息、提示文本等
  */
 
-export const Strings = {
+// 接口定义
+interface CommonStrings {
+  error: string;
+  loading: string;
+  retry: string;
+  back: string;
+  confirm: string;
+  cancel: string;
+  success: string;
+  failed: string;
+}
+
+interface MainPageCategories {
+  all: string;
+  featured: string;
+  popular: string;
+  new: string;
+}
+
+interface MainPageTabs {
+  vod: string;
+  live: string;
+  search: string;
+  history: string;
+  settings: string;
+}
+
+interface MainPageStrings {
+  appTitle: string;
+  loadingContent: string;
+  loadFailed: string;
+  noData: string;
+  categories: MainPageCategories;
+  tabs: MainPageTabs;
+}
+
+interface LivePageCategories {
+  all: string;
+}
+
+interface LivePagePlayback {
+  volume: string;
+  brightness: string;
+  speed: string;
+}
+
+interface LivePageErrorMessages {
+  network: string;
+  decode: string;
+  source: string;
+  unknown: string;
+}
+
+interface LivePageErrorActions {
+  retry: string;
+  retryConnection: string;
+  switchLine: string;
+  switchSource: string;
+}
+
+interface LivePageStrings {
+  loading: string;
+  noData: string;
+  loadingFailed: string;
+  reconnecting: string;
+  playing: string;
+  buffering: string;
+  error: string;
+  back: string;
+  categories: LivePageCategories;
+  playback: LivePagePlayback;
+  errorMessages: LivePageErrorMessages;
+  errorActions: LivePageErrorActions;
+}
+
+interface SettingsPageValidation {
+  nameRequired: string;
+  nameLength: string;
+  urlRequired: string;
+  urlProtocol: string;
+  urlFormat: string;
+}
+
+interface SettingsPageCacheItems {
+  video: string;
+  image: string;
+  config: string;
+  selectAll: string;
+  clear: string;
+  noItems: string;
+}
+
+interface SettingsPageSync {
+  status: string;
+  lastSync: string;
+  syncing: string;
+  success: string;
+  failed: string;
+  notSynced: string;
+  never: string;
+}
+
+interface SettingsPageDeviceFlow {
+  status: string;
+  devices: string;
+  noDevices: string;
+  loadingFailed: string;
+}
+
+interface SettingsPageVoiceAssistant {
+  status: string;
+  notInitialized: string;
+}
+
+interface SettingsPageGestureControl {
+  status: string;
+  notInitialized: string;
+}
+
+interface SettingsPageStrings {
+  title: string;
+  reset: string;
+  loading: string;
+  loadingFailed: string;
+  networkSources: string;
+  vodSites: string;
+  liveChannels: string;
+  wallpapers: string;
+  advanced: string;
+  healthCheck: string;
+  checkAll: string;
+  adBlock: string;
+  dataSync: string;
+  voiceAssistant: string;
+  gestureControl: string;
+  deviceFlow: string;
+  cache: string;
+  deviceInfo: string;
+  version: string;
+  addSource: string;
+  sourceTest: string;
+  sourceAccessible: string;
+  sourceNotAccessible: string;
+  sourceAdded: string;
+  sourceAddFailed: string;
+  validation: SettingsPageValidation;
+  cacheItems: SettingsPageCacheItems;
+  sync: SettingsPageSync;
+  deviceFlow: SettingsPageDeviceFlow;
+  voiceAssistant: SettingsPageVoiceAssistant;
+  gestureControl: SettingsPageGestureControl;
+}
+
+interface ServicesStrings {
+  initializationFailed: string;
+  networkError: string;
+  timeout: string;
+  notFound: string;
+  unauthorized: string;
+  forbidden: string;
+}
+
+interface StringsType {
+  common: CommonStrings;
+  mainPage: MainPageStrings;
+  livePage: LivePageStrings;
+  settingsPage: SettingsPageStrings;
+  services: ServicesStrings;
+}
+
+export const Strings: StringsType = {
   // 通用错误消息
   common: {
     error: '操作失败',

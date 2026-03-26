@@ -1,0 +1,1800 @@
+import StorageUtil from "@bundle:com.raytv.app/raytv/ets/common/util/StorageUtil";
+import ConfigParser from "@bundle:com.raytv.app/raytv/ets/service/config/ConfigParser";
+import Logger from "@bundle:com.raytv.app/raytv/ets/common/util/Logger";
+import { handleError } from "@bundle:com.raytv.app/raytv/ets/common/util/AppError";
+import ApiResponse, { ResponseCode } from "@bundle:com.raytv.app/raytv/ets/data/dto/ApiResponse";
+import ObjectUtils from "@bundle:com.raytv.app/raytv/ets/common/util/ark/ObjectUtils";
+// 安全存储键前缀 | Secure storage key prefix
+const SECURE_STORAGE_PREFIX = 'secure_';
+// 敏感配置键列表 | Sensitive config keys list
+const SENSITIVE_CONFIG_KEYS = [
+    'subtitleApiKey',
+    'cloudToken',
+    'proxyPassword',
+    'siteAuth',
+    'apiKey',
+    'authToken',
+    'password'
+];
+// 常量定义 | Constant definition
+const TAG = 'ConfigService';
+// 配置导出项目接口 | Config export item interface
+export interface ConfigExportItem {
+    key: string;
+    value: string | number | boolean;
+    updatedAt: number;
+}
+// 配置导出数据接口 | Config export data interface
+export interface ConfigExportData {
+    exportDate: string;
+    version: string;
+    configs: ConfigExportItem[];
+}
+// 配置更新接口 | Config update interface
+export interface ConfigUpdate {
+    player?: Partial<PlayerConfig>;
+    display?: Partial<DisplayConfig>;
+    network?: Partial<NetworkConfig>;
+    storage?: Partial<StorageConfig>;
+    general?: Partial<GeneralConfig>;
+    security?: Partial<SecurityConfig>;
+    notification?: Partial<NotificationConfig>;
+    accessibility?: Partial<AccessibilityConfig>;
+    live?: Partial<LiveConfig>;
+    vod?: Partial<VodConfig>;
+}
+// 代理配置更新接口 | Proxy config update interface
+export interface ProxyConfigUpdate {
+    type?: string;
+    host?: string;
+    port?: number;
+}
+// 配置值类型定义 | Config value type definition
+export type ConfigValue = string | number | boolean | object | null;
+// 配置键默认值接口 | Config key default values interface
+export interface DefaultConfig {
+    // 显示相关 | Display related
+    theme: string;
+    language: string;
+    interfaceScale: number;
+    uiAnimationEnabled: boolean;
+    startupScreen: string;
+    homeLayout: string;
+    // 视频播放相关 | Video playback related
+    videoQuality: string;
+    playbackSpeed: number;
+    autoPlay: boolean;
+    autoNextEpisode: boolean;
+    backgroundPlayEnabled: boolean;
+    videoPlayerSettings: object;
+    // 字幕相关 | Subtitle related
+    subtitleEnabled: boolean;
+    subtitleSize: number;
+    subtitleColor: string;
+    subtitleDelay: number;
+    // 缓存相关 | Cache related
+    cacheEnabled: boolean;
+    cacheLimit: number; // MB
+    // 网络相关 | Network related
+    networkTimeout: number; // 秒 Seconds
+    proxyEnabled: boolean;
+    proxyConfig: null;
+    dataSaverEnabled: boolean;
+    customHeaders: object;
+    customCookies: object;
+    // 通知相关 | Notification related
+    notificationEnabled: boolean;
+    // 更新相关 | Update related
+    updateCheckEnabled: boolean;
+    // 数据收集相关 | Data collection related
+    crashReportingEnabled: boolean;
+    analyticsEnabled: boolean;
+    // 排序相关 | Sorting related
+    favoriteSort: string;
+    historySort: string;
+    searchSort: string;
+    // 下载相关 | Download related
+    maxConcurrentDownloads: number;
+    downloadNetworkType: string; // all, wifi, cellular
+    // 其他 | Others
+    recentlyWatchedLimit: number;
+    streamingEnabled: boolean;
+    localPlaybackEnabled: boolean;
+    defaultCategory: string;
+    preferredServer: string;
+    videoSources: string[];
+}
+;
+// 配置键类型定义 | Config key type definition
+export type ConfigKey = keyof DefaultConfig;
+// 播放器配置接口 | Player configuration interface
+export interface PlayerConfig {
+    defaultPlayer: string;
+    autoPlay: boolean;
+    rememberPosition: boolean;
+    maxBufferSize: number;
+    minBufferSize: number;
+    preloadSeconds: number;
+    enableHardwareDecoding: boolean;
+    enableHDR: boolean;
+    subtitleSize: number;
+    subtitleColor: string;
+    subtitleBackgroundColor: string;
+    audioTrack: string;
+    videoTrack: string;
+}
+// 显示配置接口 | Display configuration interface
+export interface DisplayConfig {
+    theme: string;
+    fontScale: number;
+    enableAnimations: boolean;
+    enableBlur: boolean;
+    autoRotate: boolean;
+    resolution: string;
+    screenSaverDelay: number;
+    idleTimeout: number;
+}
+// 网络配置接口 | Network configuration interface
+export interface NetworkConfig {
+    timeout: number;
+    retryCount: number;
+    retryDelay: number;
+    enableCache: boolean;
+    cacheSize: number;
+    autoDetectNetwork: boolean;
+    useProxy: boolean;
+    proxyConfig: ProxyConfig;
+}
+// 代理配置接口 | Proxy configuration interface
+export interface ProxyConfig {
+    type: string;
+    host: string;
+    port: number;
+}
+// 存储配置接口 | Storage configuration interface
+export interface StorageConfig {
+    cachePath: string;
+    downloadPath: string;
+    maxCacheSize: number;
+    autoClearCache: boolean;
+    clearCacheInterval: number;
+    enableBackgroundCleanup: boolean;
+}
+// 通用配置接口 | General configuration interface
+export interface GeneralConfig {
+    language: string;
+    region: string;
+    timeZone: string;
+    enableAnalytics: boolean;
+    enableUsageReport: boolean;
+    firstLaunch: boolean;
+    version: string;
+    lastUpdated: number;
+}
+// 安全配置接口 | Security configuration interface
+export interface SecurityConfig {
+    enablePinCode: boolean;
+    pinCode: string;
+    enableBiometric: boolean;
+    allowedApps: string[];
+    lockTimeout: number;
+    secureContentOnly: boolean;
+}
+// 通知配置接口 | Notification configuration interface
+export interface NotificationConfig {
+    enablePush: boolean;
+    enableUpdateNotification: boolean;
+    enableContentNotification: boolean;
+    enableLiveReminder: boolean;
+    notificationSound: string;
+    notificationVolume: number;
+}
+// 无障碍配置接口 | Accessibility configuration interface
+export interface AccessibilityConfig {
+    enableHighContrast: boolean;
+    enableScreenReader: boolean;
+    textToSpeechRate: number;
+    closedCaptionEnabled: boolean;
+    audioDescriptionEnabled: boolean;
+    hapticFeedbackEnabled: boolean;
+}
+// 直播配置接口 | Live configuration interface
+export interface LiveConfig {
+    epgEnabled: boolean;
+    epgAutoUpdate: boolean;
+    epgUpdateInterval: number;
+    channelFavoritesEnabled: boolean;
+    lastWatchedChannel: string;
+    lastWatchedGroup: string;
+}
+// VOD配置接口 | VOD configuration interface
+export interface VodConfig {
+    autoPlayNextEpisode: boolean;
+    showRecommendedContent: boolean;
+    downloadQuality: string;
+    streamingQuality: string;
+}
+// 完整配置接口 | Complete configuration interface
+export interface Config {
+    player: PlayerConfig;
+    display: DisplayConfig;
+    network: NetworkConfig;
+    storage: StorageConfig;
+    general: GeneralConfig;
+    security: SecurityConfig;
+    notification: NotificationConfig;
+    accessibility: AccessibilityConfig;
+    live: LiveConfig;
+    vod: VodConfig;
+}
+// 选项项目接口 | Option item interface
+export interface OptionItem {
+    label: string;
+    value: ConfigValue;
+}
+// 验证配置接口 | Validation configuration interface
+export interface ValidationConfig {
+    min?: number;
+    max?: number;
+    pattern?: string;
+    required?: boolean;
+}
+// 配置项目接口 | Config item interface
+export interface ConfigItem {
+    key: ConfigKey;
+    value: ConfigValue;
+    description?: string;
+    type: 'string' | 'number' | 'boolean' | 'object' | 'null';
+    defaultValue: ConfigValue;
+    category: string;
+    options?: OptionItem[];
+    validation?: ValidationConfig;
+    updatedAt: number;
+    createdAt: number;
+}
+// 配置导入结果接口 | Config import result interface
+export interface ConfigImportResult {
+    imported: number;
+    skipped: number;
+    invalid: number;
+}
+// 批量配置项目接口 | Batch config item interface
+export interface BatchConfigItem {
+    key: ConfigKey;
+    value: ConfigValue;
+}
+// 批量配置结果接口 | Batch config result interface
+export interface BatchConfigResult {
+    updated: number;
+    failed: number;
+}
+// 完整默认配置 | Complete default configuration
+export const DEFAULT_FULL_CONFIG: Config = {
+    player: {
+        defaultPlayer: 'system',
+        autoPlay: false,
+        rememberPosition: true,
+        maxBufferSize: 20,
+        minBufferSize: 5,
+        preloadSeconds: 30,
+        enableHardwareDecoding: true,
+        enableHDR: false,
+        subtitleSize: 18,
+        subtitleColor: '#FFFFFF',
+        subtitleBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+        audioTrack: 'default',
+        videoTrack: 'auto'
+    },
+    display: {
+        theme: 'light',
+        fontScale: 1.0,
+        enableAnimations: true,
+        enableBlur: true,
+        autoRotate: true,
+        resolution: 'auto',
+        screenSaverDelay: 300,
+        idleTimeout: 0
+    },
+    network: {
+        timeout: 30000,
+        retryCount: 3,
+        retryDelay: 1000,
+        enableCache: true,
+        cacheSize: 500,
+        autoDetectNetwork: true,
+        useProxy: false,
+        proxyConfig: {
+            type: 'none',
+            host: '',
+            port: 0
+        }
+    },
+    storage: {
+        cachePath: '',
+        downloadPath: '',
+        maxCacheSize: 1024,
+        autoClearCache: true,
+        clearCacheInterval: 7,
+        enableBackgroundCleanup: true
+    },
+    general: {
+        language: 'zh-CN',
+        region: 'CN',
+        timeZone: 'Asia/Shanghai',
+        enableAnalytics: true,
+        enableUsageReport: false,
+        firstLaunch: false,
+        version: '1.0.0',
+        lastUpdated: Date.now()
+    },
+    security: {
+        enablePinCode: false,
+        pinCode: '',
+        enableBiometric: false,
+        allowedApps: [],
+        lockTimeout: 300,
+        secureContentOnly: false
+    },
+    notification: {
+        enablePush: true,
+        enableUpdateNotification: true,
+        enableContentNotification: false,
+        enableLiveReminder: true,
+        notificationSound: 'default',
+        notificationVolume: 1.0
+    },
+    accessibility: {
+        enableHighContrast: false,
+        enableScreenReader: false,
+        textToSpeechRate: 1.0,
+        closedCaptionEnabled: true,
+        audioDescriptionEnabled: false,
+        hapticFeedbackEnabled: true
+    },
+    live: {
+        epgEnabled: true,
+        epgAutoUpdate: true,
+        epgUpdateInterval: 3600,
+        channelFavoritesEnabled: true,
+        lastWatchedChannel: '',
+        lastWatchedGroup: ''
+    },
+    vod: {
+        autoPlayNextEpisode: true,
+        showRecommendedContent: true,
+        downloadQuality: '720p',
+        streamingQuality: 'auto'
+    }
+};
+// 配置键默认值 | Config key default values
+export const DEFAULT_CONFIG: DefaultConfig = {
+    // 显示相关 | Display related
+    theme: 'dark',
+    language: 'auto',
+    interfaceScale: 100,
+    uiAnimationEnabled: true,
+    startupScreen: 'home',
+    homeLayout: 'default',
+    // 视频播放相关 | Video playback related
+    videoQuality: 'high',
+    playbackSpeed: 1.0,
+    autoPlay: true,
+    autoNextEpisode: true,
+    backgroundPlayEnabled: false,
+    videoPlayerSettings: {} as Record<string, string | number | boolean>,
+    // 字幕相关 | Subtitle related
+    subtitleEnabled: true,
+    subtitleSize: 16,
+    subtitleColor: '#FFFFFF',
+    subtitleDelay: 0,
+    // 缓存相关 | Cache related
+    cacheEnabled: true,
+    cacheLimit: 5000,
+    // 网络相关 | Network related
+    networkTimeout: 30,
+    proxyEnabled: false,
+    proxyConfig: null,
+    dataSaverEnabled: false,
+    customHeaders: {} as Record<string, string>,
+    customCookies: {} as Record<string, string>,
+    // 通知相关 | Notification related
+    notificationEnabled: true,
+    // 更新相关 | Update related
+    updateCheckEnabled: true,
+    // 数据收集相关 | Data collection related
+    crashReportingEnabled: false,
+    analyticsEnabled: false,
+    // 排序相关 | Sorting related
+    favoriteSort: 'addedAt_desc',
+    historySort: 'timestamp_desc',
+    searchSort: 'relevance_desc',
+    // 下载相关 | Download related
+    maxConcurrentDownloads: 3,
+    downloadNetworkType: 'all',
+    // 其他 | Others
+    recentlyWatchedLimit: 20,
+    streamingEnabled: true,
+    localPlaybackEnabled: true,
+    defaultCategory: 'all',
+    preferredServer: 'auto',
+    videoSources: []
+};
+// 配置分类 | Config categories
+// 注意：DEFAULT_CONFIG 已在上方完整初始化，此处无需重复赋值 | Note: DEFAULT_CONFIG is fully initialized above, no need for duplicate assignments here
+// 配置分类 | Config categories
+export const CONFIG_CATEGORIES = {} as Record<string, string>;
+// 验证结果接口 | Validation result interface
+export interface ValidationResult {
+    isValid: boolean;
+    errorMessage?: string;
+}
+/**
+ * 配置服务 | Configuration service
+ * 负责管理应用的各种设置参数 | Responsible for managing various application settings parameters
+ */
+export default class ConfigService {
+    private static instance: ConfigService;
+    private configCache: Map<ConfigKey, ConfigItem> = new Map();
+    private configParser: ConfigParser;
+    private fullConfig: Config = this.deepCopyConfig(DEFAULT_FULL_CONFIG);
+    private isInitialized: boolean = false;
+    /**
+     * 构造函数（私有，防止外部实例化） | Constructor (private, prevent external instantiation)
+     */
+    private constructor() {
+        this.configParser = ConfigParser.getInstance();
+    }
+    /**
+     * 安全获取对象属性 | Safely get object property
+     * @param obj 对象 | Object
+     * @param key 属性名 | Property name
+     * @returns 属性值 | Property value
+     */
+    private getSafeProperty(obj: object, key: string): ConfigValue {
+        try {
+            // 检查属性是否存在
+            if (typeof obj === 'object' && obj !== null) {
+                // ArkTS 兼容：使用 Object.getOwnPropertyNames 检查属性是否存在
+                const objRecord = obj as Record<string, ConfigValue>;
+                const keys = Object.getOwnPropertyNames(obj);
+                if (keys.includes(key)) {
+                    const value = objRecord[key];
+                    // 确保返回值符合 ConfigValue 类型
+                    if (value === undefined) {
+                        return null;
+                    }
+                    return value;
+                }
+            }
+            return null;
+        }
+        catch {
+            return null;
+        }
+    }
+    /**
+     * 获取单例实例 | Get singleton instance
+     */
+    public static getInstance(): ConfigService {
+        if (!ConfigService.instance) {
+            ConfigService.instance = new ConfigService();
+        }
+        return ConfigService.instance;
+    }
+    /**
+     * 获取对象的所有键 | Get all keys of an object
+     * 适应ArkTS语法的实现 | ArkTS compatible implementation
+     */
+    private getObjectKeys<T extends object>(obj: T): string[] {
+        if (obj === null || typeof obj !== 'object') {
+            return [];
+        }
+        // 对于 DEFAULT_CONFIG，返回预定义的键列表
+        return [
+            'theme', 'language', 'interfaceScale', 'uiAnimationEnabled', 'startupScreen', 'homeLayout',
+            'videoQuality', 'playbackSpeed', 'autoPlay', 'autoNextEpisode', 'backgroundPlayEnabled', 'videoPlayerSettings',
+            'subtitleEnabled', 'subtitleSize', 'subtitleColor', 'subtitleDelay',
+            'cacheEnabled', 'cacheLimit',
+            'networkTimeout', 'proxyEnabled', 'proxyConfig', 'dataSaverEnabled', 'customHeaders', 'customCookies',
+            'notificationEnabled',
+            'updateCheckEnabled',
+            'crashReportingEnabled', 'analyticsEnabled',
+            'favoriteSort', 'historySort', 'searchSort',
+            'maxConcurrentDownloads', 'downloadNetworkType',
+            'recentlyWatchedLimit', 'streamingEnabled', 'localPlaybackEnabled', 'defaultCategory', 'preferredServer', 'videoSources'
+        ];
+    }
+    /**
+     * 深拷贝配置 | Deep copy configuration
+     */
+    private deepCopyConfig<T>(config: T): T {
+        const jsonString: string = JSON.stringify(config);
+        return JSON.parse(jsonString) as T;
+    }
+    /**
+     * 获取完整配置 | Get complete configuration
+     */
+    public async getFullConfig(): Promise<Config> {
+        if (!this.isInitialized) {
+            await this.initializeConfig();
+        }
+        return this.deepCopyConfig(this.fullConfig);
+    }
+    /**
+     * 合并配置 | Merge configuration
+     */
+    private mergeConfig<T>(defaultConfig: T, customConfig: ConfigUpdate): T {
+        // 使用ArkTS兼容的对象合并方法 | Use ArkTS compatible object merging method
+        if (!customConfig || typeof customConfig !== 'object' || Array.isArray(customConfig)) {
+            return defaultConfig;
+        }
+        const result: T = this.deepCopyConfig(defaultConfig);
+        const resultConfig = result as Config;
+        // 定义配置部分合并映射 | Define config section merge mapping
+        const mergeHandlers: Map<string, (target: object, source: object) => void> = new Map();
+        mergeHandlers.set('player', (target: object, source: object): void => this.mergePlayerConfig(target as PlayerConfig, source as Partial<PlayerConfig>));
+        mergeHandlers.set('display', (target: object, source: object): void => this.mergeDisplayConfig(target as DisplayConfig, source as Partial<DisplayConfig>));
+        mergeHandlers.set('network', (target: object, source: object): void => this.mergeNetworkConfig(target as NetworkConfig, source as Partial<NetworkConfig>));
+        mergeHandlers.set('storage', (target: object, source: object): void => this.mergeStorageConfig(target as StorageConfig, source as Partial<StorageConfig>));
+        mergeHandlers.set('general', (target: object, source: object): void => this.mergeGeneralConfig(target as GeneralConfig, source as Partial<GeneralConfig>));
+        mergeHandlers.set('security', (target: object, source: object): void => this.mergeSecurityConfig(target as SecurityConfig, source as Partial<SecurityConfig>));
+        mergeHandlers.set('notification', (target: object, source: object): void => this.mergeNotificationConfig(target as NotificationConfig, source as Partial<NotificationConfig>));
+        mergeHandlers.set('accessibility', (target: object, source: object): void => this.mergeAccessibilityConfig(target as AccessibilityConfig, source as Partial<AccessibilityConfig>));
+        mergeHandlers.set('live', (target: object, source: object): void => this.mergeLiveConfig(target as LiveConfig, source as Partial<LiveConfig>));
+        mergeHandlers.set('vod', (target: object, source: object): void => this.mergeVodConfig(target as VodConfig, source as Partial<VodConfig>));
+        // 统一处理配置合并 | Unified config merging
+        Array.from(mergeHandlers.keys()).forEach((section: string): void => {
+            const handler = mergeHandlers.get(section);
+            if (!handler)
+                return;
+            const customConfigObj = customConfig as Config;
+            const resultConfigObj = resultConfig as Config;
+            let customSection: object | undefined;
+            let resultSection: object | undefined;
+            if (section === 'player') {
+                customSection = customConfigObj.player;
+                resultSection = resultConfigObj.player;
+            }
+            else if (section === 'display') {
+                customSection = customConfigObj.display;
+                resultSection = resultConfigObj.display;
+            }
+            else if (section === 'network') {
+                customSection = customConfigObj.network;
+                resultSection = resultConfigObj.network;
+            }
+            else if (section === 'storage') {
+                customSection = customConfigObj.storage;
+                resultSection = resultConfigObj.storage;
+            }
+            else if (section === 'general') {
+                customSection = customConfigObj.general;
+                resultSection = resultConfigObj.general;
+            }
+            else if (section === 'security') {
+                customSection = customConfigObj.security;
+                resultSection = resultConfigObj.security;
+            }
+            else if (section === 'notification') {
+                customSection = customConfigObj.notification;
+                resultSection = resultConfigObj.notification;
+            }
+            else if (section === 'accessibility') {
+                customSection = customConfigObj.accessibility;
+                resultSection = resultConfigObj.accessibility;
+            }
+            else if (section === 'live') {
+                customSection = customConfigObj.live;
+                resultSection = resultConfigObj.live;
+            }
+            else if (section === 'vod') {
+                customSection = customConfigObj.vod;
+                resultSection = resultConfigObj.vod;
+            }
+            if (customSection && typeof customSection === 'object' && resultSection) {
+                handler(resultSection, customSection);
+            }
+        });
+        return result;
+    }
+    /**
+     * 合并播放器配置 | Merge player config
+     */
+    private mergePlayerConfig(target: PlayerConfig, source: Partial<PlayerConfig>): void {
+        if (source.defaultPlayer !== undefined)
+            target.defaultPlayer = source.defaultPlayer;
+        if (source.autoPlay !== undefined)
+            target.autoPlay = source.autoPlay;
+        if (source.rememberPosition !== undefined)
+            target.rememberPosition = source.rememberPosition;
+        if (source.maxBufferSize !== undefined)
+            target.maxBufferSize = source.maxBufferSize;
+        if (source.minBufferSize !== undefined)
+            target.minBufferSize = source.minBufferSize;
+        if (source.preloadSeconds !== undefined)
+            target.preloadSeconds = source.preloadSeconds;
+        if (source.enableHardwareDecoding !== undefined)
+            target.enableHardwareDecoding = source.enableHardwareDecoding;
+        if (source.enableHDR !== undefined)
+            target.enableHDR = source.enableHDR;
+        if (source.subtitleSize !== undefined)
+            target.subtitleSize = source.subtitleSize;
+        if (source.subtitleColor !== undefined)
+            target.subtitleColor = source.subtitleColor;
+        if (source.subtitleBackgroundColor !== undefined)
+            target.subtitleBackgroundColor = source.subtitleBackgroundColor;
+        if (source.audioTrack !== undefined)
+            target.audioTrack = source.audioTrack;
+        if (source.videoTrack !== undefined)
+            target.videoTrack = source.videoTrack;
+    }
+    /**
+     * 合并显示配置 | Merge display config
+     */
+    private mergeDisplayConfig(target: DisplayConfig, source: Partial<DisplayConfig>): void {
+        if (source.theme !== undefined)
+            target.theme = source.theme;
+        if (source.fontScale !== undefined)
+            target.fontScale = source.fontScale;
+        if (source.enableAnimations !== undefined)
+            target.enableAnimations = source.enableAnimations;
+        if (source.enableBlur !== undefined)
+            target.enableBlur = source.enableBlur;
+        if (source.autoRotate !== undefined)
+            target.autoRotate = source.autoRotate;
+        if (source.resolution !== undefined)
+            target.resolution = source.resolution;
+        if (source.screenSaverDelay !== undefined)
+            target.screenSaverDelay = source.screenSaverDelay;
+        if (source.idleTimeout !== undefined)
+            target.idleTimeout = source.idleTimeout;
+    }
+    /**
+     * 合并网络配置 | Merge network config
+     */
+    private mergeNetworkConfig(target: NetworkConfig, source: Partial<NetworkConfig>): void {
+        if (source.timeout !== undefined)
+            target.timeout = source.timeout;
+        if (source.retryCount !== undefined)
+            target.retryCount = source.retryCount;
+        if (source.retryDelay !== undefined)
+            target.retryDelay = source.retryDelay;
+        if (source.enableCache !== undefined)
+            target.enableCache = source.enableCache;
+        if (source.cacheSize !== undefined)
+            target.cacheSize = source.cacheSize;
+        if (source.autoDetectNetwork !== undefined)
+            target.autoDetectNetwork = source.autoDetectNetwork;
+        if (source.useProxy !== undefined)
+            target.useProxy = source.useProxy;
+        if (source.proxyConfig !== undefined)
+            target.proxyConfig = source.proxyConfig;
+    }
+    /**
+     * 合并存储配置 | Merge storage config
+     */
+    private mergeStorageConfig(target: StorageConfig, source: Partial<StorageConfig>): void {
+        if (source.cachePath !== undefined)
+            target.cachePath = source.cachePath;
+        if (source.downloadPath !== undefined)
+            target.downloadPath = source.downloadPath;
+        if (source.maxCacheSize !== undefined)
+            target.maxCacheSize = source.maxCacheSize;
+        if (source.autoClearCache !== undefined)
+            target.autoClearCache = source.autoClearCache;
+        if (source.clearCacheInterval !== undefined)
+            target.clearCacheInterval = source.clearCacheInterval;
+        if (source.enableBackgroundCleanup !== undefined)
+            target.enableBackgroundCleanup = source.enableBackgroundCleanup;
+    }
+    /**
+     * 合并通用配置 | Merge general config
+     */
+    private mergeGeneralConfig(target: GeneralConfig, source: Partial<GeneralConfig>): void {
+        if (source.language !== undefined)
+            target.language = source.language;
+        if (source.region !== undefined)
+            target.region = source.region;
+        if (source.timeZone !== undefined)
+            target.timeZone = source.timeZone;
+        if (source.enableAnalytics !== undefined)
+            target.enableAnalytics = source.enableAnalytics;
+        if (source.enableUsageReport !== undefined)
+            target.enableUsageReport = source.enableUsageReport;
+        if (source.firstLaunch !== undefined)
+            target.firstLaunch = source.firstLaunch;
+        if (source.version !== undefined)
+            target.version = source.version;
+        if (source.lastUpdated !== undefined)
+            target.lastUpdated = source.lastUpdated;
+    }
+    /**
+     * 合并安全配置 | Merge security config
+     */
+    private mergeSecurityConfig(target: SecurityConfig, source: Partial<SecurityConfig>): void {
+        if (source.enablePinCode !== undefined)
+            target.enablePinCode = source.enablePinCode;
+        if (source.pinCode !== undefined)
+            target.pinCode = source.pinCode;
+        if (source.enableBiometric !== undefined)
+            target.enableBiometric = source.enableBiometric;
+        if (source.allowedApps !== undefined)
+            target.allowedApps = source.allowedApps;
+        if (source.lockTimeout !== undefined)
+            target.lockTimeout = source.lockTimeout;
+        if (source.secureContentOnly !== undefined)
+            target.secureContentOnly = source.secureContentOnly;
+    }
+    /**
+     * 合并通知配置 | Merge notification config
+     */
+    private mergeNotificationConfig(target: NotificationConfig, source: Partial<NotificationConfig>): void {
+        if (source.enablePush !== undefined)
+            target.enablePush = source.enablePush;
+        if (source.enableUpdateNotification !== undefined)
+            target.enableUpdateNotification = source.enableUpdateNotification;
+        if (source.enableContentNotification !== undefined)
+            target.enableContentNotification = source.enableContentNotification;
+        if (source.enableLiveReminder !== undefined)
+            target.enableLiveReminder = source.enableLiveReminder;
+        if (source.notificationSound !== undefined)
+            target.notificationSound = source.notificationSound;
+        if (source.notificationVolume !== undefined)
+            target.notificationVolume = source.notificationVolume;
+    }
+    /**
+     * 合并无障碍配置 | Merge accessibility config
+     */
+    private mergeAccessibilityConfig(target: AccessibilityConfig, source: Partial<AccessibilityConfig>): void {
+        if (source.enableHighContrast !== undefined)
+            target.enableHighContrast = source.enableHighContrast;
+        if (source.enableScreenReader !== undefined)
+            target.enableScreenReader = source.enableScreenReader;
+        if (source.textToSpeechRate !== undefined)
+            target.textToSpeechRate = source.textToSpeechRate;
+        if (source.closedCaptionEnabled !== undefined)
+            target.closedCaptionEnabled = source.closedCaptionEnabled;
+        if (source.audioDescriptionEnabled !== undefined)
+            target.audioDescriptionEnabled = source.audioDescriptionEnabled;
+        if (source.hapticFeedbackEnabled !== undefined)
+            target.hapticFeedbackEnabled = source.hapticFeedbackEnabled;
+    }
+    /**
+     * 合并直播配置 | Merge live config
+     */
+    private mergeLiveConfig(target: LiveConfig, source: Partial<LiveConfig>): void {
+        if (source.epgEnabled !== undefined)
+            target.epgEnabled = source.epgEnabled;
+        if (source.epgAutoUpdate !== undefined)
+            target.epgAutoUpdate = source.epgAutoUpdate;
+        if (source.epgUpdateInterval !== undefined)
+            target.epgUpdateInterval = source.epgUpdateInterval;
+        if (source.channelFavoritesEnabled !== undefined)
+            target.channelFavoritesEnabled = source.channelFavoritesEnabled;
+        if (source.lastWatchedChannel !== undefined)
+            target.lastWatchedChannel = source.lastWatchedChannel;
+        if (source.lastWatchedGroup !== undefined)
+            target.lastWatchedGroup = source.lastWatchedGroup;
+    }
+    /**
+     * 合并VOD配置 | Merge vod config
+     */
+    private mergeVodConfig(target: VodConfig, source: Partial<VodConfig>): void {
+        if (source.autoPlayNextEpisode !== undefined)
+            target.autoPlayNextEpisode = source.autoPlayNextEpisode;
+        if (source.showRecommendedContent !== undefined)
+            target.showRecommendedContent = source.showRecommendedContent;
+        if (source.downloadQuality !== undefined)
+            target.downloadQuality = source.downloadQuality;
+        if (source.streamingQuality !== undefined)
+            target.streamingQuality = source.streamingQuality;
+    }
+    /**
+     * 确保默认配置存在 | Ensure default configuration exists
+     */
+    private ensureDefaultConfig(): void {
+        // 更新最后修改时间 | Update last modified time
+        this.fullConfig.general.lastUpdated = Date.now();
+        // 验证必要的配置项 | Verify necessary configuration items
+        if (!this.fullConfig.player) {
+            this.fullConfig.player = DEFAULT_FULL_CONFIG.player;
+        }
+        if (!this.fullConfig.display) {
+            this.fullConfig.display = DEFAULT_FULL_CONFIG.display;
+        }
+        if (!this.fullConfig.network) {
+            this.fullConfig.network = DEFAULT_FULL_CONFIG.network;
+        }
+    }
+    /**
+     * 更新完整配置 | Update complete configuration
+     */
+    public async updateFullConfig(customConfig: Partial<Config>): Promise<ApiResponse<Config>> {
+        try {
+            // 合并配置 - 使用类型安全的方法 | Merge configuration - Use type-safe method
+            this.fullConfig = this.mergeConfig(this.fullConfig, customConfig as ConfigUpdate);
+            this.ensureDefaultConfig();
+            // 处理敏感配置 | Handle sensitive config
+            const configJsonString: string = JSON.stringify(this.fullConfig);
+            const configToSave: Config = JSON.parse(configJsonString) as Config;
+            // 保存敏感信息到安全存储 | Save sensitive info to secure storage
+            if (configToSave.security && configToSave.security.pinCode) {
+                await this.setSecureConfig('pinCode', configToSave.security.pinCode);
+                // 从普通存储中移除敏感信息 | Remove sensitive info from normal storage
+                configToSave.security.pinCode = '';
+            }
+            // 保存到存储 | Save to storage
+            await StorageUtil.putString('app_full_config', JSON.stringify(configToSave));
+            return ApiResponse.success(this.fullConfig, '配置更新成功');
+        }
+        catch (error) {
+            // 处理配置更新错误 | Handle config update error
+            const appError = handleError(error, 'Failed to update full config');
+            Logger.error(TAG, appError.toString());
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
+        }
+    }
+    /**
+     * 添加配置变更监听 | Add config change listener
+     */
+    private configListeners: Array<(config: Config) => void> = [];
+    /**
+     * 添加配置变更监听 | Add config change listener
+     */
+    public addConfigListener(listener: (config: Config) => void): void {
+        this.configListeners.push(listener);
+    }
+    /**
+     * 移除配置变更监听 | Remove config change listener
+     */
+    public removeConfigListener(listener: (config: Config) => void): void {
+        const index = this.configListeners.indexOf(listener);
+        if (index > -1) {
+            this.configListeners.splice(index, 1);
+        }
+    }
+    /**
+     * 初始化配置 | Initialize configuration
+     */
+    private async initializeConfig(): Promise<void> {
+        try {
+            Logger.info(TAG, '正在初始化配置... | Initializing configuration...');
+            // 1. 首先尝试加载完整配置 | 1. First try to load complete configuration
+            await this.loadFullConfig();
+            // 初始化数据结构 | Initialize data structure
+            this.configCache = new Map();
+            // 合并默认配置和数据库配置 | Merge default config and database config
+            const defaultConfigKeys = this.getObjectKeys(DEFAULT_CONFIG);
+            for (let i = 0; i < defaultConfigKeys.length; i++) {
+                const key = defaultConfigKeys[i] as ConfigKey;
+                const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+                // 创建默认配置项 | Create default config item
+                const defaultItem: ConfigItem = {
+                    key: key,
+                    value: defaultValue,
+                    type: this.getValueType(defaultValue),
+                    defaultValue,
+                    category: this.getConfigCategory(key),
+                    updatedAt: Date.now(),
+                    createdAt: Date.now()
+                };
+                this.configCache.set(key, defaultItem);
+            }
+            // 确保默认配置完整 | Ensure default config is complete
+            this.ensureDefaultConfig();
+            this.isInitialized = true;
+            Logger.info(TAG, '配置初始化成功 | Configuration initialized successfully');
+        }
+        catch (error) {
+            const appError = handleError(error, 'Failed to initialize configuration');
+            Logger.error(TAG, appError.toString());
+            // 初始化失败时使用默认配置 | Use default config when initialization fails
+            this.fullConfig = this.deepCopyConfig(DEFAULT_FULL_CONFIG);
+            this.ensureDefaultConfig();
+            this.isInitialized = true;
+        }
+    }
+    /**
+     * 加载完整配置 | Load complete configuration
+     */
+    private async loadFullConfig(): Promise<void> {
+        try {
+            // 尝试从本地存储加载完整配置 | Try to load complete config from local storage
+            const storedConfigStr = await StorageUtil.getString('app_full_config');
+            if (storedConfigStr) {
+                // 使用明确的Config类型替代any | Use explicit Config type instead of any
+                const storedConfig = JSON.parse(storedConfigStr) as Config;
+                if (storedConfig && typeof storedConfig === 'object') {
+                    // 合并存储的配置和默认配置 - 避免unknown类型转换 | Merge stored config and default config - avoid unknown type conversion
+                    this.fullConfig = this.mergeConfig(DEFAULT_FULL_CONFIG, storedConfig as ConfigUpdate);
+                    // 从安全存储中恢复敏感信息 | Restore sensitive info from secure storage
+                    const pinCode = await this.getSecureConfig('pinCode');
+                    if (pinCode) {
+                        this.fullConfig.security.pinCode = pinCode;
+                    }
+                    Logger.info(TAG, '从存储加载完整配置成功 | Loaded full configuration from storage');
+                }
+                else {
+                    // 使用默认配置 | Use default config
+                    this.fullConfig = this.deepCopyConfig(DEFAULT_FULL_CONFIG);
+                    await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
+                    Logger.info(TAG, '使用默认完整配置 | Using default full configuration');
+                }
+            }
+            else {
+                // 使用默认配置 | Use default config
+                this.fullConfig = this.deepCopyConfig(DEFAULT_FULL_CONFIG);
+                await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
+                Logger.info(TAG, '使用默认完整配置 | Using default full configuration');
+            }
+        }
+        catch (error) {
+            const appError = handleError(error, 'Failed to load full config');
+            Logger.error(TAG, appError.toString());
+            // 加载失败时使用默认配置 | Use default config when loading fails
+            this.fullConfig = this.deepCopyConfig(DEFAULT_FULL_CONFIG);
+        }
+    }
+    /**
+     * 获取配置 | Get configuration
+     */
+    public async getConfig(key: ConfigKey): Promise<ApiResponse<ConfigValue>> {
+        try {
+            Logger.debug(TAG, `正在获取配置项: ${key} | Getting config for key: ${key}`);
+            // 检查缓存 | Check cache
+            if (this.configCache.has(key)) {
+                const config = this.configCache.get(key)!;
+                return ApiResponse.success(config.value, `获取配置[${key}]成功`);
+            }
+            // 返回默认值 | Return default value
+            const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+            return ApiResponse.success(defaultValue, `配置[${key}]不存在，返回默认值`);
+        }
+        catch (error) {
+            const appError = handleError(error, `Failed to get config for key: ${key}`);
+            Logger.error(TAG, appError.toString());
+            // 发生错误时返回默认值 | Return default value when error occurs
+            const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+            return ApiResponse.success(defaultValue, `获取配置失败，返回默认值`);
+        }
+    }
+    /**
+     * 获取部分配置 | Get partial configuration
+     */
+    public async getPartialConfig(key: keyof Config): Promise<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig> {
+        if (!this.isInitialized) {
+            await this.initializeConfig();
+        }
+        let configSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig | undefined;
+        // 手动处理不同配置部分的访问 | Manually handle access to different config sections
+        switch (key) {
+            case 'player':
+                configSection = this.fullConfig.player;
+                break;
+            case 'display':
+                configSection = this.fullConfig.display;
+                break;
+            case 'network':
+                configSection = this.fullConfig.network;
+                break;
+            case 'storage':
+                configSection = this.fullConfig.storage;
+                break;
+            case 'general':
+                configSection = this.fullConfig.general;
+                break;
+            case 'security':
+                configSection = this.fullConfig.security;
+                break;
+            case 'notification':
+                configSection = this.fullConfig.notification;
+                break;
+            case 'accessibility':
+                configSection = this.fullConfig.accessibility;
+                break;
+            case 'live':
+                configSection = this.fullConfig.live;
+                break;
+            case 'vod':
+                configSection = this.fullConfig.vod;
+                break;
+            default:
+                configSection = undefined;
+                break;
+        }
+        if (!configSection) {
+            // 如果配置部分不存在，从默认配置获取 | If config section doesn't exist, get from default config
+            let defaultSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig | undefined;
+            switch (key) {
+                case 'player':
+                    defaultSection = DEFAULT_FULL_CONFIG.player;
+                    break;
+                case 'display':
+                    defaultSection = DEFAULT_FULL_CONFIG.display;
+                    break;
+                case 'network':
+                    defaultSection = DEFAULT_FULL_CONFIG.network;
+                    break;
+                case 'storage':
+                    defaultSection = DEFAULT_FULL_CONFIG.storage;
+                    break;
+                case 'general':
+                    defaultSection = DEFAULT_FULL_CONFIG.general;
+                    break;
+                case 'security':
+                    defaultSection = DEFAULT_FULL_CONFIG.security;
+                    break;
+                case 'notification':
+                    defaultSection = DEFAULT_FULL_CONFIG.notification;
+                    break;
+                case 'accessibility':
+                    defaultSection = DEFAULT_FULL_CONFIG.accessibility;
+                    break;
+                case 'live':
+                    defaultSection = DEFAULT_FULL_CONFIG.live;
+                    break;
+                case 'vod':
+                    defaultSection = DEFAULT_FULL_CONFIG.vod;
+                    break;
+                default:
+                    defaultSection = undefined;
+                    break;
+            }
+            return this.deepCopyConfig(defaultSection) as PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
+        }
+        return this.deepCopyConfig(configSection);
+    }
+    /**
+     * 更新部分配置 | Update partial configuration
+     */
+    public async updatePartialConfig(key: keyof Config, sectionConfig: ConfigUpdate): Promise<ApiResponse<PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig>> {
+        try {
+            if (!this.isInitialized) {
+                await this.initializeConfig();
+            }
+            // 更新部分配置 | Update partial config
+            let updatedSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
+            // 手动处理不同配置部分的访问和更新 | Manually handle access to and update of different config sections
+            switch (key) {
+                case 'player':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.player);
+                    break;
+                case 'display':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.display);
+                    break;
+                case 'network':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.network);
+                    break;
+                case 'storage':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.storage);
+                    break;
+                case 'general':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.general);
+                    break;
+                case 'security':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.security);
+                    break;
+                case 'notification':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.notification);
+                    break;
+                case 'accessibility':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.accessibility);
+                    break;
+                case 'live':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.live);
+                    break;
+                case 'vod':
+                    updatedSection = this.deepCopyConfig(this.fullConfig.vod);
+                    break;
+                default:
+                    return ApiResponse.error(ResponseCode.BAD_REQUEST, '无效的配置部分');
+            }
+            // 根据配置类型，使用不同的赋值方法，避免使用unknown类型转换 | According to config type, use different assignment methods, avoid using unknown type conversion
+            switch (key) {
+                case 'player':
+                    if (sectionConfig.player) {
+                        this.mergePlayerConfig(updatedSection as PlayerConfig, sectionConfig.player);
+                    }
+                    break;
+                case 'display':
+                    if (sectionConfig.display) {
+                        this.mergeDisplayConfig(updatedSection as DisplayConfig, sectionConfig.display);
+                    }
+                    break;
+                case 'network':
+                    if (sectionConfig.network) {
+                        this.mergeNetworkConfig(updatedSection as NetworkConfig, sectionConfig.network);
+                    }
+                    break;
+                case 'storage':
+                    if (sectionConfig.storage) {
+                        this.mergeStorageConfig(updatedSection as StorageConfig, sectionConfig.storage);
+                    }
+                    break;
+                case 'general':
+                    if (sectionConfig.general) {
+                        this.mergeGeneralConfig(updatedSection as GeneralConfig, sectionConfig.general);
+                    }
+                    break;
+                case 'security':
+                    if (sectionConfig.security) {
+                        this.mergeSecurityConfig(updatedSection as SecurityConfig, sectionConfig.security);
+                    }
+                    break;
+                case 'notification':
+                    if (sectionConfig.notification) {
+                        this.mergeNotificationConfig(updatedSection as NotificationConfig, sectionConfig.notification);
+                    }
+                    break;
+                case 'accessibility':
+                    if (sectionConfig.accessibility) {
+                        this.mergeAccessibilityConfig(updatedSection as AccessibilityConfig, sectionConfig.accessibility);
+                    }
+                    break;
+                case 'live':
+                    if (sectionConfig.live) {
+                        this.mergeLiveConfig(updatedSection as LiveConfig, sectionConfig.live);
+                    }
+                    break;
+                case 'vod':
+                    if (sectionConfig.vod) {
+                        this.mergeVodConfig(updatedSection as VodConfig, sectionConfig.vod);
+                    }
+                    break;
+            }
+            // 更新配置部分 | Update config section
+            switch (key) {
+                case 'player':
+                    this.fullConfig.player = updatedSection as PlayerConfig;
+                    break;
+                case 'display':
+                    this.fullConfig.display = updatedSection as DisplayConfig;
+                    break;
+                case 'network':
+                    this.fullConfig.network = updatedSection as NetworkConfig;
+                    break;
+                case 'storage':
+                    this.fullConfig.storage = updatedSection as StorageConfig;
+                    break;
+                case 'general':
+                    this.fullConfig.general = updatedSection as GeneralConfig;
+                    break;
+                case 'security':
+                    this.fullConfig.security = updatedSection as SecurityConfig;
+                    break;
+                case 'notification':
+                    this.fullConfig.notification = updatedSection as NotificationConfig;
+                    break;
+                case 'accessibility':
+                    this.fullConfig.accessibility = updatedSection as AccessibilityConfig;
+                    break;
+                case 'live':
+                    this.fullConfig.live = updatedSection as LiveConfig;
+                    break;
+                case 'vod':
+                    this.fullConfig.vod = updatedSection as VodConfig;
+                    break;
+            }
+            // 更新最后修改时间 | Update last modified time
+            this.fullConfig.general.lastUpdated = Date.now();
+            // 保存到存储 | Save to storage
+            await StorageUtil.putString('app_full_config', JSON.stringify(this.fullConfig));
+            // 返回更新后的配置部分 | Return updated config section
+            let finalConfigSection: PlayerConfig | DisplayConfig | NetworkConfig | StorageConfig | GeneralConfig | SecurityConfig | NotificationConfig | AccessibilityConfig | LiveConfig | VodConfig;
+            switch (key) {
+                case 'player':
+                    finalConfigSection = this.fullConfig.player;
+                    break;
+                case 'display':
+                    finalConfigSection = this.fullConfig.display;
+                    break;
+                case 'network':
+                    finalConfigSection = this.fullConfig.network;
+                    break;
+                case 'storage':
+                    finalConfigSection = this.fullConfig.storage;
+                    break;
+                case 'general':
+                    finalConfigSection = this.fullConfig.general;
+                    break;
+                case 'security':
+                    finalConfigSection = this.fullConfig.security;
+                    break;
+                case 'notification':
+                    finalConfigSection = this.fullConfig.notification;
+                    break;
+                case 'accessibility':
+                    finalConfigSection = this.fullConfig.accessibility;
+                    break;
+                case 'live':
+                    finalConfigSection = this.fullConfig.live;
+                    break;
+                case 'vod':
+                    finalConfigSection = this.fullConfig.vod;
+                    break;
+                default:
+                    finalConfigSection = this.fullConfig.general; // 默认general配置 | Default to general config
+                    break;
+            }
+            return ApiResponse.success(finalConfigSection, '配置更新成功');
+        }
+        catch (error) {
+            const appError = handleError(error, `Failed to update partial config for key: ${String(key)}`);
+            Logger.error(TAG, appError.toString());
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '配置更新失败');
+        }
+    }
+    /**
+     * 获取配置项目 | Get config item
+     */
+    public async getConfigItem(key: ConfigKey): Promise<ApiResponse<ConfigItem>> {
+        try {
+            Logger.debug(TAG, `正在获取配置项目: ${key} | Getting config item for key: ${key}`);
+            // 检查缓存 | Check cache
+            if (this.configCache.has(key)) {
+                const config = this.configCache.get(key)!;
+                return ApiResponse.success(config, `获取配置项[${key}]成功`);
+            }
+            // 创建并返回默认配置项 | Create and return default config item
+            const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+            const defaultItem: ConfigItem = {
+                key: key,
+                value: defaultValue,
+                type: this.getValueType(defaultValue),
+                defaultValue: defaultValue,
+                category: this.getConfigCategory(key),
+                updatedAt: Date.now(),
+                createdAt: Date.now()
+            };
+            return ApiResponse.success(defaultItem, `配置项[${key}]不存在，返回默认配置项`);
+        }
+        catch (error) {
+            Logger.error(TAG, `获取配置项目失败: ${key} | Failed to get config item for key: ${key}`);
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, `获取配置项失败`);
+        }
+    }
+    /**
+     * 设置配置 | Set config
+     */
+    public async setConfig(key: ConfigKey, value: ConfigValue): Promise<ApiResponse<ConfigItem>> {
+        try {
+            Logger.info(TAG, `正在设置配置项: ${key} = ${JSON.stringify(value)} | Setting config: ${key} = ${JSON.stringify(value)}`);
+            // 验证配置值 | Validate config value
+            const validationResult = this.validateConfigValue(key, value);
+            if (!validationResult.isValid) {
+                return ApiResponse.validationError([
+                    { field: key, message: validationResult.errorMessage || '配置值无效' }
+                ]);
+            }
+            // 获取或创建配置项 | Get or create config item
+            let configItem: ConfigItem;
+            if (this.configCache.has(key)) {
+                // 更新现有配置 | Update existing config
+                const existingItem = this.configCache.get(key)!;
+                configItem = {
+                    key: existingItem.key,
+                    value: value,
+                    type: existingItem.type,
+                    defaultValue: existingItem.defaultValue,
+                    category: existingItem.category,
+                    description: existingItem.description,
+                    options: existingItem.options,
+                    validation: existingItem.validation,
+                    updatedAt: Date.now(),
+                    createdAt: existingItem.createdAt
+                };
+            }
+            else {
+                // 创建新配置 | Create new config
+                configItem = {
+                    key: key,
+                    value: value,
+                    type: this.getValueType(value),
+                    defaultValue: this.getSafeProperty(DEFAULT_CONFIG, key),
+                    category: this.getConfigCategory(key),
+                    updatedAt: Date.now(),
+                    createdAt: Date.now()
+                };
+            }
+            // 更新缓存 | Update cache
+            this.configCache.set(key, configItem);
+            // 触发配置变更事件 | Trigger config change event
+            this.notifyConfigChanged(key, value);
+            Logger.info(TAG, `Config updated successfully: ${key} | Config updated successfully: ${key}`);
+            return ApiResponse.success(configItem, `设置配置[${key}]成功`);
+        }
+        catch (error) {
+            Logger.error(TAG, `设置配置项失败: ${key} | Failed to set config: ${key}: ${error instanceof Error ? error.message : String(error)}`);
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, `设置配置失败`);
+        }
+    }
+    /**
+     * 批量设置配置 | Batch set config
+     */
+    public async setMultipleConfig(configs: BatchConfigItem[]): Promise<ApiResponse<BatchConfigResult>> {
+        try {
+            Logger.info(TAG, `正在批量设置配置: ${configs.length} 项 | Setting multiple configs: ${configs.length} items`);
+            let updated = 0;
+            let failed = 0;
+            for (let i = 0; i < configs.length; i++) {
+                const configItem = configs[i];
+                const key = configItem.key;
+                const value = configItem.value;
+                try {
+                    // 验证配置值 | Validate config value
+                    const validationResult = this.validateConfigValue(key, value);
+                    if (!validationResult.isValid) {
+                        Logger.warn(TAG, `配置值无效: ${key}: ${validationResult.errorMessage} | Invalid config value for ${key}: ${validationResult.errorMessage}`);
+                        failed++;
+                        continue;
+                    }
+                    // 更新配置 | Update config
+                    await this.setConfig(key, value);
+                    updated++;
+                }
+                catch (error) {
+                    Logger.warn(TAG, `更新配置项失败: ${key} | Failed to update config ${key}: ${error instanceof Error ? error.message : String(error)}`);
+                    failed++;
+                }
+            }
+            Logger.info(TAG, `批量配置更新完成: ${updated} 成功, ${failed} 失败 | Multiple configs updated: ${updated} success, ${failed} failed`);
+            const result: BatchConfigResult = {
+                updated: updated,
+                failed: failed
+            };
+            return ApiResponse.success(result, `批量更新配置完成，成功${updated}项，失败${failed}项`);
+        }
+        catch (error) {
+            Logger.error(TAG, `批量设置配置失败 | Failed to set multiple configs: ${error instanceof Error ? error.message : String(error)}`);
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '批量更新配置失败');
+        }
+    }
+    /**
+     * 重置配置为默认值 | Reset config to default
+     */
+    public async resetConfig(key: ConfigKey): Promise<ApiResponse<ConfigItem>> {
+        try {
+            Logger.info(TAG, `正在重置配置项为默认值: ${key} | Resetting config to default: ${key}`);
+            const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+            // 更新配置项 | Update config item
+            const configItem: ConfigItem = {
+                key: key,
+                value: defaultValue,
+                type: this.getValueType(defaultValue),
+                defaultValue: defaultValue,
+                category: this.getConfigCategory(key),
+                updatedAt: Date.now(),
+                createdAt: this.configCache.has(key) ? this.configCache.get(key)!.createdAt : Date.now()
+            };
+            // 更新缓存 | Update cache
+            this.configCache.set(key, configItem);
+            // 触发配置变更事件 | Trigger config change event
+            this.notifyConfigChanged(key, defaultValue);
+            Logger.info(TAG, `配置项重置成功: ${key} | Config reset successfully: ${key}`);
+            return ApiResponse.success(configItem, `重置配置[${key}]成功`);
+        }
+        catch (error) {
+            Logger.error(TAG, `重置配置项失败: ${key} | Failed to reset config: ${key}`);
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '重置配置失败');
+        }
+    }
+    /**
+     * 重置所有配置为默认值 | Reset all config to default
+     */
+    public async resetAllConfig(): Promise<ApiResponse<boolean>> {
+        try {
+            Logger.info(TAG, '正在重置所有配置为默认值 | Resetting all config to default values');
+            // 清空缓存 | Clear cache
+            this.configCache.clear();
+            // 重新初始化配置 | Reinitialize config
+            await this.initializeConfig();
+            // 触发配置重置事件 | Trigger config reset event
+            this.notifyConfigReset();
+            Logger.info(TAG, '所有配置重置成功 | All config reset successfully');
+            return ApiResponse.success(true, '重置所有配置成功');
+        }
+        catch (error) {
+            Logger.error(TAG, '重置所有配置失败 | Failed to reset all config');
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '重置所有配置失败');
+        }
+    }
+    /**
+     * 获取所有配置 | Get all configs
+     */
+    public async getAllConfig(category?: string): Promise<ApiResponse<ConfigItem[]>> {
+        try {
+            Logger.info(TAG, `正在获取所有配置${category ? `, 分类: ${category}` : ''} | Getting all configs${category ? ` for category: ${category}` : ''}`);
+            let allConfigs: ConfigItem[];
+            if (category) {
+                // 按分类获取 | Get by category
+                allConfigs = Array.from(this.configCache.values())
+                    .filter((item: ConfigItem) => item.category === category);
+            }
+            else {
+                // 获取全部 | Get all
+                allConfigs = Array.from(this.configCache.values());
+            }
+            return ApiResponse.success(allConfigs, `获取配置列表成功，共${allConfigs.length}项`);
+        }
+        catch (error) {
+            Logger.error(TAG, '获取所有配置失败 | Failed to get all configs');
+            return ApiResponse.error(ResponseCode.UNKNOWN_ERROR, '获取配置列表失败');
+        }
+    }
+    /**
+     * 验证配置值 | Validate config value
+     */
+    private validateConfigValue(key: ConfigKey, value: ConfigValue): ValidationResult {
+        // 获取默认值类型 | Get default value type
+        const defaultValue = this.getSafeProperty(DEFAULT_CONFIG, key);
+        if (defaultValue === null) {
+            const result: ValidationResult = { isValid: false, errorMessage: `未知的配置项: ${key}` };
+            return result;
+        }
+        // 检查类型 | Check type
+        const expectedType = this.getValueType(defaultValue);
+        const actualType = this.getValueType(value);
+        if (expectedType !== actualType) {
+            const result: ValidationResult = {
+                isValid: false,
+                errorMessage: `配置类型错误，期望${expectedType}，实际${actualType}`
+            };
+            return result;
+        }
+        // 对特定配置进行范围验证 | Validate specific configs
+        switch (key) {
+            case 'cacheLimit':
+                if (typeof value === 'number' && (value < 0 || value > 50000)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '缓存限制必须在0-50000MB之间' };
+                    return result;
+                }
+                break;
+            case 'networkTimeout':
+                if (typeof value === 'number' && (value < 5 || value > 300)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '网络超时必须在5-300秒之间' };
+                    return result;
+                }
+                break;
+            case 'subtitleSize':
+                if (typeof value === 'number' && (value < 10 || value > 48)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '字幕大小必须在10-48之间' };
+                    return result;
+                }
+                break;
+            case 'maxConcurrentDownloads':
+                if (typeof value === 'number' && (value < 1 || value > 10)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '最大并发下载数必须在1-10之间' };
+                    return result;
+                }
+                break;
+            case 'interfaceScale':
+                if (typeof value === 'number' && (value < 50 || value > 200)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '界面缩放必须在50%-200%之间' };
+                    return result;
+                }
+                break;
+            case 'playbackSpeed':
+                if (typeof value === 'number' && (value < 0.1 || value > 5)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '播放速度必须在0.1-5之间' };
+                    return result;
+                }
+                break;
+            case 'subtitleDelay':
+                if (typeof value === 'number' && (value < -30 || value > 30)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '字幕延迟必须在-30到30之间' };
+                    return result;
+                }
+                break;
+            case 'recentlyWatchedLimit':
+                if (typeof value === 'number' && (value < 1 || value > 100)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '最近观看限制必须在1-100之间' };
+                    return result;
+                }
+                break;
+        }
+        // 验证字符串类型配置 Validate string type configs
+        if (typeof value === 'string') {
+            // 防止注入攻击 Prevent injection attacks
+            const dangerousPatterns = [
+                /<script[^>]*>.*?<\/script>/gi,
+                /<iframe[^>]*>.*?<\/iframe>/gi,
+                /javascript:/gi,
+                /on\w+\s*=/gi,
+                /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC)\b/i,
+                /\b(OR|AND)\s+1=1\b/i,
+                /'OR'1'='1/,
+                /"OR"1"="1/
+            ];
+            for (const pattern of dangerousPatterns) {
+                if (pattern.test(value)) {
+                    const result: ValidationResult = { isValid: false, errorMessage: '配置值包含潜在的恶意内容' };
+                    return result;
+                }
+            }
+        }
+        // 验证对象类型配置 Validate object type configs
+        if (typeof value === 'object' && value !== null) {
+            // 防止嵌套过深 Prevent excessive nesting
+            const depth = this.getObjectDepth(value);
+            if (depth > 5) {
+                const result: ValidationResult = { isValid: false, errorMessage: '配置对象嵌套过深' };
+                return result;
+            }
+        }
+        const result: ValidationResult = { isValid: true };
+        return result;
+    }
+    /**
+     * 获取对象深度 Get object depth
+     */
+    private getObjectDepth(obj: object | null | undefined): number {
+        if (typeof obj !== 'object' || obj === null) {
+            return 0;
+        }
+        let maxDepth = 0;
+        const keys = ObjectUtils.getKeys(obj);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const objRecord = obj as Record<string, ConfigValue>;
+            const value = objRecord[key];
+            const depth = this.getObjectDepth(value);
+            maxDepth = Math.max(maxDepth, depth);
+        }
+        return maxDepth + 1;
+    }
+    /**
+     * 获取值的类型 | Get value type
+     */
+    private getValueType(value: ConfigValue): 'string' | 'number' | 'boolean' | 'object' | 'null' {
+        if (value === null)
+            return 'null';
+        if (Array.isArray(value))
+            return 'object';
+        return typeof value as 'string' | 'number' | 'boolean' | 'object';
+    }
+    /**
+     * 获取配置分类 | Get config category
+     */
+    private getConfigCategory(key: ConfigKey): string {
+        const categoryMap = new Map<string, string>([
+            // 显示相关 | Display related
+            ['theme', 'display'],
+            ['language', 'display'],
+            ['interfaceScale', 'display'],
+            ['uiAnimationEnabled', 'display'],
+            ['startupScreen', 'display'],
+            ['homeLayout', 'display'],
+            // 视频播放相关 | Video playback related
+            ['videoQuality', 'playback'],
+            ['playbackSpeed', 'playback'],
+            ['autoPlay', 'playback'],
+            ['autoNextEpisode', 'playback'],
+            ['backgroundPlayEnabled', 'playback'],
+            ['videoPlayerSettings', 'playback'],
+            // 字幕相关 | Subtitle related
+            ['subtitleEnabled', 'subtitle'],
+            ['subtitleSize', 'subtitle'],
+            ['subtitleColor', 'subtitle'],
+            ['subtitleDelay', 'subtitle'],
+            // 缓存相关 | Cache related
+            ['cacheEnabled', 'cache'],
+            ['cacheLimit', 'cache'],
+            // 网络相关 | Network related
+            ['networkTimeout', 'network'],
+            ['proxyEnabled', 'network'],
+            ['proxyConfig', 'network'],
+            ['dataSaverEnabled', 'network'],
+            ['customHeaders', 'network'],
+            ['customCookies', 'network'],
+            // 通知相关 | Notification related
+            ['notificationEnabled', 'notification'],
+            // 更新相关 | Update related
+            ['updateCheckEnabled', 'update'],
+            // 数据收集相关 | Data collection related
+            ['crashReportingEnabled', 'data_collection'],
+            ['analyticsEnabled', 'data_collection'],
+            // 排序相关 | Sorting related
+            ['favoriteSort', 'sorting'],
+            ['historySort', 'sorting'],
+            ['searchSort', 'sorting'],
+            // 下载相关 | Download related
+            ['maxConcurrentDownloads', 'download'],
+            ['downloadNetworkType', 'download'],
+            // 其他 | Others
+            ['recentlyWatchedLimit', 'other'],
+            ['streamingEnabled', 'other'],
+            ['localPlaybackEnabled', 'other'],
+            ['defaultCategory', 'other'],
+            ['preferredServer', 'other'],
+            ['videoSources', 'other']
+        ]);
+        return categoryMap.get(key) || 'other';
+    }
+    /**
+     * 检查是否为敏感配置键 | Check if config key is sensitive
+     */
+    private isSensitiveConfigKey(key: string): boolean {
+        return SENSITIVE_CONFIG_KEYS.some(sensitiveKey => key.toLowerCase().includes(sensitiveKey.toLowerCase()));
+    }
+    /**
+     * 获取安全存储的配置 | Get config from secure storage
+     */
+    public async getSecureConfig(key: string): Promise<string | null> {
+        try {
+            const secureKey = `${SECURE_STORAGE_PREFIX}${key}`;
+            return await StorageUtil.getString(secureKey);
+        }
+        catch (error) {
+            Logger.error(TAG, `Failed to get secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
+            return null;
+        }
+    }
+    /**
+     * 设置安全存储的配置 | Set config to secure storage
+     */
+    public async setSecureConfig(key: string, value: string): Promise<boolean> {
+        try {
+            const secureKey = `${SECURE_STORAGE_PREFIX}${key}`;
+            await StorageUtil.putString(secureKey, value);
+            Logger.info(TAG, `Secure config saved: ${key}`);
+            return true;
+        }
+        catch (error) {
+            Logger.error(TAG, `Failed to save secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
+            return false;
+        }
+    }
+    /**
+     * 移除安全存储的配置 | Remove config from secure storage
+     */
+    public async removeSecureConfig(key: string): Promise<boolean> {
+        try {
+            const secureKey = `${SECURE_STORAGE_PREFIX}${key}`;
+            await StorageUtil.remove(secureKey);
+            Logger.info(TAG, `Secure config removed: ${key}`);
+            return true;
+        }
+        catch (error) {
+            Logger.error(TAG, `Failed to remove secure config: ${key}: ${error instanceof Error ? (error as Error).message : String(error)}`);
+            return false;
+        }
+    }
+    /**
+     * 清除所有安全存储的配置 | Clear all secure configs
+     */
+    public async clearAllSecureConfig(): Promise<boolean> {
+        try {
+            // 清除所有以安全存储前缀开头的配置
+            // Clear all configs with secure storage prefix
+            // 注意：StorageUtil 没有 getAllKeys 方法，这里使用替代方案
+            // Note: StorageUtil doesn't have getAllKeys method, using alternative approach
+            // 由于无法直接获取所有键，这里只清除已知的敏感配置键
+            // Since we can't directly get all keys, only clear known sensitive config keys
+            for (const key of SENSITIVE_CONFIG_KEYS) {
+                const secureKey = `${SECURE_STORAGE_PREFIX}${key}`;
+                await StorageUtil.remove(secureKey);
+            }
+            Logger.info(TAG, 'All secure configs cleared');
+            return true;
+        }
+        catch (error) {
+            Logger.error(TAG, `Failed to clear all secure configs: ${error instanceof Error ? (error as Error).message : String(error)}`);
+            return false;
+        }
+    }
+    /**
+     * 获取字幕API密钥 | Get subtitle API key
+     */
+    public async getSubtitleApiKey(provider: string): Promise<string | null> {
+        return await this.getSecureConfig(`subtitle_api_key_${provider}`);
+    }
+    /**
+     * 设置字幕API密钥 | Set subtitle API key
+     */
+    public async setSubtitleApiKey(provider: string, apiKey: string): Promise<boolean> {
+        return await this.setSecureConfig(`subtitle_api_key_${provider}`, apiKey);
+    }
+    /**
+     * 获取云同步令牌 | Get cloud sync token
+     */
+    public async getCloudSyncToken(): Promise<string | null> {
+        return await this.getSecureConfig('cloud_sync_token');
+    }
+    /**
+     * 设置云同步令牌 | Set cloud sync token
+     */
+    public async setCloudSyncToken(token: string): Promise<boolean> {
+        return await this.setSecureConfig('cloud_sync_token', token);
+    }
+    // ========== 事件通知模块 | Event notification module ==========
+    private configItemListeners: Map<string, Array<(value: ConfigValue) => void>> = new Map();
+    private globalListeners: Array<(key: ConfigKey, value: ConfigValue) => void> = [];
+    private resetListeners: Array<() => void> = [];
+    /**
+     * 监听特定配置项变化 | Listen to specific config item changes
+     */
+    public addConfigItemListener(key: ConfigKey, listener: (value: ConfigValue) => void): () => void {
+        const keyStr = key as string;
+        if (!this.configItemListeners.has(keyStr)) {
+            this.configItemListeners.set(keyStr, []);
+        }
+        const listeners = this.configItemListeners.get(keyStr)!;
+        listeners.push(listener);
+        // 返回取消监听函数 | Return unsubscribe function
+        return () => {
+            const index = listeners.indexOf(listener);
+            if (index > -1) {
+                listeners.splice(index, 1);
+            }
+        };
+    }
+    /**
+     * 添加全局配置监听 | Add global config listener
+     */
+    public addGlobalConfigListener(listener: (key: ConfigKey, value: ConfigValue) => void): () => void {
+        this.globalListeners.push(listener);
+        // 返回取消监听函数 | Return unsubscribe function
+        return () => {
+            const index = this.globalListeners.indexOf(listener);
+            if (index > -1) {
+                this.globalListeners.splice(index, 1);
+            }
+        };
+    }
+    /**
+     * 添加配置重置监听 | Add config reset listener
+     */
+    public addConfigResetListener(listener: () => void): () => void {
+        this.resetListeners.push(listener);
+        // 返回取消监听函数 | Return unsubscribe function
+        return () => {
+            const index = this.resetListeners.indexOf(listener);
+            if (index > -1) {
+                this.resetListeners.splice(index, 1);
+            }
+        };
+    }
+    /**
+     * 通知配置变更 | Notify config change
+     */
+    private notifyConfigChanged(key: ConfigKey, value: ConfigValue): void {
+        // 通知特定配置的监听器 | Notify listeners for specific config
+        const keyStr = key as string;
+        if (this.configItemListeners.has(keyStr)) {
+            const listeners = this.configItemListeners.get(keyStr)!;
+            for (let i = 0; i < listeners.length; i++) {
+                const listener = listeners[i];
+                try {
+                    listener(value);
+                }
+                catch (error) {
+                    Logger.error(TAG, `配置监听器错误: ${key} | Error in config listener for ${key}: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
+        }
+        // 通知全局监听器 | Notify global listeners
+        for (let i = 0; i < this.globalListeners.length; i++) {
+            const listener = this.globalListeners[i];
+            try {
+                listener(key, value);
+            }
+            catch (error) {
+                Logger.error(TAG, `全局配置监听器错误 | Error in global config listener: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+    }
+    /**
+     * 通知配置重置 | Notify config reset
+     */
+    private notifyConfigReset(): void {
+        for (let i = 0; i < this.resetListeners.length; i++) {
+            const listener = this.resetListeners[i];
+            try {
+                listener();
+            }
+            catch (error) {
+                Logger.error(TAG, `配置重置监听器错误 | Error in config reset listener: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+    }
+}

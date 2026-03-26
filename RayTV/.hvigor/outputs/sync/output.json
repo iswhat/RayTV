@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "ohos-module-raytv": {
+    "SELECT_TARGET": "default",
+    "MODULE_BUILD_DIR": "D:\\tv\\RayTV\\raytv\\build",
+    "TARGETS": {
+      "default": {
+        "SOURCE_ROOT": "D:\\tv\\RayTV\\raytv\\src\\main",
+        "RESOURCES_PATH": [
+          "D:\\tv\\RayTV\\raytv\\src\\main\\resources"
+        ],
+        "BUILD_PATH": {
+          "OUTPUT_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\outputs\\default",
+          "INTERMEDIA_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates",
+          "JS_ASSETS_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\loader_out\\default",
+          "JS_LITE_ASSETS_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\loader_out_lite\\default",
+          "RES_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\res\\default",
+          "RES_PROFILE_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\res\\default\\resources\\base\\profile",
+          "ETS_SUPER_VISUAL_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\cache\\default\\default@CompileArkTS\\esmodule",
+          "JS_SUPER_VISUAL_PATH": "D:\\tv\\RayTV\\raytv\\build\\default\\cache\\default\\default@CompileJS\\jsbundle",
+          "WORKER_LOADER": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\loader\\default\\loader.json",
+          "MANIFEST_JSON": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\manifest\\default",
+          "OUTPUT_METADATA_JSON": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\hap_metadata\\default\\output_metadata.json",
+          "SOURCE_MAP_DIR": "D:\\tv\\RayTV\\raytv\\build\\default\\intermediates\\source_map\\default"
+        },
+        "BUILD_OPTION": {
+          "debuggable": true
+        }
+      }
+    },
+    "BUILD_OPTION": {
+      "default-default": {
+        "debuggable": true,
+        "copyFrom": "default",
+        "resOptions": {
+          "copyCodeResource": {
+            "enable": false
+          }
+        },
+        "name": "debug",
+        "arkOptions": {
+          "obfuscation": {
+            "ruleOptions": {
+              "enable": false
+            }
+          }
+        }
+      }
+    },
+    "BUILD_PROFILE_OPT": {
+      "apiType": "stageMode",
+      "buildOption": {
+        "resOptions": {
+          "copyCodeResource": {
+            "enable": false
+          }
+        }
+      },
+      "targets": [
+        {
+          "name": "default"
+        }
+      ],
+      "buildOptionSet": [
+        {
+          "name": "debug",
+          "arkOptions": {
+            "obfuscation": {
+              "ruleOptions": {
+                "enable": false
+              }
+            }
+          }
+        },
+        {
+          "name": "release",
+          "arkOptions": {
+            "obfuscation": {
+              "ruleOptions": {
+                "enable": true,
+                "files": [
+                  "./obfuscation-rules.txt"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "default"
+        }
+      ]
+    },
+    "BUILD_CACHE_DIR": ""
+  },
+  "ohos-project": {
+    "SELECT_PRODUCT_NAME": "default",
+    "MODULE_BUILD_DIR": "D:\\tv\\RayTV\\build",
+    "BUNDLE_NAME": "com.raytv.app",
+    "VERSION_CODE": 1000000,
+    "VERSION_NAME": "1.0.0",
+    "BUILD_PATH": {
+      "OUTPUT_PATH": "D:\\tv\\RayTV\\build\\outputs\\default"
+    },
+    "MODULES": [
+      {
+        "name": "raytv",
+        "srcPath": "D:\\tv\\RayTV\\raytv",
+        "belongProjectPath": "D:\\tv\\RayTV"
+      }
+    ],
+    "PROFILE_OPT": {
+      "app": {
+        "signingConfigs": [],
+        "products": [
+          {
+            "name": "default",
+            "compileSdkVersion": 18,
+            "targetSdkVersion": 18,
+            "compatibleSdkVersion": 18
+          }
+        ]
+      },
+      "modules": [
+        {
+          "name": "raytv",
+          "srcPath": "./raytv"
+        }
+      ]
+    },
+    "CONFIG_PROPERTIES": {
+      "enableSignTask": true,
+      "skipNativeIncremental": false,
+      "hvigor.keepDependency": true
+    },
+    "OVERALL_PROJECT_PATHS": [
+      "D:\\tv\\RayTV"
+    ],
+    "BUILD_CACHE_DIR": ""
+  }
+}

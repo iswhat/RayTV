@@ -1,0 +1,10 @@
+{
+  "item": [
+    {
+      "name": "app_icon",
+      "type": "image",
+      "image": "app_icon.svg",
+      "enableScale": true
+    }
+  ]
+}

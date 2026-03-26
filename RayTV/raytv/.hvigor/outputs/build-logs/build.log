@@ -1,0 +1,249 @@
+[2026-03-24T17:01:59.391] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T17:01:59.561] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T17:01:59.394] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T17:02:01.104] [DEBUG] debug-file - java daemon tryConnect failed Error: connect ECONNREFUSED 127.0.0.1:45050
+[2026-03-24T17:02:01.111] [DEBUG] debug-file - on error: Error: spawn java ENOENT
+[2026-03-24T17:02:01.203] [DEBUG] debug-file - session manager: set active socket. socketId=SBGB1RGzWMMPUfCDAAAB
+[2026-03-24T17:02:02.682] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:02:02.690] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2026-03-24T17:02:02.691] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2026-03-24T17:02:02.694] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2026-03-24T17:02:02.699] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2026-03-24T17:02:02.703] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T17:02:02.716] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-24T17:02:02.716] [ERROR] debug-file - [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+[2026-03-24T17:02:02.718] [DEBUG] debug-file - ERROR: stacktrace = AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:02:02.718] [ERROR] debug-file - AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:02:02.743] [ERROR] debug-file - BUILD FAILED in 36 ms 
+[2026-03-24T17:02:02.781] [DEBUG] debug-file - Cleanup worker 0.
+[2026-03-24T17:02:02.782] [DEBUG] debug-file - Worker 0 has been cleaned up.
+[2026-03-24T17:02:02.783] [DEBUG] debug-file - Current idle worker size: 1.
+[2026-03-24T17:02:02.783] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T17:02:02.783] [DEBUG] debug-file - Cleanup worker 1.
+[2026-03-24T17:02:02.784] [DEBUG] debug-file - Worker 1 has been cleaned up.
+[2026-03-24T17:02:02.784] [DEBUG] debug-file - Current idle worker size: 0.
+[2026-03-24T17:02:02.784] [DEBUG] debug-file - Current resident worker size: 2.
+[2026-03-24T17:02:02.787] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T17:02:02.796] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:02:02.797] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:02:02.791] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2026-03-24T17:02:02.792] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2026-03-24T17:02:02.799] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:02:02.800] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:03:04.828] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T17:03:04.923] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T17:03:04.830] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T17:03:06.029] [DEBUG] debug-file - session manager: set active socket. socketId=bGEWBdGAlhHeJZo-AAAD
+[2026-03-24T17:03:06.039] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:03:06.049] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T17:03:06.055] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-24T17:03:06.055] [ERROR] debug-file - [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+[2026-03-24T17:03:06.055] [DEBUG] debug-file - ERROR: stacktrace = AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:03:06.056] [ERROR] debug-file - AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:03:06.070] [ERROR] debug-file - BUILD FAILED in 21 ms 
+[2026-03-24T17:03:06.088] [DEBUG] debug-file - There's no busy workers and idle workers need cleanup.
+[2026-03-24T17:03:06.088] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T17:03:06.099] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:03:06.100] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:03:06.099] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:03:06.100] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:06:33.018] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T17:06:33.118] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T17:06:33.021] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T17:06:34.111] [DEBUG] debug-file - session manager: set active socket. socketId=euEUKYG7JAwY2cTsAAAF
+[2026-03-24T17:06:34.120] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:06:34.126] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T17:06:34.132] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-24T17:06:34.132] [ERROR] debug-file - [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+[2026-03-24T17:06:34.133] [DEBUG] debug-file - ERROR: stacktrace = AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:06:34.134] [ERROR] debug-file - AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:06:34.149] [ERROR] debug-file - BUILD FAILED in 22 ms 
+[2026-03-24T17:06:34.170] [DEBUG] debug-file - There's no busy workers and idle workers need cleanup.
+[2026-03-24T17:06:34.171] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T17:06:34.180] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:06:34.181] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:06:34.181] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:06:34.182] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:10:35.463] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2026-03-24T17:10:35.655] [DEBUG] debug-file - env: daemon=true
+[2026-03-24T17:10:35.468] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.1.1', dependencies: {} }
+[2026-03-24T17:10:37.184] [DEBUG] debug-file - session manager: set active socket. socketId=osX7u0MsrXqXI78BAAAH
+[2026-03-24T17:10:37.197] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:10:37.204] [DEBUG] debug-file - Workers' log level updated to INFO
+[2026-03-24T17:10:37.209] [DEBUG] debug-file - hvigor build process will be closed with an error.
+[2026-03-24T17:10:37.210] [ERROR] debug-file - [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+[2026-03-24T17:10:37.210] [DEBUG] debug-file - ERROR: stacktrace = AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:10:37.210] [ERROR] debug-file - AdaptorError: [31m00303010 Configuration Error
+Error Message: The property of module should be an array in root project build-profile.json5. At file: D:\tv\RayTV\raytv\build-profile.json5
+
+* Try the following:
+  > Check the project-level build-profile.json5 file and ensure that the module's option is an array.
+[39m
+    at HvigorLogger.printErrorExit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\log\hvigor-log.js:1:5087)
+    at checkProjectConfigFile (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:3667)
+    at new HvigorConfig (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:1421)
+    at hvigorConfigInit (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\external\core\hvigor-config.js:1:4092)
+    at init (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\internal\lifecycle\init.js:1:2867)
+    at start (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:2495)
+    at boot (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\boot\index.js:1:1795)
+    at Worker.<anonymous> (C:\Program Files\Huawei\DevEco Studio\tools\hvigor\hvigor\src\base\daemon\cluster\worker-process-lifecycle.js:1:3747)
+    at Worker.emit (node:events:529:35)
+    at process.<anonymous> (node:internal/cluster/worker:35:12)
+[2026-03-24T17:10:37.226] [ERROR] debug-file - BUILD FAILED in 21 ms 
+[2026-03-24T17:10:37.247] [DEBUG] debug-file - There's no busy workers and idle workers need cleanup.
+[2026-03-24T17:10:37.247] [DEBUG] debug-file - hvigor build process will be closed.
+[2026-03-24T17:10:37.261] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:10:37.262] [DEBUG] debug-file - session manager: send message to worker process.
+[2026-03-24T17:10:37.262] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2026-03-24T17:10:37.263] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
