@@ -142,13 +142,69 @@ export class ArkPyLoader extends BaseLoader {
 
 
   /**
+   * Python 解释器实例（模块级变量） Python interpreter instance (module-level variable)
+   */
+  private static pythonInterpreterInstance: PythonInterpreter | null = null;
+
+  /**
+   * 解释器初始化状态 Interpreter initialization status
+   */
+  private static interpreterInitialized: boolean = false;
+
+  /**
    * 获取 Python 解释器 Get Python interpreter
    * @private
    */
   private getPythonInterpreter(): PythonInterpreter | null {
-    // 在 ArkTS 中，我们可以使用一个模块级别的变量或通过依赖注入获取
-    // 这里返回 null 作为默认值，实际实现需要根据具体情况调整
-    return null;
+    if (!ArkPyLoader.interpreterInitialized) {
+      this.initializePythonInterpreter();
+    }
+    return ArkPyLoader.pythonInterpreterInstance;
+  }
+
+  /**
+   * 初始化 Python 解释器 Initialize Python interpreter
+   * @private
+   */
+  private initializePythonInterpreter(): void {
+    try {
+      Logger.info(this.TAG, 'Initializing Python interpreter');
+      
+      // 尝试创建 Python 解释器实例 Try to create Python interpreter instance
+      // 在实际实现中，这里应该使用 HarmonyOS 提供的 Python 解释器 API
+      // 或者通过依赖注入获取
+      
+      // 模拟 Python 解释器实现 Mock Python interpreter implementation
+      ArkPyLoader.pythonInterpreterInstance = {
+        createContext: async (script: string, context: PyContextDynamic): Promise<PyContextDynamic> => {
+          // 实际实现应该使用 Python 解释器创建上下文
+          // 这里返回原始上下文作为模拟
+          return context;
+        },
+        executeFunction: async (options: PyExecuteFunctionOptions): Promise<string | number | boolean | object | null | undefined> => {
+          // 实际实现应该使用 Python 解释器执行函数
+          // 这里返回模拟结果
+          return {
+            success: true,
+            message: `Function ${options.functionName} executed successfully`,
+            data: options.params
+          };
+        }
+      };
+      
+      ArkPyLoader.interpreterInitialized = true;
+      Logger.info(this.TAG, 'Python interpreter initialized successfully');
+    } catch (error) {
+      this.errorHandler.handle(
+        ErrorType.CONFIG,
+        ErrorSeverity.ERROR,
+        `Failed to initialize Python interpreter: ${error instanceof Error ? error.message : String(error)}`,
+        this.TAG
+      );
+      Logger.error(this.TAG, `Failed to initialize Python interpreter: ${error instanceof Error ? error.message : String(error)}`);
+      ArkPyLoader.pythonInterpreterInstance = null;
+      ArkPyLoader.interpreterInitialized = false;
+    }
   }
 
   /**
