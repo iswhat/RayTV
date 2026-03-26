@@ -449,18 +449,28 @@ export class ArkJarLoader extends BaseLoader {
     try {
       Logger.info(this.TAG, 'Creating true sandbox environment using @ohos.sandbox API');
       
+      // 从配置服务获取安全配置 Get security config from config service
+      const memoryConfig = this.configService.getMemoryConfig();
+      const securityConfig = this.configService.getSecurityConfig();
+      
       // 使用 @ohos.sandbox API 创建真正的安全沙箱 Create true security sandbox using @ohos.sandbox API
       const resourceLimits: SandboxResourceLimits = {
-        memoryLimitMB: this.loaderConfig.maxMemory || 256,
+        memoryLimitMB: memoryConfig.maxHeapSize,
         cpuLimitPercent: 30,
         diskQuotaMB: 512
       };
+      
+      // 根据站点配置和安全策略设置权限 Set permissions based on site config and security policy
+      const permissions: string[] = ['file.read', 'network.http'];
+      
+      // 只有受信任的站点才允许额外权限 Only allow additional permissions for trusted sites
+      if (this.site.trusted) {
+        permissions.push('file.write', 'network.https');
+      }
+      
       const sandboxOptions: SandboxCreateOptions = {
         name: `raytv_jar_${this.site.key}`,
-        permissions: [
-          'file.read',
-          'network.http'
-        ],
+        permissions: permissions,
         resourceLimits: resourceLimits
       };
       this.sandboxId = await sandbox.createSandbox(sandboxOptions);
