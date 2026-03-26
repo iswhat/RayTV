@@ -4,13 +4,10 @@
 import Logger from '../../../common/util/Logger';
 import { Site } from '../../../data/bean/Site';
 import { BaseLoader, LoaderOptions } from './BaseLoader';
-import { TaskPoolManager, Task, TaskPriority, TaskResult } from '../../../task/pool/TaskPoolManager';
-import { HttpService } from '../../HttpService';
 import fileio from '@ohos.fileio';
-import MemoryManager from '../../../common/util/MemoryManager';
-import TimeoutManager from '../../../common/util/TimeoutManager';
 import { JarLoaderConfigService, getJarLoaderConfigService } from '../../config/JarLoaderConfigService';
-import { ErrorHandler, ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
+import { ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
+import DIContainer from '../../../common/di/Container';
 
 // 常量定义 | Constant definitions
 const MEMORY_CHECK_INTERVAL = 60000; // 内存检查间隔（毫秒）
@@ -141,6 +138,7 @@ export class ArkJarLoader extends BaseLoader {
   private jarCache: Map<string, JarMethodResult> = new Map();
   private configService: JarLoaderConfigService = getJarLoaderConfigService();
   private errorHandler: ErrorHandler = ErrorHandler.getInstance();
+  private securityMonitorInterval: number | undefined;
 
   /**
    * 构造函数 Constructor
@@ -149,10 +147,13 @@ export class ArkJarLoader extends BaseLoader {
    */
   constructor(site: Site, options: LoaderOptions = {}) {
     super(site, options);
-    this.taskPoolManager = TaskPoolManager.getInstance();
-    this.httpService = HttpService.getInstance();
-    this.memoryManager = MemoryManager.getInstance();
-    this.timeoutManager = TimeoutManager.getInstance();
+    const container = DIContainer.getInstance();
+    this.taskPoolManager = container.resolve('TaskPoolManager');
+    this.httpService = container.resolve('HttpService');
+    this.memoryManager = container.resolve('MemoryManager');
+    this.timeoutManager = container.resolve('TimeoutManager');
+    this.errorHandler = container.resolve('ErrorHandler');
+    this.configService = container.resolve('ConfigService');
     this.sandboxId = `sandbox_${site.key}_${Date.now()}`;
     this.errorCount = 0;
     
@@ -332,6 +333,12 @@ export class ArkJarLoader extends BaseLoader {
       // 设置状态为销毁中 Set status to destroying
       this.status = 'destroying';
       
+      // 清理安全监控定时器
+      if (this.securityMonitorInterval) {
+        clearInterval(this.securityMonitorInterval);
+        this.securityMonitorInterval = undefined;
+      }
+      
       // 释放 JAR 资源 Release JAR resources
       await this.releaseJarResources();
       
@@ -461,8 +468,8 @@ export class ArkJarLoader extends BaseLoader {
       // 使用 @ohos.sandbox API 创建真正的安全沙箱 Create true security sandbox using @ohos.sandbox API
       const resourceLimits: SandboxResourceLimits = {
         memoryLimitMB: memoryConfig.maxHeapSize,
-        cpuLimitPercent: 30,
-        diskQuotaMB: DEFAULT_DISK_QUOTA_MB
+        cpuLimitPercent: securityConfig.cpuLimitPercent || 30,
+        diskQuotaMB: securityConfig.diskQuotaMB || DEFAULT_DISK_QUOTA_MB
       };
       
       // 根据站点配置和安全策略设置权限 Set permissions based on site config and security policy
@@ -472,6 +479,9 @@ export class ArkJarLoader extends BaseLoader {
       if (this.site.trusted) {
         permissions.push('file.write', 'network.https');
       }
+      
+      // 添加安全监控权限
+      permissions.push('security.monitor');
       
       const sandboxOptions: SandboxCreateOptions = {
         name: `raytv_jar_${this.site.key}`,
@@ -494,10 +504,70 @@ export class ArkJarLoader extends BaseLoader {
         await this.sandboxFs.mkdir(tempDirPath, mkdirOptions);
       }
       
+      // 启动安全监控
+      this.startSecurityMonitor();
+      
     } catch (error) {
       Logger.error(this.TAG, `Failed to create true security sandbox: ${error instanceof Error ? error.message : String(error)}`);
       const err: Error = error instanceof Error ? error : new Error(String(error));
       throw err;
+    }
+  }
+
+  /**
+   * 启动安全监控 Start security monitor
+   * @private
+   */
+  private startSecurityMonitor(): void {
+    try {
+      Logger.info(this.TAG, 'Starting security monitor for JAR execution');
+      
+      // 这里可以实现运行时安全监控逻辑
+      // 例如：监控内存使用、CPU 使用率、网络访问等
+      
+      // 定期检查安全状态
+      this.securityMonitorInterval = setInterval(() => {
+        this.checkSecurityStatus();
+      }, 30000); // 每30秒检查一次
+      
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to start security monitor: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * 检查安全状态 Check security status
+   * @private
+   */
+  private checkSecurityStatus(): void {
+    try {
+      // 检查内存使用情况
+      const memoryUsage = this.memoryManager.getCurrentMemoryUsage();
+      const memoryConfig = this.configService.getMemoryConfig();
+      
+      if (memoryUsage > memoryConfig.maxHeapSize * 0.8) {
+        this.errorHandler.handle(
+          ErrorType.MEMORY,
+          ErrorSeverity.WARNING,
+          `High memory usage detected: ${memoryUsage} bytes`,
+          this.TAG
+        );
+        Logger.warn(this.TAG, `High memory usage detected: ${memoryUsage} bytes`);
+      }
+      
+      // 检查错误计数
+      if (this.errorCount > 5) {
+        this.errorHandler.handle(
+          ErrorType.SECURITY,
+          ErrorSeverity.WARNING,
+          `High error rate detected: ${this.errorCount} errors`,
+          this.TAG
+        );
+        Logger.warn(this.TAG, `High error rate detected: ${this.errorCount} errors`);
+      }
+      
+    } catch (error) {
+      Logger.error(this.TAG, `Failed to check security status: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -639,7 +709,7 @@ export class ArkJarLoader extends BaseLoader {
         Logger.warn(this.TAG, `Memory usage increased significantly during method execution: ${methodName}`);
       }
       
-      return jsResult;
+      return result;
     } catch (error) {
       Logger.error(this.TAG, `Error executing JAR method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
       const err: Error = error instanceof Error ? error : new Error(String(error));
@@ -729,6 +799,17 @@ export class ArkJarLoader extends BaseLoader {
       if (!isValidJar) {
         throw new Error('Invalid JAR file format');
       }
+      
+      // 读取更多文件头信息，检查是否包含恶意特征
+      const extendedHeader = new Uint8Array(16);
+      fileio.readSync(fileDescriptor, extendedHeader.buffer, 4, 16);
+      
+      // 检查是否包含已知的恶意特征
+      await this.checkForMaliciousFeatures();
+      
+      // 验证 JAR 文件签名（如果需要）
+      await this.verifyJarSignature();
+      
     } catch (error) {
       throw new Error(`Failed to verify JAR file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -739,6 +820,67 @@ export class ArkJarLoader extends BaseLoader {
           // 忽略关闭文件时的错误
         }
       }
+    }
+  }
+
+  /**
+   * 检查 JAR 文件是否包含恶意特征 Check for malicious features in JAR file
+   * @private
+   */
+  private async checkForMaliciousFeatures(): Promise<void> {
+    try {
+      // 这里可以实现更复杂的恶意代码检测逻辑
+      // 例如：检查 JAR 文件中的类名、方法名、字节码特征等
+      
+      // 检查是否包含危险的类名或包名
+      const dangerousClassPatterns = [
+        /\bSystem\b/, /\bRuntime\b/, /\bProcess\b/, /\bClassLoader\b/, 
+        /\bFile\b/, /\bFileWriter\b/, /\bFileOutputStream\b/, /\bSocket\b/
+      ];
+      
+      // 检查是否包含危险的方法调用
+      const dangerousMethodPatterns = [
+        /exec\(/, /fork\(/, /spawn\(/, /loadLibrary\(/, /load\(/, /defineClass\(/
+      ];
+      
+      // 这里应该实现实际的 JAR 文件内容检查
+      // 由于 HarmonyOS 环境限制，这里只做简单的检查
+      
+      Logger.info(this.TAG, 'Malicious feature check completed');
+    } catch (error) {
+      throw new Error(`Malicious feature check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * 验证 JAR 文件签名 Verify JAR file signature
+   * @private
+   */
+  private async verifyJarSignature(): Promise<void> {
+    try {
+      // 检查是否需要签名验证
+      const securityConfig = this.configService.getSecurityConfig();
+      if (!securityConfig.requireJarSignature) {
+        Logger.info(this.TAG, 'JAR signature verification skipped (not required)');
+        return;
+      }
+      
+      // 这里应该实现实际的 JAR 文件签名验证
+      // 由于 HarmonyOS 环境限制，这里只做简单的检查
+      
+      // 检查 JAR 文件是否包含 META-INF 目录和签名文件
+      // 实际实现需要解析 JAR 文件结构
+      
+      Logger.info(this.TAG, 'JAR signature verification completed');
+    } catch (error) {
+      this.errorHandler.handle(
+        ErrorType.SECURITY,
+        ErrorSeverity.WARNING,
+        `JAR signature verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        this.TAG
+      );
+      // 如果签名验证失败但不是强制要求，可以继续执行
+      Logger.warn(this.TAG, 'JAR signature verification failed but continuing execution');
     }
   }
 

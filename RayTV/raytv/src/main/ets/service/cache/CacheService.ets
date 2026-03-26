@@ -1,4 +1,4 @@
-﻿// 缓存服务 Cache service
+// 缓存服务 Cache service
 
 import StorageUtil from '../../common/util/StorageUtil';
 import FileUtil from '../../common/util/FileUtil';
@@ -1952,6 +1952,18 @@ export default class CacheService {
     } else if (key.includes('temp')) {
       // 临时数据缓存时间较短
       expiry = 300000; // 5分钟
+    } else if (key.includes('video')) {
+      // 视频相关缓存时间适中
+      expiry = 24 * 3600000; // 1天
+    } else if (key.includes('search')) {
+      // 搜索结果缓存时间较短
+      expiry = 6 * 3600000; // 6小时
+    } else if (key.includes('user')) {
+      // 用户数据缓存时间较长
+      expiry = 7 * 24 * 3600000; // 7天
+    } else if (key.includes('recommendation')) {
+      // 推荐数据缓存时间适中
+      expiry = 12 * 3600000; // 12小时
     }
     
     // 根据标签调整
@@ -1961,6 +1973,12 @@ export default class CacheService {
     } else if (tags.includes('static')) {
       // 静态内容缓存时间较长
       expiry = Math.max(expiry, 7 * 24 * 3600000); // 最少7天
+    } else if (tags.includes('frequent')) {
+      // 频繁访问的内容缓存时间较长
+      expiry = Math.max(expiry, 3 * 24 * 3600000); // 最少3天
+    } else if (tags.includes('volatile')) {
+      // 易变内容缓存时间较短
+      expiry = Math.min(expiry, 3600000); // 最多1小时
     }
     
     // 根据数据大小调整
@@ -2007,34 +2025,46 @@ export default class CacheService {
     // 4. 大小惩罚分数 (0-50) - 越大的缓存项越容易被删除
     const sizePenalty = Math.min((metadata.size / (1024 * 1024)) * 5, 50);
     
-    // 5. 内容类型分数 (0-50)
-    let typeScore = 30; // 默认分数
+    // 5. 内容类型分数 (0-100)
+    let typeScore = 50; // 默认分数
     if (metadata.key.includes('parse_result')) {
       typeScore = 80; // 解析结果优先级高
     } else if (metadata.key.includes('config')) {
-      typeScore = 70; // 配置信息优先级较高
+      typeScore = 90; // 配置信息优先级较高
+    } else if (metadata.key.includes('user')) {
+      typeScore = 85; // 用户数据优先级高
+    } else if (metadata.key.includes('recommendation')) {
+      typeScore = 70; // 推荐数据优先级较高
+    } else if (metadata.key.includes('video')) {
+      typeScore = 60; // 视频相关优先级一般
     } else if (metadata.key.includes('image')) {
       typeScore = 40; // 图片优先级一般
+    } else if (metadata.key.includes('search')) {
+      typeScore = 30; // 搜索结果优先级较低
     } else if (metadata.key.includes('temp')) {
       typeScore = 10; // 临时数据优先级低
     }
     
-    // 6. 来源分数 (0-30)
-    let sourceScore = 20; // 默认分数
+    // 6. 来源分数 (0-50)
+    let sourceScore = 30; // 默认分数
     if (metadata.source === 'ParserManager') {
-      sourceScore = 30; // 解析器来源优先级高
+      sourceScore = 50; // 解析器来源优先级高
     } else if (metadata.source === 'ConfigService') {
-      sourceScore = 25; // 配置服务来源优先级较高
+      sourceScore = 45; // 配置服务来源优先级较高
+    } else if (metadata.source === 'UserService') {
+      sourceScore = 40; // 用户服务来源优先级较高
+    } else if (metadata.source === 'RecommendationService') {
+      sourceScore = 35; // 推荐服务来源优先级一般
     }
     
     // 7. 综合计算最终分数
     const finalScore = (
-      priorityScore * 0.3 +
+      priorityScore * 0.25 +
       frequencyScore * 0.25 +
       recencyScore * 0.2 +
-      typeScore * 0.15 +
-      sourceScore * 0.1 -
-      sizePenalty * 0.1
+      typeScore * 0.2 +
+      sourceScore * 0.05 -
+      sizePenalty * 0.05
     );
     
     return finalScore;

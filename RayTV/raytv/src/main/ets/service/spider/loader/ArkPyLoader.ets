@@ -6,12 +6,9 @@ import ObjectUtils from '../../../common/util/ark/ObjectUtils';
 import { BaseLoader, LoaderOptions } from './BaseLoader';
 import { SiteSpider, VideoItem, VideoDetail } from '../CrawlerService';
 import { Site, SiteInfo } from '../../../data/bean/Site';
-import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
-import { HttpService } from '../../HttpService';
-import MemoryManager from '../../../common/util/MemoryManager';
-import TimeoutManager from '../../../common/util/TimeoutManager';
 import { PythonLoaderConfigService, getPythonLoaderConfigService } from '../../config/PythonLoaderConfigService';
-import { ErrorHandler, ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
+import { ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
+import DIContainer from '../../../common/di/Container';
 
 // 常量定义 | Constant definitions
 const MEMORY_RECOVERY_DELAY = 1000; // 内存恢复等待时间（毫秒）
@@ -136,10 +133,13 @@ export class ArkPyLoader extends BaseLoader {
    */
   constructor(site: Site, options: LoaderOptions = {}) {
     super(site, options);
-    this.taskPoolManager = TaskPoolManager.getInstance();
-    this.httpService = HttpService.getInstance();
-    this.memoryManager = MemoryManager.getInstance();
-    this.timeoutManager = TimeoutManager.getInstance();
+    const container = DIContainer.getInstance();
+    this.taskPoolManager = container.resolve('TaskPoolManager');
+    this.httpService = container.resolve('HttpService');
+    this.memoryManager = container.resolve('MemoryManager');
+    this.timeoutManager = container.resolve('TimeoutManager');
+    this.errorHandler = container.resolve('ErrorHandler');
+    this.configService = container.resolve('ConfigService');
     this.pyModuleName = `site_${site.key || 'default'}`;
     this.errorCount = 0;
   }

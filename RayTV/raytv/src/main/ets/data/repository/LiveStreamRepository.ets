@@ -1,4 +1,4 @@
-﻿// LiveStreamRepository - 鐩存挱鏁版嵁浠撳簱绫?// 璐熻矗绠＄悊鐩存挱娴佺浉鍏虫暟鎹紝鍖呮嫭鐩存挱鍒楄〃銆佺洿鎾鎯呫€佸叧娉ㄣ€佽鐪嬬粺璁＄瓑
+// LiveStreamRepository - 鐩存挱鏁版嵁浠撳簱绫?// 璐熻矗绠＄悊鐩存挱娴佺浉鍏虫暟鎹紝鍖呮嫭鐩存挱鍒楄〃銆佺洿鎾鎯呫€佸叧娉ㄣ€佽鐪嬬粺璁＄瓑
 
 import Logger from '../../common/util/Logger';
 import StorageUtil from '../../common/util/StorageUtil';
@@ -195,7 +195,7 @@ export class LiveStreamRepository {
   
   // API绔偣閰嶇疆
   private apiEndpoints = {
-    baseUrl: 'TODO_CONFIGURE_REAL_API',
+    baseUrl: 'https://api.raytv.com',
     liveStreams: '/live/streams',
     liveStreamDetail: '/live/streams/:id',
     liveStreamChat: '/live/streams/:id/chat',
@@ -274,7 +274,7 @@ export class LiveStreamRepository {
    * 璁剧疆浜嬩欢鐩戝惉鍣?   */
   private setupEventListeners(): void {
     // 鐩戝惉搴旂敤閫€鍑轰簨浠讹紝娓呯悊瑙傜湅浼氳瘽
-    this.eventBus.on('app:exit', async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ( instanceof Error ? async ( instanceof Error ? async ( : new Error(String(async ( : new Error(String(async ( instanceof Error ? async ( : new Error(String(async ())))))) => {
+    this.eventBus.on('app:exit', async () => {
       await this.cleanupWatchSessions();
     });
     
@@ -348,7 +348,7 @@ export class LiveStreamRepository {
   /**
    * 淇濆瓨瑙傜湅鍘嗗彶
    */
-  private async saveWatchHistory(streamId: string, startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number : new Error(String(startTime: number, endTime: number instanceof Error ? startTime: number, endTime: number : new Error(String(startTime: number, endTime: number))))))): Promise<void> {
+  private async saveWatchHistory(streamId: string, startTime: number, endTime: number): Promise<void> {
     try {
       const watchDuration = endTime - startTime;
       
@@ -380,33 +380,7 @@ export class LiveStreamRepository {
       
       // 灏濊瘯浠庣紦瀛樿幏鍙?      const cachedData = await this.cacheService.get<LiveStreamListResponse>(
         CacheType.LIVE_STREAM_LIST, cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-       : new Error(String(cacheKey
-       instanceof Error ? cacheKey
-       : new Error(String(cacheKey
-      )))))));
+      );
       
       if (cachedData && !this.isCacheExpired(cachedData.timestamp, this.liveConfig.liveStreamListCacheDuration)) {
         this.logger.debug('Live streams loaded from cache');
@@ -440,59 +414,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -595,59 +517,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -708,59 +578,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -832,7 +650,7 @@ export class LiveStreamRepository {
        : new Error(String(this.storageKeys.followedBroadcasters
        instanceof Error ? this.storageKeys.followedBroadcasters
        : new Error(String(this.storageKeys.followedBroadcasters
-      )))))));
+      ;
       
       return followedStreams || [];
     } catch (error) {
@@ -850,59 +668,59 @@ export class LiveStreamRepository {
       // 鍙戝竷浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_STREAM_LIST_LOADED, {
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( instanceof Error ? {
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now( : new Error(String({
+        timestamp: Date.now(),
         type: LiveStreamEventType.LIVE_STREAM_LIST_LOADED,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         data: { followedStreams }
       });
       
@@ -944,7 +762,7 @@ export class LiveStreamRepository {
        : new Error(String(this.storageKeys.followedBroadcasters
        instanceof Error ? this.storageKeys.followedBroadcasters
        : new Error(String(this.storageKeys.followedBroadcasters
-      )))))));
+      ;
       
       this.logger.info('Followed streams cleared');
     } catch (error) {
@@ -986,7 +804,7 @@ export class LiveStreamRepository {
        : new Error(String(cacheKey
        instanceof Error ? cacheKey
        : new Error(String(cacheKey
-      )))))));
+      ;
       
       if (cachedData && !this.isCacheExpired(cachedData.timestamp, this.liveConfig.featuredStreamsCacheDuration)) {
         this.logger.debug('Featured streams loaded from cache');
@@ -1121,59 +939,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1209,59 +975,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1324,59 +1038,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1404,59 +1066,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1501,59 +1111,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1580,59 +1138,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1660,59 +1166,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1771,59 +1225,7 @@ export class LiveStreamRepository {
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {
         type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( instanceof Error ? {
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now( : new Error(String({
-        type: LiveStreamEventType.LIVE_ERROR,
-        timestamp: Date.now())))))),
+        timestamp: Date.now(),
         error: error as Error
       });
       
@@ -1857,7 +1259,7 @@ export class LiveStreamRepository {
       // 鍋滄蹇冭烦妫€娴?      // 娉ㄦ剰锛氬湪ArkTS涓紝setInterval杩斿洖鐨則imer闇€瑕佹墜鍔ㄦ竻鐞?      // 杩欓噷闇€瑕佹牴鎹疄闄呭疄鐜版潵娓呯悊瀹氭椂鍣?      
       this.logger.info('LiveStreamRepository shutdown');
     } catch (error) {
-      this.logger.error('Failed to shutdown LiveStreamRepository', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error)))))));
+      this.logger.error('Failed to shutdown LiveStreamRepository', error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error instanceof Error ? error as Error instanceof Error ? error as Error : new Error(String(error as Error : new Error(String(error as Error instanceof Error ? error as Error : new Error(String(error as Error;
       
       // 鍙戝竷閿欒浜嬩欢
       this.eventBus.emit(LiveStreamEventType.LIVE_ERROR, {

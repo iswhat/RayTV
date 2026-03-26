@@ -1,4 +1,4 @@
-﻿// SynologyAdapter.ets - 群晖协议适配器
+// SynologyAdapter.ets - 群晖协议适配器
 import { NASDevice, NASFileItem } from '../types/NASDeviceTypes';
 import { BaseNASProtocolAdapter, NASFileType } from '../NASProtocolAdapter';
 import HttpService from '../../HttpService';
@@ -216,7 +216,11 @@ export class SynologyAdapter extends BaseNASProtocolAdapter {
   }
 
   private getSessionId(device: NASDevice): string {
-    return this.sessionIds.get(device.id) || 'mock_synology_sid';
+    const sid = this.sessionIds.get(device.id);
+    if (!sid) {
+      throw new Error('No session ID found. Please connect to the device first.');
+    }
+    return sid;
   }
 
   getConfigOptions(): Record<string, string | number | boolean> {

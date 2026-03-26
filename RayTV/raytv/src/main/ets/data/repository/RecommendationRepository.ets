@@ -135,7 +135,7 @@ export class RecommendationRepository {
   
   // API绔偣閰嶇疆
   private readonly apiEndpoints = {
-    baseUrl: 'TODO_CONFIGURE_REAL_API',
+    baseUrl: 'https://api.raytv.com',
     recommendations: '/recommendations',
     personalized: '/recommendations/personalized',
     similar: '/recommendations/similar/:id',

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Local Recommendation Algorithm - 本地推荐算法实现
  * 
  * 基于用户行为和内容特征生成推荐，不依赖外部API
@@ -9,6 +9,7 @@ import Logger from '../../common/util/Logger';
 import ContentAccessService from './ContentAccessService';
 import { VodSiteWithSource, LiveChannelWithSource } from './SourcePoolManager';
 import { RecommendationItem, RecommendationType, UserPreferences } from '../data/repository/RecommendationRepository';
+import StorageUtil from '../../common/util/StorageUtil';
 
 // ========================================
 // 推荐算法相关接口
@@ -119,8 +120,13 @@ export class LocalRecommendationAlgorithm {
       // 加载用户行为历史
       await this.loadUserBehaviors();
       
-      // 构建用户画像
-      await this.buildUserProfile();
+      // 加载用户画像
+      await this.loadUserProfile();
+      
+      // 如果没有用户画像，构建新的
+      if (!this.userProfile) {
+        await this.buildUserProfile();
+      }
       
       this.logger.info('LocalRecommendationAlgorithm initialized successfully');
     } catch (error) {
@@ -376,9 +382,14 @@ export class LocalRecommendationAlgorithm {
     
     this.userBehaviors.set(key, behaviors);
     
-    // 异步保存到存储
+    // 异步保存到存储并更新用户画像
     this.saveUserBehaviors().catch(err => {
       this.logger.warn('Failed to save user behaviors', err);
+    });
+    
+    // 异步更新用户画像
+    this.buildUserProfile().catch(err => {
+      this.logger.warn('Failed to update user profile', err);
     });
   }
   
@@ -390,7 +401,28 @@ export class LocalRecommendationAlgorithm {
    * 加载用户行为历史
    */
   private async loadUserBehaviors(): Promise<void> {
-    // TODO: 从本地存储加载用户行为
+    try {
+      const stored = await StorageUtil.get('user_behaviors');
+      if (stored) {
+        try {
+          const behaviorsData = JSON.parse(stored);
+          this.userBehaviors = new Map(Object.entries(behaviorsData));
+          // 转换数组
+          for (const [key, value] of this.userBehaviors) {
+            if (Array.isArray(value)) {
+              this.userBehaviors.set(key, value);
+            }
+          }
+          this.logger.debug(`Loaded ${this.userBehaviors.size} user behavior entries`);
+        } catch (parseError) {
+          this.logger.error('Failed to parse user behaviors', parseError as Error);
+          this.userBehaviors = new Map();
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load user behaviors', error as Error);
+      this.userBehaviors = new Map();
+    }
     this.logger.debug('User behaviors loaded');
   }
   
@@ -398,8 +430,65 @@ export class LocalRecommendationAlgorithm {
    * 保存用户行为
    */
   private async saveUserBehaviors(): Promise<void> {
-    // TODO: 保存用户行为到本地存储
-    this.logger.debug('User behaviors saved');
+    try {
+      // 转换Map为普通对象以便存储
+      const behaviorsData: Record<string, UserBehavior[]> = {};
+      for (const [key, value] of this.userBehaviors) {
+        behaviorsData[key] = value;
+      }
+      const data = JSON.stringify(behaviorsData);
+      await StorageUtil.set('user_behaviors', data);
+      this.logger.debug(`Saved ${this.userBehaviors.size} user behavior entries`);
+    } catch (error) {
+      this.logger.error('Failed to save user behaviors', error as Error);
+    }
+  }
+  
+  /**
+   * 保存用户画像
+   */
+  private async saveUserProfile(): Promise<void> {
+    try {
+      if (this.userProfile) {
+        // 转换Map为数组以便存储
+        const profileData = {
+          ...this.userProfile,
+          preferredCategories: Array.from(this.userProfile.preferredCategories.entries()),
+          preferredTags: Array.from(this.userProfile.preferredTags.entries())
+        };
+        const data = JSON.stringify(profileData);
+        await StorageUtil.set('user_profile', data);
+        this.logger.debug('Saved user profile');
+      }
+    } catch (error) {
+      this.logger.error('Failed to save user profile', error as Error);
+    }
+  }
+  
+  /**
+   * 加载用户画像
+   */
+  private async loadUserProfile(): Promise<void> {
+    try {
+      const stored = await StorageUtil.get('user_profile');
+      if (stored) {
+        try {
+          const profileData = JSON.parse(stored);
+          this.userProfile = {
+            ...profileData,
+            preferredCategories: new Map(profileData.preferredCategories),
+            preferredTags: new Map(profileData.preferredTags)
+          };
+          this.logger.debug('Loaded user profile');
+        } catch (parseError) {
+          this.logger.error('Failed to parse user profile', parseError as Error);
+          this.userProfile = null;
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load user profile', error as Error);
+      this.userProfile = null;
+    }
   }
   
   /**
@@ -477,6 +566,9 @@ export class LocalRecommendationAlgorithm {
       watchedHistory,
       likedContent
     };
+    
+    // 保存用户画像到存储
+    await this.saveUserProfile();
   }
   
   /**
@@ -584,11 +676,53 @@ export class LocalRecommendationAlgorithm {
    * 计算流行度
    */
   private calculatePopularity(item: VodSiteWithSource | LiveChannelWithSource): number {
-    // 基于观看次数、喜欢次数等计算
-    // 这里使用简化的计算方式
-    const baseScore = 0.5;
-    const randomFactor = Math.random() * 0.3;  // 模拟随机性
-    return Math.min(1.0, baseScore + randomFactor);
+    // 基于用户行为数据计算流行度
+    let popularityScore = 0.5; // 基础分数
+    
+    // 1. 基于用户行为计算
+    const behaviors = this.userBehaviors.get(item.id) || [];
+    if (behaviors.length > 0) {
+      let viewCount = 0;
+      let likeCount = 0;
+      let completeCount = 0;
+      
+      for (const behavior of behaviors) {
+        if (behavior.action === 'view' || behavior.action === 'play') {
+          viewCount++;
+        }
+        if (behavior.action === 'like') {
+          likeCount++;
+        }
+        if (behavior.action === 'complete') {
+          completeCount++;
+        }
+      }
+      
+      // 计算行为得分
+      const viewScore = Math.min(viewCount / 10, 0.2); // 最多贡献0.2分
+      const likeScore = Math.min(likeCount / 5, 0.3);  // 最多贡献0.3分
+      const completeScore = Math.min(completeCount / 3, 0.2); // 最多贡献0.2分
+      
+      popularityScore += viewScore + likeScore + completeScore;
+    }
+    
+    // 2. 基于内容自身属性
+    if ('score' in item && item.score) {
+      // 如果有评分，将其转换为0-0.2的分数
+      const scoreNum = parseFloat(item.score);
+      if (!isNaN(scoreNum)) {
+        popularityScore += (scoreNum / 10) * 0.2;
+      }
+    }
+    
+    // 3. 基于新鲜度
+    if ('lastUpdated' in item) {
+      const freshness = this.calculateFreshness(item.lastUpdated);
+      popularityScore += freshness * 0.1;
+    }
+    
+    // 确保流行度在0-1之间
+    return Math.min(1.0, Math.max(0.1, popularityScore));
   }
   
   /**
@@ -675,10 +809,195 @@ export class LocalRecommendationAlgorithm {
    * 计算协同过滤得分
    */
   private calculateCollaborativeScore(content: ContentFeature, userProfile: UserProfile): number {
-    // 简化的协同过滤算法
-    // 实际应用中可以使用矩阵分解等算法
+    // 基于用户的协同过滤算法
+    // 1. 计算用户之间的相似度
+    // 2. 找到相似用户喜欢的内容
+    // 3. 结合物品相似度计算得分
     
-    // 检查是否喜欢类似的内容
+    // 获取所有用户的行为数据（这里简化为当前用户的行为）
+    const allUserBehaviors = this.userBehaviors;
+    
+    // 构建用户-内容矩阵
+    const userItemMatrix = this.buildUserItemMatrix(allUserBehaviors);
+    
+    // 计算用户之间的相似度
+    const userSimilarities = this.calculateUserSimilarities(userItemMatrix);
+    
+    // 找到与当前用户最相似的用户
+    const similarUsers = this.findSimilarUsers(userSimilarities, 'current_user', 5);
+    
+    // 基于相似用户的行为计算得分
+    let collaborativeScore = 0;
+    let totalWeight = 0;
+    
+    for (const [similarUserId, similarity] of similarUsers) {
+      if (similarity <= 0) continue;
+      
+      // 获取相似用户喜欢的内容
+      const similarUserLikedContent = this.getUserLikedContent(similarUserId, allUserBehaviors);
+      
+      // 计算相似用户喜欢的内容与目标内容的相似度
+      for (const likedId of similarUserLikedContent) {
+        const likedFeature = this.contentFeaturesCache.get(likedId);
+        if (likedFeature) {
+          const contentSimilarity = this.calculateContentSimilarity(likedFeature, content);
+          collaborativeScore += similarity * contentSimilarity;
+          totalWeight += similarity;
+        }
+      }
+    }
+    
+    // 归一化
+    if (totalWeight > 0) {
+      return Math.min(1.0, collaborativeScore / totalWeight);
+    }
+    
+    // 如果没有相似用户，使用基于内容的协同过滤
+    return this.calculateContentBasedCollaborativeScore(content, userProfile);
+  }
+  
+  /**
+   * 构建用户-内容矩阵
+   */
+  private buildUserItemMatrix(userBehaviors: Map<string, UserBehavior[]>): Map<string, Map<string, number>> {
+    const matrix = new Map<string, Map<string, number>>();
+    
+    // 简化实现：只考虑当前用户
+    const currentUser = 'current_user';
+    const userItems = new Map<string, number>();
+    
+    for (const behaviors of userBehaviors.values()) {
+      for (const behavior of behaviors) {
+        let score = 0;
+        switch (behavior.action) {
+          case 'like':
+          case 'complete':
+            score = 5;
+            break;
+          case 'play':
+            score = 3;
+            break;
+          case 'view':
+            score = 1;
+            break;
+          default:
+            score = 0;
+        }
+        
+        // 考虑观看时长和进度
+        if (behavior.duration && behavior.totalDuration) {
+          const progress = behavior.duration / behavior.totalDuration;
+          score *= (0.5 + 0.5 * progress);
+        }
+        
+        userItems.set(behavior.videoId, score);
+      }
+    }
+    
+    matrix.set(currentUser, userItems);
+    return matrix;
+  }
+  
+  /**
+   * 计算用户之间的相似度
+   */
+  private calculateUserSimilarities(matrix: Map<string, Map<string, number>>): Map<string, Map<string, number>> {
+    const similarities = new Map<string, Map<string, number>>();
+    const users = Array.from(matrix.keys());
+    
+    for (let i = 0; i < users.length; i++) {
+      const user1 = users[i];
+      similarities.set(user1, new Map());
+      
+      for (let j = 0; j < users.length; j++) {
+        const user2 = users[j];
+        if (user1 === user2) {
+          similarities.get(user1)?.set(user2, 1.0);
+          continue;
+        }
+        
+        const similarity = this.calculateUserSimilarity(
+          matrix.get(user1) || new Map(),
+          matrix.get(user2) || new Map()
+        );
+        similarities.get(user1)?.set(user2, similarity);
+      }
+    }
+    
+    return similarities;
+  }
+  
+  /**
+   * 计算两个用户之间的相似度
+   */
+  private calculateUserSimilarity(user1Items: Map<string, number>, user2Items: Map<string, number>): number {
+    // 使用余弦相似度
+    const commonItems = new Set<string>();
+    
+    // 找到共同的内容
+    for (const item of user1Items.keys()) {
+      if (user2Items.has(item)) {
+        commonItems.add(item);
+      }
+    }
+    
+    if (commonItems.size === 0) {
+      return 0;
+    }
+    
+    let dotProduct = 0;
+    let user1Norm = 0;
+    let user2Norm = 0;
+    
+    for (const item of commonItems) {
+      const score1 = user1Items.get(item) || 0;
+      const score2 = user2Items.get(item) || 0;
+      
+      dotProduct += score1 * score2;
+      user1Norm += score1 * score1;
+      user2Norm += score2 * score2;
+    }
+    
+    if (user1Norm === 0 || user2Norm === 0) {
+      return 0;
+    }
+    
+    return dotProduct / (Math.sqrt(user1Norm) * Math.sqrt(user2Norm));
+  }
+  
+  /**
+   * 找到与目标用户最相似的用户
+   */
+  private findSimilarUsers(similarities: Map<string, Map<string, number>>, targetUserId: string, limit: number): Array<[string, number]> {
+    const userSimilarities = similarities.get(targetUserId) || new Map();
+    
+    return Array.from(userSimilarities.entries())
+      .filter(([userId, similarity]) => userId !== targetUserId)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit);
+  }
+  
+  /**
+   * 获取用户喜欢的内容
+   */
+  private getUserLikedContent(userId: string, userBehaviors: Map<string, UserBehavior[]>): string[] {
+    const likedContent: string[] = [];
+    
+    for (const [contentId, behaviors] of userBehaviors.entries()) {
+      const hasLikeAction = behaviors.some(b => b.action === 'like' || b.action === 'complete');
+      if (hasLikeAction) {
+        likedContent.push(contentId);
+      }
+    }
+    
+    return likedContent;
+  }
+  
+  /**
+   * 基于内容的协同过滤得分（备用方法）
+   */
+  private calculateContentBasedCollaborativeScore(content: ContentFeature, userProfile: UserProfile): number {
+    // 基于用户喜欢的内容计算相似度
     let score = 0;
     
     for (const likedId of userProfile.likedContent) {
@@ -690,7 +1009,9 @@ export class LocalRecommendationAlgorithm {
     }
     
     // 归一化
-    return Math.min(1.0, score / userProfile.likedContent.length);
+    return userProfile.likedContent.length > 0 
+      ? Math.min(1.0, score / userProfile.likedContent.length)
+      : 0;
   }
   
   /**

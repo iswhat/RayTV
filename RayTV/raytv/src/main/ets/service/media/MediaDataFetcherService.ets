@@ -95,12 +95,37 @@ export class MediaDataFetcherService {
   private cacheService: CacheService;
   private eventBus: EventBusUtil;
   
-  // 缓存配置
+  // 缓存配置 - 根据媒体类型自动调整
   private readonly CACHE_DURATION = {
-    MEDIA_DETAIL: 30 * 60,        // 媒体详情缓存30分钟
-    EPISODES: 10 * 60,           // 剧集列表缓存10分钟
-    PLAY_SOURCES: 5 * 60,          // 播放源缓存5分钟
-    RELATED_MEDIA: 60 * 60          // 相关媒体缓存1小时
+    // 基础缓存时间（秒）
+    BASE: {
+      MEDIA_DETAIL: 30 * 60,        // 媒体详情基础缓存30分钟
+      EPISODES: 10 * 60,           // 剧集列表基础缓存10分钟
+      PLAY_SOURCES: 5 * 60,          // 播放源基础缓存5分钟
+      RELATED_MEDIA: 60 * 60          // 相关媒体基础缓存1小时
+    },
+    // 按媒体类型的缓存系数
+    TYPE_FACTOR: {
+      movie: 1.5,           // 电影：缓存时间延长50%
+      tv: 1.0,             // 电视剧：标准缓存时间
+      anime: 0.8,           // 动漫：缓存时间缩短20%
+      documentary: 2.0,     // 纪录片：缓存时间延长100%
+      variety: 0.5          // 综艺：缓存时间缩短50%
+    },
+    // 最小缓存时间（秒）
+    MIN: {
+      MEDIA_DETAIL: 15 * 60,        // 媒体详情最小15分钟
+      EPISODES: 5 * 60,            // 剧集列表最小5分钟
+      PLAY_SOURCES: 2 * 60,         // 播放源最小2分钟
+      RELATED_MEDIA: 30 * 60        // 相关媒体最小30分钟
+    },
+    // 最大缓存时间（秒）
+    MAX: {
+      MEDIA_DETAIL: 120 * 60,       // 媒体详情最大2小时
+      EPISODES: 30 * 60,           // 剧集列表最大30分钟
+      PLAY_SOURCES: 15 * 60,         // 播放源最大15分钟
+      RELATED_MEDIA: 180 * 60       // 相关媒体最大3小时
+    }
   };
   
   private constructor() {
@@ -152,13 +177,18 @@ export class MediaDataFetcherService {
       const detail = await this.fetchMediaDetailFromSites(mediaId, sites);
       
       if (detail) {
+        // 计算智能缓存时间
+        const cacheDuration = this.calculateCacheDuration('MEDIA_DETAIL', detail.type);
+        
         // 缓存结果
         await this.cacheService.set(
           cacheKey,
           detail,
           CacheType.MEDIA,
-          this.CACHE_DURATION.MEDIA_DETAIL
+          cacheDuration
         );
+        
+        this.logger.debug(`Cached media detail with duration: ${cacheDuration}s (type: ${detail.type})`);
       }
       
       return detail;
@@ -189,13 +219,27 @@ export class MediaDataFetcherService {
       const episodes: EpisodeInfo[] = await this.fetchEpisodesFromSites(mediaId, sourceId);
       
       if (episodes.length > 0) {
+        // 获取媒体类型以计算智能缓存时间
+        let mediaType: string | undefined;
+        try {
+          const mediaDetail = await this.getMediaDetail(mediaId, sourceId);
+          mediaType = mediaDetail?.type;
+        } catch (error) {
+          this.logger.debug('Failed to get media type for cache calculation', error as Error);
+        }
+        
+        // 计算智能缓存时间
+        const cacheDuration = this.calculateCacheDuration('EPISODES', mediaType);
+        
         // 缓存结果
         await this.cacheService.set(
           cacheKey,
           episodes,
           CacheType.MEDIA,
-          this.CACHE_DURATION.EPISODES
+          cacheDuration
         );
+        
+        this.logger.debug(`Cached episodes with duration: ${cacheDuration}s (type: ${mediaType || 'unknown'})`);
       }
       
       return episodes;
@@ -226,13 +270,27 @@ export class MediaDataFetcherService {
       const sources: PlaySource[] = await this.fetchPlaySourcesFromSites(mediaId, episodeId, sourceId);
       
       if (sources.length > 0) {
+        // 获取媒体类型以计算智能缓存时间
+        let mediaType: string | undefined;
+        try {
+          const mediaDetail = await this.getMediaDetail(mediaId, sourceId);
+          mediaType = mediaDetail?.type;
+        } catch (error) {
+          this.logger.debug('Failed to get media type for cache calculation', error as Error);
+        }
+        
+        // 计算智能缓存时间
+        const cacheDuration = this.calculateCacheDuration('PLAY_SOURCES', mediaType);
+        
         // 缓存结果
         await this.cacheService.set(
           cacheKey,
           sources,
           CacheType.MEDIA,
-          this.CACHE_DURATION.PLAY_SOURCES
+          cacheDuration
         );
+        
+        this.logger.debug(`Cached play sources with duration: ${cacheDuration}s (type: ${mediaType || 'unknown'})`);
       }
       
       return sources;
@@ -333,13 +391,18 @@ export class MediaDataFetcherService {
       }
       
       // 缓存结果
-      if (related.length > 0) {
+      if (related.length > 0 && mediaDetail) {
+        // 计算智能缓存时间
+        const cacheDuration = this.calculateCacheDuration('RELATED_MEDIA', mediaDetail.type);
+        
         await this.cacheService.set(
           cacheKey,
           related,
           CacheType.MEDIA,
-          this.CACHE_DURATION.RELATED_MEDIA
+          cacheDuration
         );
+        
+        this.logger.debug(`Cached related media with duration: ${cacheDuration}s (type: ${mediaDetail.type})`);
       }
       
       return related;
@@ -429,36 +492,36 @@ export class MediaDataFetcherService {
     mediaId: string
   ): Promise<MediaDetail | null> {
     try {
-      // 简化实现：基于站点数据生成详情
-      // 实际应用中应该调用站点的API
-      this.logger.debug(`Fetching from ${site.name}, siteKey: ${site.siteKey}`);
+      this.logger.debug(`Fetching media detail from site: ${site.name}, mediaId: ${mediaId}`);
       
       // 检查站点是否支持该mediaId
       if (!this.isMediaIdFromSite(mediaId, site)) {
         return null;
       }
       
-      // 生成详情
+      // 实际应用中应该调用站点的API
+      // 这里使用站点的实际数据构建媒体详情
       const detail: MediaDetail = {
         id: mediaId,
-        title: `${site.name} - 媒体详情`,
-        type: 'movie',
+        title: site.name,
+        type: site.type || 'movie',
         area: site.area || '未知',
         lang: site.lang || '未知',
-        year: new Date().getFullYear().toString(),
-        score: '8.0',
-        status: '更新中',
-        desc: `来自${site.name}的精彩内容。这部作品制作精良，演员阵容强大，讲述了一个引人入胜的故事。`,
+        year: site.year || new Date().getFullYear().toString(),
+        score: site.score || '7.0',
+        status: site.status || '更新中',
+        desc: site.desc || `来自${site.name}的内容`,
         cover: site.icon || '',
-        tags: (site.tags || []).slice(0, 5),
-        actors: [],
-        director: '',
-        duration: 120
+        tags: site.tags || [],
+        actors: site.actors || [],
+        director: site.director || '',
+        duration: site.duration || 90
       };
       
+      this.logger.debug(`Fetched media detail: ${detail.title}`);
       return detail;
     } catch (error) {
-      Logger.error(`Failed to fetch detail from site ${site.name}`, error as Error);
+      this.logger.error(`Failed to fetch detail from site ${site.name}`, error as Error);
       return null;
     }
   }
@@ -471,25 +534,32 @@ export class MediaDataFetcherService {
     sourceId?: string
   ): Promise<EpisodeInfo[]> {
     try {
-      // 简化实现：生成模拟剧集列表
+      this.logger.debug(`Fetching episodes for media: ${mediaId}, source: ${sourceId || 'all'}`);
+      
       // 实际应用中应该调用站点的API
+      // 这里基于媒体ID和站点信息生成合理的剧集列表
       const episodes: EpisodeInfo[] = [];
-      const episodeCount = Math.floor(Math.random() * 24) + 1; // 1-24集
+      
+      // 根据媒体类型确定剧集数量
+      // 电影通常只有1集，电视剧有多个集数
+      const mediaDetail = await this.getMediaDetail(mediaId, sourceId);
+      const episodeCount = mediaDetail?.type === 'movie' ? 1 : 12; // 电影1集，其他12集
       
       for (let i = 1; i <= episodeCount; i++) {
         episodes.push({
           id: `ep_${i}`,
-          name: `第${i}集`,
+          name: mediaDetail?.type === 'movie' ? '正片' : `第${i}集`,
           episodeNumber: i,
           url: `${mediaId}/ep_${i}`,
-          duration: 45,
+          duration: mediaDetail?.duration || 45,
           quality: '1080p'
         });
       }
       
+      this.logger.debug(`Fetched ${episodes.length} episodes for media: ${mediaId}`);
       return episodes;
     } catch (error) {
-      Logger.error('MediaDataFetcher', Failed to fetch episodes, error as Error);
+      this.logger.error('Failed to fetch episodes', error as Error);
       return [];
     }
   }
@@ -503,29 +573,34 @@ export class MediaDataFetcherService {
     sourceId?: string
   ): Promise<PlaySource[]> {
     try {
-      // 简化实现：生成多个播放源
+      this.logger.debug(`Fetching play sources for media: ${mediaId}, episode: ${episodeId}`);
+      
       // 实际应用中应该调用站点的API或解析器
       const sources: PlaySource[] = [];
       
-      // 生成多个播放源
-      const sourceNames = ['默认线路', '备用线路1', '备用线路2', '高清线路', '极速线路'];
+      // 基于媒体类型和质量级别生成播放源
       const qualities = ['1080p', '720p', '480p'];
+      const formats = ['m3u8', 'mp4'];
       
-      sourceNames.forEach((name, index) => {
-        sources.push({
-          id: `source_${index}`,
-          name: name,
-          url: `${mediaId}/${episodeId}/${index}`,
-          format: 'm3u8',
-          quality: qualities[index % qualities.length],
-          isDefault: index === 0,
-          needParse: false
+      qualities.forEach((quality, index) => {
+        formats.forEach((format, formatIndex) => {
+          const sourceName = `${quality} ${format.toUpperCase()}`;
+          sources.push({
+            id: `source_${index}_${formatIndex}`,
+            name: sourceName,
+            url: `${mediaId}/${episodeId}/${quality}/${format}`,
+            format: format,
+            quality: quality,
+            isDefault: index === 0 && formatIndex === 0, // 默认使用1080p m3u8
+            needParse: format === 'm3u8' // m3u8格式可能需要解析
+          });
         });
       });
       
+      this.logger.debug(`Fetched ${sources.length} play sources for media: ${mediaId}`);
       return sources;
     } catch (error) {
-      Logger.error('MediaDataFetcher', Failed to fetch play sources, error as Error);
+      this.logger.error('Failed to fetch play sources', error as Error);
       return [];
     }
   }
@@ -538,29 +613,41 @@ export class MediaDataFetcherService {
     keyword: string
   ): Promise<MediaDetail[]> {
     try {
-      // 简化实现：基于站点名称生成搜索结果
+      this.logger.debug(`Searching from site: ${site.name}, keyword: ${keyword}`);
+      
       // 实际应用中应该调用站点的搜索API
-      if (!site.name.toLowerCase().includes(keyword.toLowerCase())) {
-        return [];
+      // 这里基于站点信息和关键词生成搜索结果
+      const results: MediaDetail[] = [];
+      
+      // 检查站点名称、标签或描述是否包含关键词
+      const keywordLower = keyword.toLowerCase();
+      const matchesKeyword = 
+        site.name.toLowerCase().includes(keywordLower) ||
+        (site.tags && site.tags.some(tag => tag.toLowerCase().includes(keywordLower))) ||
+        (site.desc && site.desc.toLowerCase().includes(keywordLower));
+      
+      if (matchesKeyword) {
+        results.push({
+          id: site.id,
+          title: site.name,
+          type: site.type || 'movie',
+          area: site.area || '未知',
+          lang: site.lang || '未知',
+          year: site.year || new Date().getFullYear().toString(),
+          score: site.score || '7.0',
+          status: site.status || '更新中',
+          desc: site.desc || `来自${site.name}的内容`,
+          cover: site.icon || '',
+          tags: site.tags || [],
+          actors: site.actors || [],
+          director: site.director || ''
+        });
       }
       
-      return [{
-        id: site.id,
-        title: site.name,
-        type: 'movie',
-        area: site.area || '未知',
-        lang: site.lang || '未知',
-        year: new Date().getFullYear().toString(),
-        score: '8.0',
-        status: '更新中',
-        desc: site.name,
-        cover: site.icon || '',
-        tags: (site.tags || []).slice(0, 5),
-        actors: [],
-        director: ''
-      }];
+      this.logger.debug(`Found ${results.length} results from site: ${site.name}`);
+      return results;
     } catch (error) {
-      Logger.error(`Failed to search from site ${site.name}`, error as Error);
+      this.logger.error(`Failed to search from site ${site.name}`, error as Error);
       return [];
     }
   }
@@ -594,10 +681,11 @@ export class MediaDataFetcherService {
   public async clearCache(): Promise<void> {
     try {
       // 清除媒体相关缓存
-      Logger.info('MediaDataFetcher', Clearing media data cache);
-      // TODO: 实现清除缓存逻辑
+      this.logger.info('Clearing media data cache');
+      await this.cacheService.clear(CacheType.MEDIA);
+      this.logger.info('Media data cache cleared successfully');
     } catch (error) {
-      Logger.error('MediaDataFetcher', Failed to clear cache, error as Error);
+      this.logger.error('Failed to clear cache', error as Error);
     }
   }
   
@@ -617,6 +705,120 @@ export class MediaDataFetcherService {
     } catch (error: Error) {
       Logger.error('MediaDataFetcher', 'Failed to preload media: ' + error.message);
     }
+  }
+  
+  /**
+   * 批量获取媒体详情
+   */
+  public async getMediaDetails(mediaIds: string[], sourceId?: string): Promise<Map<string, MediaDetail | null>> {
+    try {
+      Logger.info(`Fetching details for ${mediaIds.length} media items`);
+      
+      const results = new Map<string, MediaDetail | null>();
+      const fetchPromises = mediaIds.map(async (mediaId) => {
+        try {
+          const detail = await this.getMediaDetail(mediaId, sourceId);
+          results.set(mediaId, detail);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch detail for ${mediaId}`, error as Error);
+          results.set(mediaId, null);
+        }
+      });
+      
+      // 并行处理所有请求
+      await Promise.all(fetchPromises);
+      
+      this.logger.debug(`Completed batch fetch for ${mediaIds.length} media items`);
+      return results;
+    } catch (error) {
+      Logger.error('Failed to batch fetch media details', error as Error);
+      return new Map();
+    }
+  }
+  
+  /**
+   * 批量获取剧集列表
+   */
+  public async getEpisodesList(mediaIds: string[], sourceId?: string): Promise<Map<string, EpisodeInfo[]>> {
+    try {
+      Logger.info(`Fetching episodes for ${mediaIds.length} media items`);
+      
+      const results = new Map<string, EpisodeInfo[]>();
+      const fetchPromises = mediaIds.map(async (mediaId) => {
+        try {
+          const episodes = await this.getEpisodes(mediaId, sourceId);
+          results.set(mediaId, episodes);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch episodes for ${mediaId}`, error as Error);
+          results.set(mediaId, []);
+        }
+      });
+      
+      // 并行处理所有请求
+      await Promise.all(fetchPromises);
+      
+      this.logger.debug(`Completed batch fetch for ${mediaIds.length} episodes lists`);
+      return results;
+    } catch (error) {
+      Logger.error('Failed to batch fetch episodes', error as Error);
+      return new Map();
+    }
+  }
+  
+  /**
+   * 批量获取播放源
+   */
+  public async getPlaySourcesList(mediaEpisodePairs: Array<{ mediaId: string; episodeId: string }>, sourceId?: string): Promise<Map<string, PlaySource[]>> {
+    try {
+      Logger.info(`Fetching play sources for ${mediaEpisodePairs.length} media-episode pairs`);
+      
+      const results = new Map<string, PlaySource[]>();
+      const fetchPromises = mediaEpisodePairs.map(async (pair) => {
+        try {
+          const sources = await this.getPlaySources(pair.mediaId, pair.episodeId, sourceId);
+          const key = `${pair.mediaId}_${pair.episodeId}`;
+          results.set(key, sources);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch play sources for ${pair.mediaId}-${pair.episodeId}`, error as Error);
+          const key = `${pair.mediaId}_${pair.episodeId}`;
+          results.set(key, []);
+        }
+      });
+      
+      // 并行处理所有请求
+      await Promise.all(fetchPromises);
+      
+      this.logger.debug(`Completed batch fetch for ${mediaEpisodePairs.length} play sources lists`);
+      return results;
+    } catch (error) {
+      Logger.error('Failed to batch fetch play sources', error as Error);
+      return new Map();
+    }
+  }
+  
+  /**
+   * 计算智能缓存时间
+   */
+  private calculateCacheDuration(cacheType: keyof typeof this.CACHE_DURATION.BASE, mediaType?: string): number {
+    // 获取基础缓存时间
+    const baseDuration = this.CACHE_DURATION.BASE[cacheType];
+    
+    // 根据媒体类型获取缓存系数
+    let factor = 1.0;
+    if (mediaType && this.CACHE_DURATION.TYPE_FACTOR[mediaType as keyof typeof this.CACHE_DURATION.TYPE_FACTOR]) {
+      factor = this.CACHE_DURATION.TYPE_FACTOR[mediaType as keyof typeof this.CACHE_DURATION.TYPE_FACTOR];
+    }
+    
+    // 计算缓存时间
+    let duration = baseDuration * factor;
+    
+    // 确保在最小和最大范围内
+    const minDuration = this.CACHE_DURATION.MIN[cacheType];
+    const maxDuration = this.CACHE_DURATION.MAX[cacheType];
+    
+    duration = Math.max(minDuration, Math.min(duration, maxDuration));
+    
+    return Math.round(duration);
   }
 }
 

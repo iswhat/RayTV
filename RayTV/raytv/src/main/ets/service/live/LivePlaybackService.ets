@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LivePlaybackService - 完整的直播播放服务
  * 
  * 基于HarmonyOS AVPlayer实现直播流播放功能
@@ -10,6 +10,7 @@ import PlayerService, { PlayerStatus, PlayerEvent, PlayerConfig } from '../playe
 import ContentAccessService from './ContentAccessService';
 import { LiveChannelWithSource } from './SourcePoolManager';
 import EventBusUtil from '../../common/util/EventBusUtil';
+import StorageUtil from '../../common/util/StorageUtil';
 
 // ========================================
 // 直播播放相关接口
@@ -101,6 +102,31 @@ export interface LivePlaybackEventData {
   attempt?: number;
 }
 
+/**
+ * 播放历史项
+ */
+export interface PlaybackHistoryItem {
+  channelId: string;
+  channelName: string;
+  startTime: number;
+  endTime: number;
+  watchTime: number; // 观看时长（秒）
+  quality: string;
+  bitrate: number;
+}
+
+/**
+ * 播放统计信息
+ */
+export interface PlaybackStats {
+  totalWatchTime: number; // 总观看时长（秒）
+  channelWatchTime: Map<string, number>; // 每个频道的观看时长
+  dailyWatchTime: Map<string, number>; // 每日观看时长
+  weeklyWatchTime: Map<string, number>; // 每周观看时长
+  mostWatchedChannels: Array<{ channelId: string; channelName: string; watchTime: number }>; // 观看最多的频道
+  averageWatchTime: number; // 平均观看时长（秒）
+}
+
 // ========================================
 // 直播播放服务类
 // ========================================
@@ -138,6 +164,23 @@ export class LivePlaybackService {
   private recentChannels: LiveChannelWithSource[] = [];
   private maxRecentChannels: number = 20;
   
+  // 收藏频道
+  private favoriteChannels: LiveChannelWithSource[] = [];
+  
+  // 播放历史记录
+  private playbackHistory: PlaybackHistoryItem[] = [];
+  private maxHistoryItems: number = 100;
+  
+  // 播放统计
+  private playbackStats: PlaybackStats = {
+    totalWatchTime: 0,
+    channelWatchTime: new Map(),
+    dailyWatchTime: new Map(),
+    weeklyWatchTime: new Map(),
+    mostWatchedChannels: [],
+    averageWatchTime: 0
+  };
+  
   private constructor() {
     this.logger = Logger.getInstance('LivePlaybackService');
     this.playerService = PlayerService.getInstance();
@@ -165,6 +208,9 @@ export class LivePlaybackService {
     try {
       await this.playerService.initialize();
       await this.loadRecentChannels();
+      await this.loadFavoriteChannels();
+      await this.loadPlaybackHistory();
+      await this.loadPlaybackStats();
       this.logger.info('LivePlaybackService initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize LivePlaybackService', error as Error);
@@ -183,7 +229,7 @@ export class LivePlaybackService {
       this.updateStatus(LivePlaybackStatus.CONNECTING);
       
       // 加载到最近播放
-      this.addToRecentChannels(channel);
+      await this.addToRecentChannels(channel);
       
       // 获取播放URL（支持解码器配置）
       const playUrl = await this.getPlayUrl(channel);
@@ -421,30 +467,275 @@ export class LivePlaybackService {
   }
   
   /**
+   * 收藏频道
+   */
+  public async addToFavorites(channel: LiveChannelWithSource): Promise<boolean> {
+    try {
+      // 检查是否已收藏
+      if (this.isFavorite(channel)) {
+        this.logger.info(`Channel ${channel.name} is already in favorites`);
+        return false;
+      }
+      
+      // 添加到收藏列表
+      this.favoriteChannels.push(channel);
+      
+      // 保存到存储
+      await this.saveFavoriteChannels();
+      
+      this.logger.info(`Added channel ${channel.name} to favorites`);
+      return true;
+    } catch (error) {
+      this.logger.error('Failed to add channel to favorites', error as Error);
+      return false;
+    }
+  }
+  
+  /**
+   * 取消收藏频道
+   */
+  public async removeFromFavorites(channel: LiveChannelWithSource): Promise<boolean> {
+    try {
+      // 检查是否在收藏列表中
+      const index = this.favoriteChannels.findIndex(c => c.id === channel.id);
+      if (index === -1) {
+        this.logger.info(`Channel ${channel.name} is not in favorites`);
+        return false;
+      }
+      
+      // 从收藏列表中移除
+      this.favoriteChannels.splice(index, 1);
+      
+      // 保存到存储
+      await this.saveFavoriteChannels();
+      
+      this.logger.info(`Removed channel ${channel.name} from favorites`);
+      return true;
+    } catch (error) {
+      this.logger.error('Failed to remove channel from favorites', error as Error);
+      return false;
+    }
+  }
+  
+  /**
+   * 获取收藏的频道列表
+   */
+  public getFavoriteChannels(): LiveChannelWithSource[] {
+    return [...this.favoriteChannels];
+  }
+  
+  /**
+   * 检查频道是否已收藏
+   */
+  public isFavorite(channel: LiveChannelWithSource): boolean {
+    return this.favoriteChannels.some(c => c.id === channel.id);
+  }
+  
+  /**
+   * 切换频道收藏状态
+   */
+  public async toggleFavorite(channel: LiveChannelWithSource): Promise<boolean> {
+    if (this.isFavorite(channel)) {
+      return await this.removeFromFavorites(channel);
+    } else {
+      return await this.addToFavorites(channel);
+    }
+  }
+  
+  /**
+   * 开始播放记录
+   */
+  public startPlaybackRecord(channel: LiveChannelWithSource): void {
+    // 这里可以记录开始时间，实际实现会在playChannel方法中调用
+    this.logger.info(`Started playback record for channel: ${channel.name}`);
+  }
+  
+  /**
+   * 结束播放记录
+   */
+  public async endPlaybackRecord(channel: LiveChannelWithSource, watchTime: number): Promise<void> {
+    try {
+      const historyItem: PlaybackHistoryItem = {
+        channelId: channel.id,
+        channelName: channel.name,
+        startTime: Date.now() - watchTime * 1000,
+        endTime: Date.now(),
+        watchTime,
+        quality: this.currentQuality,
+        bitrate: this.streamStats.bitrate
+      };
+      
+      // 添加到历史记录
+      this.playbackHistory.unshift(historyItem);
+      
+      // 限制历史记录数量
+      if (this.playbackHistory.length > this.maxHistoryItems) {
+        this.playbackHistory = this.playbackHistory.slice(0, this.maxHistoryItems);
+      }
+      
+      // 更新统计信息
+      await this.updatePlaybackStats(historyItem);
+      
+      // 保存历史记录和统计信息
+      await this.savePlaybackHistory();
+      await this.savePlaybackStats();
+      
+      this.logger.info(`Ended playback record for channel: ${channel.name}, watch time: ${watchTime}s`);
+    } catch (error) {
+      this.logger.error('Failed to end playback record', error as Error);
+    }
+  }
+  
+  /**
+   * 获取播放历史记录
+   */
+  public getPlaybackHistory(): PlaybackHistoryItem[] {
+    return [...this.playbackHistory];
+  }
+  
+  /**
+   * 获取播放统计信息
+   */
+  public getPlaybackStats(): PlaybackStats {
+    return {
+      ...this.playbackStats,
+      channelWatchTime: new Map(this.playbackStats.channelWatchTime),
+      dailyWatchTime: new Map(this.playbackStats.dailyWatchTime),
+      weeklyWatchTime: new Map(this.playbackStats.weeklyWatchTime),
+      mostWatchedChannels: [...this.playbackStats.mostWatchedChannels]
+    };
+  }
+  
+  /**
+   * 分析播放模式
+   */
+  public analyzePlaybackPatterns(): {
+    mostWatchedTimeOfDay: number;
+    mostWatchedDayOfWeek: number;
+    averageSessionDuration: number;
+    watchFrequency: number;
+  } {
+    if (this.playbackHistory.length === 0) {
+      return {
+        mostWatchedTimeOfDay: 0,
+        mostWatchedDayOfWeek: 0,
+        averageSessionDuration: 0,
+        watchFrequency: 0
+      };
+    }
+    
+    // 分析一天中最常观看的时间
+    const hourlyWatches = new Map<number, number>();
+    // 分析一周中最常观看的日子
+    const dailyWatches = new Map<number, number>();
+    // 计算平均会话时长
+    let totalSessionDuration = 0;
+    
+    this.playbackHistory.forEach(item => {
+      const startDate = new Date(item.startTime);
+      const hour = startDate.getHours();
+      const dayOfWeek = startDate.getDay();
+      
+      hourlyWatches.set(hour, (hourlyWatches.get(hour) || 0) + 1);
+      dailyWatches.set(dayOfWeek, (dailyWatches.get(dayOfWeek) || 0) + 1);
+      totalSessionDuration += item.watchTime;
+    });
+    
+    // 找出最常观看的时间
+    let mostWatchedTimeOfDay = 0;
+    let maxHourlyWatches = 0;
+    hourlyWatches.forEach((count, hour) => {
+      if (count > maxHourlyWatches) {
+        maxHourlyWatches = count;
+        mostWatchedTimeOfDay = hour;
+      }
+    });
+    
+    // 找出最常观看的日子
+    let mostWatchedDayOfWeek = 0;
+    let maxDailyWatches = 0;
+    dailyWatches.forEach((count, day) => {
+      if (count > maxDailyWatches) {
+        maxDailyWatches = count;
+        mostWatchedDayOfWeek = day;
+      }
+    });
+    
+    const averageSessionDuration = totalSessionDuration / this.playbackHistory.length;
+    const watchFrequency = this.playbackHistory.length / 7; // 假设一周的数据
+    
+    return {
+      mostWatchedTimeOfDay,
+      mostWatchedDayOfWeek,
+      averageSessionDuration,
+      watchFrequency
+    };
+  }
+  
+  /**
+   * 清除播放历史
+   */
+  public async clearPlaybackHistory(): Promise<void> {
+    try {
+      this.playbackHistory = [];
+      this.playbackStats = {
+        totalWatchTime: 0,
+        channelWatchTime: new Map(),
+        dailyWatchTime: new Map(),
+        weeklyWatchTime: new Map(),
+        mostWatchedChannels: [],
+        averageWatchTime: 0
+      };
+      
+      await StorageUtil.remove('playback_history');
+      await StorageUtil.remove('playback_stats');
+      
+      this.logger.info('Playback history cleared');
+    } catch (error) {
+      this.logger.error('Failed to clear playback history', error as Error);
+    }
+  }
+  
+  /**
    * 截图
    */
   public captureSnapshot(): Promise<string | null> {
-    // TODO: 实现截图功能
-    this.logger.warn('Snapshot capture not implemented yet');
-    return Promise.resolve(null);
+    try {
+      this.logger.info('Capturing snapshot');
+      // 使用播放器服务进行截图
+      return this.playerService.captureSnapshot();
+    } catch (error) {
+      this.logger.error('Failed to capture snapshot', error as Error);
+      return Promise.resolve(null);
+    }
   }
   
   /**
    * 录制直播
    */
   public startRecording(): Promise<boolean> {
-    // TODO: 实现录制功能
-    this.logger.warn('Recording not implemented yet');
-    return Promise.resolve(false);
+    try {
+      this.logger.info('Starting recording');
+      // 使用播放器服务开始录制
+      return this.playerService.startRecording();
+    } catch (error) {
+      this.logger.error('Failed to start recording', error as Error);
+      return Promise.resolve(false);
+    }
   }
   
   /**
    * 停止录制
    */
   public stopRecording(): Promise<string | null> {
-    // TODO: 实现停止录制
-    this.logger.warn('Stop recording not implemented yet');
-    return Promise.resolve(null);
+    try {
+      this.logger.info('Stopping recording');
+      // 使用播放器服务停止录制
+      return this.playerService.stopRecording();
+    } catch (error) {
+      this.logger.error('Failed to stop recording', error as Error);
+      return Promise.resolve(null);
+    }
   }
   
   // ========================================
@@ -459,11 +750,18 @@ export class LivePlaybackService {
       // 检查是否需要使用解码器
       const decoderConfigs = this.contentService.getDecoderConfigs();
       
-      // 简单实现：直接返回频道URL
-      // 实际应用中需要根据解码器配置进行URL转换
+      // 应用解码器转换逻辑
       if (decoderConfigs.length > 0) {
         this.logger.debug('Applying decoder configs');
-        // TODO: 应用解码器转换逻辑
+        
+        // 遍历解码器配置，找到适合当前频道的解码器
+        for (const config of decoderConfigs) {
+          if (this.isDecoderSuitable(config, channel)) {
+            this.logger.debug(`Using decoder: ${config.name}`);
+            // 应用解码器转换
+            return this.applyDecoderTransform(config, channel.url);
+          }
+        }
       }
       
       return channel.url;
@@ -580,7 +878,7 @@ export class LivePlaybackService {
   /**
    * 添加到最近播放
    */
-  private addToRecentChannels(channel: LiveChannelWithSource): void {
+  private async addToRecentChannels(channel: LiveChannelWithSource): Promise<void> {
     // 移除已存在的相同频道
     const index = this.recentChannels.findIndex(c => c.id === channel.id);
     if (index !== -1) {
@@ -596,23 +894,287 @@ export class LivePlaybackService {
     }
     
     // 保存到存储
-    this.saveRecentChannels();
+    await this.saveRecentChannels();
   }
   
   /**
    * 加载最近播放的频道
    */
   private async loadRecentChannels(): Promise<void> {
-    // TODO: 从本地存储加载
+    try {
+      const stored = await StorageUtil.get('recent_channels');
+      if (stored) {
+        try {
+          const channels = JSON.parse(stored) as LiveChannelWithSource[];
+          this.recentChannels = channels;
+          this.logger.debug(`Loaded ${channels.length} recent channels`);
+        } catch (parseError) {
+          this.logger.error('Failed to parse recent channels', parseError as Error);
+          this.recentChannels = [];
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load recent channels', error as Error);
+      this.recentChannels = [];
+    }
     this.logger.debug('Recent channels loaded');
   }
   
   /**
    * 保存最近播放的频道
    */
-  private saveRecentChannels(): void {
-    // TODO: 保存到本地存储
-    this.logger.debug('Recent channels saved');
+  private async saveRecentChannels(): Promise<void> {
+    try {
+      const data = JSON.stringify(this.recentChannels);
+      await StorageUtil.set('recent_channels', data);
+      this.logger.debug(`Saved ${this.recentChannels.length} recent channels`);
+    } catch (error) {
+      this.logger.error('Failed to save recent channels', error as Error);
+    }
+  }
+  
+  /**
+   * 加载收藏的频道
+   */
+  private async loadFavoriteChannels(): Promise<void> {
+    try {
+      const stored = await StorageUtil.get('favorite_channels');
+      if (stored) {
+        try {
+          const channels = JSON.parse(stored) as LiveChannelWithSource[];
+          this.favoriteChannels = channels;
+          this.logger.debug(`Loaded ${channels.length} favorite channels`);
+        } catch (parseError) {
+          this.logger.error('Failed to parse favorite channels', parseError as Error);
+          this.favoriteChannels = [];
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load favorite channels', error as Error);
+      this.favoriteChannels = [];
+    }
+    this.logger.debug('Favorite channels loaded');
+  }
+  
+  /**
+   * 保存收藏的频道
+   */
+  private async saveFavoriteChannels(): Promise<void> {
+    try {
+      const data = JSON.stringify(this.favoriteChannels);
+      await StorageUtil.set('favorite_channels', data);
+      this.logger.debug(`Saved ${this.favoriteChannels.length} favorite channels`);
+    } catch (error) {
+      this.logger.error('Failed to save favorite channels', error as Error);
+    }
+  }
+  
+  /**
+   * 检查解码器是否适合当前频道
+   */
+  private isDecoderSuitable(config: any, channel: LiveChannelWithSource): boolean {
+    // 检查解码器是否支持当前频道的协议
+    if (config.supportedProtocols) {
+      const url = channel.url.toLowerCase();
+      for (const protocol of config.supportedProtocols) {
+        if (url.includes(protocol.toLowerCase())) {
+          return true;
+        }
+      }
+    }
+    
+    // 检查解码器是否支持当前频道的编码格式
+    if (config.supportedCodecs && channel.codec) {
+      for (const codec of config.supportedCodecs) {
+        if (channel.codec.toLowerCase().includes(codec.toLowerCase())) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * 应用解码器转换
+   */
+  private applyDecoderTransform(config: any, url: string): string {
+    // 根据解码器配置转换URL
+    if (config.transformUrl) {
+      try {
+        return config.transformUrl(url);
+      } catch (error) {
+        this.logger.error('Failed to transform URL with decoder', error as Error);
+        return url;
+      }
+    }
+    
+    // 默认转换：添加解码器参数
+    if (config.params) {
+      const separator = url.includes('?') ? '&' : '?';
+      const params = Object.entries(config.params)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      return `${url}${separator}${params}`;
+    }
+    
+    return url;
+  }
+  
+  /**
+   * 加载播放历史
+   */
+  private async loadPlaybackHistory(): Promise<void> {
+    try {
+      const stored = await StorageUtil.get('playback_history');
+      if (stored) {
+        try {
+          const history = JSON.parse(stored) as PlaybackHistoryItem[];
+          this.playbackHistory = history;
+          this.logger.debug(`Loaded ${history.length} playback history items`);
+        } catch (parseError) {
+          this.logger.error('Failed to parse playback history', parseError as Error);
+          this.playbackHistory = [];
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load playback history', error as Error);
+      this.playbackHistory = [];
+    }
+  }
+  
+  /**
+   * 保存播放历史
+   */
+  private async savePlaybackHistory(): Promise<void> {
+    try {
+      const data = JSON.stringify(this.playbackHistory);
+      await StorageUtil.set('playback_history', data);
+      this.logger.debug(`Saved ${this.playbackHistory.length} playback history items`);
+    } catch (error) {
+      this.logger.error('Failed to save playback history', error as Error);
+    }
+  }
+  
+  /**
+   * 加载播放统计
+   */
+  private async loadPlaybackStats(): Promise<void> {
+    try {
+      const stored = await StorageUtil.get('playback_stats');
+      if (stored) {
+        try {
+          const stats = JSON.parse(stored);
+          this.playbackStats = {
+            totalWatchTime: stats.totalWatchTime,
+            channelWatchTime: new Map(stats.channelWatchTime),
+            dailyWatchTime: new Map(stats.dailyWatchTime),
+            weeklyWatchTime: new Map(stats.weeklyWatchTime),
+            mostWatchedChannels: stats.mostWatchedChannels,
+            averageWatchTime: stats.averageWatchTime
+          };
+          this.logger.debug('Loaded playback stats');
+        } catch (parseError) {
+          this.logger.error('Failed to parse playback stats', parseError as Error);
+          this.resetPlaybackStats();
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load playback stats', error as Error);
+      this.resetPlaybackStats();
+    }
+  }
+  
+  /**
+   * 保存播放统计
+   */
+  private async savePlaybackStats(): Promise<void> {
+    try {
+      const data = JSON.stringify({
+        totalWatchTime: this.playbackStats.totalWatchTime,
+        channelWatchTime: Array.from(this.playbackStats.channelWatchTime.entries()),
+        dailyWatchTime: Array.from(this.playbackStats.dailyWatchTime.entries()),
+        weeklyWatchTime: Array.from(this.playbackStats.weeklyWatchTime.entries()),
+        mostWatchedChannels: this.playbackStats.mostWatchedChannels,
+        averageWatchTime: this.playbackStats.averageWatchTime
+      });
+      await StorageUtil.set('playback_stats', data);
+      this.logger.debug('Saved playback stats');
+    } catch (error) {
+      this.logger.error('Failed to save playback stats', error as Error);
+    }
+  }
+  
+  /**
+   * 更新播放统计
+   */
+  private async updatePlaybackStats(historyItem: PlaybackHistoryItem): Promise<void> {
+    // 更新总观看时长
+    this.playbackStats.totalWatchTime += historyItem.watchTime;
+    
+    // 更新频道观看时长
+    const currentChannelTime = this.playbackStats.channelWatchTime.get(historyItem.channelId) || 0;
+    this.playbackStats.channelWatchTime.set(historyItem.channelId, currentChannelTime + historyItem.watchTime);
+    
+    // 更新每日观看时长
+    const date = new Date(historyItem.startTime).toISOString().split('T')[0];
+    const currentDailyTime = this.playbackStats.dailyWatchTime.get(date) || 0;
+    this.playbackStats.dailyWatchTime.set(date, currentDailyTime + historyItem.watchTime);
+    
+    // 更新每周观看时长
+    const weekStart = this.getWeekStartDate(historyItem.startTime);
+    const currentWeeklyTime = this.playbackStats.weeklyWatchTime.get(weekStart) || 0;
+    this.playbackStats.weeklyWatchTime.set(weekStart, currentWeeklyTime + historyItem.watchTime);
+    
+    // 更新观看最多的频道
+    this.updateMostWatchedChannels();
+    
+    // 更新平均观看时长
+    this.playbackStats.averageWatchTime = this.playbackStats.totalWatchTime / this.playbackHistory.length;
+  }
+  
+  /**
+   * 更新观看最多的频道
+   */
+  private updateMostWatchedChannels(): void {
+    const channelWatchTimeArray = Array.from(this.playbackStats.channelWatchTime.entries())
+      .map(([channelId, watchTime]) => {
+        const channel = this.contentService.getLiveChannelById(channelId);
+        return {
+          channelId,
+          channelName: channel ? channel.name : channelId,
+          watchTime
+        };
+      })
+      .sort((a, b) => b.watchTime - a.watchTime)
+      .slice(0, 10); // 只保留前10个
+    
+    this.playbackStats.mostWatchedChannels = channelWatchTimeArray;
+  }
+  
+  /**
+   * 重置播放统计
+   */
+  private resetPlaybackStats(): void {
+    this.playbackStats = {
+      totalWatchTime: 0,
+      channelWatchTime: new Map(),
+      dailyWatchTime: new Map(),
+      weeklyWatchTime: new Map(),
+      mostWatchedChannels: [],
+      averageWatchTime: 0
+    };
+  }
+  
+  /**
+   * 获取周开始日期
+   */
+  private getWeekStartDate(timestamp: number): string {
+    const date = new Date(timestamp);
+    const dayOfWeek = date.getDay();
+    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const weekStart = new Date(date.setDate(diff));
+    return weekStart.toISOString().split('T')[0];
   }
   
   /**
@@ -620,13 +1182,31 @@ export class LivePlaybackService {
    */
   private updateStats(): void {
     // 定期更新统计信息
-    // TODO: 从播放器获取实际统计信息
-    setInterval(() => {
-      this.streamStats.totalBytes += Math.floor(Math.random() * 10000);
-      this.streamStats.bitrate = Math.floor(Math.random() * 5000000) + 1000000;
-      this.streamStats.fps = Math.floor(Math.random() * 10) + 20;
-      
-      this.eventBus.publish(LivePlaybackEventType.STATS_UPDATED, { stats: this.streamStats });
+    setInterval(async () => {
+      try {
+        // 从播放器获取实际统计信息
+        const playerStats = await this.playerService.getStats();
+        if (playerStats) {
+          this.streamStats = {
+            bitrate: playerStats.bitrate || this.streamStats.bitrate,
+            fps: playerStats.fps || this.streamStats.fps,
+            resolution: playerStats.resolution || this.streamStats.resolution,
+            bufferLength: playerStats.bufferLength || this.streamStats.bufferLength,
+            droppedFrames: playerStats.droppedFrames || this.streamStats.droppedFrames,
+            decodedFrames: playerStats.decodedFrames || this.streamStats.decodedFrames,
+            totalBytes: playerStats.totalBytes || this.streamStats.totalBytes
+          };
+        } else {
+          // 模拟统计信息（当播放器无法提供时）
+          this.streamStats.totalBytes += Math.floor(Math.random() * 10000);
+          this.streamStats.bitrate = Math.floor(Math.random() * 5000000) + 1000000;
+          this.streamStats.fps = Math.floor(Math.random() * 10) + 20;
+        }
+        
+        this.eventBus.publish(LivePlaybackEventType.STATS_UPDATED, { stats: this.streamStats });
+      } catch (error) {
+        this.logger.error('Failed to update stats', error as Error);
+      }
     }, 5000);
   }
 }

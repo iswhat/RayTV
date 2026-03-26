@@ -12,6 +12,12 @@ import { VoiceAssistantManager } from '../../service/voice/VoiceAssistantManager
 import { GestureServiceInstance } from '../../service/input/GestureService';
 import DataSyncService from '../../service/sync/DataSyncService';
 import { DeviceFlowManager } from '../../service/device/DeviceFlowManager';
+import { MemoryManager } from '../util/MemoryManager';
+import { TimeoutManager } from '../util/TimeoutManager';
+import { ErrorHandler } from '../util/ErrorHandler';
+import { TaskPoolManager } from '../../service/pool/SourcePoolManager';
+import { SiteHealthCheckService } from '../../service/site/SiteHealthCheckService';
+import { ParserManager } from '../../service/parser/ParserManager';
 
 const TAG: string = 'ServiceRegistry';
 
@@ -23,6 +29,9 @@ export function registerServices(): void {
 
   // 注册工具类 | Register utility classes
   container.register('StorageUtil', () => StorageUtil, true);
+  container.register('MemoryManager', () => MemoryManager.getInstance(), true);
+  container.register('TimeoutManager', () => TimeoutManager.getInstance(), true);
+  container.register('ErrorHandler', () => ErrorHandler.getInstance(), true);
 
   // 注册 DAO 类 | Register DAO classes
   container.register('SiteDao', (): SiteDao => new SiteDao(), true);
@@ -36,6 +45,9 @@ export function registerServices(): void {
   container.register('GestureService', (): any => GestureServiceInstance, true);
   container.register('DataSyncService', (): DataSyncService => DataSyncService.getInstance(), true);
   container.register('DeviceFlowManager', (): DeviceFlowManager => DeviceFlowManager.getInstance(), true);
+  container.register('TaskPoolManager', (): TaskPoolManager => TaskPoolManager.getInstance(), true);
+  container.register('SiteHealthCheckService', (): SiteHealthCheckService => SiteHealthCheckService.getInstance(), true);
+  container.register('ParserManager', (): ParserManager => ParserManager.getInstance(), true);
 
   Logger.info(TAG, 'All services registered successfully');
 }

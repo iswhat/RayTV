@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ErrorHandler - Error handling utility class | 错误处理工具类
  * Provides unified error handling, error parsing and error message generation functionality | 提供统一的错误处理、错误解析和错误信息生成功能
  */
@@ -12,6 +12,11 @@ export enum ErrorType {
   SERVICE_ERROR = 'service_error',
   PERMISSION_ERROR = 'permission_error',
   VALIDATION_ERROR = 'validation_error',
+  MEDIA_ERROR = 'media_error',
+  MEMORY_ERROR = 'memory_error',
+  TIMEOUT_ERROR = 'timeout_error',
+  SECURITY_ERROR = 'security_error',
+  CONFIG_ERROR = 'config_error',
   UNKNOWN_ERROR = 'unknown_error'
 }
 
@@ -233,8 +238,10 @@ export class ErrorHandler {
   private detectErrorType(message: string): ErrorType {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('network') || lowerMessage.includes('connection') || lowerMessage.includes('timeout')) {
+    if (lowerMessage.includes('network') || lowerMessage.includes('connection') || lowerMessage.includes('http')) {
       return ErrorType.NETWORK_ERROR;
+    } else if (lowerMessage.includes('timeout') || lowerMessage.includes('timed out')) {
+      return ErrorType.TIMEOUT_ERROR;
     } else if (lowerMessage.includes('storage') || lowerMessage.includes('cache') || lowerMessage.includes('disk')) {
       return ErrorType.STORAGE_ERROR;
     } else if (lowerMessage.includes('permission') || lowerMessage.includes('denied')) {
@@ -243,6 +250,14 @@ export class ErrorHandler {
       return ErrorType.VALIDATION_ERROR;
     } else if (lowerMessage.includes('service') || lowerMessage.includes('api')) {
       return ErrorType.SERVICE_ERROR;
+    } else if (lowerMessage.includes('media') || lowerMessage.includes('player') || lowerMessage.includes('playback')) {
+      return ErrorType.MEDIA_ERROR;
+    } else if (lowerMessage.includes('memory') || lowerMessage.includes('heap') || lowerMessage.includes('stack')) {
+      return ErrorType.MEMORY_ERROR;
+    } else if (lowerMessage.includes('security') || lowerMessage.includes('dangerous') || lowerMessage.includes('blocked')) {
+      return ErrorType.SECURITY_ERROR;
+    } else if (lowerMessage.includes('config') || lowerMessage.includes('configuration')) {
+      return ErrorType.CONFIG_ERROR;
     } else {
       return ErrorType.UNKNOWN_ERROR;
     }
@@ -349,6 +364,8 @@ export class ErrorHandler {
       switch (errorInfo.type) {
         case ErrorType.NETWORK_ERROR:
           return '网络连接失败，请检查网络设置后重试';
+        case ErrorType.TIMEOUT_ERROR:
+          return '网络请求超时，请检查网络连接后重试';
         case ErrorType.STORAGE_ERROR:
           return '存储操作失败，请检查存储空间后重试';
         case ErrorType.SERVICE_ERROR:
@@ -357,6 +374,14 @@ export class ErrorHandler {
           return '权限不足，请检查应用权限设置';
         case ErrorType.VALIDATION_ERROR:
           return errorInfo.message || '输入数据有误，请检查后重试';
+        case ErrorType.MEDIA_ERROR:
+          return '媒体播放失败，请检查网络或重试';
+        case ErrorType.MEMORY_ERROR:
+          return '内存不足，请清理后台应用后重试';
+        case ErrorType.SECURITY_ERROR:
+          return '安全验证失败，请检查网络环境';
+        case ErrorType.CONFIG_ERROR:
+          return '配置错误，请检查应用设置';
         case ErrorType.UNKNOWN_ERROR:
         default:
           return '操作失败，请稍后再试';
@@ -395,6 +420,56 @@ export class ErrorHandler {
     const errorInfo = this.parseError(error, 'PERMISSION_ERROR_CHECK');
     return errorInfo.type === ErrorType.PERMISSION_ERROR;
   }
+
+  /**
+   * Check if it is a media error | 检查是否是媒体错误
+   * @param error Error object | 错误对象
+   * @returns Whether it is a media error | 是否是媒体错误
+   */
+  public isMediaError(error: Error | object | string | number | boolean | null | undefined): boolean {
+    const errorInfo = this.parseError(error, 'MEDIA_ERROR_CHECK');
+    return errorInfo.type === ErrorType.MEDIA_ERROR;
+  }
+
+  /**
+   * Check if it is a memory error | 检查是否是内存错误
+   * @param error Error object | 错误对象
+   * @returns Whether it is a memory error | 是否是内存错误
+   */
+  public isMemoryError(error: Error | object | string | number | boolean | null | undefined): boolean {
+    const errorInfo = this.parseError(error, 'MEMORY_ERROR_CHECK');
+    return errorInfo.type === ErrorType.MEMORY_ERROR;
+  }
+
+  /**
+   * Check if it is a timeout error | 检查是否是超时错误
+   * @param error Error object | 错误对象
+   * @returns Whether it is a timeout error | 是否是超时错误
+   */
+  public isTimeoutError(error: Error | object | string | number | boolean | null | undefined): boolean {
+    const errorInfo = this.parseError(error, 'TIMEOUT_ERROR_CHECK');
+    return errorInfo.type === ErrorType.TIMEOUT_ERROR;
+  }
+
+  /**
+   * Check if it is a security error | 检查是否是安全错误
+   * @param error Error object | 错误对象
+   * @returns Whether it is a security error | 是否是安全错误
+   */
+  public isSecurityError(error: Error | object | string | number | boolean | null | undefined): boolean {
+    const errorInfo = this.parseError(error, 'SECURITY_ERROR_CHECK');
+    return errorInfo.type === ErrorType.SECURITY_ERROR;
+  }
+
+  /**
+   * Check if it is a config error | 检查是否是配置错误
+   * @param error Error object | 错误对象
+   * @returns Whether it is a config error | 是否是配置错误
+   */
+  public isConfigError(error: Error | object | string | number | boolean | null | undefined): boolean {
+    const errorInfo = this.parseError(error, 'CONFIG_ERROR_CHECK');
+    return errorInfo.type === ErrorType.CONFIG_ERROR;
+  }
 }
 
 /**
@@ -414,6 +489,51 @@ export function handleError(error: Error | object | string | number | boolean | 
  */
 export function getFriendlyErrorMessage(error: Error | object | string | number | boolean | null | undefined): string {
   return ErrorHandler.getInstance().getFriendlyErrorMessage(error);
+}
+
+/**
+ * Check if it is a media error | 检查是否是媒体错误
+ * @param error Error object | 错误对象
+ * @returns Whether it is a media error | 是否是媒体错误
+ */
+export function isMediaError(error: Error | object | string | number | boolean | null | undefined): boolean {
+  return ErrorHandler.getInstance().isMediaError(error);
+}
+
+/**
+ * Check if it is a memory error | 检查是否是内存错误
+ * @param error Error object | 错误对象
+ * @returns Whether it is a memory error | 是否是内存错误
+ */
+export function isMemoryError(error: Error | object | string | number | boolean | null | undefined): boolean {
+  return ErrorHandler.getInstance().isMemoryError(error);
+}
+
+/**
+ * Check if it is a timeout error | 检查是否是超时错误
+ * @param error Error object | 错误对象
+ * @returns Whether it is a timeout error | 是否是超时错误
+ */
+export function isTimeoutError(error: Error | object | string | number | boolean | null | undefined): boolean {
+  return ErrorHandler.getInstance().isTimeoutError(error);
+}
+
+/**
+ * Check if it is a security error | 检查是否是安全错误
+ * @param error Error object | 错误对象
+ * @returns Whether it is a security error | 是否是安全错误
+ */
+export function isSecurityError(error: Error | object | string | number | boolean | null | undefined): boolean {
+  return ErrorHandler.getInstance().isSecurityError(error);
+}
+
+/**
+ * Check if it is a config error | 检查是否是配置错误
+ * @param error Error object | 错误对象
+ * @returns Whether it is a config error | 是否是配置错误
+ */
+export function isConfigError(error: Error | object | string | number | boolean | null | undefined): boolean {
+  return ErrorHandler.getInstance().isConfigError(error);
 }
 
 /**
