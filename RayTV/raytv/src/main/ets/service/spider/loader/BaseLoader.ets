@@ -1,10 +1,13 @@
 // BaseLoader.ets - 加载器基类 Loader base class
 // 实现站点脚本的加载和执行 Implements loading and execution of site scripts
 import Logger from '../../../common/util/Logger';
-import { Site } from '../../../data/bean/Site';
+import { Site, SiteInfo } from '../../../data/bean/Site';
 import { HttpService } from '../../HttpService';
 import { SiteSpider, VideoItem, VideoDetail } from '../CrawlerService';
-import { SiteInfo } from '../../../data/bean/Site';
+
+// 常量定义 | Constant definitions
+const DEFAULT_TIMEOUT = 30000; // 默认超时时间（毫秒）
+const DEFAULT_RETRY_COUNT = 3; // 默认重试次数
 
 /**
  * 加载器类型枚举 Loader type enum
@@ -63,8 +66,8 @@ export abstract class BaseLoader {
   constructor(site: Site, options: LoaderOptions = {}) {
     this.site = site;
     this.options = {
-      timeout: 30000,
-      retryCount: 3,
+      timeout: DEFAULT_TIMEOUT,
+      retryCount: DEFAULT_RETRY_COUNT,
       sandboxEnabled: true,
       allowThirdParty: false
     };
