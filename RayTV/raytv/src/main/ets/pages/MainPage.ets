@@ -1,11 +1,13 @@
 import { AppNavigator, DetailParams } from '../navigation/AppNavigator';
 import Logger from '../common/util/Logger';
-import ContentAccessServiceInstance, { ContentAccessService } from '../service/content/ContentAccessService';
 import display from '@ohos.display';
 import ContentSourceBadge from '../components/ContentSourceBadge';
 import { ImageLazyLoader } from '../components/ImageLazyLoader';
 import { LazyLoadStrategy } from '../types/LazyLoadTypes';
 import Strings from '../common/resources/Strings';
+import { theme } from '../common/theme/ThemeConfig';
+import { handleError, ErrorType } from '../common/util/ErrorHandler';
+import { mainPageViewModel, FeaturedMediaItem } from './viewmodel/MainPageViewModel';
 
 /**
  * 应用主页面 | Application main page
@@ -15,17 +17,6 @@ interface TabItem {
   key: string;
   name: string;
   icon?: string;
-}
-
-interface FeaturedMediaItem {
-  id: string;
-  title: string;
-  cover: string;
-  type: string;
-  siteKey?: string;
-  rating?: string;
-  sourceId?: string;
-  sourceName?: string;
 }
 
 interface CategoryTab {
@@ -67,9 +58,6 @@ struct MainPage {
     { key: 'history', name: Strings.mainPage.tabs.history },
     { key: 'settings', name: Strings.mainPage.tabs.settings }
   ];
-
-  // 服务实例 | Service instances
-  private contentService: ContentAccessService = ContentAccessServiceInstance;
 
 
   // 生命周期 | Lifecycle
@@ -122,7 +110,14 @@ struct MainPage {
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    this.currentDate = year + '年' + month + '月' + day + '日 ' + hours + ':' + minutes;
+    
+    const dateFormat = theme.getDateFormat().full;
+    this.currentDate = dateFormat
+      .replace('{year}', year.toString())
+      .replace('{month}', month)
+      .replace('{day}', day)
+      .replace('{hours}', hours)
+      .replace('{minutes}', minutes);
   }
   
   // 初始化屏幕信息 | Initialize screen information
@@ -149,52 +144,25 @@ struct MainPage {
       this.isLoading = true;
       this.isError = false;
 
-      // 确保ContentAccessService已初始化 | Ensure ContentAccessService is initialized
-      if (!this.contentService.isInitialized()) {
-        await this.contentService.initialize();
-      }
-
-      // 从ContentAccessService获取真实的点播站点数据 | Get real VOD site data from ContentAccessService
-      const allVodSites = this.contentService.getAllVodSites();
-
-      if (allVodSites.length > 0) {
-        // 将VodSiteWithSource转换为FeaturedMediaItem
-        const toMediaItem = (site: import('../service/pool/SourcePoolManager').VodSiteWithSource, idx: number): FeaturedMediaItem => ({
-          id: `${site.siteKey}_${idx}`,
-          title: site.name,
-          cover: '', // VodSiteWithSource 没有 logo 字段，使用空字符串
-          type: 'vod',
-          siteKey: site.siteKey,
-          sourceId: site.sourceId,
-          sourceName: site.sourceName
-        });
-
-        // 推荐内容：取前5个站点 | Featured: first 5 sites
-        this.featuredMedia = allVodSites.slice(0, 5).map(toMediaItem);
-
-        // 热门内容：取5-10个站点 | Popular: sites 5-10
-        this.popularMedia = allVodSites.slice(5, 10).map(toMediaItem);
-
-        // 最新内容：取最后一批站点（最多5个）| New: last batch of sites (up to 5)
-        const newStart = Math.max(10, allVodSites.length - 5);
-        this.newMedia = allVodSites.slice(newStart).map(toMediaItem);
-
-        Logger.info(this.TAG, `Loaded ${allVodSites.length} VOD sites from ContentAccessService`);
-      } else {
-        // 无数据时提示用户配置源 | No data: prompt user to configure sources
-        this.featuredMedia = [];
-        this.popularMedia = [];
-        this.newMedia = [];
-        Logger.warn(this.TAG, 'No VOD sites available. Please configure network sources in Settings.');
+      // 使用ViewModel加载推荐内容 | Load featured media using ViewModel
+      const result = await mainPageViewModel.loadFeaturedMedia();
+      
+      this.featuredMedia = result.featuredMedia;
+      this.popularMedia = result.popularMedia;
+      this.newMedia = result.newMedia;
+      this.isError = result.hasError;
+      
+      if (result.hasError && result.errorMessage) {
+        this.errorMessage = result.errorMessage;
       }
 
       this.isLoading = false;
 
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(this.TAG, `Failed to load featured media: ${errorMsg}`);
+      const errorInfo = handleError(error, ErrorType.CONTENT_LOAD_ERROR);
+      Logger.error(this.TAG, `Failed to load featured media: ${errorInfo.message}`);
       this.isError = true;
-      this.errorMessage = `推荐内容加载失败: ${errorMsg}`;
+      this.errorMessage = errorInfo.friendlyMessage || Strings.mainPage.loadFailed;
       this.isLoading = false;
     }
   }
@@ -205,8 +173,9 @@ struct MainPage {
       Logger.info(this.TAG, `Main menu clicked: ${key}`);
 
       // 验证菜单键值 | Validate menu key
-      if (!key) {
-        Logger.error(this.TAG, 'Invalid menu key');
+      if (!mainPageViewModel.validateMenuKey(key)) {
+        const errorInfo = handleError(new Error('Invalid menu key'), ErrorType.VALIDATION_ERROR);
+        Logger.error(this.TAG, errorInfo.message);
         return;
       }
 
@@ -231,11 +200,13 @@ struct MainPage {
           AppNavigator.getInstance().navigateToSettings();
           break;
         default:
-          Logger.warn(this.TAG, `Unknown menu key: ${key}`);
+          const warningInfo = handleError(new Error(`Unknown menu key: ${key}`), ErrorType.VALIDATION_ERROR);
+          Logger.warn(this.TAG, warningInfo.message);
           break;
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle main menu click: ${error}`);
+      const errorInfo = handleError(error, ErrorType.NAVIGATION_ERROR);
+      Logger.error(this.TAG, `Failed to handle main menu click: ${errorInfo.message}`);
     }
   }
   
@@ -245,8 +216,9 @@ struct MainPage {
       Logger.info(this.TAG, `Category clicked: ${categoryId}`);
 
       // 验证分类ID | Validate category ID
-      if (!categoryId) {
-        Logger.error(this.TAG, 'Invalid category ID');
+      if (!mainPageViewModel.validateCategoryId(categoryId)) {
+        const errorInfo = handleError(new Error('Invalid category ID'), ErrorType.VALIDATION_ERROR);
+        Logger.error(this.TAG, errorInfo.message);
         return;
       }
 
@@ -264,7 +236,8 @@ struct MainPage {
       }
       // 其他分类在 build 中通过 selectedCategory 状态自动过滤展示
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle category click: ${error}`);
+      const errorInfo = handleError(error, ErrorType.CATEGORY_ERROR);
+      Logger.error(this.TAG, `Failed to handle category click: ${errorInfo.message}`);
     }
   }
   
@@ -274,8 +247,9 @@ struct MainPage {
       Logger.info(this.TAG, `Media clicked: ${media.title}, Source: ${media.sourceName}`);
 
       // 验证媒体数据完整性 | Validate media data integrity
-      if (!media.id || !media.siteKey) {
-        Logger.error(this.TAG, 'Invalid media data: missing required fields');
+      if (!mainPageViewModel.validateMediaData(media)) {
+        const errorInfo = handleError(new Error('Invalid media data: missing required fields'), ErrorType.VALIDATION_ERROR);
+        Logger.error(this.TAG, errorInfo.message);
         return;
       }
 
@@ -286,20 +260,26 @@ struct MainPage {
       };
       AppNavigator.getInstance().navigateToDetail(params);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to handle media click: ${error}`);
+      const errorInfo = handleError(error, ErrorType.NAVIGATION_ERROR);
+      Logger.error(this.TAG, `Failed to handle media click: ${errorInfo.message}`);
     }
   }
   
   // 渲染媒体项 | Render media item
   @Builder
   private renderMediaItem(media: FeaturedMediaItem): void {
+    const colors = theme.getColors();
+    const sizes = theme.getSizes();
+    const shadows = theme.getShadows();
+    const mediaSizes = this.isLandscape ? sizes.media.landscape : sizes.media.portrait;
+    
     Column() {
       Stack() {
         ImageLazyLoader({
           src: media.cover || '',
           imgWidth: '100%',
-          imgHeight: this.isLandscape ? 320 : 240,
-          imgRadius: 12,
+          imgHeight: mediaSizes.imageHeight,
+          imgRadius: sizes.borderRadius.lg,
           placeholder: '',
           lazyStrategy: LazyLoadStrategy.VISIBLE
         })
@@ -309,40 +289,44 @@ struct MainPage {
           ContentSourceBadge({
             sourceName: media.sourceName
           })
-          .position({ top: 8, right: 8 })
+          .position({ top: sizes.spacing.sm, right: sizes.spacing.sm })
         }
         
         // 评分标识 | Rating badge
         if (media.rating) {
           Row() {
             Text(media.rating)
-              .fontSize(14)
+              .fontSize(sizes.font.sm)
               .fontWeight(600)
-              .fontColor('#FFFFFF')
+              .fontColor(colors.text.primary)
           }
-          .backgroundColor('#FF6B35')
-          .padding({ left: 8, right: 8, top: 4, bottom: 4 })
-          .borderRadius(8)
-          .position({ bottom: 8, right: 8 })
+          .backgroundColor(colors.warning)
+          .padding({ left: sizes.spacing.sm, right: sizes.spacing.sm, top: sizes.spacing.xs, bottom: sizes.spacing.xs })
+          .borderRadius(sizes.borderRadius.md)
+          .position({ bottom: sizes.spacing.sm, right: sizes.spacing.sm })
         }
       }
-      .margin({ bottom: 12 })
+      .margin({ bottom: sizes.spacing.md })
       
       Text(media.title)
-        .fontSize(16)
+        .fontSize(sizes.font.md)
         .fontWeight(600)
         .maxLines(2)
-        .margin({ left: 8, right: 8 })
+        .margin({ left: sizes.spacing.sm, right: sizes.spacing.sm })
         .textAlign(TextAlign.Center)
-        .fontColor('#FFFFFF')
+        .fontColor(colors.text.primary)
     }
-    .padding(12)
-    .backgroundColor('#2C2C2C')
-    .borderRadius(16)
-    .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.4)', offsetY: 6 })
+    .padding(sizes.spacing.md)
+    .backgroundColor(colors.background.card)
+    .borderRadius(sizes.borderRadius.xl)
+    .shadow({ 
+      radius: shadows.card.radius, 
+      color: shadows.card.color, 
+      offsetY: shadows.card.offsetY 
+    })
     .onClick(() => this.handleMediaClick(media))
-    .width(this.isLandscape ? 260 : 200)
-    .height(this.isLandscape ? 440 : 370)
+    .width(mediaSizes.width)
+    .height(mediaSizes.height)
     .focusable(true)
     // 添加点击反馈动画
     .gesture(
@@ -356,38 +340,49 @@ struct MainPage {
   // 渲染内容区域 | Render content section
   @Builder
   private renderContentSection(title: string, mediaList: FeaturedMediaItem[]) {
+    const colors = theme.getColors();
+    const sizes = theme.getSizes();
+    const mediaSizes = this.isLandscape ? sizes.media.landscape : sizes.media.portrait;
+    const listHeight = this.isLandscape ? sizes.media.list.landscape : sizes.media.list.portrait;
+    
     Column() {
       // 内容标题 | Content title
       Row() {
         Text(title)
-          .fontSize(20)
+          .fontSize(sizes.font.xl)
           .fontWeight(700)
-          .fontColor('#FFFFFF')
-          .margin({ left: 30, top: 24, bottom: 16 })
+          .fontColor(colors.text.primary)
+          .margin({ left: sizes.spacing.xxl, top: sizes.spacing.xl, bottom: sizes.spacing.lg })
       }
       
       // 内容区域 | Content area - 使用List实现虚拟列表
       List({
         scroller: this.contentScroller,
         initialIndex: 0,
-        space: 20
+        space: sizes.spacing.xl
       }) {
         ForEach(mediaList, (item: FeaturedMediaItem) => {
           ListItem() {
             this.renderMediaItem(item)
           }
-          .width(this.isLandscape ? 260 : 200)
-          .height(this.isLandscape ? 440 : 370)
+          .width(mediaSizes.width)
+          .height(mediaSizes.height)
         }, (item: FeaturedMediaItem) => `${item.id}_${item.sourceId || 'default'}`)
       }
       .listDirection(Axis.Horizontal)
       .scrollBar(BarState.Auto)
-      .height(this.isLandscape ? 500 : 400)
-      .padding({ left: 30, right: 30, bottom: 30 })
+      .height(listHeight)
+      .padding({ left: sizes.spacing.xxl, right: sizes.spacing.xxl, bottom: sizes.spacing.xxl })
     }
   }
   
   build() {
+    const colors = theme.getColors();
+    const sizes = theme.getSizes();
+    const animations = theme.getAnimations();
+    const mediaSizes = this.isLandscape ? sizes.media.landscape : sizes.media.portrait;
+    const listHeight = this.isLandscape ? sizes.media.list.landscape : sizes.media.list.portrait;
+    
     Column() {
       // 顶部区域 | Top area
       Column() {
@@ -395,48 +390,48 @@ struct MainPage {
         Row() {
           // 应用标题 | App title
           Text('RayTV')
-            .fontSize(24)
+            .fontSize(sizes.font.xxl)
             .fontWeight(700)
-            .fontColor('#FFFFFF')
-            .margin({ left: 40 })
+            .fontColor(colors.text.primary)
+            .margin({ left: sizes.spacing.xxxl })
           
           // 日期显示 | Date display
           Text(this.currentDate)
-            .fontSize(16)
-            .fontColor('#E0E0E0')
-            .margin({ right: 40 })
+            .fontSize(sizes.font.md)
+            .fontColor(colors.text.secondary)
+            .margin({ right: sizes.spacing.xxxl })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         .alignItems(VerticalAlign.Center)
-        .height(80)
-        .backgroundColor('#007AFF')
+        .height(sizes.height.header)
+        .backgroundColor(colors.primary)
         
         // 主功能菜单 | Main function menu
         Row() {
           ForEach(this.mainMenuItems, (item: TabItem) => {
             Column() {
             Text(item.name)
-              .fontSize(18)
+              .fontSize(sizes.font.lg)
               .fontWeight(this.selectedTab === item.key ? 700 : 400)
-              .fontColor(this.selectedTab === item.key ? '#007AFF' : '#FFFFFF')
-              .padding({ left: 30, right: 30, top: 16, bottom: 16 })
-              .border(this.selectedTab === item.key ? { width: { bottom: 3 }, color: '#007AFF' } : { width: { bottom: 0 }, color: 'transparent' })
+              .fontColor(this.selectedTab === item.key ? colors.primary : colors.text.primary)
+              .padding({ left: sizes.spacing.xxl, right: sizes.spacing.xxl, top: sizes.spacing.lg, bottom: sizes.spacing.lg })
+              .border(this.selectedTab === item.key ? { width: { bottom: 3 }, color: colors.primary } : { width: { bottom: 0 }, color: 'transparent' })
           }
           .onClick(() => this.handleMainMenuClick(item.key))
           .focusable(true)
-          .backgroundColor(this.selectedTab === item.key ? 'rgba(255, 255, 255, 0.1)' : 'transparent')
+          .backgroundColor(this.selectedTab === item.key ? colors.primaryLight : 'transparent')
           .animation({
-            duration: 200,
-            curve: Curve.EaseOut
+            duration: animations.duration.short,
+            curve: animations.curve.easeOut
           })
           }, (item: TabItem) => item.key)
         }
         .width('100%')
         .justifyContent(FlexAlign.Start)
         .alignItems(VerticalAlign.Center)
-        .backgroundColor('#1E1E1E')
-        .padding({ left: 30 })
+        .backgroundColor(colors.background.secondary)
+        .padding({ left: sizes.spacing.xxl })
       }
       
       // 主内容区域 | Main content area
@@ -446,9 +441,9 @@ struct MainPage {
             if (this.isLoading) {
           Column() {
             Text(Strings.mainPage.loadingContent)
-              .fontSize(18)
-              .fontColor('#8E8E93')
-              .margin({ top: 30, bottom: 20 })
+              .fontSize(sizes.font.lg)
+              .fontColor(colors.text.disabled)
+              .margin({ top: sizes.spacing.xxl, bottom: sizes.spacing.xl })
                 
                 // 骨架屏 | Skeleton screen
                 Row() {
@@ -456,64 +451,64 @@ struct MainPage {
                     Column() {
                       // 图片骨架 | Image skeleton
                       Column()
-                        .width(this.isLandscape ? 234 : 176)
-                        .height(this.isLandscape ? 320 : 240)
-                        .backgroundColor('#2C2C2C')
-                        .borderRadius(12)
+                        .width(mediaSizes.skeleton.width)
+                        .height(mediaSizes.skeleton.height)
+                        .backgroundColor(colors.background.card)
+                        .borderRadius(sizes.borderRadius.lg)
                         .animation({
-                          duration: 1000,
+                          duration: animations.duration.long,
                           tempo: 1,
-                          curve: Curve.EaseInOut,
+                          curve: animations.curve.easeInOut,
                           iterations: -1,
                           delay: item * 100
                         })
                       
                       // 标题骨架 | Title skeleton
                       Column()
-                        .width(this.isLandscape ? 216 : 168)
+                        .width(mediaSizes.skeleton.titleWidth)
                         .height(40)
-                        .backgroundColor('#2C2C2C')
-                        .borderRadius(4)
-                        .margin({ top: 12 })
+                        .backgroundColor(colors.background.card)
+                        .borderRadius(sizes.borderRadius.sm)
+                        .margin({ top: sizes.spacing.md })
                         .animation({
-                          duration: 1000,
+                          duration: animations.duration.long,
                           tempo: 1,
-                          curve: Curve.EaseInOut,
+                          curve: animations.curve.easeInOut,
                           iterations: -1,
                           delay: item * 150
                         })
                     }
-                    .padding(12)
-                    .width(this.isLandscape ? 260 : 200)
-                    .height(this.isLandscape ? 440 : 370)
+                    .padding(sizes.spacing.md)
+                    .width(mediaSizes.width)
+                    .height(mediaSizes.height)
                   })
                 }
-                .padding({ left: 30, right: 30, bottom: 30 })
+                .padding({ left: sizes.spacing.xxl, right: sizes.spacing.xxl, bottom: sizes.spacing.xxl })
               }
               .justifyContent(FlexAlign.Start)
-              .height(this.isLandscape ? 500 : 400)
+              .height(listHeight)
             } else if (this.isError) {
               Column() {
                 Text(Strings.mainPage.loadFailed)
-                  .fontSize(18)
-                  .fontColor('#FF5252')
-                  .margin({ top: 20 })
+                  .fontSize(sizes.font.lg)
+                  .fontColor(colors.text.error)
+                  .margin({ top: sizes.spacing.xl })
                 Text(this.errorMessage)
-                  .fontSize(16)
-                  .fontColor('#FF9800')
-                  .margin({ top: 12 })
+                  .fontSize(sizes.font.md)
+                  .fontColor(colors.text.warning)
+                  .margin({ top: sizes.spacing.md })
                 Button(Strings.common.retry)
                   .onClick(() => this.loadFeaturedMedia())
-                  .backgroundColor('#007AFF')
-                  .fontColor('white')
-                  .borderRadius(20)
-                  .padding({ left: 30, right: 30, top: 14, bottom: 14 })
-                  .margin({ top: 20 })
-                  .fontSize(16)
+                  .backgroundColor(colors.primary)
+                  .fontColor(colors.text.primary)
+                  .borderRadius(sizes.borderRadius.xxl)
+                  .padding({ left: sizes.spacing.xxl, right: sizes.spacing.xxl, top: 14, bottom: 14 })
+                  .margin({ top: sizes.spacing.xl })
+                  .fontSize(sizes.font.md)
                   .focusable(true)
               }
               .justifyContent(FlexAlign.Center)
-              .height(this.isLandscape ? 500 : 400)
+              .height(listHeight)
             } else {
               // 推荐内容 | Recommended content
               if (this.featuredMedia.length > 0) {
@@ -536,11 +531,11 @@ struct MainPage {
         .scrollable(ScrollDirection.Vertical)
         .scrollBar(BarState.Auto)
         .flexGrow(1)
-        .backgroundColor('#121212')
+        .backgroundColor(colors.background.primary)
       }
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#121212')
+    .backgroundColor(colors.background.primary)
   }
 }

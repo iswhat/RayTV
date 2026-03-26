@@ -8,6 +8,10 @@ import { StorageUtil } from '../util/StorageUtil';
 import { CrawlerService } from '../../service/spider/CrawlerService';
 import MediaService from '../../service/media/MediaService';
 import { SiteDao } from '../../data/db/dao/SiteDao';
+import { VoiceAssistantManager } from '../../service/voice/VoiceAssistantManager';
+import { GestureServiceInstance } from '../../service/input/GestureService';
+import DataSyncService from '../../service/sync/DataSyncService';
+import { DeviceFlowManager } from '../../service/device/DeviceFlowManager';
 
 const TAG: string = 'ServiceRegistry';
 
@@ -28,6 +32,10 @@ export function registerServices(): void {
   container.register('HttpService', (): HttpService => HttpService.getInstance(), true);
   container.register('CrawlerService', (): CrawlerService => CrawlerService.getInstance(), true);
   container.register('MediaService', (): MediaService => MediaService.getInstance(), true);
+  container.register('VoiceAssistantManager', (): VoiceAssistantManager => VoiceAssistantManager.getInstance(), true);
+  container.register('GestureService', (): any => GestureServiceInstance, true);
+  container.register('DataSyncService', (): DataSyncService => DataSyncService.getInstance(), true);
+  container.register('DeviceFlowManager', (): DeviceFlowManager => DeviceFlowManager.getInstance(), true);
 
   Logger.info(TAG, 'All services registered successfully');
 }
