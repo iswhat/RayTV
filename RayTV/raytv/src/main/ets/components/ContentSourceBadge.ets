@@ -183,7 +183,7 @@ export struct SourceCard {
   priority: number = 1;
   tags: string[] = [];
   contentUsage: Record<string, boolean> = {};
-  onClick?: (event?: any) => void;
+  onClick?: () => void;
   onToggle?: (isActive: boolean) => void;
   
   build() {

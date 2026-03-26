@@ -109,10 +109,10 @@ interface PyFunctionInfo {
 export class ArkPyLoader extends BaseLoader {
   public readonly TAG: string = 'ArkPyLoader';
   private pyContext: PyContextDynamic = {};
-  private scriptContent: string = '';
+  protected scriptContent: string = '';
   private pythonCode: string = '';
   private taskPoolManager: TaskPoolManager;
-  private httpService: HttpService;
+  protected httpService: HttpService;
   private memoryManager: MemoryManager;
   private timeoutManager: TimeoutManager;
   private lastUsedTime: number = 0;
@@ -286,8 +286,8 @@ export class ArkPyLoader extends BaseLoader {
       // 从 URL 加载 Load from URL
       Logger.info(this.TAG, `正在从URL加载Python脚本: ${config.api} | Loading Python script from URL: ${config.api}`);
       try {
-        const response = await this.httpService.get(config.api, { timeout: 15000 });
-        this.scriptContent = response.data as string;
+        const response = await this.httpService.get<string>(config.api, { timeout: 15000 });
+        this.scriptContent = response.data;
         this.pythonCode = this.scriptContent;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
@@ -398,12 +398,14 @@ export class ArkPyLoader extends BaseLoader {
       get: async (url: string, options?: Record<string, string | number | boolean | object | null | undefined>): Promise<object> => {
         // 验证 URL 安全性 Validate URL security
         this.validateUrl(url);
-        return this.httpService.get(url, options || {});
+        const response = await this.httpService.get<Record<string, string | number | boolean | object>>(url, options || {});
+        return response.data;
       },
       post: async (url: string, data?: string | number | boolean | object | null | undefined, options?: Record<string, string | number | boolean | object | null | undefined>): Promise<object> => {
         // 验证 URL 安全性 Validate URL security
         this.validateUrl(url);
-        return this.httpService.post(url, data, options || {});
+        const response = await this.httpService.post<Record<string, string | number | boolean | object>>(url, data, options || {});
+        return response.data;
       }
     };
     this.pyContext.http = httpApi;

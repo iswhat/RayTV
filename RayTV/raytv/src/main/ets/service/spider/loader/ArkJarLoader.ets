@@ -120,7 +120,7 @@ export class ArkJarLoader extends BaseLoader {
   public readonly TAG: string = 'ArkJarLoader';
   private jarFilePath: string = '';
   private taskPoolManager: TaskPoolManager;
-  private httpService: HttpService;
+  protected httpService: HttpService;
   private memoryManager: MemoryManager;
   private timeoutManager: TimeoutManager;
   private loaderConfig: JarLoaderConfig = {};
@@ -230,15 +230,15 @@ export class ArkJarLoader extends BaseLoader {
         // 在后台线程执行 JAR 方法 Execute JAR method in background thread
         const self: ArkJarLoader = this;
         const result: JarMethodResult = await new Promise<JarMethodResult>((resolve, reject) => {
-          const task: Task<TaskResult> = {
+          const task: Task<JarMethodResult> = {
             id: `jar_${methodName}_${Date.now()}`,
             priority: TaskPriority.NORMAL,
-            execute: async (): Promise<TaskResult> => {
+            execute: async (): Promise<JarMethodResult> => {
               const methodResult = await self.executeJarMethod(methodName, args);
-              return methodResult as unknown as TaskResult;
+              return methodResult;
             },
-            onComplete: (res: TaskResult) => {
-              resolve(res as unknown as JarMethodResult);
+            onComplete: (res: JarMethodResult) => {
+              resolve(res);
             },
             onError: (err: Error) => {
               reject(err);
@@ -449,7 +449,7 @@ export class ArkJarLoader extends BaseLoader {
       
       const result: JarMethodResult = {
         success: true,
-        data: resultData as unknown as JarMethodData,
+        data: resultData as JarMethodData,
         timestamp: Date.now()
       };
       
@@ -534,8 +534,7 @@ export class ArkJarLoader extends BaseLoader {
     // 简单的文件头验证，确保是有效的 JAR/ZIP 文件
     let fileDescriptor: number = -1;
     try {
-      const openedFile = fileio.openSync(this.jarFilePath, 0);
-      fileDescriptor = openedFile.fd;
+      fileDescriptor = fileio.openSync(this.jarFilePath, 0);
       const header = new Uint8Array(4);
       fileio.readSync(fileDescriptor, header.buffer);
       
