@@ -302,6 +302,7 @@ export class ArkPyLoader extends BaseLoader {
 
     try {
       // 安全验证 Security validation
+      this.validateMethod(methodName);
       this.validateParams(args);
       
       Logger.info(this.TAG, `正在调用Python方法: ${methodName}，站点: ${this.site.name} | Invoking Python method: ${methodName} for site: ${this.site.name}`);
