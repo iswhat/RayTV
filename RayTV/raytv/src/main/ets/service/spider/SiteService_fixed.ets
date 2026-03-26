@@ -5,6 +5,8 @@ import { SiteDao } from '../../data/db/dao/SiteDao';
 import { Inject } from '../../common/di/Container';
 import CacheService from '../cache/CacheService';
 import { HttpService } from '../HttpService';
+import { SiteConfigService, getSiteConfigService } from '../config/SiteConfigService';
+import { ErrorHandler, ErrorType, ErrorSeverity } from '../../common/util/ErrorHandler';
 
 // 站点测试结果接口 | Site test result interface
 export interface SiteTestResult {
@@ -204,6 +206,8 @@ export class SiteService implements ISiteService {
   private siteDao!: SiteDao;
   
   private cacheService: CacheService = CacheService.getInstance();
+  private configService: SiteConfigService = getSiteConfigService();
+  private errorHandler: ErrorHandler = ErrorHandler.getInstance();
   private initialized: boolean = false;
   
   /**
@@ -238,8 +242,10 @@ export class SiteService implements ISiteService {
       this.initialized = true;
       LoggerUtil.info(TAG, 'Site service initialized successfully');
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to initialize site service: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      this.errorHandler.handleError(error, ErrorType.SERVICE, ErrorSeverity.HIGH, TAG);
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      LoggerUtil.error(TAG, `Failed to initialize site service: ${errorMessage}`);
+      throw new Error(`初始化站点服务失败: ${errorMessage}`);
     }
   }
   
@@ -259,15 +265,18 @@ export class SiteService implements ISiteService {
       const sites = await this.siteDao.getAll();
 
       // 缓存结果 Cache the result
-      await this.cacheService.set('sites:all', sites, { expiry: 300 * 1000 }); // 缓存5分钟 Cache for 5 minutes
+      const cacheConfig = this.configService.getCacheConfig();
+      await this.cacheService.set('sites:all', sites, { expiry: cacheConfig.allSitesExpiry });
       
       return sites;
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get all sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      this.errorHandler.handleError(error, ErrorType.DATABASE, ErrorSeverity.MEDIUM, TAG);
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      LoggerUtil.error(TAG, `Failed to get all sites: ${errorMessage}`);
+      throw new Error(`获取站点列表失败: ${errorMessage}`);
     }
   }
-  
+
   /**
    * 获取启用的站点 Get enabled sites
    * @returns 启用的站点列表 Enabled site list
@@ -277,8 +286,10 @@ export class SiteService implements ISiteService {
       const allSites = await this.getAllSites();
       return allSites.filter(site => site.enabled);
     } catch (error) {
-      LoggerUtil.error(TAG, `Failed to get enabled sites: ${error instanceof Error ? error.message : String(error)}`);
-      throw error instanceof Error ? error : new Error(String(error));
+      this.errorHandler.handleError(error, ErrorType.DATABASE, ErrorSeverity.MEDIUM, TAG);
+      const errorMessage: string = error instanceof Error ? error.message : String(error);
+      LoggerUtil.error(TAG, `Failed to get enabled sites: ${errorMessage}`);
+      throw new Error(`获取启用站点失败: ${errorMessage}`);
     }
   }
   
@@ -315,9 +326,10 @@ export class SiteService implements ISiteService {
       const site = await this.siteDao.getByKey(key);
 
       // 缓存结果 Cache the result
-      if (site) {
-        await this.cacheService.set(cacheKey, site, { expiry: 600 * 1000 }); // 缓存10分钟 Cache for 10 minutes
-      }
+        if (site) {
+          const cacheConfig = this.configService.getCacheConfig();
+          await this.cacheService.set(cacheKey, site, { expiry: cacheConfig.singleSiteExpiry });
+        }
 
       return site || null;
     } catch (error) {
@@ -500,10 +512,11 @@ export class SiteService implements ISiteService {
       // 2. 发送HTTP请求测试连接 Send HTTP request to test connection
       try {
         const httpService = HttpService.getInstance();
-        
+        const httpConfig = this.configService.getHttpConfig();
+
         // 发送实际的HTTP请求 Send actual HTTP request
         const response = await httpService.get<Record<string, string | number | boolean | object>> (site.api, {
-          timeout: 10000,
+          timeout: httpConfig.testTimeout,
           cache: false
         });
         
@@ -541,17 +554,20 @@ export class SiteService implements ISiteService {
       
       // 3. 测试站点API响应 Test site API response
       try {
+        const httpConfig = this.configService.getHttpConfig();
+        const apiConfig = this.configService.getApiConfig();
+
         // 根据站点类型进行不同的API测试 Test API based on site type
         if (site.type === SiteType.VOD || site.type === SiteType.MIXED) {
           // 测试视频站点API Test video site API
           const httpService = HttpService.getInstance();
-          
+
           // 尝试获取首页数据 Try to get home page data
-        const homeResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/home`, {
-          timeout: 10000,
+        const homeResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}${apiConfig.homePath}`, {
+          timeout: httpConfig.testTimeout,
           cache: false
         });
-          
+
           if (homeResponse.status >= 200 && homeResponse.status < 300) {
             // API响应正常 API response normal
           } else {
@@ -560,10 +576,10 @@ export class SiteService implements ISiteService {
         } else if (site.type === SiteType.LIVE) {
           // 测试直播站点API Test live site API
           const httpService = HttpService.getInstance();
-          
+
           // 尝试获取频道列表 Try to get channel list
-        const channelResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}/channels`, {
-          timeout: 10000,
+        const channelResponse = await httpService.get<Record<string, string | number | boolean | object>>(`${site.api}${apiConfig.channelsPath}`, {
+          timeout: httpConfig.testTimeout,
           cache: false
         });
           
@@ -603,10 +619,11 @@ export class SiteService implements ISiteService {
       await this.saveSite(site);
       
     } catch (error) {
+      this.errorHandler.handleError(error, ErrorType.NETWORK, ErrorSeverity.MEDIUM, TAG);
       result.status = 'failed';
-      result.errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      result.errorMessage = this.errorHandler.getFriendlyMessage(error);
       result.responseTime = Date.now() - startTime;
-      
+
       // 更新站点错误统计 Update site error statistics
       try {
         const site = await this.getSiteByKey(key);
@@ -618,6 +635,7 @@ export class SiteService implements ISiteService {
           await this.saveSite(site);
         }
       } catch (updateError) {
+        this.errorHandler.handleError(updateError, ErrorType.DATABASE, ErrorSeverity.LOW, TAG);
         LoggerUtil.error(TAG, `Failed to update error stats: ${updateError instanceof Error ? updateError.message : String(updateError)}`);
       }
     }

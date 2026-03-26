@@ -190,11 +190,18 @@ export default class MainAbility extends UIAbility {
     
     // 清理服务资源 | Clean up service resources
     try {
+      // 重置服务初始化管理器状态
+      const serviceInitManager = ServiceInitManager.getInstance();
+      serviceInitManager.reset();
+      Logger.info(TAG, 'Service initialization manager reset successfully');
+      
+      // 清理依赖注入容器
       const container = DIContainer.getInstance();
       container.clearSingleton();
       Logger.info(TAG, 'Service resources cleaned up successfully');
     } catch (error) {
-      Logger.error(TAG, 'Failed to clean up service resources', error as Error);
+      const errorInfo = handleError(error, 'CLEANUP_SERVICES');
+      Logger.error(TAG, `Failed to clean up service resources: ${errorInfo.message}`);
     }
   }
 

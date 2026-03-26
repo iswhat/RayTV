@@ -10,6 +10,8 @@ import { TaskPoolManager } from '../../../task/pool/TaskPoolManager';
 import { HttpService } from '../../HttpService';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
+import { PythonLoaderConfigService, getPythonLoaderConfigService } from '../../config/PythonLoaderConfigService';
+import { ErrorHandler, ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
 
 /**
  * Ark Python 加载器 Ark Python loader
@@ -119,7 +121,8 @@ export class ArkPyLoader extends BaseLoader {
   private isInitialized: boolean = false;
   private pyModuleName: string = '';
   private errorCount: number = 0;
-  private maxErrorCount: number = 5;
+  private configService: PythonLoaderConfigService = getPythonLoaderConfigService();
+  private errorHandler: ErrorHandler = ErrorHandler.getInstance();
 
   /**
    * 构造函数 Constructor
@@ -133,6 +136,13 @@ export class ArkPyLoader extends BaseLoader {
     this.memoryManager = MemoryManager.getInstance();
     this.timeoutManager = TimeoutManager.getInstance();
     this.pyModuleName = `site_${site.key || 'default'}`;
+  }
+
+  /**
+   * 获取最大错误次数 | Get max error count
+   */
+  private getMaxErrorCount(): number {
+    return this.configService.getErrorHandlingConfig().maxErrorCount;
   }
 
   /**
@@ -202,9 +212,10 @@ export class ArkPyLoader extends BaseLoader {
       Logger.info(this.TAG, `正在调用Python方法: ${methodName}，站点: ${this.site.name} | Invoking Python method: ${methodName} for site: ${this.site.name}`);
 
       // 设置执行超时 Set execution timeout
+      const timeoutConfig = this.configService.getTimeoutConfig();
       const timeoutId = this.timeoutManager.setTimeout(() => {
         throw new Error(`Method ${methodName} execution timed out`);
-      }, 60000); // Python 执行可能需要更长时间，设置 60 秒超时
+      }, timeoutConfig.methodExecutionTimeout);
       try {
         // 直接执行 Python 方法 Execute Python method directly
         const result = await this.executeMethod(methodName, args);
@@ -286,7 +297,8 @@ export class ArkPyLoader extends BaseLoader {
       // 从 URL 加载 Load from URL
       Logger.info(this.TAG, `正在从URL加载Python脚本: ${config.api} | Loading Python script from URL: ${config.api}`);
       try {
-        const response = await this.httpService.get<string>(config.api, { timeout: 15000 });
+        const timeoutConfig = this.configService.getTimeoutConfig();
+        const response = await this.httpService.get<string>(config.api, { timeout: timeoutConfig.scriptLoadTimeout });
         this.scriptContent = response.data;
         this.pythonCode = this.scriptContent;
       } catch (error) {

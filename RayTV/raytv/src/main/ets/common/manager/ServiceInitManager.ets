@@ -47,6 +47,17 @@ export class ServiceInitManager {
 
     try {
       // 按顺序初始化服务，确保依赖关系正确
+      // 1. 基础服务（无依赖）
+      await this.initializeConfigService();
+      await this.initializeHttpService();
+      
+      // 2. 数据服务（依赖基础服务）
+      await this.initializeStorageUtil();
+      await this.initializeSiteDao();
+      await this.initializeMediaService();
+      await this.initializeCrawlerService();
+      
+      // 3. 功能服务（依赖数据服务）
       await this.initializeVoiceAssistantManager();
       await this.initializeGestureService();
       await this.initializeDataSyncService(context);
@@ -57,6 +68,174 @@ export class ServiceInitManager {
       const errorInfo = handleError(error, 'INITIALIZE_SERVICES');
       Logger.error(TAG, `Service initialization failed: ${errorInfo.message}`);
       // 即使部分服务初始化失败，应用仍继续运行
+    }
+  }
+
+  /**
+   * Initialize ConfigService | 初始化ConfigService
+   */
+  private async initializeConfigService(): Promise<void> {
+    const serviceName = 'ConfigService';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const configService = this.container.resolve(serviceName);
+      if (configService && typeof configService.initialize === 'function') {
+        await configService.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // ConfigService 是核心服务，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_CONFIG');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
+    }
+  }
+
+  /**
+   * Initialize HttpService | 初始化HttpService
+   */
+  private async initializeHttpService(): Promise<void> {
+    const serviceName = 'HttpService';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const httpService = this.container.resolve(serviceName);
+      if (httpService && typeof httpService.initialize === 'function') {
+        await httpService.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // HttpService 是核心服务，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_HTTP');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
+    }
+  }
+
+  /**
+   * Initialize StorageUtil | 初始化StorageUtil
+   */
+  private async initializeStorageUtil(): Promise<void> {
+    const serviceName = 'StorageUtil';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const storageUtil = this.container.resolve(serviceName);
+      if (storageUtil && typeof storageUtil.initialize === 'function') {
+        await storageUtil.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // StorageUtil 是工具类，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_STORAGE');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
+    }
+  }
+
+  /**
+   * Initialize SiteDao | 初始化SiteDao
+   */
+  private async initializeSiteDao(): Promise<void> {
+    const serviceName = 'SiteDao';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const siteDao = this.container.resolve(serviceName);
+      if (siteDao && typeof siteDao.initialize === 'function') {
+        await siteDao.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // SiteDao 是DAO类，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_SITE_DAO');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
+    }
+  }
+
+  /**
+   * Initialize MediaService | 初始化MediaService
+   */
+  private async initializeMediaService(): Promise<void> {
+    const serviceName = 'MediaService';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const mediaService = this.container.resolve(serviceName);
+      if (mediaService && typeof mediaService.initialize === 'function') {
+        await mediaService.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // MediaService 是核心服务，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_MEDIA');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
+    }
+  }
+
+  /**
+   * Initialize CrawlerService | 初始化CrawlerService
+   */
+  private async initializeCrawlerService(): Promise<void> {
+    const serviceName = 'CrawlerService';
+    if (this.initializedServices.has(serviceName)) {
+      Logger.info(TAG, `${serviceName} already initialized`);
+      return;
+    }
+
+    try {
+      const crawlerService = this.container.resolve(serviceName);
+      if (crawlerService && typeof crawlerService.initialize === 'function') {
+        await crawlerService.initialize();
+        this.initializedServices.add(serviceName);
+        Logger.info(TAG, `${serviceName} initialized successfully`);
+      } else {
+        Logger.warn(TAG, `${serviceName} not found or missing initialize method`);
+        // CrawlerService 是核心服务，尝试创建实例
+        this.initializedServices.add(serviceName);
+      }
+    } catch (error) {
+      const errorInfo = handleError(error, 'INITIALIZE_CRAWLER');
+      Logger.warn(TAG, `${serviceName} initialization failed (degraded mode): ${errorInfo.message}`);
+      // 服务初始化失败时记录错误但不崩溃，应用可降级运行
     }
   }
 

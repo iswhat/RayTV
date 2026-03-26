@@ -5,88 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8fcf770d-f814-4159-97f0-0a34e3e945c4" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.hvigor/cache/file-cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/.hvigor/cache/file-cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.hvigor/cache/task-cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/.hvigor/cache/task-cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.hvigor/outputs/build-logs/build.log" beforeDir="false" afterPath="$PROJECT_DIR$/.hvigor/outputs/build-logs/build.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.hvigor/outputs/logs/details/details.json" beforeDir="false" afterPath="$PROJECT_DIR$/.hvigor/outputs/logs/details/details.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.hvigor/report/report-202603241825408160.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/config/buildConfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/config/buildConfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/.tsbuildinfo.linter" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/.tsbuildinfo.linter" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/filesInfo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/filesInfo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/modules.cache" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/modules.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/npmEntries.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/MainAbility.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/di/Container.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/di/ServiceRegistry.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/resources/Strings.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/resources/Strings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/resources/Strings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/AppError.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/ErrorHandler.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/EventBusUtil.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/JsonUtil.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/Logger.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/MemoryManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/StorageUtil.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/StorageUtil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/StorageUtil.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/TimeoutManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/TypeSafetyHelper.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/URLValidator.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/ark/ObjectUtils.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/common/util/ark/TypeUtils.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/components/ContentSourceBadge.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/components/ContentSourceBadge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/components/ContentSourceBadge.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/components/ImageLazyLoader.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/data/bean/Site.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/data/db/DatabaseManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/data/db/TableSchema.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/data/db/dao/SiteDao.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/data/dto/ApiResponse.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/design/DesignSystem.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/design/ThemeProvider.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/navigation/AppNavigator.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/CategoryPage.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/Index.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/MainPage.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/MainPage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/MainPage.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/MediaDetailPage.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/ModernSettingsPage.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/pages/SearchPage.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/raytvbackupability/RayTVBackupAbility.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/HttpService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/cache/CacheService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/config/ConfigParser.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/config/ConfigParser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/config/ConfigParser.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/config/ConfigService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/config/ConfigSourceService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/content/ContentAccessService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/device/DeviceFlowManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/input/GestureService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/live/LiveChannelTypes.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/media/MediaService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/pool/SourcePoolManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/pool/SourcePoolManager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/pool/SourcePoolManager.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/search/SearchService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/CrawlerService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/LoaderFactory.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/SiteManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkJarLoader.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkJarLoader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkJarLoader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkJsLoader.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkPyLoader.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkPyLoader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/ArkPyLoader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/spider/loader/BaseLoader.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/sync/DataSyncService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/sync/DataSyncService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/sync/DataSyncService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/sync/ModernDistributedDataService.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/service/voice/VoiceAssistantManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/task/pool/TaskPoolManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/types/LazyLoadTypes.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/raytv/src/main/ets/utils/ImageCacheManager.protoBin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/sourceMaps.json" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/debug/sourceMaps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/watchCompiler.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/cache/default/default@PreviewArkTS/esmodule/watchCompiler.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raytv/.preview/default/intermediates/assets/default/ets/sourceMaps.map" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/.preview/default/intermediates/assets/default/ets/sourceMaps.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raytv/src/main/ets/MainAbility.ets" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/src/main/ets/MainAbility.ets" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raytv/src/main/ets/common/manager/ServiceInitManager.ets" beforeDir="false" afterPath="$PROJECT_DIR$/raytv/src/main/ets/common/manager/ServiceInitManager.ets" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,22 +26,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.raytv.executor": "Run",
-    "Hvigor.RayTV [clean].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "ace.nodejs.path": "C:/Program Files/Huawei/DevEco Studio/tools/node",
-    "ace.nodejs.version": "18.20.1",
-    "git-widget-placeholder": "main",
-    "projectSizeLastTraceTimestamp-bf8b9f0ad4174ae95fa37efb2c0a665dd383c24919dcead832d021d2e309": "1774490725686",
-    "resolution": "1080*2340",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "com.huawei.deveco.sdkmanager.ohos.idea.ui.OhSdkConfigProvider",
-    "shape": "default"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.raytv.executor&quot;: &quot;Run&quot;,
+    &quot;Hvigor.RayTV [clean].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;ace.nodejs.path&quot;: &quot;C:/Program Files/Huawei/DevEco Studio/tools/node&quot;,
+    &quot;ace.nodejs.version&quot;: &quot;18.20.1&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;projectSizeLastTraceTimestamp-bf8b9f0ad4174ae95fa37efb2c0a665dd383c24919dcead832d021d2e309&quot;: &quot;1774490725686&quot;,
+    &quot;resolution&quot;: &quot;1080*2340&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.huawei.deveco.sdkmanager.ohos.idea.ui.OhSdkConfigProvider&quot;,
+    &quot;shape&quot;: &quot;default&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Application.raytv">
     <configuration name="raytv" type="HotReLoadTask" factoryName="Hot Reload">
       <MODULE_NAME />
