@@ -136,14 +136,10 @@ export class ArkPyLoader extends BaseLoader {
     this.memoryManager = MemoryManager.getInstance();
     this.timeoutManager = TimeoutManager.getInstance();
     this.pyModuleName = `site_${site.key || 'default'}`;
+    this.errorCount = 0;
   }
 
-  /**
-   * 获取最大错误次数 | Get max error count
-   */
-  private getMaxErrorCount(): number {
-    return this.configService.getErrorHandlingConfig().maxErrorCount;
-  }
+
 
   /**
    * 获取 Python 解释器 Get Python interpreter
@@ -153,6 +149,92 @@ export class ArkPyLoader extends BaseLoader {
     // 在 ArkTS 中，我们可以使用一个模块级别的变量或通过依赖注入获取
     // 这里返回 null 作为默认值，实际实现需要根据具体情况调整
     return null;
+  }
+
+  /**
+   * 错误分类 | Classify error
+   * @param error 错误对象
+   * @returns ErrorType 错误类型
+   */
+  private classifyError(error: Error): ErrorType {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('memory') || message.includes('heap') || message.includes('stack')) {
+      return ErrorType.MEMORY;
+    }
+    if (message.includes('timeout') || message.includes('timed out')) {
+      return ErrorType.TIMEOUT;
+    }
+    if (message.includes('network') || message.includes('http') || message.includes('fetch')) {
+      return ErrorType.NETWORK;
+    }
+    if (message.includes('security') || message.includes('dangerous') || message.includes('blocked')) {
+      return ErrorType.SECURITY;
+    }
+    if (message.includes('parse') || message.includes('syntax') || message.includes('json')) {
+      return ErrorType.PARSE;
+    }
+    if (message.includes('validation') || message.includes('invalid') || message.includes('param')) {
+      return ErrorType.VALIDATION;
+    }
+    if (message.includes('config') || message.includes('configuration')) {
+      return ErrorType.CONFIG;
+    }
+    
+    return ErrorType.UNKNOWN;
+  }
+
+  /**
+   * 尝试自动恢复 | Attempt recovery
+   * @param errorType 错误类型
+   * @param error 错误对象
+   */
+  private async attemptRecovery(errorType: ErrorType, error: Error): Promise<void> {
+    const errorHandlingConfig = this.configService.getErrorHandlingConfig();
+    
+    if (!errorHandlingConfig.autoCleanup) {
+      Logger.info(this.TAG, '自动恢复已禁用 | Auto recovery disabled');
+      return;
+    }
+
+    try {
+      switch (errorType) {
+        case ErrorType.MEMORY:
+          Logger.info(this.TAG, '尝试内存恢复 | Attempting memory recovery');
+          this.cleanupResources();
+          // 等待GC运行
+          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+          break;
+          
+        case ErrorType.TIMEOUT:
+          Logger.info(this.TAG, '尝试超时恢复 | Attempting timeout recovery');
+          this.cleanupResources();
+          break;
+          
+        case ErrorType.NETWORK:
+          Logger.info(this.TAG, '尝试网络恢复 | Attempting network recovery');
+          // 网络错误等待一段时间后重试
+          await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+          break;
+          
+        case ErrorType.SECURITY:
+          Logger.warn(this.TAG, '安全错误，清理资源 | Security error, cleaning up resources');
+          this.cleanupResources();
+          break;
+          
+        case ErrorType.PARSE:
+          Logger.info(this.TAG, '解析错误，清理脚本 | Parse error, cleaning up script');
+          this.scriptContent = '';
+          this.pythonCode = '';
+          break;
+          
+        default:
+          Logger.info(this.TAG, '执行默认恢复 | Executing default recovery');
+          this.cleanupResources();
+      }
+    } catch (recoveryError) {
+      Logger.error(this.TAG, `恢复失败: ${recoveryError instanceof Error ? recoveryError.message : String(recoveryError)} | Recovery failed`);
+    }
   }
 
   /**
@@ -187,6 +269,19 @@ export class ArkPyLoader extends BaseLoader {
       const err = error instanceof Error ? error : new Error(String(error));
       this.isInitialized = false;
       this.cleanupResources();
+      
+      // 错误分类处理
+      const errorType = this.classifyError(err);
+      this.errorHandler.handle(
+        errorType,
+        ErrorSeverity.ERROR,
+        `Python loader initialization failed: ${err.message}`,
+        this.TAG
+      );
+      
+      // 尝试自动恢复
+      await this.attemptRecovery(errorType, err);
+      
       Logger.error(this.TAG, `Python加载器初始化失败: ${err.message} | Failed to initialize Python loader: ${err.message}`);
       throw err;
     }
@@ -226,15 +321,38 @@ export class ArkPyLoader extends BaseLoader {
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
+      
+      // 错误分类
+      const errorType = this.classifyError(err);
+      
+      // 记录错误
+      this.errorHandler.handle(
+        errorType,
+        ErrorSeverity.ERROR,
+        `Failed to invoke Python method ${methodName}: ${err.message}`,
+        this.TAG
+      );
+      
       Logger.error(this.TAG, `调用Python方法${methodName}失败: ${err.message} | Failed to invoke Python method ${methodName}: ${err.message}`);
-      // 错误计数增加 Error count increment
+      
+      // 错误计数增加
       this.errorCount++;
 
-      // 如果错误过多，清理资源 If too many errors, clean up resources
-      if (this.errorCount >= this.maxErrorCount) {
+      // 如果错误过多，清理资源
+      const errorHandlingConfig = this.configService.getErrorHandlingConfig();
+      if (this.errorCount >= errorHandlingConfig.maxErrorCount) {
+        this.errorHandler.handle(
+          ErrorType.UNKNOWN,
+          ErrorSeverity.WARNING,
+          `Too many errors (${this.errorCount}), cleaning up resources`,
+          this.TAG
+        );
         Logger.warn(this.TAG, '错误过多，正在清理资源 | Too many errors, cleaning up resources');
         this.cleanupResources();
       }
+      
+      // 尝试自动恢复
+      await this.attemptRecovery(errorType, err);
 
       throw err;
     }
@@ -531,7 +649,8 @@ export class ArkPyLoader extends BaseLoader {
       json: jsonApi,
       sleep: (seconds: number): Promise<void> => {
         return new Promise<void>((resolve: () => void) => {
-          setTimeout(resolve, Math.min(seconds * 1000, 10000)); // 限制最大延迟 10 秒
+          const timeoutConfig = this.configService.getTimeoutConfig();
+          setTimeout(resolve, Math.min(seconds * 1000, timeoutConfig.maxSleepTime));
         });
       }
     };
@@ -619,8 +738,14 @@ export class ArkPyLoader extends BaseLoader {
     }
 
     // 限制方法执行内存使用 Limit method execution memory usage
-    const maxMemoryUsage = 100 * 1024 * 1024; // Python 执行可能需要更多内存，设置 100MB
+    const memoryConfig = this.configService.getMemoryConfig();
     if (!this.memoryManager.checkMemoryAvailability()) {
+      this.errorHandler.handle(
+        ErrorType.MEMORY,
+        ErrorSeverity.ERROR,
+        'Memory limit exceeded for method execution',
+        this.TAG
+      );
       throw new Error('Memory limit exceeded for method execution');
     }
 
@@ -736,8 +861,15 @@ export class ArkPyLoader extends BaseLoader {
     // 检查代码复杂度，防止恶意构造 Check code complexity, prevent malicious construction
     const lineCount = this.scriptContent.split('\n').length;
     const braceCount = (this.scriptContent.match(/:/g) || []).length;
+    const securityConfig = this.configService.getSecurityConfig();
 
-    if (lineCount > 2000 || braceCount > 800) {
+    if (lineCount > securityConfig.maxCodeLines || braceCount > securityConfig.maxBraceCount) {
+      this.errorHandler.handle(
+        ErrorType.SECURITY,
+        ErrorSeverity.ERROR,
+        `Python script too complex: ${lineCount} lines, ${braceCount} braces`,
+        this.TAG
+      );
       throw new Error('Python script too complex, potential security risk');
     }
   }
@@ -773,11 +905,12 @@ export class ArkPyLoader extends BaseLoader {
       throw new Error('Python interpreter or executeFunction method not available');
     }
     
+    const timeoutConfig = this.configService.getTimeoutConfig();
     return await pythonInterpreter.executeFunction({
       context: this.pyContext,
       functionName: functionName,
       params: params,
-      timeout: 30000 // 30秒超时
+      timeout: timeoutConfig.methodExecutionTimeout
     } as PyExecuteFunctionOptions);
   }
   
@@ -827,17 +960,75 @@ export class ArkPyLoader extends BaseLoader {
     // 检查参数大小，防止过大的参数导致内存问题
     const paramsSize = JSON.stringify(params).length;
     if (paramsSize > 2 * 1024 * 1024) { // Python 可能处理更大的数据，设置 2MB 限制
+      this.errorHandler.handle(
+        ErrorType.VALIDATION,
+        ErrorSeverity.ERROR,
+        `Parameters too large: ${paramsSize} bytes`,
+        this.TAG
+      );
       throw new Error('Parameters too large');
     }
 
     // 检查参数深度，防止递归嵌套对象 Check parameter depth, prevent recursive nested objects
     const maxDepth = 12;
     if (this.checkObjectDepth(params) > maxDepth) {
+      this.errorHandler.handle(
+        ErrorType.VALIDATION,
+        ErrorSeverity.ERROR,
+        `Parameters too deeply nested: ${this.checkObjectDepth(params)} levels`,
+        this.TAG
+      );
       throw new Error('Parameters too deeply nested');
     }
 
     // 检查集合大小，防止过大的数组 Check collection size, prevent oversized arrays
     this.checkCollectionSize(params);
+  }
+
+  /**
+   * 验证方法 Validate method
+   * @param method 方法名称 Method name
+   * @private
+   */
+  private validateMethod(method: string): void {
+    // 检查方法名是否包含危险字符或格式 Check if method name contains dangerous characters or format
+    const dangerousPatterns = [/\s/, /\./, /\//, /\\/, /\*/, /\$/, /\#/, /\@/, /\!/, /\&/, /\*/];
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(method)) {
+        this.errorHandler.handle(
+          ErrorType.SECURITY,
+          ErrorSeverity.ERROR,
+          `Invalid method name: ${method}`,
+          this.TAG
+        );
+        throw new Error(`Security violation: Invalid method name: ${method}`);
+      }
+    }
+    
+    // 方法名长度限制 Method name length limit
+    if (method.length > 100) {
+      this.errorHandler.handle(
+        ErrorType.VALIDATION,
+        ErrorSeverity.ERROR,
+        `Method name too long: ${method.length} characters`,
+        this.TAG
+      );
+      throw new Error('Method name too long');
+    }
+    
+    // 检查方法名是否以危险前缀开头 Check if method name starts with dangerous prefix
+    const dangerousPrefixes = ['__', 'exec', 'eval', 'compile', 'open', 'file'];
+    for (const prefix of dangerousPrefixes) {
+      if (method.toLowerCase().startsWith(prefix)) {
+        this.errorHandler.handle(
+          ErrorType.SECURITY,
+          ErrorSeverity.ERROR,
+          `Dangerous method name: ${method}`,
+          this.TAG
+        );
+        throw new Error(`Security violation: Dangerous method name: ${method}`);
+      }
+    }
   }
   
   /**
@@ -869,10 +1060,16 @@ export class ArkPyLoader extends BaseLoader {
    * @private
    */
   private checkCollectionSize(obj: string | number | boolean | object | null | undefined): void {
-    const maxArrayLength = 20000;
+    const securityConfig = this.configService.getSecurityConfig();
 
     if (Array.isArray(obj)) {
-      if (obj.length > maxArrayLength) {
+      if (obj.length > securityConfig.maxArrayLength) {
+        this.errorHandler.handle(
+          ErrorType.VALIDATION,
+          ErrorSeverity.ERROR,
+          `Array too large: ${obj.length} items`,
+          this.TAG
+        );
         throw new Error('Array too large');
       }
 
@@ -884,7 +1081,13 @@ export class ArkPyLoader extends BaseLoader {
       }
     } else if (typeof obj === 'object' && obj !== null) {
       const keys = ObjectUtils.getKeys(obj);
-      if (keys.length > 2000) {
+      if (keys.length > securityConfig.maxObjectKeys) {
+        this.errorHandler.handle(
+          ErrorType.VALIDATION,
+          ErrorSeverity.ERROR,
+          `Object has too many properties: ${keys.length}`,
+          this.TAG
+        );
         throw new Error('Object has too many properties');
       }
 

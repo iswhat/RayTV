@@ -9,6 +9,8 @@ import { HttpService } from '../../HttpService';
 import fileio from '@ohos.fileio';
 import MemoryManager from '../../../common/util/MemoryManager';
 import TimeoutManager from '../../../common/util/TimeoutManager';
+import { JarLoaderConfigService, getJarLoaderConfigService } from '../../config/JarLoaderConfigService';
+import { ErrorHandler, ErrorType, ErrorSeverity } from '../../../common/util/ErrorHandler';
 
 // Generic return value type for script method calls
 type PyValue = string | number | boolean | object | null | undefined;
@@ -130,9 +132,10 @@ export class ArkJarLoader extends BaseLoader {
   private methodExecutedCount: number = 0;
   private lastMemoryCheckTime: number = 0;
   private errorCount: number = 0;
-  private maxErrorCount: number = 5;
   private status: string = 'initialized';
   private jarCache: Map<string, JarMethodResult> = new Map();
+  private configService: JarLoaderConfigService = getJarLoaderConfigService();
+  private errorHandler: ErrorHandler = ErrorHandler.getInstance();
 
   /**
    * 构造函数 Constructor
@@ -146,11 +149,16 @@ export class ArkJarLoader extends BaseLoader {
     this.memoryManager = MemoryManager.getInstance();
     this.timeoutManager = TimeoutManager.getInstance();
     this.sandboxId = `sandbox_${site.key}_${Date.now()}`;
+    this.errorCount = 0;
+    
+    // 从配置服务获取配置 Get config from config service
+    const memoryConfig = this.configService.getMemoryConfig();
+    const timeoutConfig = this.configService.getTimeoutConfig();
     
     // 设置默认配置 Set default configuration
     this.loaderConfig = {
-      timeout: 30000,
-      maxMemory: 256, // MB
+      timeout: timeoutConfig.jarLoadTimeout,
+      maxMemory: memoryConfig.maxHeapSize,
       sandboxEnabled: true
     };
   }
@@ -181,10 +189,23 @@ export class ArkJarLoader extends BaseLoader {
       this.lastMemoryCheckTime = Date.now();
       Logger.info(this.TAG, `JAR loader initialized successfully for site: ${this.site.name}`);
     } catch (error) {
-      Logger.error(this.TAG, `Failed to initialize JAR loader: ${error instanceof Error ? error.message : String(error)}`);
+      const err = error instanceof Error ? error : new Error(String(error));
+      
+      // 错误分类处理
+      const errorType = this.classifyError(err);
+      this.errorHandler.handle(
+        errorType,
+        ErrorSeverity.ERROR,
+        `JAR loader initialization failed: ${err.message}`,
+        this.TAG
+      );
+      
+      // 尝试自动恢复
+      await this.attemptRecovery(errorType, err);
+      
+      Logger.error(this.TAG, `Failed to initialize JAR loader: ${err.message}`);
       // 清理资源 Clean up resources
       await this.cleanupResources();
-      const err: Error = error instanceof Error ? error : new Error(String(error));
       throw err;
     }
   }
@@ -203,10 +224,18 @@ export class ArkJarLoader extends BaseLoader {
       
       // 定期检查内存 Check memory periodically
       this.methodExecutedCount++;
-      if (this.methodExecutedCount % 10 === 0 || Date.now() - this.lastMemoryCheckTime > 60000) {
-        if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
+      const memoryConfig = this.configService.getMemoryConfig();
+      const checkInterval = 60000; // 60秒检查间隔
+      if (this.methodExecutedCount % 10 === 0 || Date.now() - this.lastMemoryCheckTime > checkInterval) {
+        if (!this.memoryManager.checkMemoryAvailability(memoryConfig.maxHeapSize)) {
           await this.garbageCollect();
-          if (!this.memoryManager.checkMemoryAvailability(this.loaderConfig.maxMemory || 256)) {
+          if (!this.memoryManager.checkMemoryAvailability(memoryConfig.maxHeapSize)) {
+            this.errorHandler.handle(
+              ErrorType.MEMORY,
+              ErrorSeverity.ERROR,
+              'Insufficient memory to execute JAR method',
+              this.TAG
+            );
             throw new Error('Insufficient memory to execute JAR method');
           }
         }
@@ -221,11 +250,12 @@ export class ArkJarLoader extends BaseLoader {
       Logger.info(this.TAG, `Invoking JAR method: ${methodName} for site: ${this.site.name}`);
       
       // 使用超时管理器处理超时 Use timeout manager to handle timeout
+      const timeoutConfig = this.configService.getTimeoutConfig();
       const timeoutId = `jar_timeout_${methodName}_${Date.now()}`;
       this.timeoutManager.setTimeout(timeoutId, (): void => {
         const timeoutError: Error = new Error(`Method ${methodName} execution timed out`);
         throw timeoutError;
-      }, this.loaderConfig.timeout || 30000);
+      }, timeoutConfig.methodExecutionTimeout);
       try {
         // 在后台线程执行 JAR 方法 Execute JAR method in background thread
         const self: ArkJarLoader = this;
@@ -251,14 +281,38 @@ export class ArkJarLoader extends BaseLoader {
         this.timeoutManager.clearTimeout(timeoutId);
       }
     } catch (error) {
-      Logger.error(this.TAG, `Failed to invoke JAR method ${methodName}: ${error instanceof Error ? error.message : String(error)}`);
-      // 增加错误计数 Increase error count
+      const err = error instanceof Error ? error : new Error(String(error));
+      
+      // 错误分类
+      const errorType = this.classifyError(err);
+      
+      // 记录错误
+      this.errorHandler.handle(
+        errorType,
+        ErrorSeverity.ERROR,
+        `Failed to invoke JAR method ${methodName}: ${err.message}`,
+        this.TAG
+      );
+      
+      Logger.error(this.TAG, `Failed to invoke JAR method ${methodName}: ${err.message}`);
+      
+      // 增加错误计数
       this.errorCount++;
-      if (this.errorCount > this.maxErrorCount) {
+      const errorHandlingConfig = this.configService.getErrorHandlingConfig();
+      if (this.errorCount > errorHandlingConfig.maxErrorCount) {
+        this.errorHandler.handle(
+          ErrorType.UNKNOWN,
+          ErrorSeverity.WARNING,
+          `Too many errors (${this.errorCount}), destroying loader`,
+          this.TAG
+        );
         Logger.warn(this.TAG, `Too many errors, destroying loader for site: ${this.site.name}`);
         await this.destroy();
       }
-      const err: Error = error instanceof Error ? error : new Error(String(error));
+      
+      // 尝试自动恢复
+      await this.attemptRecovery(errorType, err);
+      
       throw err;
     }
   }
@@ -295,6 +349,90 @@ export class ArkJarLoader extends BaseLoader {
     } catch (error) {
       Logger.error(this.TAG, `Error during JAR loader destruction: ${error instanceof Error ? error.message : String(error)}`);
       this.status = 'destroyed';
+    }
+  }
+
+  /**
+   * 错误分类 | Classify error
+   * @param error 错误对象
+   * @returns ErrorType 错误类型
+   */
+  private classifyError(error: Error): ErrorType {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('memory') || message.includes('heap') || message.includes('stack')) {
+      return ErrorType.MEMORY;
+    }
+    if (message.includes('timeout') || message.includes('timed out')) {
+      return ErrorType.TIMEOUT;
+    }
+    if (message.includes('network') || message.includes('http') || message.includes('fetch')) {
+      return ErrorType.NETWORK;
+    }
+    if (message.includes('security') || message.includes('dangerous') || message.includes('blocked')) {
+      return ErrorType.SECURITY;
+    }
+    if (message.includes('parse') || message.includes('syntax') || message.includes('json')) {
+      return ErrorType.PARSE;
+    }
+    if (message.includes('validation') || message.includes('invalid') || message.includes('param')) {
+      return ErrorType.VALIDATION;
+    }
+    if (message.includes('config') || message.includes('configuration')) {
+      return ErrorType.CONFIG;
+    }
+    
+    return ErrorType.UNKNOWN;
+  }
+
+  /**
+   * 尝试自动恢复 | Attempt recovery
+   * @param errorType 错误类型
+   * @param error 错误对象
+   */
+  private async attemptRecovery(errorType: ErrorType, error: Error): Promise<void> {
+    const errorHandlingConfig = this.configService.getErrorHandlingConfig();
+    
+    if (!errorHandlingConfig.autoCleanup) {
+      Logger.info(this.TAG, '自动恢复已禁用 | Auto recovery disabled');
+      return;
+    }
+
+    try {
+      switch (errorType) {
+        case ErrorType.MEMORY:
+          Logger.info(this.TAG, '尝试内存恢复 | Attempting memory recovery');
+          await this.cleanupResources();
+          await this.garbageCollect();
+          break;
+          
+        case ErrorType.TIMEOUT:
+          Logger.info(this.TAG, '尝试超时恢复 | Attempting timeout recovery');
+          await this.cleanupResources();
+          break;
+          
+        case ErrorType.NETWORK:
+          Logger.info(this.TAG, '尝试网络恢复 | Attempting network recovery');
+          // 网络错误等待一段时间后重试
+          await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+          break;
+          
+        case ErrorType.SECURITY:
+          Logger.warn(this.TAG, '安全错误，清理资源 | Security error, cleaning up resources');
+          await this.cleanupResources();
+          break;
+          
+        case ErrorType.PARSE:
+          Logger.info(this.TAG, '解析错误，清理JAR文件 | Parse error, cleaning up JAR file');
+          this.jarFilePath = '';
+          break;
+          
+        default:
+          Logger.info(this.TAG, '执行默认恢复 | Executing default recovery');
+          await this.cleanupResources();
+      }
+    } catch (recoveryError) {
+      Logger.error(this.TAG, `恢复失败: ${recoveryError instanceof Error ? recoveryError.message : String(recoveryError)} | Recovery failed`);
     }
   }
 
@@ -458,7 +596,15 @@ export class ArkJarLoader extends BaseLoader {
       
       // 检查内存使用增长 Check memory usage increase
       const endMemory = this.memoryManager.getCurrentMemoryUsage();
-      if (endMemory - startMemory > 32 * 1024 * 1024) { // 超过 32MB 增长
+      const memoryConfig = this.configService.getMemoryConfig();
+      const memoryGrowthThreshold = memoryConfig.gcThreshold * 1024 * 1024; // 转换为字节
+      if (endMemory - startMemory > memoryGrowthThreshold) {
+        this.errorHandler.handle(
+          ErrorType.MEMORY,
+          ErrorSeverity.WARNING,
+          `Memory usage increased significantly during method execution: ${methodName}`,
+          this.TAG
+        );
         Logger.warn(this.TAG, `Memory usage increased significantly during method execution: ${methodName}`);
       }
       
@@ -524,9 +670,16 @@ export class ArkJarLoader extends BaseLoader {
       throw statError;
     }
     
-    const maxSize = (this.loaderConfig.maxMemory || 256) * 1024 * 1024; // 转换为字节 Convert to bytes
+    const securityConfig = this.configService.getSecurityConfig();
+    const maxSize = securityConfig.maxJarSize;
     
     if (fileStats.size > maxSize) {
+      this.errorHandler.handle(
+        ErrorType.SECURITY,
+        ErrorSeverity.ERROR,
+        `JAR file exceeds maximum allowed size (${fileStats.size} > ${maxSize} bytes)`,
+        this.TAG
+      );
       const sizeError: Error = new Error(`JAR file exceeds maximum allowed size (${maxSize} bytes)`);
       throw sizeError;
     }
@@ -589,7 +742,14 @@ export class ArkJarLoader extends BaseLoader {
    */
   private validateParams(params: Array<JarMethodParam>): void {
     const paramsSize = JSON.stringify(params).length;
-    if (paramsSize > 1024 * 1024) { // 1MB 限制
+    const maxParamsSize = 1024 * 1024; // 1MB 限制
+    if (paramsSize > maxParamsSize) {
+      this.errorHandler.handle(
+        ErrorType.VALIDATION,
+        ErrorSeverity.ERROR,
+        `JAR method parameters too large: ${paramsSize} bytes`,
+        this.TAG
+      );
       throw new Error('JAR method parameters too large');
     }
   }

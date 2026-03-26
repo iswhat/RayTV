@@ -28,6 +28,10 @@ export interface PythonLoaderConfig {
     maxExecutionTime: number;    // 最大执行时间（毫秒）
     allowedModules: string[];    // 允许的模块列表
     blockedKeywords: string[];   // 禁止的关键词列表
+    maxCodeLines: number;        // 最大代码行数
+    maxBraceCount: number;       // 最大冒号数量（控制复杂度）
+    maxArrayLength: number;      // 最大数组长度
+    maxObjectKeys: number;       // 最大对象键数量
   };
 }
 
@@ -53,7 +57,11 @@ const DEFAULT_PYTHON_LOADER_CONFIG: PythonLoaderConfig = {
     maxCodeLength: 100000,       // 最大10万字符
     maxExecutionTime: 300000,    // 最大5分钟
     allowedModules: ['json', 'math', 're', 'datetime', 'urllib', 'http'],
-    blockedKeywords: ['eval', 'exec', '__import__', 'open', 'file', 'subprocess', 'os.system']
+    blockedKeywords: ['eval', 'exec', '__import__', 'open', 'file', 'subprocess', 'os.system'],
+    maxCodeLines: 2000,          // 最大2000行
+    maxBraceCount: 800,          // 最大800个冒号
+    maxArrayLength: 20000,       // 最大数组长度20000
+    maxObjectKeys: 2000          // 最大对象键数量2000
   }
 };
 
